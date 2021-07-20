@@ -1,5 +1,5 @@
 ---
-title: API Reference
+title: API Documentation
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - r
@@ -21,31 +21,48 @@ code_clipboard: true
 
 # Introduction
 
+> We present examples in Python and R. You can switch the programming language above. 
+
 *WHHYY am I here?* You'll see:
 
-Y is an open web API allowing easy querying of SARS-CoV-2 sequencing data. The core features are:
+Y is an open web application programming interface (API) allowing easy querying of SARS-CoV-2 sequencing data using web links. The core features are:
 
-- Filter sequences by various metadata as well as by mutations
-- Aggregate data by any field you like
-- Get the unaggregated data
-- Get the raw sequences as fasta (aligned or unaligned)
+- Filter sequences by metadata or mutations
+- Aggregate data by any metadata or mutation field you like
+- Get the metadata as JSON (easily parsed to a data table, see below)
+- Get the sequences as FASTA (aligned or unaligned)
 
-This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement).
+This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). More information about the underlying software and the code can be found in our Github repository (add link). 
 
-
-More information about the underlying software and the code can be found in our Github repository (add link). In following, we first show the basic syntax of the API and provide examples on the right side. In the section "Use Cases", we then present examples how this can be used in Python and R. You can switch the programming language in the top-right navigation.
+In following, we demostrate the core features enabled by the API. On the left, we present the basic syntax of the API and on the right, we show how to use it for queries. In the section "Use Cases", we provide examples how to use the API to query public SARS-CoV-2 sequencing data to generate statistics, create plots, or download sequences for further analysis. 
 
 
 # Overview
 
-> **Examples:**
+The API has four main endpoints related to samples. These endpoints provide different types of data:
+
+- `/v1/sample/aggregated` - use to get summary data aggregated across samples
+- `/v1/sample/details` - use to get per-sample metadata
+- `/v1/sample/fasta` - use to get original (unaligned) sequences
+- `/v1/sample/fasta-aligned` - use to get aligned sequences
+
+The API returns resonses (data) based on a query to one of the endpoints. 
+
+## Query Format
+
+> **Query example:**
 >
 > Get the total number of available sequences:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated' target="_blank">
 >   /v1/sample/aggregated
 > </a>
->
-> Output:
+
+To query an endpoint, use the web link with prefix
+`https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
+
+## Response Format
+
+> **Response example**:
 
 ```json
 {
@@ -55,24 +72,11 @@ More information about the underlying software and the code can be found in our 
 }
 ```
 
+Responses are returned in [JSON](https://www.json.org/json-en.html) format with three top level attributes:
 
-There are four main **sample** endpoints:
-
-- `/v1/sample/aggregated` - provides aggregated data
-- `/v1/sample/details` - provides detailed information about the samples
-- `/v1/sample/fasta` - provides the original (unaligned) sequences in the fasta format
-- `/v1/sample/fasta-aligned` - provides the aligned sequences in the fasta format
-
-
-## Response Format
-
-The responses are in the JSON format. They have three top level attributes:
-
-- info: general information about the API
-- errors: something went wrong! See error section (todo) for further details and don't use the results.
-- payload: the actual results
-
-
+- "info" - data about the API itself
+- "errors" - an array (hopefully empty!) of things that wrong. See section "Errors" (TODO) for further details.
+- "payload" - the actual data
 
 
 # Filters
@@ -92,7 +96,7 @@ The responses are in the JSON format. They have three top level attributes:
 }
 ```
 
-> Get details about the AY.1 samples in Geneva, Switzerland:<br/>
+> Get details about samples from lineage AY.1 in Geneva, Switzerland:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
 >   /v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
@@ -130,13 +134,14 @@ The responses are in the JSON format. They have three top level attributes:
 }
 ```
 
-> Get the aligned sequences of the AY.1 samples in Geneva, Switzerland:<br/>
+> Get the aligned sequences of the samples from AY.1 in Geneva, Switzerland:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/fasta-aligned?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
 >   /v1/sample/fasta-aligned?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
 
+Large queries, for example detailed information on all the samples, will take a bit. Instead, we can adapt the query to filter to only samples of interest.
 
-All the main **sample** endpoints can be filtered by the following attributes:
+All four **sample** endpoints can be filtered by the following attributes:
 
 - dateFrom
 - dateTo
@@ -161,7 +166,7 @@ All the main **sample** endpoints can be filtered by the following attributes:
 - originatingLab
 - nucMutations
 
-In addition, the endpoints `details`, `fasta`, and `fasta-aligned` can be filtered by these attributes:
+The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
 
 - genbankAccession
 - sraAccession
