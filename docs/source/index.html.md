@@ -41,10 +41,10 @@ In following, we demostrate the core features enabled by the API. On the left, w
 
 The API has four main endpoints related to samples. These endpoints provide different types of data:
 
-- `/v1/sample/aggregated` - use to get summary data aggregated across samples
-- `/v1/sample/details` - use to get per-sample metadata
-- `/v1/sample/fasta` - use to get original (unaligned) sequences
-- `/v1/sample/fasta-aligned` - use to get aligned sequences
+- `/sample/aggregated` - use to get summary data aggregated across samples
+- `/sample/details` - use to get per-sample metadata
+- `/sample/fasta` - use to get original (unaligned) sequences
+- `/sample/fasta-aligned` - use to get aligned sequences
 
 The API returns resonses (data) based on a query to one of the endpoints. 
 
@@ -54,11 +54,11 @@ The API returns resonses (data) based on a query to one of the endpoints.
 >
 > Get the total number of available sequences:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated' target="_blank">
->   /v1/sample/aggregated
+>   /sample/aggregated
 > </a>
 
 To query an endpoint, use the web link with prefix
-`https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
+`https://cov-spectrum.ethz.ch/public/api/v1` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
 
 ## Response Format
 
@@ -85,7 +85,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 >
 > Get the number of all samples in Switzerland in 2021:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
->   /v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31
+>   /sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31
 > </a>
 
 ```json
@@ -98,7 +98,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 
 > Get details about samples from lineage AY.1 in Geneva, Switzerland:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
->   /v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
+>   /sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
 
 ```json
@@ -134,11 +134,6 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 }
 ```
 
-> Get the aligned sequences of the samples from AY.1 in Geneva, Switzerland:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/fasta-aligned?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
->   /v1/sample/fasta-aligned?country=Switzerland&division=Geneva&pangoLineage=AY.1
-> </a>
-
 Large queries, for example detailed information on all the samples, will take a bit. Instead, we can adapt the query to filter to only samples of interest.
 
 All four **sample** endpoints can be filtered by the following attributes:
@@ -159,12 +154,13 @@ All four **sample** endpoints can be filtered by the following attributes:
 - sex
 - host
 - samplingStrategy
-- pangoLineage
+- pangoLineage (see section "Filter Pango Lineages")
 - nextstrainClade
 - gisaidClade
 - submittingLab
 - originatingLab
-- nucMutations
+- nucMutations (see section "Filter Mutations")
+- aaMutations (coming soon!)
 
 The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
 
@@ -172,6 +168,36 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 - sraAccession
 - gisaidEpiIsl
 
+## Filter Pango Lineages
+
+
+> Get the total number of samples of the lineage B.1.617.2 without sub-lineages:<br/>
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
+>   /sample/aggregated?pangoLineage=B.1.617.2
+> </a>
+
+> Get the total number of samples of the lineage B.1.617.2 including sub-lineages:<br/>
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
+>   /sample/aggregated?pangoLineage=B.1.617.2*
+> </a>
+
+
+Pango lineage names inherit the hierarchical nature of genetic lineages. For example, B.1.1 is a sub-lineage of B.1. More information about the pango nomenclature can be found on the website of the [Pango network](https://www.pango.network/).
+
+With the `pangoLineage` filter, it is possible to not only filter for a very specific lineage but also to include its sub-lineages. To include sub-lineages, add a `*` at the end. For example, writing B.1.351 will only give samples of B.1.351. Writing B.1.351* or B.1.351.* (there is no difference between the two variants) will return B.1.351, B.1.351.1, B.1.351.2, etc.
+
+An official pango lineage name can only have at most three number components. A sub-lineage of a lineage with a maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can be found [here](https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json). B.1.617.2 has the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. This API is aware of aliases. Filtering B.1.617.2* will include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the same results as AY.1.
+
+
+## Filter Mutations
+
+It is possible to filter for amino acid and nucleotide bases/mutations.
+
+A nucleotide mutation has the format `<position><base>`.
+
+An amino acid mutation has the format `<gene>:<position><base>`. The following genes are available: E, M, N, ORF1a, ORF1b, ORF3a, ORF6, ORF7a, ORF7b, ORF8, ORF9b, S.
+
+Additional features are coming soon. For example, it will be possible to filter for any mutations at a certain position.
 
 
 # Aggregation
@@ -180,7 +206,7 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 >
 > Get the number of B.1.1.7 samples per country:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
->   /v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7
+>   /sample/aggregated?fields=country&pangoLineage=B.1.1.7
 > </a>
 
 ```json
@@ -197,7 +223,7 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 
 > Get the number of samples per Nextstrain clade and country:<br/>
 > <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=nextstrainClade,country' target="_blank">
->   /v1/sample/aggregated?fields=nextstrainClade,country
+>   /sample/aggregated?fields=nextstrainClade,country
 > </a>
 
 ```json
@@ -213,7 +239,7 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 ```
 
 
-Above, we used the `/v1/sample/aggregated` endpoint to get the total counts of sequences with or without filters. Using the query parameter `fields`, we can group the samples and get the counts per group. For example, we can use it to get the number of samples per country.
+Above, we used the `/sample/aggregated` endpoint to get the total counts of sequences with or without filters. Using the query parameter `fields`, we can group the samples and get the counts per group. For example, we can use it to get the number of samples per country.
 
 `fields` accepts a comma-separated list. The following values are available:
 
