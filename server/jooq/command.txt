@@ -1,0 +1,1 @@
+java -cp jooq-3.14.8.jar;jooq-meta-3.14.8.jar;jooq-codegen-3.14.8.jar;reactive-streams-1.0.2.jar;postgresql-42.2.19.jar;jaxb-api-2.4.0-b180830.0359.jar org.jooq.codegen.GenerationTool jooq.xml
