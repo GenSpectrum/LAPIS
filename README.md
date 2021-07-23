@@ -1,1 +1,1 @@
-# Y
+# Lightweight API for Sequences (lapis)
