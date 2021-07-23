@@ -21,8 +21,6 @@ code_clipboard: true
 
 # Introduction
 
-> We present examples in Python and R. You can switch the programming language above. 
-
 *WHHYY am I here?* You'll see:
 
 Y is an open web application programming interface (API) allowing easy querying of SARS-CoV-2 sequencing data using web links. The core features are:
@@ -46,7 +44,7 @@ The API has four main endpoints related to samples. These endpoints provide diff
 - `/sample/fasta` - use to get original (unaligned) sequences
 - `/sample/fasta-aligned` - use to get aligned sequences
 
-The API returns resonses (data) based on a query to one of the endpoints. 
+The API returns a response (data) based on a query to one of the endpoints. You can view a responses in your browser, or use the data programatically. We'll provide some examples in r and python.
 
 ## Query Format
 
@@ -134,7 +132,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 }
 ```
 
-Large queries, for example detailed information on all the samples, will take a bit. Instead, we can adapt the query to filter to only samples of interest.
+Large queries, for example detailed information on all the samples, will take a bit. Instead, we can adapt the query to filter to only samples of interest. The syntax for additing filters is `<attribute1>=<valueA>&<attribute2>=<valueB>`.
 
 All four **sample** endpoints can be filtered by the following attributes:
 
@@ -168,6 +166,8 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 - sraAccession
 - gisaidEpiIsl
 
+To determine which values are available for each attribute, see the example in section "Aggregation".
+
 ## Filter Pango Lineages
 
 
@@ -184,7 +184,7 @@ The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filter
 
 Pango lineage names inherit the hierarchical nature of genetic lineages. For example, B.1.1 is a sub-lineage of B.1. More information about the pango nomenclature can be found on the website of the [Pango network](https://www.pango.network/).
 
-With the `pangoLineage` filter, it is possible to not only filter for a very specific lineage but also to include its sub-lineages. To include sub-lineages, add a `*` at the end. For example, writing B.1.351 will only give samples of B.1.351. Writing B.1.351* or B.1.351.* (there is no difference between the two variants) will return B.1.351, B.1.351.1, B.1.351.2, etc.
+With the `pangoLineage` filter, it is possible to not only filter for a very specific lineage but also to include its sub-lineages. To include sub-lineages, add a `*` at the end. For example, writing B.1.351 will only give samples of B.1.351. Writing B.1.351* or B.1.351.* (there is no difference between these two options) will return B.1.351, B.1.351.1, B.1.351.2, etc.
 
 An official pango lineage name can only have at most three number components. A sub-lineage of a lineage with a maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can be found [here](https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json). B.1.617.2 has the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. This API is aware of aliases. Filtering B.1.617.2* will include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the same results as AY.1.
 
@@ -238,8 +238,24 @@ Additional features are coming soon. For example, it will be possible to filter 
 }
 ```
 
+> Get all the possible values for attribute "division" in Swtizerland:<br/> 
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=division&country=Switzerland' target="_blank">
+>   /sample/aggregated?division,country=Switzerland
+> </a>
 
-Above, we used the `/sample/aggregated` endpoint to get the total counts of sequences with or without filters. Using the query parameter `fields`, we can group the samples and get the counts per group. For example, we can use it to get the number of samples per country.
+```json
+{
+  "info": {"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
+  "errors": [],
+  "payload": [
+    {"division": "Basel-Land", "count": 4658},
+    {"division": "Aargau", "count": 2964},
+    ...
+  ]
+}
+```
+
+Above, we used the `/sample/aggregated` endpoint to get the total counts of sequences with or without filters. Using the query parameter `fields`, we can group the samples and get the counts per group. For example, we can use it to get the number of samples per country. We can also use it to list the available values for each attribute.
 
 `fields` accepts a comma-separated list. The following values are available:
 
