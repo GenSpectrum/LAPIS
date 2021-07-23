@@ -1,0 +1,44 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.1'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+}
+
+group 'ch.ethz'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+    compile 'org.yaml:snakeyaml:1.28'
+    compile 'org.postgresql:postgresql:42.2.19'
+    compile 'com.mchange:c3p0:0.9.5.5'
+    compile 'org.javatuples:javatuples:1.2'
+    compile 'org.apache.commons:commons-csv:1.8'
+    compile 'commons-io:commons-io:2.8.0'
+    compile 'org.apache.commons:commons-text:1.9'
+    compile 'org.tukaani:xz:1.9'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'org.simplejavamail:simple-java-mail:6.5.3'
+    compile 'org.jooq:jooq:3.14.8'
+
+    testCompile 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "ch.ethz.y.Main"
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
