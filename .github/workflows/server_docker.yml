@@ -32,4 +32,4 @@ jobs:
         if: env.BRANCH == 'public'
         run: |
           docker tag new_image ${{ env.IMAGE_NAME }}:public
-          docker push ${{ env.IMAGE_NAME }}:pulic
+          docker push ${{ env.IMAGE_NAME }}:public
