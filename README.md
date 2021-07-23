@@ -1,1 +1,1 @@
-# Lightweight API for Sequences (lapis)
+# Lightweight API for Sequences (LAPIS)
