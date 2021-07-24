@@ -36,7 +36,7 @@ test {
 
 jar {
     manifest {
-        attributes "Main-Class": "ch.ethz.y.Main"
+        attributes "Main-Class": "ch.ethz.lapis.Main"
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }

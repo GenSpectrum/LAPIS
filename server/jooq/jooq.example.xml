@@ -18,7 +18,7 @@
         <generate/>
 
         <target>
-            <packageName>org.jooq.y</packageName>
+            <packageName>org.jooq.lapis</packageName>
             <directory>../src/main/java</directory>
         </target>
     </generator>

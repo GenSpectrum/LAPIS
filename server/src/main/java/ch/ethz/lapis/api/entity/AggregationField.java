@@ -1,0 +1,24 @@
+package ch.ethz.lapis.api.entity;
+
+public enum AggregationField {
+
+    DATE,
+    DATESUBMITTED,
+    REGION,
+    COUNTRY,
+    DIVISION,
+    LOCATION,
+    REGIONEXPOSURE,
+    COUNTRYEXPOSURE,
+    DIVISIONEXPOSURE,
+    AGE,
+    SEX,
+    HOST,
+    SAMPLINGSTRATEGY,
+    PANGOLINEAGE,
+    NEXTSTRAINCLADE,
+    GISAIDCLADE,
+    SUBMITTINGLAB,
+    ORIGINATINGLAB;
+
+}
