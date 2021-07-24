@@ -1,4 +1,4 @@
-package ch.ethz.lapis.api.controller.v1;
+package ch.ethz.lapis.api.controller.v0;
 
 import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/sample")
+@RequestMapping("/v0/sample")
 public class SampleController {
 
     private final SampleService sampleService;
@@ -22,22 +22,22 @@ public class SampleController {
     }
 
     @GetMapping("/aggregated")
-    public Response<SampleAggregatedResponse> getAggregated(SampleAggregatedRequest request) throws SQLException {
+    public V0Response<SampleAggregatedResponse> getAggregated(SampleAggregatedRequest request) throws SQLException {
         long start = System.currentTimeMillis();
         List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
         System.out.println("E2E: " + (System.currentTimeMillis() - start));
-        return new Response<>(new SampleAggregatedResponse(
+        return new V0Response<>(new SampleAggregatedResponse(
                 request.getFields(),
                 aggregatedSamples
         ));
     }
 
     @GetMapping("/details")
-    public Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
+    public V0Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
         long start = System.currentTimeMillis();
         List<SampleDetail> samples = sampleService.getDetailedSamples(request);
         System.out.println("E2E: " + (System.currentTimeMillis() - start));
-        return new Response<>(new SampleDetailResponse(samples));
+        return new V0Response<>(new SampleDetailResponse(samples));
     }
 
     @GetMapping(

@@ -1,15 +1,14 @@
 ---
-title: API Documentation
+title: LAPIS Documentation
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - r
   - python
 
 toc_footers:
-  - Github (add link)
-  - Publication (add link)
-  - <a href='https://bsse.ethz.ch/cevo' target="_blank">Developed by cEvo@ETH Zurich</a>
-  - <a href='https://github.com/slatedocs/slate' target="_blank">Documentation Powered by Slate</a>
+  - <a href="https://github.com/cevo-public/LAPIS">Github</a>
+  - <a href="https://bsse.ethz.ch/cevo">Developed by cEvo@ETH Zurich</a>
+  - <a href="https://github.com/slatedocs/slate">Documentation Powered by Slate</a>
 
 includes:
   - use-cases
@@ -21,19 +20,20 @@ code_clipboard: true
 
 # Introduction
 
-*WHHYY am I here?* You'll see:
-
-Y is an open web application programming interface (API) allowing easy querying of SARS-CoV-2 sequencing data using web links. The core features are:
+LAPIS (Lightweight API for Sequences) is an open web application programming interface (API) allowing easy querying of SARS-CoV-2 sequencing data using web links. The core features are:
 
 - Filter sequences by metadata or mutations
-- Aggregate data by any metadata or mutation field you like
+- Aggregate data by any metadata field you like
 - Get the metadata as JSON (easily parsed to a data table, see below)
 - Get the sequences as FASTA (aligned or unaligned)
 
-This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). More information about the underlying software and the code can be found in our Github repository (add link). 
+This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). More information about the underlying software and the code can be found in our [Github repository](https://github.com/cevo-public/LAPIS). 
 
 In following, we demostrate the core features enabled by the API. On the left, we present the basic syntax of the API and on the right, we show how to use it for queries. In the section "Use Cases", we provide examples how to use the API to query public SARS-CoV-2 sequencing data to generate statistics, create plots, or download sequences for further analysis. 
 
+<aside class="warning">
+This is a beta version. Data are not being updated. We will replace it with an official release (version 1) by the end of August 2021. Please send us feedback through <a href="https://github.com/cevo-public/LAPIS/issues">https://github.com/cevo-public/LAPIS/issues</a>.
+</aside>
 
 # Overview
 
@@ -46,17 +46,21 @@ The API has four main endpoints related to samples. These endpoints provide diff
 
 The API returns a response (data) based on a query to one of the endpoints. You can view a responses in your browser, or use the data programatically. We'll provide some examples in r and python.
 
+<aside class="notice">
+The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints currently only return at most 1000 sequences per request. We will increase the limit in the future.
+</aside>
+
 ## Query Format
 
 > **Query example:**
 >
 > Get the total number of available sequences:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated' target="_blank">
 >   /sample/aggregated
 > </a>
 
 To query an endpoint, use the web link with prefix
-`https://cov-spectrum.ethz.ch/public/api/v1` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
+`https://cov-spectrum.ethz.ch/public/api/v0` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
 
 ## Response Format
 
@@ -82,7 +86,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 > **Examples:**
 >
 > Get the number of all samples in Switzerland in 2021:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
 >   /sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31
 > </a>
 
@@ -95,7 +99,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 ```
 
 > Get details about samples from lineage AY.1 in Geneva, Switzerland:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
 >   /sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
 
@@ -158,7 +162,7 @@ All four **sample** endpoints can be filtered by the following attributes:
 - submittingLab
 - originatingLab
 - nucMutations (see section "Filter Mutations")
-- aaMutations (coming soon!)
+- aaMutations (see section "Filter Mutations")
 
 The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
 
@@ -172,12 +176,12 @@ To determine which values are available for each attribute, see the example in s
 
 
 > Get the total number of samples of the lineage B.1.617.2 without sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2
 > </a>
 
 > Get the total number of samples of the lineage B.1.617.2 including sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2*
 > </a>
 
@@ -186,16 +190,26 @@ Pango lineage names inherit the hierarchical nature of genetic lineages. For exa
 
 With the `pangoLineage` filter, it is possible to not only filter for a very specific lineage but also to include its sub-lineages. To include sub-lineages, add a `*` at the end. For example, writing B.1.351 will only give samples of B.1.351. Writing B.1.351* or B.1.351.* (there is no difference between these two options) will return B.1.351, B.1.351.1, B.1.351.2, etc.
 
-An official pango lineage name can only have at most three number components. A sub-lineage of a lineage with a maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can be found [here](https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json). B.1.617.2 has the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. This API is aware of aliases. Filtering B.1.617.2* will include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the same results as AY.1.
+An official pango lineage name can only have at most three number components. A sub-lineage of a lineage with a maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can be found [here](https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json). B.1.617.2 has the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. LAPIS is aware of aliases. Filtering B.1.617.2* will include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the same results as AY.1.
 
 
 ## Filter Mutations
 
-It is possible to filter for amino acid and nucleotide bases/mutations.
+> Get the total number of samples with the synonymous nucleotide mutations 913T and 5986T and the amino acid mutation S:484K:<br/>
+> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K" target="_blank">
+>   /sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K
+> </a>
 
-A nucleotide mutation has the format `<position><base>`.
+> Get the total number of samples for which we do not know whether the S:501 position is mutated:<br/>
+> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?aaMutations=S:501X" target="_blank">
+>   /sample/aggregated?aaMutations=S:501X
+> </a>
 
-An amino acid mutation has the format `<gene>:<position><base>`. The following genes are available: E, M, N, ORF1a, ORF1b, ORF3a, ORF6, ORF7a, ORF7b, ORF8, ORF9b, S.
+It is possible to filter for amino acid and nucleotide bases/mutations. Multiple mutations can be provided by specifying a comma-separated list.
+
+A nucleotide mutation has the format `<position><base>`. A "base" can be one of the four nucleotides `A`, `T`, `C`, and `G`. It can also be `-` for deletion and `N` for unknown.
+
+An amino acid mutation has the format `<gene>:<position><base>`. The following genes are available: E, M, N, ORF1a, ORF1b, ORF3a, ORF6, ORF7a, ORF7b, ORF8, ORF9b, S. A "base" can be one of the 20 amino acid codes. It can also be `-` for deletion and `X` for unknown.
 
 Additional features are coming soon. For example, it will be possible to filter for any mutations at a certain position.
 
@@ -205,7 +219,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 > **Examples:**
 >
 > Get the number of B.1.1.7 samples per country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
 >   /sample/aggregated?fields=country&pangoLineage=B.1.1.7
 > </a>
 
@@ -222,7 +236,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get the number of samples per Nextstrain clade and country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=nextstrainClade,country' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=nextstrainClade,country' target="_blank">
 >   /sample/aggregated?fields=nextstrainClade,country
 > </a>
 
@@ -239,7 +253,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get all the possible values for attribute "division" in Swtizerland:<br/> 
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=division&country=Switzerland' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=division&country=Switzerland' target="_blank">
 >   /sample/aggregated?division,country=Switzerland
 > </a>
 

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Information {
 
-    private int apiVersion = 1;
+    private int apiVersion = 0;
     private LocalDate deprecationDate = null;
     private String deprecationInfo = null;
 
