@@ -1,6 +1,7 @@
 package ch.ethz.lapis;
 
 import ch.ethz.lapis.core.DatabaseService;
+import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
 import ch.ethz.lapis.source.NextstrainGenbankService;
 import ch.ethz.lapis.transform.TransformService;
@@ -26,6 +27,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             throw new RuntimeException("TODO: write help page");
         }
         globalConfig = config;
+        GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
         if ("--api".equals(args[0])) {
             String[] argsForSpring = Arrays.copyOfRange(args, 1, args.length);
             SpringApplication app = new SpringApplication(LapisMain.class);

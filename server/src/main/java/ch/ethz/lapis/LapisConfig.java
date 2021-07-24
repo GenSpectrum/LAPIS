@@ -2,10 +2,13 @@ package ch.ethz.lapis;
 
 import ch.ethz.lapis.core.Config;
 import ch.ethz.lapis.core.DatabaseConfig;
+import ch.ethz.lapis.core.HttpProxyConfig;
 
 public class LapisConfig implements Config {
 
     private DatabaseConfig vineyard;
+
+    private HttpProxyConfig httpProxy;
 
     private String workdir;
 
@@ -19,6 +22,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setVineyard(DatabaseConfig vineyard) {
         this.vineyard = vineyard;
+        return this;
+    }
+
+    public HttpProxyConfig getHttpProxy() {
+        return httpProxy;
+    }
+
+    public LapisConfig setHttpProxy(HttpProxyConfig httpProxy) {
+        this.httpProxy = httpProxy;
         return this;
     }
 
