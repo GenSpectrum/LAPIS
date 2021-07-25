@@ -12,9 +12,8 @@ public class V0Response<Payload> {
     private Information info = new Information()
             .setApiVersion(0)
             .setDeprecationDate(LocalDate.of(2021, Month.AUGUST, 25))
-            .setDeprecationInfo("This is a beta version. Data are not being updated. It will soon be replaced with" +
-                    " the official release (version 1). Please send us feedback through" +
-                    " https://github.com/cevo-public/LAPIS/issues.");
+            .setDeprecationInfo("This is a beta version. It will soon be replaced with the official release" +
+                    " (version 1). Please send us feedback through https://github.com/cevo-public/LAPIS/issues.");
 
     public V0Response() {
     }

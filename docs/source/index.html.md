@@ -27,12 +27,12 @@ LAPIS (Lightweight API for Sequences) is an open web application programming int
 - Get the metadata as JSON (easily parsed to a data table, see below)
 - Get the sequences as FASTA (aligned or unaligned)
 
-This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). More information about the underlying software and the code can be found in our [Github repository](https://github.com/cevo-public/LAPIS). 
+This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). We update the data every day. More information about the underlying software and the code can be found in our [Github repository](https://github.com/cevo-public/LAPIS). 
 
 In following, we demostrate the core features enabled by the API. On the left, we present the basic syntax of the API and on the right, we show how to use it for queries. In the section "Use Cases", we provide examples how to use the API to query public SARS-CoV-2 sequencing data to generate statistics, create plots, or download sequences for further analysis. 
 
 <aside class="warning">
-This is a beta version. Data are not being updated. We will replace it with an official release (version 1) by the end of August 2021. Please send us feedback through <a href="https://github.com/cevo-public/LAPIS/issues">https://github.com/cevo-public/LAPIS/issues</a>.
+This is a beta version. We will replace it with an official release (version 1) by the end of August 2021. Please send us feedback through <a href="https://github.com/cevo-public/LAPIS/issues">https://github.com/cevo-public/LAPIS/issues</a>.
 </aside>
 
 # Overview
