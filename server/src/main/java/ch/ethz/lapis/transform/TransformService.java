@@ -11,22 +11,27 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
 public class TransformService {
 
     private final ComboPooledDataSource databasePool;
+    private final int maxNumberWorkers;
     private final SeqCompressor alignedSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
     private final SeqCompressor nucMutationColumnarCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
     private final SeqCompressor aaColumnarCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
 
-    public TransformService(ComboPooledDataSource databasePool) {
+    public TransformService(ComboPooledDataSource databasePool, int maxNumberWorkers) {
         this.databasePool = databasePool;
+        this.maxNumberWorkers = maxNumberWorkers;
     }
 
 
-    public void mergeAndTransform() throws SQLException {
+    public void mergeAndTransform() throws SQLException, InterruptedException {
         // Fill the tables
         //     y_main_metadata_staging
         //     y_main_sequence_staging
@@ -127,7 +132,7 @@ public class TransformService {
     }
 
 
-    public void transformSeqsToColumnar() throws SQLException {
+    public void transformSeqsToColumnar() throws SQLException, InterruptedException {
         // Load all compressed and aligned sequences and their IDs
         String sql1 = """
             select s.id, s.seq_aligned_compressed
@@ -155,45 +160,53 @@ public class TransformService {
         System.out.println("Data loaded");
 
         // Read the sequences and create columnar data
-        try (Connection conn = databasePool.getConnection()) {
-            for (int j = 0; j < 15; j++) {
-                int start = 2000 * j;
-                int end = Math.min(2000 * (j + 1), 29903);
-                System.out.println(LocalDateTime.now() +  " Position " + start + " - " +end);
+        ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
+        for (int j = 0; j < 15; j++) {
+            final int start = 2000 * j;
+            final int end = Math.min(2000 * (j + 1), 29903);
+            executor.execute(() -> {
+                try (Connection conn = databasePool.getConnection()) {
+                    System.out.println(LocalDateTime.now() +  " Position " + start + " - " +end);
 
-                List<StringBuilder> columns = new ArrayList<>();
-                for (int i = start; i < end; i++) {
-                    columns.add(new StringBuilder());
-                }
-
-                for (Pair<Integer, byte[]> compressedSequence : compressedSequences) {
-                    byte[] compressed = compressedSequence.getValue1();
-                    char[] seq = alignedSeqCompressor.decompress(compressed).toCharArray();
+                    List<StringBuilder> columns = new ArrayList<>();
                     for (int i = start; i < end; i++) {
-                        columns.get(i - start).append(seq[i]);
+                        columns.add(new StringBuilder());
                     }
-                }
 
-                List<String> columnStrs = columns.stream().map(StringBuilder::toString).collect(Collectors.toList());
-                List<byte[]> compressed = columnStrs.stream()
-                        .map(nucMutationColumnarCompressor::compress)
-                        .collect(Collectors.toList());
+                    for (Pair<Integer, byte[]> compressedSequence : compressedSequences) {
+                        byte[] compressed = compressedSequence.getValue1();
+                        char[] seq = alignedSeqCompressor.decompress(compressed).toCharArray();
+                        for (int i = start; i < end; i++) {
+                            columns.get(i - start).append(seq[i]);
+                        }
+                    }
 
-                String sql2 = """
+                    List<String> columnStrs = columns.stream().map(StringBuilder::toString).collect(Collectors.toList());
+                    List<byte[]> compressed = columnStrs.stream()
+                            .map(nucMutationColumnarCompressor::compress)
+                            .collect(Collectors.toList());
+
+                    String sql2 = """
                     insert into y_main_sequence_columnar_staging (position, data_compressed)
                     values (?, ?);
                 """;
-                try (PreparedStatement statement = conn.prepareStatement(sql2)) {
-                    for (int i = start; i < end; i++) {
-                        statement.setInt(1, i + 1);
-                        statement.setBytes(2, compressed.get(i - start));
-                        statement.addBatch();
+                    try (PreparedStatement statement = conn.prepareStatement(sql2)) {
+                        for (int i = start; i < end; i++) {
+                            statement.setInt(1, i + 1);
+                            statement.setBytes(2, compressed.get(i - start));
+                            statement.addBatch();
+                        }
+                        statement.executeBatch();
+                        statement.clearBatch();
                     }
-                    statement.executeBatch();
-                    statement.clearBatch();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            });
+
         }
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.DAYS);
     }
 
 

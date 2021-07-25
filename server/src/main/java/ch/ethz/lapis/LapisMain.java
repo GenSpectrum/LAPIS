@@ -44,7 +44,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
         }
         if ("--update-main-tables".equals(args[0])) {
             ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            TransformService transformService = new TransformService(dbPool);
+            TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
             transformService.mergeAndTransform();
             return;
         }
@@ -53,7 +53,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             NextstrainGenbankService nextstrainGenBankService = new NextstrainGenbankService(
                     dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath());
             nextstrainGenBankService.updateData();
-            TransformService transformService = new TransformService(dbPool);
+            TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
             transformService.mergeAndTransform();
             return;
         }
