@@ -127,7 +127,7 @@ create table y_main_aa_sequence_columnar
 
 -- Privileges
 
-grant select, insert, update, delete, references
+grant select, insert, update, delete, references, truncate
 on
   y_nextstrain_genbank,
   y_main_metadata,

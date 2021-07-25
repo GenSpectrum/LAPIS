@@ -4,6 +4,7 @@ import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.jooq.SQL;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,14 +53,15 @@ public class NextstrainGenbankService {
         // Download files from Nextstrain
         downloadFiles();
 
+        // Delete old data
+        deleteOldData();
+
         // The files and different types of data will be inserted/updated independently and one after the other in the
         // following order:
         //   1. original sequences
         //   2. aligned sequences
         //   3. metadata
         //   4. nextclade data (for now, only the aa mutations)
-        // Then, we delete incomplete entries: e.g., metadata without sequences, aligned sequence without original
-        // sequence, etc.
 
         // It is highly important to update the AAMutations before the aligned sequences because the AAMutations check
         // the old aligned sequences and only compute the aa mutation sequences if the aligned sequences changed.
@@ -67,8 +70,6 @@ public class NextstrainGenbankService {
         updateSeqOriginalOrAligned(true);
         updateMetadata();
         updateNextcladeData();
-
-        // TODO Delete old data
     }
 
 
@@ -92,6 +93,16 @@ public class NextstrainGenbankService {
             FileOutputStream fileOutputStream = new FileOutputStream(workdir.resolve(file).toFile());
             fileOutputStream.getChannel()
                     .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+        }
+    }
+
+
+    private void deleteOldData() throws SQLException {
+        String sql = "truncate y_nextstrain_genbank;";
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql);
+            }
         }
     }
 
