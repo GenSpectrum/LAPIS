@@ -299,6 +299,9 @@ public class NextstrainGenbankService {
                              = new NextstrainGenbankMetadataFileReader(gzipInputStream)) {
                     int i = 0;
                     for (NextstrainGenbankMetadataEntry entry : metadataReader) {
+                        if (entry.getStrain() == null) {
+                            continue;
+                        }
                         statement.setString(1, entry.getGenbankAccession());
                         statement.setString(2, entry.getSraAccession());
                         statement.setString(3, entry.getGisaidEpiIsl());
