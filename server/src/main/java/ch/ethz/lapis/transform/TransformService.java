@@ -249,7 +249,13 @@ public class TransformService {
                 }
 
                 // Read the sequences and create columnar data
-                int aaSeqLength = aaSequences.get(0).getValue1().length();
+                int aaSeqLength = -1;
+                for (Pair<Integer, String> p : aaSequences) {
+                    if (p.getValue1() != null) {
+                        aaSeqLength = p.getValue1().length();
+                        break;
+                    }
+                }
                 double iterations = Math.ceil(aaSeqLength * 1.0 / 2000);
                 conn.setAutoCommit(false);
                 for (int j = 0; j < iterations; j++) {
