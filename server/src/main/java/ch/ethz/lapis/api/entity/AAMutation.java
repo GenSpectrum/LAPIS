@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.entity;
 
+import ch.ethz.lapis.util.Utils;
+
 public class AAMutation {
 
     private String gene;
@@ -50,7 +52,7 @@ public class AAMutation {
      * @param mutationCode Examples: "S:501Y", "S:501"
      */
     public static AAMutation parse(String mutationCode) {
-        String[] split = mutationCode.split(":");
+        String[] split = Utils.normalizeAAMutation(mutationCode).split(":");
         String gene = split[0];
         if (!Character.isDigit(split[1].charAt(split[1].length() - 1))) {
             return new AAMutation(

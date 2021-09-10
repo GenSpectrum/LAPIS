@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.entity;
 
+import ch.ethz.lapis.util.Utils;
+
 public class NucMutation {
 
     private int position;
@@ -37,7 +39,7 @@ public class NucMutation {
      * @param mutationCode Examples: "1234T", "2345"
      */
     public static NucMutation parse(String mutationCode) {
-        mutationCode = mutationCode.toUpperCase();
+        mutationCode = Utils.normalizeNucMutation(mutationCode);
         if (!Character.isDigit(mutationCode.charAt(mutationCode.length() - 1))) {
             return new NucMutation(
                     Integer.parseInt(mutationCode.substring(0, mutationCode.length() - 1)),
