@@ -62,39 +62,8 @@ public class SampleService {
     public List<SampleAggregated> getAggregatedSamples(SampleAggregatedRequest request) throws SQLException {
         List<AggregationField> fields = request.getFields();
 
-        // Filter the IDs by nucleotide mutations (if requested)
-        List<Integer> nucIds = null;
-        if (request.getNucMutations() != null && !request.getNucMutations().isEmpty()) {
-            nucIds = getIdsWithNucMutations(request.getNucMutations());
-            System.out.println("I found " + nucIds.size() + " with the searched " + request.getNucMutations().size()
-                    + " nucleotide mutations.");
-        }
-        if (nucIds != null && nucIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // Filter the IDs by amino acid mutations (if requested)
-        List<Integer> aaIds = null;
-        if (request.getAaMutations() != null && !request.getAaMutations().isEmpty()) {
-            aaIds = getIdsWithAAMutations(request.getAaMutations());
-            System.out.println("I found " + aaIds.size() + " with the searched " + request.getAaMutations().size()
-                    + " amino acid mutations.");
-        }
-
-        // Merge the nuc and aa mutation filter results
-        Set<Integer> ids = null;
-        if (nucIds != null && aaIds != null) {
-            ids = new HashSet<>(nucIds);
-            ids.retainAll(new HashSet<>(aaIds));
-        } else if (nucIds != null) {
-            ids = new HashSet<>(nucIds);
-        } else if (aaIds != null) {
-            ids = new HashSet<>(aaIds);
-        }
-        if (ids != null) {
-            System.out.println("There are " + ids.size() + " with all the searched nucleotide and amino acid " +
-                    "mutations");
-        }
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -196,12 +165,10 @@ public class SampleService {
 
 
     public List<SampleDetail> getDetailedSamples(SampleDetailRequest request) throws SQLException {
-        // Filter the IDs by mutations (if requested)
-        List<Integer> ids = null;
-        if (request.getNucMutations() != null && !request.getNucMutations().isEmpty()) {
-            ids = getIdsWithNucMutations(request.getNucMutations());
-            System.out.println("I found " + ids.size() + " with the searched " + request.getNucMutations().size()
-                    + " nucleotide mutations.");
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        if (ids != null && ids.isEmpty()) {
+            return new ArrayList<>();
         }
 
         // Filter further by the other metadata and prepare the response
@@ -286,12 +253,10 @@ public class SampleService {
 
 
     public String getFasta(SampleDetailRequest request, boolean aligned) throws SQLException {
-        // Filter the IDs by mutations (if requested)
-        List<Integer> ids = null;
-        if (request.getNucMutations() != null && !request.getNucMutations().isEmpty()) {
-            ids = getIdsWithNucMutations(request.getNucMutations());
-            System.out.println("I found " + ids.size() + " with the searched " + request.getNucMutations().size()
-                    + " nucleotide mutations.");
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        if (ids != null && ids.isEmpty()) {
+            return "";
         }
 
         StringBuilder fastaBuilder = new StringBuilder();
@@ -345,6 +310,56 @@ public class SampleService {
             }
         }
         return fastaBuilder.toString();
+    }
+
+
+    /**
+     * This function returns a set of IDs of the samples that have the filtered mutations. If an argument
+     * (i.e., nucMutations or aaMutations) is null or empty, it means that we don't filter for that. If we don't filter
+     * for any of the two mutation types, this function returns null. If no sequence has the filtered mutations, this
+     * function returns an empty set.
+     */
+    private Set<Integer> getIdsFromMutationFilters(
+            List<NucMutation> nucMutations,
+            List<AAMutation> aaMutations
+    ) throws SQLException {
+        // Filter the IDs by nucleotide mutations (if requested)
+        List<Integer> nucIds = null;
+        if (nucMutations != null && !nucMutations.isEmpty()) {
+            nucIds = getIdsWithNucMutations(nucMutations);
+            System.out.println("I found " + nucIds.size() + " with the searched " + nucMutations.size()
+                    + " nucleotide mutations.");
+        }
+        if (nucIds != null && nucIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        // Filter the IDs by amino acid mutations (if requested)
+        List<Integer> aaIds = null;
+        if (aaMutations != null && !aaMutations.isEmpty()) {
+            aaIds = getIdsWithAAMutations(aaMutations);
+            System.out.println("I found " + aaIds.size() + " with the searched " + aaMutations.size()
+                    + " amino acid mutations.");
+        }
+        if (aaIds != null && aaIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        // Merge the nuc and aa mutation filter results
+        Set<Integer> ids = null;
+        if (nucIds != null && aaIds != null) {
+            ids = new HashSet<>(nucIds);
+            ids.retainAll(new HashSet<>(aaIds));
+        } else if (nucIds != null) {
+            ids = new HashSet<>(nucIds);
+        } else if (aaIds != null) {
+            ids = new HashSet<>(aaIds);
+        }
+        if (ids != null) {
+            System.out.println("There are " + ids.size() + " with all the searched nucleotide and amino acid " +
+                    "mutations");
+        }
+        return ids;
     }
 
 
