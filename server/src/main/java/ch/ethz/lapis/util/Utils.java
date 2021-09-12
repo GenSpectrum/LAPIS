@@ -110,21 +110,7 @@ public class Utils {
      * This function does not intend to catch invalid mutation codes.
      */
     public static String normalizeAAMutation(String mutationCode) {
-        List<String> normalizedGenes = new ArrayList<>(){{
-            // TODO Load the data from genemap.gff or from the database table "gene"
-            add("E");
-            add("N");
-            add("M");
-            add("ORF7a");
-            add("ORF8");
-            add("ORF6");
-            add("ORF3a");
-            add("ORF9b");
-            add("ORF7b");
-            add("S");
-            add("ORF1a");
-            add("ORF1b");
-        }};
+        List<String> normalizedGenes = ReferenceGenomeData.getInstance().getGeneNames();
         Map<String, String> lowerCaseToNormalizedGene = new HashMap<>();
         for (String normalizedGene : normalizedGenes) {
             lowerCaseToNormalizedGene.put(normalizedGene.toLowerCase(), normalizedGene);
