@@ -53,6 +53,11 @@ public class NextstrainGenbankNextcladeFileReader
         ReferenceGenomeData refData = ReferenceGenomeData.getInstance();
         String nucDels = Arrays.stream(csv.get("deletions").split(","))
                 .flatMap(nucDel -> {
+                    if (nucDel.isBlank()) {
+                        System.out.println("[Weird] Empty ncDel: '" + nucDel + "' " + csv.get("seqName") + " " +
+                                csv.get("deletions"));
+                        return Stream.empty();
+                    }
                     // Nextclade reports the deletions either as a single position (e.g., 28254) or as a range
                     // (e.g., 22029-22034). We transform it into "22029-,22030-,22031-" ...
                     Stream<Integer> posStream;
