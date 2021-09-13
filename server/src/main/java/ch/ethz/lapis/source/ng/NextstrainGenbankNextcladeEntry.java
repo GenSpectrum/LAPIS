@@ -1,4 +1,4 @@
-package ch.ethz.lapis.source;
+package ch.ethz.lapis.source.ng;
 
 public class NextstrainGenbankNextcladeEntry {
     private String strain;

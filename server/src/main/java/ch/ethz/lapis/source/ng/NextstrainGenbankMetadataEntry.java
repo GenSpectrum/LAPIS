@@ -1,4 +1,4 @@
-package ch.ethz.lapis.source;
+package ch.ethz.lapis.source.ng;
 
 import java.time.LocalDate;
 

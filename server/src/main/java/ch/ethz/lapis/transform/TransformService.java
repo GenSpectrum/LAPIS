@@ -1,6 +1,6 @@
 package ch.ethz.lapis.transform;
 
-import ch.ethz.lapis.source.NextstrainGenbankMutationAAWorker;
+import ch.ethz.lapis.source.ng.NextstrainGenbankMutationAAWorker;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
@@ -36,7 +36,7 @@ public class TransformService {
         //     y_main_metadata_staging
         //     y_main_sequence_staging
         //     y_main_aa_sequence_staging
-        mergeSources();
+        pullFromNextstrainGenbankTable();
         // Fill the table y_main_sequence_columnar_staging
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
@@ -46,8 +46,7 @@ public class TransformService {
     }
 
 
-    public void mergeSources() throws SQLException {
-        // Currently, we only use nextstrain/genbank as source
+    public void pullFromNextstrainGenbankTable() throws SQLException {
         String sql1 = """
                 insert into y_main_metadata_staging (
                   id, source, source_primary_key, genbank_accession, sra_accession, gisaid_epi_isl,

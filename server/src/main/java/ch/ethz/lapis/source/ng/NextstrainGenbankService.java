@@ -1,10 +1,9 @@
-package ch.ethz.lapis.source;
+package ch.ethz.lapis.source.ng;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.jooq.SQL;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

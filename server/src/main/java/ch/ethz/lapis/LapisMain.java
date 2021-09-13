@@ -3,7 +3,7 @@ package ch.ethz.lapis;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
-import ch.ethz.lapis.source.NextstrainGenbankService;
+import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.boot.SpringApplication;

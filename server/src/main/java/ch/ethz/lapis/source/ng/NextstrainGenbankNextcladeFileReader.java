@@ -1,4 +1,4 @@
-package ch.ethz.lapis.source;
+package ch.ethz.lapis.source.ng;
 
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import org.apache.commons.csv.CSVFormat;
