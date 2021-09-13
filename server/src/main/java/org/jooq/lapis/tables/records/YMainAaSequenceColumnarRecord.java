@@ -21,42 +21,42 @@ public class YMainAaSequenceColumnarRecord extends UpdatableRecordImpl<YMainAaSe
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_columnar.gene</code>.
+     * Setter for <code>y_main_aa_sequence_columnar.gene</code>.
      */
     public void setGene(String value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_columnar.gene</code>.
+     * Getter for <code>y_main_aa_sequence_columnar.gene</code>.
      */
     public String getGene() {
         return (String) get(0);
     }
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_columnar.position</code>.
+     * Setter for <code>y_main_aa_sequence_columnar.position</code>.
      */
     public void setPosition(Integer value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_columnar.position</code>.
+     * Getter for <code>y_main_aa_sequence_columnar.position</code>.
      */
     public Integer getPosition() {
         return (Integer) get(1);
     }
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_columnar.data_compressed</code>.
+     * Setter for <code>y_main_aa_sequence_columnar.data_compressed</code>.
      */
     public void setDataCompressed(byte[] value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_columnar.data_compressed</code>.
+     * Getter for <code>y_main_aa_sequence_columnar.data_compressed</code>.
      */
     public byte[] getDataCompressed() {
         return (byte[]) get(2);

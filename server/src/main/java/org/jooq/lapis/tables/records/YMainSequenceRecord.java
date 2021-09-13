@@ -21,98 +21,98 @@ public class YMainSequenceRecord extends UpdatableRecordImpl<YMainSequenceRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.y_main_sequence.id</code>.
+     * Setter for <code>y_main_sequence.id</code>.
      */
     public void setId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.id</code>.
+     * Getter for <code>y_main_sequence.id</code>.
      */
     public Integer getId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.seq_aligned_compressed</code>.
+     * Setter for <code>y_main_sequence.seq_aligned_compressed</code>.
      */
     public void setSeqAlignedCompressed(byte[] value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.seq_aligned_compressed</code>.
+     * Getter for <code>y_main_sequence.seq_aligned_compressed</code>.
      */
     public byte[] getSeqAlignedCompressed() {
         return (byte[]) get(1);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.aa_mutations</code>.
+     * Setter for <code>y_main_sequence.aa_mutations</code>.
      */
     public void setAaMutations(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.aa_mutations</code>.
+     * Getter for <code>y_main_sequence.aa_mutations</code>.
      */
     public String getAaMutations() {
         return (String) get(2);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.nuc_substitutions</code>.
+     * Setter for <code>y_main_sequence.nuc_substitutions</code>.
      */
     public void setNucSubstitutions(String value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.nuc_substitutions</code>.
+     * Getter for <code>y_main_sequence.nuc_substitutions</code>.
      */
     public String getNucSubstitutions() {
         return (String) get(3);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.nuc_deletions</code>.
+     * Setter for <code>y_main_sequence.nuc_deletions</code>.
      */
     public void setNucDeletions(String value) {
         set(4, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.nuc_deletions</code>.
+     * Getter for <code>y_main_sequence.nuc_deletions</code>.
      */
     public String getNucDeletions() {
         return (String) get(4);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.nuc_insertions</code>.
+     * Setter for <code>y_main_sequence.nuc_insertions</code>.
      */
     public void setNucInsertions(String value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.nuc_insertions</code>.
+     * Getter for <code>y_main_sequence.nuc_insertions</code>.
      */
     public String getNucInsertions() {
         return (String) get(5);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence.seq_original_compressed</code>.
+     * Setter for <code>y_main_sequence.seq_original_compressed</code>.
      */
     public void setSeqOriginalCompressed(byte[] value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence.seq_original_compressed</code>.
+     * Getter for <code>y_main_sequence.seq_original_compressed</code>.
      */
     public byte[] getSeqOriginalCompressed() {
         return (byte[]) get(6);

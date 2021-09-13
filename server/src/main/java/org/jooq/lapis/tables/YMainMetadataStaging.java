@@ -21,9 +21,9 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Indexes;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainMetadataStagingRecord;
 
 
@@ -36,7 +36,7 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_metadata_staging</code>
+     * The reference instance of <code>y_main_metadata_staging</code>
      */
     public static final YMainMetadataStaging Y_MAIN_METADATA_STAGING = new YMainMetadataStaging();
 
@@ -49,132 +49,132 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     }
 
     /**
-     * The column <code>public.y_main_metadata_staging.id</code>.
+     * The column <code>y_main_metadata_staging.id</code>.
      */
     public final TableField<YMainMetadataStagingRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.source</code>.
+     * The column <code>y_main_metadata_staging.source</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SOURCE = createField(DSL.name("source"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.source_primary_key</code>.
+     * The column <code>y_main_metadata_staging.source_primary_key</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SOURCE_PRIMARY_KEY = createField(DSL.name("source_primary_key"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.genbank_accession</code>.
+     * The column <code>y_main_metadata_staging.genbank_accession</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> GENBANK_ACCESSION = createField(DSL.name("genbank_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.sra_accession</code>.
+     * The column <code>y_main_metadata_staging.sra_accession</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.gisaid_epi_isl</code>.
+     * The column <code>y_main_metadata_staging.gisaid_epi_isl</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> GISAID_EPI_ISL = createField(DSL.name("gisaid_epi_isl"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.strain</code>.
+     * The column <code>y_main_metadata_staging.strain</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.date</code>.
+     * The column <code>y_main_metadata_staging.date</code>.
      */
     public final TableField<YMainMetadataStagingRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.date_submitted</code>.
+     * The column <code>y_main_metadata_staging.date_submitted</code>.
      */
     public final TableField<YMainMetadataStagingRecord, LocalDate> DATE_SUBMITTED = createField(DSL.name("date_submitted"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.region</code>.
+     * The column <code>y_main_metadata_staging.region</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> REGION = createField(DSL.name("region"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.country</code>.
+     * The column <code>y_main_metadata_staging.country</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.division</code>.
+     * The column <code>y_main_metadata_staging.division</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> DIVISION = createField(DSL.name("division"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.location</code>.
+     * The column <code>y_main_metadata_staging.location</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> LOCATION = createField(DSL.name("location"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.region_exposure</code>.
+     * The column <code>y_main_metadata_staging.region_exposure</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> REGION_EXPOSURE = createField(DSL.name("region_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.country_exposure</code>.
+     * The column <code>y_main_metadata_staging.country_exposure</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> COUNTRY_EXPOSURE = createField(DSL.name("country_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.division_exposure</code>.
+     * The column <code>y_main_metadata_staging.division_exposure</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> DIVISION_EXPOSURE = createField(DSL.name("division_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.host</code>.
+     * The column <code>y_main_metadata_staging.host</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> HOST = createField(DSL.name("host"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.age</code>.
+     * The column <code>y_main_metadata_staging.age</code>.
      */
     public final TableField<YMainMetadataStagingRecord, Integer> AGE = createField(DSL.name("age"), SQLDataType.INTEGER, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.sex</code>.
+     * The column <code>y_main_metadata_staging.sex</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.sampling_strategy</code>.
+     * The column <code>y_main_metadata_staging.sampling_strategy</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.pango_lineage</code>.
+     * The column <code>y_main_metadata_staging.pango_lineage</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.nextstrain_clade</code>.
+     * The column <code>y_main_metadata_staging.nextstrain_clade</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> NEXTSTRAIN_CLADE = createField(DSL.name("nextstrain_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.gisaid_clade</code>.
+     * The column <code>y_main_metadata_staging.gisaid_clade</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> GISAID_CLADE = createField(DSL.name("gisaid_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.originating_lab</code>.
+     * The column <code>y_main_metadata_staging.originating_lab</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> ORIGINATING_LAB = createField(DSL.name("originating_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.submitting_lab</code>.
+     * The column <code>y_main_metadata_staging.submitting_lab</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SUBMITTING_LAB = createField(DSL.name("submitting_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata_staging.authors</code>.
+     * The column <code>y_main_metadata_staging.authors</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
 
@@ -187,21 +187,21 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     }
 
     /**
-     * Create an aliased <code>public.y_main_metadata_staging</code> table reference
+     * Create an aliased <code>y_main_metadata_staging</code> table reference
      */
     public YMainMetadataStaging(String alias) {
         this(DSL.name(alias), Y_MAIN_METADATA_STAGING);
     }
 
     /**
-     * Create an aliased <code>public.y_main_metadata_staging</code> table reference
+     * Create an aliased <code>y_main_metadata_staging</code> table reference
      */
     public YMainMetadataStaging(Name alias) {
         this(alias, Y_MAIN_METADATA_STAGING);
     }
 
     /**
-     * Create a <code>public.y_main_metadata_staging</code> table reference
+     * Create a <code>y_main_metadata_staging</code> table reference
      */
     public YMainMetadataStaging() {
         this(DSL.name("y_main_metadata_staging"), null);
@@ -213,7 +213,7 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

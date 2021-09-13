@@ -20,8 +20,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainSequenceColumnarRecord;
 
 
@@ -34,7 +34,7 @@ public class YMainSequenceColumnar extends TableImpl<YMainSequenceColumnarRecord
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_sequence_columnar</code>
+     * The reference instance of <code>y_main_sequence_columnar</code>
      */
     public static final YMainSequenceColumnar Y_MAIN_SEQUENCE_COLUMNAR = new YMainSequenceColumnar();
 
@@ -47,12 +47,12 @@ public class YMainSequenceColumnar extends TableImpl<YMainSequenceColumnarRecord
     }
 
     /**
-     * The column <code>public.y_main_sequence_columnar.position</code>.
+     * The column <code>y_main_sequence_columnar.position</code>.
      */
     public final TableField<YMainSequenceColumnarRecord, Integer> POSITION = createField(DSL.name("position"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_sequence_columnar.data_compressed</code>.
+     * The column <code>y_main_sequence_columnar.data_compressed</code>.
      */
     public final TableField<YMainSequenceColumnarRecord, byte[]> DATA_COMPRESSED = createField(DSL.name("data_compressed"), SQLDataType.BLOB.nullable(false), this, "");
 
@@ -65,21 +65,21 @@ public class YMainSequenceColumnar extends TableImpl<YMainSequenceColumnarRecord
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence_columnar</code> table reference
+     * Create an aliased <code>y_main_sequence_columnar</code> table reference
      */
     public YMainSequenceColumnar(String alias) {
         this(DSL.name(alias), Y_MAIN_SEQUENCE_COLUMNAR);
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence_columnar</code> table reference
+     * Create an aliased <code>y_main_sequence_columnar</code> table reference
      */
     public YMainSequenceColumnar(Name alias) {
         this(alias, Y_MAIN_SEQUENCE_COLUMNAR);
     }
 
     /**
-     * Create a <code>public.y_main_sequence_columnar</code> table reference
+     * Create a <code>y_main_sequence_columnar</code> table reference
      */
     public YMainSequenceColumnar() {
         this(DSL.name("y_main_sequence_columnar"), null);
@@ -91,7 +91,7 @@ public class YMainSequenceColumnar extends TableImpl<YMainSequenceColumnarRecord
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

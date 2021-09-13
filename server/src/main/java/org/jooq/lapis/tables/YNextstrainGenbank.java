@@ -20,8 +20,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YNextstrainGenbankRecord;
 
 
@@ -34,7 +34,7 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_nextstrain_genbank</code>
+     * The reference instance of <code>y_nextstrain_genbank</code>
      */
     public static final YNextstrainGenbank Y_NEXTSTRAIN_GENBANK = new YNextstrainGenbank();
 
@@ -47,157 +47,157 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     }
 
     /**
-     * The column <code>public.y_nextstrain_genbank.genbank_accession</code>.
+     * The column <code>y_nextstrain_genbank.genbank_accession</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> GENBANK_ACCESSION = createField(DSL.name("genbank_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.sra_accession</code>.
+     * The column <code>y_nextstrain_genbank.sra_accession</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.gisaid_epi_isl</code>.
+     * The column <code>y_nextstrain_genbank.gisaid_epi_isl</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> GISAID_EPI_ISL = createField(DSL.name("gisaid_epi_isl"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.strain</code>.
+     * The column <code>y_nextstrain_genbank.strain</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.date</code>.
+     * The column <code>y_nextstrain_genbank.date</code>.
      */
     public final TableField<YNextstrainGenbankRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.date_original</code>.
+     * The column <code>y_nextstrain_genbank.date_original</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> DATE_ORIGINAL = createField(DSL.name("date_original"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.date_submitted</code>.
+     * The column <code>y_nextstrain_genbank.date_submitted</code>.
      */
     public final TableField<YNextstrainGenbankRecord, LocalDate> DATE_SUBMITTED = createField(DSL.name("date_submitted"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.region</code>.
+     * The column <code>y_nextstrain_genbank.region</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> REGION = createField(DSL.name("region"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.country</code>.
+     * The column <code>y_nextstrain_genbank.country</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.division</code>.
+     * The column <code>y_nextstrain_genbank.division</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> DIVISION = createField(DSL.name("division"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.location</code>.
+     * The column <code>y_nextstrain_genbank.location</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> LOCATION = createField(DSL.name("location"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.region_exposure</code>.
+     * The column <code>y_nextstrain_genbank.region_exposure</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> REGION_EXPOSURE = createField(DSL.name("region_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.country_exposure</code>.
+     * The column <code>y_nextstrain_genbank.country_exposure</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> COUNTRY_EXPOSURE = createField(DSL.name("country_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.division_exposure</code>.
+     * The column <code>y_nextstrain_genbank.division_exposure</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> DIVISION_EXPOSURE = createField(DSL.name("division_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.host</code>.
+     * The column <code>y_nextstrain_genbank.host</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> HOST = createField(DSL.name("host"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.age</code>.
+     * The column <code>y_nextstrain_genbank.age</code>.
      */
     public final TableField<YNextstrainGenbankRecord, Integer> AGE = createField(DSL.name("age"), SQLDataType.INTEGER, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.sex</code>.
+     * The column <code>y_nextstrain_genbank.sex</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.sampling_strategy</code>.
+     * The column <code>y_nextstrain_genbank.sampling_strategy</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.pango_lineage</code>.
+     * The column <code>y_nextstrain_genbank.pango_lineage</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.nextstrain_clade</code>.
+     * The column <code>y_nextstrain_genbank.nextstrain_clade</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> NEXTSTRAIN_CLADE = createField(DSL.name("nextstrain_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.gisaid_clade</code>.
+     * The column <code>y_nextstrain_genbank.gisaid_clade</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> GISAID_CLADE = createField(DSL.name("gisaid_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.originating_lab</code>.
+     * The column <code>y_nextstrain_genbank.originating_lab</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> ORIGINATING_LAB = createField(DSL.name("originating_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.submitting_lab</code>.
+     * The column <code>y_nextstrain_genbank.submitting_lab</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> SUBMITTING_LAB = createField(DSL.name("submitting_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.authors</code>.
+     * The column <code>y_nextstrain_genbank.authors</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.seq_original_compressed</code>.
+     * The column <code>y_nextstrain_genbank.seq_original_compressed</code>.
      */
     public final TableField<YNextstrainGenbankRecord, byte[]> SEQ_ORIGINAL_COMPRESSED = createField(DSL.name("seq_original_compressed"), SQLDataType.BLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.seq_aligned_compressed</code>.
+     * The column <code>y_nextstrain_genbank.seq_aligned_compressed</code>.
      */
     public final TableField<YNextstrainGenbankRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.aa_mutations</code>.
+     * The column <code>y_nextstrain_genbank.aa_mutations</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.nuc_insertions</code>.
+     * The column <code>y_nextstrain_genbank.nuc_insertions</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.nuc_substitutions</code>.
+     * The column <code>y_nextstrain_genbank.nuc_substitutions</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> NUC_SUBSTITUTIONS = createField(DSL.name("nuc_substitutions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.nuc_deletions</code>.
+     * The column <code>y_nextstrain_genbank.nuc_deletions</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> NUC_DELETIONS = createField(DSL.name("nuc_deletions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_nextstrain_genbank.aa_seqs</code>.
+     * The column <code>y_nextstrain_genbank.aa_seqs</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> AA_SEQS = createField(DSL.name("aa_seqs"), SQLDataType.CLOB, this, "");
 
@@ -210,21 +210,21 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     }
 
     /**
-     * Create an aliased <code>public.y_nextstrain_genbank</code> table reference
+     * Create an aliased <code>y_nextstrain_genbank</code> table reference
      */
     public YNextstrainGenbank(String alias) {
         this(DSL.name(alias), Y_NEXTSTRAIN_GENBANK);
     }
 
     /**
-     * Create an aliased <code>public.y_nextstrain_genbank</code> table reference
+     * Create an aliased <code>y_nextstrain_genbank</code> table reference
      */
     public YNextstrainGenbank(Name alias) {
         this(alias, Y_NEXTSTRAIN_GENBANK);
     }
 
     /**
-     * Create a <code>public.y_nextstrain_genbank</code> table reference
+     * Create a <code>y_nextstrain_genbank</code> table reference
      */
     public YNextstrainGenbank() {
         this(DSL.name("y_nextstrain_genbank"), null);
@@ -236,7 +236,7 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

@@ -5,7 +5,7 @@ package org.jooq.lapis.routines;
 
 
 import org.jooq.impl.AbstractRoutine;
-import org.jooq.lapis.Public;
+import org.jooq.lapis.DefaultSchema;
 
 
 /**
@@ -20,6 +20,6 @@ public class YSwitchInStagingTables extends AbstractRoutine<java.lang.Void> {
      * Create a new routine call instance
      */
     public YSwitchInStagingTables() {
-        super("y_switch_in_staging_tables", Public.PUBLIC);
+        super("y_switch_in_staging_tables", DefaultSchema.DEFAULT_SCHEMA);
     }
 }

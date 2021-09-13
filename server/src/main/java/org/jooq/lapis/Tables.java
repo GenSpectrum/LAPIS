@@ -18,63 +18,63 @@ import org.jooq.lapis.tables.YNextstrainGenbank;
 
 
 /**
- * Convenience access to all tables in public.
+ * Convenience access to all tables in the default schema.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
 
     /**
-     * The table <code>public.y_main_aa_sequence</code>.
+     * The table <code>y_main_aa_sequence</code>.
      */
     public static final YMainAaSequence Y_MAIN_AA_SEQUENCE = YMainAaSequence.Y_MAIN_AA_SEQUENCE;
 
     /**
-     * The table <code>public.y_main_aa_sequence_columnar</code>.
+     * The table <code>y_main_aa_sequence_columnar</code>.
      */
     public static final YMainAaSequenceColumnar Y_MAIN_AA_SEQUENCE_COLUMNAR = YMainAaSequenceColumnar.Y_MAIN_AA_SEQUENCE_COLUMNAR;
 
     /**
-     * The table <code>public.y_main_aa_sequence_columnar_staging</code>.
+     * The table <code>y_main_aa_sequence_columnar_staging</code>.
      */
     public static final YMainAaSequenceColumnarStaging Y_MAIN_AA_SEQUENCE_COLUMNAR_STAGING = YMainAaSequenceColumnarStaging.Y_MAIN_AA_SEQUENCE_COLUMNAR_STAGING;
 
     /**
-     * The table <code>public.y_main_aa_sequence_staging</code>.
+     * The table <code>y_main_aa_sequence_staging</code>.
      */
     public static final YMainAaSequenceStaging Y_MAIN_AA_SEQUENCE_STAGING = YMainAaSequenceStaging.Y_MAIN_AA_SEQUENCE_STAGING;
 
     /**
-     * The table <code>public.y_main_metadata</code>.
+     * The table <code>y_main_metadata</code>.
      */
     public static final YMainMetadata Y_MAIN_METADATA = YMainMetadata.Y_MAIN_METADATA;
 
     /**
-     * The table <code>public.y_main_metadata_staging</code>.
+     * The table <code>y_main_metadata_staging</code>.
      */
     public static final YMainMetadataStaging Y_MAIN_METADATA_STAGING = YMainMetadataStaging.Y_MAIN_METADATA_STAGING;
 
     /**
-     * The table <code>public.y_main_sequence</code>.
+     * The table <code>y_main_sequence</code>.
      */
     public static final YMainSequence Y_MAIN_SEQUENCE = YMainSequence.Y_MAIN_SEQUENCE;
 
     /**
-     * The table <code>public.y_main_sequence_columnar</code>.
+     * The table <code>y_main_sequence_columnar</code>.
      */
     public static final YMainSequenceColumnar Y_MAIN_SEQUENCE_COLUMNAR = YMainSequenceColumnar.Y_MAIN_SEQUENCE_COLUMNAR;
 
     /**
-     * The table <code>public.y_main_sequence_columnar_staging</code>.
+     * The table <code>y_main_sequence_columnar_staging</code>.
      */
     public static final YMainSequenceColumnarStaging Y_MAIN_SEQUENCE_COLUMNAR_STAGING = YMainSequenceColumnarStaging.Y_MAIN_SEQUENCE_COLUMNAR_STAGING;
 
     /**
-     * The table <code>public.y_main_sequence_staging</code>.
+     * The table <code>y_main_sequence_staging</code>.
      */
     public static final YMainSequenceStaging Y_MAIN_SEQUENCE_STAGING = YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING;
 
     /**
-     * The table <code>public.y_nextstrain_genbank</code>.
+     * The table <code>y_nextstrain_genbank</code>.
      */
     public static final YNextstrainGenbank Y_NEXTSTRAIN_GENBANK = YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK;
 }

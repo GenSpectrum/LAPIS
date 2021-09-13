@@ -20,8 +20,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 
 
@@ -34,7 +34,7 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_sequence</code>
+     * The reference instance of <code>y_main_sequence</code>
      */
     public static final YMainSequence Y_MAIN_SEQUENCE = new YMainSequence();
 
@@ -47,37 +47,37 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
     }
 
     /**
-     * The column <code>public.y_main_sequence.id</code>.
+     * The column <code>y_main_sequence.id</code>.
      */
     public final TableField<YMainSequenceRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_sequence.seq_aligned_compressed</code>.
+     * The column <code>y_main_sequence.seq_aligned_compressed</code>.
      */
     public final TableField<YMainSequenceRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence.aa_mutations</code>.
+     * The column <code>y_main_sequence.aa_mutations</code>.
      */
     public final TableField<YMainSequenceRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence.nuc_substitutions</code>.
+     * The column <code>y_main_sequence.nuc_substitutions</code>.
      */
     public final TableField<YMainSequenceRecord, String> NUC_SUBSTITUTIONS = createField(DSL.name("nuc_substitutions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence.nuc_deletions</code>.
+     * The column <code>y_main_sequence.nuc_deletions</code>.
      */
     public final TableField<YMainSequenceRecord, String> NUC_DELETIONS = createField(DSL.name("nuc_deletions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence.nuc_insertions</code>.
+     * The column <code>y_main_sequence.nuc_insertions</code>.
      */
     public final TableField<YMainSequenceRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence.seq_original_compressed</code>.
+     * The column <code>y_main_sequence.seq_original_compressed</code>.
      */
     public final TableField<YMainSequenceRecord, byte[]> SEQ_ORIGINAL_COMPRESSED = createField(DSL.name("seq_original_compressed"), SQLDataType.BLOB, this, "");
 
@@ -90,21 +90,21 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence</code> table reference
+     * Create an aliased <code>y_main_sequence</code> table reference
      */
     public YMainSequence(String alias) {
         this(DSL.name(alias), Y_MAIN_SEQUENCE);
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence</code> table reference
+     * Create an aliased <code>y_main_sequence</code> table reference
      */
     public YMainSequence(Name alias) {
         this(alias, Y_MAIN_SEQUENCE);
     }
 
     /**
-     * Create a <code>public.y_main_sequence</code> table reference
+     * Create a <code>y_main_sequence</code> table reference
      */
     public YMainSequence() {
         this(DSL.name("y_main_sequence"), null);
@@ -116,7 +116,7 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

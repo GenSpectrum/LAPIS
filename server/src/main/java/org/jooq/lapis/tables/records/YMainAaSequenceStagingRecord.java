@@ -21,42 +21,42 @@ public class YMainAaSequenceStagingRecord extends UpdatableRecordImpl<YMainAaSeq
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_staging.id</code>.
+     * Setter for <code>y_main_aa_sequence_staging.id</code>.
      */
     public void setId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_staging.id</code>.
+     * Getter for <code>y_main_aa_sequence_staging.id</code>.
      */
     public Integer getId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_staging.gene</code>.
+     * Setter for <code>y_main_aa_sequence_staging.gene</code>.
      */
     public void setGene(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_staging.gene</code>.
+     * Getter for <code>y_main_aa_sequence_staging.gene</code>.
      */
     public String getGene() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>public.y_main_aa_sequence_staging.aa_seq</code>.
+     * Setter for <code>y_main_aa_sequence_staging.aa_seq</code>.
      */
     public void setAaSeq(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.y_main_aa_sequence_staging.aa_seq</code>.
+     * Getter for <code>y_main_aa_sequence_staging.aa_seq</code>.
      */
     public String getAaSeq() {
         return (String) get(2);

@@ -13,7 +13,7 @@ import org.jooq.lapis.tables.YMainMetadataStaging;
 
 
 /**
- * A class modelling indexes of tables in public.
+ * A class modelling indexes of tables in the default schema.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Indexes {

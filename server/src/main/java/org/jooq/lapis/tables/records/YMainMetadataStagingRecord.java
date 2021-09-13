@@ -20,364 +20,364 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.id</code>.
+     * Setter for <code>y_main_metadata_staging.id</code>.
      */
     public void setId(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.id</code>.
+     * Getter for <code>y_main_metadata_staging.id</code>.
      */
     public Integer getId() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.source</code>.
+     * Setter for <code>y_main_metadata_staging.source</code>.
      */
     public void setSource(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.source</code>.
+     * Getter for <code>y_main_metadata_staging.source</code>.
      */
     public String getSource() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.source_primary_key</code>.
+     * Setter for <code>y_main_metadata_staging.source_primary_key</code>.
      */
     public void setSourcePrimaryKey(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.source_primary_key</code>.
+     * Getter for <code>y_main_metadata_staging.source_primary_key</code>.
      */
     public String getSourcePrimaryKey() {
         return (String) get(2);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.genbank_accession</code>.
+     * Setter for <code>y_main_metadata_staging.genbank_accession</code>.
      */
     public void setGenbankAccession(String value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.genbank_accession</code>.
+     * Getter for <code>y_main_metadata_staging.genbank_accession</code>.
      */
     public String getGenbankAccession() {
         return (String) get(3);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.sra_accession</code>.
+     * Setter for <code>y_main_metadata_staging.sra_accession</code>.
      */
     public void setSraAccession(String value) {
         set(4, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.sra_accession</code>.
+     * Getter for <code>y_main_metadata_staging.sra_accession</code>.
      */
     public String getSraAccession() {
         return (String) get(4);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.gisaid_epi_isl</code>.
+     * Setter for <code>y_main_metadata_staging.gisaid_epi_isl</code>.
      */
     public void setGisaidEpiIsl(String value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.gisaid_epi_isl</code>.
+     * Getter for <code>y_main_metadata_staging.gisaid_epi_isl</code>.
      */
     public String getGisaidEpiIsl() {
         return (String) get(5);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.strain</code>.
+     * Setter for <code>y_main_metadata_staging.strain</code>.
      */
     public void setStrain(String value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.strain</code>.
+     * Getter for <code>y_main_metadata_staging.strain</code>.
      */
     public String getStrain() {
         return (String) get(6);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.date</code>.
+     * Setter for <code>y_main_metadata_staging.date</code>.
      */
     public void setDate(LocalDate value) {
         set(7, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.date</code>.
+     * Getter for <code>y_main_metadata_staging.date</code>.
      */
     public LocalDate getDate() {
         return (LocalDate) get(7);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.date_submitted</code>.
+     * Setter for <code>y_main_metadata_staging.date_submitted</code>.
      */
     public void setDateSubmitted(LocalDate value) {
         set(8, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.date_submitted</code>.
+     * Getter for <code>y_main_metadata_staging.date_submitted</code>.
      */
     public LocalDate getDateSubmitted() {
         return (LocalDate) get(8);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.region</code>.
+     * Setter for <code>y_main_metadata_staging.region</code>.
      */
     public void setRegion(String value) {
         set(9, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.region</code>.
+     * Getter for <code>y_main_metadata_staging.region</code>.
      */
     public String getRegion() {
         return (String) get(9);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.country</code>.
+     * Setter for <code>y_main_metadata_staging.country</code>.
      */
     public void setCountry(String value) {
         set(10, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.country</code>.
+     * Getter for <code>y_main_metadata_staging.country</code>.
      */
     public String getCountry() {
         return (String) get(10);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.division</code>.
+     * Setter for <code>y_main_metadata_staging.division</code>.
      */
     public void setDivision(String value) {
         set(11, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.division</code>.
+     * Getter for <code>y_main_metadata_staging.division</code>.
      */
     public String getDivision() {
         return (String) get(11);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.location</code>.
+     * Setter for <code>y_main_metadata_staging.location</code>.
      */
     public void setLocation(String value) {
         set(12, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.location</code>.
+     * Getter for <code>y_main_metadata_staging.location</code>.
      */
     public String getLocation() {
         return (String) get(12);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.region_exposure</code>.
+     * Setter for <code>y_main_metadata_staging.region_exposure</code>.
      */
     public void setRegionExposure(String value) {
         set(13, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.region_exposure</code>.
+     * Getter for <code>y_main_metadata_staging.region_exposure</code>.
      */
     public String getRegionExposure() {
         return (String) get(13);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.country_exposure</code>.
+     * Setter for <code>y_main_metadata_staging.country_exposure</code>.
      */
     public void setCountryExposure(String value) {
         set(14, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.country_exposure</code>.
+     * Getter for <code>y_main_metadata_staging.country_exposure</code>.
      */
     public String getCountryExposure() {
         return (String) get(14);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.division_exposure</code>.
+     * Setter for <code>y_main_metadata_staging.division_exposure</code>.
      */
     public void setDivisionExposure(String value) {
         set(15, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.division_exposure</code>.
+     * Getter for <code>y_main_metadata_staging.division_exposure</code>.
      */
     public String getDivisionExposure() {
         return (String) get(15);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.host</code>.
+     * Setter for <code>y_main_metadata_staging.host</code>.
      */
     public void setHost(String value) {
         set(16, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.host</code>.
+     * Getter for <code>y_main_metadata_staging.host</code>.
      */
     public String getHost() {
         return (String) get(16);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.age</code>.
+     * Setter for <code>y_main_metadata_staging.age</code>.
      */
     public void setAge(Integer value) {
         set(17, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.age</code>.
+     * Getter for <code>y_main_metadata_staging.age</code>.
      */
     public Integer getAge() {
         return (Integer) get(17);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.sex</code>.
+     * Setter for <code>y_main_metadata_staging.sex</code>.
      */
     public void setSex(String value) {
         set(18, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.sex</code>.
+     * Getter for <code>y_main_metadata_staging.sex</code>.
      */
     public String getSex() {
         return (String) get(18);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.sampling_strategy</code>.
+     * Setter for <code>y_main_metadata_staging.sampling_strategy</code>.
      */
     public void setSamplingStrategy(String value) {
         set(19, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.sampling_strategy</code>.
+     * Getter for <code>y_main_metadata_staging.sampling_strategy</code>.
      */
     public String getSamplingStrategy() {
         return (String) get(19);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.pango_lineage</code>.
+     * Setter for <code>y_main_metadata_staging.pango_lineage</code>.
      */
     public void setPangoLineage(String value) {
         set(20, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.pango_lineage</code>.
+     * Getter for <code>y_main_metadata_staging.pango_lineage</code>.
      */
     public String getPangoLineage() {
         return (String) get(20);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.nextstrain_clade</code>.
+     * Setter for <code>y_main_metadata_staging.nextstrain_clade</code>.
      */
     public void setNextstrainClade(String value) {
         set(21, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.nextstrain_clade</code>.
+     * Getter for <code>y_main_metadata_staging.nextstrain_clade</code>.
      */
     public String getNextstrainClade() {
         return (String) get(21);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.gisaid_clade</code>.
+     * Setter for <code>y_main_metadata_staging.gisaid_clade</code>.
      */
     public void setGisaidClade(String value) {
         set(22, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.gisaid_clade</code>.
+     * Getter for <code>y_main_metadata_staging.gisaid_clade</code>.
      */
     public String getGisaidClade() {
         return (String) get(22);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.originating_lab</code>.
+     * Setter for <code>y_main_metadata_staging.originating_lab</code>.
      */
     public void setOriginatingLab(String value) {
         set(23, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.originating_lab</code>.
+     * Getter for <code>y_main_metadata_staging.originating_lab</code>.
      */
     public String getOriginatingLab() {
         return (String) get(23);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.submitting_lab</code>.
+     * Setter for <code>y_main_metadata_staging.submitting_lab</code>.
      */
     public void setSubmittingLab(String value) {
         set(24, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.submitting_lab</code>.
+     * Getter for <code>y_main_metadata_staging.submitting_lab</code>.
      */
     public String getSubmittingLab() {
         return (String) get(24);
     }
 
     /**
-     * Setter for <code>public.y_main_metadata_staging.authors</code>.
+     * Setter for <code>y_main_metadata_staging.authors</code>.
      */
     public void setAuthors(String value) {
         set(25, value);
     }
 
     /**
-     * Getter for <code>public.y_main_metadata_staging.authors</code>.
+     * Getter for <code>y_main_metadata_staging.authors</code>.
      */
     public String getAuthors() {
         return (String) get(25);

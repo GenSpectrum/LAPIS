@@ -9,13 +9,14 @@ import org.jooq.lapis.routines.YSwitchInStagingTables;
 
 
 /**
- * Convenience access to all stored procedures and functions in public.
+ * Convenience access to all stored procedures and functions in the default 
+ * schema.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Routines {
 
     /**
-     * Call <code>public.y_switch_in_staging_tables</code>
+     * Call <code>y_switch_in_staging_tables</code>
      */
     public static void ySwitchInStagingTables(
           Configuration configuration

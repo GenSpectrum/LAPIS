@@ -20,8 +20,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainSequenceStagingRecord;
 
 
@@ -34,7 +34,7 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_sequence_staging</code>
+     * The reference instance of <code>y_main_sequence_staging</code>
      */
     public static final YMainSequenceStaging Y_MAIN_SEQUENCE_STAGING = new YMainSequenceStaging();
 
@@ -47,37 +47,37 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
     }
 
     /**
-     * The column <code>public.y_main_sequence_staging.id</code>.
+     * The column <code>y_main_sequence_staging.id</code>.
      */
     public final TableField<YMainSequenceStagingRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.seq_aligned_compressed</code>.
+     * The column <code>y_main_sequence_staging.seq_aligned_compressed</code>.
      */
     public final TableField<YMainSequenceStagingRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.aa_mutations</code>.
+     * The column <code>y_main_sequence_staging.aa_mutations</code>.
      */
     public final TableField<YMainSequenceStagingRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.nuc_substitutions</code>.
+     * The column <code>y_main_sequence_staging.nuc_substitutions</code>.
      */
     public final TableField<YMainSequenceStagingRecord, String> NUC_SUBSTITUTIONS = createField(DSL.name("nuc_substitutions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.nuc_deletions</code>.
+     * The column <code>y_main_sequence_staging.nuc_deletions</code>.
      */
     public final TableField<YMainSequenceStagingRecord, String> NUC_DELETIONS = createField(DSL.name("nuc_deletions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.nuc_insertions</code>.
+     * The column <code>y_main_sequence_staging.nuc_insertions</code>.
      */
     public final TableField<YMainSequenceStagingRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_sequence_staging.seq_original_compressed</code>.
+     * The column <code>y_main_sequence_staging.seq_original_compressed</code>.
      */
     public final TableField<YMainSequenceStagingRecord, byte[]> SEQ_ORIGINAL_COMPRESSED = createField(DSL.name("seq_original_compressed"), SQLDataType.BLOB, this, "");
 
@@ -90,21 +90,21 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence_staging</code> table reference
+     * Create an aliased <code>y_main_sequence_staging</code> table reference
      */
     public YMainSequenceStaging(String alias) {
         this(DSL.name(alias), Y_MAIN_SEQUENCE_STAGING);
     }
 
     /**
-     * Create an aliased <code>public.y_main_sequence_staging</code> table reference
+     * Create an aliased <code>y_main_sequence_staging</code> table reference
      */
     public YMainSequenceStaging(Name alias) {
         this(alias, Y_MAIN_SEQUENCE_STAGING);
     }
 
     /**
-     * Create a <code>public.y_main_sequence_staging</code> table reference
+     * Create a <code>y_main_sequence_staging</code> table reference
      */
     public YMainSequenceStaging() {
         this(DSL.name("y_main_sequence_staging"), null);
@@ -116,7 +116,7 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

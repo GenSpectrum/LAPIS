@@ -21,9 +21,9 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Indexes;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainMetadataRecord;
 
 
@@ -36,7 +36,7 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_metadata</code>
+     * The reference instance of <code>y_main_metadata</code>
      */
     public static final YMainMetadata Y_MAIN_METADATA = new YMainMetadata();
 
@@ -49,132 +49,132 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     }
 
     /**
-     * The column <code>public.y_main_metadata.id</code>.
+     * The column <code>y_main_metadata.id</code>.
      */
     public final TableField<YMainMetadataRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata.source</code>.
+     * The column <code>y_main_metadata.source</code>.
      */
     public final TableField<YMainMetadataRecord, String> SOURCE = createField(DSL.name("source"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata.source_primary_key</code>.
+     * The column <code>y_main_metadata.source_primary_key</code>.
      */
     public final TableField<YMainMetadataRecord, String> SOURCE_PRIMARY_KEY = createField(DSL.name("source_primary_key"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_metadata.genbank_accession</code>.
+     * The column <code>y_main_metadata.genbank_accession</code>.
      */
     public final TableField<YMainMetadataRecord, String> GENBANK_ACCESSION = createField(DSL.name("genbank_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.sra_accession</code>.
+     * The column <code>y_main_metadata.sra_accession</code>.
      */
     public final TableField<YMainMetadataRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.gisaid_epi_isl</code>.
+     * The column <code>y_main_metadata.gisaid_epi_isl</code>.
      */
     public final TableField<YMainMetadataRecord, String> GISAID_EPI_ISL = createField(DSL.name("gisaid_epi_isl"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.strain</code>.
+     * The column <code>y_main_metadata.strain</code>.
      */
     public final TableField<YMainMetadataRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.date</code>.
+     * The column <code>y_main_metadata.date</code>.
      */
     public final TableField<YMainMetadataRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.date_submitted</code>.
+     * The column <code>y_main_metadata.date_submitted</code>.
      */
     public final TableField<YMainMetadataRecord, LocalDate> DATE_SUBMITTED = createField(DSL.name("date_submitted"), SQLDataType.LOCALDATE, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.region</code>.
+     * The column <code>y_main_metadata.region</code>.
      */
     public final TableField<YMainMetadataRecord, String> REGION = createField(DSL.name("region"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.country</code>.
+     * The column <code>y_main_metadata.country</code>.
      */
     public final TableField<YMainMetadataRecord, String> COUNTRY = createField(DSL.name("country"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.division</code>.
+     * The column <code>y_main_metadata.division</code>.
      */
     public final TableField<YMainMetadataRecord, String> DIVISION = createField(DSL.name("division"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.location</code>.
+     * The column <code>y_main_metadata.location</code>.
      */
     public final TableField<YMainMetadataRecord, String> LOCATION = createField(DSL.name("location"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.region_exposure</code>.
+     * The column <code>y_main_metadata.region_exposure</code>.
      */
     public final TableField<YMainMetadataRecord, String> REGION_EXPOSURE = createField(DSL.name("region_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.country_exposure</code>.
+     * The column <code>y_main_metadata.country_exposure</code>.
      */
     public final TableField<YMainMetadataRecord, String> COUNTRY_EXPOSURE = createField(DSL.name("country_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.division_exposure</code>.
+     * The column <code>y_main_metadata.division_exposure</code>.
      */
     public final TableField<YMainMetadataRecord, String> DIVISION_EXPOSURE = createField(DSL.name("division_exposure"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.host</code>.
+     * The column <code>y_main_metadata.host</code>.
      */
     public final TableField<YMainMetadataRecord, String> HOST = createField(DSL.name("host"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.age</code>.
+     * The column <code>y_main_metadata.age</code>.
      */
     public final TableField<YMainMetadataRecord, Integer> AGE = createField(DSL.name("age"), SQLDataType.INTEGER, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.sex</code>.
+     * The column <code>y_main_metadata.sex</code>.
      */
     public final TableField<YMainMetadataRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.sampling_strategy</code>.
+     * The column <code>y_main_metadata.sampling_strategy</code>.
      */
     public final TableField<YMainMetadataRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.pango_lineage</code>.
+     * The column <code>y_main_metadata.pango_lineage</code>.
      */
     public final TableField<YMainMetadataRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.nextstrain_clade</code>.
+     * The column <code>y_main_metadata.nextstrain_clade</code>.
      */
     public final TableField<YMainMetadataRecord, String> NEXTSTRAIN_CLADE = createField(DSL.name("nextstrain_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.gisaid_clade</code>.
+     * The column <code>y_main_metadata.gisaid_clade</code>.
      */
     public final TableField<YMainMetadataRecord, String> GISAID_CLADE = createField(DSL.name("gisaid_clade"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.originating_lab</code>.
+     * The column <code>y_main_metadata.originating_lab</code>.
      */
     public final TableField<YMainMetadataRecord, String> ORIGINATING_LAB = createField(DSL.name("originating_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.submitting_lab</code>.
+     * The column <code>y_main_metadata.submitting_lab</code>.
      */
     public final TableField<YMainMetadataRecord, String> SUBMITTING_LAB = createField(DSL.name("submitting_lab"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>public.y_main_metadata.authors</code>.
+     * The column <code>y_main_metadata.authors</code>.
      */
     public final TableField<YMainMetadataRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
 
@@ -187,21 +187,21 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     }
 
     /**
-     * Create an aliased <code>public.y_main_metadata</code> table reference
+     * Create an aliased <code>y_main_metadata</code> table reference
      */
     public YMainMetadata(String alias) {
         this(DSL.name(alias), Y_MAIN_METADATA);
     }
 
     /**
-     * Create an aliased <code>public.y_main_metadata</code> table reference
+     * Create an aliased <code>y_main_metadata</code> table reference
      */
     public YMainMetadata(Name alias) {
         this(alias, Y_MAIN_METADATA);
     }
 
     /**
-     * Create a <code>public.y_main_metadata</code> table reference
+     * Create a <code>y_main_metadata</code> table reference
      */
     public YMainMetadata() {
         this(DSL.name("y_main_metadata"), null);
@@ -213,7 +213,7 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

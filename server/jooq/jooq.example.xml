@@ -12,6 +12,7 @@
             <name>org.jooq.meta.postgres.PostgresDatabase</name>
             <includes>y_.*</includes>
             <inputSchema>public</inputSchema>
+            <outputSchemaToDefault>true</outputSchemaToDefault>
         </database>
 
         <!-- Generation flags: See advanced configuration properties -->

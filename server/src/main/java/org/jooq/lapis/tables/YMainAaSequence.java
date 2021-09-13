@@ -20,8 +20,8 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
+import org.jooq.lapis.DefaultSchema;
 import org.jooq.lapis.Keys;
-import org.jooq.lapis.Public;
 import org.jooq.lapis.tables.records.YMainAaSequenceRecord;
 
 
@@ -34,7 +34,7 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The reference instance of <code>public.y_main_aa_sequence</code>
+     * The reference instance of <code>y_main_aa_sequence</code>
      */
     public static final YMainAaSequence Y_MAIN_AA_SEQUENCE = new YMainAaSequence();
 
@@ -47,17 +47,17 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     }
 
     /**
-     * The column <code>public.y_main_aa_sequence.id</code>.
+     * The column <code>y_main_aa_sequence.id</code>.
      */
     public final TableField<YMainAaSequenceRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_aa_sequence.gene</code>.
+     * The column <code>y_main_aa_sequence.gene</code>.
      */
     public final TableField<YMainAaSequenceRecord, String> GENE = createField(DSL.name("gene"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>public.y_main_aa_sequence.aa_seq</code>.
+     * The column <code>y_main_aa_sequence.aa_seq</code>.
      */
     public final TableField<YMainAaSequenceRecord, String> AA_SEQ = createField(DSL.name("aa_seq"), SQLDataType.CLOB.nullable(false), this, "");
 
@@ -70,21 +70,21 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     }
 
     /**
-     * Create an aliased <code>public.y_main_aa_sequence</code> table reference
+     * Create an aliased <code>y_main_aa_sequence</code> table reference
      */
     public YMainAaSequence(String alias) {
         this(DSL.name(alias), Y_MAIN_AA_SEQUENCE);
     }
 
     /**
-     * Create an aliased <code>public.y_main_aa_sequence</code> table reference
+     * Create an aliased <code>y_main_aa_sequence</code> table reference
      */
     public YMainAaSequence(Name alias) {
         this(alias, Y_MAIN_AA_SEQUENCE);
     }
 
     /**
-     * Create a <code>public.y_main_aa_sequence</code> table reference
+     * Create a <code>y_main_aa_sequence</code> table reference
      */
     public YMainAaSequence() {
         this(DSL.name("y_main_aa_sequence"), null);
@@ -96,7 +96,7 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
 
     @Override
     public Schema getSchema() {
-        return Public.PUBLIC;
+        return DefaultSchema.DEFAULT_SCHEMA;
     }
 
     @Override

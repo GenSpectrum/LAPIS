@@ -21,28 +21,28 @@ public class YMainSequenceColumnarStagingRecord extends UpdatableRecordImpl<YMai
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.y_main_sequence_columnar_staging.position</code>.
+     * Setter for <code>y_main_sequence_columnar_staging.position</code>.
      */
     public void setPosition(Integer value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence_columnar_staging.position</code>.
+     * Getter for <code>y_main_sequence_columnar_staging.position</code>.
      */
     public Integer getPosition() {
         return (Integer) get(0);
     }
 
     /**
-     * Setter for <code>public.y_main_sequence_columnar_staging.data_compressed</code>.
+     * Setter for <code>y_main_sequence_columnar_staging.data_compressed</code>.
      */
     public void setDataCompressed(byte[] value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.y_main_sequence_columnar_staging.data_compressed</code>.
+     * Getter for <code>y_main_sequence_columnar_staging.data_compressed</code>.
      */
     public byte[] getDataCompressed() {
         return (byte[]) get(1);
