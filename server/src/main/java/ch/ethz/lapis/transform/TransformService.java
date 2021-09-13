@@ -1,7 +1,7 @@
 package ch.ethz.lapis.transform;
 
-import ch.ethz.lapis.source.ng.NextstrainGenbankMutationAAWorker;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -223,7 +223,7 @@ public class TransformService {
                   ) aas on mm.id = aas.id
                 order by mm.id;
             """;
-            for (String gene : NextstrainGenbankMutationAAWorker.genes) {
+            for (String gene : ReferenceGenomeData.getInstance().getGeneNames()) {
                 System.out.println("Start processing gene " + gene);
                 // Load all amino acid sequences and their IDs
                 List<Pair<Integer, String>> aaSequences = new ArrayList<>();

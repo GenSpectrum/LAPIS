@@ -29,20 +29,6 @@ public class NextstrainGenbankMutationAAWorker {
         }
     }
 
-    public final static List<String> genes = new ArrayList<>() {{
-        add("E");
-        add("M");
-        add("N");
-        add("ORF1a");
-        add("ORF1b");
-        add("ORF3a");
-        add("ORF6");
-        add("ORF7a");
-        add("ORF7b");
-        add("ORF8");
-        add("ORF9b");
-        add("S");
-    }};
     private final int id;
     private final ComboPooledDataSource databasePool;
     private final Path workDir;
@@ -50,7 +36,6 @@ public class NextstrainGenbankMutationAAWorker {
     private final Path geneMapGff;
     private final Path nextalignPath;
     private final SeqCompressor nucSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
-    private final SeqCompressor aaSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AASEQ);
 
     public NextstrainGenbankMutationAAWorker(
             int id,
@@ -150,6 +135,7 @@ public class NextstrainGenbankMutationAAWorker {
             Path seqFastaPath,
             List<FastaEntry> batch
     ) throws IOException, InterruptedException {
+        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();;
         Path outputPath = workDir.resolve("output");
         String command = nextalignPath.toAbsolutePath() +
                 " --sequences=" + seqFastaPath.toAbsolutePath() +
