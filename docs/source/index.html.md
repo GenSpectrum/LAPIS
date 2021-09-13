@@ -37,10 +37,12 @@ This is a beta version. We will replace it with an official release (version 1) 
 
 # Overview
 
-The API has four main endpoints related to samples. These endpoints provide different types of data:
+The API has six main endpoints related to samples. These endpoints provide different types of data:
 
 - `/sample/aggregated` - use to get summary data aggregated across samples
 - `/sample/details` - use to get per-sample metadata
+- `/sample/aa-mutations` - use to get the common amino acid mutations (shared by at least 5% of the sequences)
+- `/sample/nuc-mutations` - use to get the common nucleotide mutations (shared by at least 5% of the sequences)
 - `/sample/fasta` - use to get original (unaligned) sequences
 - `/sample/fasta-aligned` - use to get aligned sequences
 
@@ -138,7 +140,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 
 Large queries, for example detailed information on all the samples, will take a bit. Instead, we can adapt the query to filter to only samples of interest. The syntax for additing filters is `<attribute1>=<valueA>&<attribute2>=<valueB>`.
 
-All four **sample** endpoints can be filtered by the following attributes:
+All six **sample** endpoints can be filtered by the following attributes:
 
 - dateFrom
 - dateTo
@@ -164,7 +166,7 @@ All four **sample** endpoints can be filtered by the following attributes:
 - nucMutations (see section "Filter Mutations")
 - aaMutations (see section "Filter Mutations")
 
-The endpoints `details`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
+The endpoints `details`, `aa-mutations`, `nuc-mutations`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
 
 - genbankAccession
 - sraAccession
