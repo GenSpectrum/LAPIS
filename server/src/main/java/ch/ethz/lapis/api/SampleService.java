@@ -3,12 +3,14 @@ package ch.ethz.lapis.api;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.NucMutation;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.PangolinLineageAlias;
@@ -252,6 +254,89 @@ public class SampleService {
     }
 
 
+    public SampleMutationsResponse getMutations(
+            SampleDetailRequest request,
+            SequenceType sequenceType
+    ) throws SQLException {
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        if (ids != null && ids.isEmpty()) {
+            return new SampleMutationsResponse();
+        }
+
+        // Filter further by the other metadata and prepare the response
+        try (Connection conn = getDatabaseConnection()) {
+            DSLContext ctx = JooqHelper.getDSLCtx(conn);
+            YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;
+            YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
+
+            List<Condition> conditions = getConditions(request, metaTbl);
+            TableOnConditionStep<Record> baseTbl;
+            if (ids != null) {
+                Table<Record1<Object>> idsTbl = DSL.values(ids.stream()
+                        .map(DSL::row)
+                        .collect(Collectors.toList())
+                        .toArray(new Row1[0])
+                ).as("ids", "id");
+                baseTbl = idsTbl
+                        .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
+                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
+            } else {
+                baseTbl = metaTbl
+                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
+            }
+
+            var proportionField = DSL.count().cast(Double.class).div(
+                    DSL.field(
+                            ctx
+                                    .select(DSL.count())
+                                    .from(baseTbl)
+                                    .where(conditions)
+                    )
+            ).as("proportion");
+            String mutationColumnName = switch (sequenceType) {
+                case AMINO_ACID -> "aa_mutations";
+                case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
+            };
+            var statement = ctx
+                    .select(
+                            DSL.field("mutation").cast(String.class),
+                            DSL.field("proportion").cast(Double.class)
+                    )
+                    .from(
+                            ctx
+                                    .select(
+                                            DSL.field("mut.mutation"),
+                                            proportionField
+                                    )
+                                    .from(
+                                            baseTbl.crossApply(
+                                                    "unnest(string_to_array(" + mutationColumnName + ", ',')) mut(mutation)"
+                                            )
+                                    )
+                                    .where(conditions)
+                                    .groupBy(DSL.field("mut.mutation"))
+                    )
+                    .where(DSL.field("proportion").ge(0.05))
+                    .orderBy(DSL.field("proportion").desc());
+            Result<Record2<String, Double>> records = statement.fetch();
+            List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
+            for (var r : records) {
+                // Because of the way we are concatenating the nuc_substitutions and nuc_deletions column, it is
+                // possible to get empty values.
+                if (r.value1().isBlank()) {
+                    continue;
+                }
+                mutationEntries.add(new SampleMutationsResponse.MutationEntry(
+                        r.value1(),
+                        r.value2()
+                ));
+            }
+            return new SampleMutationsResponse(mutationEntries);
+        }
+    }
+
+
     public String getFasta(SampleDetailRequest request, boolean aligned) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
@@ -262,7 +347,6 @@ public class SampleService {
         StringBuilder fastaBuilder = new StringBuilder();
 
         // Filter further by the other metadata and prepare the response
-        List<SampleDetail> samples = new ArrayList<>();
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
             YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;

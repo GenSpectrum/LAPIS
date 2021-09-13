@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.controller.v0;
 
 import ch.ethz.lapis.api.SampleService;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.res.*;
@@ -38,6 +39,18 @@ public class SampleController {
         List<SampleDetail> samples = sampleService.getDetailedSamples(request);
         System.out.println("E2E: " + (System.currentTimeMillis() - start));
         return new V0Response<>(new SampleDetailResponse(samples));
+    }
+
+    @GetMapping("/aa-mutations")
+    public V0Response<SampleMutationsResponse> getAAMutations(SampleDetailRequest request) throws SQLException {
+        SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.AMINO_ACID);
+        return new V0Response<>(mutationsResponse);
+    }
+
+    @GetMapping("/nuc-mutations")
+    public V0Response<SampleMutationsResponse> getNucMutations(SampleDetailRequest request) throws SQLException {
+        SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.NUCLEOTIDE);
+        return new V0Response<>(mutationsResponse);
     }
 
     @GetMapping(
