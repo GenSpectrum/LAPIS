@@ -7,6 +7,7 @@ public class DatabaseConfig implements Config {
     private String dbname;
     private String username;
     private String password;
+    private String schema;
 
     public String getHost() {
         return host;
@@ -46,5 +47,14 @@ public class DatabaseConfig implements Config {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public DatabaseConfig setSchema(String schema) {
+        this.schema = schema;
+        return this;
     }
 }
