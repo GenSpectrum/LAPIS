@@ -9,6 +9,12 @@ public class MutationAA {
     MutationAA() {
     }
 
+    public MutationAA(String gene, int position, String mutation) {
+        this.gene = gene;
+        this.position = position;
+        this.mutation = mutation;
+    }
+
     public String getGene() {
         return gene;
     }

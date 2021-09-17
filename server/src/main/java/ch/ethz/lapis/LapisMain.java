@@ -3,6 +3,7 @@ package ch.ethz.lapis;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
+import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -42,19 +43,34 @@ public class LapisMain extends SubProgram<LapisConfig> {
             nextstrainGenBankService.updateData();
             return;
         }
+        if ("--update-gisaid".equals(args[0])) {
+            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
+            GisaidService gisaidService = new GisaidService(
+                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                    config.getGisaidApiConfig(), config.getGeoLocationRulesPath());
+            gisaidService.updateData();
+            return;
+        }
         if ("--update-main-tables".equals(args[0])) {
             ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
             TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
-            transformService.mergeAndTransform();
+            transformService.mergeAndTransform(config.getSource());
             return;
         }
         if ("--update-all".equals(args[0])) {
             ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            NextstrainGenbankService nextstrainGenBankService = new NextstrainGenbankService(
-                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath());
-            nextstrainGenBankService.updateData();
+            if (config.getSource() == LapisConfig.Source.NG) {
+                NextstrainGenbankService nextstrainGenBankService = new NextstrainGenbankService(
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath());
+                nextstrainGenBankService.updateData();
+            } else if (config.getSource() == LapisConfig.Source.GISAID) {
+                GisaidService gisaidService = new GisaidService(
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath());
+                gisaidService.updateData();
+            }
             TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
-            transformService.mergeAndTransform();
+            transformService.mergeAndTransform(config.getSource());
             return;
         }
     }

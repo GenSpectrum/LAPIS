@@ -59,6 +59,26 @@ public class ReferenceGenomeData {
     }
 
 
+    public String getNucleotideSequence() {
+        return nucleotideSequence;
+    }
+
+
+    public char[] getNucleotideSequenceArr() {
+        return nucleotideSequenceArr;
+    }
+
+
+    public Map<String, String> getGeneAASequences() {
+        return geneAASequences;
+    }
+
+
+    public Map<String, char[]> getGeneAASequencesArr() {
+        return geneAASequencesArr;
+    }
+
+
     public List<String> getGeneNames() {
         return new ArrayList<>(geneAASequences.keySet());
     }

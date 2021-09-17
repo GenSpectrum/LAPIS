@@ -8,6 +8,11 @@ public class MutationNuc {
     MutationNuc() {
     }
 
+    public MutationNuc(int position, String mutation) {
+        this.position = position;
+        this.mutation = mutation;
+    }
+
     public int getPosition() {
         return position;
     }

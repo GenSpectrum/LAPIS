@@ -13,8 +13,13 @@ RUN ./gradlew clean build -x test
 FROM openjdk:15 AS server
 WORKDIR /app
 
+# Download nextalign
 RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64" -o "nextalign"
 RUN chmod +x nextalign
+
+# Download geo location corrections list from Nextstrain
+RUN curl https://raw.githubusercontent.com/nextstrain/ncov-ingest/master/source-data/gisaid_geoLocationRules.tsv -o gisaid_geoLocationRules.tsv
+
 COPY --from=builder /build/build/libs/lapis-1.0-SNAPSHOT.jar /app/lapis.jar
 
 EXPOSE 2345

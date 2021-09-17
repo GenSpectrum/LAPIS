@@ -1,3 +1,17 @@
+create schema open;
+create schema gisaid;
+
+grant usage on schema open, gisaid to y_user;
+
+-- Basic information
+
+create table pangolin_lineage_alias
+(
+  alias text primary key,
+  full_name text not null unique
+);
+
+
 -- Source: Nextstrain/GenBank
 
 create table y_nextstrain_genbank
@@ -22,6 +36,42 @@ create table y_nextstrain_genbank
   sampling_strategy text,
   pango_lineage text,
   nextstrain_clade text,
+  gisaid_clade text,
+  originating_lab text,
+  submitting_lab text,
+  authors text,
+  seq_original_compressed bytea,
+  seq_aligned_compressed bytea,
+  aa_seqs text,
+  aa_mutations text,
+  nuc_substitutions text,
+  nuc_deletions text,
+  nuc_insertions text
+);
+
+
+-- Source: GISAID
+
+create table y_gisaid
+(
+  updated_at timestamp not null,
+  gisaid_epi_isl text primary key,
+  strain text,
+  date date,
+  date_original text,
+  date_submitted date,
+  region text,
+  country text,
+  division text,
+  location text,
+  region_exposure	text,
+  country_exposure text,
+  division_exposure text,
+  host text,
+  age int,
+  sex text,
+  sampling_strategy text,
+  pango_lineage text,
   gisaid_clade text,
   originating_lab text,
   submitting_lab text,
@@ -89,7 +139,6 @@ create index on y_main_metadata (nextstrain_clade);
 create index on y_main_metadata (gisaid_clade);
 create index on y_main_metadata (originating_lab);
 create index on y_main_metadata (submitting_lab);
-create index on y_main_metadata (authors);
 
 create table y_main_sequence
 (
@@ -129,7 +178,9 @@ create table y_main_aa_sequence_columnar
 
 grant select, insert, update, delete, references, truncate
 on
+  pangolin_lineage_alias,
   y_nextstrain_genbank,
+--   y_gisaid,
   y_main_metadata,
   y_main_sequence,
   y_main_sequence_columnar,
