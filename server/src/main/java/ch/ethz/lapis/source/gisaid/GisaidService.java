@@ -344,7 +344,7 @@ public class GisaidService {
 
     private void deleteSequences(Set<String> gisaidEpiIslToDelete) throws SQLException {
         String sql = """
-            delete from gisaid_api_sequence where gisaid_epi_isl = ?;
+            delete from y_gisaid where gisaid_epi_isl = ?;
         """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
