@@ -332,7 +332,16 @@ public class TransformService {
                     return null;
                 });
             }
-            executor.invokeAll(tasks2);
+            List<Future<Void>> futures = executor.invokeAll(tasks2);
+            try {
+                for (Future<Void> future : futures) {
+                    future.get();
+                }
+            } catch (ExecutionException e) {
+                executor.shutdown();
+                executor.awaitTermination(3, TimeUnit.MINUTES);
+                throw new RuntimeException(e);
+            }
         }
         executor.shutdown();
         executor.awaitTermination(3, TimeUnit.MINUTES);
@@ -438,9 +447,17 @@ public class TransformService {
                 return null;
             });
         }
-        executor.invokeAll(tasks);
-        executor.shutdown();
-        executor.awaitTermination(3, TimeUnit.MINUTES);
+        List<Future<Void>> futures = executor.invokeAll(tasks);
+        try {
+            for (Future<Void> future : futures) {
+                    future.get();
+            }
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } finally {
+            executor.shutdown();
+            executor.awaitTermination(3, TimeUnit.MINUTES);
+        }
     }
 
 
