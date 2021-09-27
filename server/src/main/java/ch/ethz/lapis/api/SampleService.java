@@ -83,11 +83,7 @@ public class SampleService {
 
             Result<Record> records;
             if (ids != null) {
-                Table<Record1<Object>> idsTbl = DSL.values(ids.stream()
-                        .map(DSL::row)
-                        .collect(Collectors.toList())
-                        .toArray(new Row1[0])
-                ).as("ids", "id");
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
                         .select(selectFields)
                         .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
@@ -207,11 +203,7 @@ public class SampleService {
 
             Result<Record> records;
             if (ids != null) {
-                Table<Record1<Object>> idsTbl = DSL.values(ids.stream()
-                        .map(DSL::row)
-                        .collect(Collectors.toList())
-                        .toArray(new Row1[0])
-                ).as("ids", "id");
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
                         .select(selectFields)
                         .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
@@ -273,11 +265,7 @@ public class SampleService {
             List<Condition> conditions = getConditions(request, metaTbl);
             TableOnConditionStep<Record> baseTbl;
             if (ids != null) {
-                Table<Record1<Object>> idsTbl = DSL.values(ids.stream()
-                        .map(DSL::row)
-                        .collect(Collectors.toList())
-                        .toArray(new Row1[0])
-                ).as("ids", "id");
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 baseTbl = idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
                         .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
@@ -358,11 +346,7 @@ public class SampleService {
             List<Condition> conditions = getConditions(request, metaTbl);
             Result<Record2<String, byte[]>> records;
             if (ids != null) {
-                Table<Record1<Object>> idsTbl = DSL.values(ids.stream()
-                        .map(DSL::row)
-                        .collect(Collectors.toList())
-                        .toArray(new Row1[0])
-                ).as("ids", "id");
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
                         .select(metaTbl.GENBANK_ACCESSION, seqColumn)
                         .from(
@@ -444,6 +428,18 @@ public class SampleService {
                     "mutations");
         }
         return ids;
+    }
+
+
+    private Table<Record1<Integer>> getIdsTable(Set<Integer> ids, DSLContext ctx) {
+        String idsStr = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
+        return ctx
+                .select(DSL.field("i.id::integer", Integer.class).as("id"))
+                // We are concatenating SQL here!
+                // This is safe because the IDs are read from the database and were generated and then written
+                // by this program into the database. Further, the IDs are guaranteed to be integers.
+                .from("unnest(string_to_array('" + idsStr + "', ',')) i(id)")
+                .asTable("ids");
     }
 
 
