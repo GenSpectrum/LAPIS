@@ -12,6 +12,13 @@ create table pangolin_lineage_alias
 );
 
 
+create table data_version
+(
+  dataset text primary key,
+  timestamp bigint not null
+);
+
+
 -- Source: Nextstrain/GenBank
 
 create table y_nextstrain_genbank
@@ -179,6 +186,7 @@ create table y_main_aa_sequence_columnar
 grant select, insert, update, delete, references, truncate
 on
   pangolin_lineage_alias,
+  data_version,
   y_nextstrain_genbank,
 --   y_gisaid,
   y_main_metadata,

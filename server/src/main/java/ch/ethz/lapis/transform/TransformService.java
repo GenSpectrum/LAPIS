@@ -44,7 +44,7 @@ public class TransformService {
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
         transformAASeqsToColumnar();
-        // Switch the _staging tables with the active tables
+        // Switch the _staging tables with the active tables + update value in data_version
         switchInStagingTables();
     }
 
@@ -462,11 +462,24 @@ public class TransformService {
 
 
     public void switchInStagingTables() throws SQLException {
-        String sql = "select y_switch_in_staging_tables()";
+        String sql1 = "select y_switch_in_staging_tables()";
+        String sql2 = """
+            insert into data_version (dataset, timestamp)
+            values ('merged', extract(epoch from now())::bigint)
+            on conflict (dataset) do update
+            set
+              timestamp = extract(epoch from now())::bigint;
+        """;
         try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
             try (Statement statement = conn.createStatement()) {
-                statement.execute(sql);
+                statement.execute(sql1);
             }
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql2);
+            }
+            conn.commit();
+            conn.setAutoCommit(true);
         }
     }
 }
