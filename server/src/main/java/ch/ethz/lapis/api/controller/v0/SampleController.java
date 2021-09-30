@@ -24,9 +24,7 @@ public class SampleController {
 
     @GetMapping("/aggregated")
     public V0Response<SampleAggregatedResponse> getAggregated(SampleAggregatedRequest request) throws SQLException {
-        long start = System.currentTimeMillis();
         List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
-        System.out.println("E2E: " + (System.currentTimeMillis() - start));
         return new V0Response<>(new SampleAggregatedResponse(
                 request.getFields(),
                 aggregatedSamples
@@ -35,9 +33,7 @@ public class SampleController {
 
     @GetMapping("/details")
     public V0Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
-        long start = System.currentTimeMillis();
         List<SampleDetail> samples = sampleService.getDetailedSamples(request);
-        System.out.println("E2E: " + (System.currentTimeMillis() - start));
         return new V0Response<>(new SampleDetailResponse(samples));
     }
 
@@ -58,10 +54,7 @@ public class SampleController {
             produces = "text/x-fasta"
     )
     public String getFasta(SampleDetailRequest request) throws SQLException {
-        long start = System.currentTimeMillis();
-        String fasta = sampleService.getFasta(request, false);
-        System.out.println("E2E: " + (System.currentTimeMillis() - start));
-        return fasta;
+        return sampleService.getFasta(request, false);
     }
 
     @GetMapping(
@@ -69,10 +62,7 @@ public class SampleController {
             produces = "text/x-fasta"
     )
     public String getAlignedFasta(SampleDetailRequest request) throws SQLException {
-        long start = System.currentTimeMillis();
-        String fasta = sampleService.getFasta(request, true);
-        System.out.println("E2E: " + (System.currentTimeMillis() - start));
-        return fasta;
+        return sampleService.getFasta(request, true);
     }
 
 }
