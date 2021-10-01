@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 @Service
 public class SampleService {
 
-    private static final ComboPooledDataSource dbPool
-            = DatabaseService.createDatabaseConnectionPool(LapisMain.globalConfig.getVineyard());
+    private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private static final SeqCompressor referenceSeqCompressor
             = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
     private static final SeqCompressor nucMutationColumnarCompressor

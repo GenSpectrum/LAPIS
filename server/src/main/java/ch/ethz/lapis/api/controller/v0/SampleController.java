@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.controller.v0;
 
 import ch.ethz.lapis.api.CacheService;
+import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.SequenceType;
@@ -24,16 +25,19 @@ public class SampleController {
 
     private final CacheService cacheService;
     private final SampleService sampleService;
+    private final DataVersionService dataVersionService;
     private final ObjectMapper objectMapper;
 
 
     public SampleController(
             CacheService cacheService,
             SampleService sampleService,
+            DataVersionService dataVersionService,
             ObjectMapper objectMapper
     ) {
         this.cacheService = cacheService;
         this.sampleService = sampleService;
+        this.dataVersionService = dataVersionService;
         this.objectMapper = objectMapper;
     }
 
@@ -43,14 +47,14 @@ public class SampleController {
             produces = "application/json"
     )
     public String getAggregated(SampleAggregatedRequest request) {
-        ApiCacheKey cacheKey = new ApiCacheKey("/v0/sample/aggregated", request);
+        ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         return useCacheOrCompute(cacheKey, () -> {
             try {
                 List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
                 V0Response<SampleAggregatedResponse> response = new V0Response<>(new SampleAggregatedResponse(
                         request.getFields(),
                         aggregatedSamples
-                ));
+                ), dataVersionService.getVersion());
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);
@@ -62,7 +66,7 @@ public class SampleController {
     @GetMapping( "/details")
     public V0Response<SampleMutationsResponse> getDetails(SampleDetailRequest request) throws SQLException {
         SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.AMINO_ACID);
-        return new V0Response<>(mutationsResponse);
+        return new V0Response<>(mutationsResponse, dataVersionService.getVersion());
     }
 
 
@@ -71,11 +75,12 @@ public class SampleController {
             produces = "application/json"
     )
     public String getAAMutations(SampleDetailRequest request) {
-        ApiCacheKey cacheKey = new ApiCacheKey("/v0/sample/aa-mutations", request);
+        ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AA_MUTATIONS, request);
         return useCacheOrCompute(cacheKey, () -> {
            try {
                SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.AMINO_ACID);
-               V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse);
+               V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse,
+                       dataVersionService.getVersion());
                return objectMapper.writeValueAsString(response);
            } catch (SQLException | JsonProcessingException e) {
                throw new RuntimeException(e);
@@ -89,11 +94,12 @@ public class SampleController {
             produces = "application/json"
     )
     public String getNucMutations(SampleDetailRequest request) {
-        ApiCacheKey cacheKey = new ApiCacheKey("/v0/sample/nuc-mutations", request);
+        ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_NUC_MUTATIONS, request);
         return useCacheOrCompute(cacheKey, () -> {
            try {
                SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.NUCLEOTIDE);
-               V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse);
+               V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse,
+                       dataVersionService.getVersion());
                return objectMapper.writeValueAsString(response);
            } catch (SQLException | JsonProcessingException e) {
                throw new RuntimeException(e);

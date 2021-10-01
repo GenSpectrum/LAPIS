@@ -8,6 +8,9 @@ public class NucMutation {
 
     private Character mutation;
 
+    public NucMutation() {
+    }
+
     public NucMutation(int position) {
         this.position = position;
     }
