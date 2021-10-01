@@ -18,8 +18,9 @@ public class V0Response<Payload> {
     public V0Response() {
     }
 
-    public V0Response(Payload payload) {
+    public V0Response(Payload payload, long dataVersion) {
         this.payload = payload;
+        this.info.setDataVersion(dataVersion);
     }
 
     public Payload getPayload() {

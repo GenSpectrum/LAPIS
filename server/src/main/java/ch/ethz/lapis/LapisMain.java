@@ -9,14 +9,17 @@ import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 @SpringBootApplication
+@EnableScheduling
 public class LapisMain extends SubProgram<LapisConfig> {
 
     public static LapisConfig globalConfig;
+    public static ComboPooledDataSource dbPool;
 
     public LapisMain() {
         super("Lapis", LapisConfig.class);
@@ -28,6 +31,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             throw new RuntimeException("TODO: write help page");
         }
         globalConfig = config;
+        dbPool = DatabaseService.createDatabaseConnectionPool(LapisMain.globalConfig.getVineyard());
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
         if ("--api".equals(args[0])) {
             String[] argsForSpring = Arrays.copyOfRange(args, 1, args.length);

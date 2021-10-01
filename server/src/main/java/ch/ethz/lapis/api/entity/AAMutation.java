@@ -10,6 +10,9 @@ public class AAMutation {
 
     private Character mutation;
 
+    public AAMutation() {
+    }
+
     public AAMutation(String gene, int position) {
         this.gene = gene;
         this.position = position;

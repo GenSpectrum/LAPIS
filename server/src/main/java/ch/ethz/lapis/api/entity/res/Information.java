@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class Information {
 
     private int apiVersion = 0;
+    private long dataVersion = -1;
     private LocalDate deprecationDate = null;
     private String deprecationInfo = null;
 
@@ -14,6 +15,15 @@ public class Information {
 
     public Information setApiVersion(int apiVersion) {
         this.apiVersion = apiVersion;
+        return this;
+    }
+
+    public long getDataVersion() {
+        return dataVersion;
+    }
+
+    public Information setDataVersion(long dataVersion) {
+        this.dataVersion = dataVersion;
         return this;
     }
 

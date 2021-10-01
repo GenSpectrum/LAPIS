@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -257,6 +258,10 @@ public class GisaidService {
             unhandledException.printStackTrace();
         }
 
+        if (unhandledExceptions.isEmpty()) {
+            updateDataVersion(startTime);
+        }
+
         // Clean up the work directory
         try (DirectoryStream<Path> directory = Files.newDirectoryStream(workdir)) {
             for (Path path : directory) {
@@ -401,5 +406,25 @@ public class GisaidService {
         fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         fileChannel.close();
         fileOutputStream.close();
+    }
+
+
+    private void updateDataVersion(LocalDateTime startTime) throws SQLException {
+        ZoneId zoneId = ZoneId.systemDefault();
+        long epoch = startTime.atZone(zoneId).toEpochSecond();
+        String sql = """
+            insert into data_version (dataset, timestamp)
+            values ('gisaid', ?)
+            on conflict (dataset) do update
+            set
+              timestamp = ?;
+        """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setLong(1, epoch);
+                statement.setLong(2, epoch);
+                statement.execute();
+            }
+        }
     }
 }

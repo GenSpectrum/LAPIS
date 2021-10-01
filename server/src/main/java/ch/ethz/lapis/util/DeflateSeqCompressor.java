@@ -1,9 +1,9 @@
 package ch.ethz.lapis.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -14,7 +14,8 @@ public class DeflateSeqCompressor implements SeqCompressor {
         REFERENCE,
         ATCGNDEL,
         AASEQ,
-        AACODONS
+        AACODONS,
+        NONE
     }
 
     private static final int bufferSize = 5000000;
@@ -26,7 +27,12 @@ public class DeflateSeqCompressor implements SeqCompressor {
             case ATCGNDEL -> "/simple-ATCGNdel-dictionary.txt";
             case AASEQ -> "/aa-seq-dictionary.txt";
             case AACODONS -> "/simple-AAcodons-dictionary.txt";
+            case NONE -> null;
         };
+        if (name == null) {
+            this.dict = null;
+            return;
+        }
         //Read File Content
         try {
             InputStream in = getClass().getResourceAsStream(name);
@@ -39,13 +45,19 @@ public class DeflateSeqCompressor implements SeqCompressor {
     @Override
     public byte[] compress(String seq) {
         byte[] input = seq.getBytes(StandardCharsets.UTF_8);
-        byte[] output = new byte[bufferSize];
+        byte[] buf = new byte[bufferSize];
         Deflater deflater = new Deflater(9);
         deflater.setInput(input);
-        deflater.setDictionary(dict);
+        if (dict != null) {
+            deflater.setDictionary(dict);
+        }
         deflater.finish();
-        int compressedDataLength = deflater.deflate(output);
-        return Arrays.copyOfRange(output, 0, compressedDataLength);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while (!deflater.finished()) {
+            int count = deflater.deflate(buf);
+            out.write(buf, 0, count);
+        }
+        return out.toByteArray();
     }
 
     @Override
@@ -53,12 +65,18 @@ public class DeflateSeqCompressor implements SeqCompressor {
         try {
             Inflater inflater = new Inflater();
             inflater.setInput(compressed);
-            byte[] result = new byte[bufferSize];
-            inflater.inflate(result);
-            inflater.setDictionary(dict);
-            int resultLength = inflater.inflate(result);
+            byte[] buf = new byte[bufferSize];
+            if (dict != null) {
+                inflater.inflate(buf);
+                inflater.setDictionary(dict);
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buf);
+                out.write(buf, 0, count);
+            }
             inflater.end();
-            return new String(result, 0, resultLength, StandardCharsets.UTF_8);
+            return out.toString(StandardCharsets.UTF_8);
         } catch (DataFormatException e) {
             throw new RuntimeException(e);
         }

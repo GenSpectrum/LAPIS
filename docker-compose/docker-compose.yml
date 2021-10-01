@@ -1,0 +1,29 @@
+version: '3'
+services:
+
+  lapis_server:
+    image: ghcr.io/cevo-public/lapis-server:public
+    container_name: lapis_server
+    restart: unless-stopped
+    depends_on:
+      - lapis_redis
+    ports:
+      - 2345:2345
+    volumes:
+      - <path>/lapis-config.yml:/app/lapis-config.yml
+  lapis_docs:
+    image: ghcr.io/cevo-public/lapis-docs:public
+    container_name: lapis_docs
+    restart: unless-stopped
+    ports:
+      - 4567:4567
+  lapis_redis:
+    image: redis:6
+    container_name: lapis_redis
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:6789:6379
+    volumes:
+      - <path>/redis.conf:/usr/local/etc/redis/redis.conf
+      - <path>/redis-data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]

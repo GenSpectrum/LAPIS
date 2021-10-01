@@ -18,6 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -49,6 +51,8 @@ public class NextstrainGenbankService {
     }
 
     public void updateData() throws IOException, SQLException, InterruptedException {
+        LocalDateTime startTime = LocalDateTime.now();
+
         // Download files from Nextstrain
         downloadFiles();
 
@@ -69,6 +73,8 @@ public class NextstrainGenbankService {
         updateSeqOriginalOrAligned(true);
         updateMetadata();
         updateNextcladeData();
+
+        updateDataVersion(startTime);
     }
 
 
@@ -404,6 +410,26 @@ public class NextstrainGenbankService {
                 }
             }
             conn.setAutoCommit(true);
+        }
+    }
+
+
+    private void updateDataVersion(LocalDateTime startTime) throws SQLException {
+        ZoneId zoneId = ZoneId.systemDefault();
+        long epoch = startTime.atZone(zoneId).toEpochSecond();
+        String sql = """
+            insert into data_version (dataset, timestamp)
+            values ('nextstrain-genbank', ?)
+            on conflict (dataset) do update
+            set
+              timestamp = ?;
+        """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setLong(1, epoch);
+                statement.setLong(2, epoch);
+                statement.execute();
+            }
         }
     }
 

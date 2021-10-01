@@ -1,3 +1,5 @@
 # Editors
 .idea/
 *.iml
+
+docker-compose.override.yml
