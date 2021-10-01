@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api;
 
+import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.controller.v0.SampleController;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
@@ -55,7 +56,8 @@ public class CacheService {
         });
     }};
 
-    private final JedisPool pool = new JedisPool("127.0.0.1", 6789);
+    private final JedisPool pool = new JedisPool(LapisMain.globalConfig.getRedisHost(),
+            LapisMain.globalConfig.getRedisPort());
     private final ObjectMapper objectMapper;
     private final DeflateSeqCompressor compressor;
     private final SampleController sampleController;

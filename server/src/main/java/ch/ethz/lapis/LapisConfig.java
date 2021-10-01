@@ -29,6 +29,10 @@ public class LapisConfig implements Config {
 
     private Boolean cacheEnabled;
 
+    private String redisHost;
+
+    private Integer redisPort;
+
 
     public DatabaseConfig getVineyard() {
         return vineyard;
@@ -108,6 +112,24 @@ public class LapisConfig implements Config {
 
     public LapisConfig setCacheEnabled(Boolean cacheEnabled) {
         this.cacheEnabled = cacheEnabled;
+        return this;
+    }
+
+    public String getRedisHost() {
+        return redisHost;
+    }
+
+    public LapisConfig setRedisHost(String redisHost) {
+        this.redisHost = redisHost;
+        return this;
+    }
+
+    public Integer getRedisPort() {
+        return redisPort;
+    }
+
+    public LapisConfig setRedisPort(Integer redisPort) {
+        this.redisPort = redisPort;
         return this;
     }
 }
