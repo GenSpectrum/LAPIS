@@ -8,6 +8,7 @@ import ch.ethz.lapis.util.DeflateSeqCompressor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Conditional(IsCacheEnabledCondition.class)
 public class CacheService {
 
     public static final class SupportedEndpoints {

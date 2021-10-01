@@ -27,6 +27,8 @@ public class LapisConfig implements Config {
 
     private Source source;
 
+    private Boolean cacheEnabled;
+
 
     public DatabaseConfig getVineyard() {
         return vineyard;
@@ -97,6 +99,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setSource(Source source) {
         this.source = source;
+        return this;
+    }
+
+    public Boolean getCacheEnabled() {
+        return cacheEnabled;
+    }
+
+    public LapisConfig setCacheEnabled(Boolean cacheEnabled) {
+        this.cacheEnabled = cacheEnabled;
         return this;
     }
 }

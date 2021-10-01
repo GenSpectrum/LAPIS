@@ -9,19 +9,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 
 
 @Service
 public class DataVersionService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
-    private final CacheService cacheService;
+    private final Optional<CacheService> cacheServiceOpt;
 
     private long version = -1;
 
 
-    public DataVersionService(CacheService cacheService) {
-        this.cacheService = cacheService;
+    public DataVersionService(Optional<CacheService> cacheServiceOpt) {
+        this.cacheServiceOpt = cacheServiceOpt;
         autoFetchVersionDate();
     }
 
@@ -49,7 +50,9 @@ public class DataVersionService {
                         // Update the cache
                         System.out.println("New data version: " + version + " -> " + newVersion);
                         version = newVersion;
-                        cacheService.updateCacheIfOutdated(version);
+                        if (cacheServiceOpt.isPresent()) {
+                            cacheServiceOpt.get().updateCacheIfOutdated(version);
+                        }
                     }
                 }
             }

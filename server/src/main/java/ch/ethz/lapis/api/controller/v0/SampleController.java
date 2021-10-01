@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 
@@ -23,19 +24,19 @@ import java.util.function.Supplier;
 @RequestMapping("/v0/sample")
 public class SampleController {
 
-    private final CacheService cacheService;
+    private final Optional<CacheService> cacheServiceOpt;
     private final SampleService sampleService;
     private final DataVersionService dataVersionService;
     private final ObjectMapper objectMapper;
 
 
     public SampleController(
-            CacheService cacheService,
+            Optional<CacheService> cacheServiceOpt,
             SampleService sampleService,
             DataVersionService dataVersionService,
             ObjectMapper objectMapper
     ) {
-        this.cacheService = cacheService;
+        this.cacheServiceOpt = cacheServiceOpt;
         this.sampleService = sampleService;
         this.dataVersionService = dataVersionService;
         this.objectMapper = objectMapper;
@@ -127,6 +128,10 @@ public class SampleController {
 
 
     private String useCacheOrCompute(ApiCacheKey cacheKey, Supplier<String> compute) {
+        if (cacheServiceOpt.isEmpty()) {
+            return compute.get();
+        }
+        CacheService cacheService = cacheServiceOpt.get();
         String cached = cacheService.getCompressedString(cacheKey);
         if (cached != null) {
             System.out.println("Cache hit");
