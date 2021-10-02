@@ -44,8 +44,6 @@ public class TransformService {
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
         transformAASeqsToColumnar();
-        // Switch the _staging tables with the active tables + update value in data_version
-        switchInStagingTables();
     }
 
 
@@ -461,6 +459,29 @@ public class TransformService {
     }
 
 
+    public void mergeAdditionalMetadataFromS3c() throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set
+              hospitalized = a.hospitalized,
+              died = a.died,
+              fully_vaccinated = null -- TODO change this to "a.fully_vaccinated" once we decide to use it
+            from y_s3c a
+            where
+              m.gisaid_epi_isl = a.gisaid_epi_isl or m.sra_accession = a.sra_accession;
+        """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql);
+            }
+        }
+    }
+
+
+
+    /**
+     * Switch the _staging tables with the active tables and update value in data_version
+     */
     public void switchInStagingTables() throws SQLException {
         String sql1 = "select y_switch_in_staging_tables()";
         String sql2 = """

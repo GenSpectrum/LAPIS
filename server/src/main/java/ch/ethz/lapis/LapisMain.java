@@ -5,6 +5,7 @@ import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
 import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
+import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @SpringBootApplication
 @EnableScheduling
@@ -40,42 +44,53 @@ public class LapisMain extends SubProgram<LapisConfig> {
             app.run(argsForSpring);
             return;
         }
-        if ("--update-nextstrain-genbank".equals(args[0])) {
-            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            NextstrainGenbankService nextstrainGenBankService = new NextstrainGenbankService(
-                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath());
-            nextstrainGenBankService.updateData();
-            return;
-        }
-        if ("--update-gisaid".equals(args[0])) {
-            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            GisaidService gisaidService = new GisaidService(
-                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
-                    config.getGisaidApiConfig(), config.getGeoLocationRulesPath());
-            gisaidService.updateData();
-            return;
-        }
-        if ("--update-main-tables".equals(args[0])) {
-            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
-            transformService.mergeAndTransform(config.getSource());
-            return;
-        }
-        if ("--update-all".equals(args[0])) {
-            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-            if (config.getSource() == LapisConfig.Source.NG) {
-                NextstrainGenbankService nextstrainGenBankService = new NextstrainGenbankService(
-                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath());
-                nextstrainGenBankService.updateData();
-            } else if (config.getSource() == LapisConfig.Source.GISAID) {
-                GisaidService gisaidService = new GisaidService(
-                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
-                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath());
-                gisaidService.updateData();
+        if ("--update-data".equals(args[0])) {
+            if (args.length < 2) {
+                throw new RuntimeException("Please provide the update steps. - TODO: write help page");
             }
-            TransformService transformService = new TransformService(dbPool, config.getMaxNumberWorkers());
-            transformService.mergeAndTransform(config.getSource());
-            return;
+            String[] updateSteps = args[1].split(",");
+            ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
+            Set<String> availableSteps = new HashSet<>() {{
+                add(UpdateSteps.loadNG);
+                add(UpdateSteps.loadGisaid);
+                add(UpdateSteps.loadS3C);
+                add(UpdateSteps.transformNG);
+                add(UpdateSteps.transformGisaid);
+                add(UpdateSteps.mergeFromS3C);
+                add(UpdateSteps.switchInStaging);
+            }};
+            for (String updateStep : updateSteps) {
+                if (!availableSteps.contains(updateStep)) {
+                    throw new RuntimeException("Unknown update step. - TODO: write help page");
+                }
+            }
+            for (String updateStep : updateSteps) {
+                switch (updateStep) {
+                    case UpdateSteps.loadNG ->
+                            new NextstrainGenbankService(
+                                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath()
+                            ).updateData();
+                    case UpdateSteps.loadGisaid ->
+                            new GisaidService(
+                                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                                    config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
+                            ).updateData();
+                    case UpdateSteps.loadS3C ->
+                            new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
+                    case UpdateSteps.transformNG ->
+                            new TransformService(dbPool, config.getMaxNumberWorkers())
+                                    .mergeAndTransform(LapisConfig.Source.NG);
+                    case UpdateSteps.transformGisaid ->
+                            new TransformService(dbPool, config.getMaxNumberWorkers())
+                                    .mergeAndTransform(LapisConfig.Source.GISAID);
+                    case UpdateSteps.mergeFromS3C ->
+                            new TransformService(dbPool, config.getMaxNumberWorkers())
+                                    .mergeAdditionalMetadataFromS3c();
+                    case UpdateSteps.switchInStaging ->
+                            new TransformService(dbPool, config.getMaxNumberWorkers())
+                                    .switchInStagingTables();
+                }
+            }
         }
     }
 

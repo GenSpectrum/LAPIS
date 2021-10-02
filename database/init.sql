@@ -93,6 +93,17 @@ create table y_gisaid
 );
 
 
+-- Source: S3C (additional metadata)
+
+create table y_s3c (
+  gisaid_epi_isl text unique,
+  sra_accession text unique,
+  hospitalized boolean,
+  died boolean,
+  fully_vaccinated boolean
+);
+
+
 -- Transformed and merged
 
 create table y_main_metadata
@@ -195,6 +206,7 @@ on
   data_version,
   y_nextstrain_genbank,
 --   y_gisaid,
+  y_s3c,
   y_main_metadata,
   y_main_sequence,
   y_main_sequence_columnar,

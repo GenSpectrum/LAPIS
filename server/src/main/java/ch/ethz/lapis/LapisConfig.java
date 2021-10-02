@@ -26,8 +26,6 @@ public class LapisConfig implements Config {
 
     private GisaidApiConfig gisaidApiConfig;
 
-    private Source source;
-
     private Boolean cacheEnabled;
 
     private String redisHost;
@@ -35,6 +33,8 @@ public class LapisConfig implements Config {
     private Integer redisPort;
 
     private OpennessLevel apiOpennessLevel;
+
+    private DatabaseConfig s3cVineyard;
 
 
     public DatabaseConfig getVineyard() {
@@ -100,15 +100,6 @@ public class LapisConfig implements Config {
         return this;
     }
 
-    public Source getSource() {
-        return source;
-    }
-
-    public LapisConfig setSource(Source source) {
-        this.source = source;
-        return this;
-    }
-
     public Boolean getCacheEnabled() {
         return cacheEnabled;
     }
@@ -142,6 +133,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setApiOpennessLevel(OpennessLevel apiOpennessLevel) {
         this.apiOpennessLevel = apiOpennessLevel;
+        return this;
+    }
+
+    public DatabaseConfig getS3cVineyard() {
+        return s3cVineyard;
+    }
+
+    public LapisConfig setS3cVineyard(DatabaseConfig s3cVineyard) {
+        this.s3cVineyard = s3cVineyard;
         return this;
     }
 }
