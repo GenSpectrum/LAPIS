@@ -3,15 +3,14 @@ package ch.ethz.lapis.api;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.AggregationField;
-import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.NucMutation;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.PangolinLineageAlias;
 import ch.ethz.lapis.util.PangolinLineageAliasResolver;
@@ -133,6 +132,15 @@ public class SampleService {
                 if (fields.contains(AggregationField.SEX)) {
                     sample.setSex(r.get(tbl.SEX));
                 }
+                if (fields.contains(AggregationField.HOSPITALIZED)) {
+                    sample.setHospitalized(r.get(tbl.HOSPITALIZED));
+                }
+                if (fields.contains(AggregationField.DIED)) {
+                    sample.setDied(r.get(tbl.DIED));
+                }
+                if (fields.contains(AggregationField.FULLYVACCINATED)) {
+                    sample.setFullyVaccinated(r.get(tbl.FULLY_VACCINATED));
+                }
                 if (fields.contains(AggregationField.HOST)) {
                     sample.setHost(r.get(tbl.HOST));
                 }
@@ -189,6 +197,9 @@ public class SampleService {
                 add(tbl.DIVISION_EXPOSURE);;
                 add(tbl.AGE);
                 add(tbl.SEX);
+                add(tbl.HOSPITALIZED);
+                add(tbl.DIED);
+                add(tbl.FULLY_VACCINATED);
                 add(tbl.HOST);
                 add(tbl.SAMPLING_STRATEGY);
                 add(tbl.PANGO_LINEAGE);
@@ -231,6 +242,9 @@ public class SampleService {
                         .setDivisionExposure(r.get(tbl.DIVISION_EXPOSURE))
                         .setAge(r.get(tbl.AGE))
                         .setSex(r.get(tbl.SEX))
+                        .setHospitalized(r.get(tbl.HOSPITALIZED))
+                        .setDied(r.get(tbl.DIED))
+                        .setFullyVaccinated(r.get(tbl.FULLY_VACCINATED))
                         .setHost(r.get(tbl.HOST))
                         .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
                         .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
@@ -486,6 +500,15 @@ public class SampleService {
         if (request.getSex() != null) {
             conditions.add(tbl.SEX.eq(request.getSex()));
         }
+        if (request.getHospitalized() != null) {
+            conditions.add(tbl.HOSPITALIZED.eq(request.getHospitalized()));
+        }
+        if (request.getDied() != null) {
+            conditions.add(tbl.DIED.eq(request.getDied()));
+        }
+        if (request.getFullyVaccinated() != null) {
+            conditions.add(tbl.FULLY_VACCINATED.eq(request.getFullyVaccinated()));
+        }
         if (request.getRegion() != null) {
             conditions.add(tbl.REGION.eq(request.getRegion()));
         }
@@ -550,6 +573,9 @@ public class SampleService {
             put(AggregationField.DIVISIONEXPOSURE, tbl.DIVISION_EXPOSURE);
             put(AggregationField.AGE, tbl.AGE);
             put(AggregationField.SEX, tbl.SEX);
+            put(AggregationField.HOSPITALIZED, tbl.HOSPITALIZED);
+            put(AggregationField.DIED, tbl.DIED);
+            put(AggregationField.FULLYVACCINATED, tbl.FULLY_VACCINATED);
             put(AggregationField.HOST, tbl.HOST);
             put(AggregationField.SAMPLINGSTRATEGY, tbl.SAMPLING_STRATEGY);
             put(AggregationField.PANGOLINEAGE, tbl.PANGO_LINEAGE);

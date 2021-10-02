@@ -32,6 +32,9 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Integer ageFrom;
     private Integer ageTo;
     private String sex;
+    private Boolean hospitalized;
+    private Boolean died;
+    private Boolean fullyVaccinated;
     private String host;
     private String samplingStrategy;
     private String pangoLineage;
@@ -166,6 +169,33 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setSex(String sex) {
         this.sex = sex;
+        return (T) this;
+    }
+
+    public Boolean getHospitalized() {
+        return hospitalized;
+    }
+
+    public T setHospitalized(Boolean hospitalized) {
+        this.hospitalized = hospitalized;
+        return (T) this;
+    }
+
+    public Boolean getDied() {
+        return died;
+    }
+
+    public T setDied(Boolean died) {
+        this.died = died;
+        return (T) this;
+    }
+
+    public Boolean getFullyVaccinated() {
+        return fullyVaccinated;
+    }
+
+    public T setFullyVaccinated(Boolean fullyVaccinated) {
+        this.fullyVaccinated = fullyVaccinated;
         return (T) this;
     }
 
