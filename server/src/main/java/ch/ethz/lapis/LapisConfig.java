@@ -26,8 +26,6 @@ public class LapisConfig implements Config {
 
     private GisaidApiConfig gisaidApiConfig;
 
-    private Source source;
-
     private Boolean cacheEnabled;
 
     private String redisHost;
@@ -97,15 +95,6 @@ public class LapisConfig implements Config {
 
     public LapisConfig setGisaidApiConfig(GisaidApiConfig gisaidApiConfig) {
         this.gisaidApiConfig = gisaidApiConfig;
-        return this;
-    }
-
-    public Source getSource() {
-        return source;
-    }
-
-    public LapisConfig setSource(Source source) {
-        this.source = source;
         return this;
     }
 
