@@ -52,6 +52,11 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
     public final TableField<YMainSequenceStagingRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
+     * The column <code>y_main_sequence_staging.seq_original_compressed</code>.
+     */
+    public final TableField<YMainSequenceStagingRecord, byte[]> SEQ_ORIGINAL_COMPRESSED = createField(DSL.name("seq_original_compressed"), SQLDataType.BLOB, this, "");
+
+    /**
      * The column <code>y_main_sequence_staging.seq_aligned_compressed</code>.
      */
     public final TableField<YMainSequenceStagingRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
@@ -75,11 +80,6 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
      * The column <code>y_main_sequence_staging.nuc_insertions</code>.
      */
     public final TableField<YMainSequenceStagingRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_sequence_staging.seq_original_compressed</code>.
-     */
-    public final TableField<YMainSequenceStagingRecord, byte[]> SEQ_ORIGINAL_COMPRESSED = createField(DSL.name("seq_original_compressed"), SQLDataType.BLOB, this, "");
 
     private YMainSequenceStaging(Name alias, Table<YMainSequenceStagingRecord> aliased) {
         this(alias, aliased, null);
@@ -160,7 +160,7 @@ public class YMainSequenceStaging extends TableImpl<YMainSequenceStagingRecord> 
     // -------------------------------------------------------------------------
 
     @Override
-    public Row7<Integer, byte[], String, String, String, String, byte[]> fieldsRow() {
+    public Row7<Integer, byte[], byte[], String, String, String, String> fieldsRow() {
         return (Row7) super.fieldsRow();
     }
 }

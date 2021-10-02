@@ -383,6 +383,48 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         return (String) get(25);
     }
 
+    /**
+     * Setter for <code>y_main_metadata_staging.hospitalized</code>.
+     */
+    public void setHospitalized(Boolean value) {
+        set(26, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.hospitalized</code>.
+     */
+    public Boolean getHospitalized() {
+        return (Boolean) get(26);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.died</code>.
+     */
+    public void setDied(Boolean value) {
+        set(27, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.died</code>.
+     */
+    public Boolean getDied() {
+        return (Boolean) get(27);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.fully_vaccinated</code>.
+     */
+    public void setFullyVaccinated(Boolean value) {
+        set(28, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.fully_vaccinated</code>.
+     */
+    public Boolean getFullyVaccinated() {
+        return (Boolean) get(28);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -406,7 +448,7 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
     /**
      * Create a detached, initialised YMainMetadataStagingRecord
      */
-    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors) {
+    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Boolean hospitalized, Boolean died, Boolean fullyVaccinated) {
         super(YMainMetadataStaging.Y_MAIN_METADATA_STAGING);
 
         setId(id);
@@ -435,5 +477,8 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         setOriginatingLab(originatingLab);
         setSubmittingLab(submittingLab);
         setAuthors(authors);
+        setHospitalized(hospitalized);
+        setDied(died);
+        setFullyVaccinated(fullyVaccinated);
     }
 }

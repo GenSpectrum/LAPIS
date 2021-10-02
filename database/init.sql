@@ -116,6 +116,9 @@ create table y_main_metadata
   host text,
   age int,
   sex text,
+  hospitalized boolean,
+  died boolean,
+  fully_vaccinated boolean,
   sampling_strategy text,
   pango_lineage text,
   nextstrain_clade text,
@@ -140,6 +143,9 @@ create index on y_main_metadata (division_exposure);
 create index on y_main_metadata (host);
 create index on y_main_metadata (age);
 create index on y_main_metadata (sex);
+create index on y_main_metadata (hospitalized);
+create index on y_main_metadata (died);
+create index on y_main_metadata (fully_vaccinated);
 create index on y_main_metadata (sampling_strategy);
 create index on y_main_metadata (pango_lineage);
 create index on y_main_metadata (nextstrain_clade);
