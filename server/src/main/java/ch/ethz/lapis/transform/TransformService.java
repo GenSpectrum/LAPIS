@@ -44,8 +44,6 @@ public class TransformService {
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
         transformAASeqsToColumnar();
-        // Switch the _staging tables with the active tables + update value in data_version
-        switchInStagingTables();
     }
 
 
@@ -461,6 +459,9 @@ public class TransformService {
     }
 
 
+    /**
+     * Switch the _staging tables with the active tables and update value in data_version
+     */
     public void switchInStagingTables() throws SQLException {
         String sql1 = "select y_switch_in_staging_tables()";
         String sql2 = """
