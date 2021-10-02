@@ -32,9 +32,9 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case DIVISIONEXPOSURE -> gen.writeStringField("divisionExposure", sample.getDivisionExposure());
                     case AGE -> gen.writeObjectField("age", sample.getAge());
                     case SEX -> gen.writeStringField("sex", sample.getSex());
-                    case HOSPITALIZED -> gen.writeBooleanField("hospitalized", sample.getHospitalized());
-                    case DIED ->  gen.writeBooleanField("died", sample.getDied());
-                    case FULLYVACCINATED -> gen.writeBooleanField("fullyVaccinated", sample.getFullyVaccinated());
+                    case HOSPITALIZED -> gen.writeObjectField("hospitalized", sample.getHospitalized());
+                    case DIED ->  gen.writeObjectField("died", sample.getDied());
+                    case FULLYVACCINATED -> gen.writeObjectField("fullyVaccinated", sample.getFullyVaccinated());
                     case HOST -> gen.writeStringField("host", sample.getHost());
                     case SAMPLINGSTRATEGY -> gen.writeStringField("samplingStrategy", sample.getSamplingStrategy());
                     case PANGOLINEAGE -> gen.writeStringField("pangoLineage", sample.getPangoLineage());
