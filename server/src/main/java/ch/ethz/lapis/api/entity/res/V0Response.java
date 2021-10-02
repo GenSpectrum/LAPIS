@@ -8,7 +8,7 @@ import java.util.List;
 public class V0Response<Payload> {
 
     private Payload payload;
-    private List<Object> errors = new ArrayList<>();
+    private List<ErrorEntry> errors = new ArrayList<>();
     private Information info = new Information()
             .setApiVersion(0)
             .setDeprecationDate(LocalDate.of(2021, Month.AUGUST, 25))
@@ -32,11 +32,11 @@ public class V0Response<Payload> {
         return this;
     }
 
-    public List<Object> getErrors() {
+    public List<ErrorEntry> getErrors() {
         return errors;
     }
 
-    public V0Response<Payload> setErrors(List<Object> errors) {
+    public V0Response<Payload> setErrors(List<ErrorEntry> errors) {
         this.errors = errors;
         return this;
     }
