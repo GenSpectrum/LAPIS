@@ -65,9 +65,9 @@ public class SampleController {
 
 
     @GetMapping( "/details")
-    public V0Response<SampleMutationsResponse> getDetails(SampleDetailRequest request) throws SQLException {
-        SampleMutationsResponse mutationsResponse = sampleService.getMutations(request, SequenceType.AMINO_ACID);
-        return new V0Response<>(mutationsResponse, dataVersionService.getVersion());
+    public V0Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
+        List<SampleDetail> samples = sampleService.getDetailedSamples(request);
+        return new V0Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
     }
 
 
