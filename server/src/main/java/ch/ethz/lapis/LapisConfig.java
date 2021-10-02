@@ -34,6 +34,8 @@ public class LapisConfig implements Config {
 
     private OpennessLevel apiOpennessLevel;
 
+    private DatabaseConfig s3cVineyard;
+
 
     public DatabaseConfig getVineyard() {
         return vineyard;
@@ -131,6 +133,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setApiOpennessLevel(OpennessLevel apiOpennessLevel) {
         this.apiOpennessLevel = apiOpennessLevel;
+        return this;
+    }
+
+    public DatabaseConfig getS3cVineyard() {
+        return s3cVineyard;
+    }
+
+    public LapisConfig setS3cVineyard(DatabaseConfig s3cVineyard) {
+        this.s3cVineyard = s3cVineyard;
         return this;
     }
 }

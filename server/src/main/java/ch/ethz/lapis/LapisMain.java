@@ -5,6 +5,7 @@ import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
 import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
+import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.boot.SpringApplication;
@@ -52,6 +53,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             Set<String> availableSteps = new HashSet<>() {{
                 add(UpdateSteps.loadNG);
                 add(UpdateSteps.loadGisaid);
+                add(UpdateSteps.loadS3C);
                 add(UpdateSteps.transformNG);
                 add(UpdateSteps.transformGisaid);
             }};
@@ -71,6 +73,8 @@ public class LapisMain extends SubProgram<LapisConfig> {
                                     dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
                                     config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
                             ).updateData();
+                    case UpdateSteps.loadS3C ->
+                            new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
                     case UpdateSteps.transformNG ->
                             new TransformService(dbPool, config.getMaxNumberWorkers())
                                     .mergeAndTransform(LapisConfig.Source.NG);
