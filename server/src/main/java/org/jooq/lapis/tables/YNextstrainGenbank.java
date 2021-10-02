@@ -177,14 +177,14 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     public final TableField<YNextstrainGenbankRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
 
     /**
+     * The column <code>y_nextstrain_genbank.aa_seqs</code>.
+     */
+    public final TableField<YNextstrainGenbankRecord, String> AA_SEQS = createField(DSL.name("aa_seqs"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_nextstrain_genbank.aa_mutations</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_nextstrain_genbank.nuc_insertions</code>.
-     */
-    public final TableField<YNextstrainGenbankRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_nextstrain_genbank.nuc_substitutions</code>.
@@ -197,9 +197,9 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     public final TableField<YNextstrainGenbankRecord, String> NUC_DELETIONS = createField(DSL.name("nuc_deletions"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>y_nextstrain_genbank.aa_seqs</code>.
+     * The column <code>y_nextstrain_genbank.nuc_insertions</code>.
      */
-    public final TableField<YNextstrainGenbankRecord, String> AA_SEQS = createField(DSL.name("aa_seqs"), SQLDataType.CLOB, this, "");
+    public final TableField<YNextstrainGenbankRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
 
     private YNextstrainGenbank(Name alias, Table<YNextstrainGenbankRecord> aliased) {
         this(alias, aliased, null);
@@ -241,12 +241,12 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
 
     @Override
     public UniqueKey<YNextstrainGenbankRecord> getPrimaryKey() {
-        return Keys.Y_NEXTSTRAIN_GENBANK_PK;
+        return Keys.Y_NEXTSTRAIN_GENBANK_PKEY;
     }
 
     @Override
     public List<UniqueKey<YNextstrainGenbankRecord>> getKeys() {
-        return Arrays.<UniqueKey<YNextstrainGenbankRecord>>asList(Keys.Y_NEXTSTRAIN_GENBANK_PK);
+        return Arrays.<UniqueKey<YNextstrainGenbankRecord>>asList(Keys.Y_NEXTSTRAIN_GENBANK_PKEY);
     }
 
     @Override

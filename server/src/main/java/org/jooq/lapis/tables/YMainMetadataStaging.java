@@ -178,6 +178,21 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      */
     public final TableField<YMainMetadataStagingRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
 
+    /**
+     * The column <code>y_main_metadata_staging.hospitalized</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> HOSPITALIZED = createField(DSL.name("hospitalized"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.died</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> DIED = createField(DSL.name("died"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.fully_vaccinated</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
+
     private YMainMetadataStaging(Name alias, Table<YMainMetadataStagingRecord> aliased) {
         this(alias, aliased, null);
     }
@@ -218,7 +233,7 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
+        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIED_IDX, Indexes.Y_MAIN_METADATA_STAGING_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
     }
 
     @Override
