@@ -1,5 +1,6 @@
 package ch.ethz.lapis;
 
+import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.core.Config;
 import ch.ethz.lapis.core.DatabaseConfig;
 import ch.ethz.lapis.core.HttpProxyConfig;
@@ -32,6 +33,8 @@ public class LapisConfig implements Config {
     private String redisHost;
 
     private Integer redisPort;
+
+    private OpennessLevel apiOpennessLevel;
 
 
     public DatabaseConfig getVineyard() {
@@ -130,6 +133,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setRedisPort(Integer redisPort) {
         this.redisPort = redisPort;
+        return this;
+    }
+
+    public OpennessLevel getApiOpennessLevel() {
+        return apiOpennessLevel;
+    }
+
+    public LapisConfig setApiOpennessLevel(OpennessLevel apiOpennessLevel) {
+        this.apiOpennessLevel = apiOpennessLevel;
         return this;
     }
 }

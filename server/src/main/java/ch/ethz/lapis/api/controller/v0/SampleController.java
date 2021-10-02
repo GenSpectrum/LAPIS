@@ -1,13 +1,16 @@
 package ch.ethz.lapis.api.controller.v0;
 
+import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
+import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.res.*;
+import ch.ethz.lapis.api.exception.GisaidLimitationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +31,7 @@ public class SampleController {
     private final SampleService sampleService;
     private final DataVersionService dataVersionService;
     private final ObjectMapper objectMapper;
+    private final OpennessLevel openness = LapisMain.globalConfig.getApiOpennessLevel();
 
 
     public SampleController(
@@ -66,6 +70,9 @@ public class SampleController {
 
     @GetMapping( "/details")
     public V0Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
+        if (openness == OpennessLevel.GISAID) {
+            throw new GisaidLimitationException();
+        }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request);
         return new V0Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
     }
@@ -76,6 +83,13 @@ public class SampleController {
             produces = "application/json"
     )
     public String getAAMutations(SampleDetailRequest request) {
+        if (openness == OpennessLevel.GISAID && (
+                request.getGisaidEpiIsl() != null
+                        || request.getGenbankAccession() != null
+                        || request.getSraAccession() != null
+        )) {
+            throw new GisaidLimitationException();
+        }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AA_MUTATIONS, request);
         return useCacheOrCompute(cacheKey, () -> {
            try {
@@ -95,6 +109,13 @@ public class SampleController {
             produces = "application/json"
     )
     public String getNucMutations(SampleDetailRequest request) {
+        if (openness == OpennessLevel.GISAID && (
+                request.getGisaidEpiIsl() != null
+                        || request.getGenbankAccession() != null
+                        || request.getSraAccession() != null
+        )) {
+            throw new GisaidLimitationException();
+        }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_NUC_MUTATIONS, request);
         return useCacheOrCompute(cacheKey, () -> {
            try {
@@ -114,6 +135,9 @@ public class SampleController {
             produces = "text/x-fasta"
     )
     public String getFasta(SampleDetailRequest request) throws SQLException {
+        if (openness == OpennessLevel.GISAID) {
+            throw new GisaidLimitationException();
+        }
         return sampleService.getFasta(request, false);
     }
 
@@ -123,6 +147,9 @@ public class SampleController {
             produces = "text/x-fasta"
     )
     public String getAlignedFasta(SampleDetailRequest request) throws SQLException {
+        if (openness == OpennessLevel.GISAID) {
+            throw new GisaidLimitationException();
+        }
         return sampleService.getFasta(request, true);
     }
 
