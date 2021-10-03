@@ -11,10 +11,7 @@ import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.PangolinLineageAlias;
-import ch.ethz.lapis.util.PangolinLineageAliasResolver;
-import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.jooq.Record;
 import org.jooq.*;
@@ -40,6 +37,7 @@ public class SampleService {
             = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
     private static final SeqCompressor aaMutationColumnarCompressor
             = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+    private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
     private final PangolinLineageAliasResolver pangolinLineageAliasResolver;
 
 
@@ -709,9 +707,13 @@ public class SampleService {
 
 
     private boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {
+        Character mutationBase = searchedMutation.getMutation();
         if (searchedMutation.getMutation() == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome
-            throw new RuntimeException("Not implemented");
+            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (N)
+            return foundBase != 'N' && foundBase != referenceGenome.getNucleotideBase(searchedMutation.getPosition());
+        } else if (mutationBase == '.') {
+            // Check whether the base is not mutated, i.e., equals the base of the reference genome
+            return foundBase == referenceGenome.getNucleotideBase(searchedMutation.getPosition());
         } else {
             return foundBase == searchedMutation.getMutation();
         }
@@ -719,11 +721,17 @@ public class SampleService {
 
 
     private boolean isMatchingMutation(Character foundBase, AAMutation searchedMutation) {
-        if (searchedMutation.getMutation() == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome
-            throw new RuntimeException("Not implemented");
+        Character mutationBase = searchedMutation.getMutation();
+        if (mutationBase == null) {
+            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (X)
+            return foundBase != 'X' && foundBase != referenceGenome.getGeneAABase(searchedMutation.getGene(),
+                    searchedMutation.getPosition());
+        } else if (mutationBase == '.') {
+            // Check whether the base is not mutated, i.e., equals the base of the reference genome
+            return foundBase == referenceGenome.getGeneAABase(searchedMutation.getGene(),
+                    searchedMutation.getPosition());
         } else {
-            return foundBase == searchedMutation.getMutation();
+            return foundBase == mutationBase;
         }
     }
 
