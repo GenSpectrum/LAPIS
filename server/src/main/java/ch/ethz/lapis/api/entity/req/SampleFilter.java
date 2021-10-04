@@ -2,11 +2,10 @@ package ch.ethz.lapis.api.entity.req;
 
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.NucMutation;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public abstract class SampleFilter<T extends SampleFilter<T>> {
 

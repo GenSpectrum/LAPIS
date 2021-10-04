@@ -1,7 +1,6 @@
 package ch.ethz.lapis.source;
 
 import ch.ethz.lapis.util.ReferenceGenomeData;
-
 import java.util.ArrayList;
 import java.util.List;
 

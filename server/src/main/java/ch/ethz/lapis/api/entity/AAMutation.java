@@ -24,6 +24,23 @@ public class AAMutation {
         this.mutation = mutation;
     }
 
+    /**
+     * @param mutationCode Examples: "S:501Y", "S:501"
+     */
+    public static AAMutation parse(String mutationCode) {
+        String[] split = Utils.normalizeAAMutation(mutationCode).split(":");
+        String gene = split[0];
+        if (!Character.isDigit(split[1].charAt(split[1].length() - 1))) {
+            return new AAMutation(
+                gene,
+                Integer.parseInt(split[1].substring(0, split[1].length() - 1)),
+                split[1].charAt(split[1].length() - 1)
+            );
+        } else {
+            return new AAMutation(gene, Integer.parseInt(split[1]));
+        }
+    }
+
     public String getGene() {
         return gene;
     }
@@ -49,22 +66,5 @@ public class AAMutation {
     public AAMutation setMutation(Character mutation) {
         this.mutation = mutation;
         return this;
-    }
-
-    /**
-     * @param mutationCode Examples: "S:501Y", "S:501"
-     */
-    public static AAMutation parse(String mutationCode) {
-        String[] split = Utils.normalizeAAMutation(mutationCode).split(":");
-        String gene = split[0];
-        if (!Character.isDigit(split[1].charAt(split[1].length() - 1))) {
-            return new AAMutation(
-                    gene,
-                    Integer.parseInt(split[1].substring(0, split[1].length() - 1)),
-                    split[1].charAt(split[1].length() - 1)
-            );
-        } else {
-            return new AAMutation(gene, Integer.parseInt(split[1]));
-        }
     }
 }

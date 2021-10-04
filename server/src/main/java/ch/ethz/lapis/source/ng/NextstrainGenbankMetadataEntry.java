@@ -3,6 +3,7 @@ package ch.ethz.lapis.source.ng;
 import java.time.LocalDate;
 
 public class NextstrainGenbankMetadataEntry {
+
     private String strain;
     private String virus;
     private String gisaidEpiIsl;

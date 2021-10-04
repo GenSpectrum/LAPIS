@@ -8,34 +8,18 @@ import ch.ethz.lapis.source.gisaid.GisaidApiConfig;
 
 public class LapisConfig implements Config {
 
-    public enum Source {
-        NG, GISAID;
-    }
-
     private DatabaseConfig vineyard;
-
     private HttpProxyConfig httpProxy;
-
     private String workdir;
-
     private Integer maxNumberWorkers;
-
     private String nextalignPath;
-
     private String geoLocationRulesPath;
-
     private GisaidApiConfig gisaidApiConfig;
-
     private Boolean cacheEnabled;
-
     private String redisHost;
-
     private Integer redisPort;
-
     private OpennessLevel apiOpennessLevel;
-
     private DatabaseConfig s3cVineyard;
-
 
     public DatabaseConfig getVineyard() {
         return vineyard;
@@ -143,5 +127,9 @@ public class LapisConfig implements Config {
     public LapisConfig setS3cVineyard(DatabaseConfig s3cVineyard) {
         this.s3cVineyard = s3cVineyard;
         return this;
+    }
+
+    public enum Source {
+        NG, GISAID
     }
 }

@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SampleMutationsResponse extends ArrayList<SampleMutationsResponse.MutationEntry> {
+
+    public SampleMutationsResponse() {
+    }
+
+    public SampleMutationsResponse(Collection<? extends MutationEntry> c) {
+        super(c);
+    }
+
     public static class MutationEntry {
+
         private final String mutation;
         private final double proportion;
 
@@ -20,12 +29,5 @@ public class SampleMutationsResponse extends ArrayList<SampleMutationsResponse.M
         public double getProportion() {
             return proportion;
         }
-    }
-
-    public SampleMutationsResponse() {
-    }
-
-    public SampleMutationsResponse(Collection<? extends MutationEntry> c) {
-        super(c);
     }
 }

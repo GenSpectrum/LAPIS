@@ -10,6 +10,6 @@ public enum OpennessLevel {
     /**
      * Only aggregated data may be shared. Sequences may not be shared.
      */
-    GISAID;
+    GISAID
 
 }

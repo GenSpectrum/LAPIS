@@ -1,6 +1,7 @@
 package ch.ethz.lapis.util;
 
 public class PangolinLineageAlias {
+
     private final String alias;
     private final String fullName;
 

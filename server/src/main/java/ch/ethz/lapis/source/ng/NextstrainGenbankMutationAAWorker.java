@@ -1,9 +1,12 @@
 package ch.ethz.lapis.source.ng;
 
-import ch.ethz.lapis.util.*;
+import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.FastaEntry;
+import ch.ethz.lapis.util.FastaFileReader;
+import ch.ethz.lapis.util.ReferenceGenomeData;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.commons.io.FileUtils;
-
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -17,17 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 
 public class NextstrainGenbankMutationAAWorker {
-
-    private static class GeneAASeq {
-        private final String gene;
-        private final String seq;
-        public GeneAASeq(String gene, String seq) {
-            this.gene = gene;
-            this.seq = seq;
-        }
-    }
 
     private final int id;
     private final ComboPooledDataSource databasePool;
@@ -36,14 +31,13 @@ public class NextstrainGenbankMutationAAWorker {
     private final Path geneMapGff;
     private final Path nextalignPath;
     private final SeqCompressor nucSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
-
     public NextstrainGenbankMutationAAWorker(
-            int id,
-            ComboPooledDataSource databasePool,
-            Path workDir,
-            Path referenceFasta,
-            Path geneMapGff,
-            Path nextalignPath) {
+        int id,
+        ComboPooledDataSource databasePool,
+        Path workDir,
+        Path referenceFasta,
+        Path geneMapGff,
+        Path nextalignPath) {
         this.id = id;
         this.databasePool = databasePool;
         this.workDir = workDir;
@@ -61,10 +55,10 @@ public class NextstrainGenbankMutationAAWorker {
             seqMap.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
         }
         String fetchSql = """
-            select strain, seq_aligned_compressed
-            from y_nextstrain_genbank
-            where strain = any(?::text[]) and seq_aligned_compressed is not null;
-        """;
+                select strain, seq_aligned_compressed
+                from y_nextstrain_genbank
+                where strain = any(?::text[]) and seq_aligned_compressed is not null;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
                 statement.setArray(1, conn.createArrayOf("text", seqMap.keySet().toArray()));
@@ -72,7 +66,7 @@ public class NextstrainGenbankMutationAAWorker {
                     while (rs.next()) {
                         String sampleName = rs.getString("strain");
                         String seqUncompressed = nucSeqCompressor.decompress(
-                                rs.getBytes("seq_aligned_compressed"));
+                            rs.getBytes("seq_aligned_compressed"));
                         if (seqMap.get(sampleName).equalsIgnoreCase(seqUncompressed)) {
                             seqMap.remove(sampleName);
                         }
@@ -96,11 +90,11 @@ public class NextstrainGenbankMutationAAWorker {
         // Write to database
         System.out.println("[" + id + "] Write to database");
         String sql = """
-            insert into y_nextstrain_genbank (strain, aa_seqs)
-            values (?, ?)
-            on conflict (strain) do update
-            set aa_seqs = ?;
-        """;
+                insert into y_nextstrain_genbank (strain, aa_seqs)
+                values (?, ?)
+                on conflict (strain) do update
+                set aa_seqs = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -132,20 +126,20 @@ public class NextstrainGenbankMutationAAWorker {
     }
 
     private Map<String, List<GeneAASeq>> runNextalign(
-            Path seqFastaPath,
-            List<FastaEntry> batch
+        Path seqFastaPath,
+        List<FastaEntry> batch
     ) throws IOException, InterruptedException {
-        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();;
+        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Path outputPath = workDir.resolve("output");
         String command = nextalignPath.toAbsolutePath() +
-                " --sequences=" + seqFastaPath.toAbsolutePath() +
-                " --reference=" + referenceFasta.toAbsolutePath() +
-                " --genemap=" + geneMapGff.toAbsolutePath() +
-                " --genes=" + String.join(",", genes) +
-                " --output-dir=" + outputPath.toAbsolutePath() +
-                " --output-basename=nextalign" +
-                " --silent" +
-                " --jobs=1";
+            " --sequences=" + seqFastaPath.toAbsolutePath() +
+            " --reference=" + referenceFasta.toAbsolutePath() +
+            " --genemap=" + geneMapGff.toAbsolutePath() +
+            " --genes=" + String.join(",", genes) +
+            " --output-dir=" + outputPath.toAbsolutePath() +
+            " --output-basename=nextalign" +
+            " --silent" +
+            " --jobs=1";
 
         Process process = Runtime.getRuntime().exec(command);
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
@@ -163,10 +157,11 @@ public class NextstrainGenbankMutationAAWorker {
             geneAASeqs.put(fastaEntry.getSampleName(), new ArrayList<>());
         }
         for (String gene : genes) {
-            FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign.gene." + gene + ".fasta"), false);
+            FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign.gene." + gene + ".fasta"),
+                false);
             for (FastaEntry fastaEntry : fastaReader) {
                 geneAASeqs.get(fastaEntry.getSampleName()).add(
-                        new GeneAASeq(gene, fastaEntry.getSeq())
+                    new GeneAASeq(gene, fastaEntry.getSeq())
                 );
             }
         }
@@ -174,30 +169,39 @@ public class NextstrainGenbankMutationAAWorker {
         return geneAASeqs;
     }
 
-
     /**
-     * Format to the format: gene1:seq,gene2:seq,... where the genes are in alphabetical order. The dictionary
-     * used for compression has the same format.
+     * Format to the format: gene1:seq,gene2:seq,... where the genes are in alphabetical order. The dictionary used for
+     * compression has the same format.
      */
     private String formatGeneAASeqs(List<GeneAASeq> geneAASeqs) {
         return geneAASeqs.stream()
-                .sorted((s1, s2) -> s1.seq.compareTo(s2.gene))
-                .map(s -> s.gene + ":" + s.seq)
-                .collect(Collectors.joining(","));
+            .sorted((s1, s2) -> s1.seq.compareTo(s2.gene))
+            .map(s -> s.gene + ":" + s.seq)
+            .collect(Collectors.joining(","));
     }
 
-
     private String formatSeqAsFasta(List<FastaEntry> sequences) {
-        StringBuilder fasta = new StringBuilder("");
+        StringBuilder fasta = new StringBuilder();
         for (FastaEntry sequence : sequences) {
             fasta
-                    .append(">")
-                    .append(sequence.getSampleName())
-                    .append("\n")
-                    .append(sequence.getSeq())
-                    .append("\n\n");
+                .append(">")
+                .append(sequence.getSampleName())
+                .append("\n")
+                .append(sequence.getSeq())
+                .append("\n\n");
         }
         return fasta.toString();
+    }
+
+    private static class GeneAASeq {
+
+        private final String gene;
+        private final String seq;
+
+        public GeneAASeq(String gene, String seq) {
+            this.gene = gene;
+            this.seq = seq;
+        }
     }
 
 }

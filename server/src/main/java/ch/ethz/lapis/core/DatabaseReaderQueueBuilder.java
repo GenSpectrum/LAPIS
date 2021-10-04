@@ -17,14 +17,14 @@ public class DatabaseReaderQueueBuilder<T> {
     private final int fetchSize;
 
     /**
-     * @param statement The connection of "statement" must not be used by any other object.
+     * @param statement       The connection of "statement" must not be used by any other object.
      * @param convertFunction "rowToJobFunction" must not call next() on the result set or manipulate it in any other
-     *   way.
-     * @param capacity The maximal capacity of the queue
-     * @param fetchSize Please see java.sql.Statement.setFetchSize()
+     *                        way.
+     * @param capacity        The maximal capacity of the queue
+     * @param fetchSize       Please see java.sql.Statement.setFetchSize()
      */
     public DatabaseReaderQueueBuilder(PreparedStatement statement, Function<ResultSet, T> convertFunction,
-                                      int capacity, int fetchSize) {
+        int capacity, int fetchSize) {
         this.statement = statement;
         this.convertFunction = convertFunction;
         this.capacity = capacity;
@@ -52,7 +52,8 @@ public class DatabaseReaderQueueBuilder<T> {
                     conn.setAutoCommit(true);
                     statement.close();
                     conn.close();
-                } catch (SQLException ignored) {}
+                } catch (SQLException ignored) {
+                }
             }
         });
         fetcherThread.start();

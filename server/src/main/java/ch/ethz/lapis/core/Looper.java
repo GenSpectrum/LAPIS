@@ -1,7 +1,8 @@
 package ch.ethz.lapis.core;
 
 public class Looper {
-    private LooperConfig config;
+
+    private final LooperConfig config;
     private boolean first = true;
 
     public Looper(LooperConfig config) {

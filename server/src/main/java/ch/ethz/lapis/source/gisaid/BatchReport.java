@@ -59,9 +59,9 @@ public class BatchReport {
     @Override
     public String toString() {
         return "BatchReport{" +
-                "addedEntries=" + addedEntries +
-                ", updatedEntries=" + updatedMetadataEntries +
-                ", failedEntries=" + failedEntries +
-                '}';
+            "addedEntries=" + addedEntries +
+            ", updatedEntries=" + updatedMetadataEntries +
+            ", failedEntries=" + failedEntries +
+            '}';
     }
 }

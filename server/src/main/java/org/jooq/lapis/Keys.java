@@ -33,7 +33,7 @@ import org.jooq.lapis.tables.records.YNextstrainGenbankRecord;
 
 
 /**
- * A class modelling foreign key relationships and constraints of tables in 
+ * A class modelling foreign key relationships and constraints of tables in
  * the default schema.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })

@@ -1,6 +1,7 @@
 package ch.ethz.lapis.core;
 
 public class LooperConfig implements Config {
+
     private Boolean activated;
     private Integer minutesBetweenRuns;
 

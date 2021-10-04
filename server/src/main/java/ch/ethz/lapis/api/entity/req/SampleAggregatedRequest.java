@@ -1,7 +1,6 @@
 package ch.ethz.lapis.api.entity.req;
 
 import ch.ethz.lapis.api.entity.AggregationField;
-
 import java.util.ArrayList;
 import java.util.List;
 

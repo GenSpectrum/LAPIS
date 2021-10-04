@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.entity.res;
 
 public class SimpleMessage {
+
     private String message;
 
     public SimpleMessage(String message) {

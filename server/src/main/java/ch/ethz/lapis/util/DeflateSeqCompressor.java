@@ -10,17 +10,8 @@ import java.util.zip.Inflater;
 
 public class DeflateSeqCompressor implements SeqCompressor {
 
-    public enum DICT {
-        REFERENCE,
-        ATCGNDEL,
-        AASEQ,
-        AACODONS,
-        NONE
-    }
-
     private static final int bufferSize = 5000000;
     private final byte[] dict;
-
     public DeflateSeqCompressor(DICT dictionary) {
         String name = switch (dictionary) {
             case REFERENCE -> "/reference-dictionary.txt";
@@ -80,6 +71,14 @@ public class DeflateSeqCompressor implements SeqCompressor {
         } catch (DataFormatException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public enum DICT {
+        REFERENCE,
+        ATCGNDEL,
+        AASEQ,
+        AACODONS,
+        NONE
     }
 
 }

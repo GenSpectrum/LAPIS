@@ -3,6 +3,7 @@ package ch.ethz.lapis.source.gisaid;
 import java.util.Objects;
 
 public class GeoLocation {
+
     private String region;
     private String country;
     private String division;
@@ -16,6 +17,10 @@ public class GeoLocation {
         this.country = country;
         this.division = division;
         this.location = location;
+    }
+
+    public static GeoLocation fromArray(String[] arr) {
+        return new GeoLocation(arr[0], arr[1], arr[2], arr[3]);
     }
 
     public String getRegion() {
@@ -55,30 +60,30 @@ public class GeoLocation {
     }
 
     public String[] toArray() {
-        return new String[]{ region, country, division, location };
-    }
-
-    public static GeoLocation fromArray(String[] arr) {
-        return new GeoLocation(arr[0], arr[1], arr[2], arr[3]);
+        return new String[]{region, country, division, location};
     }
 
     @Override
     public String toString() {
         return "GeoLocation{" +
-                "region='" + region + '\'' +
-                ", country='" + country + '\'' +
-                ", division='" + division + '\'' +
-                ", location='" + location + '\'' +
-                '}';
+            "region='" + region + '\'' +
+            ", country='" + country + '\'' +
+            ", division='" + division + '\'' +
+            ", location='" + location + '\'' +
+            '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         GeoLocation that = (GeoLocation) o;
         return Objects.equals(region, that.region) && Objects.equals(country, that.country)
-                && Objects.equals(division, that.division) && Objects.equals(location, that.location);
+            && Objects.equals(division, that.division) && Objects.equals(location, that.location);
     }
 
     @Override

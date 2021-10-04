@@ -1,6 +1,7 @@
 package ch.ethz.lapis.core;
 
 public class GlobalProxyManager {
+
     public static void setProxyFromConfig(HttpProxyConfig config) {
         if (config != null && config.getActivated()) {
             System.setProperty("http.proxyHost", config.getHost());

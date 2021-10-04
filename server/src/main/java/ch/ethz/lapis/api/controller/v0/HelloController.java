@@ -2,11 +2,10 @@ package ch.ethz.lapis.api.controller.v0;
 
 import ch.ethz.lapis.api.entity.res.SimpleMessage;
 import ch.ethz.lapis.api.entity.res.V0Response;
+import java.time.Instant;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Instant;
 
 @RestController
 @RequestMapping("/v0")

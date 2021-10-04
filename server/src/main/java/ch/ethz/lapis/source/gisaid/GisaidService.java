@@ -6,12 +6,12 @@ import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.tukaani.xz.XZInputStream;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -21,18 +21,31 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.tukaani.xz.XZInputStream;
 
 
 public class GisaidService {
@@ -47,12 +60,12 @@ public class GisaidService {
     private final Path geoLocationRulesFile;
 
     public GisaidService(
-            ComboPooledDataSource databasePool,
-            String workdir,
-            int maxNumberWorkers,
-            String nextalignPath,
-            GisaidApiConfig gisaidApiConfig,
-            String geoLocationRulesFile
+        ComboPooledDataSource databasePool,
+        String workdir,
+        int maxNumberWorkers,
+        String nextalignPath,
+        GisaidApiConfig gisaidApiConfig,
+        String geoLocationRulesFile
     ) {
         this.databasePool = databasePool;
         this.workdir = Path.of(workdir);
@@ -60,6 +73,25 @@ public class GisaidService {
         this.nextalignPath = Path.of(nextalignPath);
         this.gisaidApiConfig = gisaidApiConfig;
         this.geoLocationRulesFile = Path.of(geoLocationRulesFile);
+    }
+
+    private static void downloadDataPackage(
+        URL url,
+        String username,
+        String password,
+        Path outputPath
+    ) throws IOException {
+        String auth = username + ":" + password;
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
+        String authHeaderValue = "Basic " + new String(encodedAuth);
+        HttpURLConnection gisaidApiConnection = (HttpURLConnection) url.openConnection();
+        gisaidApiConnection.setRequestProperty("Authorization", authHeaderValue);
+        ReadableByteChannel readableByteChannel = Channels.newChannel(gisaidApiConnection.getInputStream());
+        FileOutputStream fileOutputStream = new FileOutputStream(outputPath.toFile());
+        FileChannel fileChannel = fileOutputStream.getChannel();
+        fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+        fileChannel.close();
+        fileOutputStream.close();
     }
 
     public void updateData() throws IOException, SQLException, ParseException, InterruptedException {
@@ -78,10 +110,10 @@ public class GisaidService {
         Path gisaidDataFile = workdir.resolve("provision.json.xz");
         try {
             downloadDataPackage(
-                    new URL(gisaidApiConfig.getUrl()),
-                    gisaidApiConfig.getUsername(),
-                    gisaidApiConfig.getPassword(),
-                    gisaidDataFile
+                new URL(gisaidApiConfig.getUrl()),
+                gisaidApiConfig.getUsername(),
+                gisaidApiConfig.getPassword(),
+                gisaidDataFile
             );
         } catch (IOException e) {
             System.err.println("provision.json.xz could not be downloaded from GISAID");
@@ -90,9 +122,9 @@ public class GisaidService {
 
         // Load the list of all GISAID EPI ISL from the database.
         String loadExistingIdsSql = """
-            select gisaid_epi_isl
-            from y_gisaid;
-        """;
+                select gisaid_epi_isl
+                from y_gisaid;
+            """;
         Set<String> existingGisaidEpiIsls = new HashSet<>();
         try (Connection conn = databasePool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
@@ -106,7 +138,7 @@ public class GisaidService {
 
         // Create a queue to store batches and start workers to process them.
         ExhaustibleBlockingQueue<Batch> gisaidBatchQueue = new ExhaustibleLinkedBlockingQueue<>(
-                Math.max(4, maxNumberWorkers / 2));
+            Math.max(4, maxNumberWorkers / 2));
         final ConcurrentLinkedQueue<BatchReport> batchReports = new ConcurrentLinkedQueue<>();
         final ConcurrentLinkedQueue<Exception> unhandledExceptions = new ConcurrentLinkedQueue<>();
         final AtomicBoolean emergencyBrake = new AtomicBoolean(false);
@@ -121,14 +153,14 @@ public class GisaidService {
             final int finalI = i;
             executor.submit(() -> {
                 BatchProcessingWorker worker = new BatchProcessingWorker(
-                        finalI,
-                        workerWorkDir,
-                        referenceFasta,
-                        databasePool,
-                        false,
-                        nextalignPath,
-                        geneMapGff,
-                        seqCompressor
+                    finalI,
+                    workerWorkDir,
+                    referenceFasta,
+                    databasePool,
+                    false,
+                    nextalignPath,
+                    geneMapGff,
+                    seqCompressor
                 );
                 while (!emergencyBrake.get() && (!gisaidBatchQueue.isExhausted() || !gisaidBatchQueue.isEmpty())) {
                     try {
@@ -237,20 +269,20 @@ public class GisaidService {
         System.out.println("[main] Preparing final report");
         BatchReport mergedBatchReport = mergeBatchReports(new ArrayList<>(batchReports));
         boolean success = unhandledExceptions.isEmpty()
-                && mergedBatchReport.getFailedEntries() < 0.05 * processedEntries;
+            && mergedBatchReport.getFailedEntries() < 0.05 * processedEntries;
         FinalReport finalReport = new FinalReport()
-                .setSuccess(success)
-                .setStartTime(startTime)
-                .setEndTime(LocalDateTime.now())
-                .setEntriesInDataPackage(entriesInDataPackage)
-                .setProcessedEntries(processedEntries)
-                .setAddedEntries(mergedBatchReport.getAddedEntries())
-                .setUpdatedTotalEntries(mergedBatchReport.getUpdatedTotalEntries())
-                .setUpdatedMetadataEntries(mergedBatchReport.getUpdatedMetadataEntries())
-                .setUpdatedSequenceEntries(mergedBatchReport.getUpdatedSequenceEntries())
-                .setDeletedEntries(deleted)
-                .setFailedEntries(mergedBatchReport.getFailedEntries())
-                .setUnhandledExceptions(new ArrayList<>(unhandledExceptions));
+            .setSuccess(success)
+            .setStartTime(startTime)
+            .setEndTime(LocalDateTime.now())
+            .setEntriesInDataPackage(entriesInDataPackage)
+            .setProcessedEntries(processedEntries)
+            .setAddedEntries(mergedBatchReport.getAddedEntries())
+            .setUpdatedTotalEntries(mergedBatchReport.getUpdatedTotalEntries())
+            .setUpdatedMetadataEntries(mergedBatchReport.getUpdatedMetadataEntries())
+            .setUpdatedSequenceEntries(mergedBatchReport.getUpdatedSequenceEntries())
+            .setDeletedEntries(deleted)
+            .setFailedEntries(mergedBatchReport.getFailedEntries())
+            .setUnhandledExceptions(new ArrayList<>(unhandledExceptions));
 //        notificationSystem.sendReport(finalReport); TODO
 
         System.err.println("There are " + unhandledExceptions.size() + " unhandled exceptions.");
@@ -270,10 +302,9 @@ public class GisaidService {
         }
     }
 
-
     private GisaidEntry parseDataPackageLine(
-            JSONObject json,
-            GeoLocationMapper geoLocationMapper
+        JSONObject json,
+        GeoLocationMapper geoLocationMapper
     ) {
         // Parse date
         String dateOriginal = (String) json.get("covv_collection_date");
@@ -290,8 +321,8 @@ public class GisaidService {
         GeoLocation geoLocation;
         if (locationString != null) {
             List<String> locationParts = Arrays.stream(locationString.split("/"))
-                    .map(String::trim)
-                    .collect(Collectors.toList());
+                .map(String::trim)
+                .collect(Collectors.toList());
             GeoLocation gisaidDirtyLocation = new GeoLocation();
             if (locationParts.size() > 0) {
                 gisaidDirtyLocation.setRegion(locationParts.get(0));
@@ -328,29 +359,28 @@ public class GisaidService {
         LocalDate dateSubmitted = Utils.nullableLocalDateValue((String) json.get("covv_subm_date"));
 
         return new GisaidEntry()
-                .setGisaidEpiIsl((String) json.get("covv_accession_id"))
-                .setStrain((String) json.get("covv_virus_name"))
-                .setDate(date)
-                .setDateOriginal(dateOriginal)
-                .setRegion(geoLocation.getRegion())
-                .setCountry(geoLocation.getCountry())
-                .setDivision(geoLocation.getDivision())
-                .setLocation(geoLocation.getLocation())
-                .setHost((String) json.get("covv_host"))
-                .setAge(age)
-                .setSex(sexString)
-                .setPangoLineage((String) json.get("covv_lineage"))
-                .setGisaidClade((String) json.get("covv_clade"))
-                .setDateSubmitted(dateSubmitted)
-                .setSamplingStrategy((String) json.get("covv_sampling_strategy"))
-                .setSeqOriginal((String) json.get("sequence"));
+            .setGisaidEpiIsl((String) json.get("covv_accession_id"))
+            .setStrain((String) json.get("covv_virus_name"))
+            .setDate(date)
+            .setDateOriginal(dateOriginal)
+            .setRegion(geoLocation.getRegion())
+            .setCountry(geoLocation.getCountry())
+            .setDivision(geoLocation.getDivision())
+            .setLocation(geoLocation.getLocation())
+            .setHost((String) json.get("covv_host"))
+            .setAge(age)
+            .setSex(sexString)
+            .setPangoLineage((String) json.get("covv_lineage"))
+            .setGisaidClade((String) json.get("covv_clade"))
+            .setDateSubmitted(dateSubmitted)
+            .setSamplingStrategy((String) json.get("covv_sampling_strategy"))
+            .setSeqOriginal((String) json.get("sequence"));
     }
-
 
     private void deleteSequences(Set<String> gisaidEpiIslToDelete) throws SQLException {
         String sql = """
-            delete from y_gisaid where gisaid_epi_isl = ?;
-        """;
+                delete from y_gisaid where gisaid_epi_isl = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -359,13 +389,12 @@ public class GisaidService {
                     statement.addBatch();
                 }
                 statement.executeBatch();
-                statement.clearBatch();;
+                statement.clearBatch();
             }
             conn.commit();
             conn.setAutoCommit(true);
         }
     }
-
 
     private BatchReport mergeBatchReports(List<BatchReport> batchReports) {
         int addedEntries = 0;
@@ -381,44 +410,23 @@ public class GisaidService {
             failedEntries += batchReport.getFailedEntries();
         }
         return new BatchReport()
-                .setAddedEntries(addedEntries)
-                .setUpdatedTotalEntries(updatedTotalEntries)
-                .setUpdatedMetadataEntries(updatedMetadataEntries)
-                .setUpdatedSequenceEntries(updatedSequenceEntries)
-                .setFailedEntries(failedEntries);
+            .setAddedEntries(addedEntries)
+            .setUpdatedTotalEntries(updatedTotalEntries)
+            .setUpdatedMetadataEntries(updatedMetadataEntries)
+            .setUpdatedSequenceEntries(updatedSequenceEntries)
+            .setFailedEntries(failedEntries);
     }
-
-
-    private static void downloadDataPackage(
-            URL url,
-            String username,
-            String password,
-            Path outputPath
-    ) throws IOException {
-        String auth = username + ":" + password;
-        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
-        String authHeaderValue = "Basic " + new String(encodedAuth);
-        HttpURLConnection gisaidApiConnection = (HttpURLConnection) url.openConnection();
-        gisaidApiConnection.setRequestProperty("Authorization", authHeaderValue);
-        ReadableByteChannel readableByteChannel = Channels.newChannel(gisaidApiConnection.getInputStream());
-        FileOutputStream fileOutputStream = new FileOutputStream(outputPath.toFile());
-        FileChannel fileChannel = fileOutputStream.getChannel();
-        fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-        fileChannel.close();
-        fileOutputStream.close();
-    }
-
 
     private void updateDataVersion(LocalDateTime startTime) throws SQLException {
         ZoneId zoneId = ZoneId.systemDefault();
         long epoch = startTime.atZone(zoneId).toEpochSecond();
         String sql = """
-            insert into data_version (dataset, timestamp)
-            values ('gisaid', ?)
-            on conflict (dataset) do update
-            set
-              timestamp = ?;
-        """;
+                insert into data_version (dataset, timestamp)
+                values ('gisaid', ?)
+                on conflict (dataset) do update
+                set
+                  timestamp = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 statement.setLong(1, epoch);

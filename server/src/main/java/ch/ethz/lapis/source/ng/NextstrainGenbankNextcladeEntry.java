@@ -1,6 +1,7 @@
 package ch.ethz.lapis.source.ng;
 
 public class NextstrainGenbankNextcladeEntry {
+
     private String strain;
     private String aaMutations;
     private String nucSubstitutions;

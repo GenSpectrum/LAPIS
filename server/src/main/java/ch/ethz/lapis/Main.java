@@ -3,7 +3,6 @@ package ch.ethz.lapis;
 import ch.ethz.lapis.core.Config;
 import ch.ethz.lapis.core.ConfigurationManager;
 import ch.ethz.lapis.core.SubProgram;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +55,7 @@ public class Main {
         Config configuration;
         if (configFilePath != null) {
             configuration = configurationManager.loadConfiguration(configFilePath,
-                    subProgram.getConfigClass(), subProgram.getName());
+                subProgram.getConfigClass(), subProgram.getName());
         } else {
             configuration = configurationManager.loadConfiguration(subProgram.getConfigClass(), subProgram.getName());
         }
@@ -69,10 +68,10 @@ public class Main {
 
     private static void printHelp() {
         System.out.println("""
-Usage: program --help
-    | program help
-    | program [--config <path to config file>] <sub program name> <args for sub program...>
-Available subprograms are:""");
+            Usage: program --help
+                | program help
+                | program [--config <path to config file>] <sub program name> <args for sub program...>
+            Available subprograms are:""");
         printListOfSubPrograms();
     }
 

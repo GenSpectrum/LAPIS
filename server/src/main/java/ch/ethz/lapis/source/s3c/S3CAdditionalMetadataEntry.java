@@ -12,11 +12,11 @@ public class S3CAdditionalMetadataEntry {
     }
 
     public S3CAdditionalMetadataEntry(
-            String gisaidEpiIsl,
-            String enaId,
-            Boolean hospitalized,
-            Boolean died,
-            Boolean fullyVaccinated
+        String gisaidEpiIsl,
+        String enaId,
+        Boolean hospitalized,
+        Boolean died,
+        Boolean fullyVaccinated
     ) {
         this.gisaidEpiIsl = gisaidEpiIsl;
         this.enaId = enaId;

@@ -1,9 +1,8 @@
 package ch.ethz.lapis.api.exception;
 
 import ch.ethz.lapis.api.entity.res.ErrorEntry;
-import org.springframework.http.HttpStatus;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
 
 
 public abstract class BaseApiException extends RuntimeException {

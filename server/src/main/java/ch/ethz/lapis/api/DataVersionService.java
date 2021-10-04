@@ -2,14 +2,13 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 
 @Service
@@ -35,10 +34,10 @@ public class DataVersionService {
     @Scheduled(fixedDelay = 1000)
     public void autoFetchVersionDate() {
         String sql = """
-            select timestamp
-            from data_version
-            where dataset = 'merged';
-        """;
+                select timestamp
+                from data_version
+                where dataset = 'merged';
+            """;
         try (Connection conn = dbPool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
                 try (ResultSet rs = statement.executeQuery(sql)) {

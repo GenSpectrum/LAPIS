@@ -1,12 +1,11 @@
 package ch.ethz.lapis.util;
 
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.XZInputStream;
-import org.tukaani.xz.XZOutputStream;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.XZInputStream;
+import org.tukaani.xz.XZOutputStream;
 
 public class XZSeqCompressor implements SeqCompressor {
 

@@ -1,7 +1,6 @@
 package ch.ethz.lapis.api.entity.res;
 
 import ch.ethz.lapis.api.entity.AggregationField;
-
 import java.util.List;
 
 public class SampleAggregatedResponse {

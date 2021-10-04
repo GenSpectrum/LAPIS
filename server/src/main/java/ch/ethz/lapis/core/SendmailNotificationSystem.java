@@ -10,10 +10,11 @@ import java.util.List;
  * This notification system uses the "sendmail" command of the operating system. It expect it to be fully configured
  * with no further authentication needed. The idea was discarded when it was understood that within the Singularity
  * container on Euler, accessing sendmail is not directly possible.
- *
+ * <p>
  * It was never tested/used!!
  */
 public class SendmailNotificationSystem implements NotificationSystem {
+
     private final List<String> recipients;
 
     public SendmailNotificationSystem(List<String> recipients) {
@@ -25,15 +26,15 @@ public class SendmailNotificationSystem implements NotificationSystem {
         String subject = "[Harvester] GISAID API Import - " + report.getPriority();
 
         String emailSourceCode = "To: " + String.join(",", recipients) + "\n"
-                + "Subject: " + subject + "\n"
-                + "Content-Type: text/plain\n";
+            + "Subject: " + subject + "\n"
+            + "Content-Type: text/plain\n";
         if (report.getPriority() == SendableReport.PriorityLevel.FATAL) {
             emailSourceCode += "X-Priority: 1 (Highest)\n";
         }
         emailSourceCode += "\n" + report.getEmailText() + "\n";
 
         try {
-            Process process = Runtime.getRuntime().exec ("sendmail -t");
+            Process process = Runtime.getRuntime().exec("sendmail -t");
             OutputStream out = process.getOutputStream();
             PrintWriter p = new PrintWriter(out);
             p.print(emailSourceCode);

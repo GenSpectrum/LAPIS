@@ -1,23 +1,26 @@
 package ch.ethz.lapis.source.gisaid;
 
-import org.javatuples.Quartet;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import org.javatuples.Quartet;
 
 /**
  * This uses geo location rules [1] maintained by Nextstrain to clean up the location data in GISAID. It is implemented
  * similarly to [2].
- *
- * [1] https://github.com/nextstrain/ncov-ingest/blob/master/source-data/gisaid_geoLocationRules.tsv
- * [2] https://github.com/nextstrain/ncov-ingest/blob/04ca33cbed1f96320035b9f7ebcc6abf4fa25a72/lib/utils/transformpipeline/transforms.py
+ * <p>
+ * [1] https://github.com/nextstrain/ncov-ingest/blob/master/source-data/gisaid_geoLocationRules.tsv [2]
+ * https://github.com/nextstrain/ncov-ingest/blob/04ca33cbed1f96320035b9f7ebcc6abf4fa25a72/lib/utils/transformpipeline/transforms.py
  */
 public class GeoLocationMapper {
 
-    private Map<String, Map<String, Map<String, Map<String, String[]>>>> rules = new HashMap<>();
+    private final Map<String, Map<String, Map<String, Map<String, String[]>>>> rules = new HashMap<>();
 
     /**
      * @param geoLocationRulesFile The path to gisaid_geoLocationRules.tsv
@@ -34,7 +37,7 @@ public class GeoLocationMapper {
             String[] leftRight = rule.split("\t");
             if (leftRight.length != 2) {
                 throw new RuntimeException(
-                        "Unexpected line in gisaid_geoLocationRules.tsv, split by tab failed. Found: " + rule);
+                    "Unexpected line in gisaid_geoLocationRules.tsv, split by tab failed. Found: " + rule);
             }
             String[] left = leftRight[0].toLowerCase().split("/", -1);
             String[] right = leftRight[1].split("/", -1);
@@ -49,24 +52,24 @@ public class GeoLocationMapper {
             rules.get(left[0]).putIfAbsent(left[1], new HashMap<>());
             rules.get(left[0]).get(left[1]).putIfAbsent(left[2], new HashMap<>());
             rules.get(left[0]).get(left[1]).get(left[2]).put(left[3], new String[]{
-                    right[0], right[1], right[2], right[3]
+                right[0], right[1], right[2], right[3]
             });
         }
     }
 
     private Optional<String[]> findApplicableRule(GeoLocation geoLocation) {
         return findApplicableRule(
-                new Quartet<>(geoLocation.getRegion(),
-                        geoLocation.getCountry(),
-                        geoLocation.getDivision(),
-                        geoLocation.getLocation()),
-                0, rules);
+            new Quartet<>(geoLocation.getRegion(),
+                geoLocation.getCountry(),
+                geoLocation.getDivision(),
+                geoLocation.getLocation()),
+            0, rules);
     }
 
     private Optional<String[]> findApplicableRule(
-            Quartet<String, String, String, String> geoLocation,
-            int currentLevel,
-            Map<String, ?> currentLevelMap
+        Quartet<String, String, String, String> geoLocation,
+        int currentLevel,
+        Map<String, ?> currentLevelMap
     ) {
         Object fullMatchValue = currentLevelMap.get(((String) geoLocation.getValue(currentLevel)).toLowerCase());
         Object wildCastValue = currentLevelMap.get("*");
@@ -94,24 +97,24 @@ public class GeoLocationMapper {
 
     public GeoLocation resolve(GeoLocation geoLocation) {
         GeoLocation normalizedGeoLocation = new GeoLocation(
-                geoLocation.getRegion() != null ? geoLocation.getRegion().trim() : "",
-                geoLocation.getCountry() != null ? geoLocation.getCountry().trim() : "",
-                geoLocation.getDivision() != null ? geoLocation.getDivision().trim() : "",
-                geoLocation.getLocation() != null ? geoLocation.getLocation().trim() : ""
+            geoLocation.getRegion() != null ? geoLocation.getRegion().trim() : "",
+            geoLocation.getCountry() != null ? geoLocation.getCountry().trim() : "",
+            geoLocation.getDivision() != null ? geoLocation.getDivision().trim() : "",
+            geoLocation.getLocation() != null ? geoLocation.getLocation().trim() : ""
         );
         GeoLocation resolved = resolve(normalizedGeoLocation, 0);
         return new GeoLocation(
-                !"".equals(resolved.getRegion()) ? resolved.getRegion() : null,
-                !"".equals(resolved.getCountry()) ? resolved.getCountry() : null,
-                !"".equals(resolved.getDivision()) ? resolved.getDivision() : null,
-                !"".equals(resolved.getLocation()) ? resolved.getLocation() : null
+            !"".equals(resolved.getRegion()) ? resolved.getRegion() : null,
+            !"".equals(resolved.getCountry()) ? resolved.getCountry() : null,
+            !"".equals(resolved.getDivision()) ? resolved.getDivision() : null,
+            !"".equals(resolved.getLocation()) ? resolved.getLocation() : null
         );
     }
 
     private GeoLocation resolve(GeoLocation geoLocation, int numberOfAppliedRules) {
         if (numberOfAppliedRules > 1000) {
             throw new RuntimeException("More than 1000 geographic location rules applied on the same entry. " +
-                    "There might be cyclicity in your rules. GeoLocation: " + geoLocation);
+                "There might be cyclicity in your rules. GeoLocation: " + geoLocation);
         }
         Optional<String[]> ruleOpt = findApplicableRule(geoLocation);
         if (ruleOpt.isEmpty()) {

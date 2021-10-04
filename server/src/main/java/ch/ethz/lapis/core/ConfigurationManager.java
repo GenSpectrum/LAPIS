@@ -3,13 +3,12 @@ package ch.ethz.lapis.core;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.yaml.snakeyaml.Yaml;
 
 
 public class ConfigurationManager {
@@ -20,7 +19,7 @@ public class ConfigurationManager {
      * Loads the configuration from both the config file and from environment variables
      */
     public <T extends Config> T loadConfiguration(Path configPath, Class<T> configClass, String programName)
-            throws IOException {
+        throws IOException {
         Map<String, ?> fileConfigMaps1 = readConfigMapsFromYaml(configPath);
         Map<String, ?> envConfigMaps1 = readConfigMapFromEnvironmentVariables();
 
@@ -42,8 +41,8 @@ public class ConfigurationManager {
         merged = Utils.nullableMapDeepMerge(merged, envProgramConfig);
 
         ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         T mergedConfig = objectMapper.convertValue(merged, configClass);
         return mergedConfig;
     }
@@ -66,14 +65,14 @@ public class ConfigurationManager {
         Map merged = Utils.nullableMapDeepMerge(envDefaultConfig, envProgramConfig);
 
         ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         T mergedConfig = objectMapper.convertValue(merged, configClass);
         return mergedConfig;
     }
 
     private Map<String, ?> readConfigMapsFromYaml(Path configPath)
-            throws IOException {
+        throws IOException {
         Yaml yaml = new Yaml();
         return yaml.load(Files.readString(configPath));
     }

@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +104,8 @@ public class Utils {
 
 
     /**
-     * Examples for normalized amino acid mutation codes: S:501Y, ORF1a:123N
-     * Examples for not normalized codes: S:N501Y, s:501Y, ORF1A:123N
-     * This function does not intend to catch invalid mutation codes.
+     * Examples for normalized amino acid mutation codes: S:501Y, ORF1a:123N Examples for not normalized codes: S:N501Y,
+     * s:501Y, ORF1A:123N This function does not intend to catch invalid mutation codes.
      */
     public static String normalizeAAMutation(String mutationCode) {
         List<String> normalizedGenes = ReferenceGenomeData.getInstance().getGeneNames();
@@ -130,9 +128,8 @@ public class Utils {
 
 
     /**
-     * Examples for normalized nucleotide mutation codes: 123C, 234T
-     * Examples for not normalized codes: T123C, 234t
-     * This function does not intend to catch invalid mutation codes.
+     * Examples for normalized nucleotide mutation codes: 123C, 234T Examples for not normalized codes: T123C, 234t This
+     * function does not intend to catch invalid mutation codes.
      */
     public static String normalizeNucMutation(String mutationCode) {
         if (!Character.isDigit(mutationCode.charAt(0))) {

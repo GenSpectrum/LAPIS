@@ -2,9 +2,12 @@ package ch.ethz.lapis.source.ng;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
-import ch.ethz.lapis.util.*;
+import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.FastaEntry;
+import ch.ethz.lapis.util.FastaFileReader;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,10 +42,10 @@ public class NextstrainGenbankService {
     private final SeqCompressor seqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
 
     public NextstrainGenbankService(
-            ComboPooledDataSource databasePool,
-            String workdir,
-            int maxNumberWorkers,
-            String nextalignPath
+        ComboPooledDataSource databasePool,
+        String workdir,
+        int maxNumberWorkers,
+        String nextalignPath
     ) {
         this.databasePool = databasePool;
         this.workdir = Path.of(workdir);
@@ -97,7 +100,7 @@ public class NextstrainGenbankService {
             ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
             FileOutputStream fileOutputStream = new FileOutputStream(workdir.resolve(file).toFile());
             fileOutputStream.getChannel()
-                    .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+                .transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         }
     }
 
@@ -115,11 +118,11 @@ public class NextstrainGenbankService {
     private void updateSeqOriginalOrAligned(boolean aligned) throws IOException, SQLException {
         String filename = !aligned ? "sequences.fasta.xz" : "aligned.fasta.xz";
         String sql = """
-            insert into y_nextstrain_genbank (strain, seq_original_compressed)
-            values (?, ?)
-            on conflict (strain) do update
-            set seq_original_compressed = ?;
-        """;
+                insert into y_nextstrain_genbank (strain, seq_original_compressed)
+                values (?, ?)
+                on conflict (strain) do update
+                set seq_original_compressed = ?;
+            """;
         if (aligned) {
             sql = sql.replaceAll("_original_", "_aligned_");
         }
@@ -129,7 +132,8 @@ public class NextstrainGenbankService {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), true)) {
                     for (FastaEntry entry : fastaReader) {
-                        byte[] compressed = seqCompressor.compress(aligned ? entry.getSeq().toUpperCase() : entry.getSeq());
+                        byte[] compressed = seqCompressor.compress(
+                            aligned ? entry.getSeq().toUpperCase() : entry.getSeq());
                         statement.setString(1, entry.getSampleName());
                         statement.setBytes(2, compressed);
                         statement.setBytes(3, compressed);
@@ -159,7 +163,7 @@ public class NextstrainGenbankService {
 
         // Create a queue to store batches and start workers to process them.
         ExhaustibleBlockingQueue<List<FastaEntry>> batchQueue
-                = new ExhaustibleLinkedBlockingQueue<>(Math.max(4, maxNumberWorkers / 2));
+            = new ExhaustibleLinkedBlockingQueue<>(Math.max(4, maxNumberWorkers / 2));
         final ConcurrentLinkedQueue<Exception> unhandledExceptions = new ConcurrentLinkedQueue<>();
         final AtomicBoolean emergencyBrake = new AtomicBoolean(false);
         ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
@@ -172,12 +176,12 @@ public class NextstrainGenbankService {
             final int finalI = i;
             executor.submit(() -> {
                 var worker = new NextstrainGenbankMutationAAWorker(
-                        finalI,
-                        databasePool,
-                        workerWorkDir,
-                        referenceFasta,
-                        geneMapGff,
-                        nextalignPath
+                    finalI,
+                    databasePool,
+                    workerWorkDir,
+                    referenceFasta,
+                    geneMapGff,
+                    nextalignPath
                 );
                 while (!emergencyBrake.get() && (!batchQueue.isExhausted() || !batchQueue.isEmpty())) {
                     try {
@@ -259,49 +263,49 @@ public class NextstrainGenbankService {
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
 
         String sql = """
-            insert into y_nextstrain_genbank (
-              genbank_accession, sra_accession, gisaid_epi_isl, strain, date, date_original,
-              date_submitted, region, country, division, location, region_exposure, country_exposure,
-              division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextstrain_clade,
-              gisaid_clade, originating_lab, submitting_lab, authors
-            )
-            values (
-              ?, ?, ?, ?, ?, ?,
-              ?, ?, ?, ?, ?, ?, ?,
-              ?, ?, ?, ?, ?, ?, ?,
-              ?, ?, ?, ?
-            )
-            on conflict (strain) do update
-            set
-              genbank_accession = ?,
-              sra_accession = ?,
-              gisaid_epi_isl = ?,
-              date = ?,
-              date_original = ?,
-              date_submitted = ?,
-              region = ?,
-              country = ?,
-              division = ?,
-              location = ?,
-              region_exposure = ?,
-              country_exposure = ?,
-              division_exposure = ?,
-              host = ?,
-              age = ?,
-              sex = ?,
-              sampling_strategy = ?,
-              pango_lineage = ?,
-              nextstrain_clade = ?,
-              gisaid_clade = ?,
-              originating_lab = ?,
-              submitting_lab = ?,
-              authors = ?;
-        """;
+                insert into y_nextstrain_genbank (
+                  genbank_accession, sra_accession, gisaid_epi_isl, strain, date, date_original,
+                  date_submitted, region, country, division, location, region_exposure, country_exposure,
+                  division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextstrain_clade,
+                  gisaid_clade, originating_lab, submitting_lab, authors
+                )
+                values (
+                  ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?
+                )
+                on conflict (strain) do update
+                set
+                  genbank_accession = ?,
+                  sra_accession = ?,
+                  gisaid_epi_isl = ?,
+                  date = ?,
+                  date_original = ?,
+                  date_submitted = ?,
+                  region = ?,
+                  country = ?,
+                  division = ?,
+                  location = ?,
+                  region_exposure = ?,
+                  country_exposure = ?,
+                  division_exposure = ?,
+                  host = ?,
+                  age = ?,
+                  sex = ?,
+                  sampling_strategy = ?,
+                  pango_lineage = ?,
+                  nextstrain_clade = ?,
+                  gisaid_clade = ?,
+                  originating_lab = ?,
+                  submitting_lab = ?,
+                  authors = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (NextstrainGenbankMetadataFileReader metadataReader
-                             = new NextstrainGenbankMetadataFileReader(gzipInputStream)) {
+                    = new NextstrainGenbankMetadataFileReader(gzipInputStream)) {
                     int i = 0;
                     for (NextstrainGenbankMetadataEntry entry : metadataReader) {
                         if (entry.getStrain() == null) {
@@ -374,20 +378,20 @@ public class NextstrainGenbankService {
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
 
         String sql = """
-            insert into y_nextstrain_genbank (strain, aa_mutations, nuc_substitutions, nuc_deletions, nuc_insertions)
-            values (?, ?, ?, ?, ?)
-            on conflict (strain) do update
-            set
-              aa_mutations = ?,
-              nuc_substitutions = ?,
-              nuc_deletions = ?,
-              nuc_insertions = ?;
-        """;
+                insert into y_nextstrain_genbank (strain, aa_mutations, nuc_substitutions, nuc_deletions, nuc_insertions)
+                values (?, ?, ?, ?, ?)
+                on conflict (strain) do update
+                set
+                  aa_mutations = ?,
+                  nuc_substitutions = ?,
+                  nuc_deletions = ?,
+                  nuc_insertions = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (NextstrainGenbankNextcladeFileReader nextcladeReader
-                             = new NextstrainGenbankNextcladeFileReader(gzipInputStream)) {
+                    = new NextstrainGenbankNextcladeFileReader(gzipInputStream)) {
                     int i = 0;
                     for (NextstrainGenbankNextcladeEntry entry : nextcladeReader) {
                         statement.setString(1, entry.getStrain());
@@ -418,12 +422,12 @@ public class NextstrainGenbankService {
         ZoneId zoneId = ZoneId.systemDefault();
         long epoch = startTime.atZone(zoneId).toEpochSecond();
         String sql = """
-            insert into data_version (dataset, timestamp)
-            values ('nextstrain-genbank', ?)
-            on conflict (dataset) do update
-            set
-              timestamp = ?;
-        """;
+                insert into data_version (dataset, timestamp)
+                values ('nextstrain-genbank', ?)
+                on conflict (dataset) do update
+                set
+                  timestamp = ?;
+            """;
         try (Connection conn = databasePool.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 statement.setLong(1, epoch);

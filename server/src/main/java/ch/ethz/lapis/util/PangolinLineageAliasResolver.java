@@ -13,12 +13,8 @@ public class PangolinLineageAliasResolver {
     }
 
     /**
-     * Examples:
-     *   B.1.1.1.2 -> [C.2]
-     *   B.1.1.1   -> [C]
-     *   B.1.1.1*  -> [C.*]
-     *   B.1.1*    -> [C.*, D.*, K.*, ...]
-     *   B.1.1.12* -> []
+     * Examples: B.1.1.1.2 -> [C.2] B.1.1.1   -> [C] B.1.1.1*  -> [C.*] B.1.1*    -> [C.*, D.*, K.*, ...] B.1.1.12* ->
+     * []
      */
     public List<String> findAlias(String query) {
         // We need to consider the following cases:
@@ -47,21 +43,21 @@ public class PangolinLineageAliasResolver {
 
         if (!queryIsShorter) {
             return aliases.stream()
-                    .filter(a -> finalQueryRoot.equals(a.getFullName())
-                            || finalQueryRoot.startsWith(a.getFullName() + "."))
-                    .map(a -> a.getAlias() + finalQueryRoot.substring(a.getFullName().length())
-                            + (prefixSearch ? ".*" : ""))
-                    .collect(Collectors.toList());
+                .filter(a -> finalQueryRoot.equals(a.getFullName())
+                    || finalQueryRoot.startsWith(a.getFullName() + "."))
+                .map(a -> a.getAlias() + finalQueryRoot.substring(a.getFullName().length())
+                    + (prefixSearch ? ".*" : ""))
+                .collect(Collectors.toList());
         }
         if (!prefixSearch && queryIsShorter) {
             return new ArrayList<>();
         }
         if (prefixSearch && queryIsShorter) {
             return aliases.stream()
-                    .filter(a -> a.getFullName().equals(finalQueryRoot)
-                            || a.getFullName().startsWith(finalQueryRoot + "."))
-                    .map(a -> a.getAlias() + ".*")
-                    .collect(Collectors.toList());
+                .filter(a -> a.getFullName().equals(finalQueryRoot)
+                    || a.getFullName().startsWith(finalQueryRoot + "."))
+                .map(a -> a.getAlias() + ".*")
+                .collect(Collectors.toList());
         }
         throw new RuntimeException("Unexpected error: This should be unreachable. Query: " + query);
     }

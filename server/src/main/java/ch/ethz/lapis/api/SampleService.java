@@ -12,10 +12,35 @@ import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.util.*;
+import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.PangolinLineageAlias;
+import ch.ethz.lapis.util.PangolinLineageAliasResolver;
+import ch.ethz.lapis.util.ReferenceGenomeData;
+import ch.ethz.lapis.util.SeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.*;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Record3;
+import org.jooq.Result;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableOnConditionStep;
 import org.jooq.impl.DSL;
 import org.jooq.lapis.tables.YMainAaSequenceColumnar;
 import org.jooq.lapis.tables.YMainMetadata;
@@ -23,21 +48,16 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
 
-import java.sql.Statement;
-import java.sql.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Service
 public class SampleService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private static final SeqCompressor referenceSeqCompressor
-            = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
+        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
     private static final SeqCompressor nucMutationColumnarCompressor
-            = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
+        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
     private static final SeqCompressor aaMutationColumnarCompressor
-            = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
     private final PangolinLineageAliasResolver pangolinLineageAliasResolver;
 
@@ -82,22 +102,22 @@ public class SampleService {
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
-                        .select(selectFields)
-                        .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                        .where(conditions)
-                        .groupBy(groupByFields);
+                    .select(selectFields)
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
+                    .where(conditions)
+                    .groupBy(groupByFields);
                 records = statement.fetch();
             } else {
                 var statement = ctx
-                        .select(selectFields)
-                        .from(tbl)
-                        .where(conditions)
-                        .groupBy(groupByFields);
+                    .select(selectFields)
+                    .from(tbl)
+                    .where(conditions)
+                    .groupBy(groupByFields);
                 records = statement.fetch();
             }
             for (var r : records) {
                 SampleAggregated sample = new SampleAggregated()
-                        .setCount(r.get("count", Integer.class));
+                    .setCount(r.get("count", Integer.class));
                 if (fields.contains(AggregationField.DATE)) {
                     sample.setDate(r.get(tbl.DATE));
                 }
@@ -193,7 +213,7 @@ public class SampleService {
                 add(tbl.LOCATION);
                 add(tbl.REGION_EXPOSURE);
                 add(tbl.COUNTRY_EXPOSURE);
-                add(tbl.DIVISION_EXPOSURE);;
+                add(tbl.DIVISION_EXPOSURE);
                 add(tbl.AGE);
                 add(tbl.SEX);
                 add(tbl.HOSPITALIZED);
@@ -214,43 +234,43 @@ public class SampleService {
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
-                        .select(selectFields)
-                        .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                        .where(conditions);
+                    .select(selectFields)
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
+                    .where(conditions);
                 records = statement.fetch();
             } else {
                 var statement = ctx
-                        .select(selectFields)
-                        .from(tbl)
-                        .where(conditions);
+                    .select(selectFields)
+                    .from(tbl)
+                    .where(conditions);
                 records = statement.fetch();
             }
             for (var r : records) {
                 SampleDetail sample = new SampleDetail()
-                        .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
-                        .setSraAccession(r.get(tbl.SRA_ACCESSION))
-                        .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
-                        .setDate(r.get(tbl.DATE))
-                        .setDateSubmitted(r.get(tbl.DATE_SUBMITTED))
-                        .setRegion(r.get(tbl.REGION))
-                        .setCountry(r.get(tbl.COUNTRY))
-                        .setDivision(r.get(tbl.DIVISION))
-                        .setLocation(r.get(tbl.LOCATION))
-                        .setRegionExposure(r.get(tbl.REGION_EXPOSURE))
-                        .setCountryExposure(r.get(tbl.COUNTRY_EXPOSURE))
-                        .setDivisionExposure(r.get(tbl.DIVISION_EXPOSURE))
-                        .setAge(r.get(tbl.AGE))
-                        .setSex(r.get(tbl.SEX))
-                        .setHospitalized(r.get(tbl.HOSPITALIZED))
-                        .setDied(r.get(tbl.DIED))
-                        .setFullyVaccinated(r.get(tbl.FULLY_VACCINATED))
-                        .setHost(r.get(tbl.HOST))
-                        .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
-                        .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
-                        .setNextstrainClade(r.get(tbl.NEXTSTRAIN_CLADE))
-                        .setGisaidCloade(r.get(tbl.GISAID_CLADE))
-                        .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
-                        .setOriginatingLab(r.get(tbl.ORIGINATING_LAB));
+                    .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
+                    .setSraAccession(r.get(tbl.SRA_ACCESSION))
+                    .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
+                    .setDate(r.get(tbl.DATE))
+                    .setDateSubmitted(r.get(tbl.DATE_SUBMITTED))
+                    .setRegion(r.get(tbl.REGION))
+                    .setCountry(r.get(tbl.COUNTRY))
+                    .setDivision(r.get(tbl.DIVISION))
+                    .setLocation(r.get(tbl.LOCATION))
+                    .setRegionExposure(r.get(tbl.REGION_EXPOSURE))
+                    .setCountryExposure(r.get(tbl.COUNTRY_EXPOSURE))
+                    .setDivisionExposure(r.get(tbl.DIVISION_EXPOSURE))
+                    .setAge(r.get(tbl.AGE))
+                    .setSex(r.get(tbl.SEX))
+                    .setHospitalized(r.get(tbl.HOSPITALIZED))
+                    .setDied(r.get(tbl.DIED))
+                    .setFullyVaccinated(r.get(tbl.FULLY_VACCINATED))
+                    .setHost(r.get(tbl.HOST))
+                    .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
+                    .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
+                    .setNextstrainClade(r.get(tbl.NEXTSTRAIN_CLADE))
+                    .setGisaidCloade(r.get(tbl.GISAID_CLADE))
+                    .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
+                    .setOriginatingLab(r.get(tbl.ORIGINATING_LAB));
                 samples.add(sample);
             }
         }
@@ -312,8 +332,8 @@ public class SampleService {
 
 
     public SampleMutationsResponse getMutations(
-            SampleDetailRequest request,
-            SequenceType sequenceType
+        SampleDetailRequest request,
+        SequenceType sequenceType
     ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
@@ -332,46 +352,46 @@ public class SampleService {
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 baseTbl = idsTbl
-                        .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
+                    .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
+                    .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
             } else {
                 baseTbl = metaTbl
-                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
+                    .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
             }
 
             var proportionField = DSL.count().cast(Double.class).div(
-                    DSL.field(
-                            ctx
-                                    .select(DSL.count())
-                                    .from(baseTbl)
-                                    .where(conditions)
-                    )
+                DSL.field(
+                    ctx
+                        .select(DSL.count())
+                        .from(baseTbl)
+                        .where(conditions)
+                )
             ).as("proportion");
             String mutationColumnName = switch (sequenceType) {
                 case AMINO_ACID -> "aa_mutations";
                 case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
             };
             var statement = ctx
-                    .select(
-                            DSL.field("mutation").cast(String.class),
-                            DSL.field("proportion").cast(Double.class)
-                    )
-                    .from(
-                            ctx
-                                    .select(
-                                            DSL.field("mut.mutation"),
-                                            proportionField
-                                    )
-                                    .from(
-                                            baseTbl.crossApply(
-                                                    "unnest(string_to_array(" + mutationColumnName + ", ',')) mut(mutation)"
-                                            )
-                                    )
-                                    .where(conditions)
-                                    .groupBy(DSL.field("mut.mutation"))
-                    )
-                    .where(DSL.field("proportion").ge(0.05))
-                    .orderBy(DSL.field("proportion").desc());
+                .select(
+                    DSL.field("mutation").cast(String.class),
+                    DSL.field("proportion").cast(Double.class)
+                )
+                .from(
+                    ctx
+                        .select(
+                            DSL.field("mut.mutation"),
+                            proportionField
+                        )
+                        .from(
+                            baseTbl.crossApply(
+                                "unnest(string_to_array(" + mutationColumnName + ", ',')) mut(mutation)"
+                            )
+                        )
+                        .where(conditions)
+                        .groupBy(DSL.field("mut.mutation"))
+                )
+                .where(DSL.field("proportion").ge(0.05))
+                .orderBy(DSL.field("proportion").desc());
             Result<Record2<String, Double>> records = statement.fetch();
             List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
             for (var r : records) {
@@ -381,8 +401,8 @@ public class SampleService {
                     continue;
                 }
                 mutationEntries.add(new SampleMutationsResponse.MutationEntry(
-                        r.value1(),
-                        r.value2()
+                    r.value1(),
+                    r.value2()
                 ));
             }
             return new SampleMutationsResponse(mutationEntries);
@@ -406,40 +426,40 @@ public class SampleService {
             YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
 
             TableField<YMainSequenceRecord, byte[]> seqColumn = aligned ?
-                    seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
+                seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
 
             List<Condition> conditions = getConditions(request, metaTbl);
             Result<Record2<String, byte[]>> records;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
                 var statement = ctx
-                        .select(metaTbl.GENBANK_ACCESSION, seqColumn)
-                        .from(
-                                idsTbl
-                                        .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                        )
-                        .where(conditions)
-                        .limit(1000);
+                    .select(metaTbl.GENBANK_ACCESSION, seqColumn)
+                    .from(
+                        idsTbl
+                            .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
+                            .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
+                    )
+                    .where(conditions)
+                    .limit(1000);
                 records = statement.fetch();
             } else {
                 var statement = ctx
-                        .select(metaTbl.GENBANK_ACCESSION, seqColumn)
-                        .from(
-                                metaTbl
-                                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                        )
-                        .where(conditions)
-                        .limit(1000);
+                    .select(metaTbl.GENBANK_ACCESSION, seqColumn)
+                    .from(
+                        metaTbl
+                            .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
+                    )
+                    .where(conditions)
+                    .limit(1000);
                 records = statement.fetch();
             }
             for (var r : records) {
                 fastaBuilder
-                        .append(">")
-                        .append(r.get(metaTbl.GENBANK_ACCESSION))
-                        .append("\n")
-                        .append(referenceSeqCompressor.decompress(r.get(seqColumn)))
-                        .append("\n\n");
+                    .append(">")
+                    .append(r.get(metaTbl.GENBANK_ACCESSION))
+                    .append("\n")
+                    .append(referenceSeqCompressor.decompress(r.get(seqColumn)))
+                    .append("\n\n");
             }
         }
         return fastaBuilder.toString();
@@ -447,21 +467,21 @@ public class SampleService {
 
 
     /**
-     * This function returns a set of IDs of the samples that have the filtered mutations. If an argument
-     * (i.e., nucMutations or aaMutations) is null or empty, it means that we don't filter for that. If we don't filter
-     * for any of the two mutation types, this function returns null. If no sequence has the filtered mutations, this
-     * function returns an empty set.
+     * This function returns a set of IDs of the samples that have the filtered mutations. If an argument (i.e.,
+     * nucMutations or aaMutations) is null or empty, it means that we don't filter for that. If we don't filter for any
+     * of the two mutation types, this function returns null. If no sequence has the filtered mutations, this function
+     * returns an empty set.
      */
     private Set<Integer> getIdsFromMutationFilters(
-            List<NucMutation> nucMutations,
-            List<AAMutation> aaMutations
+        List<NucMutation> nucMutations,
+        List<AAMutation> aaMutations
     ) throws SQLException {
         // Filter the IDs by nucleotide mutations (if requested)
         List<Integer> nucIds = null;
         if (nucMutations != null && !nucMutations.isEmpty()) {
             nucIds = getIdsWithNucMutations(nucMutations);
             System.out.println("I found " + nucIds.size() + " with the searched " + nucMutations.size()
-                    + " nucleotide mutations.");
+                + " nucleotide mutations.");
         }
         if (nucIds != null && nucIds.isEmpty()) {
             return new HashSet<>();
@@ -472,7 +492,7 @@ public class SampleService {
         if (aaMutations != null && !aaMutations.isEmpty()) {
             aaIds = getIdsWithAAMutations(aaMutations);
             System.out.println("I found " + aaIds.size() + " with the searched " + aaMutations.size()
-                    + " amino acid mutations.");
+                + " amino acid mutations.");
         }
         if (aaIds != null && aaIds.isEmpty()) {
             return new HashSet<>();
@@ -490,7 +510,7 @@ public class SampleService {
         }
         if (ids != null) {
             System.out.println("There are " + ids.size() + " with all the searched nucleotide and amino acid " +
-                    "mutations");
+                "mutations");
         }
         return ids;
     }
@@ -499,12 +519,12 @@ public class SampleService {
     private Table<Record1<Integer>> getIdsTable(Set<Integer> ids, DSLContext ctx) {
         String idsStr = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
         return ctx
-                .select(DSL.field("i.id::integer", Integer.class).as("id"))
-                // We are concatenating SQL here!
-                // This is safe because the IDs are read from the database and were generated and then written
-                // by this program into the database. Further, the IDs are guaranteed to be integers.
-                .from("unnest(string_to_array('" + idsStr + "', ',')) i(id)")
-                .asTable("ids");
+            .select(DSL.field("i.id::integer", Integer.class).as("id"))
+            // We are concatenating SQL here!
+            // This is safe because the IDs are read from the database and were generated and then written
+            // by this program into the database. Further, the IDs are guaranteed to be integers.
+            .from("unnest(string_to_array('" + idsStr + "', ',')) i(id)")
+            .asTable("ids");
     }
 
 
@@ -637,8 +657,8 @@ public class SampleService {
             put(AggregationField.ORIGINATINGLAB, tbl.ORIGINATING_LAB);
         }};
         return aggregationFields.stream()
-                .map(ALL_FIELDS::get)
-                .collect(Collectors.toList());
+            .map(ALL_FIELDS::get)
+            .collect(Collectors.toList());
     }
 
 
@@ -653,10 +673,10 @@ public class SampleService {
             positions.add(nucMutation.getPosition());
         }
         String sql = """
-              select position, data_compressed
-              from y_main_sequence_columnar
-              where position = any(?::int[]);
-        """;
+                  select position, data_compressed
+                  from y_main_sequence_columnar
+                  where position = any(?::int[]);
+            """;
         List<Integer> foundIds = null;
         try (Connection conn = getDatabaseConnection()) {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -714,9 +734,9 @@ public class SampleService {
                 condition = condition.or(tbl.GENE.eq(m.getGene()).and(tbl.POSITION.eq(m.getPosition())));
             }
             var statement = ctx
-                    .select(tbl.GENE, tbl.POSITION, tbl.DATA_COMPRESSED)
-                    .from(tbl)
-                    .where(condition);
+                .select(tbl.GENE, tbl.POSITION, tbl.DATA_COMPRESSED)
+                .from(tbl)
+                .where(condition);
             for (Record3<String, Integer, byte[]> record : statement.fetch()) {
                 String gene = record.value1();
                 int position = record.value2();
@@ -779,11 +799,11 @@ public class SampleService {
         if (mutationBase == null) {
             // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (X)
             return foundBase != 'X' && foundBase != referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                    searchedMutation.getPosition());
+                searchedMutation.getPosition());
         } else if (mutationBase == '.') {
             // Check whether the base is not mutated, i.e., equals the base of the reference genome
             return foundBase == referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                    searchedMutation.getPosition());
+                searchedMutation.getPosition());
         } else {
             return foundBase == mutationBase;
         }
@@ -792,13 +812,12 @@ public class SampleService {
 
     /**
      * This function translates a pangolin lineage query to an array of SQL like-statements. A sequence matches the
-     * query if any like-statements are fulfilled. The like-statements are designed to be passed into the following
-     * SQL statement:
-     *   where pangolin_lineage like any(?)
-     *
-     * Prefix search: Return the lineage and all sub-lineages. I.e., for both "B.1.*" and "B.1*", B.1 and
-     * all lineages starting with "B.1." should be returned. "B.11" should not be returned.
-     *
+     * query if any like-statements are fulfilled. The like-statements are designed to be passed into the following SQL
+     * statement: where pangolin_lineage like any(?)
+     * <p>
+     * Prefix search: Return the lineage and all sub-lineages. I.e., for both "B.1.*" and "B.1*", B.1 and all lineages
+     * starting with "B.1." should be returned. "B.11" should not be returned.
+     * <p>
      * Example: "B.1.2*" will return [B.1.2, B.1.2.%].
      */
     private String[] parsePangolinLineageQuery(String query) {
@@ -834,19 +853,19 @@ public class SampleService {
 
     public List<PangolinLineageAlias> getPangolinLineageAliases() throws SQLException {
         String sql = """
-                select
-                  alias,
-                  full_name
-                from pangolin_lineage_alias;
-        """;
+                    select
+                      alias,
+                      full_name
+                    from pangolin_lineage_alias;
+            """;
         try (Connection conn = getDatabaseConnection()) {
             try (Statement statement = conn.createStatement()) {
                 try (ResultSet rs = statement.executeQuery(sql)) {
                     List<PangolinLineageAlias> aliases = new ArrayList<>();
                     while (rs.next()) {
                         aliases.add(new PangolinLineageAlias(
-                                rs.getString("alias"),
-                                rs.getString("full_name")
+                            rs.getString("alias"),
+                            rs.getString("full_name")
                         ));
                     }
                     return aliases;

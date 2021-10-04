@@ -8,14 +8,13 @@ import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication
@@ -66,29 +65,22 @@ public class LapisMain extends SubProgram<LapisConfig> {
             }
             for (String updateStep : updateSteps) {
                 switch (updateStep) {
-                    case UpdateSteps.loadNG ->
-                            new NextstrainGenbankService(
-                                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath()
-                            ).updateData();
-                    case UpdateSteps.loadGisaid ->
-                            new GisaidService(
-                                    dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
-                                    config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
-                            ).updateData();
-                    case UpdateSteps.loadS3C ->
-                            new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
-                    case UpdateSteps.transformNG ->
-                            new TransformService(dbPool, config.getMaxNumberWorkers())
-                                    .mergeAndTransform(LapisConfig.Source.NG);
-                    case UpdateSteps.transformGisaid ->
-                            new TransformService(dbPool, config.getMaxNumberWorkers())
-                                    .mergeAndTransform(LapisConfig.Source.GISAID);
-                    case UpdateSteps.mergeFromS3C ->
-                            new TransformService(dbPool, config.getMaxNumberWorkers())
-                                    .mergeAdditionalMetadataFromS3c();
-                    case UpdateSteps.switchInStaging ->
-                            new TransformService(dbPool, config.getMaxNumberWorkers())
-                                    .switchInStagingTables();
+                    case UpdateSteps.loadNG -> new NextstrainGenbankService(
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath()
+                    ).updateData();
+                    case UpdateSteps.loadGisaid -> new GisaidService(
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
+                    ).updateData();
+                    case UpdateSteps.loadS3C -> new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
+                    case UpdateSteps.transformNG -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                        .mergeAndTransform(LapisConfig.Source.NG);
+                    case UpdateSteps.transformGisaid -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                        .mergeAndTransform(LapisConfig.Source.GISAID);
+                    case UpdateSteps.mergeFromS3C -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                        .mergeAdditionalMetadataFromS3c();
+                    case UpdateSteps.switchInStaging -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                        .switchInStagingTables();
                 }
             }
         }

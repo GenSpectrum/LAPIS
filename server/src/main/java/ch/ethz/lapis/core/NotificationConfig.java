@@ -4,7 +4,55 @@ import java.util.List;
 
 public class NotificationConfig implements Config {
 
+    private Boolean activated;
+    private String type;
+    private String dropoffDirectory;
+    private List<String> recipients;
+    private SenderConfig sender;
+
+    public Boolean getActivated() {
+        return activated;
+    }
+
+    public void setActivated(Boolean activated) {
+        this.activated = activated;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getDropoffDirectory() {
+        return dropoffDirectory;
+    }
+
+    public void setDropoffDirectory(String dropoffDirectory) {
+        this.dropoffDirectory = dropoffDirectory;
+    }
+
+    public List<String> getRecipients() {
+        return recipients;
+    }
+
+    public void setRecipients(List<String> recipients) {
+        this.recipients = recipients;
+    }
+
+    public SenderConfig getSender() {
+        return sender;
+    }
+
+    public NotificationConfig setSender(SenderConfig sender) {
+        this.sender = sender;
+        return this;
+    }
+
     public static class SenderConfig implements Config {
+
         private String smtpHost;
         private Integer smtpPort;
         private String smtpUsername;
@@ -55,52 +103,5 @@ public class NotificationConfig implements Config {
             this.address = address;
             return this;
         }
-    }
-
-    private Boolean activated;
-    private String type;
-    private String dropoffDirectory;
-    private List<String> recipients;
-    private SenderConfig sender;
-
-    public Boolean getActivated() {
-        return activated;
-    }
-
-    public void setActivated(Boolean activated) {
-        this.activated = activated;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getDropoffDirectory() {
-        return dropoffDirectory;
-    }
-
-    public void setDropoffDirectory(String dropoffDirectory) {
-        this.dropoffDirectory = dropoffDirectory;
-    }
-
-    public List<String> getRecipients() {
-        return recipients;
-    }
-
-    public void setRecipients(List<String> recipients) {
-        this.recipients = recipients;
-    }
-
-    public SenderConfig getSender() {
-        return sender;
-    }
-
-    public NotificationConfig setSender(SenderConfig sender) {
-        this.sender = sender;
-        return this;
     }
 }

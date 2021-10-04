@@ -2,6 +2,7 @@ package ch.ethz.lapis.core;
 
 
 public class SimpleReport implements SendableReport {
+
     private final PriorityLevel priorityLevel;
     private final String text;
     private final String programName;

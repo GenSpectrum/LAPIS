@@ -1,15 +1,14 @@
 package ch.ethz.lapis.core;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.api.email.EmailPopulatingBuilder;
 import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SmtpNotificationSystem implements NotificationSystem, SendAttachmentCapable {
 
@@ -19,29 +18,29 @@ public class SmtpNotificationSystem implements NotificationSystem, SendAttachmen
 
 
     public SmtpNotificationSystem(
-            String senderSmtpHost,
-            int senderSmtpPort,
-            String senderSmtpUsername,
-            String senderSmtpPassword,
-            String senderAddress,
-            List<String> recipients
+        String senderSmtpHost,
+        int senderSmtpPort,
+        String senderSmtpUsername,
+        String senderSmtpPassword,
+        String senderAddress,
+        List<String> recipients
     ) {
         this.senderAddress = senderAddress;
         this.recipients = recipients;
 
         mailer = MailerBuilder
-                .withSMTPServer(senderSmtpHost, senderSmtpPort, senderSmtpUsername, senderSmtpPassword)
-                .withTransportStrategy(TransportStrategy.SMTP_TLS)
-                .buildMailer();
+            .withSMTPServer(senderSmtpHost, senderSmtpPort, senderSmtpUsername, senderSmtpPassword)
+            .withTransportStrategy(TransportStrategy.SMTP_TLS)
+            .buildMailer();
     }
 
 
     @Override
     public void sendReport(SendableReport report) {
         EmailPopulatingBuilder builder = EmailBuilder.startingBlank()
-                .from(senderAddress)
-                .withSubject(report.getSubject())
-                .withPlainText(report.getEmailText());
+            .from(senderAddress)
+            .withSubject(report.getSubject())
+            .withPlainText(report.getEmailText());
         for (String recipient : recipients) {
             builder.to(recipient);
         }
@@ -60,9 +59,9 @@ public class SmtpNotificationSystem implements NotificationSystem, SendAttachmen
     @Override
     public void sendReportWithAttachment(SendableReportWithAttachments report, List<String> additionalRecipients) {
         EmailPopulatingBuilder builder = EmailBuilder.startingBlank()
-                .from(senderAddress)
-                .withSubject(report.getSubject())
-                .withPlainText(report.getEmailText());
+            .from(senderAddress)
+            .withSubject(report.getSubject())
+            .withPlainText(report.getEmailText());
         for (String recipient : recipients) {
             builder.to(recipient);
         }

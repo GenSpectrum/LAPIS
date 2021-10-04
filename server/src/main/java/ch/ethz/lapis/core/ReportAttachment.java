@@ -1,6 +1,7 @@
 package ch.ethz.lapis.core;
 
 public class ReportAttachment {
+
     private final String attachmentFilename;
     private final byte[] bytes;
     private final String mimeType;

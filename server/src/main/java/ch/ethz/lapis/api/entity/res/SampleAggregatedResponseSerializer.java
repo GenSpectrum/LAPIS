@@ -4,17 +4,17 @@ import ch.ethz.lapis.api.entity.AggregationField;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.springframework.boot.jackson.JsonComponent;
-
 import java.io.IOException;
+import org.springframework.boot.jackson.JsonComponent;
 
 @JsonComponent
 public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAggregatedResponse> {
+
     @Override
     public void serialize(
-            SampleAggregatedResponse resultSet,
-            JsonGenerator gen,
-            SerializerProvider serializers
+        SampleAggregatedResponse resultSet,
+        JsonGenerator gen,
+        SerializerProvider serializers
     ) throws IOException {
         gen.writeStartArray();
         for (SampleAggregated sample : resultSet.getSamples()) {
@@ -33,7 +33,7 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case AGE -> gen.writeObjectField("age", sample.getAge());
                     case SEX -> gen.writeStringField("sex", sample.getSex());
                     case HOSPITALIZED -> gen.writeObjectField("hospitalized", sample.getHospitalized());
-                    case DIED ->  gen.writeObjectField("died", sample.getDied());
+                    case DIED -> gen.writeObjectField("died", sample.getDied());
                     case FULLYVACCINATED -> gen.writeObjectField("fullyVaccinated", sample.getFullyVaccinated());
                     case HOST -> gen.writeStringField("host", sample.getHost());
                     case SAMPLINGSTRATEGY -> gen.writeStringField("samplingStrategy", sample.getSamplingStrategy());

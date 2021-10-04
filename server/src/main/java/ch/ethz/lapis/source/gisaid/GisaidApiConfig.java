@@ -4,6 +4,7 @@ import ch.ethz.lapis.core.Config;
 
 
 public class GisaidApiConfig implements Config {
+
     private String url;
     private String username;
     private String password;

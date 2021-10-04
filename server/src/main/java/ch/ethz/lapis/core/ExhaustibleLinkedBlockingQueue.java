@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class ExhaustibleLinkedBlockingQueue<E> extends LinkedBlockingQueue<E> implements ExhaustibleBlockingQueue<E> {
+
     private boolean exhausted = false;
 
 

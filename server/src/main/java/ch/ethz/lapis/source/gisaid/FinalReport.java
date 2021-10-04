@@ -2,7 +2,6 @@ package ch.ethz.lapis.source.gisaid;
 
 import ch.ethz.lapis.core.SendableReport;
 import ch.ethz.lapis.core.Utils;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,18 +42,18 @@ public class FinalReport implements SendableReport {
     @Override
     public String getEmailText() {
         String text =
-                "Success: " + success + "\n\n" +
-                        "Started at: " + startTime + "\n" +
-                        "Ended at: " + endTime + "\n\n" +
-                        "Failed entries: " + failedEntries + "\n\n" +
-                        "Entries in the data package: " + entriesInDataPackage + "\n" +
-                        "Processed entries: " + processedEntries + "\n" +
-                        "Added entries: " + addedEntries + "\n" +
-                        "Updated entries: " + updatedTotalEntries + "\n" +
-                        "Updated metadata: " + updatedMetadataEntries + "\n" +
-                        "Updated sequences: " + updatedSequenceEntries + "\n" +
-                        "Deleted entries: " + deletedEntries + "\n" +
-                        "Number of unhandled exceptions: " + unhandledExceptions.size() + "\n\n";
+            "Success: " + success + "\n\n" +
+                "Started at: " + startTime + "\n" +
+                "Ended at: " + endTime + "\n\n" +
+                "Failed entries: " + failedEntries + "\n\n" +
+                "Entries in the data package: " + entriesInDataPackage + "\n" +
+                "Processed entries: " + processedEntries + "\n" +
+                "Added entries: " + addedEntries + "\n" +
+                "Updated entries: " + updatedTotalEntries + "\n" +
+                "Updated metadata: " + updatedMetadataEntries + "\n" +
+                "Updated sequences: " + updatedSequenceEntries + "\n" +
+                "Deleted entries: " + deletedEntries + "\n" +
+                "Number of unhandled exceptions: " + unhandledExceptions.size() + "\n\n";
         if (!unhandledExceptions.isEmpty()) {
             text += "Unhandled exceptions:\n";
             for (Exception unhandledException : unhandledExceptions) {

@@ -37,9 +37,9 @@ public class SubmitterInformation {
     @Override
     public String toString() {
         return "SubmitterInformation{" +
-                "submittingLab='" + submittingLab + '\'' +
-                ", originatingLab='" + originatingLab + '\'' +
-                ", authors='" + authors + '\'' +
-                '}';
+            "submittingLab='" + submittingLab + '\'' +
+            ", originatingLab='" + originatingLab + '\'' +
+            ", authors='" + authors + '\'' +
+            '}';
     }
 }

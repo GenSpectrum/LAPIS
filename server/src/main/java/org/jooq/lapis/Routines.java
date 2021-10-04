@@ -9,7 +9,7 @@ import org.jooq.lapis.routines.YSwitchInStagingTables;
 
 
 /**
- * Convenience access to all stored procedures and functions in the default 
+ * Convenience access to all stored procedures and functions in the default
  * schema.
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })

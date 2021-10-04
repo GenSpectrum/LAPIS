@@ -22,6 +22,6 @@ public enum AggregationField {
     NEXTSTRAINCLADE,
     GISAIDCLADE,
     SUBMITTINGLAB,
-    ORIGINATINGLAB;
+    ORIGINATINGLAB
 
 }

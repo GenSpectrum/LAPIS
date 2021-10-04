@@ -20,6 +20,21 @@ public class NucMutation {
         this.mutation = mutation;
     }
 
+    /**
+     * @param mutationCode Examples: "1234T", "2345"
+     */
+    public static NucMutation parse(String mutationCode) {
+        mutationCode = Utils.normalizeNucMutation(mutationCode);
+        if (!Character.isDigit(mutationCode.charAt(mutationCode.length() - 1))) {
+            return new NucMutation(
+                Integer.parseInt(mutationCode.substring(0, mutationCode.length() - 1)),
+                mutationCode.charAt(mutationCode.length() - 1)
+            );
+        } else {
+            return new NucMutation(Integer.parseInt(mutationCode));
+        }
+    }
+
     public int getPosition() {
         return position;
     }
@@ -36,20 +51,5 @@ public class NucMutation {
     public NucMutation setMutation(Character mutation) {
         this.mutation = mutation;
         return this;
-    }
-
-    /**
-     * @param mutationCode Examples: "1234T", "2345"
-     */
-    public static NucMutation parse(String mutationCode) {
-        mutationCode = Utils.normalizeNucMutation(mutationCode);
-        if (!Character.isDigit(mutationCode.charAt(mutationCode.length() - 1))) {
-            return new NucMutation(
-                    Integer.parseInt(mutationCode.substring(0, mutationCode.length() - 1)),
-                    mutationCode.charAt(mutationCode.length() - 1)
-            );
-        } else {
-            return new NucMutation(Integer.parseInt(mutationCode));
-        }
     }
 }
