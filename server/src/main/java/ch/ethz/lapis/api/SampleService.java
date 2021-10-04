@@ -8,6 +8,7 @@ import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
+import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
@@ -254,6 +255,59 @@ public class SampleService {
             }
         }
         return samples;
+    }
+
+
+    public List<Contributor> getContributors(SampleDetailRequest request) throws SQLException {
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        if (ids != null && ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Filter further by the other metadata and prepare the response
+        List<Contributor> contributors = new ArrayList<>();
+        try (Connection conn = getDatabaseConnection()) {
+            DSLContext ctx = JooqHelper.getDSLCtx(conn);
+            YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
+
+            List<Field<?>> selectFields = new ArrayList<>() {{
+                add(tbl.GENBANK_ACCESSION);
+                add(tbl.SRA_ACCESSION);
+                add(tbl.GISAID_EPI_ISL);
+                add(tbl.SUBMITTING_LAB);
+                add(tbl.ORIGINATING_LAB);
+                add(tbl.AUTHORS);
+            }};
+            List<Condition> conditions = getConditions(request, tbl);
+
+            Result<Record> records;
+            if (ids != null) {
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+                var statement = ctx
+                    .select(selectFields)
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
+                    .where(conditions);
+                records = statement.fetch();
+            } else {
+                var statement = ctx
+                    .select(selectFields)
+                    .from(tbl)
+                    .where(conditions);
+                records = statement.fetch();
+            }
+            for (var r : records) {
+                Contributor contributor = new Contributor()
+                    .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
+                    .setSraAccession(r.get(tbl.SRA_ACCESSION))
+                    .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
+                    .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
+                    .setOriginatingLab(r.get(tbl.ORIGINATING_LAB))
+                    .setAuthors(r.get(tbl.AUTHORS));
+                contributors.add(contributor);
+            }
+        }
+        return contributors;
     }
 
 

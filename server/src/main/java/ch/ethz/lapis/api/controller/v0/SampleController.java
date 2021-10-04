@@ -78,6 +78,13 @@ public class SampleController {
     }
 
 
+    @GetMapping( "/contributors")
+    public V0Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
+        List<Contributor> contributors = sampleService.getContributors(request);
+        return new V0Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
+    }
+
+
     @GetMapping(
             value = "/aa-mutations",
             produces = "application/json"
