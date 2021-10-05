@@ -9,24 +9,19 @@ import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
-import ch.ethz.lapis.api.entity.res.Contributor;
-import ch.ethz.lapis.api.entity.res.ContributorResponse;
-import ch.ethz.lapis.api.entity.res.SampleAggregated;
-import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
-import ch.ethz.lapis.api.entity.res.SampleDetail;
-import ch.ethz.lapis.api.entity.res.SampleDetailResponse;
-import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.api.entity.res.V0Response;
+import ch.ethz.lapis.api.entity.res.*;
+import ch.ethz.lapis.api.exception.ForbiddenException;
 import ch.ethz.lapis.api.exception.GisaidLimitationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -86,6 +81,9 @@ public class SampleController {
 
     @GetMapping("/contributors")
     public V0Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
+        if (request.getHospitalized() != null || request.getDied() != null || request.getFullyVaccinated() != null) {
+            throw new ForbiddenException();
+        }
         List<Contributor> contributors = sampleService.getContributors(request);
         return new V0Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
     }
