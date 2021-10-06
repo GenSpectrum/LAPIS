@@ -1,9 +1,11 @@
-const supertest = require('supertest');
-const {ajv} = require('./validators')
-const {isOkay, checkPayloadFromSchema} = require('./shared')
+const {
+  isOkay,
+  checkPayloadFromSchema,
 
-
-const server = supertest.agent(process.env.API_URL);
+  apiUrl,
+  server,
+  openness,
+} = require('./shared')
 
 
 describe('Endpoint sample/aggregated', () => {

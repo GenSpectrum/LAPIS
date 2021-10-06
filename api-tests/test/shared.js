@@ -1,6 +1,14 @@
 const Ajv = require('ajv/dist/jtd')
 const validators = require('./validators')
 const {ajv} = require("./validators");
+const supertest = require("supertest");
+
+
+const apiUrl = process.env.API_URL;
+const server = supertest.agent(apiUrl);
+const openness = process.env.OPENNESS
+
+console.log('Testing ' + apiUrl + ' with openness level ' + openness);
 
 
 const hasRightGeneralSchema = (res) => {
@@ -17,12 +25,27 @@ const hasNoErrorEntries = (res) => {
   }
 };
 
+const hasNoPayload = (res) => {
+  const body = res.body;
+  if (body.payload !== null) {
+    throw new Error('Found payload');
+  }
+};
+
 const isOkay = (req) => {
   return req
     .expect(200)
     .expect('Content-Type', /json/)
     .expect(hasRightGeneralSchema)
     .expect(hasNoErrorEntries);
+};
+
+const isNotOkay = (req) => {
+  return req
+    .expect((res) => res.status !== 200)
+    .expect('Content-Type', /json/)
+    .expect(hasRightGeneralSchema)
+    .expect(hasNoPayload);
 };
 
 const checkPayloadFromSchema = (schema) => {
@@ -36,6 +59,13 @@ const checkPayloadFromSchema = (schema) => {
 
 
 module.exports = {
+  // Functions
   isOkay,
-  checkPayloadFromSchema
+  isNotOkay,
+  checkPayloadFromSchema,
+
+  // Shared variables
+  apiUrl,
+  server,
+  openness,
 };
