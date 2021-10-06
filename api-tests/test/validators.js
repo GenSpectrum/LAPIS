@@ -10,20 +10,10 @@ const generalSchema = {
   properties: {
     info: {
       properties: {
-        apiVersion: {
-          type: 'uint32'
-        },
-        dataVersion: {
-          type: 'uint32'
-        },
-        deprecationDate: {
-          type: 'timestamp',
-          nullable: true
-        },
-        deprecationInfo: {
-          type: 'string',
-          nullable: true
-        }
+        apiVersion: {type: 'uint32'},
+        dataVersion: {type: 'uint32'},
+        deprecationDate: {type: 'timestamp', nullable: true},
+        deprecationInfo: {type: 'string', nullable: true}
       }
     },
     errors: {
