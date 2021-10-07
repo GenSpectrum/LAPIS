@@ -13,8 +13,8 @@ import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.PangolinLineageAlias;
-import ch.ethz.lapis.util.PangolinLineageAliasResolver;
+import ch.ethz.lapis.util.PangoLineageAlias;
+import ch.ethz.lapis.util.PangoLineageQueryToSqlLikesConverter;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -59,14 +59,15 @@ public class SampleService {
     private static final SeqCompressor aaMutationColumnarCompressor
         = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
-    private final PangolinLineageAliasResolver pangolinLineageAliasResolver;
+    private final PangoLineageQueryToSqlLikesConverter pangoLineageParser;
 
 
     public SampleService() {
         try {
             // TODO This will be only loaded once and will not reload when the aliases change. The aliases should not
             //   change too often so it is not a very big issue but it could potentially cause unexpected results.
-            this.pangolinLineageAliasResolver = new PangolinLineageAliasResolver(getPangolinLineageAliases());
+            List<PangoLineageAlias> aliases = getPangolinLineageAliases();
+            this.pangoLineageParser = new PangoLineageQueryToSqlLikesConverter(aliases);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -592,7 +593,7 @@ public class SampleService {
         }
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
-            String[] pangolinLineageLikeStatements = parsePangolinLineageQuery(pangoLineage);
+            String[] pangolinLineageLikeStatements = pangoLineageParser.convert(pangoLineage);
             conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
         }
         if (request.getRegion() != null) {
@@ -810,48 +811,7 @@ public class SampleService {
     }
 
 
-    /**
-     * This function translates a pangolin lineage query to an array of SQL like-statements. A sequence matches the
-     * query if any like-statements are fulfilled. The like-statements are designed to be passed into the following SQL
-     * statement: where pangolin_lineage like any(?)
-     * <p>
-     * Prefix search: Return the lineage and all sub-lineages. I.e., for both "B.1.*" and "B.1*", B.1 and all lineages
-     * starting with "B.1." should be returned. "B.11" should not be returned.
-     * <p>
-     * Example: "B.1.2*" will return [B.1.2, B.1.2.%].
-     */
-    private String[] parsePangolinLineageQuery(String query) {
-        String finalQuery = query.toUpperCase();
-
-        // Resolve aliases
-        List<String> resolvedQueries = new ArrayList<>() {{
-            add(finalQuery);
-        }};
-        resolvedQueries.addAll(pangolinLineageAliasResolver.findAlias(query));
-
-        // Handle prefix search
-        List<String> result = new ArrayList<>();
-        for (String resolvedQuery : resolvedQueries) {
-            if (resolvedQuery.contains("%")) {
-                // Nope, I don't want to allow undocumented features.
-            } else if (!resolvedQuery.endsWith("*")) {
-                result.add(resolvedQuery);
-            } else {
-                // Prefix search
-                String rootLineage = resolvedQuery.substring(0, resolvedQuery.length() - 1);
-                if (rootLineage.endsWith(".")) {
-                    rootLineage = rootLineage.substring(0, rootLineage.length() - 1);
-                }
-                String subLineages = rootLineage + ".%";
-                result.add(rootLineage);
-                result.add(subLineages);
-            }
-        }
-        return result.toArray(new String[0]);
-    }
-
-
-    public List<PangolinLineageAlias> getPangolinLineageAliases() throws SQLException {
+    public List<PangoLineageAlias> getPangolinLineageAliases() throws SQLException {
         String sql = """
                     select
                       alias,
@@ -861,9 +821,9 @@ public class SampleService {
         try (Connection conn = getDatabaseConnection()) {
             try (Statement statement = conn.createStatement()) {
                 try (ResultSet rs = statement.executeQuery(sql)) {
-                    List<PangolinLineageAlias> aliases = new ArrayList<>();
+                    List<PangoLineageAlias> aliases = new ArrayList<>();
                     while (rs.next()) {
-                        aliases.add(new PangolinLineageAlias(
+                        aliases.add(new PangoLineageAlias(
                             rs.getString("alias"),
                             rs.getString("full_name")
                         ));

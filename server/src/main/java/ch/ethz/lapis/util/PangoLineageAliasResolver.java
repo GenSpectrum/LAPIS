@@ -4,17 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PangolinLineageAliasResolver {
+public class PangoLineageAliasResolver {
 
-    private final List<PangolinLineageAlias> aliases;
+    private final List<PangoLineageAlias> aliases;
 
-    public PangolinLineageAliasResolver(List<PangolinLineageAlias> aliases) {
+    public PangoLineageAliasResolver(List<PangoLineageAlias> aliases) {
         this.aliases = aliases;
     }
 
     /**
-     * Examples: B.1.1.1.2 -> [C.2] B.1.1.1   -> [C] B.1.1.1*  -> [C.*] B.1.1*    -> [C.*, D.*, K.*, ...] B.1.1.12* ->
-     * []
+     * Examples:
+     *   - B.1.1.1.2 -> [C.2]
+     *   - B.1.1.1   -> [C]
+     *   - B.1.1.1*  -> [C.*]
+     *   - B.1.1*    -> [C.*, D.*, K.*, ...]
+     *   - B.1.1.12* -> []
      */
     public List<String> findAlias(String query) {
         // We need to consider the following cases:
