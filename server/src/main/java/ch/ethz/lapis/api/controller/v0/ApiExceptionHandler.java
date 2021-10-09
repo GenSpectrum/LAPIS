@@ -23,6 +23,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     protected ResponseEntity<V0Response<Object>> handleUnexpectedExceptions(Throwable ex) {
+        System.err.println("Unexpected error:");
+        ex.printStackTrace();
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new V0Response<>().setErrors(new ArrayList<>() {{
