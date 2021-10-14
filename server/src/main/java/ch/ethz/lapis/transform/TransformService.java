@@ -474,6 +474,8 @@ public class TransformService {
         String sql = """
                 update y_main_metadata_staging m
                 set
+                  age = a.age,
+                  sex = a.sex,
                   hospitalized = a.hospitalized,
                   died = a.died,
                   fully_vaccinated = null -- TODO change this to "a.fully_vaccinated" once we decide to use it

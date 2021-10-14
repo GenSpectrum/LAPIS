@@ -98,6 +98,8 @@ create table y_gisaid
 create table y_s3c (
   gisaid_epi_isl text unique,
   sra_accession text unique,
+  age integer,
+  sex text,
   hospitalized boolean,
   died boolean,
   fully_vaccinated boolean

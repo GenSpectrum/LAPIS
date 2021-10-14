@@ -26,19 +26,21 @@ public class S3CVineyardService {
         // Load all additional metadata from S3C Vineyard
         ComboPooledDataSource s3cVineyardPool = DatabaseService.createDatabaseConnectionPool(s3cVineyardDatabaseConfig);
         String loadSql = """
-                select
-                  si.gisaid_id,
-                  bm.hospitalisation_type = 'HOSPITALIZED' as hospitalized,
-                  coalesce(bm.pttod, false) as died,
-                  (case
-                    when bm.impfstatus = 'YES' and (bm.fall_dt - bm.impfdatum_dose2 >= 14) then true
-                    when bm.impfstatus = 'YES' or bm.impfstatus = 'NO' then false
-                  end) as fully_vaccinated
-                from
-                  sequence_identifier si
-                  join viollier_test vt on si.ethid = vt.ethid
-                  join bag_meldeformular bm on vt.sample_number = bm.sample_number
-                where si.gisaid_id is not null;
+            select
+              si.gisaid_id,
+              bm.altersjahr as age,
+              case when bm.sex = 'Männlich' then 'Male' when bm.sex = 'Weiblich' then 'Female' end as sex,
+              bm.hospitalisation_type = 'HOSPITALIZED' as hospitalized,
+              coalesce(bm.pttod, false) as died,
+              (case
+                when bm.impfstatus = 'YES' and (bm.fall_dt - bm.impfdatum_dose2 >= 14) then true
+                when bm.impfstatus = 'YES' or bm.impfstatus = 'NO' then false
+              end) as fully_vaccinated
+            from
+              sequence_identifier si
+              join viollier_test vt on si.ethid = vt.ethid
+              join bag_meldeformular bm on vt.sample_number = bm.sample_number
+            where si.gisaid_id is not null;
             """;
         List<S3CAdditionalMetadataEntry> data = new ArrayList<>();
         try (Connection s3cConn = s3cVineyardPool.getConnection()) {
@@ -48,6 +50,8 @@ public class S3CVineyardService {
                         data.add(new S3CAdditionalMetadataEntry(
                             rs.getString("gisaid_id"),
                             null,
+                            rs.getObject("age", Integer.class),
+                            rs.getString("sex"),
                             rs.getObject("hospitalized", Boolean.class),
                             rs.getObject("died", Boolean.class),
                             rs.getObject("fully_vaccinated", Boolean.class)
@@ -63,8 +67,8 @@ public class S3CVineyardService {
                 delete from y_s3c;
             """;
         String insertSql = """
-                insert into y_s3c (gisaid_epi_isl, sra_accession, hospitalized, died, fully_vaccinated)
-                values (?, ?, ?, ?, ?);
+                insert into y_s3c (gisaid_epi_isl, sra_accession, age, sex, hospitalized, died, fully_vaccinated)
+                values (?, ?, ?, ?, ?, ?, ?);
             """;
         try (Connection lapisConn = databasePool.getConnection()) {
             lapisConn.setAutoCommit(false);
@@ -75,9 +79,11 @@ public class S3CVineyardService {
                 for (S3CAdditionalMetadataEntry d : data) {
                     statement.setString(1, d.getGisaidEpiIsl());
                     statement.setString(2, d.getEnaId());
-                    statement.setObject(3, d.getHospitalized());
-                    statement.setObject(4, d.getDied());
-                    statement.setObject(5, d.getFullyVaccinated());
+                    statement.setObject(3, d.getAge());
+                    statement.setString(4, d.getSex());
+                    statement.setObject(5, d.getHospitalized());
+                    statement.setObject(6, d.getDied());
+                    statement.setObject(7, d.getFullyVaccinated());
                     statement.addBatch();
                 }
                 statement.executeBatch();
