@@ -81,7 +81,13 @@ public class SampleController {
 
     @GetMapping("/contributors")
     public V0Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
-        if (request.getHospitalized() != null || request.getDied() != null || request.getFullyVaccinated() != null) {
+        if (request.getAgeFrom() != null
+            || request.getAgeTo() != null
+            || request.getSex() != null
+            || request.getHospitalized() != null
+            || request.getDied() != null
+            || request.getFullyVaccinated() != null
+        ) {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request);
