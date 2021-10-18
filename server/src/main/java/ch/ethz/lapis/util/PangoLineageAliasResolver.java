@@ -35,7 +35,7 @@ public class PangoLineageAliasResolver {
         // Prefix search    + query is shorter: multiple matches possible -> query is a prefix of the alias' full name
 
         boolean prefixSearch = query.endsWith("*");
-        String queryRoot = query; // The query without a tailing *
+        String queryRoot = query.toUpperCase(); // The query without a tailing * and upper-case
         if (prefixSearch) {
             queryRoot = queryRoot.substring(0, queryRoot.length() - 1);
             if (queryRoot.endsWith(".")) {
