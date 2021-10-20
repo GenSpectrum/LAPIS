@@ -1,4 +1,4 @@
-package ch.ethz.lapis.api.controller.v0;
+package ch.ethz.lapis.api.controller.v1;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 
 @RestController
-@RequestMapping("/v0/sample")
+@RequestMapping("/v1/sample")
 public class SampleController {
 
     private final Optional<CacheService> cacheServiceOpt;
@@ -57,7 +57,7 @@ public class SampleController {
         return useCacheOrCompute(cacheKey, () -> {
             try {
                 List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
-                V0Response<SampleAggregatedResponse> response = new V0Response<>(new SampleAggregatedResponse(
+                V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),
                     aggregatedSamples
                 ), dataVersionService.getVersion());
@@ -70,17 +70,17 @@ public class SampleController {
 
 
     @GetMapping("/details")
-    public V0Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
+    public V1Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request);
-        return new V0Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
+        return new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
     }
 
 
     @GetMapping("/contributors")
-    public V0Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
+    public V1Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -91,7 +91,7 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request);
-        return new V0Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
+        return new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
     }
 
 
@@ -112,7 +112,7 @@ public class SampleController {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.AMINO_ACID);
-                V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse,
+                V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion());
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
@@ -139,7 +139,7 @@ public class SampleController {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.NUCLEOTIDE);
-                V0Response<SampleMutationsResponse> response = new V0Response<>(mutationsResponse,
+                V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion());
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {

@@ -1,7 +1,7 @@
 package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
-import ch.ethz.lapis.api.controller.v0.SampleController;
+import ch.ethz.lapis.api.controller.v1.SampleController;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;

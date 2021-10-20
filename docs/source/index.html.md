@@ -31,9 +31,6 @@ This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.ni
 
 In following, we demostrate the core features enabled by the API. On the left, we present the basic syntax of the API and on the right, we show how to use it for queries. In the section "Use Cases", we provide examples how to use the API to query public SARS-CoV-2 sequencing data to generate statistics, create plots, or download sequences for further analysis. 
 
-<aside class="warning">
-This is a beta version. We will replace it with an official release (version 1) by the end of August 2021. Please send us feedback through <a href="https://github.com/cevo-public/LAPIS/issues">https://github.com/cevo-public/LAPIS/issues</a>.
-</aside>
 
 # Overview
 
@@ -57,12 +54,12 @@ The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints 
 > **Query example:**
 >
 > Get the total number of available sequences:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated' target="_blank">
 >   /sample/aggregated
 > </a>
 
 To query an endpoint, use the web link with prefix
-`https://cov-spectrum.ethz.ch/public/api/v0` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
+`https://cov-spectrum.ethz.ch/public/api/v1` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
 
 ## Response Format
 
@@ -72,7 +69,7 @@ To query an endpoint, use the web link with prefix
 {
   "info":{"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors":[],
-  "payload":[{"count":913515}]
+  "data":[{"count":913515}]
 }
 ```
 
@@ -80,7 +77,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 
 - "info" - data about the API itself
 - "errors" - an array (hopefully empty!) of things that wrong. See section "Errors" (TODO) for further details.
-- "payload" - the actual data
+- "data" - the actual data
 
 
 # Filters
@@ -88,7 +85,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 > **Examples:**
 >
 > Get the number of all samples in Switzerland in 2021:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
 >   /sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31
 > </a>
 
@@ -96,12 +93,12 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 {
   "info":{"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors":[],
-  "payload":[{"count":22701}]
+  "data":[{"count":22701}]
 }
 ```
 
 > Get details about samples from lineage AY.1 in Geneva, Switzerland:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
 >   /sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
 
@@ -109,7 +106,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 {
   "info": {"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors": [],
-  "payload": [
+  "data": [
     {
       "date": "2021-05-26",
       "dateSubmitted": "2021-06-29",
@@ -178,12 +175,12 @@ To determine which values are available for each attribute, see the example in s
 
 
 > Get the total number of samples of the lineage B.1.617.2 without sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2
 > </a>
 
 > Get the total number of samples of the lineage B.1.617.2 including sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2*
 > </a>
 
@@ -198,12 +195,12 @@ An official pango lineage name can only have at most three number components. A 
 ## Filter Mutations
 
 > Get the total number of samples with the synonymous nucleotide mutations 913T and 5986T and the amino acid mutation S:484K:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K" target="_blank">
 >   /sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K
 > </a>
 
 > Get the total number of samples for which we do not know whether the S:501 position is mutated:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?aaMutations=S:501X" target="_blank">
+> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?aaMutations=S:501X" target="_blank">
 >   /sample/aggregated?aaMutations=S:501X
 > </a>
 
@@ -221,7 +218,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 > **Examples:**
 >
 > Get the number of B.1.1.7 samples per country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
 >   /sample/aggregated?fields=country&pangoLineage=B.1.1.7
 > </a>
 
@@ -229,7 +226,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 {
   "info": {"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors": [],
-  "payload": [
+  "data": [
     {"country": "Austria", "count": 82},
     {"country": "Bahrain", "count": 48},
     ...
@@ -238,7 +235,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get the number of samples per Nextstrain clade and country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=nextstrainClade,country' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=nextstrainClade,country' target="_blank">
 >   /sample/aggregated?fields=nextstrainClade,country
 > </a>
 
@@ -246,7 +243,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 {
   "info": {"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors": [],
-  "payload": [
+  "data": [
     {"nextstrainClade": "19A", "country": "Australia", "count": 317},
     {"nextstrainClade": "19A", "country": "Bahrain", "count": 2},
     ...
@@ -255,7 +252,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get all the possible values for attribute "division" in Swtizerland:<br/> 
-> <a href='https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=division&country=Switzerland' target="_blank">
+> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=division&country=Switzerland' target="_blank">
 >   /sample/aggregated?division,country=Switzerland
 > </a>
 
@@ -263,7 +260,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 {
   "info": {"apiVersion":1,"deprecationDate":null,"deprecationInfo":null},
   "errors": [],
-  "payload": [
+  "data": [
     {"division": "Basel-Land", "count": 4658},
     {"division": "Aargau", "count": 2964},
     ...

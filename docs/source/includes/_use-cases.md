@@ -9,7 +9,7 @@ library(jsonlite)
 library(ggplot2)
 
 # Query the API
-response <- fromJSON("https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?fields=region")
+response <- fromJSON("https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=region")
 
 # Check for errors
 errors <- response$errors
@@ -25,7 +25,7 @@ if (!is.null(deprecationDate)) {
 }
 
 # The data is good to be used!
-data <- response$payload
+data <- response$data
 
 # Make a plot
 ggplot(
@@ -64,7 +64,7 @@ library(ggplot2)
 # Query the API
 date_from <- format(Sys.Date() - as.difftime(100, unit = "days"), "%Y-%m-%d")
 query <- paste0(
-  "https://cov-spectrum.ethz.ch/public/api/v0/sample/aggregated?",
+  "https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?",
   "fields=date",
   "&country=Switzerland",
   "&dateFrom=", date_from,
@@ -86,7 +86,7 @@ if (!is.null(deprecationDate)) {
 }
 
 # The data is good to be used!
-data <- response$payload
+data <- response$data
 
 # Make a plot
 ggplot(
