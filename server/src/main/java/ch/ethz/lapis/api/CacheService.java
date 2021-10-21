@@ -9,6 +9,14 @@ import ch.ethz.lapis.util.DeflateSeqCompressor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.args.FlushMode;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.args.FlushMode;
 
 
 @Service
@@ -56,6 +58,8 @@ public class CacheService {
         this.sampleController = sampleController;
         objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         compressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.NONE);
     }
 
@@ -162,7 +166,6 @@ public class CacheService {
     }
 
     public static final class SupportedEndpoints {
-
         public static final String SAMPLE_AGGREGATED = "/v0/sample/aggregated";
         public static final String SAMPLE_AA_MUTATIONS = "/v0/sample/aa-mutations";
         public static final String SAMPLE_NUC_MUTATIONS = "/v0/sample/nuc-mutations";
