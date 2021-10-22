@@ -3,8 +3,8 @@ package ch.ethz.lapis.api;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.controller.v1.SampleController;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
+import ch.ethz.lapis.api.entity.req.MutationRequest;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
-import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +32,8 @@ public class CacheService {
 
     private static final Map<String, Class<?>> endpointToClass = new HashMap<>() {{
         put(SupportedEndpoints.SAMPLE_AGGREGATED, SampleAggregatedRequest.class);
-        put(SupportedEndpoints.SAMPLE_AA_MUTATIONS, SampleDetailRequest.class);
-        put(SupportedEndpoints.SAMPLE_NUC_MUTATIONS, SampleDetailRequest.class);
+        put(SupportedEndpoints.SAMPLE_AA_MUTATIONS, MutationRequest.class);
+        put(SupportedEndpoints.SAMPLE_NUC_MUTATIONS, MutationRequest.class);
     }};
     private static final Map<String, BiConsumer<SampleController, Object>> endpointToPreComputation = new HashMap<>() {{
         put(SupportedEndpoints.SAMPLE_AGGREGATED, (sampleController, obj) -> {
@@ -41,11 +41,11 @@ public class CacheService {
             sampleController.getAggregated(request);
         });
         put(SupportedEndpoints.SAMPLE_AA_MUTATIONS, (sampleController, obj) -> {
-            SampleDetailRequest request = (SampleDetailRequest) obj;
+            MutationRequest request = (MutationRequest) obj;
             sampleController.getAAMutations(request);
         });
         put(SupportedEndpoints.SAMPLE_NUC_MUTATIONS, (sampleController, obj) -> {
-            SampleDetailRequest request = (SampleDetailRequest) obj;
+            MutationRequest request = (MutationRequest) obj;
             sampleController.getNucMutations(request);
         });
     }};

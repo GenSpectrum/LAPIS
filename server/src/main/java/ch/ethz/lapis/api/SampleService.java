@@ -12,41 +12,21 @@ import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.PangoLineageAlias;
-import ch.ethz.lapis.util.PangoLineageQueryToSqlLikesConverter;
-import ch.ethz.lapis.util.ReferenceGenomeData;
-import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Record3;
-import org.jooq.Result;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.TableOnConditionStep;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.lapis.tables.YMainAaSequenceColumnar;
 import org.jooq.lapis.tables.YMainMetadata;
 import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
+
+import java.sql.Statement;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SampleService {
@@ -334,7 +314,8 @@ public class SampleService {
 
     public SampleMutationsResponse getMutations(
         SampleDetailRequest request,
-        SequenceType sequenceType
+        SequenceType sequenceType,
+        float minProportion
     ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
@@ -391,7 +372,7 @@ public class SampleService {
                         .where(conditions)
                         .groupBy(DSL.field("mut.mutation"))
                 )
-                .where(DSL.field("proportion").ge(0.05))
+                .where(DSL.field("proportion").ge(minProportion))
                 .orderBy(DSL.field("proportion").desc());
             Result<Record2<String, Double>> records = statement.fetch();
             List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();

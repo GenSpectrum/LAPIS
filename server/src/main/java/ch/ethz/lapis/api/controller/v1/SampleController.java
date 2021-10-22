@@ -7,6 +7,7 @@ import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.req.MutationRequest;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.res.*;
@@ -99,7 +100,7 @@ public class SampleController {
         value = "/aa-mutations",
         produces = "application/json"
     )
-    public String getAAMutations(SampleDetailRequest request) {
+    public String getAAMutations(MutationRequest request) {
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -111,7 +112,7 @@ public class SampleController {
         return useCacheOrCompute(cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
-                    SequenceType.AMINO_ACID);
+                    SequenceType.AMINO_ACID, request.getMinProportion());
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion());
                 return objectMapper.writeValueAsString(response);
@@ -126,7 +127,7 @@ public class SampleController {
         value = "/nuc-mutations",
         produces = "application/json"
     )
-    public String getNucMutations(SampleDetailRequest request) {
+    public String getNucMutations(MutationRequest request) {
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -138,7 +139,7 @@ public class SampleController {
         return useCacheOrCompute(cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
-                    SequenceType.NUCLEOTIDE);
+                    SequenceType.NUCLEOTIDE, request.getMinProportion());
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion());
                 return objectMapper.writeValueAsString(response);
