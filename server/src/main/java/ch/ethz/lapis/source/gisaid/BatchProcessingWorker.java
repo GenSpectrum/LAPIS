@@ -3,29 +3,17 @@ package ch.ethz.lapis.source.gisaid;
 import ch.ethz.lapis.source.MutationAA;
 import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.source.MutationNuc;
-import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.FastaFileReader;
-import ch.ethz.lapis.util.ReferenceGenomeData;
-import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.io.IOException;
+import org.apache.commons.io.FileUtils;
+
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.sql.*;
+import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 
 
 public class BatchProcessingWorker {
@@ -305,28 +293,10 @@ public class BatchProcessingWorker {
     private Map<String, NextalignResultEntry> runNextalign(
         Batch batch,
         Path originalSeqFastaPath
-    ) throws IOException, InterruptedException {
-        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
+    ) {
         Path outputPath = workDir.resolve("output");
-        String command = nextalignPath.toAbsolutePath() +
-            " --sequences=" + originalSeqFastaPath.toAbsolutePath() +
-            " --reference=" + referenceFasta.toAbsolutePath() +
-            " --genemap=" + geneMapGff.toAbsolutePath() +
-            " --genes=" + String.join(",", genes) +
-            " --output-dir=" + outputPath.toAbsolutePath() +
-            " --output-basename=nextalign" +
-            " --silent" +
-            " --jobs=1";
-
-        Process process = Runtime.getRuntime().exec(command);
-        boolean exited = process.waitFor(20, TimeUnit.MINUTES);
-        if (!exited) {
-            process.destroyForcibly();
-            throw new RuntimeException("Nextalign timed out (after 20 minutes)");
-        }
-        if (process.exitValue() != 0) {
-            throw new RuntimeException("Nextalign exited with code " + process.exitValue());
-        }
+        ExternalProcessHelper.execNextalign(outputPath, nextalignPath, originalSeqFastaPath, referenceFasta,
+            geneMapGff);
 
         // Read the aligned nucleotide sequence
         Map<String, String> nucSeqs = new HashMap<>();
@@ -336,6 +306,7 @@ public class BatchProcessingWorker {
         }
 
         // Read the amino acid sequences
+        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Map<String, List<GeneAASeq>> geneAASeqs = new HashMap<>();
         for (GisaidEntry entry : batch.getEntries()) {
             geneAASeqs.put(entry.getGisaidEpiIsl(), new ArrayList<>());

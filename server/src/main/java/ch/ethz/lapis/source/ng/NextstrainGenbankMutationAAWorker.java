@@ -1,13 +1,9 @@
 package ch.ethz.lapis.source.ng;
 
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.FastaFileReader;
-import ch.ethz.lapis.util.ReferenceGenomeData;
-import ch.ethz.lapis.util.SeqCompressor;
-import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.io.IOException;
+import org.apache.commons.io.FileUtils;
+
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,9 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 
 public class NextstrainGenbankMutationAAWorker {
 
@@ -128,30 +122,13 @@ public class NextstrainGenbankMutationAAWorker {
     private Map<String, List<GeneAASeq>> runNextalign(
         Path seqFastaPath,
         List<FastaEntry> batch
-    ) throws IOException, InterruptedException {
-        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
+    ) {
         Path outputPath = workDir.resolve("output");
-        String command = nextalignPath.toAbsolutePath() +
-            " --sequences=" + seqFastaPath.toAbsolutePath() +
-            " --reference=" + referenceFasta.toAbsolutePath() +
-            " --genemap=" + geneMapGff.toAbsolutePath() +
-            " --genes=" + String.join(",", genes) +
-            " --output-dir=" + outputPath.toAbsolutePath() +
-            " --output-basename=nextalign" +
-            " --silent" +
-            " --jobs=1";
-
-        Process process = Runtime.getRuntime().exec(command);
-        boolean exited = process.waitFor(20, TimeUnit.MINUTES);
-        if (!exited) {
-            process.destroyForcibly();
-            throw new RuntimeException("Nextalign timed out (after 20 minutes)");
-        }
-        if (process.exitValue() != 0) {
-            throw new RuntimeException("Nextalign exited with code " + process.exitValue());
-        }
+        ExternalProcessHelper.execNextalign(outputPath, nextalignPath, seqFastaPath, referenceFasta,
+            geneMapGff);
 
         // Read the output
+        List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Map<String, List<GeneAASeq>> geneAASeqs = new HashMap<>();
         for (FastaEntry fastaEntry : batch) {
             geneAASeqs.put(fastaEntry.getSampleName(), new ArrayList<>());
