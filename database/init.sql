@@ -19,6 +19,13 @@ create table data_version
 );
 
 
+create table pango_version
+(
+  name text primary key,
+  version text not null
+);
+
+
 -- Source: Nextstrain/GenBank
 
 create table y_nextstrain_genbank
@@ -206,6 +213,7 @@ grant select, insert, update, delete, references, truncate
 on
   pangolin_lineage_alias,
   data_version,
+  pango_version,
   y_nextstrain_genbank,
 --   y_gisaid,
   y_s3c,
