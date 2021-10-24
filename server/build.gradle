@@ -13,23 +13,23 @@ repositories {
 }
 
 dependencies {
-    compile 'org.springframework.boot:spring-boot-starter-web'
-    compile 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
-    compile 'org.yaml:snakeyaml:1.28'
-    compile 'org.postgresql:postgresql:42.2.19'
-    compile 'com.mchange:c3p0:0.9.5.5'
-    compile 'org.javatuples:javatuples:1.2'
-    compile 'org.apache.commons:commons-csv:1.8'
-    compile 'commons-io:commons-io:2.8.0'
-    compile 'org.apache.commons:commons-text:1.9'
-    compile 'org.tukaani:xz:1.9'
-    compile 'com.googlecode.json-simple:json-simple:1.1.1'
-    compile 'org.simplejavamail:simple-java-mail:6.5.3'
-    compile 'org.jooq:jooq:3.14.8'
-    compile 'redis.clients:jedis:3.7.0'
+    implementation 'org.yaml:snakeyaml:1.28'
+    implementation 'org.postgresql:postgresql:42.2.19'
+    implementation 'com.mchange:c3p0:0.9.5.5'
+    implementation 'org.javatuples:javatuples:1.2'
+    implementation 'org.apache.commons:commons-csv:1.8'
+    implementation 'commons-io:commons-io:2.8.0'
+    implementation 'org.apache.commons:commons-text:1.9'
+    implementation 'org.tukaani:xz:1.9'
+    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+    implementation 'org.simplejavamail:simple-java-mail:6.5.3'
+    implementation 'org.jooq:jooq:3.14.8'
+    implementation 'redis.clients:jedis:3.7.0'
 
-    testCompile 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 test {
@@ -41,6 +41,6 @@ jar {
         attributes "Main-Class": "ch.ethz.lapis.Main"
     }
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     }
 }

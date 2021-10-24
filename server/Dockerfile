@@ -1,6 +1,6 @@
 ## Build app ##
 
-FROM openjdk:15 AS builder
+FROM openjdk:16 AS builder
 WORKDIR /build/
 
 COPY . .
@@ -10,7 +10,7 @@ RUN ./gradlew clean build -x test
 
 ## Run server ##
 
-FROM openjdk:15 AS server
+FROM openjdk:16 AS server
 WORKDIR /app
 
 # Download nextalign
