@@ -1,0 +1,41 @@
+## Build app ##
+
+FROM openjdk:16 AS builder
+WORKDIR /build/
+
+COPY . .
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build -x test
+
+
+## Run server ##
+
+FROM openjdk:16-buster AS server
+WORKDIR /app
+
+# Install Conda
+# Based on https://towardsdatascience.com/conda-pip-and-docker-ftw-d64fe638dc45
+ENV CONDA_DIR /root/miniconda3
+SHELL [ "/bin/bash", "--login", "-c" ]
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh
+RUN bash /miniconda.sh -b -p
+RUN rm /miniconda.sh
+ENV PATH=$CONDA_DIR/bin:$PATH
+RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
+RUN conda init bash
+
+# Install pangolin
+RUN git clone https://github.com/cov-lineages/pangolin.git /pangolin
+RUN conda env create -f /pangolin/environment.yml
+SHELL ["conda", "run", "-n", "pangolin", "/bin/bash", "-c"]
+RUN cd /pangolin && python setup.py install
+RUN pangolin --update
+
+# Download nextalign
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64" -o "nextalign"
+RUN chmod +x nextalign
+
+# Download geo location corrections list from Nextstrain
+RUN curl https://raw.githubusercontent.com/nextstrain/ncov-ingest/master/source-data/gisaid_geoLocationRules.tsv -o gisaid_geoLocationRules.tsv
+
+COPY --from=builder /build/build/libs/lapis-1.0-SNAPSHOT.jar /app/lapis.jar

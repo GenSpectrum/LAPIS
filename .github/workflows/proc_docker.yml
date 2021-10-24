@@ -1,4 +1,4 @@
-name: Docker (server)
+name: Docker (processing)
 
 on:
   push:
@@ -7,10 +7,10 @@ on:
     - cron: '0 7 */2 * *'
 
 env:
-  IMAGE_NAME: ghcr.io/cevo-public/lapis-server
+  IMAGE_NAME: ghcr.io/cevo-public/lapis-proc
 
 jobs:
-  docker-api:
+  docker-proc:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "BRANCH=$(eval 'echo $GITHUB_REF | sed s/refs\\/heads\\/// | sed s/\\//__/ ')" >> $GITHUB_ENV
       - name: Build image
-        run: docker build -t new_image -f Dockerfile-api .
+        run: docker build -t new_image -f Dockerfile-proc .
       - name: Login to Github Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Add tags and push
