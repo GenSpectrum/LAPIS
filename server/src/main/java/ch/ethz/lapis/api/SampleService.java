@@ -349,6 +349,7 @@ public class SampleService {
                         .where(conditions)
                 )
             ).as("proportion");
+            var countField = DSL.count().cast(Integer.class).as("count");
             String mutationColumnName = switch (sequenceType) {
                 case AMINO_ACID -> "aa_mutations";
                 case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
@@ -356,13 +357,15 @@ public class SampleService {
             var statement = ctx
                 .select(
                     DSL.field("mutation").cast(String.class),
-                    DSL.field("proportion").cast(Double.class)
+                    DSL.field("proportion").cast(Double.class),
+                    DSL.field("count").cast(Integer.class)
                 )
                 .from(
                     ctx
                         .select(
                             DSL.field("mut.mutation"),
-                            proportionField
+                            proportionField,
+                            countField
                         )
                         .from(
                             baseTbl.crossApply(
@@ -374,7 +377,7 @@ public class SampleService {
                 )
                 .where(DSL.field("proportion").ge(minProportion))
                 .orderBy(DSL.field("proportion").desc());
-            Result<Record2<String, Double>> records = statement.fetch();
+            Result<Record3<String, Double, Integer>> records = statement.fetch();
             List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
             for (var r : records) {
                 // Because of the way we are concatenating the nuc_substitutions and nuc_deletions column, it is
@@ -384,8 +387,8 @@ public class SampleService {
                 }
                 mutationEntries.add(new SampleMutationsResponse.MutationEntry(
                     r.value1(),
-                    r.value2()
-                ));
+                    r.value2(),
+                    r.value3()));
             }
             return new SampleMutationsResponse(mutationEntries);
         }

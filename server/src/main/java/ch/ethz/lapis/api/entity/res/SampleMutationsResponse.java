@@ -16,10 +16,12 @@ public class SampleMutationsResponse extends ArrayList<SampleMutationsResponse.M
 
         private final String mutation;
         private final double proportion;
+        private final int count;
 
-        public MutationEntry(String mutation, double proportion) {
+        public MutationEntry(String mutation, double proportion, int count) {
             this.mutation = mutation;
             this.proportion = proportion;
+            this.count = count;
         }
 
         public String getMutation() {
@@ -28,6 +30,10 @@ public class SampleMutationsResponse extends ArrayList<SampleMutationsResponse.M
 
         public double getProportion() {
             return proportion;
+        }
+
+        public int getCount() {
+            return count;
         }
     }
 }
