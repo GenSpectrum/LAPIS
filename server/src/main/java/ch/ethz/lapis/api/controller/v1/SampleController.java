@@ -15,10 +15,13 @@ import ch.ethz.lapis.api.exception.ForbiddenException;
 import ch.ethz.lapis.api.exception.GisaidLimitationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +56,9 @@ public class SampleController {
         value = "/aggregated",
         produces = "application/json"
     )
-    public String getAggregated(SampleAggregatedRequest request) {
+    public ResponseEntity<String> getAggregated(SampleAggregatedRequest request) {
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
-        return useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(cacheKey, () -> {
             try {
                 List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
@@ -67,6 +70,7 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        return respondWithEtag(body, cacheKey);
     }
 
 
@@ -100,7 +104,7 @@ public class SampleController {
         value = "/aa-mutations",
         produces = "application/json"
     )
-    public String getAAMutations(MutationRequest request) {
+    public ResponseEntity<String> getAAMutations(MutationRequest request) {
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -109,7 +113,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AA_MUTATIONS, request);
-        return useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.AMINO_ACID, request.getMinProportion());
@@ -120,6 +124,7 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        return respondWithEtag(body, cacheKey);
     }
 
 
@@ -127,7 +132,7 @@ public class SampleController {
         value = "/nuc-mutations",
         produces = "application/json"
     )
-    public String getNucMutations(MutationRequest request) {
+    public ResponseEntity<String> getNucMutations(MutationRequest request) {
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -136,7 +141,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_NUC_MUTATIONS, request);
-        return useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.NUCLEOTIDE, request.getMinProportion());
@@ -147,6 +152,7 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        return respondWithEtag(body, cacheKey);
     }
 
 
@@ -188,6 +194,19 @@ public class SampleController {
         System.out.println("Cache miss");
         cacheService.setCompressedString(cacheKey, response);
         return response;
+    }
+
+    private <T> ResponseEntity<T> respondWithEtag(T body, ApiCacheKey cacheKey) {
+        try {
+            String cacheKeyString = objectMapper.writeValueAsString(cacheKey);
+            String cacheKeyHash = DigestUtils.md5DigestAsHex(cacheKeyString.getBytes(StandardCharsets.UTF_8));
+            String etag = cacheKeyHash + "-" + dataVersionService.getVersion();
+            return ResponseEntity.ok()
+                .eTag(etag)
+                .body(body);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
