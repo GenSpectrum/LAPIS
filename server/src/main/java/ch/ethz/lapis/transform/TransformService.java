@@ -6,22 +6,14 @@ import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.javatuples.Pair;
+
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import org.javatuples.Pair;
 
 
 public class TransformService {
@@ -261,7 +253,7 @@ public class TransformService {
         //     much more!
         //     (The SARS-CoV-2 genomes has 29903 bases.)
         //   - Uncompressing millions of sequences needs a lot of CPU power.
-        int columnsBatchSize = 3000; // This is the core value to balance the needed RAM, CPU and wall-clock time.
+        int columnsBatchSize = 2500; // This is the core value to balance the needed RAM, CPU and wall-clock time.
         int numberIterations = (int) Math.ceil(29903.0 / columnsBatchSize);
         int sequencesBatchSize = 20000;
         int numberTasksPerIteration = (int) Math.ceil(compressedSequences.size() * 1.0 / sequencesBatchSize);
@@ -405,7 +397,7 @@ public class TransformService {
                             break;
                         }
                     }
-                    int batchSize = 1500;
+                    int batchSize = 1000;
                     double iterations = Math.ceil(aaSeqLength * 1.0 / batchSize);
                     conn.setAutoCommit(false);
                     for (int j = 0; j < iterations; j++) {
