@@ -276,6 +276,7 @@ public class SampleService {
                 add(tbl.GENBANK_ACCESSION);
                 add(tbl.SRA_ACCESSION);
                 add(tbl.GISAID_EPI_ISL);
+                add(tbl.STRAIN);
                 add(tbl.SUBMITTING_LAB);
                 add(tbl.ORIGINATING_LAB);
                 add(tbl.AUTHORS);
@@ -302,6 +303,7 @@ public class SampleService {
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
                     .setSraAccession(r.get(tbl.SRA_ACCESSION))
                     .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
+                    .setStrain(r.get(tbl.STRAIN))
                     .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
                     .setOriginatingLab(r.get(tbl.ORIGINATING_LAB))
                     .setAuthors(r.get(tbl.AUTHORS));

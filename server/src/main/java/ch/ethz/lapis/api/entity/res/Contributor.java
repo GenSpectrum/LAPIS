@@ -5,6 +5,7 @@ public class Contributor {
     private String genbankAccession;
     private String sraAccession;
     private String gisaidEpiIsl;
+    private String strain;
     private String submittingLab;
     private String originatingLab;
     private String authors;
@@ -33,6 +34,15 @@ public class Contributor {
 
     public Contributor setGisaidEpiIsl(String gisaidEpiIsl) {
         this.gisaidEpiIsl = gisaidEpiIsl;
+        return this;
+    }
+
+    public String getStrain() {
+        return strain;
+    }
+
+    public Contributor setStrain(String strain) {
+        this.strain = strain;
         return this;
     }
 
