@@ -314,6 +314,48 @@ public class SampleService {
     }
 
 
+    public List<String> getStrainNames(SampleDetailRequest request) throws SQLException {
+        // Filter by mutations (if requested)
+        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        if (ids != null && ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Filter further by the other metadata and prepare the response
+        List<String> strainNames = new ArrayList<>();
+        try (Connection conn = getDatabaseConnection()) {
+            DSLContext ctx = JooqHelper.getDSLCtx(conn);
+            YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
+
+            List<Field<?>> selectFields = new ArrayList<>() {{
+                add(tbl.STRAIN);
+            }};
+            List<Condition> conditions = getConditions(request, tbl);
+            conditions.add(tbl.STRAIN.isNotNull());
+
+            Result<Record> records;
+            if (ids != null) {
+                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+                var statement = ctx
+                    .select(selectFields)
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
+                    .where(conditions);
+                records = statement.fetch();
+            } else {
+                var statement = ctx
+                    .select(selectFields)
+                    .from(tbl)
+                    .where(conditions);
+                records = statement.fetch();
+            }
+            for (var r : records) {
+                strainNames.add(r.get(tbl.STRAIN));
+            }
+        }
+        return strainNames;
+    }
+
+
     public SampleMutationsResponse getMutations(
         SampleDetailRequest request,
         SequenceType sequenceType,

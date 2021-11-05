@@ -101,6 +101,26 @@ public class SampleController {
 
 
     @GetMapping(
+        value = "/strain-names",
+        produces = "text/plain"
+    )
+    public String getStrainNames(SampleDetailRequest request) throws SQLException {
+        if (openness == OpennessLevel.GISAID && (
+            request.getAgeFrom() != null
+            || request.getAgeTo() != null
+            || request.getSex() != null
+            || request.getHospitalized() != null
+            || request.getDied() != null
+            || request.getFullyVaccinated() != null
+        )) {
+            throw new ForbiddenException();
+        }
+        List<String> strainNames = sampleService.getStrainNames(request);
+        return String.join("\n", strainNames);
+    }
+
+
+    @GetMapping(
         value = "/aa-mutations",
         produces = "application/json"
     )
