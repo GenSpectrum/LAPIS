@@ -121,6 +121,26 @@ public class SampleController {
 
 
     @GetMapping(
+        value = "/gisaid-epi-isl",
+        produces = "text/plain"
+    )
+    public String getGisaidEpiIsls(SampleDetailRequest request) throws SQLException {
+        if (openness == OpennessLevel.GISAID && (
+            request.getAgeFrom() != null
+                || request.getAgeTo() != null
+                || request.getSex() != null
+                || request.getHospitalized() != null
+                || request.getDied() != null
+                || request.getFullyVaccinated() != null
+        )) {
+            throw new ForbiddenException();
+        }
+        List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request);
+        return String.join("\n", gisaidEpiIsls);
+    }
+
+
+    @GetMapping(
         value = "/aa-mutations",
         produces = "application/json"
     )
