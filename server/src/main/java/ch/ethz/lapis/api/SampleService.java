@@ -903,4 +903,17 @@ public class SampleService {
             }
         }
     }
+
+
+    public String getPangoVersions() throws SQLException {
+        String sql = "select version from y_pango_version where name = 'all';";
+        try (Connection conn = getDatabaseConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    rs.next();
+                    return rs.getString("version");
+                }
+            }
+        }
+    }
 }
