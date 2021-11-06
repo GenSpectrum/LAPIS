@@ -8,13 +8,14 @@ import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication
@@ -56,6 +57,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
                 add(UpdateSteps.transformNG);
                 add(UpdateSteps.transformGisaid);
                 add(UpdateSteps.mergeFromS3C);
+                add(UpdateSteps.computePangoLineages);
                 add(UpdateSteps.switchInStaging);
             }};
             for (String updateStep : updateSteps) {
@@ -73,13 +75,20 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
                     ).updateData();
                     case UpdateSteps.loadS3C -> new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
-                    case UpdateSteps.transformNG -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                    case UpdateSteps.transformNG -> new TransformService(dbPool, config.getMaxNumberWorkers(),
+                        config.getWorkdir())
                         .mergeAndTransform(LapisConfig.Source.NG);
-                    case UpdateSteps.transformGisaid -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                    case UpdateSteps.transformGisaid -> new TransformService(dbPool, config.getMaxNumberWorkers(),
+                        config.getWorkdir())
                         .mergeAndTransform(LapisConfig.Source.GISAID);
-                    case UpdateSteps.mergeFromS3C -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                    case UpdateSteps.mergeFromS3C -> new TransformService(dbPool, config.getMaxNumberWorkers(),
+                        config.getWorkdir())
                         .mergeAdditionalMetadataFromS3c();
-                    case UpdateSteps.switchInStaging -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                    case UpdateSteps.computePangoLineages -> new TransformService(dbPool, config.getMaxNumberWorkers(),
+                        config.getWorkdir())
+                        .computePangoLineages();
+                    case UpdateSteps.switchInStaging -> new TransformService(dbPool, config.getMaxNumberWorkers(),
+                        config.getWorkdir())
                         .switchInStagingTables();
                 }
             }

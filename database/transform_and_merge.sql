@@ -8,6 +8,7 @@ create table y_main_sequence_staging (like y_main_sequence including all);
 create table y_main_sequence_columnar_staging (like y_main_sequence_columnar including all);
 create table y_main_aa_sequence_staging (like y_main_aa_sequence including all);
 create table y_main_aa_sequence_columnar_staging (like y_main_aa_sequence_columnar including all);
+create table y_pango_version_staging (like y_pango_version including all);
 
 grant select, insert, update, delete, references, truncate
 on
@@ -15,7 +16,8 @@ on
   y_main_sequence_staging,
   y_main_sequence_columnar_staging,
   y_main_aa_sequence_staging,
-  y_main_aa_sequence_columnar_staging
+  y_main_aa_sequence_columnar_staging,
+  y_pango_version_staging
 to y_user;
 
 -- Switch out the tables
@@ -26,22 +28,25 @@ begin
   alter table y_main_sequence_columnar rename to y_main_sequence_columnar_old;
   alter table y_main_aa_sequence rename to y_main_aa_sequence_old;
   alter table y_main_aa_sequence_columnar rename to y_main_aa_sequence_columnar_old;
+  alter table y_pango_version rename to y_pango_version_old;
 
   alter table y_main_metadata_staging rename to y_main_metadata;
   alter table y_main_sequence_staging rename to y_main_sequence;
   alter table y_main_sequence_columnar_staging rename to y_main_sequence_columnar;
   alter table y_main_aa_sequence_staging rename to y_main_aa_sequence;
   alter table y_main_aa_sequence_columnar_staging rename to y_main_aa_sequence_columnar;
+  alter table y_pango_version_staging rename to y_pango_version;
 
   truncate y_main_metadata_old, y_main_sequence_old,
     y_main_sequence_columnar_old, y_main_aa_sequence_old,
-    y_main_aa_sequence_columnar_old;
+    y_main_aa_sequence_columnar_old, y_pango_version_old;
 
   alter table y_main_metadata_old rename to y_main_metadata_staging;
   alter table y_main_sequence_old rename to y_main_sequence_staging;
   alter table y_main_sequence_columnar_old rename to y_main_sequence_columnar_staging;
   alter table y_main_aa_sequence_old rename to y_main_aa_sequence_staging;
   alter table y_main_aa_sequence_columnar_old rename to y_main_aa_sequence_columnar_staging;
+  alter table y_pango_version_old rename to y_pango_version_staging;
 end;
 $$ language plpgsql;
 revoke all on function y_switch_in_staging_tables() from public;

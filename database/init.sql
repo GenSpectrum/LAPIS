@@ -19,7 +19,7 @@ create table data_version
 );
 
 
-create table pango_version
+create table y_pango_version
 (
   name text primary key,
   version text not null
@@ -141,6 +141,7 @@ create table y_main_metadata
   fully_vaccinated boolean,
   sampling_strategy text,
   pango_lineage text,
+  pango_lineage_usher text,
   nextstrain_clade text,
   gisaid_clade text,
   originating_lab text,
@@ -168,6 +169,7 @@ create index on y_main_metadata (died);
 create index on y_main_metadata (fully_vaccinated);
 create index on y_main_metadata (sampling_strategy);
 create index on y_main_metadata (pango_lineage);
+create index on y_main_metadata (pango_lineage_usher);
 create index on y_main_metadata (nextstrain_clade);
 create index on y_main_metadata (gisaid_clade);
 create index on y_main_metadata (originating_lab);
@@ -213,7 +215,7 @@ grant select, insert, update, delete, references, truncate
 on
   pangolin_lineage_alias,
   data_version,
-  pango_version,
+  y_pango_version,
   y_nextstrain_genbank,
 --   y_gisaid,
   y_s3c,

@@ -1,18 +1,27 @@
 package ch.ethz.lapis.transform;
 
 import ch.ethz.lapis.LapisConfig;
+import ch.ethz.lapis.core.DatabaseReaderQueueBuilder;
+import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
+import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.io.FileUtils;
 import org.javatuples.Pair;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -20,14 +29,16 @@ public class TransformService {
 
     private final ComboPooledDataSource databasePool;
     private final int maxNumberWorkers;
+    private final Path workdir;
     private final SeqCompressor alignedSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
     private final SeqCompressor nucMutationColumnarCompressor = new DeflateSeqCompressor(
         DeflateSeqCompressor.DICT.ATCGNDEL);
     private final SeqCompressor aaColumnarCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
 
-    public TransformService(ComboPooledDataSource databasePool, int maxNumberWorkers) {
+    public TransformService(ComboPooledDataSource databasePool, int maxNumberWorkers, String workdir) {
         this.databasePool = databasePool;
         this.maxNumberWorkers = maxNumberWorkers;
+        this.workdir = Path.of(workdir);
     }
 
 
@@ -484,6 +495,157 @@ public class TransformService {
 
 
     /**
+     * This function (re-)computes the pango lineage for all sequences
+     */
+    public void computePangoLineages() throws SQLException, IOException, InterruptedException {
+        // Update pangolin
+        PangoLineageComputer.updatePangolin();
+
+        // Preparations
+        int batchSize = 2000;
+        Path pangolinWorkdir = workdir.resolve("pangolin");
+        Files.createDirectories(pangolinWorkdir);
+
+        // Create a queue with the sequences
+        ExhaustibleBlockingQueue<List<Sequence>> batchQueue = new ExhaustibleLinkedBlockingQueue<>(
+            Math.max(8, maxNumberWorkers / 2));
+
+        // Start workers that take from the queue and do the computation
+        final AtomicBoolean emergencyBrake = new AtomicBoolean(false);
+        ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
+        for (int i = 0; i < maxNumberWorkers; i++) {
+            Path workerWorkdir = pangolinWorkdir.resolve("worker-" + i);
+            Files.createDirectories(workerWorkdir);
+            final int workerId = i;
+            executor.submit(() -> {
+                try {
+                    while (!batchQueue.isExhausted() || !batchQueue.isEmpty()) {
+                        List<Sequence> sequences = batchQueue.poll(5, TimeUnit.SECONDS);
+                        if (sequences == null) {
+                            continue;
+                        }
+                        // Compute
+                        System.out.println("[" + workerId + "] Start computing lineages of " + sequences.size() +
+                            " sequences");
+                        Path fastaPath = workerWorkdir.resolve("sequences.fasta");
+                        Files.writeString(fastaPath, formatSeqAsFasta(sequences));
+                        List<PangoLineageEntry> lineages =
+                            PangoLineageComputer.computePangoLineage(workerWorkdir, fastaPath);
+                        System.out.println("[" + workerId + "] Start writing " + lineages.size() +
+                            " lineages to database");
+
+                        // Write to database
+                        String sql = """
+                            update y_main_metadata_staging
+                            set
+                              pango_lineage = ?,
+                              pango_lineage_usher = ?
+                            where id = ?::integer;
+                        """;
+                        try (Connection conn = databasePool.getConnection()) {
+                            conn.setAutoCommit(false);
+                            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                                for (PangoLineageEntry lineage : lineages) {
+                                    statement.setString(1, lineage.getPangoLineage());
+                                    statement.setString(2, lineage.getPangoLineageUsher());
+                                    statement.setString(3, lineage.getSequenceName());
+                                    statement.addBatch();
+                                }
+                                Utils.executeClearCommitBatch(conn, statement);
+                                conn.setAutoCommit(true);
+                            }
+                        }
+
+                        // Clean up the work directory
+                        System.out.println("[" + workerId + "] Clean up");
+                        try (DirectoryStream<Path> directory = Files.newDirectoryStream(workerWorkdir)) {
+                            for (Path path : directory) {
+                                if (Files.isDirectory(path)) {
+                                    FileUtils.deleteDirectory(path.toFile());
+                                } else {
+                                    Files.delete(path);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.err.println("Pulling the emergency break!");
+                    emergencyBrake.set(true);
+                }
+            });
+        }
+
+        // Fill the queue
+        String fetchSql = """
+            select id::text, seq_original_compressed
+            from y_main_sequence_staging;
+        """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
+                ExhaustibleBlockingQueue<Sequence> sequenceQueue = new DatabaseReaderQueueBuilder<>(
+                    statement,
+                    (rs) -> {
+                        try {
+                            String name = rs.getString("id");
+                            byte[] seqCompressed = rs.getBytes("seq_original_compressed");
+                            String seq = alignedSeqCompressor.decompress(seqCompressed);
+                            return new Sequence().setName(name).setSeq(seq);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    500,
+                    500
+                ).build();
+                List<Sequence> batch = new ArrayList<>();
+                while (!emergencyBrake.get() && (!sequenceQueue.isExhausted() || !sequenceQueue.isEmpty())) {
+                    Sequence sequence = sequenceQueue.poll(5, TimeUnit.SECONDS);
+                    if (sequence == null) {
+                        continue;
+                    }
+                    batch.add(sequence);
+                    if (batch.size() >= batchSize) {
+                        batchQueue.put(batch);
+                        batch = new ArrayList<>();
+                    }
+                }
+                batchQueue.put(batch);
+                batch = new ArrayList<>();
+                batchQueue.setExhausted(true);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (emergencyBrake.get()) {
+            System.err.println("Emergency exit!");
+            executor.shutdown();
+            boolean terminated = executor.awaitTermination(1, TimeUnit.MINUTES);
+            if (!terminated) {
+                executor.shutdownNow();
+            }
+            throw new RuntimeException();
+        } else {
+            // Wait until everything has finished
+            executor.shutdown();
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+
+            // Write version to database
+            String allVersions = PangoLineageComputer.getPangoAllVersions(pangolinWorkdir);
+            String sql = "insert into y_pango_version_staging (name, version) values (?, ?);";
+            try (Connection conn = databasePool.getConnection()) {
+                try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                    statement.setString(1, "all");
+                    statement.setString(2, allVersions);
+                    statement.execute();
+                }
+            }
+        }
+    }
+
+
+    /**
      * Switch the _staging tables with the active tables and update value in data_version
      */
     public void switchInStagingTables() throws SQLException {
@@ -506,5 +668,18 @@ public class TransformService {
             conn.commit();
             conn.setAutoCommit(true);
         }
+    }
+
+    private String formatSeqAsFasta(List<Sequence> sequences) {
+        StringBuilder fasta = new StringBuilder();
+        for (Sequence sequence : sequences) {
+            fasta
+                .append(">")
+                .append(sequence.getName())
+                .append("\n")
+                .append(sequence.getSeq())
+                .append("\n\n");
+        }
+        return fasta.toString();
     }
 }

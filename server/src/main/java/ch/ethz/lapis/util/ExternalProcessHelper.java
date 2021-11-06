@@ -42,4 +42,28 @@ public class ExternalProcessHelper {
             " --jobs=1";
         return ExternalProcessHelper.exec(command, 20);
     }
+
+    public static Process executePangolin(Path outputPath, Path seqFastaPath) {
+        String command = "conda run --no-capture-output -n pangolin pangolin -o " + outputPath.toAbsolutePath() +
+            " " + seqFastaPath.toAbsolutePath();
+        return ExternalProcessHelper.exec(command, 20);
+    }
+
+    public static Process executePangolinUsher(Path outputPath, Path seqFastaPath) {
+        String command = "conda run --no-capture-output -n pangolin pangolin --usher " +
+            "--outfile lineage_report-usher.csv -o " + outputPath.toAbsolutePath() + " " +
+            seqFastaPath.toAbsolutePath();
+        return ExternalProcessHelper.exec(command, 20);
+    }
+
+    public static Process executePangolinVersion(Path outputPath) {
+        String command = "conda run --no-capture-output -n pangolin pangolin --all-versions > " +
+            outputPath.toAbsolutePath();
+        return ExternalProcessHelper.exec(command, 20);
+    }
+
+    public static Process executePangolinUpdate() {
+        String command = "conda run --no-capture-output -n pangolin pangolin --update";
+        return ExternalProcessHelper.exec(command, 20);
+    }
 }
