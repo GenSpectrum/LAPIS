@@ -15,10 +15,10 @@ WORKDIR /app
 
 # Install Conda
 # Based on https://towardsdatascience.com/conda-pip-and-docker-ftw-d64fe638dc45
-ENV CONDA_DIR /root/miniconda3
+ENV CONDA_DIR /app/miniconda3
 SHELL [ "/bin/bash", "--login", "-c" ]
 RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh
-RUN bash /miniconda.sh -b -p
+RUN bash /miniconda.sh -b -p $CONDA_DIR
 RUN rm /miniconda.sh
 ENV PATH=$CONDA_DIR/bin:$PATH
 RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
