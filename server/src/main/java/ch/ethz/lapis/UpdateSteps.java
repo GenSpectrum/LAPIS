@@ -10,6 +10,7 @@ public class UpdateSteps {
     public static final String transformGisaid = "transform-gisaid";
     public static final String mergeFromS3C = "merge-from-s3c";
     public static final String mergeFromPangolinAssignment = "merge-form-pangolin-assignment";
+    public static final String finalTransforms = "final-transforms";
     public static final String switchInStaging = "switch-in-staging";
 
 }

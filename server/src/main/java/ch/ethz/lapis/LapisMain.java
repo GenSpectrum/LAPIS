@@ -60,6 +60,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
                 add(UpdateSteps.transformGisaid);
                 add(UpdateSteps.mergeFromS3C);
                 add(UpdateSteps.mergeFromPangolinAssignment);
+                add(UpdateSteps.finalTransforms);
                 add(UpdateSteps.switchInStaging);
             }};
             for (String updateStep : updateSteps) {
@@ -87,6 +88,8 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         .mergeAdditionalMetadataFromS3c();
                     case UpdateSteps.mergeFromPangolinAssignment ->
                         new TransformService(dbPool, config.getMaxNumberWorkers()).mergeFromPangolinAssignment();
+                    case UpdateSteps.finalTransforms ->
+                        new TransformService(dbPool, config.getMaxNumberWorkers()).finalTransforms();
                     case UpdateSteps.switchInStaging -> new TransformService(dbPool, config.getMaxNumberWorkers())
                         .switchInStagingTables();
                 }
