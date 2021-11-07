@@ -483,6 +483,23 @@ public class TransformService {
     }
 
 
+    public void mergeFromPangolinAssignment() throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set
+              pango_lineage = a.pango_lineage
+            from y_pangolin_assignment a
+            where
+              m.gisaid_epi_isl = a.gisaid_epi_isl;
+        """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql);
+            }
+        }
+    }
+
+
     /**
      * Switch the _staging tables with the active tables and update value in data_version
      */

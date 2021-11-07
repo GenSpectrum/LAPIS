@@ -106,6 +106,14 @@ create table y_s3c (
 );
 
 
+-- Source: cov-lineages GitHub pangolin-assignments
+-- https://github.com/cov-lineages/pangolin-assignment
+
+create table y_pangolin_assignment (
+  gisaid_epi_isl text primary key,
+  pango_lineage text
+);
+
 -- Transformed and merged
 
 create table y_main_metadata
@@ -209,6 +217,7 @@ on
   y_nextstrain_genbank,
 --   y_gisaid,
   y_s3c,
+  y_pangolin_assignment,
   y_main_metadata,
   y_main_sequence,
   y_main_sequence_columnar,
