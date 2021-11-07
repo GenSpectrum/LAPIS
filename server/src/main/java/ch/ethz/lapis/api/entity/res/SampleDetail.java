@@ -8,6 +8,8 @@ public class SampleDetail extends SampleMetadata<SampleDetail> {
 
     private String gisaidEpiIsl;
 
+    private String strain;
+
     public String getGenbankAccession() {
         return genbankAccession;
     }
@@ -32,6 +34,15 @@ public class SampleDetail extends SampleMetadata<SampleDetail> {
 
     public SampleDetail setGisaidEpiIsl(String gisaidEpiIsl) {
         this.gisaidEpiIsl = gisaidEpiIsl;
+        return this;
+    }
+
+    public String getStrain() {
+        return strain;
+    }
+
+    public SampleDetail setStrain(String strain) {
+        this.strain = strain;
         return this;
     }
 }

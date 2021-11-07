@@ -186,6 +186,7 @@ public class SampleService {
                 add(tbl.GENBANK_ACCESSION);
                 add(tbl.SRA_ACCESSION);
                 add(tbl.GISAID_EPI_ISL);
+                add(tbl.STRAIN);
                 add(tbl.DATE);
                 add(tbl.DATE_SUBMITTED);
                 add(tbl.REGION);
@@ -207,7 +208,6 @@ public class SampleService {
                 add(tbl.GISAID_CLADE);
                 add(tbl.SUBMITTING_LAB);
                 add(tbl.ORIGINATING_LAB);
-                add(tbl.AUTHORS);
             }};
             List<Condition> conditions = getConditions(request, tbl);
 
@@ -231,6 +231,7 @@ public class SampleService {
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
                     .setSraAccession(r.get(tbl.SRA_ACCESSION))
                     .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
+                    .setStrain(r.get(tbl.STRAIN))
                     .setDate(r.get(tbl.DATE))
                     .setDateSubmitted(r.get(tbl.DATE_SUBMITTED))
                     .setRegion(r.get(tbl.REGION))
