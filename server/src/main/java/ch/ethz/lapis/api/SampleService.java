@@ -5,6 +5,7 @@ import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.NucMutation;
 import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
@@ -169,7 +170,10 @@ public class SampleService {
     }
 
 
-    public List<SampleDetail> getDetailedSamples(SampleDetailRequest request) throws SQLException {
+    public List<SampleDetail> getDetailedSamples(
+        SampleDetailRequest request,
+        OrderAndLimitConfig orderAndLimit
+    ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
@@ -212,20 +216,21 @@ public class SampleService {
             List<Condition> conditions = getConditions(request, tbl);
 
             Result<Record> records;
+            SelectJoinStep<Record> statement;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
             } else {
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(tbl)
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(tbl);
             }
+            SelectConnectByStep<Record> statement2 = statement
+                .where(conditions);
+            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            records = statement3.fetch();
             for (var r : records) {
                 SampleDetail sample = new SampleDetail()
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
@@ -260,7 +265,10 @@ public class SampleService {
     }
 
 
-    public List<Contributor> getContributors(SampleDetailRequest request) throws SQLException {
+    public List<Contributor> getContributors(
+        SampleDetailRequest request,
+        OrderAndLimitConfig orderAndLimit
+    ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
@@ -285,20 +293,21 @@ public class SampleService {
             List<Condition> conditions = getConditions(request, tbl);
 
             Result<Record> records;
+            SelectJoinStep<Record> statement;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
             } else {
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(tbl)
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(tbl);
             }
+            SelectConnectByStep<Record> statement2 = statement
+                .where(conditions);
+            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            records = statement3.fetch();
             for (var r : records) {
                 Contributor contributor = new Contributor()
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
@@ -315,7 +324,10 @@ public class SampleService {
     }
 
 
-    public List<String> getStrainNames(SampleDetailRequest request) throws SQLException {
+    public List<String> getStrainNames(
+        SampleDetailRequest request,
+        OrderAndLimitConfig orderAndLimit
+    ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
@@ -335,20 +347,21 @@ public class SampleService {
             conditions.add(tbl.STRAIN.isNotNull());
 
             Result<Record> records;
+            SelectJoinStep<Record> statement;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
             } else {
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(tbl)
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(tbl);
             }
+            SelectConnectByStep<Record> statement2 = statement
+                .where(conditions);
+            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            records = statement3.fetch();
             for (var r : records) {
                 strainNames.add(r.get(tbl.STRAIN));
             }
@@ -357,7 +370,10 @@ public class SampleService {
     }
 
 
-    public List<String> getGisaidEpiIsls(SampleDetailRequest request) throws SQLException {
+    public List<String> getGisaidEpiIsls(
+        SampleDetailRequest request,
+        OrderAndLimitConfig orderAndLimit
+    ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
@@ -377,20 +393,21 @@ public class SampleService {
             conditions.add(tbl.GISAID_EPI_ISL.isNotNull());
 
             Result<Record> records;
+            SelectJoinStep<Record> statement;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
             } else {
-                var statement = ctx
+                statement = ctx
                     .select(selectFields)
-                    .from(tbl)
-                    .where(conditions);
-                records = statement.fetch();
+                    .from(tbl);
             }
+            SelectConnectByStep<Record> statement2 = statement
+                .where(conditions);
+            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            records = statement3.fetch();
             for (var r : records) {
                 gisaidEpiIsls.add(r.get(tbl.GISAID_EPI_ISL));
             }
@@ -482,7 +499,11 @@ public class SampleService {
     }
 
 
-    public String getFasta(SampleDetailRequest request, boolean aligned) throws SQLException {
+    public String getFasta(
+        SampleDetailRequest request,
+        boolean aligned,
+        OrderAndLimitConfig orderAndLimit
+    ) throws SQLException {
         // Filter by mutations (if requested)
         Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
         if (ids != null && ids.isEmpty()) {
@@ -512,7 +533,7 @@ public class SampleService {
                             .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
                     )
                     .where(conditions)
-                    .limit(1000);
+                    .limit(orderAndLimit.getLimit() != null ? Math.min(1000, orderAndLimit.getLimit()) : 1000);
                 records = statement.fetch();
             } else {
                 var statement = ctx
@@ -522,7 +543,7 @@ public class SampleService {
                             .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
                     )
                     .where(conditions)
-                    .limit(1000);
+                    .limit(orderAndLimit.getLimit() != null ? Math.min(1000, orderAndLimit.getLimit()) : 1000);
                 records = statement.fetch();
             }
             for (var r : records) {
@@ -731,6 +752,17 @@ public class SampleService {
         return aggregationFields.stream()
             .map(ALL_FIELDS::get)
             .collect(Collectors.toList());
+    }
+
+
+    private <T extends Record> Select<T> setOrderAndLimit(
+        SelectLimitStep<T> limitStep,
+        OrderAndLimitConfig orderAndLimitConfig
+    ) {
+        if (orderAndLimitConfig.getLimit() != null) {
+            return limitStep.limit(orderAndLimitConfig.getLimit());
+        }
+        return limitStep;
     }
 
 

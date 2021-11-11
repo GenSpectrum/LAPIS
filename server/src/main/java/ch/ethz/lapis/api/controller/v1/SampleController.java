@@ -7,6 +7,7 @@ import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.MutationRequest;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
@@ -75,17 +76,23 @@ public class SampleController {
 
 
     @GetMapping("/details")
-    public V1Response<SampleDetailResponse> getDetails(SampleDetailRequest request) throws SQLException {
+    public V1Response<SampleDetailResponse> getDetails(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
-        List<SampleDetail> samples = sampleService.getDetailedSamples(request);
+        List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
         return new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
     }
 
 
     @GetMapping("/contributors")
-    public V1Response<ContributorResponse> getContributors(SampleDetailRequest request) throws SQLException {
+    public V1Response<ContributorResponse> getContributors(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -95,7 +102,7 @@ public class SampleController {
         ) {
             throw new ForbiddenException();
         }
-        List<Contributor> contributors = sampleService.getContributors(request);
+        List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
         return new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
     }
 
@@ -104,7 +111,10 @@ public class SampleController {
         value = "/strain-names",
         produces = "text/plain"
     )
-    public String getStrainNames(SampleDetailRequest request) throws SQLException {
+    public String getStrainNames(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
             || request.getAgeTo() != null
@@ -115,7 +125,7 @@ public class SampleController {
         )) {
             throw new ForbiddenException();
         }
-        List<String> strainNames = sampleService.getStrainNames(request);
+        List<String> strainNames = sampleService.getStrainNames(request, limitAndOrder);
         return String.join("\n", strainNames);
     }
 
@@ -124,7 +134,10 @@ public class SampleController {
         value = "/gisaid-epi-isl",
         produces = "text/plain"
     )
-    public String getGisaidEpiIsls(SampleDetailRequest request) throws SQLException {
+    public String getGisaidEpiIsls(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
                 || request.getAgeTo() != null
@@ -135,7 +148,7 @@ public class SampleController {
         )) {
             throw new ForbiddenException();
         }
-        List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request);
+        List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request, limitAndOrder);
         return String.join("\n", gisaidEpiIsls);
     }
 
@@ -200,11 +213,14 @@ public class SampleController {
         value = "/fasta",
         produces = "text/x-fasta"
     )
-    public String getFasta(SampleDetailRequest request) throws SQLException {
+    public String getFasta(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
-        return sampleService.getFasta(request, false);
+        return sampleService.getFasta(request, false, limitAndOrder);
     }
 
 
@@ -212,11 +228,14 @@ public class SampleController {
         value = "/fasta-aligned",
         produces = "text/x-fasta"
     )
-    public String getAlignedFasta(SampleDetailRequest request) throws SQLException {
+    public String getAlignedFasta(
+        SampleDetailRequest request,
+        OrderAndLimitConfig limitAndOrder
+    ) throws SQLException {
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
-        return sampleService.getFasta(request, true);
+        return sampleService.getFasta(request, true, limitAndOrder);
     }
 
 
