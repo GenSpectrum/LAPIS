@@ -13,6 +13,7 @@ import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
+import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.jooq.Record;
@@ -24,6 +25,7 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Statement;
 import java.sql.*;
 import java.util.*;
@@ -229,7 +231,7 @@ public class SampleService {
             }
             SelectConnectByStep<Record> statement2 = statement
                 .where(conditions);
-            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
             records = statement3.fetch();
             for (var r : records) {
                 SampleDetail sample = new SampleDetail()
@@ -306,7 +308,7 @@ public class SampleService {
             }
             SelectConnectByStep<Record> statement2 = statement
                 .where(conditions);
-            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
             records = statement3.fetch();
             for (var r : records) {
                 Contributor contributor = new Contributor()
@@ -360,7 +362,7 @@ public class SampleService {
             }
             SelectConnectByStep<Record> statement2 = statement
                 .where(conditions);
-            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
             records = statement3.fetch();
             for (var r : records) {
                 strainNames.add(r.get(tbl.STRAIN));
@@ -406,7 +408,7 @@ public class SampleService {
             }
             SelectConnectByStep<Record> statement2 = statement
                 .where(conditions);
-            Select<Record> statement3 = setOrderAndLimit(statement2, orderAndLimit);
+            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
             records = statement3.fetch();
             for (var r : records) {
                 gisaidEpiIsls.add(r.get(tbl.GISAID_EPI_ISL));
@@ -755,14 +757,29 @@ public class SampleService {
     }
 
 
-    private <T extends Record> Select<T> setOrderAndLimit(
-        SelectLimitStep<T> limitStep,
+    private <T extends Record> Select<T> applyOrderAndLimit(
+        SelectOrderByStep<T> statement,
         OrderAndLimitConfig orderAndLimitConfig
     ) {
-        if (orderAndLimitConfig.getLimit() != null) {
-            return limitStep.limit(orderAndLimitConfig.getLimit());
+        // orderBy
+        SelectLimitStep<T> statement2 = statement;
+        String orderBy = orderAndLimitConfig.getOrderBy();
+        if (orderBy != null && !orderBy.isBlank() && !orderBy.equals(OrderAndLimitConfig.SpecialOrdering.ARBITRARY)) {
+            if (orderBy.equals(OrderAndLimitConfig.SpecialOrdering.RANDOM)) {
+                SelectSeekStep1<T, BigDecimal> x;
+                statement2 = statement.orderBy(DSL.rand());
+            } else {
+                throw new UnsupportedOrdering(orderBy);
+            }
         }
-        return limitStep;
+
+        // limit
+        Select<T> statement3 = statement2;
+        if (orderAndLimitConfig.getLimit() != null) {
+            statement3 = statement2.limit(orderAndLimitConfig.getLimit());
+        }
+
+        return statement3;
     }
 
 
