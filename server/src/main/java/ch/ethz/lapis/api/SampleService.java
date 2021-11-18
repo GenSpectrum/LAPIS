@@ -719,8 +719,14 @@ public class SampleService {
             if (sdr.getGenbankAccession() != null) {
                 conditions.add(tbl.GENBANK_ACCESSION.eq(sdr.getGenbankAccession()));
             }
+            if (sdr.getSraAccession() != null) {
+                conditions.add(tbl.SRA_ACCESSION.eq(sdr.getSraAccession()));
+            }
             if (sdr.getGisaidEpiIsl() != null) {
                 conditions.add(tbl.GISAID_EPI_ISL.eq(sdr.getGisaidEpiIsl()));
+            }
+            if (sdr.getStrain() != null) {
+                conditions.add(tbl.STRAIN.eq(sdr.getStrain()));
             }
         }
         return conditions;

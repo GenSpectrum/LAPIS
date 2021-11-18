@@ -8,6 +8,8 @@ public class SampleDetailRequest extends SampleFilter<SampleDetailRequest> {
 
     private String gisaidEpiIsl;
 
+    private String strain;
+
     public String getGenbankAccession() {
         return genbankAccession;
     }
@@ -32,6 +34,15 @@ public class SampleDetailRequest extends SampleFilter<SampleDetailRequest> {
 
     public SampleDetailRequest setGisaidEpiIsl(String gisaidEpiIsl) {
         this.gisaidEpiIsl = gisaidEpiIsl;
+        return this;
+    }
+
+    public String getStrain() {
+        return strain;
+    }
+
+    public SampleDetailRequest setStrain(String strain) {
+        this.strain = strain;
         return this;
     }
 }
