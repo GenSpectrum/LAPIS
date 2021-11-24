@@ -65,7 +65,7 @@ public class SampleController {
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),
                     aggregatedSamples
-                ), dataVersionService.getVersion());
+                ), dataVersionService.getVersion(), openness);
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);
@@ -84,7 +84,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
-        return new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion());
+        return new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness);
     }
 
 
@@ -103,7 +103,7 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
-        return new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion());
+        return new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness);
     }
 
 
@@ -171,7 +171,7 @@ public class SampleController {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.AMINO_ACID, request.getMinProportion());
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
-                    dataVersionService.getVersion());
+                    dataVersionService.getVersion(), openness);
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);
@@ -199,7 +199,7 @@ public class SampleController {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.NUCLEOTIDE, request.getMinProportion());
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
-                    dataVersionService.getVersion());
+                    dataVersionService.getVersion(), openness);
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);

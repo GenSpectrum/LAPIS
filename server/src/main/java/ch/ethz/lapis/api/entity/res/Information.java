@@ -8,6 +8,7 @@ public class Information {
     private long dataVersion = -1;
     private LocalDate deprecationDate = null;
     private String deprecationInfo = null;
+    private String acknowledgement = null;
 
     public int getApiVersion() {
         return apiVersion;
@@ -42,6 +43,15 @@ public class Information {
 
     public Information setDeprecationInfo(String deprecationInfo) {
         this.deprecationInfo = deprecationInfo;
+        return this;
+    }
+
+    public String getAcknowledgement() {
+        return acknowledgement;
+    }
+
+    public Information setAcknowledgement(String acknowledgement) {
+        this.acknowledgement = acknowledgement;
         return this;
     }
 }
