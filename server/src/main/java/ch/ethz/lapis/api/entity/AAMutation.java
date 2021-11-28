@@ -1,8 +1,9 @@
 package ch.ethz.lapis.api.entity;
 
+import ch.ethz.lapis.api.entity.query.VariantQueryExpr;
 import ch.ethz.lapis.util.Utils;
 
-public class AAMutation {
+public class AAMutation implements VariantQueryExpr {
 
     private String gene;
 
@@ -66,5 +67,14 @@ public class AAMutation {
     public AAMutation setMutation(Character mutation) {
         this.mutation = mutation;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "AAMutation{" +
+            "gene='" + gene + '\'' +
+            ", position=" + position +
+            ", mutation=" + mutation +
+            '}';
     }
 }

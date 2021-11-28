@@ -15,12 +15,14 @@ grammar VariantQuery;
 
 // parser rules
 
-expr : single
-	| '!' expr
-	| expr '&' expr
-	| expr '|' expr
-	| '(' expr ')';
-single: aa_mut | nuc_mut | pango_query | gisaid_clade | nextstrain_clade;
+expr:
+	single						# Uni
+	| '!' expr				# Neg
+	| expr '&' expr		# And
+	| expr '|' expr		# Or
+	| '(' expr ')'		# Par
+	;
+single: aa_mut | nuc_mut | pango_query | gisaid_clade_query | nextstrain_clade_query;
 
 nuc_mut : nuc? position nuc_mutated?;
 aa_mut : gene ':' aa? position aa_mutated?;
@@ -37,8 +39,12 @@ pango_include_sub: DOT? ASTERISK;
 pango_lineage: character character? pango_number_component? pango_number_component? pango_number_component?;
 pango_number_component: '.' NUMBER NUMBER? NUMBER?;
 
-gisaid_clade: G I S A I D ':' character character?;
-nextstrain_clade: N E X T S T R A I N ':' NUMBER NUMBER character;
+gisaid_clade: character character?;
+gisaid_clade_prefix: G I S A I D ':';
+gisaid_clade_query: gisaid_clade_prefix gisaid_clade;
+nextstrain_clade: NUMBER NUMBER character;
+nextstrain_clade_prefix: N E X T S T R A I N ':';
+nextstrain_clade_query: nextstrain_clade_prefix nextstrain_clade;
 
 character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 

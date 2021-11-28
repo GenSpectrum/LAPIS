@@ -18,13 +18,61 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpr(VariantQueryParser.ExprContext ctx) { }
+	@Override public void enterPar(VariantQueryParser.ParContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExpr(VariantQueryParser.ExprContext ctx) { }
+	@Override public void exitPar(VariantQueryParser.ParContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterUni(VariantQueryParser.UniContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUni(VariantQueryParser.UniContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNeg(VariantQueryParser.NegContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNeg(VariantQueryParser.NegContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOr(VariantQueryParser.OrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOr(VariantQueryParser.OrContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAnd(VariantQueryParser.AndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAnd(VariantQueryParser.AndContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -198,6 +246,30 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGisaid_clade_prefix(VariantQueryParser.Gisaid_clade_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGisaid_clade_prefix(VariantQueryParser.Gisaid_clade_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGisaid_clade_query(VariantQueryParser.Gisaid_clade_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGisaid_clade_query(VariantQueryParser.Gisaid_clade_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterNextstrain_clade(VariantQueryParser.Nextstrain_cladeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -205,6 +277,30 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNextstrain_clade(VariantQueryParser.Nextstrain_cladeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNextstrain_clade_prefix(VariantQueryParser.Nextstrain_clade_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNextstrain_clade_prefix(VariantQueryParser.Nextstrain_clade_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

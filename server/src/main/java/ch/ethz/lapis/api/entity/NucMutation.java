@@ -1,8 +1,9 @@
 package ch.ethz.lapis.api.entity;
 
+import ch.ethz.lapis.api.entity.query.VariantQueryExpr;
 import ch.ethz.lapis.util.Utils;
 
-public class NucMutation {
+public class NucMutation implements VariantQueryExpr {
 
     private int position;
 
@@ -51,5 +52,13 @@ public class NucMutation {
     public NucMutation setMutation(Character mutation) {
         this.mutation = mutation;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "NucMutation{" +
+            "position=" + position +
+            ", mutation=" + mutation +
+            '}';
     }
 }

@@ -10,15 +10,65 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface VariantQueryListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link VariantQueryParser#expr}.
+	 * Enter a parse tree produced by the {@code Par}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpr(VariantQueryParser.ExprContext ctx);
+	void enterPar(VariantQueryParser.ParContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link VariantQueryParser#expr}.
+	 * Exit a parse tree produced by the {@code Par}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpr(VariantQueryParser.ExprContext ctx);
+	void exitPar(VariantQueryParser.ParContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Uni}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterUni(VariantQueryParser.UniContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Uni}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitUni(VariantQueryParser.UniContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Neg}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterNeg(VariantQueryParser.NegContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Neg}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitNeg(VariantQueryParser.NegContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Or}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterOr(VariantQueryParser.OrContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Or}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitOr(VariantQueryParser.OrContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code And}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnd(VariantQueryParser.AndContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code And}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnd(VariantQueryParser.AndContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#single}.
 	 * @param ctx the parse tree
@@ -160,6 +210,26 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 */
 	void exitGisaid_clade(VariantQueryParser.Gisaid_cladeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#gisaid_clade_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void enterGisaid_clade_prefix(VariantQueryParser.Gisaid_clade_prefixContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#gisaid_clade_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void exitGisaid_clade_prefix(VariantQueryParser.Gisaid_clade_prefixContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#gisaid_clade_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterGisaid_clade_query(VariantQueryParser.Gisaid_clade_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#gisaid_clade_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitGisaid_clade_query(VariantQueryParser.Gisaid_clade_queryContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#nextstrain_clade}.
 	 * @param ctx the parse tree
 	 */
@@ -169,6 +239,26 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNextstrain_clade(VariantQueryParser.Nextstrain_cladeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#nextstrain_clade_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void enterNextstrain_clade_prefix(VariantQueryParser.Nextstrain_clade_prefixContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#nextstrain_clade_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void exitNextstrain_clade_prefix(VariantQueryParser.Nextstrain_clade_prefixContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#nextstrain_clade_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#nextstrain_clade_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#character}.
 	 * @param ctx the parse tree
