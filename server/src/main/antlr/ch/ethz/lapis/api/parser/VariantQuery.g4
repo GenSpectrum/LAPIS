@@ -8,6 +8,9 @@
  *   - !123- & 123  (The nucleotide at position 123 is not deleted, but it is mutated)
 */
 grammar VariantQuery;
+@header {
+    package ch.ethz.lapis.api.parser;
+}
 
 
 // parser rules
@@ -31,13 +34,13 @@ gene: E | M | N | S | ORF;
 
 pango_query: pango_lineage pango_include_sub?;
 pango_include_sub: DOT? ASTERISK;
-pango_lineage: char char? pango_number_component? pango_number_component? pango_number_component?;
+pango_lineage: character character? pango_number_component? pango_number_component? pango_number_component?;
 pango_number_component: '.' NUMBER NUMBER? NUMBER?;
 
-gisaid_clade: G I S A I D ':' char char?;
-nextstrain_clade: N E X T S T R A I N ':' NUMBER NUMBER char;
+gisaid_clade: G I S A I D ':' character character?;
+nextstrain_clade: N E X T S T R A I N ':' NUMBER NUMBER character;
 
-char: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
+character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
 
 // lexer rules
