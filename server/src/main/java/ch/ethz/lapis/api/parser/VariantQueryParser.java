@@ -19,23 +19,23 @@ public class VariantQueryParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, A=7, B=8, C=9, D=10, E=11,
-		F=12, G=13, H=14, I=15, J=16, K=17, L=18, M=19, N=20, O=21, P=22, Q=23,
-		R=24, S=25, T=26, U=27, V=28, W=29, X=30, Y=31, Z=32, MINUS=33, DOT=34,
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, A=7, B=8, C=9, D=10, E=11, 
+		F=12, G=13, H=14, I=15, J=16, K=17, L=18, M=19, N=20, O=21, P=22, Q=23, 
+		R=24, S=25, T=26, U=27, V=28, W=29, X=30, Y=31, Z=32, MINUS=33, DOT=34, 
 		ASTERISK=35, ORF=36, NUMBER=37, WHITESPACE=38;
 	public static final int
-		RULE_expr = 0, RULE_single = 1, RULE_nuc_mut = 2, RULE_aa_mut = 3, RULE_position = 4,
-		RULE_aa = 5, RULE_aa_mutated = 6, RULE_nuc = 7, RULE_nuc_mutated = 8,
-		RULE_gene = 9, RULE_pango_query = 10, RULE_pango_include_sub = 11, RULE_pango_lineage = 12,
-		RULE_pango_number_component = 13, RULE_gisaid_clade = 14, RULE_gisaid_clade_prefix = 15,
-		RULE_gisaid_clade_query = 16, RULE_nextstrain_clade = 17, RULE_nextstrain_clade_prefix = 18,
+		RULE_expr = 0, RULE_single = 1, RULE_nuc_mut = 2, RULE_aa_mut = 3, RULE_position = 4, 
+		RULE_aa = 5, RULE_aa_mutated = 6, RULE_nuc = 7, RULE_nuc_mutated = 8, 
+		RULE_gene = 9, RULE_pango_query = 10, RULE_pango_include_sub = 11, RULE_pango_lineage = 12, 
+		RULE_pango_number_component = 13, RULE_gisaid_clade = 14, RULE_gisaid_clade_prefix = 15, 
+		RULE_gisaid_clade_query = 16, RULE_nextstrain_clade = 17, RULE_nextstrain_clade_prefix = 18, 
 		RULE_nextstrain_clade_query = 19, RULE_character = 20;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"expr", "single", "nuc_mut", "aa_mut", "position", "aa", "aa_mutated",
-			"nuc", "nuc_mutated", "gene", "pango_query", "pango_include_sub", "pango_lineage",
-			"pango_number_component", "gisaid_clade", "gisaid_clade_prefix", "gisaid_clade_query",
-			"nextstrain_clade", "nextstrain_clade_prefix", "nextstrain_clade_query",
+			"expr", "single", "nuc_mut", "aa_mut", "position", "aa", "aa_mutated", 
+			"nuc", "nuc_mutated", "gene", "pango_query", "pango_include_sub", "pango_lineage", 
+			"pango_number_component", "gisaid_clade", "gisaid_clade_prefix", "gisaid_clade_query", 
+			"nextstrain_clade", "nextstrain_clade_prefix", "nextstrain_clade_query", 
 			"character"
 		};
 	}
@@ -43,18 +43,18 @@ public class VariantQueryParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'!'", "'&'", "'|'", "'('", "')'", "':'", "'A'", "'B'", "'C'",
-			"'D'", "'E'", "'F'", "'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'",
-			"'N'", "'O'", "'P'", "'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'",
+			null, "'!'", "'&'", "'|'", "'('", "')'", "':'", "'A'", "'B'", "'C'", 
+			"'D'", "'E'", "'F'", "'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'", 
+			"'N'", "'O'", "'P'", "'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'", 
 			"'X'", "'Y'", "'Z'", "'-'", "'.'", "'*'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, null, null, "A", "B", "C", "D", "E", "F",
-			"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-			"U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF", "NUMBER",
+			null, null, null, null, null, null, null, "A", "B", "C", "D", "E", "F", 
+			"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", 
+			"U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF", "NUMBER", 
 			"WHITESPACE"
 		};
 	}
@@ -114,7 +114,7 @@ public class VariantQueryParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
-
+	 
 		public ExprContext() { }
 		public void copyFrom(ExprContext ctx) {
 			super.copyFrom(ctx);
@@ -316,7 +316,7 @@ public class VariantQueryParser extends Parser {
 						}
 						break;
 					}
-					}
+					} 
 				}
 				setState(62);
 				_errHandler.sync(this);
@@ -585,7 +585,7 @@ public class VariantQueryParser extends Parser {
 			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(87);
+			setState(87); 
 			_errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -601,7 +601,7 @@ public class VariantQueryParser extends Parser {
 				default:
 					throw new NoViableAltException(this);
 				}
-				setState(89);
+				setState(89); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,8,_ctx);
 			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );

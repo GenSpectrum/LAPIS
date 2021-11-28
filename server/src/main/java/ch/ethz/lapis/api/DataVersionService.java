@@ -1,14 +1,16 @@
 package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
+import ch.ethz.lapis.api.query.DataStore;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 
 @Service
@@ -16,12 +18,14 @@ public class DataVersionService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private final Optional<CacheService> cacheServiceOpt;
+    private final DataStore dataStore;
 
     private long version = -1;
 
 
-    public DataVersionService(Optional<CacheService> cacheServiceOpt) {
+    public DataVersionService(Optional<CacheService> cacheServiceOpt, DataStore dataStore) {
         this.cacheServiceOpt = cacheServiceOpt;
+        this.dataStore = dataStore;
         autoFetchVersionDate();
     }
 
@@ -52,6 +56,7 @@ public class DataVersionService {
                         if (cacheServiceOpt.isPresent()) {
                             cacheServiceOpt.get().updateCacheIfOutdated(version);
                         }
+                        dataStore.loadLineageNames();
                     }
                 }
             }

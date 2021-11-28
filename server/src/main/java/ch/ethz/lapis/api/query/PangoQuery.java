@@ -1,4 +1,4 @@
-package ch.ethz.lapis.api.entity.query;
+package ch.ethz.lapis.api.query;
 
 public class PangoQuery implements VariantQueryExpr {
 
@@ -25,5 +25,17 @@ public class PangoQuery implements VariantQueryExpr {
             "pangoLineage='" + pangoLineage + '\'' +
             ", includeSubLineage=" + includeSubLineage +
             '}';
+    }
+
+    @Override
+    public boolean[] evaluate(DataStore dataStore) {
+        // TODO Include sub-lineages if requested
+        String pangoLineage = this.pangoLineage.toUpperCase();
+        String[] data = dataStore.getPangoLineageArray();
+        boolean[] result = new boolean[data.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = pangoLineage.equals(data[i]);
+        }
+        return result;
     }
 }

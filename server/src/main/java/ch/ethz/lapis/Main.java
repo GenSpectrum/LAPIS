@@ -1,7 +1,7 @@
 package ch.ethz.lapis;
 
 import ch.ethz.lapis.api.VariantQueryListener;
-import ch.ethz.lapis.api.entity.query.VariantQueryExpr;
+import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.core.Config;

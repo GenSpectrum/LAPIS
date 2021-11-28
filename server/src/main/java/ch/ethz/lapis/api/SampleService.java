@@ -818,7 +818,7 @@ public class SampleService {
                             // If this is the first round, search all sequences
                             foundIds = new ArrayList<>();
                             for (int i = 0; i < nucleotides.length; i++) {
-                                if (isMatchingMutation(nucleotides[i], searchedMutation)) {
+                                if (NucMutation.isMatchingMutation(nucleotides[i], searchedMutation)) {
                                     foundIds.add(i);
                                 }
                             }
@@ -826,7 +826,7 @@ public class SampleService {
                             // In the subsequent rounds, we will just continue filter the foundIds.
                             List<Integer> nextFoundIds = new ArrayList<>();
                             for (Integer foundId : foundIds) {
-                                if (isMatchingMutation(nucleotides[foundId], searchedMutation)) {
+                                if (NucMutation.isMatchingMutation(nucleotides[foundId], searchedMutation)) {
                                     nextFoundIds.add(foundId);
                                 }
                             }
@@ -874,7 +874,7 @@ public class SampleService {
                     // If this is the first round, search all sequences
                     foundIds = new ArrayList<>();
                     for (int i = 0; i < aaCodons.length; i++) {
-                        if (isMatchingMutation(aaCodons[i], searchedMutation)) {
+                        if (AAMutation.isMatchingMutation(aaCodons[i], searchedMutation)) {
                             foundIds.add(i);
                         }
                     }
@@ -882,7 +882,7 @@ public class SampleService {
                     // In the subsequent rounds, we will just continue filter the foundIds.
                     List<Integer> nextFoundIds = new ArrayList<>();
                     for (Integer foundId : foundIds) {
-                        if (isMatchingMutation(aaCodons[foundId], searchedMutation)) {
+                        if (AAMutation.isMatchingMutation(aaCodons[foundId], searchedMutation)) {
                             nextFoundIds.add(foundId);
                         }
                     }
@@ -904,36 +904,6 @@ public class SampleService {
 
     private String encodeGenePosition(String gene, int position) {
         return gene + ":" + position;
-    }
-
-
-    private boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {
-        Character mutationBase = searchedMutation.getMutation();
-        if (searchedMutation.getMutation() == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (N)
-            return foundBase != 'N' && foundBase != referenceGenome.getNucleotideBase(searchedMutation.getPosition());
-        } else if (mutationBase == '.') {
-            // Check whether the base is not mutated, i.e., equals the base of the reference genome
-            return foundBase == referenceGenome.getNucleotideBase(searchedMutation.getPosition());
-        } else {
-            return foundBase == searchedMutation.getMutation();
-        }
-    }
-
-
-    private boolean isMatchingMutation(Character foundBase, AAMutation searchedMutation) {
-        Character mutationBase = searchedMutation.getMutation();
-        if (mutationBase == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (X)
-            return foundBase != 'X' && foundBase != referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                searchedMutation.getPosition());
-        } else if (mutationBase == '.') {
-            // Check whether the base is not mutated, i.e., equals the base of the reference genome
-            return foundBase == referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                searchedMutation.getPosition());
-        } else {
-            return foundBase == mutationBase;
-        }
     }
 
 

@@ -1,9 +1,13 @@
 package ch.ethz.lapis.api.entity;
 
-import ch.ethz.lapis.api.entity.query.VariantQueryExpr;
+import ch.ethz.lapis.api.query.DataStore;
+import ch.ethz.lapis.api.query.VariantQueryExpr;
+import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
 
 public class NucMutation implements VariantQueryExpr {
+
+    private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
 
     private int position;
 
@@ -60,5 +64,28 @@ public class NucMutation implements VariantQueryExpr {
             "position=" + position +
             ", mutation=" + mutation +
             '}';
+    }
+
+    @Override
+    public boolean[] evaluate(DataStore dataStore) {
+        char[] data = dataStore.getNucArray(position);
+        boolean[] result = new boolean[data.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = isMatchingMutation(data[i], this);
+        }
+        return result;
+    }
+
+    public static boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {
+        Character mutationBase = searchedMutation.getMutation();
+        if (searchedMutation.getMutation() == null) {
+            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (N)
+            return foundBase != 'N' && foundBase != referenceGenome.getNucleotideBase(searchedMutation.getPosition());
+        } else if (mutationBase == '.') {
+            // Check whether the base is not mutated, i.e., equals the base of the reference genome
+            return foundBase == referenceGenome.getNucleotideBase(searchedMutation.getPosition());
+        } else {
+            return foundBase == searchedMutation.getMutation();
+        }
     }
 }

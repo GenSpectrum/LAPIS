@@ -2,9 +2,9 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.NucMutation;
-import ch.ethz.lapis.api.entity.query.*;
 import ch.ethz.lapis.api.parser.VariantQueryBaseListener;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
+import ch.ethz.lapis.api.query.*;
 
 import java.util.Stack;
 

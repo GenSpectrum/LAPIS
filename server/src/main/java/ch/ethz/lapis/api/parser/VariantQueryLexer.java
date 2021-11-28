@@ -19,9 +19,9 @@ public class VariantQueryLexer extends Lexer {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, A=7, B=8, C=9, D=10, E=11,
-		F=12, G=13, H=14, I=15, J=16, K=17, L=18, M=19, N=20, O=21, P=22, Q=23,
-		R=24, S=25, T=26, U=27, V=28, W=29, X=30, Y=31, Z=32, MINUS=33, DOT=34,
+		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, A=7, B=8, C=9, D=10, E=11, 
+		F=12, G=13, H=14, I=15, J=16, K=17, L=18, M=19, N=20, O=21, P=22, Q=23, 
+		R=24, S=25, T=26, U=27, V=28, W=29, X=30, Y=31, Z=32, MINUS=33, DOT=34, 
 		ASTERISK=35, ORF=36, NUMBER=37, WHITESPACE=38;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -33,9 +33,9 @@ public class VariantQueryLexer extends Lexer {
 
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "A", "B", "C", "D", "E",
-			"F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-			"T", "U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF",
+			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "A", "B", "C", "D", "E", 
+			"F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", 
+			"T", "U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF", 
 			"NUMBER", "WHITESPACE"
 		};
 	}
@@ -43,18 +43,18 @@ public class VariantQueryLexer extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'!'", "'&'", "'|'", "'('", "')'", "':'", "'A'", "'B'", "'C'",
-			"'D'", "'E'", "'F'", "'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'",
-			"'N'", "'O'", "'P'", "'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'",
+			null, "'!'", "'&'", "'|'", "'('", "')'", "':'", "'A'", "'B'", "'C'", 
+			"'D'", "'E'", "'F'", "'G'", "'H'", "'I'", "'J'", "'K'", "'L'", "'M'", 
+			"'N'", "'O'", "'P'", "'Q'", "'R'", "'S'", "'T'", "'U'", "'V'", "'W'", 
 			"'X'", "'Y'", "'Z'", "'-'", "'.'", "'*'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, null, null, null, null, null, null, "A", "B", "C", "D", "E", "F",
-			"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-			"U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF", "NUMBER",
+			null, null, null, null, null, null, null, "A", "B", "C", "D", "E", "F", 
+			"G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", 
+			"U", "V", "W", "X", "Y", "Z", "MINUS", "DOT", "ASTERISK", "ORF", "NUMBER", 
 			"WHITESPACE"
 		};
 	}
