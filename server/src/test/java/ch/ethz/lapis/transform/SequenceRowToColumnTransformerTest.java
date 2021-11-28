@@ -32,7 +32,8 @@ public class SequenceRowToColumnTransformerTest {
             (pos, result) -> {
                 resultQueue.add(new Pair<>(pos, result));
             },
-            compressor::compress
+            compressor::compress,
+            '?'
         );
         List<String> results = resultQueue.stream()
             .map(p -> new Pair<>(

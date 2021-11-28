@@ -262,7 +262,8 @@ public class TransformService {
                     throw new RuntimeException(e);
                 }
             },
-            nucMutationColumnarCompressor::compress
+            nucMutationColumnarCompressor::compress,
+            'N'
         );
     }
 
@@ -327,9 +328,13 @@ public class TransformService {
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw e;
                     }
                 },
-                aaColumnarCompressor::compress
+                aaColumnarCompressor::compress,
+                'X'
             );
         }
     }

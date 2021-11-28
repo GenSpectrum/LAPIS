@@ -51,7 +51,8 @@ public class SequenceRowToColumnTransformer {
         List<S> compressedSequences,
         Function<S, String> decompressor,
         BiConsumer<Integer, List<T>> consumer,
-        Function<String, T> compressor
+        Function<String, T> compressor,
+        char unknownCode
     ) {
         try {
             if (compressedSequences.isEmpty()) {
@@ -73,21 +74,33 @@ public class SequenceRowToColumnTransformer {
                     final int endSeq = Math.min(batchSize * (taskIndex + 1), compressedSequences.size());
 
                     tasks.add(() -> {
-                        System.out.println(
-                            LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - Start");
-                        List<StringBuilder> columns = new ArrayList<>();
-                        for (int i = startPos; i < endPos; i++) {
-                            columns.add(new StringBuilder());
-                        }
-                        for (int seqIndex = startSeq; seqIndex < endSeq; seqIndex++) {
-                            S compressed = compressedSequences.get(seqIndex);
-                            char[] seq = decompressor.apply(compressed).toCharArray();
+                        try {
+                            System.out.println(
+                                LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - Start");
+                            List<StringBuilder> columns = new ArrayList<>();
                             for (int i = startPos; i < endPos; i++) {
-                                columns.get(i - startPos).append(seq[i]);
+                                columns.add(new StringBuilder());
                             }
+                            for (int seqIndex = startSeq; seqIndex < endSeq; seqIndex++) {
+                                S compressed = compressedSequences.get(seqIndex);
+                                if (compressed == null) {
+                                    for (int i = startPos; i < endPos; i++) {
+                                        columns.get(i - startPos).append(unknownCode);
+                                    }
+                                } else {
+                                    String decompressed = decompressor.apply(compressed);
+                                    char[] seq = decompressed.toCharArray();
+                                    for (int i = startPos; i < endPos; i++) {
+                                        columns.get(i - startPos).append(seq[i]);
+                                    }
+                                }
+                            }
+                            System.out.println(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
+                            return columns;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw e;
                         }
-                        System.out.println(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
-                        return columns;
                     });
                 }
 
