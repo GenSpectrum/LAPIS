@@ -1,19 +1,14 @@
 package ch.ethz.lapis;
 
-import ch.ethz.lapis.api.VariantQueryListener;
-import ch.ethz.lapis.api.query.VariantQueryExpr;
-import ch.ethz.lapis.api.parser.VariantQueryLexer;
-import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.core.Config;
 import ch.ethz.lapis.core.ConfigurationManager;
 import ch.ethz.lapis.core.SubProgram;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Main {
@@ -23,18 +18,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Welcome at Vineyard!");
-
-        String query = "P.1.* | S:484K & B.1.1.7 & (!C123T | nextstrain:21K)".toUpperCase();
-        VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(query));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        VariantQueryParser parser = new VariantQueryParser(tokens);
-        ParseTree tree = parser.expr();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        VariantQueryListener listener = new VariantQueryListener();
-        walker.walk(listener, tree);
-        VariantQueryExpr expr = listener.getExpr();
-
-        System.exit(0);
 
         // Load sub programs
         subPrograms = new ArrayList<>() {{

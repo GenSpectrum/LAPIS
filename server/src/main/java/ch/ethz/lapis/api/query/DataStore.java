@@ -30,7 +30,10 @@ public class DataStore {
 
     public synchronized void loadLineageNames() {
         String sql = """
-            select upper(pango_lineage), upper(nextstrain_clade), upper(gisaid_clade)
+            select
+                upper(pango_lineage) as pango_lineage,
+                upper(nextstrain_clade) as nextstrain_clade,
+                upper(gisaid_clade) as gisaid_clade
             from y_main_metadata
             order by id;
         """;
