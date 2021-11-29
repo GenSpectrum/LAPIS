@@ -37,7 +37,8 @@ gene: E | M | N | S | ORF;
 
 pango_query: pango_lineage pango_include_sub?;
 pango_include_sub: DOT? ASTERISK;
-pango_lineage: character character? pango_number_component? pango_number_component? pango_number_component?;
+// We accept inputs like B.1.617.2.1 which we would translate to AY.1. This is unofficial, but useful.
+pango_lineage: character character? pango_number_component*;
 pango_number_component: '.' NUMBER NUMBER? NUMBER?;
 
 gisaid_clade: character character?;
