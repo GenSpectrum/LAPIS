@@ -2,10 +2,11 @@ package ch.ethz.lapis.api.entity.req;
 
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.NucMutation;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.format.annotation.DateTimeFormat;
 
 public abstract class SampleFilter<T extends SampleFilter<T>> {
 
@@ -44,6 +45,8 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     private List<NucMutation> nucMutations = new ArrayList<>();
     private List<AAMutation> aaMutations = new ArrayList<>();
+
+    private String variantQuery;
 
     public LocalDate getDateFrom() {
         return dateFrom;
@@ -276,6 +279,15 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setAaMutations(List<AAMutation> aaMutations) {
         this.aaMutations = aaMutations;
+        return (T) this;
+    }
+
+    public String getVariantQuery() {
+        return variantQuery;
+    }
+
+    public T setVariantQuery(String variantQuery) {
+        this.variantQuery = variantQuery;
         return (T) this;
     }
 }

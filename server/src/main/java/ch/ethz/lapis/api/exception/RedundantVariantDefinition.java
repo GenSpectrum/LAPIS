@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public class MalformedVariantQueryException extends BaseApiException {
+public class RedundantVariantDefinition extends BaseApiException {
     @Override
     public HttpStatus getHttpStatus() {
         return HttpStatus.BAD_REQUEST;
@@ -14,7 +14,8 @@ public class MalformedVariantQueryException extends BaseApiException {
     @Override
     public List<ErrorEntry> getErrorEntries() {
         return List.of(new ErrorEntry(
-            "The variantQuery is malformed."
+            "Please specify the variant either by using the fields pangoLineage, nextstrainClade, gisaidClade, " +
+                "aaMutations and nucMutations, or by using variantQuery - don't use both at the same time."
         ));
     }
 }

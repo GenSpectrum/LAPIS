@@ -4,6 +4,7 @@ import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.api.query.DataStore;
+import ch.ethz.lapis.api.query.ThrowingErrorListener;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.core.GlobalProxyManager;
@@ -43,11 +44,13 @@ public class LapisMain extends SubProgram<LapisConfig> {
     }
 
     private void test() {
-        String query = "P.1 | S:484K & B.1.1.7".toUpperCase();
+        String query = "P.1 | S:484K &".toUpperCase();
         VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(query));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         VariantQueryParser parser = new VariantQueryParser(tokens);
-        ParseTree tree = parser.expr();
+        parser.removeErrorListeners();
+        parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+        ParseTree tree = parser.start();
         ParseTreeWalker walker = new ParseTreeWalker();
         VariantQueryListener listener = new VariantQueryListener();
         walker.walk(listener, tree);
@@ -76,9 +79,6 @@ public class LapisMain extends SubProgram<LapisConfig> {
         }
         globalConfig = config;
         dbPool = DatabaseService.createDatabaseConnectionPool(LapisMain.globalConfig.getVineyard());
-
-        test();
-
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
         if ("--api".equals(args[0])) {
             String[] argsForSpring = Arrays.copyOfRange(args, 1, args.length);

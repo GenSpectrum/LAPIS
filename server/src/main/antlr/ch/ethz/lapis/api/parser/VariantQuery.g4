@@ -15,6 +15,7 @@ grammar VariantQuery;
 
 // parser rules
 
+start: expr EOF;
 expr:
 	single						# Uni
 	| '!' expr				# Neg

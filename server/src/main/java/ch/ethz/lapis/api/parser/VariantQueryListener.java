@@ -10,6 +10,16 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface VariantQueryListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#start}.
+	 * @param ctx the parse tree
+	 */
+	void enterStart(VariantQueryParser.StartContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#start}.
+	 * @param ctx the parse tree
+	 */
+	void exitStart(VariantQueryParser.StartContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code Par}
 	 * labeled alternative in {@link VariantQueryParser#expr}.
 	 * @param ctx the parse tree

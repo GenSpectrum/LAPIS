@@ -7,13 +7,11 @@ import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
-import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
-import ch.ethz.lapis.api.entity.req.MutationRequest;
-import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
-import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
+import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
 import ch.ethz.lapis.api.exception.ForbiddenException;
 import ch.ethz.lapis.api.exception.GisaidLimitationException;
+import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +56,7 @@ public class SampleController {
         produces = "application/json"
     )
     public ResponseEntity<String> getAggregated(SampleAggregatedRequest request) {
+        checkVariantFilter(request);
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
@@ -80,6 +79,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
@@ -93,6 +93,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -115,6 +116,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
             || request.getAgeTo() != null
@@ -138,6 +140,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
                 || request.getAgeTo() != null
@@ -158,6 +161,7 @@ public class SampleController {
         produces = "application/json"
     )
     public ResponseEntity<String> getAAMutations(MutationRequest request) {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -186,6 +190,7 @@ public class SampleController {
         produces = "application/json"
     )
     public ResponseEntity<String> getNucMutations(MutationRequest request) {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -217,6 +222,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
@@ -232,6 +238,7 @@ public class SampleController {
         SampleDetailRequest request,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
@@ -265,6 +272,17 @@ public class SampleController {
                 .body(body);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    private void checkVariantFilter(SampleFilter<?> request) {
+        if (request.getVariantQuery() != null &&
+            (request.getPangoLineage() != null || request.getNextstrainClade() != null
+                || request.getGisaidClade() != null
+                || (request.getAaMutations() != null && !request.getAaMutations().isEmpty())
+                || (request.getNucMutations() != null && !request.getNucMutations().isEmpty()))) {
+            throw new RedundantVariantDefinition();
         }
     }
 
