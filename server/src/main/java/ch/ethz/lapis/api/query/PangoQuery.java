@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.util.PangoLineageQueryConverter;
+
 public class PangoQuery implements VariantQueryExpr {
 
     private final String pangoLineage;
@@ -29,12 +31,28 @@ public class PangoQuery implements VariantQueryExpr {
 
     @Override
     public boolean[] evaluate(DataStore dataStore) {
-        // TODO Include sub-lineages if requested
         String pangoLineage = this.pangoLineage.toUpperCase();
+        if (includeSubLineage) {
+            pangoLineage += "*";
+        }
+        PangoLineageQueryConverter queryConverter = dataStore.getPangoLineageQueryConverter();
+        PangoLineageQueryConverter.PangoLineageQueryMatch match = queryConverter.convert(pangoLineage);
+
         String[] data = dataStore.getPangoLineageArray();
         boolean[] result = new boolean[data.length];
+
         for (int i = 0; i < result.length; i++) {
-            result[i] = pangoLineage.equals(data[i]);
+            boolean r = false;
+            String d = data[i];
+            if (d != null) {
+                for (String s : match.getExact()) {
+                    r = r || d.equals(s);
+                }
+                for (String s : match.getPrefix()) {
+                    r = r || d.startsWith(s);
+                }
+            }
+            result[i] = r;
         }
         return result;
     }

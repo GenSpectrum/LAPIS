@@ -1,8 +1,7 @@
 package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.LapisMain;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +17,7 @@ public class DataStore {
         = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
     private static final SeqCompressor aaMutationColumnarCompressor
         = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+    private final PangoLineageQueryConverter pangoLineageQueryConverter;
 
     private String[] pangoLineageArray;
     private String[] nextstrainCladeArray;
@@ -26,6 +26,8 @@ public class DataStore {
 
     public DataStore() {
         loadLineageNames();
+        List<PangoLineageAlias> pangolinLineageAliases = getPangolinLineageAliases();
+        this.pangoLineageQueryConverter = new PangoLineageQueryConverter(pangolinLineageAliases);
     }
 
     public synchronized void loadLineageNames() {
@@ -56,6 +58,37 @@ public class DataStore {
         this.pangoLineageArray = pangoLineageList.toArray(new String[0]);
         this.nextstrainCladeArray = nextstrainCladeList.toArray(new String[0]);
         this.gisaidCladeArray = gisaidCladeList.toArray(new String[0]);
+    }
+
+
+    private List<PangoLineageAlias> getPangolinLineageAliases() {
+        String sql = """
+            select
+              alias,
+              full_name
+            from pangolin_lineage_alias;
+        """;
+        try (Connection conn = dbPool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    List<PangoLineageAlias> aliases = new ArrayList<>();
+                    while (rs.next()) {
+                        aliases.add(new PangoLineageAlias(
+                            rs.getString("alias"),
+                            rs.getString("full_name")
+                        ));
+                    }
+                    return aliases;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public PangoLineageQueryConverter getPangoLineageQueryConverter() {
+        return pangoLineageQueryConverter;
     }
 
 

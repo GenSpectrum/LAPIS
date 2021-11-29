@@ -53,7 +53,7 @@ public class SampleService {
     private static final SeqCompressor aaMutationColumnarCompressor
         = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
-    private final PangoLineageQueryToSqlLikesConverter pangoLineageParser;
+    private final PangoLineageQueryConverter pangoLineageParser;
     private final DataStore dataStore;
 
 
@@ -63,7 +63,7 @@ public class SampleService {
             // TODO This will be only loaded once and will not reload when the aliases change. The aliases should not
             //   change too often so it is not a very big issue but it could potentially cause unexpected results.
             List<PangoLineageAlias> aliases = getPangolinLineageAliases();
-            this.pangoLineageParser = new PangoLineageQueryToSqlLikesConverter(aliases);
+            this.pangoLineageParser = new PangoLineageQueryConverter(aliases);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -750,7 +750,7 @@ public class SampleService {
         }
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
-            String[] pangolinLineageLikeStatements = pangoLineageParser.convert(pangoLineage);
+            String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
             conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
         }
         if (request.getRegion() != null) {
