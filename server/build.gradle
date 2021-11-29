@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
     id "org.ec4j.editorconfig" version "0.0.3"
+    id 'antlr'
 }
 
 group 'ch.ethz'
@@ -29,7 +30,14 @@ dependencies {
     implementation 'org.jooq:jooq:3.14.8'
     implementation 'redis.clients:jedis:3.7.0'
 
+    antlr "org.antlr:antlr4:4.9.3"
+    implementation "org.antlr:antlr4-runtime:4.9.3"
+
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+generateGrammarSource {
+    outputDirectory = file("src/main/java")
 }
 
 test {

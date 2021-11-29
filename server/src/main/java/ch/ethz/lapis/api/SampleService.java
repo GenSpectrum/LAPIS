@@ -13,9 +13,20 @@ import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
+import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
+import ch.ethz.lapis.api.parser.VariantQueryLexer;
+import ch.ethz.lapis.api.parser.VariantQueryParser;
+import ch.ethz.lapis.api.query.DataStore;
+import ch.ethz.lapis.api.query.ThrowingErrorListener;
+import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jooq.Record;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -42,15 +53,17 @@ public class SampleService {
     private static final SeqCompressor aaMutationColumnarCompressor
         = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
-    private final PangoLineageQueryToSqlLikesConverter pangoLineageParser;
+    private final PangoLineageQueryConverter pangoLineageParser;
+    private final DataStore dataStore;
 
 
-    public SampleService() {
+    public SampleService(DataStore dataStore) {
+        this.dataStore = dataStore;
         try {
             // TODO This will be only loaded once and will not reload when the aliases change. The aliases should not
             //   change too often so it is not a very big issue but it could potentially cause unexpected results.
             List<PangoLineageAlias> aliases = getPangolinLineageAliases();
-            this.pangoLineageParser = new PangoLineageQueryToSqlLikesConverter(aliases);
+            this.pangoLineageParser = new PangoLineageQueryConverter(aliases);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -65,8 +78,7 @@ public class SampleService {
     public List<SampleAggregated> getAggregatedSamples(SampleAggregatedRequest request) throws SQLException {
         List<AggregationField> fields = request.getFields();
 
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -176,8 +188,7 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -271,8 +282,7 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -330,8 +340,7 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -376,8 +385,7 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -423,8 +431,7 @@ public class SampleService {
         SequenceType sequenceType,
         float minProportion
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new SampleMutationsResponse();
         }
@@ -506,8 +513,7 @@ public class SampleService {
         boolean aligned,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        // Filter by mutations (if requested)
-        Set<Integer> ids = getIdsFromMutationFilters(request.getNucMutations(), request.getAaMutations());
+        Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return "";
         }
@@ -562,6 +568,32 @@ public class SampleService {
 
 
     /**
+     * This function filters either by mutations or by the variantQuery if one of them is requested.
+     */
+    private Set<Integer> preFilterIds(SampleFilter<?> sampleFilter) throws SQLException {
+        List<NucMutation> nucMutations = sampleFilter.getNucMutations();
+        List<AAMutation> aaMutations = sampleFilter.getAaMutations();
+        String variantQuery = sampleFilter.getVariantQuery();
+
+        if ((nucMutations != null && !nucMutations.isEmpty())
+            || (aaMutations != null && !aaMutations.isEmpty())) {
+            if (variantQuery != null) {
+                throw new RuntimeException("It is not allowed to use the nucMutations/aaMutations and variantQuery " +
+                    "fields at the same time.");
+            }
+
+            return getIdsFromMutationFilters(nucMutations, aaMutations);
+        }
+
+        if (variantQuery != null) {
+            return getIdsFromVariantQuery(variantQuery);
+        }
+
+        return null;
+    }
+
+
+    /**
      * This function returns a set of IDs of the samples that have the filtered mutations. If an argument (i.e.,
      * nucMutations or aaMutations) is null or empty, it means that we don't filter for that. If we don't filter for any
      * of the two mutation types, this function returns null. If no sequence has the filtered mutations, this function
@@ -608,6 +640,37 @@ public class SampleService {
                 "mutations");
         }
         return ids;
+    }
+
+
+    /**
+     * This function parses and evaluates a variant query.
+     */
+    private Set<Integer> getIdsFromVariantQuery(String variantQuery) {
+        VariantQueryExpr expr;
+        try {
+            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            VariantQueryParser parser = new VariantQueryParser(tokens);
+            parser.removeErrorListeners();
+            parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+            ParseTree tree = parser.start();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            VariantQueryListener listener = new VariantQueryListener();
+            walker.walk(listener, tree);
+            expr = listener.getExpr();
+        } catch (ParseCancellationException e) {
+            throw new MalformedVariantQueryException();
+        }
+
+        boolean[] filtered = expr.evaluate(dataStore);
+        List<Integer> ids = new ArrayList<>();
+        for (int i = 0; i < filtered.length; i++) {
+            if (filtered[i]) {
+                ids.add(i);
+            }
+        }
+        return new HashSet<>(ids);
     }
 
 
@@ -687,7 +750,7 @@ public class SampleService {
         }
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
-            String[] pangolinLineageLikeStatements = pangoLineageParser.convert(pangoLineage);
+            String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
             conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
         }
         if (request.getRegion() != null) {
@@ -818,7 +881,7 @@ public class SampleService {
                             // If this is the first round, search all sequences
                             foundIds = new ArrayList<>();
                             for (int i = 0; i < nucleotides.length; i++) {
-                                if (isMatchingMutation(nucleotides[i], searchedMutation)) {
+                                if (NucMutation.isMatchingMutation(nucleotides[i], searchedMutation)) {
                                     foundIds.add(i);
                                 }
                             }
@@ -826,7 +889,7 @@ public class SampleService {
                             // In the subsequent rounds, we will just continue filter the foundIds.
                             List<Integer> nextFoundIds = new ArrayList<>();
                             for (Integer foundId : foundIds) {
-                                if (isMatchingMutation(nucleotides[foundId], searchedMutation)) {
+                                if (NucMutation.isMatchingMutation(nucleotides[foundId], searchedMutation)) {
                                     nextFoundIds.add(foundId);
                                 }
                             }
@@ -874,7 +937,7 @@ public class SampleService {
                     // If this is the first round, search all sequences
                     foundIds = new ArrayList<>();
                     for (int i = 0; i < aaCodons.length; i++) {
-                        if (isMatchingMutation(aaCodons[i], searchedMutation)) {
+                        if (AAMutation.isMatchingMutation(aaCodons[i], searchedMutation)) {
                             foundIds.add(i);
                         }
                     }
@@ -882,7 +945,7 @@ public class SampleService {
                     // In the subsequent rounds, we will just continue filter the foundIds.
                     List<Integer> nextFoundIds = new ArrayList<>();
                     for (Integer foundId : foundIds) {
-                        if (isMatchingMutation(aaCodons[foundId], searchedMutation)) {
+                        if (AAMutation.isMatchingMutation(aaCodons[foundId], searchedMutation)) {
                             nextFoundIds.add(foundId);
                         }
                     }
@@ -904,36 +967,6 @@ public class SampleService {
 
     private String encodeGenePosition(String gene, int position) {
         return gene + ":" + position;
-    }
-
-
-    private boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {
-        Character mutationBase = searchedMutation.getMutation();
-        if (searchedMutation.getMutation() == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (N)
-            return foundBase != 'N' && foundBase != referenceGenome.getNucleotideBase(searchedMutation.getPosition());
-        } else if (mutationBase == '.') {
-            // Check whether the base is not mutated, i.e., equals the base of the reference genome
-            return foundBase == referenceGenome.getNucleotideBase(searchedMutation.getPosition());
-        } else {
-            return foundBase == searchedMutation.getMutation();
-        }
-    }
-
-
-    private boolean isMatchingMutation(Character foundBase, AAMutation searchedMutation) {
-        Character mutationBase = searchedMutation.getMutation();
-        if (mutationBase == null) {
-            // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (X)
-            return foundBase != 'X' && foundBase != referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                searchedMutation.getPosition());
-        } else if (mutationBase == '.') {
-            // Check whether the base is not mutated, i.e., equals the base of the reference genome
-            return foundBase == referenceGenome.getGeneAABase(searchedMutation.getGene(),
-                searchedMutation.getPosition());
-        } else {
-            return foundBase == mutationBase;
-        }
     }
 
 

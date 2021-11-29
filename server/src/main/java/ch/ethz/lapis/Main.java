@@ -3,6 +3,7 @@ package ch.ethz.lapis;
 import ch.ethz.lapis.core.Config;
 import ch.ethz.lapis.core.ConfigurationManager;
 import ch.ethz.lapis.core.SubProgram;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;

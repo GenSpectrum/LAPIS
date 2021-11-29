@@ -3,12 +3,30 @@ package ch.ethz.lapis.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PangoLineageQueryToSqlLikesConverter {
+public class PangoLineageQueryConverter {
+
+    public class PangoLineageQueryMatch {
+        private final List<String> exact;
+        private final List<String> prefix;
+
+        public PangoLineageQueryMatch(List<String> exact, List<String> prefix) {
+            this.exact = exact;
+            this.prefix = prefix;
+        }
+
+        public List<String> getExact() {
+            return exact;
+        }
+
+        public List<String> getPrefix() {
+            return prefix;
+        }
+    }
 
     private final PangoLineageAliasResolver pangoLineageAliasResolver;
 
 
-    public PangoLineageQueryToSqlLikesConverter(List<PangoLineageAlias> aliases) {
+    public PangoLineageQueryConverter(List<PangoLineageAlias> aliases) {
         this.pangoLineageAliasResolver = new PangoLineageAliasResolver(aliases);
     }
 
@@ -23,7 +41,7 @@ public class PangoLineageQueryToSqlLikesConverter {
      * <p>
      * Example: "B.1.2*" will return [B.1.2, B.1.2.%].
      */
-    public String[] convert(String query) {
+    public String[] convertToSqlLikes(String query) {
         String finalQuery = query.toUpperCase();
 
         // Resolve aliases
@@ -51,6 +69,21 @@ public class PangoLineageQueryToSqlLikesConverter {
             }
         }
         return result.toArray(new String[0]);
+    }
+
+
+    public PangoLineageQueryMatch convert(String query) {
+        String[] sqlLikes = convertToSqlLikes(query);
+        List<String> exact = new ArrayList<>();
+        List<String> prefix = new ArrayList<>();
+        for (String sqlLike : sqlLikes) {
+            if (!sqlLike.endsWith("%")) {
+                exact.add(sqlLike);
+            } else {
+                prefix.add(sqlLike.substring(0, sqlLike.length() - 1));
+            }
+        }
+        return new PangoLineageQueryMatch(exact, prefix);
     }
 
 }
