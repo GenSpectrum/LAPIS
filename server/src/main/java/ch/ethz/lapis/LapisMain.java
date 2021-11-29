@@ -1,11 +1,5 @@
 package ch.ethz.lapis;
 
-import ch.ethz.lapis.api.VariantQueryListener;
-import ch.ethz.lapis.api.parser.VariantQueryLexer;
-import ch.ethz.lapis.api.parser.VariantQueryParser;
-import ch.ethz.lapis.api.query.DataStore;
-import ch.ethz.lapis.api.query.ThrowingErrorListener;
-import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
@@ -15,21 +9,14 @@ import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 
 @SpringBootApplication
@@ -41,35 +28,6 @@ public class LapisMain extends SubProgram<LapisConfig> {
 
     public LapisMain() {
         super("Lapis", LapisConfig.class);
-    }
-
-    private void test() {
-        String query = "P.1 | S:484K &".toUpperCase();
-        VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(query));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        VariantQueryParser parser = new VariantQueryParser(tokens);
-        parser.removeErrorListeners();
-        parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-        ParseTree tree = parser.start();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        VariantQueryListener listener = new VariantQueryListener();
-        walker.walk(listener, tree);
-        VariantQueryExpr expr = listener.getExpr();
-
-        DataStore dataStore = new DataStore();
-        for (int i = 0; i < 10; i++) {
-            Instant start = Instant.now();
-            boolean[] filtered = expr.evaluate(dataStore);
-            Instant finish = Instant.now();
-            long timeElapsed = Duration.between(start, finish).toMillis();
-            System.out.println("time: " + timeElapsed);
-            long count = IntStream.range(0, filtered.length)
-                .mapToObj(j -> filtered[j])
-                .filter(b -> b)
-                .count();
-            System.out.println("  found: " + count);
-        }
-        System.exit(0);
     }
 
     @Override

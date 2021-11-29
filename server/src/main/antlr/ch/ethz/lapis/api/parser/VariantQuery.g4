@@ -17,12 +17,12 @@ grammar VariantQuery;
 
 start: expr EOF;
 expr:
-	single						# Uni
-	| '!' expr				# Neg
-	| expr '&' expr		# And
-	| expr '|' expr		# Or
-	| '(' expr ')'		# Par
-	;
+  single             # Uni
+  | '!' expr         # Neg
+  | expr '&' expr    # And
+  | expr '|' expr    # Or
+  | '(' expr ')'     # Par
+  ;
 single: aa_mut | nuc_mut | pango_query | gisaid_clade_query | nextstrain_clade_query;
 
 nuc_mut : nuc? position nuc_mutated?;
