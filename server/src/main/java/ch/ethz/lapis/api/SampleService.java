@@ -649,7 +649,7 @@ public class SampleService {
     private Set<Integer> getIdsFromVariantQuery(String variantQuery) {
         VariantQueryExpr expr;
         try {
-            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery));
+            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
             VariantQueryParser parser = new VariantQueryParser(tokens);
             parser.removeErrorListeners();
