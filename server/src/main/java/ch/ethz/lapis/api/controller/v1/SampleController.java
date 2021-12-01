@@ -324,7 +324,7 @@ public class SampleController {
         if (allowCaching) {
             return CacheControl.maxAge(1, TimeUnit.DAYS);
         } else {
-            return CacheControl.noCache();
+            return CacheControl.noStore();
         }
     }
 
