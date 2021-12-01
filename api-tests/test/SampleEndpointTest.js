@@ -59,7 +59,8 @@ describe('Endpoint sample/aa-mutations', () => {
         elements: {
           properties: {
             mutation: {type: 'string'},
-            proportion: {type: 'float64'}
+            proportion: {type: 'float64'},
+            count: {type: 'uint32'}
           }
         }
       }))
@@ -73,7 +74,8 @@ describe('Endpoint sample/aa-mutations', () => {
         elements: {
           properties: {
             mutation: {type: 'string'},
-            proportion: {type: 'float64'}
+            proportion: {type: 'float64'},
+            count: {type: 'uint32'}
           }
         }
       }))
@@ -92,7 +94,8 @@ describe('Endpoint sample/nuc-mutations', () => {
         elements: {
           properties: {
             mutation: {type: 'string'},
-            proportion: {type: 'float64'}
+            proportion: {type: 'float64'},
+            count: {type: 'uint32'}
           }
         }
       }))
@@ -107,7 +110,8 @@ describe('Endpoint sample/nuc-mutations', () => {
           elements: {
             properties: {
               mutation: {type: 'string'},
-              proportion: {type: 'float64'}
+              proportion: {type: 'float64'},
+              count: {type: 'uint32'}
             }
           }
         }))

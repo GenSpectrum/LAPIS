@@ -13,13 +13,14 @@ const generalSchema = {
         apiVersion: {type: 'uint32'},
         dataVersion: {type: 'int32'},
         deprecationDate: {type: 'timestamp', nullable: true},
-        deprecationInfo: {type: 'string', nullable: true}
+        deprecationInfo: {type: 'string', nullable: true},
+        acknowledgement: {type: 'string', nullable: true},
       }
     },
     errors: {
       elements: {}
     },
-    payload: {}
+    data: {}
   }
 };
 
