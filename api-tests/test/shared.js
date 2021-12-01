@@ -27,8 +27,8 @@ const hasNoErrorEntries = (res) => {
 
 const hasNoPayload = (res) => {
   const body = res.body;
-  if (body.payload !== null) {
-    throw new Error('Found payload');
+  if (body.data !== null) {
+    throw new Error('Found data');
   }
 };
 
@@ -51,8 +51,8 @@ const isNotOkay = (req) => {
 const checkPayloadFromSchema = (schema) => {
   return (res) => {
     const validate = ajv.compile(schema);
-    if (!validate(res.body.payload)) {
-      throw new Error('The payload has the wrong schema: \n' + JSON.stringify(validate.errors, null, 2));
+    if (!validate(res.body.data)) {
+      throw new Error('The data has the wrong schema: \n' + JSON.stringify(validate.errors, null, 2));
     }
   };
 }

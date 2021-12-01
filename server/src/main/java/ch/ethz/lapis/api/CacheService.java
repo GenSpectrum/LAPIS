@@ -3,6 +3,7 @@ package ch.ethz.lapis.api;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.controller.v1.SampleController;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
+import ch.ethz.lapis.api.entity.req.GeneralConfig;
 import ch.ethz.lapis.api.entity.req.MutationRequest;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.util.DeflateSeqCompressor;
@@ -38,15 +39,15 @@ public class CacheService {
     private static final Map<String, BiConsumer<SampleController, Object>> endpointToPreComputation = new HashMap<>() {{
         put(SupportedEndpoints.SAMPLE_AGGREGATED, (sampleController, obj) -> {
             SampleAggregatedRequest request = (SampleAggregatedRequest) obj;
-            sampleController.getAggregated(request);
+            sampleController.getAggregated(request, new GeneralConfig());
         });
         put(SupportedEndpoints.SAMPLE_AA_MUTATIONS, (sampleController, obj) -> {
             MutationRequest request = (MutationRequest) obj;
-            sampleController.getAAMutations(request);
+            sampleController.getAAMutations(request, new GeneralConfig());
         });
         put(SupportedEndpoints.SAMPLE_NUC_MUTATIONS, (sampleController, obj) -> {
             MutationRequest request = (MutationRequest) obj;
-            sampleController.getNucMutations(request);
+            sampleController.getNucMutations(request, new GeneralConfig());
         });
     }};
     private final JedisPool pool = new JedisPool(LapisMain.globalConfig.getRedisHost(),

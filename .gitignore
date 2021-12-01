@@ -2,4 +2,7 @@
 .idea/
 *.iml
 
+# Personal preference
+playground/
+
 docker-compose.override.yml
