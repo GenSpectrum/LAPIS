@@ -51,6 +51,12 @@ public class SampleController {
     }
 
 
+    @GetMapping("/info")
+    public Information getInfo() {
+        return new V1Response<>(null, dataVersionService.getVersion(), openness).getInfo();
+    }
+
+
     @GetMapping(
         value = "/aggregated",
         produces = "application/json"
