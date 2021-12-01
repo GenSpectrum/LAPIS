@@ -11,9 +11,11 @@ import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
 import ch.ethz.lapis.api.exception.ForbiddenException;
 import ch.ethz.lapis.api.exception.GisaidLimitationException;
+import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 
@@ -61,7 +64,8 @@ public class SampleController {
         value = "/aggregated",
         produces = "application/json"
     )
-    public ResponseEntity<String> getAggregated(SampleAggregatedRequest request) {
+    public ResponseEntity<String> getAggregated(SampleAggregatedRequest request, GeneralConfig generalConfig) {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
@@ -76,29 +80,36 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respondWithEtag(body, cacheKey);
+        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
     }
 
 
     @GetMapping("/details")
-    public V1Response<SampleDetailResponse> getDetails(
+    public ResponseEntity<V1Response<SampleDetailResponse>> getDetails(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
-        return new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness);
+        return respond(
+            new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness),
+            generalConfig.getDataVersion() != null
+        );
     }
 
 
     @GetMapping("/contributors")
-    public V1Response<ContributorResponse> getContributors(
+    public ResponseEntity<V1Response<ContributorResponse>> getContributors(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
@@ -110,7 +121,10 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
-        return new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness);
+        return respond(
+            new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness),
+            generalConfig.getDataVersion() != null
+        );
     }
 
 
@@ -118,10 +132,12 @@ public class SampleController {
         value = "/strain-names",
         produces = "text/plain"
     )
-    public String getStrainNames(
+    public ResponseEntity<String> getStrainNames(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
@@ -134,7 +150,7 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<String> strainNames = sampleService.getStrainNames(request, limitAndOrder);
-        return String.join("\n", strainNames);
+        return respond(String.join("\n", strainNames), generalConfig.getDataVersion() != null);
     }
 
 
@@ -142,10 +158,12 @@ public class SampleController {
         value = "/gisaid-epi-isl",
         produces = "text/plain"
     )
-    public String getGisaidEpiIsls(
+    public ResponseEntity<String> getGisaidEpiIsls(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
@@ -158,7 +176,7 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request, limitAndOrder);
-        return String.join("\n", gisaidEpiIsls);
+        return respond(String.join("\n", gisaidEpiIsls), generalConfig.getDataVersion() != null);
     }
 
 
@@ -166,7 +184,8 @@ public class SampleController {
         value = "/aa-mutations",
         produces = "application/json"
     )
-    public ResponseEntity<String> getAAMutations(MutationRequest request) {
+    public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
@@ -187,7 +206,7 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respondWithEtag(body, cacheKey);
+        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
     }
 
 
@@ -195,7 +214,8 @@ public class SampleController {
         value = "/nuc-mutations",
         produces = "application/json"
     )
-    public ResponseEntity<String> getNucMutations(MutationRequest request) {
+    public ResponseEntity<String> getNucMutations(MutationRequest request, GeneralConfig generalConfig) {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
@@ -216,7 +236,7 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respondWithEtag(body, cacheKey);
+        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
     }
 
 
@@ -224,15 +244,20 @@ public class SampleController {
         value = "/fasta",
         produces = "text/x-fasta"
     )
-    public String getFasta(
+    public ResponseEntity<String> getFasta(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
-        return sampleService.getFasta(request, false, limitAndOrder);
+        return respond(
+            sampleService.getFasta(request, false, limitAndOrder),
+            generalConfig.getDataVersion() != null
+        );
     }
 
 
@@ -240,15 +265,20 @@ public class SampleController {
         value = "/fasta-aligned",
         produces = "text/x-fasta"
     )
-    public String getAlignedFasta(
+    public ResponseEntity<String> getAlignedFasta(
         SampleDetailRequest request,
+        GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
     ) throws SQLException {
+        checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
-        return sampleService.getFasta(request, true, limitAndOrder);
+        return respond(
+            sampleService.getFasta(request, true, limitAndOrder),
+            generalConfig.getDataVersion() != null
+        );
     }
 
 
@@ -268,16 +298,33 @@ public class SampleController {
         return response;
     }
 
-    private <T> ResponseEntity<T> respondWithEtag(T body, ApiCacheKey cacheKey) {
+    private <T> ResponseEntity<T> respond(T body, boolean allowCaching) {
+        return ResponseEntity.ok()
+            .cacheControl(cacheControl(allowCaching))
+            .body(body);
+    }
+
+
+    private <T> ResponseEntity<T> respond(T body, boolean allowCaching, ApiCacheKey cacheKey) {
         try {
             String cacheKeyString = objectMapper.writeValueAsString(cacheKey);
             String cacheKeyHash = DigestUtils.md5DigestAsHex(cacheKeyString.getBytes(StandardCharsets.UTF_8));
             String etag = cacheKeyHash + "-" + dataVersionService.getVersion();
             return ResponseEntity.ok()
                 .eTag(etag)
+                .cacheControl(cacheControl(allowCaching))
                 .body(body);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    private CacheControl cacheControl(boolean allowCaching) {
+        if (allowCaching) {
+            return CacheControl.maxAge(1, TimeUnit.DAYS);
+        } else {
+            return CacheControl.noCache();
         }
     }
 
@@ -289,6 +336,18 @@ public class SampleController {
                 || (request.getAaMutations() != null && !request.getAaMutations().isEmpty())
                 || (request.getNucMutations() != null && !request.getNucMutations().isEmpty()))) {
             throw new RedundantVariantDefinition();
+        }
+    }
+
+
+    /**
+     * This function throws an OutdatedDataVersionException if the requested dataVersion does not exist anymore.
+     */
+    private void checkDataVersion(Long dataVersion) {
+        if (dataVersion != null) {
+            if (dataVersion != dataVersionService.getVersion()) {
+                throw new OutdatedDataVersionException(dataVersion, dataVersionService.getVersion());
+            }
         }
     }
 
