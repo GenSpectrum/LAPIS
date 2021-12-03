@@ -16,6 +16,7 @@ import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -300,6 +301,7 @@ public class SampleController {
 
     private <T> ResponseEntity<T> respond(T body, boolean allowCaching) {
         return ResponseEntity.ok()
+            .headers(headers(dataVersionService.getVersion()))
             .cacheControl(cacheControl(allowCaching))
             .body(body);
     }
@@ -312,11 +314,19 @@ public class SampleController {
             String etag = cacheKeyHash + "-" + dataVersionService.getVersion();
             return ResponseEntity.ok()
                 .eTag(etag)
+                .headers(headers(dataVersionService.getVersion()))
                 .cacheControl(cacheControl(allowCaching))
                 .body(body);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private HttpHeaders headers(long dataVersion) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("LAPIS-Data-Version", String.valueOf(dataVersion));
+        return httpHeaders;
     }
 
 
