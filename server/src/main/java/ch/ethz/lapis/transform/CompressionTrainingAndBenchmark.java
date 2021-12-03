@@ -155,8 +155,8 @@ public class CompressionTrainingAndBenchmark {
 
         List<Pair<String, SeqCompressor>> compressors = new ArrayList<>() {{
             add(new Pair<>("zstdReference", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE)));
-            add(new Pair<>("zstdNuc", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.ATCGNDEL)));
-            add(new Pair<>("zstdAA", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AACODONS)));
+//            add(new Pair<>("zstdNuc", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.ATCGNDEL)));
+//            add(new Pair<>("zstdAA", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AACODONS)));
 //            add(new Pair<>("zstdOriginal", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.SEQ_ORIGINAL)));
 //            add(new Pair<>("zstdAligned", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.SEQ_ALIGNED)));
             add(new Pair<>("zstdNone", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE)));

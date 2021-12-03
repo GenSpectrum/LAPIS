@@ -14,9 +14,6 @@ public class ZstdSeqCompressor implements SeqCompressor {
     public ZstdSeqCompressor(DICT dictionary) {
         String name = switch (dictionary) {
             case REFERENCE -> "/reference-dictionary.txt";
-            case ATCGNDEL -> "/simple-ATCGNdel-dictionary.txt";
-            case AASEQ -> "/aa-seq-dictionary.txt";
-            case AACODONS -> "/simple-AAcodons-dictionary.txt";
             case NONE -> null;
         };
         if (name == null) {
@@ -67,9 +64,6 @@ public class ZstdSeqCompressor implements SeqCompressor {
 
     public enum DICT {
         REFERENCE,
-        ATCGNDEL,
-        AASEQ,
-        AACODONS,
         NONE
     }
 }
