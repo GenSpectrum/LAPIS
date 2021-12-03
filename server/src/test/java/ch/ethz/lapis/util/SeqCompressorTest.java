@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SeqCompressorTest {
 
     public static Stream<Arguments> arguments = Stream.of(
-        Arguments.of(new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL))
+        Arguments.of(new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL)),
+        Arguments.of(new ZstdSeqCompressor(ZstdSeqCompressor.DICT.ATCGNDEL))
     );
 
     @ParameterizedTest
