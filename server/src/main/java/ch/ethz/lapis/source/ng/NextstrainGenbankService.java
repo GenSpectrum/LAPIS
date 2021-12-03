@@ -2,11 +2,7 @@ package ch.ethz.lapis.source.ng;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.FastaFileReader;
-import ch.ethz.lapis.util.SeqCompressor;
-import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +35,7 @@ public class NextstrainGenbankService {
     private final Path workdir;
     private final int maxNumberWorkers;
     private final Path nextalignPath;
-    private final SeqCompressor seqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
 
     public NextstrainGenbankService(
         ComboPooledDataSource databasePool,

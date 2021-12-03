@@ -1,6 +1,7 @@
 package ch.ethz.lapis.transform;
 
-import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import org.javatuples.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class SequenceRowToColumnTransformerTest {
             2,
             5
         );
-        DeflateSeqCompressor compressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.NONE);
+        SeqCompressor compressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
         List<String> sequences = new ArrayList<>() {{
             add("ABCDEFGHIJKLMNOP");
             add("abcdefghijklmnop");

@@ -1,12 +1,9 @@
 package ch.ethz.lapis.source.ng;
 
-import ch.ethz.lapis.util.DeflateSeqCompressor;
-import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.FastaFileReader;
-import ch.ethz.lapis.util.ReferenceGenomeData;
-import ch.ethz.lapis.util.SeqCompressor;
-import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.io.FileUtils;
+
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -20,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 
 public class NextstrainGenbankMutationAAWorker {
 
@@ -30,7 +26,7 @@ public class NextstrainGenbankMutationAAWorker {
     private final Path referenceFasta;
     private final Path geneMapGff;
     private final Path nextalignPath;
-    private final SeqCompressor nucSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
     public NextstrainGenbankMutationAAWorker(
         int id,
         ComboPooledDataSource databasePool,
