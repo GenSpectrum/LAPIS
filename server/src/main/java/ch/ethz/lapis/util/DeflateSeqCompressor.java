@@ -16,7 +16,7 @@ public class DeflateSeqCompressor implements SeqCompressor {
         String name = switch (dictionary) {
             case REFERENCE -> "/reference-dictionary.txt";
             case ATCGNDEL -> "/simple-ATCGNdel-dictionary.txt";
-            case AASEQ -> "/aa-seq-dictionary.txt";
+            case AA_REFERENCE -> "/aa-seq-dictionary.txt";
             case AACODONS -> "/simple-AAcodons-dictionary.txt";
             case NONE -> null;
         };
@@ -76,7 +76,7 @@ public class DeflateSeqCompressor implements SeqCompressor {
     public enum DICT {
         REFERENCE,
         ATCGNDEL,
-        AASEQ,
+        AA_REFERENCE,
         AACODONS,
         NONE
     }
