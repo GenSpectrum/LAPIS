@@ -357,7 +357,7 @@ public class TransformService {
     public void transformAASeqsToColumnar() throws SQLException {
         // We process the data gene by gene
         String sql1 = """
-            select mm.id, aas.aa_seq
+            select mm.id, aas.aa_seq_compressed
             from
               y_main_metadata_staging mm
               left join (
@@ -370,7 +370,7 @@ public class TransformService {
         for (String gene : ReferenceGenomeData.getInstance().getGeneNames()) {
             System.out.println(LocalDateTime.now() + "Gene " + gene + " - Start processing");
             // Load all amino acid sequences and their IDs
-            List<String> aaSequences = new ArrayList<>();
+            List<byte[]> aaSequences = new ArrayList<>();
             int idCounter = 0;
             try (Connection conn = databasePool.getConnection()) {
                 try (PreparedStatement statement = conn.prepareStatement(sql1)) {
@@ -378,7 +378,7 @@ public class TransformService {
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
                             int id = rs.getInt("id");
-                            String seq = rs.getString("aa_seq");
+                            byte[] seq = rs.getBytes("aa_seq_compressed");
                             if (id != idCounter) {
                                 throw new RuntimeException("Weird.. I expected ID=" + idCounter + " but got " + id);
                             }
@@ -396,7 +396,7 @@ public class TransformService {
             SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 2500);
             transformer.transform(
                 aaSequences,
-                (a) -> a,
+                aaSeqCompressor::decompress,
                 (pos, result) -> {
                     String sql2 = """
                         insert into y_main_aa_sequence_columnar_staging (position, gene, data_compressed)
