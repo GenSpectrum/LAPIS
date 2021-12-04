@@ -36,7 +36,10 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Statement;
 import java.sql.*;
 import java.util.*;
@@ -505,20 +508,22 @@ public class SampleService {
     }
 
 
-    public String getFasta(
+    public void getFasta(
         SampleDetailRequest request,
         boolean aligned,
-        OrderAndLimitConfig orderAndLimit
-    ) throws SQLException {
+        OrderAndLimitConfig orderAndLimit,
+        OutputStream outputStream
+    ) {
         Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
-            return "";
+            return;
         }
 
-        StringBuilder fastaBuilder = new StringBuilder();
-
         // Filter further by the other metadata and prepare the response
-        try (Connection conn = getDatabaseConnection()) {
+        Connection conn = null;
+        try {
+            conn = getDatabaseConnection();
+            conn.setAutoCommit(false);
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
             YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;
             YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
@@ -527,10 +532,10 @@ public class SampleService {
                 seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
 
             List<Condition> conditions = getConditions(request, metaTbl);
-            Result<Record2<String, byte[]>> records;
+            SelectLimitPercentStep<Record2<String, byte[]>> statement;
             if (ids != null) {
                 Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
+                statement = ctx
                     .select(metaTbl.GENBANK_ACCESSION, seqColumn)
                     .from(
                         idsTbl
@@ -538,55 +543,64 @@ public class SampleService {
                             .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
                     )
                     .where(conditions)
-                    .limit(orderAndLimit.getLimit() != null ? Math.min(1000, orderAndLimit.getLimit()) : 1000);
-                records = statement.fetch();
+                    .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
             } else {
-                var statement = ctx
+                statement = ctx
                     .select(metaTbl.GENBANK_ACCESSION, seqColumn)
                     .from(
                         metaTbl
                             .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
                     )
                     .where(conditions)
-                    .limit(orderAndLimit.getLimit() != null ? Math.min(1000, orderAndLimit.getLimit()) : 1000);
-                records = statement.fetch();
+                    .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
             }
-            for (var r : records) {
-                fastaBuilder
-                    .append(">")
-                    .append(r.get(metaTbl.GENBANK_ACCESSION))
-                    .append("\n")
-                    .append(referenceSeqCompressor.decompress(r.get(seqColumn)))
-                    .append("\n\n");
+            Cursor<Record2<String, byte[]>> cursor = statement.fetchSize(1000).fetchLazy();
+            for (Record2<String, byte[]> r : cursor) {
+                outputStream.write(
+                    (">" +  r.get(metaTbl.GENBANK_ACCESSION) + "\n" +
+                        referenceSeqCompressor.decompress(r.get(seqColumn)) + "\n\n").getBytes(StandardCharsets.UTF_8)
+                    );
+            }
+        } catch (IOException | SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ignored) {}
             }
         }
-        return fastaBuilder.toString();
     }
 
 
     /**
      * This function filters either by mutations or by the variantQuery if one of them is requested.
      */
-    private Set<Integer> preFilterIds(SampleFilter<?> sampleFilter) throws SQLException {
-        List<NucMutation> nucMutations = sampleFilter.getNucMutations();
-        List<AAMutation> aaMutations = sampleFilter.getAaMutations();
-        String variantQuery = sampleFilter.getVariantQuery();
+    private Set<Integer> preFilterIds(SampleFilter<?> sampleFilter) {
+        try {
+            List<NucMutation> nucMutations = sampleFilter.getNucMutations();
+            List<AAMutation> aaMutations = sampleFilter.getAaMutations();
+            String variantQuery = sampleFilter.getVariantQuery();
 
-        if ((nucMutations != null && !nucMutations.isEmpty())
-            || (aaMutations != null && !aaMutations.isEmpty())) {
-            if (variantQuery != null) {
-                throw new RuntimeException("It is not allowed to use the nucMutations/aaMutations and variantQuery " +
-                    "fields at the same time.");
+            if ((nucMutations != null && !nucMutations.isEmpty())
+                || (aaMutations != null && !aaMutations.isEmpty())) {
+                if (variantQuery != null) {
+                    throw new RuntimeException("It is not allowed to use the nucMutations/aaMutations and variantQuery " +
+                        "fields at the same time.");
+                }
+
+                return getIdsFromMutationFilters(nucMutations, aaMutations);
             }
 
-            return getIdsFromMutationFilters(nucMutations, aaMutations);
-        }
+            if (variantQuery != null) {
+                return getIdsFromVariantQuery(variantQuery);
+            }
 
-        if (variantQuery != null) {
-            return getIdsFromVariantQuery(variantQuery);
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-
-        return null;
     }
 
 

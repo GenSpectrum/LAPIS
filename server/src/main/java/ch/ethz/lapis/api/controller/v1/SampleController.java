@@ -22,6 +22,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -245,7 +246,7 @@ public class SampleController {
         value = "/fasta",
         produces = "text/x-fasta"
     )
-    public ResponseEntity<String> getFasta(
+    public ResponseEntity<StreamingResponseBody> getFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
@@ -255,8 +256,10 @@ public class SampleController {
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
+        StreamingResponseBody responseBody = response ->
+            sampleService.getFasta(request, false, limitAndOrder, response);
         return respond(
-            sampleService.getFasta(request, false, limitAndOrder),
+            responseBody,
             generalConfig.getDataVersion() != null
         );
     }
@@ -266,18 +269,20 @@ public class SampleController {
         value = "/fasta-aligned",
         produces = "text/x-fasta"
     )
-    public ResponseEntity<String> getAlignedFasta(
+    public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
+        StreamingResponseBody responseBody = response ->
+            sampleService.getFasta(request, true, limitAndOrder, response);
         return respond(
-            sampleService.getFasta(request, true, limitAndOrder),
+            responseBody,
             generalConfig.getDataVersion() != null
         );
     }
