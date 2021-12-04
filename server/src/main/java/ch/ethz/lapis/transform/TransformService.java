@@ -1,15 +1,23 @@
 package ch.ethz.lapis.transform;
 
 import ch.ethz.lapis.LapisConfig;
+import ch.ethz.lapis.core.DatabaseReaderQueueBuilder;
+import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
+import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.javatuples.Triplet;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class TransformService {
@@ -17,6 +25,7 @@ public class TransformService {
     private final ComboPooledDataSource databasePool;
     private final int maxNumberWorkers;
     private final SeqCompressor alignedSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
     private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
 
     public TransformService(ComboPooledDataSource databasePool, int maxNumberWorkers) {
@@ -35,6 +44,8 @@ public class TransformService {
         } else if (source == LapisConfig.Source.GISAID) {
             pullFromGisaidTable();
         }
+        // Compress AA sequences
+        compressAASeqs();
         // Fill the table y_main_sequence_columnar_staging
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
@@ -208,6 +219,83 @@ public class TransformService {
             conn.commit();
             conn.setAutoCommit(true);
         }
+    }
+
+
+    public void compressAASeqs() throws SQLException, InterruptedException {
+        // We will use a Triplet to store the elements.
+        // Triplet<Integer, String, String> = (id, gene, aa_seq)
+
+        // Fetch the uncompressed AA sequences
+        ExhaustibleBlockingQueue<List<Triplet<Integer, String, String>>> batches;
+        String fetchSql = """
+            select id, gene, aa_seq
+            from y_main_aa_sequence_staging;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
+                var elementQueue = new DatabaseReaderQueueBuilder<>(
+                    statement,
+                    (rs) -> {
+                        try {
+                            return new Triplet<>(rs.getInt("id"), rs.getString("gene"), rs.getString("aa_seq"));
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    3000, 3000
+                ).build();
+                batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 1000, 30);
+            }
+        }
+
+        // Compress and write to database
+        ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
+        for (int i = 0; i < maxNumberWorkers; i++) {
+            executor.submit(() -> {
+                try {
+                    while (!batches.isEmpty() || !batches.isExhausted()) {
+                        // Get a batch from the queue
+                        List<Triplet<Integer, String, String>> batch = batches.poll(3, TimeUnit.SECONDS);
+                        if (batch == null) {
+                            continue;
+                        }
+                        // Compress
+                        List<Triplet<Integer, String, byte[]>> compressed = new ArrayList<>();
+                        for (Triplet<Integer, String, String> entry : batch) {
+                            compressed.add(new Triplet<>(
+                                entry.getValue0(),
+                                entry.getValue1(),
+                                aaSeqCompressor.compress(entry.getValue2())
+                            ));
+                        }
+                        // Write to database
+                        String insertSql = """
+                            update y_main_aa_sequence_staging
+                            set aa_seq_compressed = ?
+                            where id = ? and gene = ?;
+                            """;
+                        try (Connection conn = databasePool.getConnection()) {
+                            conn.setAutoCommit(false);
+                            try (PreparedStatement statement = conn.prepareStatement(insertSql)) {
+                                for (Triplet<Integer, String, byte[]> entry : compressed) {
+                                    statement.setBytes(1, entry.getValue2());
+                                    statement.setInt(2, entry.getValue0());
+                                    statement.setString(3, entry.getValue1());
+                                    statement.addBatch();
+                                }
+                                Utils.executeClearCommitBatch(conn, statement);
+                            }
+                            conn.setAutoCommit(true);
+                        }
+                    }
+                } catch (InterruptedException | SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+        executor.shutdown();
+        executor.awaitTermination(30, TimeUnit.DAYS);
     }
 
 
