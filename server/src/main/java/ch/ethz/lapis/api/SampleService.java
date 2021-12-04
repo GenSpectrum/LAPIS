@@ -556,10 +556,12 @@ public class SampleService {
             }
             Cursor<Record2<String, byte[]>> cursor = statement.fetchSize(1000).fetchLazy();
             for (Record2<String, byte[]> r : cursor) {
-                outputStream.write(
-                    (">" +  r.get(metaTbl.GENBANK_ACCESSION) + "\n" +
-                        referenceSeqCompressor.decompress(r.get(seqColumn)) + "\n\n").getBytes(StandardCharsets.UTF_8)
-                    );
+                outputStream.write(">".getBytes(StandardCharsets.UTF_8));
+                outputStream.write(r.get(metaTbl.GENBANK_ACCESSION).getBytes(StandardCharsets.UTF_8));
+                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
+                    .getBytes(StandardCharsets.UTF_8));
+                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
