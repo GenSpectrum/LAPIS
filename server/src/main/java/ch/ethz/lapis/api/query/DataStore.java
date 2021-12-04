@@ -13,10 +13,7 @@ import java.util.List;
 public class DataStore {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
-    private static final SeqCompressor nucMutationColumnarCompressor
-        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
-    private static final SeqCompressor aaMutationColumnarCompressor
-        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+    private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
     private final PangoLineageQueryConverter pangoLineageQueryConverter;
 
     private String[] pangoLineageArray;
@@ -128,7 +125,7 @@ public class DataStore {
                         return null;
                     }
                     byte[] compressed = rs.getBytes("data_compressed");
-                    return nucMutationColumnarCompressor.decompress(compressed).toCharArray();
+                    return columnarCompressor.decompress(compressed).toCharArray();
                 }
             }
         } catch (SQLException e) {
@@ -151,7 +148,7 @@ public class DataStore {
                         return null;
                     }
                     byte[] compressed = rs.getBytes("data_compressed");
-                    return aaMutationColumnarCompressor.decompress(compressed).toCharArray();
+                    return columnarCompressor.decompress(compressed).toCharArray();
                 }
             }
         } catch (SQLException e) {

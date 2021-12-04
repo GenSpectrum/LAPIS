@@ -47,11 +47,8 @@ public class SampleService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private static final SeqCompressor referenceSeqCompressor
-        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
-    private static final SeqCompressor nucMutationColumnarCompressor
-        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL);
-    private static final SeqCompressor aaMutationColumnarCompressor
-        = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+        = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
     private final PangoLineageQueryConverter pangoLineageParser;
     private final DataStore dataStore;
@@ -876,7 +873,7 @@ public class SampleService {
                         int position = rs.getInt("position");
                         NucMutation searchedMutation = positionToMutation.get(position);
                         byte[] compressed = rs.getBytes("data_compressed");
-                        char[] nucleotides = nucMutationColumnarCompressor.decompress(compressed).toCharArray();
+                        char[] nucleotides = columnarCompressor.decompress(compressed).toCharArray();
                         if (foundIds == null) {
                             // If this is the first round, search all sequences
                             foundIds = new ArrayList<>();
@@ -931,7 +928,7 @@ public class SampleService {
                 String gene = record.value1();
                 int position = record.value2();
                 byte[] compressed = record.value3();
-                char[] aaCodons = aaMutationColumnarCompressor.decompress(compressed).toCharArray();
+                char[] aaCodons = columnarCompressor.decompress(compressed).toCharArray();
                 AAMutation searchedMutation = genePositionToMutation.get(encodeGenePosition(gene, position));
                 if (foundIds == null) {
                     // If this is the first round, search all sequences

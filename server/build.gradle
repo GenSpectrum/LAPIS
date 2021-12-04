@@ -29,11 +29,13 @@ dependencies {
     implementation 'org.simplejavamail:simple-java-mail:6.5.3'
     implementation 'org.jooq:jooq:3.14.8'
     implementation 'redis.clients:jedis:3.7.0'
+    implementation 'com.github.luben:zstd-jni:1.5.0-4'
 
     antlr "org.antlr:antlr4:4.9.3"
     implementation "org.antlr:antlr4-runtime:4.9.3"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
 }
 
 generateGrammarSource {

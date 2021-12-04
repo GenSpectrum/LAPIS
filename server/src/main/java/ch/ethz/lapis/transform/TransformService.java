@@ -1,9 +1,9 @@
 package ch.ethz.lapis.transform;
 
 import ch.ethz.lapis.LapisConfig;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.sql.*;
@@ -16,10 +16,8 @@ public class TransformService {
 
     private final ComboPooledDataSource databasePool;
     private final int maxNumberWorkers;
-    private final SeqCompressor alignedSeqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
-    private final SeqCompressor nucMutationColumnarCompressor = new DeflateSeqCompressor(
-        DeflateSeqCompressor.DICT.ATCGNDEL);
-    private final SeqCompressor aaColumnarCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS);
+    private final SeqCompressor alignedSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
 
     public TransformService(ComboPooledDataSource databasePool, int maxNumberWorkers) {
         this.databasePool = databasePool;
@@ -262,7 +260,7 @@ public class TransformService {
                     throw new RuntimeException(e);
                 }
             },
-            nucMutationColumnarCompressor::compress,
+            columnarCompressor::compress,
             'N'
         );
     }
@@ -333,7 +331,7 @@ public class TransformService {
                         throw e;
                     }
                 },
-                aaColumnarCompressor::compress,
+                columnarCompressor::compress,
                 'X'
             );
         }

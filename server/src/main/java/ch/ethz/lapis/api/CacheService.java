@@ -6,7 +6,8 @@ import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.req.GeneralConfig;
 import ch.ethz.lapis.api.entity.req.MutationRequest;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -53,7 +54,7 @@ public class CacheService {
     private final JedisPool pool = new JedisPool(LapisMain.globalConfig.getRedisHost(),
         LapisMain.globalConfig.getRedisPort());
     private final ObjectMapper objectMapper;
-    private final DeflateSeqCompressor compressor;
+    private final SeqCompressor compressor;
     private final SampleController sampleController;
     public CacheService(@Lazy SampleController sampleController) {
         this.sampleController = sampleController;
@@ -61,7 +62,7 @@ public class CacheService {
         objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        compressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.NONE);
+        compressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
     }
 
     public String getCompressedString(ApiCacheKey cacheKey) {

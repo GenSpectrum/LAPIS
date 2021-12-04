@@ -2,16 +2,16 @@ package ch.ethz.lapis.source.gisaid;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
-import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.tukaani.xz.XZInputStream;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -21,31 +21,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.tukaani.xz.XZInputStream;
 
 
 public class GisaidService {
@@ -55,7 +42,7 @@ public class GisaidService {
     private final int maxNumberWorkers;
     private final Path nextalignPath;
     private final GisaidApiConfig gisaidApiConfig;
-    private final SeqCompressor seqCompressor = new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
     private final int batchSize = 100;
     private final Path geoLocationRulesFile;
 
