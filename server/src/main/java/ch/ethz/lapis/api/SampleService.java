@@ -761,6 +761,9 @@ public class SampleService {
         if (request.getHost() != null) {
             conditions.add(tbl.HOST.eq(request.getHost()));
         }
+        if (request.getSamplingStrategy() != null) {
+            conditions.add(tbl.SAMPLING_STRATEGY.eq(request.getSamplingStrategy()));
+        }
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
             String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
