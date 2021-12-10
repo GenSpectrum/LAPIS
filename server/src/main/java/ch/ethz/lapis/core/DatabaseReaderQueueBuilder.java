@@ -39,13 +39,16 @@ public class DatabaseReaderQueueBuilder<T> {
         statement.setFetchSize(this.fetchSize);
         Thread fetcherThread = new Thread(() -> {
             try (ResultSet rs = statement.executeQuery()) {
+                System.out.println("DatabaseReaderQueueBuilder: Start fetching");
                 while (rs.next()) {
                     T job = this.convertFunction.apply(rs);
                     queue.put(job);
                 }
                 queue.setExhausted(true);
+                System.out.println("DatabaseReaderQueueBuilder: Finished");
             } catch (SQLException e) {
                 e.printStackTrace();
+                throw new RuntimeException(e);
             } catch (InterruptedException ignored) {
             } finally {
                 try {

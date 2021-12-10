@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
@@ -66,9 +65,11 @@ public class SequenceRowToColumnTransformer {
             for (int iteration = 0; iteration < numberIterations; iteration++) {
                 final int startPos = positionRangeSize * iteration;
                 final int endPos = Math.min(positionRangeSize * (iteration + 1), sequenceLength);
+                int countPos = endPos - startPos;
+                char[][] transformedData = new char[countPos][compressedSequences.size()];
                 System.out.println(LocalDateTime.now() + " Position " + startPos + " - " + endPos);
 
-                List<Callable<List<StringBuilder>>> tasks = new ArrayList<>();
+                List<Callable<List<Void>>> tasks = new ArrayList<>();
                 for (int taskIndex = 0; taskIndex < numberTasksPerIteration; taskIndex++) {
                     final int startSeq = batchSize * taskIndex;
                     final int endSeq = Math.min(batchSize * (taskIndex + 1), compressedSequences.size());
@@ -77,26 +78,22 @@ public class SequenceRowToColumnTransformer {
                         try {
                             System.out.println(
                                 LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - Start");
-                            List<StringBuilder> columns = new ArrayList<>();
-                            for (int i = startPos; i < endPos; i++) {
-                                columns.add(new StringBuilder());
-                            }
                             for (int seqIndex = startSeq; seqIndex < endSeq; seqIndex++) {
                                 S compressed = compressedSequences.get(seqIndex);
                                 if (compressed == null) {
                                     for (int i = startPos; i < endPos; i++) {
-                                        columns.get(i - startPos).append(unknownCode);
+                                        transformedData[i - startPos][seqIndex] = unknownCode;
                                     }
                                 } else {
                                     String decompressed = decompressor.apply(compressed);
                                     char[] seq = decompressed.toCharArray();
                                     for (int i = startPos; i < endPos; i++) {
-                                        columns.get(i - startPos).append(seq[i]);
+                                        transformedData[i - startPos][seqIndex] = seq[i];
                                     }
                                 }
                             }
                             System.out.println(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
-                            return columns;
+                            return null;
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw e;
@@ -104,20 +101,18 @@ public class SequenceRowToColumnTransformer {
                     });
                 }
 
-                List<List<StringBuilder>> tasksResults = executor.invokeAll(tasks).stream()
-                    .map(f -> {
+                executor.invokeAll(tasks)
+                    .forEach(f -> {
                         try {
-                            return f.get();
+                            f.get();
                         } catch (InterruptedException | ExecutionException e) {
                             throw new RuntimeException(e);
                         }
-                    })
-                    .collect(Collectors.toList());
+                    });
 
-                // Concatenate the partial strings, compress them and insert
+                // Transform char arrays to string, compress them and insert
                 // This will be done in parallel again.
                 int finalizationBatchSize = 50;
-                int countPos = endPos - startPos;
                 int numberFinalizationTasks = (int) Math.ceil(countPos * 1.0 / finalizationBatchSize);
                 List<Callable<Void>> tasks2 = new ArrayList<>();
                 for (int finalizationIndex = 0; finalizationIndex < numberFinalizationTasks; finalizationIndex++) {
@@ -130,11 +125,8 @@ public class SequenceRowToColumnTransformer {
                             finalizationPosStart + " - " + finalizationPosEnd);
                         List<T> results = new ArrayList<>();
                         for (int posIndex = finalizationPosStart; posIndex < finalizationPosEnd; posIndex++) {
-                            StringBuilder fullColumn = new StringBuilder();
-                            for (List<StringBuilder> tasksResult : tasksResults) {
-                                fullColumn.append(tasksResult.get(posIndex - startPos));
-                            }
-                            T compressed = compressor.apply(fullColumn.toString());
+                            String transformed = String.valueOf(transformedData[posIndex - startPos]);
+                            T compressed = compressor.apply(transformed);
                             results.add(compressed);
                         }
                         consumer.accept(finalizationPosStart + 1, results);
