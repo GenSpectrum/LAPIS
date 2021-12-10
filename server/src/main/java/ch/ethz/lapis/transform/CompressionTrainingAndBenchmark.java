@@ -71,6 +71,15 @@ import java.util.*;
 //    zstdReference: t=463, average size=135411
 //    zstdNuc: t=520, average size=135419
 //    deflateNone: t=29587, average size=101730
+//    ---- aa_seq ----
+//    deflateReference: t=2800, average size=497
+//    zstdReference: t=536, average size=465
+//    zstdAAReference: t=81, average size=27
+//    deflateAA: t=2773, average size=498
+//    deflateNone: t=2627, average size=492
+//    zstdNone: t=22, average size=472
+//    deflateNuc: t=2676, average size=496
+//    deflateAAReference: t=2611, average size=32
 //
 //
 //    ==== Test decompression ====
@@ -110,6 +119,15 @@ import java.util.*;
 //    zstdReference: t=263
 //    zstdNuc: t=249
 //    deflateNone: t=690
+//    ---- aa_seq ----
+//    deflateReference: t=2923
+//    zstdReference: t=20
+//    zstdAAReference: t=6
+//    deflateAA: t=3983
+//    deflateNone: t=2613
+//    zstdNone: t=8
+//    deflateNuc: t=2695
+//    deflateAAReference: t=2923
 public class CompressionTrainingAndBenchmark {
 
     public static ComboPooledDataSource dbPool = LapisMain.dbPool;
@@ -159,8 +177,10 @@ public class CompressionTrainingAndBenchmark {
 //            add(new Pair<>("zstdAA", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AACODONS)));
 //            add(new Pair<>("zstdOriginal", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.SEQ_ORIGINAL)));
 //            add(new Pair<>("zstdAligned", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.SEQ_ALIGNED)));
+            add(new Pair<>("zstdAAReference", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE)));
             add(new Pair<>("zstdNone", new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE)));
             add(new Pair<>("deflateReference", new DeflateSeqCompressor(DeflateSeqCompressor.DICT.REFERENCE)));
+            add(new Pair<>("deflateAAReference", new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AA_REFERENCE)));
             add(new Pair<>("deflateNuc", new DeflateSeqCompressor(DeflateSeqCompressor.DICT.ATCGNDEL)));
             add(new Pair<>("deflateAA", new DeflateSeqCompressor(DeflateSeqCompressor.DICT.AACODONS)));
             add(new Pair<>("deflateNone", new DeflateSeqCompressor(DeflateSeqCompressor.DICT.NONE)));
@@ -184,6 +204,12 @@ public class CompressionTrainingAndBenchmark {
             from y_main_aa_sequence_columnar
             order by random()
             limit 50;
+            """;
+        String sql4 = """
+            select aa_seq
+            from y_main_aa_sequence
+            order by random()
+            limit 2000;
             """;
         try (Connection conn = dbPool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
@@ -210,6 +236,13 @@ public class CompressionTrainingAndBenchmark {
                         columnar.add(aaColumnarCompressor.decompress(rs.getBytes("data_compressed")));
                     }
                     datasets.add(new Pair<>("aa_columnar", columnar));
+                }
+                try (ResultSet rs = statement.executeQuery(sql4)) {
+                    List<String> aaSeq = new ArrayList<>();
+                    while (rs.next()) {
+                        aaSeq.add(rs.getString("aa_seq"));
+                    }
+                    datasets.add(new Pair<>("aa_seq", aaSeq));
                 }
             }
         }
