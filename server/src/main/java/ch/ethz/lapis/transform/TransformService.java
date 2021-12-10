@@ -40,15 +40,20 @@ public class TransformService {
         //     y_main_sequence_staging
         //     y_main_aa_sequence_staging
         if (source == LapisConfig.Source.NG) {
+            System.out.println("pullFromNextstrainGenbankTable()");
             pullFromNextstrainGenbankTable();
         } else if (source == LapisConfig.Source.GISAID) {
+            System.out.println("pullFromGisaidTable()");
             pullFromGisaidTable();
         }
         // Compress AA sequences
+        System.out.println("compressAASeqs()");
         compressAASeqs();
         // Fill the table y_main_sequence_columnar_staging
+        System.out.println("transformSeqsToColumnar()");
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
+        System.out.println("transformAASeqsToColumnar()");
         transformAASeqsToColumnar();
     }
 
@@ -232,22 +237,20 @@ public class TransformService {
             select id, gene, aa_seq
             from y_main_aa_sequence_staging;
             """;
-        try (Connection conn = databasePool.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
-                var elementQueue = new DatabaseReaderQueueBuilder<>(
-                    statement,
-                    (rs) -> {
-                        try {
-                            return new Triplet<>(rs.getInt("id"), rs.getString("gene"), rs.getString("aa_seq"));
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    },
-                    3000, 3000
-                ).build();
-                batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 1000, 30);
-            }
-        }
+        Connection conn = databasePool.getConnection();
+        PreparedStatement statement = conn.prepareStatement(fetchSql);
+        var elementQueue = new DatabaseReaderQueueBuilder<>(
+            statement,
+            (rs) -> {
+                try {
+                    return new Triplet<>(rs.getInt("id"), rs.getString("gene"), rs.getString("aa_seq"));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            },
+            3000, 3000
+        ).build();
+        batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 1000, 30);
 
         // Compress and write to database
         ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
@@ -275,18 +278,18 @@ public class TransformService {
                             set aa_seq_compressed = ?
                             where id = ? and gene = ?;
                             """;
-                        try (Connection conn = databasePool.getConnection()) {
-                            conn.setAutoCommit(false);
-                            try (PreparedStatement statement = conn.prepareStatement(insertSql)) {
+                        try (Connection conn2 = databasePool.getConnection()) {
+                            conn2.setAutoCommit(false);
+                            try (PreparedStatement statement2 = conn2.prepareStatement(insertSql)) {
                                 for (Triplet<Integer, String, byte[]> entry : compressed) {
-                                    statement.setBytes(1, entry.getValue2());
-                                    statement.setInt(2, entry.getValue0());
-                                    statement.setString(3, entry.getValue1());
-                                    statement.addBatch();
+                                    statement2.setBytes(1, entry.getValue2());
+                                    statement2.setInt(2, entry.getValue0());
+                                    statement2.setString(3, entry.getValue1());
+                                    statement2.addBatch();
                                 }
-                                Utils.executeClearCommitBatch(conn, statement);
+                                Utils.executeClearCommitBatch(conn2, statement2);
                             }
-                            conn.setAutoCommit(true);
+                            conn2.setAutoCommit(true);
                         }
                     }
                 } catch (InterruptedException | SQLException e) {
