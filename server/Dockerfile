@@ -10,7 +10,20 @@ RUN ./gradlew clean build -x test
 
 ## Run server ##
 
-FROM openjdk:16 AS server
+FROM openjdk:16-bullseye AS server
+WORKDIR /app
+
+# Install SSH and corkscrew
+# https://github.com/bryanpkc/corkscrew
+RUN apt-get update
+RUN apt-get install -y openssh-client git
+RUN git clone https://github.com/bryanpkc/corkscrew.git
+WORKDIR /app/corkscrew
+RUN apt-get install -y build-essential autoconf
+RUN autoreconf --install
+RUN ./configure
+RUN make
+RUN make install
 WORKDIR /app
 
 # Download nextalign
