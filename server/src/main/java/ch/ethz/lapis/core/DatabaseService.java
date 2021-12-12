@@ -23,7 +23,7 @@ public class DatabaseService {
             pool.setJdbcUrl(jdbcUrl);
             pool.setUser(username);
             pool.setPassword(password);
-            pool.setMaxPoolSize(30);
+            pool.setMaxPoolSize(config.getMaxPoolSize());
             return pool;
         } catch (PropertyVetoException e) {
             throw new RuntimeException(e);

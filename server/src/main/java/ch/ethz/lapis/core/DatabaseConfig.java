@@ -8,6 +8,7 @@ public class DatabaseConfig implements Config {
     private String username;
     private String password;
     private String schema;
+    private int maxPoolSize = 30;
 
     public String getHost() {
         return host;
@@ -55,6 +56,15 @@ public class DatabaseConfig implements Config {
 
     public DatabaseConfig setSchema(String schema) {
         this.schema = schema;
+        return this;
+    }
+
+    public int getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public DatabaseConfig setMaxPoolSize(int maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
         return this;
     }
 }
