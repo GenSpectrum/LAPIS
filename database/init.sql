@@ -196,6 +196,7 @@ create table y_main_aa_sequence
   id integer not null,
   gene text not null,
   aa_seq text not null,
+  aa_seq_compressed bytea,
   primary key (id, gene)
 );
 
