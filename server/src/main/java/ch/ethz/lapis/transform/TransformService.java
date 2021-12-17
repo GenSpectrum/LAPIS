@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class TransformService {
@@ -246,6 +247,7 @@ public class TransformService {
 
         // Compress and write to database
         ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
+        AtomicBoolean failed = new AtomicBoolean(false);
         for (int i = 0; i < maxNumberWorkers; i++) {
             executor.submit(() -> {
                 try {
@@ -295,12 +297,16 @@ public class TransformService {
                         }
                     }
                 } catch (InterruptedException | SQLException e) {
+                    failed.set(true);
                     throw new RuntimeException(e);
                 }
             });
         }
         executor.shutdown();
         executor.awaitTermination(30, TimeUnit.DAYS);
+        if (failed.get()) {
+            throw new RuntimeException("Execution failed.");
+        }
     }
 
 
