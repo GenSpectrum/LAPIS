@@ -41,10 +41,10 @@ public class TransformService {
         //     y_main_sequence_staging
         //     y_main_aa_sequence_staging
         if (source == LapisConfig.Source.NG) {
-            System.out.println("pullFromNextstrainGenbankTable()");
+            System.out.println(LocalDateTime.now() + " pullFromNextstrainGenbankTable()");
             pullFromNextstrainGenbankTable();
             // Compress AA sequences
-            System.out.println("compressAASeqs()");
+            System.out.println(LocalDateTime.now() + " compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -57,10 +57,10 @@ public class TransformService {
                   ng.aa_seqs is not null;
             """);
         } else if (source == LapisConfig.Source.GISAID) {
-            System.out.println("pullFromGisaidTable()");
+            System.out.println(LocalDateTime.now() + " pullFromGisaidTable()");
             pullFromGisaidTable();
             // Compress AA sequences
-            System.out.println("compressAASeqs()");
+            System.out.println(LocalDateTime.now() + " compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -74,10 +74,10 @@ public class TransformService {
             """);
         }
         // Fill the table y_main_sequence_columnar_staging
-        System.out.println("transformSeqsToColumnar()");
+        System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
-        System.out.println("transformAASeqsToColumnar()");
+        System.out.println(LocalDateTime.now() + " transformAASeqsToColumnar()");
         transformAASeqsToColumnar();
     }
 
@@ -328,8 +328,7 @@ public class TransformService {
                 }
             }
         }
-        System.out.println(compressedSequences.size());
-        System.out.println("Data loaded");
+        System.out.println(LocalDateTime.now() + " Data loaded");
 
         SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 2500);
         transformer.transform(

@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +44,7 @@ public class NextstrainGenbankMutationAAWorker {
     }
 
     public void run(List<FastaEntry> batch) throws Exception {
-        System.out.println("[" + id + "] Received " + batch.size() + " sequences.");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Received " + batch.size() + " sequences.");
 
         // Find sequences that already exist and have not changed
         Map<String, String> seqMap = new HashMap<>();
@@ -70,21 +71,21 @@ public class NextstrainGenbankMutationAAWorker {
                 }
             }
         }
-        System.out.println("[" + id + "] " + batch.size() + " sequences were changed.");
+        System.out.println(LocalDateTime.now() + " [" + id + "] " + batch.size() + " sequences were changed.");
         if (batch.isEmpty()) {
-            System.out.println("[" + id + "] Nothing to do. Bye bye.");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Nothing to do. Bye bye.");
             return;
         }
 
         // Run Nextalign and read amino acid mutation sequences
         Path seqFastaPath = workDir.resolve("aligned.fasta");
-        System.out.println("[" + id + "] Write fasta to disk..");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
         Files.writeString(seqFastaPath, formatSeqAsFasta(batch));
-        System.out.println("[" + id + "] Run Nextalign..");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
         Map<String, List<GeneAASeq>> geneAASeqs = runNextalign(seqFastaPath, batch);
 
         // Write to database
-        System.out.println("[" + id + "] Write to database");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Write to database");
         String sql = """
                 insert into y_nextstrain_genbank (strain, aa_seqs)
                 values (?, ?)
@@ -108,7 +109,7 @@ public class NextstrainGenbankMutationAAWorker {
         }
 
         // Clean up workdir
-        System.out.println("[" + id + "] Clean up");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Clean up");
         try (DirectoryStream<Path> directory = Files.newDirectoryStream(workDir)) {
             for (Path path : directory) {
                 if (Files.isDirectory(path)) {
@@ -118,7 +119,7 @@ public class NextstrainGenbankMutationAAWorker {
                 }
             }
         }
-        System.out.println("[" + id + "] Finished");
+        System.out.println(LocalDateTime.now() + " [" + id + "] Finished");
     }
 
     private Map<String, List<GeneAASeq>> runNextalign(

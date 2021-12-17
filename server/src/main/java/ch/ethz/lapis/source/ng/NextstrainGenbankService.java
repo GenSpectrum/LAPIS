@@ -210,10 +210,10 @@ public class NextstrainGenbankService {
                 batch.add(entry);
                 if (batch.size() >= batchSize) {
                     while (!emergencyBrake.get()) {
-                        System.out.println("[main] Try adding a batch");
+                        System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
                         boolean success = batchQueue.offer(batch, 5, TimeUnit.SECONDS);
                         if (success) {
-                            System.out.println("[main] Batch added");
+                            System.out.println(LocalDateTime.now() + " [main] Batch added");
                             break;
                         }
                     }
@@ -222,10 +222,10 @@ public class NextstrainGenbankService {
             }
             if (!emergencyBrake.get() && !batch.isEmpty()) {
                 while (!emergencyBrake.get()) {
-                    System.out.println("[main] Try adding the last batch");
+                    System.out.println(LocalDateTime.now() + " [main] Try adding the last batch");
                     boolean success = batchQueue.offer(batch, 5, TimeUnit.SECONDS);
                     if (success) {
-                        System.out.println("[main] Batch added");
+                        System.out.println(LocalDateTime.now() + " [main] Batch added");
                         break;
                     }
                 }
@@ -236,8 +236,8 @@ public class NextstrainGenbankService {
 
         // If someone pulled the emergency brake, collect some information and send a notification email.
         if (emergencyBrake.get()) {
-            System.err.println("Emergency exit!");
-            System.err.println("The sequence batch processing workers are reporting unhandled errors:");
+            System.err.println(LocalDateTime.now() + " Emergency exit!");
+            System.err.println(LocalDateTime.now() + " The sequence batch processing workers are reporting unhandled errors:");
             for (Exception unhandledException : unhandledExceptions) {
                 unhandledException.printStackTrace();
             }

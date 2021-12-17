@@ -8,24 +8,18 @@ import ch.ethz.lapis.util.FastaFileReader;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.io.FileUtils;
+
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 
 
 public class BatchProcessingWorker {
@@ -70,7 +64,7 @@ public class BatchProcessingWorker {
     public BatchReport run(Batch batch) throws Exception {
         try {
             int batchSize = batch.getEntries().size();
-            System.out.println("[" + id + "] Received a batch");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Received a batch");
 
             // Remove entries from the batch where no sequence is provided -> very weird
             batch = new Batch(batch.getEntries().stream()
@@ -93,16 +87,16 @@ public class BatchProcessingWorker {
                 .filter(s -> s.getImportMode() == ImportMode.APPEND || s.isSequenceChanged())
                 .collect(Collectors.toList());
 
-            System.out.println("[" + id + "] " + sequencePreprocessingNeeded.size() + " out of " + batchSize +
+            System.out.println(LocalDateTime.now() + " [" + id + "] " + sequencePreprocessingNeeded.size() + " out of " + batchSize +
                 " sequences are new or have changed sequence.");
             if (!sequencePreprocessingNeeded.isEmpty()) {
                 // Write the batch to a fasta file
                 Path originalSeqFastaPath = workDir.resolve("original.fasta");
-                System.out.println("[" + id + "] Write fasta to disk..");
+                System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
                 Files.writeString(originalSeqFastaPath, formatSeqAsFasta(sequencePreprocessingNeeded));
 
                 // Run Nextalign
-                System.out.println("[" + id + "] Run Nextalign..");
+                System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
                 Map<String, NextalignResultEntry> nextalignResults = runNextalign(batch, originalSeqFastaPath);
                 ReferenceGenomeData refGenome = ReferenceGenomeData.getInstance();
                 for (GisaidEntry entry : batch.getEntries()) {
@@ -153,7 +147,7 @@ public class BatchProcessingWorker {
             }
 
             // Write the data into the database
-            System.out.println("[" + id + "] Write to database..");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Write to database..");
             writeToDatabase(batch);
 
             // Create the batch report
@@ -174,7 +168,7 @@ public class BatchProcessingWorker {
                     }
                 }
             }
-            System.out.println("[" + id + "] Everything successful with no failed sequences");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Everything successful with no failed sequences");
             return new BatchReport()
                 .setAddedEntries(addedEntries)
                 .setUpdatedTotalEntries(updatedTotalEntries)
@@ -182,7 +176,7 @@ public class BatchProcessingWorker {
                 .setUpdatedSequenceEntries(updatedSequenceEntries);
         } finally {
             // Clean up the work directory
-            System.out.println("[" + id + "] Clean up");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Clean up");
             try (DirectoryStream<Path> directory = Files.newDirectoryStream(workDir)) {
                 for (Path path : directory) {
                     if (Files.isDirectory(path)) {
@@ -192,7 +186,7 @@ public class BatchProcessingWorker {
                     }
                 }
             }
-            System.out.println("[" + id + "] Done!");
+            System.out.println(LocalDateTime.now() + " [" + id + "] Done!");
         }
     }
 

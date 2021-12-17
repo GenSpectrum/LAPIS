@@ -103,7 +103,7 @@ public class GisaidService {
                 gisaidDataFile
             );
         } catch (IOException e) {
-            System.err.println("provision.json.xz could not be downloaded from GISAID");
+            System.err.println(LocalDateTime.now() + " provision.json.xz could not be downloaded from GISAID");
             throw e;
         }
 
@@ -188,7 +188,7 @@ public class GisaidService {
             }
             entriesInDataPackage++;
             if (entriesInDataPackage % 10000 == 0) {
-                System.out.println("[main] Read " + entriesInDataPackage + " in the data package");
+                System.out.println(LocalDateTime.now() + " [main] Read " + entriesInDataPackage + " in the data package");
             }
             try {
                 JSONObject json = (JSONObject) new JSONParser().parse(line);
@@ -198,16 +198,16 @@ public class GisaidService {
                 batchEntries.add(entry);
                 processedEntries++;
             } catch (ParseException e) {
-                System.err.println("JSON parsing failed!");
+                System.err.println(LocalDateTime.now() + " JSON parsing failed!");
                 throw e;
             }
             if (batchEntries.size() >= batchSize) {
                 Batch batch = new Batch(batchEntries);
                 while (!emergencyBrake.get()) {
-                    System.out.println("[main] Try adding a batch");
+                    System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
                     boolean success = gisaidBatchQueue.offer(batch, 5, TimeUnit.SECONDS);
                     if (success) {
-                        System.out.println("[main] Batch added");
+                        System.out.println(LocalDateTime.now() + " [main] Batch added");
                         break;
                     }
                 }
@@ -217,10 +217,10 @@ public class GisaidService {
         if (!emergencyBrake.get() && !batchEntries.isEmpty()) {
             Batch lastBatch = new Batch(batchEntries);
             while (!emergencyBrake.get()) {
-                System.out.println("[main] Try adding a batch");
+                System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
                 boolean success = gisaidBatchQueue.offer(lastBatch, 5, TimeUnit.SECONDS);
                 if (success) {
-                    System.out.println("[main] Batch added");
+                    System.out.println(LocalDateTime.now() + " [main] Batch added");
                     break;
                 }
             }
@@ -230,7 +230,7 @@ public class GisaidService {
 
         // If someone pulled the emergency brake, collect some information and send a notification email.
         if (emergencyBrake.get()) {
-            System.err.println("Emergency exit!");
+            System.err.println(LocalDateTime.now() + " Emergency exit!");
             executor.shutdown();
             boolean terminated = executor.awaitTermination(3, TimeUnit.MINUTES);
             if (!terminated) {
@@ -245,7 +245,7 @@ public class GisaidService {
         // Perform deletions
         int deleted = 0;
         if (!emergencyBrake.get()) {
-            System.out.println("[main] Deleting removed sequences");
+            System.out.println(LocalDateTime.now() + " [main] Deleting removed sequences");
             Set<String> toDelete = new HashSet<>(existingGisaidEpiIsls);
             toDelete.removeAll(gisaidEpiIslInDataPackage);
             deleteSequences(toDelete);
@@ -253,7 +253,7 @@ public class GisaidService {
         }
 
         // Merge the BatchReports to a report and send it by email.
-        System.out.println("[main] Preparing final report");
+        System.out.println(LocalDateTime.now() + " [main] Preparing final report");
         BatchReport mergedBatchReport = mergeBatchReports(new ArrayList<>(batchReports));
         boolean success = unhandledExceptions.isEmpty()
             && mergedBatchReport.getFailedEntries() < 0.05 * processedEntries;
@@ -272,7 +272,7 @@ public class GisaidService {
             .setUnhandledExceptions(new ArrayList<>(unhandledExceptions));
 //        notificationSystem.sendReport(finalReport); TODO
 
-        System.err.println("There are " + unhandledExceptions.size() + " unhandled exceptions.");
+        System.err.println(LocalDateTime.now() + " There are " + unhandledExceptions.size() + " unhandled exceptions.");
         for (Exception unhandledException : unhandledExceptions) {
             unhandledException.printStackTrace();
         }
