@@ -9,6 +9,7 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
 import java.sql.*;
@@ -42,13 +43,36 @@ public class TransformService {
         if (source == LapisConfig.Source.NG) {
             System.out.println("pullFromNextstrainGenbankTable()");
             pullFromNextstrainGenbankTable();
+            // Compress AA sequences
+            System.out.println("compressAASeqs()");
+            compressAASeqs("""
+                select
+                  mm.id,
+                  ng.aa_seqs
+                from
+                    y_nextstrain_genbank ng
+                    join y_main_metadata_staging mm
+                      on mm.source = 'nextstrain/genbank' and mm.source_primary_key = ng.strain
+                where
+                  ng.aa_seqs is not null;
+            """);
         } else if (source == LapisConfig.Source.GISAID) {
             System.out.println("pullFromGisaidTable()");
             pullFromGisaidTable();
+            // Compress AA sequences
+            System.out.println("compressAASeqs()");
+            compressAASeqs("""
+                select
+                  mm.id,
+                  g.aa_seqs
+                from
+                  y_gisaid g
+                  join y_main_metadata_staging mm
+                    on mm.source = 'gisaid' and mm.source_primary_key = g.gisaid_epi_isl
+                where
+                  g.aa_seqs is not null;
+            """);
         }
-        // Compress AA sequences
-        System.out.println("compressAASeqs()");
-        compressAASeqs();
         // Fill the table y_main_sequence_columnar_staging
         System.out.println("transformSeqsToColumnar()");
         transformSeqsToColumnar();
@@ -116,26 +140,11 @@ public class TransformService {
                   join y_main_metadata_staging mm
                     on mm.source = 'nextstrain/genbank' and mm.source_primary_key = ng.strain;
             """;
-        String sql3 = """
-                insert into y_main_aa_sequence_staging (id, gene, aa_seq)
-                select
-                  mm.id,
-                  split_part(aa.gene_and_seq, ':', 1) as gene,
-                  split_part(aa.gene_and_seq, ':', 2) as aa_seq
-                from
-                  y_nextstrain_genbank ng
-                  join y_main_metadata_staging mm
-                    on mm.source = 'nextstrain/genbank' and mm.source_primary_key = ng.strain,
-                  unnest(string_to_array(ng.aa_seqs, ',')) aa(gene_and_seq)
-                where
-                  ng.aa_seqs is not null;
-            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (Statement statement = conn.createStatement()) {
                 statement.execute(sql1);
                 statement.execute(sql2);
-                statement.execute(sql3);
             }
             conn.commit();
             conn.setAutoCommit(true);
@@ -200,26 +209,11 @@ public class TransformService {
                   join y_main_metadata_staging mm
                     on mm.source = 'gisaid' and mm.source_primary_key = g.gisaid_epi_isl;
             """;
-        String sql3 = """
-                insert into y_main_aa_sequence_staging (id, gene, aa_seq)
-                select
-                  mm.id,
-                  split_part(aa.gene_and_seq, ':', 1) as gene,
-                  split_part(aa.gene_and_seq, ':', 2) as aa_seq
-                from
-                  y_gisaid g
-                  join y_main_metadata_staging mm
-                    on mm.source = 'gisaid' and mm.source_primary_key = g.gisaid_epi_isl,
-                  unnest(string_to_array(g.aa_seqs, ',')) aa(gene_and_seq)
-                where
-                  g.aa_seqs is not null;
-            """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
             try (Statement statement = conn.createStatement()) {
                 statement.execute(sql1);
                 statement.execute(sql2);
-                statement.execute(sql3);
             }
             conn.commit();
             conn.setAutoCommit(true);
@@ -227,30 +221,28 @@ public class TransformService {
     }
 
 
-    public void compressAASeqs() throws SQLException, InterruptedException {
-        // We will use a Triplet to store the elements.
-        // Triplet<Integer, String, String> = (id, gene, aa_seq)
-
+    /**
+     *
+     * @param fetchAASeqsSql A SQL query string that gives a result set with two columns: "id" and "aa_seqs"
+     */
+    public void compressAASeqs(String fetchAASeqsSql) throws SQLException, InterruptedException {
         // Fetch the uncompressed AA sequences
-        ExhaustibleBlockingQueue<List<Triplet<Integer, String, String>>> batches;
-        String fetchSql = """
-            select id, gene, aa_seq
-            from y_main_aa_sequence_staging;
-            """;
+        // The AA sequences have the format "<gene1>:<seq1>,<gene2>:<seq2>,..."
+        ExhaustibleBlockingQueue<List<Pair<Integer, String>>> batches;
         Connection conn = databasePool.getConnection();
-        PreparedStatement statement = conn.prepareStatement(fetchSql);
+        PreparedStatement statement = conn.prepareStatement(fetchAASeqsSql);
         var elementQueue = new DatabaseReaderQueueBuilder<>(
             statement,
             (rs) -> {
                 try {
-                    return new Triplet<>(rs.getInt("id"), rs.getString("gene"), rs.getString("aa_seq"));
+                    return new Pair<>(rs.getInt("id"), rs.getString("aa_seqs"));
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             },
-            3000, 3000
+            2000, 2000
         ).build();
-        batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 1000, 30);
+        batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 400, 30);
 
         // Compress and write to database
         ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
@@ -259,32 +251,42 @@ public class TransformService {
                 try {
                     while (!batches.isEmpty() || !batches.isExhausted()) {
                         // Get a batch from the queue
-                        List<Triplet<Integer, String, String>> batch = batches.poll(3, TimeUnit.SECONDS);
+                        List<Pair<Integer, String>> batch = batches.poll(3, TimeUnit.SECONDS);
                         if (batch == null) {
                             continue;
                         }
                         // Compress
+                        // We will use a Triplet to store the elements.
+                        // Triplet<Integer, String, byte[]> = (id, gene, aa_seq_compressed)
                         List<Triplet<Integer, String, byte[]>> compressed = new ArrayList<>();
-                        for (Triplet<Integer, String, String> entry : batch) {
-                            compressed.add(new Triplet<>(
-                                entry.getValue0(),
-                                entry.getValue1(),
-                                aaSeqCompressor.compress(entry.getValue2())
-                            ));
+                        for (Pair<Integer, String> aaSeqsEntry : batch) {
+                            String aaSeqs = aaSeqsEntry.getValue1();
+                            if (aaSeqs == null || aaSeqs.isBlank()) {
+                                continue;
+                            }
+                            for (String s : aaSeqs.split(",")) {
+                                String[] tmp = s.split(":");
+                                String gene = tmp[0];
+                                String aaSeq = tmp[1];
+                                compressed.add(new Triplet<>(
+                                    aaSeqsEntry.getValue0(),
+                                    gene,
+                                    aaSeqCompressor.compress(aaSeq)
+                                ));
+                            }
                         }
                         // Write to database
                         String insertSql = """
-                            update y_main_aa_sequence_staging
-                            set aa_seq_compressed = ?
-                            where id = ? and gene = ?;
+                            insert into y_main_aa_sequence_staging (id, gene, aa_seq_compressed)
+                            values (?, ?, ?);
                             """;
                         try (Connection conn2 = databasePool.getConnection()) {
                             conn2.setAutoCommit(false);
                             try (PreparedStatement statement2 = conn2.prepareStatement(insertSql)) {
                                 for (Triplet<Integer, String, byte[]> entry : compressed) {
-                                    statement2.setBytes(1, entry.getValue2());
-                                    statement2.setInt(2, entry.getValue0());
-                                    statement2.setString(3, entry.getValue1());
+                                    statement2.setInt(1, entry.getValue0());
+                                    statement2.setString(2, entry.getValue1());
+                                    statement2.setBytes(3, entry.getValue2());
                                     statement2.addBatch();
                                 }
                                 Utils.executeClearCommitBatch(conn2, statement2);
