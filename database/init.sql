@@ -65,6 +65,8 @@ create table y_nextstrain_genbank
 create table y_gisaid
 (
   updated_at timestamp not null,
+  metadata_hash text,
+  seq_original_hash text,
   gisaid_epi_isl text primary key,
   strain text,
   date date,

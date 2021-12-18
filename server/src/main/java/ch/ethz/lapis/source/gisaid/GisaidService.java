@@ -108,17 +108,23 @@ public class GisaidService {
             throw e;
         }
 
-        // Load the list of all GISAID EPI ISL from the database.
-        String loadExistingIdsSql = """
-                select gisaid_epi_isl
+        // Load the list of all GISAID EPI ISL and hashes from the database.
+        String loadExistingSql = """
+                select gisaid_epi_isl, metadata_hash, seq_original_hash
                 from y_gisaid;
             """;
-        Set<String> existingGisaidEpiIsls = new HashSet<>();
+        Map<String, GisaidHashes> oldHashes = new HashMap<>();
         try (Connection conn = databasePool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
-                try (ResultSet rs = statement.executeQuery(loadExistingIdsSql)) {
+                try (ResultSet rs = statement.executeQuery(loadExistingSql)) {
                     while (rs.next()) {
-                        existingGisaidEpiIsls.add(rs.getString("gisaid_epi_isl"));
+                        oldHashes.put(
+                            rs.getString("gisaid_epi_isl"),
+                            new GisaidHashes(
+                                rs.getString("metadata_hash"),
+                                rs.getString("seq_original_hash")
+                            )
+                        );
                     }
                 }
             }
@@ -149,7 +155,8 @@ public class GisaidService {
                     nextalignPath,
                     geneMapGff,
                     nucSeqCompressor,
-                    aaSeqCompressor
+                    aaSeqCompressor,
+                    oldHashes
                 );
                 while (!emergencyBrake.get() && (!gisaidBatchQueue.isExhausted() || !gisaidBatchQueue.isEmpty())) {
                     try {
@@ -248,7 +255,7 @@ public class GisaidService {
         int deleted = 0;
         if (!emergencyBrake.get()) {
             System.out.println(LocalDateTime.now() + " [main] Deleting removed sequences");
-            Set<String> toDelete = new HashSet<>(existingGisaidEpiIsls);
+            Set<String> toDelete = new HashSet<>(oldHashes.keySet());
             toDelete.removeAll(gisaidEpiIslInDataPackage);
             deleteSequences(toDelete);
             deleted = toDelete.size();

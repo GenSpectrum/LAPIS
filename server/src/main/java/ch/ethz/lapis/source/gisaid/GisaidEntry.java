@@ -8,6 +8,8 @@ public class GisaidEntry {
     private ImportMode importMode;
     private boolean metadataChanged = false;
     private boolean sequenceChanged = false;
+    private String metadataHash;
+    private String seqOriginalHash;
 
     private String gisaidEpiIsl;
     private String strain;
@@ -60,6 +62,24 @@ public class GisaidEntry {
 
     public GisaidEntry setSequenceChanged(boolean sequenceChanged) {
         this.sequenceChanged = sequenceChanged;
+        return this;
+    }
+
+    public String getMetadataHash() {
+        return metadataHash;
+    }
+
+    public GisaidEntry setMetadataHash(String metadataHash) {
+        this.metadataHash = metadataHash;
+        return this;
+    }
+
+    public String getSeqOriginalHash() {
+        return seqOriginalHash;
+    }
+
+    public GisaidEntry setSeqOriginalHash(String seqOriginalHash) {
+        this.seqOriginalHash = seqOriginalHash;
         return this;
     }
 

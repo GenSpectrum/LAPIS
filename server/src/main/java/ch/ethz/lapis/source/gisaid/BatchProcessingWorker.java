@@ -31,6 +31,8 @@ public class BatchProcessingWorker {
     private final Path geneMapGff;
     private final SeqCompressor nucSeqCompressor;
     private final SeqCompressor aaSeqCompressor;
+    private final Map<String, GisaidHashes> oldHashes;
+
     /**
      * @param id             An unique identifier for the worker
      * @param workDir        An empty work directory for the worker
@@ -48,7 +50,8 @@ public class BatchProcessingWorker {
         Path nextalignPath,
         Path geneMapGff,
         SeqCompressor nucSeqCompressor,
-        SeqCompressor aaSeqCompressor
+        SeqCompressor aaSeqCompressor,
+        Map<String, GisaidHashes> oldHashes
     ) {
         this.databasePool = databasePool;
         this.id = id;
@@ -59,6 +62,7 @@ public class BatchProcessingWorker {
         this.geneMapGff = geneMapGff;
         this.nucSeqCompressor = nucSeqCompressor;
         this.aaSeqCompressor = aaSeqCompressor;
+        this.oldHashes = oldHashes;
     }
 
     public BatchReport run(Batch batch) throws Exception {
@@ -191,96 +195,47 @@ public class BatchProcessingWorker {
     }
 
     /**
-     * Fetch the data of the sequences from the database and compare them with the downloaded data. If an entry is
-     * already in the database and has not changed, remove it from the batch. If an entry is already in the database and
-     * has changed, mark the entry as an update candidate. The method also checks whether the metadata or the sequence
-     * was changed.
+     * Use the oldHashes to determine changes in the downloaded data.  If an entry is already in the database and has
+     * not changed, remove it from the batch. If an entry is already in the database and has changed, mark the entry as
+     * an update candidate. The method also checks whether the metadata or the sequence was changed.
      */
-    private void determineChangeSet(Batch batch) throws SQLException {
-        Map<String, GisaidEntry> sequenceMap = new HashMap<>();
+    private void determineChangeSet(Batch batch) {
+        List<GisaidEntry> toRemove = new ArrayList<>();
         for (GisaidEntry entry : batch.getEntries()) {
-            entry.setImportMode(ImportMode.APPEND);
-            sequenceMap.put(entry.getGisaidEpiIsl(), entry);
-        }
-        String fetchSql = """
-                select
-                  gisaid_epi_isl,
-                  strain,
-                  date,
-                  date_original,
-                  date_submitted,
-                  region,
-                  country,
-                  division,
-                  location,
-                  host,
-                  age,
-                  sex,
-                  sampling_strategy,
-                  pango_lineage,
-                  gisaid_clade,
-                  originating_lab,
-                  submitting_lab,
-                  authors,
-                  seq_original_compressed
-                from y_gisaid
-                where gisaid_epi_isl = any(?);
-            """;
-        try (Connection conn = databasePool.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
-                Object[] gisaidIds = batch.getEntries().stream().map(GisaidEntry::getGisaidEpiIsl).toArray();
-                statement.setArray(1, conn.createArrayOf("text", gisaidIds));
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        GisaidEntry entry = sequenceMap.get(rs.getString("gisaid_epi_isl"));
-                        entry.setImportMode(ImportMode.UPDATE);
-                        // If updateSubmitterInformation is true, we need to fetch these data.
-                        if (updateSubmitterInformation) {
-                            Optional<SubmitterInformation> submitterInformationOpt
-                                = submitterInformationFetcher.fetchSubmitterInformation(entry.getGisaidEpiIsl());
-                            submitterInformationOpt.ifPresent(entry::setSubmitterInformation);
-                        }
-                        entry.setMetadataChanged(true);
-                        entry.setSequenceChanged(true);
-                        if (Objects.equals(entry.getStrain(), rs.getString("strain"))
-                            && Objects.equals(entry.getDate(),
-                            rs.getDate("date") != null ? rs.getDate("date").toLocalDate() : null)
-                            && Objects.equals(entry.getDateOriginal(), rs.getString("date_original"))
-                            && Objects.equals(entry.getDateSubmitted(),
-                            rs.getDate("date_submitted") != null ? rs.getDate("date_submitted").toLocalDate() : null)
-                            && Objects.equals(entry.getRegion(), rs.getString("region"))
-                            && Objects.equals(entry.getCountry(), rs.getString("country"))
-                            && Objects.equals(entry.getDivision(), rs.getString("division"))
-                            && Objects.equals(entry.getLocation(), rs.getString("location"))
-                            && Objects.equals(entry.getHost(), rs.getString("host"))
-                            && Objects.equals(entry.getAge(), rs.getObject("age"))
-                            && Objects.equals(entry.getSex(), rs.getString("sex"))
-                            && Objects.equals(entry.getSamplingStrategy(), rs.getString("sampling_strategy"))
-                            && Objects.equals(entry.getPangoLineage(), rs.getString("pango_lineage"))
-                            && Objects.equals(entry.getGisaidClade(), rs.getString("gisaid_clade"))
-                            // Compare submitter information if it has been fetched
-                            && (entry.getSubmitterInformation() == null || (
-                            Objects.equals(entry.getSubmitterInformation().getOriginatingLab(),
-                                rs.getString("originating_lab"))
-                                && Objects.equals(entry.getSubmitterInformation().getSubmittingLab(),
-                                rs.getString("submitting_lab"))
-                                && Objects.equals(entry.getSubmitterInformation().getAuthors(), rs.getString("authors"))
-                        ))
-                        ) {
-                            entry.setMetadataChanged(false);
-                        }
-                        byte[] seqOriginalCompressed = rs.getBytes("seq_original_compressed");
-                        if (Objects.equals(entry.getSeqOriginal(), seqOriginalCompressed != null ?
-                            nucSeqCompressor.decompress(seqOriginalCompressed) : null)) {
-                            entry.setSequenceChanged(false);
-                        }
-                        if (!entry.isMetadataChanged() && !entry.isSequenceChanged()) {
-                            batch.getEntries().remove(entry);
-                        }
-                    }
-                }
+            String sampleName = entry.getGisaidEpiIsl();
+            List<Object> metadataListForHashing = new ArrayList<>();
+            metadataListForHashing.add(entry.getStrain());
+            metadataListForHashing.add(entry.getDate());
+            metadataListForHashing.add(entry.getDateOriginal());
+            metadataListForHashing.add(entry.getDateSubmitted());
+            metadataListForHashing.add(entry.getRegion());
+            metadataListForHashing.add(entry.getCountry());
+            metadataListForHashing.add(entry.getDivision());
+            metadataListForHashing.add(entry.getLocation());
+            metadataListForHashing.add(entry.getHost());
+            metadataListForHashing.add(entry.getAge());
+            metadataListForHashing.add(entry.getSex());
+            metadataListForHashing.add(entry.getSamplingStrategy());
+            metadataListForHashing.add(entry.getPangoLineage());
+            metadataListForHashing.add(entry.getGisaidClade());
+            String metadataHash = Utils.hashMd5(metadataListForHashing);
+            String seqOriginalHash = Utils.hashMd5(entry.getSeqOriginal());
+            entry.setMetadataHash(metadataHash);
+            entry.setSeqOriginalHash(seqOriginalHash);
+            if (!oldHashes.containsKey(sampleName)) {
+                entry.setImportMode(ImportMode.APPEND);
+                continue;
+            }
+            entry.setImportMode(ImportMode.UPDATE);
+            String oldMetadataHash = oldHashes.get(sampleName).getMetadataHash();
+            String oldSeqOriginalHash = oldHashes.get(sampleName).getSeqOriginalHash();
+            entry.setMetadataChanged(!metadataHash.equals(oldMetadataHash));
+            entry.setSequenceChanged(!seqOriginalHash.equals(oldSeqOriginalHash));
+            if (!entry.isMetadataChanged() && !entry.isSequenceChanged()) {
+                toRemove.add(entry);
             }
         }
+        batch.getEntries().removeAll(toRemove);
     }
 
     private String formatSeqAsFasta(List<GisaidEntry> sequences) {
@@ -409,7 +364,9 @@ public class BatchProcessingWorker {
                       gisaid_clade = ?,
                       originating_lab = coalesce(?, originating_lab),
                       submitting_lab = coalesce(?, submitting_lab),
-                      authors = coalesce(?, authors)
+                      authors = coalesce(?, authors),
+                      metadata_hash = ?,
+                      seq_original_hash = ?
                     where gisaid_epi_isl = ?;
                 """;
             try (PreparedStatement statement = conn.prepareStatement(updateSequenceSql)) {
@@ -434,7 +391,9 @@ public class BatchProcessingWorker {
                     statement.setString(15, si != null ? si.getOriginatingLab() : null);
                     statement.setString(16, si != null ? si.getSubmittingLab() : null);
                     statement.setString(17, si != null ? si.getAuthors() : null);
-                    statement.setString(18, entry.getGisaidEpiIsl());
+                    statement.setString(18, entry.getMetadataHash());
+                    statement.setString(19, entry.getSeqOriginalHash());
+                    statement.setString(20, entry.getGisaidEpiIsl());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -463,14 +422,16 @@ public class BatchProcessingWorker {
                       region_exposure, country_exposure, division_exposure, host, age, sex, sampling_strategy,
                       pango_lineage, gisaid_clade, originating_lab, submitting_lab, authors,
                       seq_original_compressed, seq_aligned_compressed, aa_seqs_compressed, aa_mutations,
-                      nuc_substitutions, nuc_deletions, nuc_insertions
+                      nuc_substitutions, nuc_deletions, nuc_insertions,
+                      metadata_hash, seq_original_hash
                     )
                     values (
                       now(),
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
-                      ?, ?, ?, ?, ?, ?, ?
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?
                     );
                 """;
             try (PreparedStatement insertStatement = conn.prepareStatement(insertSequenceSql)) {
@@ -508,6 +469,8 @@ public class BatchProcessingWorker {
                     insertStatement.setString(26, entry.getNucSubstitutions());
                     insertStatement.setString(27, entry.getNucDeletions());
                     insertStatement.setString(28, entry.getNucInsertions());
+                    insertStatement.setString(29, entry.getMetadataHash());
+                    insertStatement.setString(30, entry.getSeqOriginalHash());
                     insertStatement.addBatch();
                 }
                 insertStatement.executeBatch();
