@@ -28,6 +28,7 @@ public class NextstrainGenbankMutationAAWorker {
     private final Path geneMapGff;
     private final Path nextalignPath;
     private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
     public NextstrainGenbankMutationAAWorker(
         int id,
         ComboPooledDataSource databasePool,
@@ -87,10 +88,10 @@ public class NextstrainGenbankMutationAAWorker {
         // Write to database
         System.out.println(LocalDateTime.now() + " [" + id + "] Write to database");
         String sql = """
-                insert into y_nextstrain_genbank (strain, aa_seqs)
+                insert into y_nextstrain_genbank (strain, aa_seqs_compressed)
                 values (?, ?)
                 on conflict (strain) do update
-                set aa_seqs = ?;
+                set aa_seqs_compressed = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -98,9 +99,10 @@ public class NextstrainGenbankMutationAAWorker {
                 for (Map.Entry<String, List<GeneAASeq>> mapEntry : geneAASeqs.entrySet()) {
                     String sampleName = mapEntry.getKey();
                     String aaSeqs = formatGeneAASeqs(mapEntry.getValue());
+                    byte[] aaSeqsCompressed = aaSeqCompressor.compress(aaSeqs);
                     statement.setString(1, sampleName);
-                    statement.setString(2, aaSeqs);
-                    statement.setString(3, aaSeqs);
+                    statement.setBytes(2, aaSeqsCompressed);
+                    statement.setBytes(3, aaSeqsCompressed);
                     statement.addBatch();
                     Utils.executeClearCommitBatch(conn, statement);
                 }

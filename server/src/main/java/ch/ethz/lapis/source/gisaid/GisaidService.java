@@ -42,7 +42,8 @@ public class GisaidService {
     private final int maxNumberWorkers;
     private final Path nextalignPath;
     private final GisaidApiConfig gisaidApiConfig;
-    private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
     private final int batchSize = 100;
     private final Path geoLocationRulesFile;
 
@@ -147,7 +148,8 @@ public class GisaidService {
                     false,
                     nextalignPath,
                     geneMapGff,
-                    seqCompressor
+                    nucSeqCompressor,
+                    aaSeqCompressor
                 );
                 while (!emergencyBrake.get() && (!gisaidBatchQueue.isExhausted() || !gisaidBatchQueue.isEmpty())) {
                     try {

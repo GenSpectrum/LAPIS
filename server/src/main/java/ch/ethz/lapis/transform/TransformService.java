@@ -49,13 +49,13 @@ public class TransformService {
             compressAASeqs("""
                 select
                   mm.id,
-                  ng.aa_seqs
+                  ng.aa_seqs_compressed
                 from
                     y_nextstrain_genbank ng
                     join y_main_metadata_staging mm
                       on mm.source = 'nextstrain/genbank' and mm.source_primary_key = ng.strain
                 where
-                  ng.aa_seqs is not null;
+                  ng.aa_seqs_compressed is not null;
             """);
         } else if (source == LapisConfig.Source.GISAID) {
             System.out.println(LocalDateTime.now() + " pullFromGisaidTable()");
@@ -65,13 +65,13 @@ public class TransformService {
             compressAASeqs("""
                 select
                   mm.id,
-                  g.aa_seqs
+                  g.aa_seqs_compressed
                 from
                   y_gisaid g
                   join y_main_metadata_staging mm
                     on mm.source = 'gisaid' and mm.source_primary_key = g.gisaid_epi_isl
                 where
-                  g.aa_seqs is not null;
+                  g.aa_seqs_compressed is not null;
             """);
         }
         // Fill the table y_main_sequence_columnar_staging
@@ -224,26 +224,26 @@ public class TransformService {
 
     /**
      *
-     * @param fetchAASeqsSql A SQL query string that gives a result set with two columns: "id" and "aa_seqs"
+     * @param fetchAASeqsSql A SQL query string that gives a result set with two columns: "id" and "aa_seqs_compressed"
      */
     public void compressAASeqs(String fetchAASeqsSql) throws SQLException, InterruptedException {
         // Fetch the uncompressed AA sequences
         // The AA sequences have the format "<gene1>:<seq1>,<gene2>:<seq2>,..."
-        ExhaustibleBlockingQueue<List<Pair<Integer, String>>> batches;
+        ExhaustibleBlockingQueue<List<Pair<Integer, byte[]>>> batches;
         Connection conn = databasePool.getConnection();
         PreparedStatement statement = conn.prepareStatement(fetchAASeqsSql);
         var elementQueue = new DatabaseReaderQueueBuilder<>(
             statement,
             (rs) -> {
                 try {
-                    return new Pair<>(rs.getInt("id"), rs.getString("aa_seqs"));
+                    return new Pair<>(rs.getInt("id"), rs.getBytes("aa_seqs_compressed"));
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             },
-            2000, 2000
+            50000, 20000
         ).build();
-        batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 400, 30);
+        batches = ExhaustibleLinkedBlockingQueue.batchElements(elementQueue, 500, 30);
 
         // Compress and write to database
         ExecutorService executor = Executors.newFixedThreadPool(maxNumberWorkers);
@@ -253,7 +253,7 @@ public class TransformService {
                 try {
                     while (!batches.isEmpty() || !batches.isExhausted()) {
                         // Get a batch from the queue
-                        List<Pair<Integer, String>> batch = batches.poll(3, TimeUnit.SECONDS);
+                        List<Pair<Integer, byte[]>> batch = batches.poll(3, TimeUnit.SECONDS);
                         if (batch == null) {
                             continue;
                         }
@@ -261,8 +261,8 @@ public class TransformService {
                         // We will use a Triplet to store the elements.
                         // Triplet<Integer, String, byte[]> = (id, gene, aa_seq_compressed)
                         List<Triplet<Integer, String, byte[]>> compressed = new ArrayList<>();
-                        for (Pair<Integer, String> aaSeqsEntry : batch) {
-                            String aaSeqs = aaSeqsEntry.getValue1();
+                        for (Pair<Integer, byte[]> aaSeqsEntry : batch) {
+                            String aaSeqs = aaSeqCompressor.decompress(aaSeqsEntry.getValue1());
                             if (aaSeqs == null || aaSeqs.isBlank()) {
                                 continue;
                             }

@@ -148,7 +148,7 @@ public class NextstrainGenbankService {
     }
 
 
-    private void updateAAMutations() throws IOException, SQLException, InterruptedException {
+    private void updateAAMutations() throws IOException, InterruptedException {
         // TODO Check if Nextalign is installed
 
         // Write the reference sequence and genemap.gff to the workdir

@@ -28,7 +28,7 @@ public class GisaidEntry {
 
     private String seqOriginal;
     private String seqAligned;
-    private String geneAASeqs;
+    private byte[] geneAASeqsCompressed;
 
     private String aaMutations;
     private String nucSubstitutions;
@@ -225,12 +225,12 @@ public class GisaidEntry {
         return this;
     }
 
-    public String getGeneAASeqs() {
-        return geneAASeqs;
+    public byte[] getGeneAASeqsCompressed() {
+        return geneAASeqsCompressed;
     }
 
-    public GisaidEntry setGeneAASeqs(String geneAASeqs) {
-        this.geneAASeqs = geneAASeqs;
+    public GisaidEntry setGeneAASeqsCompressed(byte[] geneAASeqsCompressed) {
+        this.geneAASeqsCompressed = geneAASeqsCompressed;
         return this;
     }
 

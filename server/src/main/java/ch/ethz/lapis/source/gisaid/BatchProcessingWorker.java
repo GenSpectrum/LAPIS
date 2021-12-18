@@ -3,10 +3,7 @@ package ch.ethz.lapis.source.gisaid;
 import ch.ethz.lapis.source.MutationAA;
 import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.source.MutationNuc;
-import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.FastaFileReader;
-import ch.ethz.lapis.util.ReferenceGenomeData;
-import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.io.FileUtils;
 
@@ -32,14 +29,15 @@ public class BatchProcessingWorker {
     private final SubmitterInformationFetcher submitterInformationFetcher = new SubmitterInformationFetcher();
     private final Path nextalignPath;
     private final Path geneMapGff;
-    private final SeqCompressor seqCompressor;
+    private final SeqCompressor nucSeqCompressor;
+    private final SeqCompressor aaSeqCompressor;
     /**
      * @param id             An unique identifier for the worker
      * @param workDir        An empty work directory for the worker
      * @param referenceFasta The path to the fasta file containing the reference
      * @param nextalignPath
      * @param geneMapGff
-     * @param seqCompressor
+     * @param nucSeqCompressor
      */
     public BatchProcessingWorker(
         int id,
@@ -49,7 +47,8 @@ public class BatchProcessingWorker {
         boolean updateSubmitterInformation,
         Path nextalignPath,
         Path geneMapGff,
-        SeqCompressor seqCompressor
+        SeqCompressor nucSeqCompressor,
+        SeqCompressor aaSeqCompressor
     ) {
         this.databasePool = databasePool;
         this.id = id;
@@ -58,7 +57,8 @@ public class BatchProcessingWorker {
         this.updateSubmitterInformation = updateSubmitterInformation;
         this.nextalignPath = nextalignPath;
         this.geneMapGff = geneMapGff;
-        this.seqCompressor = seqCompressor;
+        this.nucSeqCompressor = nucSeqCompressor;
+        this.aaSeqCompressor = aaSeqCompressor;
     }
 
     public BatchReport run(Batch batch) throws Exception {
@@ -105,7 +105,7 @@ public class BatchProcessingWorker {
                         // Add the Nextalign results to the entry
                         entry
                             .setSeqAligned(nre.alignedNucSeq)
-                            .setGeneAASeqs(formatGeneAASeqs(nre.geneAASeqs));
+                            .setGeneAASeqsCompressed(aaSeqCompressor.compress(formatGeneAASeqs(nre.geneAASeqs)));
 
                         // Extract the amino acid and nucleotide mutations
                         if (entry.getSeqAligned() != null) {
@@ -271,7 +271,7 @@ public class BatchProcessingWorker {
                         }
                         byte[] seqOriginalCompressed = rs.getBytes("seq_original_compressed");
                         if (Objects.equals(entry.getSeqOriginal(), seqOriginalCompressed != null ?
-                            seqCompressor.decompress(seqOriginalCompressed) : null)) {
+                            nucSeqCompressor.decompress(seqOriginalCompressed) : null)) {
                             entry.setSequenceChanged(false);
                         }
                         if (!entry.isMetadataChanged() && !entry.isSequenceChanged()) {
@@ -462,7 +462,7 @@ public class BatchProcessingWorker {
                       gisaid_epi_isl, strain, date, date_original, date_submitted, region, country, division, location,
                       region_exposure, country_exposure, division_exposure, host, age, sex, sampling_strategy,
                       pango_lineage, gisaid_clade, originating_lab, submitting_lab, authors,
-                      seq_original_compressed, seq_aligned_compressed, aa_seqs, aa_mutations,
+                      seq_original_compressed, seq_aligned_compressed, aa_seqs_compressed, aa_mutations,
                       nuc_substitutions, nuc_deletions, nuc_insertions
                     )
                     values (
@@ -500,10 +500,10 @@ public class BatchProcessingWorker {
                     insertStatement.setString(20, si != null ? si.getSubmittingLab() : null);
                     insertStatement.setString(21, si != null ? si.getAuthors() : null);
                     insertStatement.setBytes(22, entry.getSeqOriginal() != null ?
-                        seqCompressor.compress(entry.getSeqOriginal()) : null);
+                        nucSeqCompressor.compress(entry.getSeqOriginal()) : null);
                     insertStatement.setBytes(23, entry.getSeqAligned() != null ?
-                        seqCompressor.compress(entry.getSeqAligned()) : null);
-                    insertStatement.setString(24, entry.getGeneAASeqs());
+                        nucSeqCompressor.compress(entry.getSeqAligned()) : null);
+                    insertStatement.setBytes(24, entry.getGeneAASeqsCompressed());
                     insertStatement.setString(25, entry.getAaMutations());
                     insertStatement.setString(26, entry.getNucSubstitutions());
                     insertStatement.setString(27, entry.getNucDeletions());
