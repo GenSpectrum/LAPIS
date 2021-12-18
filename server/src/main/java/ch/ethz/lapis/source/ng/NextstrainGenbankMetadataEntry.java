@@ -1,8 +1,9 @@
 package ch.ethz.lapis.source.ng;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class NextstrainGenbankMetadataEntry {
+public class NextstrainGenbankMetadataEntry implements Serializable {
 
     private String strain;
     private String virus;

@@ -10,12 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -27,15 +23,16 @@ public class NextstrainGenbankMutationAAWorker {
     private final Path referenceFasta;
     private final Path geneMapGff;
     private final Path nextalignPath;
-    private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
     private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
+
     public NextstrainGenbankMutationAAWorker(
         int id,
         ComboPooledDataSource databasePool,
         Path workDir,
         Path referenceFasta,
         Path geneMapGff,
-        Path nextalignPath) {
+        Path nextalignPath
+    ) {
         this.id = id;
         this.databasePool = databasePool;
         this.workDir = workDir;
@@ -46,37 +43,6 @@ public class NextstrainGenbankMutationAAWorker {
 
     public void run(List<FastaEntry> batch) throws Exception {
         System.out.println(LocalDateTime.now() + " [" + id + "] Received " + batch.size() + " sequences.");
-
-        // Find sequences that already exist and have not changed
-        Map<String, String> seqMap = new HashMap<>();
-        for (FastaEntry fastaEntry : batch) {
-            seqMap.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
-        }
-        String fetchSql = """
-                select strain, seq_aligned_compressed
-                from y_nextstrain_genbank
-                where strain = any(?::text[]) and seq_aligned_compressed is not null;
-            """;
-        try (Connection conn = databasePool.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement(fetchSql)) {
-                statement.setArray(1, conn.createArrayOf("text", seqMap.keySet().toArray()));
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        String sampleName = rs.getString("strain");
-                        String seqUncompressed = nucSeqCompressor.decompress(
-                            rs.getBytes("seq_aligned_compressed"));
-                        if (seqMap.get(sampleName).equalsIgnoreCase(seqUncompressed)) {
-                            seqMap.remove(sampleName);
-                        }
-                    }
-                }
-            }
-        }
-        System.out.println(LocalDateTime.now() + " [" + id + "] " + batch.size() + " sequences were changed.");
-        if (batch.isEmpty()) {
-            System.out.println(LocalDateTime.now() + " [" + id + "] Nothing to do. Bye bye.");
-            return;
-        }
 
         // Run Nextalign and read amino acid mutation sequences
         Path seqFastaPath = workDir.resolve("aligned.fasta");
