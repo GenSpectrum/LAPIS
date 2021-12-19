@@ -23,6 +23,9 @@ create table data_version
 
 create table y_nextstrain_genbank
 (
+  metadata_hash text,
+  seq_original_hash text,
+  seq_aligned_hash text,
   genbank_accession text,
   sra_accession text,
   gisaid_epi_isl text,
@@ -49,7 +52,7 @@ create table y_nextstrain_genbank
   authors text,
   seq_original_compressed bytea,
   seq_aligned_compressed bytea,
-  aa_seqs text,
+  aa_seqs_compressed bytea,
   aa_mutations text,
   nuc_substitutions text,
   nuc_deletions text,
@@ -62,6 +65,8 @@ create table y_nextstrain_genbank
 create table y_gisaid
 (
   updated_at timestamp not null,
+  metadata_hash text,
+  seq_original_hash text,
   gisaid_epi_isl text primary key,
   strain text,
   date date,
@@ -85,7 +90,7 @@ create table y_gisaid
   authors text,
   seq_original_compressed bytea,
   seq_aligned_compressed bytea,
-  aa_seqs text,
+  aa_seqs_compressed bytea,
   aa_mutations text,
   nuc_substitutions text,
   nuc_deletions text,

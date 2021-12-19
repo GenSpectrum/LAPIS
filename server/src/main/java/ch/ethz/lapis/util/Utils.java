@@ -1,10 +1,10 @@
 package ch.ethz.lapis.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -136,6 +136,23 @@ public class Utils {
             mutationCode = mutationCode.substring(1);
         }
         return mutationCode.toUpperCase();
+    }
+
+
+    public static String hashMd5(Object obj) {
+        try {
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            ObjectOutputStream objectOut = new ObjectOutputStream(byteOut);
+            objectOut.writeObject(obj);
+            objectOut.flush();
+            byte[] bytes = byteOut.toByteArray();
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(bytes);
+            byte[] digest = md.digest();
+            return DatatypeConverter.printHexBinary(digest).toUpperCase();
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

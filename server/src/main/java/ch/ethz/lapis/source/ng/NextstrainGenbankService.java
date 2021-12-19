@@ -4,6 +4,7 @@ import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,14 +14,10 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +33,10 @@ public class NextstrainGenbankService {
     private final int maxNumberWorkers;
     private final Path nextalignPath;
     private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private Map<String, NextstrainGenbankHashes> oldHashes;
+    // updateSeqOriginalOrAligned(false) will fill this set with the "strains" of the entries for which the original
+    // sequence did not change. For those sequences, we will not overwrite the AA mutations and Nextclade data either.
+    private final Set<String> unchangedOriginalSeqStrains = new HashSet<>();
 
     public NextstrainGenbankService(
         ComboPooledDataSource databasePool,
@@ -55,21 +56,20 @@ public class NextstrainGenbankService {
         // Download files from Nextstrain
         downloadFiles();
 
-        // Delete old data
-        deleteOldData();
+        // Load the hashes of the existing data
+        this.oldHashes = getHashes();
 
         // The files and different types of data will be inserted/updated independently and one after the other in the
         // following order:
         //   1. original sequences
         //   2. aligned sequences
-        //   3. metadata
-        //   4. nextclade data (for now, only the aa mutations)
+        //   3. AA mutations (self-computed with Nextalign)
+        //   4. metadata
+        //   5. nextclade data (provided by the data source)
 
-        // It is highly important to update the AAMutations before the aligned sequences because the AAMutations check
-        // the old aligned sequences and only compute the aa mutation sequences if the aligned sequences changed.
-        updateAAMutations();
         updateSeqOriginalOrAligned(false);
         updateSeqOriginalOrAligned(true);
+        updateAAMutations();
         updateMetadata();
         updateNextcladeData();
 
@@ -101,23 +101,41 @@ public class NextstrainGenbankService {
     }
 
 
-    private void deleteOldData() throws SQLException {
-        String sql = "truncate y_nextstrain_genbank;";
+    private Map<String, NextstrainGenbankHashes> getHashes() throws SQLException {
+        String sql = """
+                select strain, metadata_hash, seq_original_hash, seq_aligned_hash
+                from y_nextstrain_genbank;
+            """;
+        Map<String, NextstrainGenbankHashes> hashes = new HashMap<>();
         try (Connection conn = databasePool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
-                statement.execute(sql);
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    while (rs.next()) {
+                        hashes.put(
+                            rs.getString("strain"),
+                            new NextstrainGenbankHashes(
+                                rs.getString("metadata_hash"),
+                                rs.getString("seq_original_hash"),
+                                rs.getString("seq_aligned_hash")
+                            )
+                        );
+                    }
+                }
             }
         }
+        return hashes;
     }
 
 
     private void updateSeqOriginalOrAligned(boolean aligned) throws IOException, SQLException {
         String filename = !aligned ? "sequences.fasta.xz" : "aligned.fasta.xz";
         String sql = """
-                insert into y_nextstrain_genbank (strain, seq_original_compressed)
-                values (?, ?)
+                insert into y_nextstrain_genbank (strain, seq_original_compressed, seq_original_hash)
+                values (?, ?, ?)
                 on conflict (strain) do update
-                set seq_original_compressed = ?;
+                set
+                  seq_original_compressed = ?,
+                  seq_original_hash = ?;
             """;
         if (aligned) {
             sql = sql.replaceAll("_original_", "_aligned_");
@@ -128,11 +146,25 @@ public class NextstrainGenbankService {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), true)) {
                     for (FastaEntry entry : fastaReader) {
-                        byte[] compressed = seqCompressor.compress(
-                            aligned ? entry.getSeq().toUpperCase() : entry.getSeq());
-                        statement.setString(1, entry.getSampleName());
+                        String seq = aligned ? entry.getSeq().toUpperCase() : entry.getSeq();
+                        String sampleName = entry.getSampleName();
+                        String currentHash = Utils.hashMd5(seq);
+                        if (oldHashes.containsKey(sampleName)) {
+                            String oldHash = aligned ? oldHashes.get(sampleName).getSeqAlignedHash() :
+                                oldHashes.get(sampleName).getSeqOriginalHash();
+                            if (currentHash.equals(oldHash)) {
+                                if (!aligned) {
+                                    unchangedOriginalSeqStrains.add(sampleName);
+                                }
+                                continue;
+                            }
+                        }
+                        byte[] compressed = seqCompressor.compress(seq);
+                        statement.setString(1, sampleName);
                         statement.setBytes(2, compressed);
-                        statement.setBytes(3, compressed);
+                        statement.setString(3, currentHash);
+                        statement.setBytes(4, compressed);
+                        statement.setString(5, currentHash);
                         statement.addBatch();
                         i++;
                         if (i % 10000 == 0) {
@@ -148,7 +180,7 @@ public class NextstrainGenbankService {
     }
 
 
-    private void updateAAMutations() throws IOException, SQLException, InterruptedException {
+    private void updateAAMutations() throws IOException, InterruptedException {
         // TODO Check if Nextalign is installed
 
         // Write the reference sequence and genemap.gff to the workdir
@@ -207,6 +239,9 @@ public class NextstrainGenbankService {
         List<FastaEntry> batch = new ArrayList<>();
         try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), true)) {
             for (FastaEntry entry : fastaReader) {
+                if (unchangedOriginalSeqStrains.contains(entry.getSampleName())) {
+                    continue;
+                }
                 batch.add(entry);
                 if (batch.size() >= batchSize) {
                     while (!emergencyBrake.get()) {
@@ -263,13 +298,13 @@ public class NextstrainGenbankService {
                   genbank_accession, sra_accession, gisaid_epi_isl, strain, date, date_original,
                   date_submitted, region, country, division, location, region_exposure, country_exposure,
                   division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextstrain_clade,
-                  gisaid_clade, originating_lab, submitting_lab, authors
+                  gisaid_clade, originating_lab, submitting_lab, authors, metadata_hash
                 )
                 values (
                   ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
-                  ?, ?, ?, ?
+                  ?, ?, ?, ?, ?
                 )
                 on conflict (strain) do update
                 set
@@ -295,7 +330,8 @@ public class NextstrainGenbankService {
                   gisaid_clade = ?,
                   originating_lab = ?,
                   submitting_lab = ?,
-                  authors = ?;
+                  authors = ?,
+                  metadata_hash = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -307,6 +343,15 @@ public class NextstrainGenbankService {
                         if (entry.getStrain() == null) {
                             continue;
                         }
+                        String sampleName = entry.getStrain();
+                        String currentHash = Utils.hashMd5(entry);
+                        if (oldHashes.containsKey(sampleName)) {
+                            String oldHash = oldHashes.get(sampleName).getMetadataHash();
+                            if (currentHash.equals(oldHash)) {
+                                continue;
+                            }
+                        }
+
                         statement.setString(1, entry.getGenbankAccession());
                         statement.setString(2, entry.getSraAccession());
                         statement.setString(3, entry.getGisaidEpiIsl());
@@ -331,30 +376,32 @@ public class NextstrainGenbankService {
                         statement.setString(22, entry.getOriginatingLab());
                         statement.setString(23, entry.getSubmittingLab());
                         statement.setString(24, entry.getAuthors());
+                        statement.setString(25, currentHash);
 
-                        statement.setString(25, entry.getGenbankAccession());
-                        statement.setString(26, entry.getSraAccession());
-                        statement.setString(27, entry.getGisaidEpiIsl());
-                        statement.setDate(28, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setString(29, entry.getDateOriginal());
-                        statement.setDate(30, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(31, entry.getRegion());
-                        statement.setString(32, entry.getCountry());
-                        statement.setString(33, entry.getDivision());
-                        statement.setString(34, entry.getLocation());
-                        statement.setString(35, entry.getRegionExposure());
-                        statement.setString(36, entry.getCountryExposure());
-                        statement.setString(37, entry.getDivisionExposure());
-                        statement.setString(38, entry.getHost());
-                        statement.setObject(39, entry.getAge());
-                        statement.setString(40, entry.getSex());
-                        statement.setString(41, entry.getSamplingStrategy());
-                        statement.setString(42, entry.getPangoLineage());
-                        statement.setString(43, entry.getNextstrainClade());
-                        statement.setString(44, entry.getGisaidClade());
-                        statement.setString(45, entry.getOriginatingLab());
-                        statement.setString(46, entry.getSubmittingLab());
-                        statement.setString(47, entry.getAuthors());
+                        statement.setString(26, entry.getGenbankAccession());
+                        statement.setString(27, entry.getSraAccession());
+                        statement.setString(28, entry.getGisaidEpiIsl());
+                        statement.setDate(29, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setString(30, entry.getDateOriginal());
+                        statement.setDate(31, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(32, entry.getRegion());
+                        statement.setString(33, entry.getCountry());
+                        statement.setString(34, entry.getDivision());
+                        statement.setString(35, entry.getLocation());
+                        statement.setString(36, entry.getRegionExposure());
+                        statement.setString(37, entry.getCountryExposure());
+                        statement.setString(38, entry.getDivisionExposure());
+                        statement.setString(39, entry.getHost());
+                        statement.setObject(40, entry.getAge());
+                        statement.setString(41, entry.getSex());
+                        statement.setString(42, entry.getSamplingStrategy());
+                        statement.setString(43, entry.getPangoLineage());
+                        statement.setString(44, entry.getNextstrainClade());
+                        statement.setString(45, entry.getGisaidClade());
+                        statement.setString(46, entry.getOriginatingLab());
+                        statement.setString(47, entry.getSubmittingLab());
+                        statement.setString(48, entry.getAuthors());
+                        statement.setString(49, currentHash);
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {
@@ -390,6 +437,9 @@ public class NextstrainGenbankService {
                     = new NextstrainGenbankNextcladeFileReader(gzipInputStream)) {
                     int i = 0;
                     for (NextstrainGenbankNextcladeEntry entry : nextcladeReader) {
+                        if (unchangedOriginalSeqStrains.contains(entry.getStrain())) {
+                            continue;
+                        }
                         statement.setString(1, entry.getStrain());
                         statement.setString(2, entry.getAaMutations());
                         statement.setString(3, entry.getNucSubstitutions());
