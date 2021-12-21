@@ -15,8 +15,6 @@ import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 
@@ -82,7 +79,14 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setETag(generateETag(cacheKey))
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("aggregated.json")
+            .setBody(body)
+            .build();
     }
 
 
@@ -98,10 +102,14 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
-        return respond(
-            new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness),
-            generalConfig.getDataVersion() != null
-        );
+        var body = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness);
+        return new SampleResponseBuilder<V1Response<SampleDetailResponse>>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("details.json")
+            .setBody(body)
+            .build();
     }
 
 
@@ -123,10 +131,14 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
-        return respond(
-            new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness),
-            generalConfig.getDataVersion() != null
-        );
+        var body = new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness);
+        return new SampleResponseBuilder<V1Response<ContributorResponse>>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("contributors.json")
+            .setBody(body)
+            .build();
     }
 
 
@@ -152,7 +164,14 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<String> strainNames = sampleService.getStrainNames(request, limitAndOrder);
-        return respond(String.join("\n", strainNames), generalConfig.getDataVersion() != null);
+        String body = String.join("\n", strainNames);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("strain_names.txt")
+            .setBody(body)
+            .build();
     }
 
 
@@ -178,7 +197,14 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request, limitAndOrder);
-        return respond(String.join("\n", gisaidEpiIsls), generalConfig.getDataVersion() != null);
+        String body = String.join("\n", gisaidEpiIsls);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("gisaid_epi_isl.txt")
+            .setBody(body)
+            .build();
     }
 
 
@@ -208,7 +234,14 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setETag(generateETag(cacheKey))
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("aa_mutations.json")
+            .setBody(body)
+            .build();
     }
 
 
@@ -238,7 +271,14 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
-        return respond(body, generalConfig.getDataVersion() != null, cacheKey);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setETag(generateETag(cacheKey))
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("nuc_mutations.json")
+            .setBody(body)
+            .build();
     }
 
 
@@ -250,7 +290,7 @@ public class SampleController {
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
@@ -258,10 +298,13 @@ public class SampleController {
         }
         StreamingResponseBody responseBody = response ->
             sampleService.getFasta(request, false, limitAndOrder, response);
-        return respond(
-            responseBody,
-            generalConfig.getDataVersion() != null
-        );
+        return new SampleResponseBuilder<StreamingResponseBody>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("sequences.fasta")
+            .setBody(responseBody)
+            .build();
     }
 
 
@@ -281,10 +324,13 @@ public class SampleController {
         }
         StreamingResponseBody responseBody = response ->
             sampleService.getFasta(request, true, limitAndOrder, response);
-        return respond(
-            responseBody,
-            generalConfig.getDataVersion() != null
-        );
+        return new SampleResponseBuilder<StreamingResponseBody>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDownloadFileName("aligned_sequences.fasta")
+            .setBody(responseBody)
+            .build();
     }
 
 
@@ -304,42 +350,14 @@ public class SampleController {
         return response;
     }
 
-    private <T> ResponseEntity<T> respond(T body, boolean allowCaching) {
-        return ResponseEntity.ok()
-            .headers(headers(dataVersionService.getVersion()))
-            .cacheControl(cacheControl(allowCaching))
-            .body(body);
-    }
 
-
-    private <T> ResponseEntity<T> respond(T body, boolean allowCaching, ApiCacheKey cacheKey) {
+    private String generateETag(ApiCacheKey cacheKey) {
         try {
             String cacheKeyString = objectMapper.writeValueAsString(cacheKey);
             String cacheKeyHash = DigestUtils.md5DigestAsHex(cacheKeyString.getBytes(StandardCharsets.UTF_8));
-            String etag = cacheKeyHash + "-" + dataVersionService.getVersion();
-            return ResponseEntity.ok()
-                .eTag(etag)
-                .headers(headers(dataVersionService.getVersion()))
-                .cacheControl(cacheControl(allowCaching))
-                .body(body);
+            return cacheKeyHash + "-" + dataVersionService.getVersion();
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-
-    private HttpHeaders headers(long dataVersion) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("LAPIS-Data-Version", String.valueOf(dataVersion));
-        return httpHeaders;
-    }
-
-
-    private CacheControl cacheControl(boolean allowCaching) {
-        if (allowCaching) {
-            return CacheControl.maxAge(1, TimeUnit.DAYS);
-        } else {
-            return CacheControl.noStore();
         }
     }
 
