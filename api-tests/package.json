@@ -4,7 +4,7 @@
   "description": "API tests for LAPIS",
   "main": "index.js",
   "scripts": {
-    "test": "API_URL=http://localhost:2345/v0 OPENNESS=open mocha --timeout 180000",
+    "test": "API_URL=http://localhost:2345/v0 OPENNESS=open mocha --timeout 600000",
     "test-prod-public": "API_URL=https://cov-spectrum.ethz.ch/public/api/v0 OPENNESS=open mocha --timeout 180000",
     "test-prod-gisaid": "API_URL=https://cov-spectrum.ethz.ch/gisaid/api/v0 OPENNESS=gisaid mocha --timeout 180000"
   },

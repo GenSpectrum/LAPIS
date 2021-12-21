@@ -132,6 +132,7 @@ describe('Endpoint sample/contributors', () => {
             genbankAccession: {type: 'string', nullable: true},
             sraAccession: {type: 'string', nullable: true},
             gisaidEpiIsl: {type: 'string', nullable: true},
+            strain: {type: 'string', nullable: true},
             submittingLab: {type: 'string', nullable: true},
             originatingLab: {type: 'string', nullable: true},
             authors: {type: 'string', nullable: true},
