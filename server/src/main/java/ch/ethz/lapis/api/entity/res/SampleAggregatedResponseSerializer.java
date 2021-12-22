@@ -4,8 +4,9 @@ import ch.ethz.lapis.api.entity.AggregationField;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import org.springframework.boot.jackson.JsonComponent;
+
+import java.io.IOException;
 
 @JsonComponent
 public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAggregatedResponse> {
@@ -22,7 +23,7 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
             for (AggregationField field : resultSet.getFields()) {
                 switch (field) {
                     case DATE -> gen.writeObjectField("date", sample.getDate());
-                    case DATESUBMITTED -> gen.writeObjectField("date", sample.getDateSubmitted());
+                    case DATESUBMITTED -> gen.writeObjectField("dateSubmitted", sample.getDateSubmitted());
                     case REGION -> gen.writeStringField("region", sample.getRegion());
                     case COUNTRY -> gen.writeStringField("country", sample.getCountry());
                     case DIVISION -> gen.writeStringField("division", sample.getDivision());
