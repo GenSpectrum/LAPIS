@@ -75,15 +75,20 @@ public class SampleService {
     }
 
 
-    public List<SampleAggregated> getAggregatedSamples(SampleAggregatedRequest request) throws SQLException {
+    public List<SampleAggregated> getAggregatedSamples(
+        SampleAggregatedRequest request,
+        StopWatch stopWatch
+    ) throws SQLException {
         List<AggregationField> fields = request.getFields();
 
+        stopWatch.round("preFilterIds()");
         Set<Integer> ids = preFilterIds(request);
         if (ids != null && ids.isEmpty()) {
             return new ArrayList<>();
         }
 
         // Filter further by the other metadata and prepare the response
+        stopWatch.round("Filter metadata and respond");
         List<SampleAggregated> samples = new ArrayList<>();
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);

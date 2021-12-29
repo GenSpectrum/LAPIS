@@ -13,6 +13,7 @@ import ch.ethz.lapis.api.exception.ForbiddenException;
 import ch.ethz.lapis.api.exception.GisaidLimitationException;
 import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
+import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
@@ -63,13 +64,20 @@ public class SampleController {
         value = "/aggregated",
         produces = "application/json"
     )
-    public ResponseEntity<String> getAggregated(SampleAggregatedRequest request, GeneralConfig generalConfig) {
+    public ResponseEntity<String> getAggregated(
+        SampleAggregatedRequest request,
+        GeneralConfig generalConfig
+    ) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        stopWatch.round("Cache check");
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
-                List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
+                List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request, stopWatch);
+                stopWatch.round("Result formatting");
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),
                     aggregatedSamples
@@ -79,6 +87,8 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        stopWatch.stop();
+        System.out.println("/aggregated - " + stopWatch.getFormattedResultString());
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
