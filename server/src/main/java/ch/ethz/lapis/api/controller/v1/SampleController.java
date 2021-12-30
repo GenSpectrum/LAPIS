@@ -57,10 +57,7 @@ public class SampleController {
     }
 
 
-    @GetMapping(
-        value = "/aggregated",
-        produces = "application/json"
-    )
+    @GetMapping("/aggregated")
     public ResponseEntity<String> getAggregated(
         SampleAggregatedRequest request,
         GeneralConfig generalConfig
@@ -93,7 +90,8 @@ public class SampleController {
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aggregated.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("aggregated")
             .setBody(body)
             .build();
     }
@@ -107,6 +105,7 @@ public class SampleController {
     ) throws SQLException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
@@ -116,7 +115,8 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("details.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("details")
             .setBody(body)
             .build();
     }
@@ -130,6 +130,7 @@ public class SampleController {
     ) throws SQLException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -145,16 +146,14 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("contributors.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("contributors")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/strain-names",
-        produces = "text/plain"
-    )
+    @GetMapping("/strain-names")
     public ResponseEntity<String> getStrainNames(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -178,16 +177,14 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("strain_names.txt")
+            .setDataFormat(DataFormat.TEXT)
+            .setDownloadFileName("strain_names")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/gisaid-epi-isl",
-        produces = "text/plain"
-    )
+    @GetMapping("/gisaid-epi-isl")
     public ResponseEntity<String> getGisaidEpiIsls(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -211,19 +208,18 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("gisaid_epi_isl.txt")
+            .setDataFormat(DataFormat.TEXT)
+            .setDownloadFileName("gisaid_epi_isl")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/aa-mutations",
-        produces = "application/json"
-    )
+    @GetMapping("/aa-mutations")
     public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -248,19 +244,18 @@ public class SampleController {
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aa_mutations.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("aa_mutations")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/nuc-mutations",
-        produces = "application/json"
-    )
+    @GetMapping("/nuc-mutations")
     public ResponseEntity<String> getNucMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -285,16 +280,14 @@ public class SampleController {
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("nuc_mutations.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("nuc_mutations")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/fasta",
-        produces = "text/x-fasta"
-    )
+    @GetMapping("/fasta")
     public ResponseEntity<StreamingResponseBody> getFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -311,16 +304,14 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("sequences.fasta")
+            .setDataFormat(DataFormat.FASTA)
+            .setDownloadFileName("sequences")
             .setBody(responseBody)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/fasta-aligned",
-        produces = "text/x-fasta"
-    )
+    @GetMapping("/fasta-aligned")
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -337,7 +328,8 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aligned_sequences.fasta")
+            .setDataFormat(DataFormat.FASTA)
+            .setDownloadFileName("aligned_sequences")
             .setBody(responseBody)
             .build();
     }
