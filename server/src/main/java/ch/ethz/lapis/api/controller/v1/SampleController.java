@@ -9,10 +9,7 @@ import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
-import ch.ethz.lapis.api.exception.ForbiddenException;
-import ch.ethz.lapis.api.exception.GisaidLimitationException;
-import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
-import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
+import ch.ethz.lapis.api.exception.*;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,10 +65,12 @@ public class SampleController {
         SampleAggregatedRequest request,
         GeneralConfig generalConfig
     ) {
+        System.out.println(generalConfig.getDataFormat());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         stopWatch.round("Cache check");
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
@@ -392,6 +391,15 @@ public class SampleController {
                 throw new OutdatedDataVersionException(dataVersion, dataVersionService.getVersion());
             }
         }
+    }
+
+    private void checkDataFormat(DataFormat dataFormat, List<DataFormat> supportedFormats) {
+        for (DataFormat supportedFormat : supportedFormats) {
+            if (supportedFormat.equals(dataFormat)) {
+                return;
+            }
+        }
+        throw new UnsupportedDataFormatException(dataFormat);
     }
 
 }
