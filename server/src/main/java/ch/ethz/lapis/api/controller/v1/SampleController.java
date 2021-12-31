@@ -273,6 +273,15 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
+                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
@@ -309,6 +318,15 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
+                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
