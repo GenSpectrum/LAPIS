@@ -4,6 +4,7 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
+import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
@@ -12,6 +13,7 @@ import ch.ethz.lapis.api.entity.res.*;
 import ch.ethz.lapis.api.exception.*;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -26,6 +28,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -63,7 +66,6 @@ public class SampleController {
         SampleAggregatedRequest request,
         GeneralConfig generalConfig
     ) {
-        System.out.println(generalConfig.getDataFormat());
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
@@ -84,6 +86,19 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<List<SampleAggregated>> res = objectMapper.readValue(body, new TypeReference<>() {});
+                List<String> csvFields = request.getFields().stream()
+                    .map(AggregationField::name)
+                    .collect(Collectors.toList());
+                csvFields.add("count");
+                body = new CsvSerializer().serialize(res.getData(), SampleAggregated.class, csvFields);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         stopWatch.stop();
         System.out.println("/aggregated - " + stopWatch.getFormattedResultString());
         return new SampleResponseBuilder<String>()

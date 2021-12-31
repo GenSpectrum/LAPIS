@@ -34,10 +34,12 @@ public class SampleResponseBuilder<E> {
             String fileNameWithEnding = downloadFileName + switch (dataFormat) {
                 case CSV -> ".csv";
                 case JSON -> ".json";
-                case TEXT -> "txt";
+                case TEXT -> ".txt";
                 case FASTA -> ".fasta";
             };
             httpHeaders.set("Content-Disposition", "attachment; filename=\"" + fileNameWithEnding + "\"");
+        } else {
+            httpHeaders.set("Content-Disposition", "inline");
         }
         builder1 = builder1.headers(httpHeaders);
         // Cache control

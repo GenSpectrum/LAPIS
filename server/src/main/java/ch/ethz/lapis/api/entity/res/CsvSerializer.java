@@ -9,15 +9,20 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class CsvSerializer {
 
     public <T> String serialize(List<T> objects, Class<T> c) {
-        List<Pair<String, Method>> fields = new ArrayList<>();
+        return serialize(objects, c, null);
+    }
+
+    public <T> String serialize(List<T> objects, Class<T> c, List<String> fields) {
+        Map<String, Pair<String, Method>> allFields = new HashMap<>(); // The keys are lower-cased
         // Find the getters via reflection and extract the field names
         Class<?> currentClass = c;
         while (currentClass != null && !currentClass.equals(Object.class)) {
@@ -38,27 +43,37 @@ public class CsvSerializer {
                     nameWithoutPrefix = name.substring(2);
                 }
                 String fieldName = Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
-                fields.add(new Pair<>(fieldName, method));
+                allFields.put(fieldName.toLowerCase(), new Pair<>(fieldName, method));
             }
             currentClass = currentClass.getSuperclass();
         }
-        fields.sort(Comparator.comparing(Pair::getValue0));
+        // Check fields
+        List<String> selectedFields = fields != null ?
+            fields.stream().map(String::toLowerCase).collect(Collectors.toList()) :
+            allFields.keySet().stream().sorted().collect(Collectors.toList());
+        if (fields != null) {
+            for (String field : selectedFields) {
+                if (!allFields.containsKey(field)) {
+                    throw new RuntimeException("Field " + field + " does not exist.");
+                }
+            }
+        }
         // Prepare header array for CSVPrinter
-        String[] header = fields.stream()
-            .map(Pair::getValue0)
+        String[] header = selectedFields.stream()
+            .map(f -> allFields.get(f).getValue0())
             .toArray(String[]::new);
         // Write CSV
         StringWriter out = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header))) {
             for (T obj : objects) {
-                Object[] record = fields.stream()
-                        .map(f -> {
-                            try {
-                                return f.getValue1().invoke(obj);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                throw new RuntimeException(e);
-                            }
-                        })
+                Object[] record = selectedFields.stream()
+                    .map(f -> {
+                        try {
+                            return allFields.get(f).getValue1().invoke(obj);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
                     .toArray(Object[]::new);
                 printer.printRecord(record);
             }
