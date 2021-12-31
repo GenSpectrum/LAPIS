@@ -19,26 +19,28 @@ public class CsvSerializer {
     public <T> String serialize(List<T> objects, Class<T> c) {
         List<Pair<String, Method>> fields = new ArrayList<>();
         // Find the getters via reflection and extract the field names
-        for (Method method : c.getDeclaredMethods()) {
-            // Skip method if it is not public
-            if (!Modifier.isPublic(method.getModifiers())) {
-                continue;
+        Class<?> currentClass = c;
+        while (currentClass != null && !currentClass.equals(Object.class)) {
+            for (Method method : currentClass.getDeclaredMethods()) {
+                // Skip method if it is not public
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    continue;
+                }
+                // Skip method if it's not a getter function
+                String name = method.getName();
+                if (!name.startsWith("get") && !name.startsWith("is")) {
+                    continue;
+                }
+                String nameWithoutPrefix;
+                if (name.startsWith("get")) {
+                    nameWithoutPrefix = name.substring(3);
+                } else {
+                    nameWithoutPrefix = name.substring(2);
+                }
+                String fieldName = Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
+                fields.add(new Pair<>(fieldName, method));
             }
-            // Skip method if it's not a getter function
-            String name = method.getName();
-            if (!name.startsWith("get") && !name.startsWith("is")) {
-                continue;
-            }
-            String nameWithoutPrefix;
-            if (name.startsWith("get")) {
-                nameWithoutPrefix = name.substring(3);
-            } else {
-                nameWithoutPrefix = name.substring(2);
-            }
-            String fieldName = Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
-            Class<?> returnType = method.getReturnType();
-            System.out.println(fieldName + " - " + returnType);
-            fields.add(new Pair<>(fieldName, method));
+            currentClass = currentClass.getSuperclass();
         }
         fields.sort(Comparator.comparing(Pair::getValue0));
         // Prepare header array for CSVPrinter

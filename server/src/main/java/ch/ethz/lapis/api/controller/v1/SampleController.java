@@ -99,11 +99,11 @@ public class SampleController {
 
 
     @GetMapping("/details")
-    public ResponseEntity<V1Response<SampleDetailResponse>> getDetails(
+    public ResponseEntity<String> getDetails(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) throws SQLException, JsonProcessingException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -111,8 +111,17 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
-        var body = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness);
-        return new SampleResponseBuilder<V1Response<SampleDetailResponse>>()
+
+        String body = switch (generalConfig.getDataFormat()) {
+            case JSON -> {
+                var response = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(),
+                    openness);
+                yield objectMapper.writeValueAsString(response);
+            }
+            case CSV -> new CsvSerializer().serialize(samples, SampleDetail.class);
+            default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
+        };
+        return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
