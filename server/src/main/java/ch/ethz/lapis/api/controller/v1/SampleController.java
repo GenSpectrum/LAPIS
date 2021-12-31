@@ -4,17 +4,16 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
+import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.ApiCacheKey;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
-import ch.ethz.lapis.api.exception.ForbiddenException;
-import ch.ethz.lapis.api.exception.GisaidLimitationException;
-import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
-import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
+import ch.ethz.lapis.api.exception.*;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -23,11 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -60,10 +61,7 @@ public class SampleController {
     }
 
 
-    @GetMapping(
-        value = "/aggregated",
-        produces = "application/json"
-    )
+    @GetMapping("/aggregated")
     public ResponseEntity<String> getAggregated(
         SampleAggregatedRequest request,
         GeneralConfig generalConfig
@@ -72,6 +70,7 @@ public class SampleController {
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         stopWatch.round("Cache check");
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
@@ -87,6 +86,19 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<List<SampleAggregated>> res = objectMapper.readValue(body, new TypeReference<>() {});
+                List<String> csvFields = request.getFields().stream()
+                    .map(AggregationField::name)
+                    .collect(Collectors.toList());
+                csvFields.add("count");
+                body = new CsvSerializer().serialize(res.getData(), SampleAggregated.class, csvFields);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         stopWatch.stop();
         System.out.println("/aggregated - " + stopWatch.getFormattedResultString());
         return new SampleResponseBuilder<String>()
@@ -94,43 +106,56 @@ public class SampleController {
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aggregated.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("aggregated")
             .setBody(body)
             .build();
     }
 
 
     @GetMapping("/details")
-    public ResponseEntity<V1Response<SampleDetailResponse>> getDetails(
+    public ResponseEntity<String> getDetails(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) throws SQLException, JsonProcessingException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
         List<SampleDetail> samples = sampleService.getDetailedSamples(request, limitAndOrder);
-        var body = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(), openness);
-        return new SampleResponseBuilder<V1Response<SampleDetailResponse>>()
+
+        String body = switch (generalConfig.getDataFormat()) {
+            case JSON -> {
+                var response = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(),
+                    openness);
+                yield objectMapper.writeValueAsString(response);
+            }
+            case CSV -> new CsvSerializer().serialize(samples, SampleDetail.class);
+            default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
+        };
+        return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("details.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("details")
             .setBody(body)
             .build();
     }
 
 
     @GetMapping("/contributors")
-    public ResponseEntity<V1Response<ContributorResponse>> getContributors(
+    public ResponseEntity<String> getContributors(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) throws SQLException, IOException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -141,21 +166,28 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
-        var body = new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness);
-        return new SampleResponseBuilder<V1Response<ContributorResponse>>()
+
+        String body = switch (generalConfig.getDataFormat()) {
+            case JSON -> {
+                var response = new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(),
+                    openness);
+                yield objectMapper.writeValueAsString(response);
+            }
+            case CSV -> new CsvSerializer().serialize(contributors, Contributor.class);
+            default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
+        };
+        return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("contributors.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("contributors")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/strain-names",
-        produces = "text/plain"
-    )
+    @GetMapping("/strain-names")
     public ResponseEntity<String> getStrainNames(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -179,16 +211,14 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("strain_names.txt")
+            .setDataFormat(DataFormat.TEXT)
+            .setDownloadFileName("strain_names")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/gisaid-epi-isl",
-        produces = "text/plain"
-    )
+    @GetMapping("/gisaid-epi-isl")
     public ResponseEntity<String> getGisaidEpiIsls(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -212,19 +242,18 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("gisaid_epi_isl.txt")
+            .setDataFormat(DataFormat.TEXT)
+            .setDownloadFileName("gisaid_epi_isl")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/aa-mutations",
-        produces = "application/json"
-    )
+    @GetMapping("/aa-mutations")
     public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -244,24 +273,32 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
+                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aa_mutations.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("aa_mutations")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/nuc-mutations",
-        produces = "application/json"
-    )
+    @GetMapping("/nuc-mutations")
     public ResponseEntity<String> getNucMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -281,21 +318,28 @@ public class SampleController {
                 throw new RuntimeException(e);
             }
         });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+            try {
+                V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
+                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("nuc_mutations.json")
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName("nuc_mutations")
             .setBody(body)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/fasta",
-        produces = "text/x-fasta"
-    )
+    @GetMapping("/fasta")
     public ResponseEntity<StreamingResponseBody> getFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -312,16 +356,14 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("sequences.fasta")
+            .setDataFormat(DataFormat.FASTA)
+            .setDownloadFileName("sequences")
             .setBody(responseBody)
             .build();
     }
 
 
-    @GetMapping(
-        value = "/fasta-aligned",
-        produces = "text/x-fasta"
-    )
+    @GetMapping("/fasta-aligned")
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
@@ -338,7 +380,8 @@ public class SampleController {
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
-            .setDownloadFileName("aligned_sequences.fasta")
+            .setDataFormat(DataFormat.FASTA)
+            .setDownloadFileName("aligned_sequences")
             .setBody(responseBody)
             .build();
     }
@@ -392,6 +435,15 @@ public class SampleController {
                 throw new OutdatedDataVersionException(dataVersion, dataVersionService.getVersion());
             }
         }
+    }
+
+    private void checkDataFormat(DataFormat dataFormat, List<DataFormat> supportedFormats) {
+        for (DataFormat supportedFormat : supportedFormats) {
+            if (supportedFormat.equals(dataFormat)) {
+                return;
+            }
+        }
+        throw new UnsupportedDataFormatException(dataFormat);
     }
 
 }

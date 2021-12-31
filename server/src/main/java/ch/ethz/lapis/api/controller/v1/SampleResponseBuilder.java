@@ -1,7 +1,9 @@
 package ch.ethz.lapis.api.controller.v1;
 
+import ch.ethz.lapis.api.entity.req.DataFormat;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.util.concurrent.TimeUnit;
@@ -14,6 +16,7 @@ public class SampleResponseBuilder<E> {
     private boolean forDownload;
     private String downloadFileName;
     private boolean allowCaching;
+    private DataFormat dataFormat = DataFormat.JSON;
     private E body;
 
     public ResponseEntity<E> build() {
@@ -28,7 +31,15 @@ public class SampleResponseBuilder<E> {
             httpHeaders.set("LAPIS-Data-Version", String.valueOf(dataVersion));
         }
         if (forDownload) {
-            httpHeaders.set("Content-Disposition", "attachment; filename=\"" + downloadFileName + "\"");
+            String fileNameWithEnding = downloadFileName + switch (dataFormat) {
+                case CSV -> ".csv";
+                case JSON -> ".json";
+                case TEXT -> ".txt";
+                case FASTA -> ".fasta";
+            };
+            httpHeaders.set("Content-Disposition", "attachment; filename=\"" + fileNameWithEnding + "\"");
+        } else {
+            httpHeaders.set("Content-Disposition", "inline");
         }
         builder1 = builder1.headers(httpHeaders);
         // Cache control
@@ -37,6 +48,14 @@ public class SampleResponseBuilder<E> {
         } else {
             builder1 = builder1.cacheControl(CacheControl.noStore());
         }
+        // Content-type
+        MediaType mediaType = switch (dataFormat) {
+            case CSV -> new MediaType("text", "csv");
+            case JSON -> MediaType.APPLICATION_JSON;
+            case TEXT -> MediaType.TEXT_PLAIN;
+            case FASTA -> new MediaType("text", "x-fasta");
+        };
+        builder1 = builder1.contentType(mediaType);
         // Body
         return builder1.body(this.body);
     }
@@ -83,6 +102,15 @@ public class SampleResponseBuilder<E> {
 
     public SampleResponseBuilder<E> setAllowCaching(boolean allowCaching) {
         this.allowCaching = allowCaching;
+        return this;
+    }
+
+    public DataFormat getDataFormat() {
+        return dataFormat;
+    }
+
+    public SampleResponseBuilder<E> setDataFormat(DataFormat dataFormat) {
+        this.dataFormat = dataFormat;
         return this;
     }
 
