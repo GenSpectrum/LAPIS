@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.List;
@@ -123,11 +124,11 @@ public class SampleController {
 
 
     @GetMapping("/contributors")
-    public ResponseEntity<V1Response<ContributorResponse>> getContributors(
+    public ResponseEntity<String> getContributors(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+    ) throws SQLException, IOException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -141,8 +142,17 @@ public class SampleController {
             throw new ForbiddenException();
         }
         List<Contributor> contributors = sampleService.getContributors(request, limitAndOrder);
-        var body = new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(), openness);
-        return new SampleResponseBuilder<V1Response<ContributorResponse>>()
+
+        String body = switch (generalConfig.getDataFormat()) {
+            case JSON -> {
+                var response = new V1Response<>(new ContributorResponse(contributors), dataVersionService.getVersion(),
+                    openness);
+                yield objectMapper.writeValueAsString(response);
+            }
+            case CSV -> new CsvSerializer().serialize(contributors, Contributor.class);
+            default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
+        };
+        return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
             .setForDownload(generalConfig.isDownloadAsFile())
