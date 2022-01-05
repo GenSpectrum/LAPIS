@@ -753,7 +753,11 @@ public class SampleService {
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
             String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
-            conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
+            if (pangoLineage.endsWith("*")) {
+                conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
+            } else {
+                conditions.add(tbl.PANGO_LINEAGE.eq(DSL.any(pangolinLineageLikeStatements)));
+            }
         }
         if (request.getRegion() != null) {
             conditions.add(tbl.REGION.eq(request.getRegion()));
