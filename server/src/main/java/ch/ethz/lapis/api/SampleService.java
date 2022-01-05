@@ -458,55 +458,36 @@ public class SampleService {
                 baseTbl = metaTbl
                     .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
             }
-
-            var proportionField = DSL.count().cast(Double.class).div(
-                DSL.field(
-                    ctx
-                        .select(DSL.count())
-                        .from(baseTbl)
-                        .where(conditions)
-                )
-            ).as("proportion");
-            var countField = DSL.count().cast(Integer.class).as("count");
             String mutationColumnName = switch (sequenceType) {
                 case AMINO_ACID -> "aa_mutations";
                 case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
             };
             var statement = ctx
-                .select(
-                    DSL.field("mutation").cast(String.class),
-                    DSL.field("proportion").cast(Double.class),
-                    DSL.field("count").cast(Integer.class)
-                )
-                .from(
-                    ctx
-                        .select(
-                            DSL.field("mut.mutation"),
-                            proportionField,
-                            countField
-                        )
-                        .from(
-                            baseTbl.crossApply(
-                                "unnest(string_to_array(" + mutationColumnName + ", ',')) mut(mutation)"
-                            )
-                        )
-                        .where(conditions)
-                        .groupBy(DSL.field("mut.mutation"))
-                )
-                .where(DSL.field("proportion").ge(minProportion))
-                .orderBy(DSL.field("proportion").desc());
-            Result<Record3<String, Double, Integer>> records = statement.fetch();
-            List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
+                        .select(DSL.field(mutationColumnName).cast(String.class))
+                        .from(baseTbl)
+                        .where(conditions);
+            Result<Record1<String>> records = statement.fetch();
+            int count = 0;
+            Map<String, int[]> mutations = new HashMap<>();
             for (var r : records) {
-                // Because of the way we are concatenating the nuc_substitutions and nuc_deletions column, it is
-                // possible to get empty values.
-                if (r.value1().isBlank()) {
+                for (String mut : r.value1().split(",")) {
+                    if (mut.isBlank()) {
+                        continue;
+                    }
+                    mutations.compute(mut, (k, v) -> v == null ?
+                        new int[] { 0 } : v)[0]++;
+                }
+                count++;
+            }
+            int minCount = (int) Math.ceil(minProportion * count);
+            List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
+            for (Map.Entry<String, int[]> entry : mutations.entrySet()) {
+                int mutCount = entry.getValue()[0];
+                if (mutCount < minCount) {
                     continue;
                 }
-                mutationEntries.add(new SampleMutationsResponse.MutationEntry(
-                    r.value1(),
-                    r.value2(),
-                    r.value3()));
+                String mut = entry.getKey();
+                mutationEntries.add(new SampleMutationsResponse.MutationEntry(mut, mutCount * 1.0 / count, mutCount));
             }
             return new SampleMutationsResponse(mutationEntries);
         }
@@ -772,7 +753,11 @@ public class SampleService {
         String pangoLineage = request.getPangoLineage();
         if (pangoLineage != null) {
             String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
-            conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
+            if (pangoLineage.endsWith("*")) {
+                conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
+            } else {
+                conditions.add(tbl.PANGO_LINEAGE.eq(DSL.any(pangolinLineageLikeStatements)));
+            }
         }
         if (request.getRegion() != null) {
             conditions.add(tbl.REGION.eq(request.getRegion()));
