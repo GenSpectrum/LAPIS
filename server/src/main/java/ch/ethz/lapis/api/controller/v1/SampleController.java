@@ -75,7 +75,8 @@ public class SampleController {
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
-                List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request, stopWatch);
+                stopWatch.round("Query data");
+                List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
                 stopWatch.round("Result formatting");
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),

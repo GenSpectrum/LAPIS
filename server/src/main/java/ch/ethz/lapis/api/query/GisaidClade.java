@@ -1,5 +1,8 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.query2.Database;
+import ch.ethz.lapis.api.query2.StringValue;
+
 public class GisaidClade implements VariantQueryExpr {
 
     private final String clade;
@@ -21,5 +24,10 @@ public class GisaidClade implements VariantQueryExpr {
             result[i] = clade.equals(data[i]);
         }
         return result;
+    }
+
+    @Override
+    public boolean[] evaluate2(Database database) {
+        return new StringValue(clade, Database.Columns.GISAID_CLADE, false).evaluate2(database);
     }
 }
