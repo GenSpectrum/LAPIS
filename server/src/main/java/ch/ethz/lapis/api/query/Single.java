@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.query2.Database;
+
 public class Single implements VariantQueryExpr {
     private VariantQueryExpr value;
 
@@ -13,7 +15,13 @@ public class Single implements VariantQueryExpr {
         return value.evaluate(dataStore);
     }
 
+    @Override
+    public boolean[] evaluate2(Database database) {
+        return value.evaluate2(database);
+    }
+
     public VariantQueryExpr getValue() {
         return value;
     }
+
 }

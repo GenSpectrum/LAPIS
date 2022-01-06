@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.query2.Database;
+
 public class BiOp implements VariantQueryExpr {
 
     public enum OpType {
@@ -30,6 +32,23 @@ public class BiOp implements VariantQueryExpr {
     public boolean[] evaluate(DataStore dataStore) {
         boolean[] leftEvaluated = left.evaluate(dataStore);
         boolean[] rightEvaluated = right.evaluate(dataStore);
+        boolean[] result = new boolean[leftEvaluated.length];
+        if (opType == OpType.AND) {
+            for (int i = 0; i < result.length; i++) {
+                result[i] = leftEvaluated[i] && rightEvaluated[i];
+            }
+        } else if (opType == OpType.OR) {
+            for (int i = 0; i < result.length; i++) {
+                result[i] = leftEvaluated[i] || rightEvaluated[i];
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean[] evaluate2(Database database) {
+        boolean[] leftEvaluated = left.evaluate2(database);
+        boolean[] rightEvaluated = right.evaluate2(database);
         boolean[] result = new boolean[leftEvaluated.length];
         if (opType == OpType.AND) {
             for (int i = 0; i < result.length; i++) {

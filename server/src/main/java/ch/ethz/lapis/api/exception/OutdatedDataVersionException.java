@@ -8,8 +8,11 @@ import java.util.List;
 
 public class OutdatedDataVersionException extends BaseApiException {
 
-    private final long requestedDataVersion;
-    private final long currentDataVersion;
+    private long requestedDataVersion = -1;
+    private long currentDataVersion = -1;
+
+    public OutdatedDataVersionException() {
+    }
 
     public OutdatedDataVersionException(long requestedDataVersion, long currentDataVersion) {
         this.requestedDataVersion = requestedDataVersion;
@@ -23,10 +26,16 @@ public class OutdatedDataVersionException extends BaseApiException {
 
     @Override
     public List<ErrorEntry> getErrorEntries() {
-        return List.of(new ErrorEntry(
-            "The requested data version " + requestedDataVersion + " does not exist anymore. The current data " +
-                "version is " + currentDataVersion + "."
-        ));
+        if (requestedDataVersion != -1) {
+            return List.of(new ErrorEntry(
+                "The requested data version " + requestedDataVersion + " does not exist anymore. The current data " +
+                    "version is " + currentDataVersion + "."
+            ));
+        } else {
+            return List.of(new ErrorEntry(
+                "The requested data version does not exist anymore. Please wait a moment and reload."
+            ));
+        }
     }
 
 }

@@ -20,6 +20,8 @@ import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.api.query.DataStore;
 import ch.ethz.lapis.api.query.ThrowingErrorListener;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
+import ch.ethz.lapis.api.query2.Database;
+import ch.ethz.lapis.api.query2.QueryEngine;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.antlr.v4.runtime.CharStreams;
@@ -76,116 +78,9 @@ public class SampleService {
 
 
     public List<SampleAggregated> getAggregatedSamples(
-        SampleAggregatedRequest request,
-        StopWatch stopWatch
+        SampleAggregatedRequest request
     ) throws SQLException {
-        List<AggregationField> fields = request.getFields();
-
-        stopWatch.round("preFilterIds()");
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // Filter further by the other metadata and prepare the response
-        stopWatch.round("Filter metadata and respond");
-        List<SampleAggregated> samples = new ArrayList<>();
-        try (Connection conn = getDatabaseConnection()) {
-            DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
-
-            List<TableField<?, ?>> groupByFields = getTableFields(fields, tbl);
-            List<Field<?>> selectFields = new ArrayList<>(groupByFields);
-            selectFields.add(DSL.count().as("count"));
-            List<Condition> conditions = getConditions(request, tbl);
-
-            Result<Record> records;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                var statement = ctx
-                    .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)))
-                    .where(conditions)
-                    .groupBy(groupByFields);
-                records = statement.fetch();
-            } else {
-                var statement = ctx
-                    .select(selectFields)
-                    .from(tbl)
-                    .where(conditions)
-                    .groupBy(groupByFields);
-                records = statement.fetch();
-            }
-            for (var r : records) {
-                SampleAggregated sample = new SampleAggregated()
-                    .setCount(r.get("count", Integer.class));
-                if (fields.contains(AggregationField.DATE)) {
-                    sample.setDate(r.get(tbl.DATE));
-                }
-                if (fields.contains(AggregationField.DATESUBMITTED)) {
-                    sample.setDateSubmitted(r.get(tbl.DATE_SUBMITTED));
-                }
-                if (fields.contains(AggregationField.REGION)) {
-                    sample.setRegion(r.get(tbl.REGION));
-                }
-                if (fields.contains(AggregationField.COUNTRY)) {
-                    sample.setCountry(r.get(tbl.COUNTRY));
-                }
-                if (fields.contains(AggregationField.DIVISION)) {
-                    sample.setDivision(r.get(tbl.DIVISION));
-                }
-                if (fields.contains(AggregationField.LOCATION)) {
-                    sample.setLocation(r.get(tbl.LOCATION));
-                }
-                if (fields.contains(AggregationField.REGIONEXPOSURE)) {
-                    sample.setRegionExposure(r.get(tbl.REGION_EXPOSURE));
-                }
-                if (fields.contains(AggregationField.COUNTRYEXPOSURE)) {
-                    sample.setCountryExposure(r.get(tbl.COUNTRY_EXPOSURE));
-                }
-                if (fields.contains(AggregationField.DIVISIONEXPOSURE)) {
-                    sample.setDivisionExposure(r.get(tbl.DIVISION_EXPOSURE));
-                }
-                if (fields.contains(AggregationField.AGE)) {
-                    sample.setAge(r.get(tbl.AGE));
-                }
-                if (fields.contains(AggregationField.SEX)) {
-                    sample.setSex(r.get(tbl.SEX));
-                }
-                if (fields.contains(AggregationField.HOSPITALIZED)) {
-                    sample.setHospitalized(r.get(tbl.HOSPITALIZED));
-                }
-                if (fields.contains(AggregationField.DIED)) {
-                    sample.setDied(r.get(tbl.DIED));
-                }
-                if (fields.contains(AggregationField.FULLYVACCINATED)) {
-                    sample.setFullyVaccinated(r.get(tbl.FULLY_VACCINATED));
-                }
-                if (fields.contains(AggregationField.HOST)) {
-                    sample.setHost(r.get(tbl.HOST));
-                }
-                if (fields.contains(AggregationField.SAMPLINGSTRATEGY)) {
-                    sample.setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY));
-                }
-                if (fields.contains(AggregationField.PANGOLINEAGE)) {
-                    sample.setPangoLineage(r.get(tbl.PANGO_LINEAGE));
-                }
-                if (fields.contains(AggregationField.NEXTSTRAINCLADE)) {
-                    sample.setNextstrainClade(r.get(tbl.NEXTSTRAIN_CLADE));
-                }
-                if (fields.contains(AggregationField.GISAIDCLADE)) {
-                    sample.setGisaidCloade(r.get(tbl.GISAID_CLADE));
-                }
-                if (fields.contains(AggregationField.SUBMITTINGLAB)) {
-                    sample.setSubmittingLab(r.get(tbl.SUBMITTING_LAB));
-                }
-                if (fields.contains(AggregationField.ORIGINATINGLAB)) {
-                    sample.setOriginatingLab(r.get(tbl.ORIGINATING_LAB));
-                }
-                samples.add(sample);
-            }
-        }
-        return samples;
+        return new QueryEngine().aggregate(Database.getOrLoadInstance(dbPool), request);
     }
 
 

@@ -2,6 +2,7 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.query.DataStore;
+import ch.ethz.lapis.api.query2.Database;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,13 @@ public class DataVersionService {
                     if (newVersion != version) {
                         // Update the cache
                         System.out.println("New data version: " + version + " -> " + newVersion);
+                        if (version == -1) {
+                            // Initial loading. Using getOrLoadInstance() prevents the data to be loaded in parallel,
+                            // e.g., by SampleController.
+                            Database.getOrLoadInstance(dbPool);
+                        } else {
+                            Database.updateInstance(dbPool);
+                        }
                         version = newVersion;
                         if (cacheServiceOpt.isPresent()) {
                             cacheServiceOpt.get().updateCacheIfOutdated(version);
