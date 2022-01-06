@@ -4,11 +4,13 @@ import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.api.query.*;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -216,16 +218,21 @@ public class QueryEngine {
     }
 
     private VariantQueryExpr parseVariantQueryExpr(String variantQuery) {
-        VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        VariantQueryParser parser = new VariantQueryParser(tokens);
-        parser.removeErrorListeners();
-        parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-        ParseTree tree = parser.start();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        VariantQueryListener listener = new VariantQueryListener();
-        walker.walk(listener, tree);
-        return listener.getExpr();
+        try {
+            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            VariantQueryParser parser = new VariantQueryParser(tokens);
+            parser.removeErrorListeners();
+            parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+            ParseTree tree = parser.start();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            VariantQueryListener listener = new VariantQueryListener();
+            walker.walk(listener, tree);
+            return listener.getExpr();
+        } catch (ParseCancellationException e) {
+            System.err.println("Malformed variant query: " + variantQuery.substring(0, 200));
+            throw new MalformedVariantQueryException();
+        }
     }
 
     private String aggregationFieldToColumnName(AggregationField field) {
