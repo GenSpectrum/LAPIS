@@ -1,4 +1,4 @@
-package ch.ethz.lapis.api.query2;
+package ch.ethz.lapis.api.query;
 
 public class StringValue implements QueryExpr {
 
@@ -13,7 +13,7 @@ public class StringValue implements QueryExpr {
     }
 
     @Override
-    public boolean[] evaluate2(Database database) {
+    public boolean[] evaluate(Database database) {
         String[] data = database.getStringColumn(columnName);
         boolean[] result = new boolean[data.length];
         if (caseSensitive) {

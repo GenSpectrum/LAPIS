@@ -1,38 +1,23 @@
 package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
-import ch.ethz.lapis.api.entity.AAMutation;
-import ch.ethz.lapis.api.entity.AggregationField;
-import ch.ethz.lapis.api.entity.NucMutation;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
-import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
-import ch.ethz.lapis.api.parser.VariantQueryLexer;
-import ch.ethz.lapis.api.parser.VariantQueryParser;
-import ch.ethz.lapis.api.query.DataStore;
-import ch.ethz.lapis.api.query.ThrowingErrorListener;
-import ch.ethz.lapis.api.query.VariantQueryExpr;
-import ch.ethz.lapis.api.query2.Database;
-import ch.ethz.lapis.api.query2.QueryEngine;
-import ch.ethz.lapis.util.*;
+import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.QueryEngine;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jooq.Record;
 import org.jooq.*;
 import org.jooq.impl.DSL;
-import org.jooq.lapis.tables.YMainAaSequenceColumnar;
 import org.jooq.lapis.tables.YMainMetadata;
 import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
@@ -42,8 +27,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.sql.Statement;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,23 +38,6 @@ public class SampleService {
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private static final SeqCompressor referenceSeqCompressor
         = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
-    private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
-    private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
-    private final PangoLineageQueryConverter pangoLineageParser;
-    private final DataStore dataStore;
-
-
-    public SampleService(DataStore dataStore) {
-        this.dataStore = dataStore;
-        try {
-            // TODO This will be only loaded once and will not reload when the aliases change. The aliases should not
-            //   change too often so it is not a very big issue but it could potentially cause unexpected results.
-            List<PangoLineageAlias> aliases = getPangolinLineageAliases();
-            this.pangoLineageParser = new PangoLineageQueryConverter(aliases);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     private Connection getDatabaseConnection() throws SQLException {
@@ -88,12 +56,13 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (ids.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Filter further by the other metadata and prepare the response
+        // Fetch data
         List<SampleDetail> samples = new ArrayList<>();
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
@@ -126,24 +95,13 @@ public class SampleService {
                 add(tbl.SUBMITTING_LAB);
                 add(tbl.ORIGINATING_LAB);
             }};
-            List<Condition> conditions = getConditions(request, tbl);
 
-            Result<Record> records;
-            SelectJoinStep<Record> statement;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                statement = ctx
-                    .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
-            } else {
-                statement = ctx
-                    .select(selectFields)
-                    .from(tbl);
-            }
-            SelectConnectByStep<Record> statement2 = statement
-                .where(conditions);
-            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
-            records = statement3.fetch();
+            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+            SelectJoinStep<Record> statement = ctx
+                .select(selectFields)
+                .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
+            Select<Record> statement2 = applyOrderAndLimit(statement, orderAndLimit);
+            Result<Record> records = statement2.fetch();
             for (var r : records) {
                 SampleDetail sample = new SampleDetail()
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
@@ -182,12 +140,13 @@ public class SampleService {
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (ids.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Filter further by the other metadata and prepare the response
+        // Fetch data
         List<Contributor> contributors = new ArrayList<>();
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
@@ -202,24 +161,13 @@ public class SampleService {
                 add(tbl.ORIGINATING_LAB);
                 add(tbl.AUTHORS);
             }};
-            List<Condition> conditions = getConditions(request, tbl);
 
-            Result<Record> records;
-            SelectJoinStep<Record> statement;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                statement = ctx
-                    .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
-            } else {
-                statement = ctx
-                    .select(selectFields)
-                    .from(tbl);
-            }
-            SelectConnectByStep<Record> statement2 = statement
-                .where(conditions);
-            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
-            records = statement3.fetch();
+            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+            SelectJoinStep<Record> statement = ctx
+                .select(selectFields)
+                .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
+            Select<Record> statement2 = applyOrderAndLimit(statement, orderAndLimit);
+            Result<Record> records = statement2.fetch();
             for (var r : records) {
                 Contributor contributor = new Contributor()
                     .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
@@ -239,90 +187,36 @@ public class SampleService {
     public List<String> getStrainNames(
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
-    ) throws SQLException {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+    ) {
+        Database database = Database.getOrLoadInstance(dbPool);
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(database, request);
+        if (ids.isEmpty()) {
             return new ArrayList<>();
         }
-
-        // Filter further by the other metadata and prepare the response
-        List<String> strainNames = new ArrayList<>();
-        try (Connection conn = getDatabaseConnection()) {
-            DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
-
-            List<Field<?>> selectFields = new ArrayList<>() {{
-                add(tbl.STRAIN);
-            }};
-            List<Condition> conditions = getConditions(request, tbl);
-            conditions.add(tbl.STRAIN.isNotNull());
-
-            Result<Record> records;
-            SelectJoinStep<Record> statement;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                statement = ctx
-                    .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
-            } else {
-                statement = ctx
-                    .select(selectFields)
-                    .from(tbl);
-            }
-            SelectConnectByStep<Record> statement2 = statement
-                .where(conditions);
-            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
-            records = statement3.fetch();
-            for (var r : records) {
-                strainNames.add(r.get(tbl.STRAIN));
-            }
-        }
-        return strainNames;
+        // Order and limit
+        ids = applyOrderAndLimit(ids, orderAndLimit);
+        // Fetch data
+        String[] strainColumn = database.getStringColumn(Database.Columns.STRAIN);
+        return ids.stream().map(id -> strainColumn[id]).collect(Collectors.toList());
     }
 
 
     public List<String> getGisaidEpiIsls(
         SampleDetailRequest request,
         OrderAndLimitConfig orderAndLimit
-    ) throws SQLException {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+    ) {
+        Database database = Database.getOrLoadInstance(dbPool);
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(database, request);
+        if (ids.isEmpty()) {
             return new ArrayList<>();
         }
-
-        // Filter further by the other metadata and prepare the response
-        List<String> gisaidEpiIsls = new ArrayList<>();
-        try (Connection conn = getDatabaseConnection()) {
-            DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
-
-            List<Field<?>> selectFields = new ArrayList<>() {{
-                add(tbl.GISAID_EPI_ISL);
-            }};
-            List<Condition> conditions = getConditions(request, tbl);
-            conditions.add(tbl.GISAID_EPI_ISL.isNotNull());
-
-            Result<Record> records;
-            SelectJoinStep<Record> statement;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                statement = ctx
-                    .select(selectFields)
-                    .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
-            } else {
-                statement = ctx
-                    .select(selectFields)
-                    .from(tbl);
-            }
-            SelectConnectByStep<Record> statement2 = statement
-                .where(conditions);
-            Select<Record> statement3 = applyOrderAndLimit(statement2, orderAndLimit);
-            records = statement3.fetch();
-            for (var r : records) {
-                gisaidEpiIsls.add(r.get(tbl.GISAID_EPI_ISL));
-            }
-        }
-        return gisaidEpiIsls;
+        // Order and limit
+        ids = applyOrderAndLimit(ids, orderAndLimit);
+        // Fetch data
+        String[] gisaidEpiIslColumn = database.getStringColumn(Database.Columns.GISAID_EPI_ISL);
+        return ids.stream().map(id -> gisaidEpiIslColumn[id]).collect(Collectors.toList());
     }
 
 
@@ -331,36 +225,30 @@ public class SampleService {
         SequenceType sequenceType,
         float minProportion
     ) throws SQLException {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (ids.isEmpty()) {
             return new SampleMutationsResponse();
         }
 
-        // Filter further by the other metadata and prepare the response
+        // Fetch data
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
             YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;
             YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
 
-            List<Condition> conditions = getConditions(request, metaTbl);
             TableOnConditionStep<Record> baseTbl;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                baseTbl = idsTbl
-                    .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                    .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
-            } else {
-                baseTbl = metaTbl
-                    .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
-            }
+            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+            baseTbl = idsTbl
+                .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
+                .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
             String mutationColumnName = switch (sequenceType) {
                 case AMINO_ACID -> "aa_mutations";
                 case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
             };
             var statement = ctx
                         .select(DSL.field(mutationColumnName).cast(String.class))
-                        .from(baseTbl)
-                        .where(conditions);
+                        .from(baseTbl);
             Result<Record1<String>> records = statement.fetch();
             int count = 0;
             Map<String, int[]> mutations = new HashMap<>();
@@ -395,8 +283,9 @@ public class SampleService {
         OrderAndLimitConfig orderAndLimit,
         OutputStream outputStream
     ) {
-        Set<Integer> ids = preFilterIds(request);
-        if (ids != null && ids.isEmpty()) {
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (ids.isEmpty()) {
             return;
         }
 
@@ -412,29 +301,16 @@ public class SampleService {
             TableField<YMainSequenceRecord, byte[]> seqColumn = aligned ?
                 seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
 
-            List<Condition> conditions = getConditions(request, metaTbl);
             SelectLimitPercentStep<Record2<String, byte[]>> statement;
-            if (ids != null) {
-                Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-                statement = ctx
-                    .select(metaTbl.GENBANK_ACCESSION, seqColumn)
-                    .from(
-                        idsTbl
-                            .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                            .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                    )
-                    .where(conditions)
-                    .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
-            } else {
-                statement = ctx
-                    .select(metaTbl.GENBANK_ACCESSION, seqColumn)
-                    .from(
-                        metaTbl
-                            .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                    )
-                    .where(conditions)
-                    .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
-            }
+            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+            statement = ctx
+                .select(metaTbl.GENBANK_ACCESSION, seqColumn)
+                .from(
+                    idsTbl
+                        .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
+                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
+                )
+                .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
             Cursor<Record2<String, byte[]>> cursor = statement.fetchSize(1000).fetchLazy();
             for (Record2<String, byte[]> r : cursor) {
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
@@ -457,118 +333,7 @@ public class SampleService {
     }
 
 
-    /**
-     * This function filters either by mutations or by the variantQuery if one of them is requested.
-     */
-    private Set<Integer> preFilterIds(SampleFilter<?> sampleFilter) {
-        try {
-            List<NucMutation> nucMutations = sampleFilter.getNucMutations();
-            List<AAMutation> aaMutations = sampleFilter.getAaMutations();
-            String variantQuery = sampleFilter.getVariantQuery();
-
-            if ((nucMutations != null && !nucMutations.isEmpty())
-                || (aaMutations != null && !aaMutations.isEmpty())) {
-                if (variantQuery != null) {
-                    throw new RuntimeException("It is not allowed to use the nucMutations/aaMutations and variantQuery " +
-                        "fields at the same time.");
-                }
-
-                return getIdsFromMutationFilters(nucMutations, aaMutations);
-            }
-
-            if (variantQuery != null) {
-                return getIdsFromVariantQuery(variantQuery);
-            }
-
-            return null;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    /**
-     * This function returns a set of IDs of the samples that have the filtered mutations. If an argument (i.e.,
-     * nucMutations or aaMutations) is null or empty, it means that we don't filter for that. If we don't filter for any
-     * of the two mutation types, this function returns null. If no sequence has the filtered mutations, this function
-     * returns an empty set.
-     */
-    private Set<Integer> getIdsFromMutationFilters(
-        List<NucMutation> nucMutations,
-        List<AAMutation> aaMutations
-    ) throws SQLException {
-        // Filter the IDs by nucleotide mutations (if requested)
-        List<Integer> nucIds = null;
-        if (nucMutations != null && !nucMutations.isEmpty()) {
-            nucIds = getIdsWithNucMutations(nucMutations);
-            System.out.println("I found " + nucIds.size() + " with the searched " + nucMutations.size()
-                + " nucleotide mutations.");
-        }
-        if (nucIds != null && nucIds.isEmpty()) {
-            return new HashSet<>();
-        }
-
-        // Filter the IDs by amino acid mutations (if requested)
-        List<Integer> aaIds = null;
-        if (aaMutations != null && !aaMutations.isEmpty()) {
-            aaIds = getIdsWithAAMutations(aaMutations);
-            System.out.println("I found " + aaIds.size() + " with the searched " + aaMutations.size()
-                + " amino acid mutations.");
-        }
-        if (aaIds != null && aaIds.isEmpty()) {
-            return new HashSet<>();
-        }
-
-        // Merge the nuc and aa mutation filter results
-        Set<Integer> ids = null;
-        if (nucIds != null && aaIds != null) {
-            ids = new HashSet<>(nucIds);
-            ids.retainAll(new HashSet<>(aaIds));
-        } else if (nucIds != null) {
-            ids = new HashSet<>(nucIds);
-        } else if (aaIds != null) {
-            ids = new HashSet<>(aaIds);
-        }
-        if (ids != null) {
-            System.out.println("There are " + ids.size() + " with all the searched nucleotide and amino acid " +
-                "mutations");
-        }
-        return ids;
-    }
-
-
-    /**
-     * This function parses and evaluates a variant query.
-     */
-    private Set<Integer> getIdsFromVariantQuery(String variantQuery) {
-        VariantQueryExpr expr;
-        try {
-            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            VariantQueryParser parser = new VariantQueryParser(tokens);
-            parser.removeErrorListeners();
-            parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-            ParseTree tree = parser.start();
-            ParseTreeWalker walker = new ParseTreeWalker();
-            VariantQueryListener listener = new VariantQueryListener();
-            walker.walk(listener, tree);
-            expr = listener.getExpr();
-        } catch (ParseCancellationException e) {
-            throw new MalformedVariantQueryException();
-        }
-
-        boolean[] filtered = expr.evaluate(dataStore);
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < filtered.length; i++) {
-            if (filtered[i]) {
-                ids.add(i);
-            }
-        }
-        return new HashSet<>(ids);
-    }
-
-
-    private Table<Record1<Integer>> getIdsTable(Set<Integer> ids, DSLContext ctx) {
+    private Table<Record1<Integer>> getIdsTable(Collection<Integer> ids, DSLContext ctx) {
         String idsStr = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
         return ctx
             .select(DSL.field("i.id::integer", Integer.class).as("id"))
@@ -577,153 +342,6 @@ public class SampleService {
             // by this program into the database. Further, the IDs are guaranteed to be integers.
             .from("unnest(string_to_array('" + idsStr + "', ',')) i(id)")
             .asTable("ids");
-    }
-
-
-    private List<Condition> getConditions(SampleFilter<?> request, YMainMetadata tbl) {
-        List<Condition> conditions = new ArrayList<>();
-        if (request.getDateFrom() != null) {
-            conditions.add(tbl.DATE.ge(request.getDateFrom()));
-        }
-        if (request.getDateTo() != null) {
-            conditions.add(tbl.DATE.le(request.getDateTo()));
-        }
-        if (request.getDateSubmittedFrom() != null) {
-            conditions.add(tbl.DATE_SUBMITTED.ge(request.getDateSubmittedFrom()));
-        }
-        if (request.getDateSubmittedTo() != null) {
-            conditions.add(tbl.DATE_SUBMITTED.le(request.getDateSubmittedTo()));
-        }
-        if (request.getRegion() != null) {
-            conditions.add(tbl.REGION.eq(request.getRegion()));
-        }
-        if (request.getCountry() != null) {
-            conditions.add(tbl.COUNTRY.eq(request.getCountry()));
-        }
-        if (request.getDivision() != null) {
-            conditions.add(tbl.DIVISION.eq(request.getDivision()));
-        }
-        if (request.getLocation() != null) {
-            conditions.add(tbl.LOCATION.eq(request.getLocation()));
-        }
-        if (request.getRegionExposure() != null) {
-            conditions.add(tbl.REGION_EXPOSURE.eq(request.getRegionExposure()));
-        }
-        if (request.getCountryExposure() != null) {
-            conditions.add(tbl.COUNTRY_EXPOSURE.eq(request.getCountryExposure()));
-        }
-        if (request.getDivisionExposure() != null) {
-            conditions.add(tbl.DIVISION_EXPOSURE.eq(request.getDivisionExposure()));
-        }
-        if (request.getAgeFrom() != null) {
-            conditions.add(tbl.AGE.ge(request.getAgeFrom()));
-        }
-        if (request.getAgeTo() != null) {
-            conditions.add(tbl.AGE.le(request.getAgeTo()));
-        }
-        if (request.getSex() != null) {
-            conditions.add(tbl.SEX.eq(request.getSex()));
-        }
-        if (request.getHospitalized() != null) {
-            conditions.add(tbl.HOSPITALIZED.eq(request.getHospitalized()));
-        }
-        if (request.getDied() != null) {
-            conditions.add(tbl.DIED.eq(request.getDied()));
-        }
-        if (request.getFullyVaccinated() != null) {
-            conditions.add(tbl.FULLY_VACCINATED.eq(request.getFullyVaccinated()));
-        }
-        if (request.getRegion() != null) {
-            conditions.add(tbl.REGION.eq(request.getRegion()));
-        }
-        if (request.getCountry() != null) {
-            conditions.add(tbl.COUNTRY.eq(request.getCountry()));
-        }
-        if (request.getHost() != null) {
-            conditions.add(tbl.HOST.eq(request.getHost()));
-        }
-        if (request.getSamplingStrategy() != null) {
-            conditions.add(tbl.SAMPLING_STRATEGY.eq(request.getSamplingStrategy()));
-        }
-        String pangoLineage = request.getPangoLineage();
-        if (pangoLineage != null) {
-            String[] pangolinLineageLikeStatements = pangoLineageParser.convertToSqlLikes(pangoLineage);
-            if (pangoLineage.endsWith("*")) {
-                conditions.add(tbl.PANGO_LINEAGE.like(DSL.any(pangolinLineageLikeStatements)));
-            } else {
-                conditions.add(tbl.PANGO_LINEAGE.eq(DSL.any(pangolinLineageLikeStatements)));
-            }
-        }
-        if (request.getRegion() != null) {
-            conditions.add(tbl.REGION.eq(request.getRegion()));
-        }
-        if (request.getCountry() != null) {
-            conditions.add(tbl.COUNTRY.eq(request.getCountry()));
-        }
-        if (request.getNextstrainClade() != null) {
-            conditions.add(tbl.NEXTSTRAIN_CLADE.eq(request.getNextstrainClade()));
-        }
-        if (request.getRegion() != null) {
-            conditions.add(tbl.REGION.eq(request.getRegion()));
-        }
-        if (request.getCountry() != null) {
-            conditions.add(tbl.COUNTRY.eq(request.getCountry()));
-        }
-        if (request.getGisaidClade() != null) {
-            conditions.add(tbl.GISAID_CLADE.eq(request.getGisaidClade()));
-        }
-        if (request.getSubmittingLab() != null) {
-            conditions.add(tbl.SUBMITTING_LAB.eq(request.getSubmittingLab()));
-        }
-        if (request.getOriginatingLab() != null) {
-            conditions.add(tbl.ORIGINATING_LAB.eq(request.getOriginatingLab()));
-        }
-        if (request instanceof SampleDetailRequest) {
-            SampleDetailRequest sdr = (SampleDetailRequest) request;
-            if (sdr.getGenbankAccession() != null) {
-                conditions.add(tbl.GENBANK_ACCESSION.eq(sdr.getGenbankAccession()));
-            }
-            if (sdr.getSraAccession() != null) {
-                conditions.add(tbl.SRA_ACCESSION.eq(sdr.getSraAccession()));
-            }
-            if (sdr.getGisaidEpiIsl() != null) {
-                conditions.add(tbl.GISAID_EPI_ISL.eq(sdr.getGisaidEpiIsl()));
-            }
-            if (sdr.getStrain() != null) {
-                conditions.add(tbl.STRAIN.eq(sdr.getStrain()));
-            }
-        }
-        return conditions;
-    }
-
-
-    private List<TableField<?, ?>> getTableFields(List<AggregationField> aggregationFields, YMainMetadata tbl) {
-        Map<AggregationField, TableField<?, ?>> ALL_FIELDS = new HashMap<>() {{
-            put(AggregationField.DATE, tbl.DATE);
-            put(AggregationField.DATESUBMITTED, tbl.DATE_SUBMITTED);
-            put(AggregationField.REGION, tbl.REGION);
-            put(AggregationField.COUNTRY, tbl.COUNTRY);
-            put(AggregationField.DIVISION, tbl.DIVISION);
-            put(AggregationField.LOCATION, tbl.LOCATION);
-            put(AggregationField.REGIONEXPOSURE, tbl.REGION_EXPOSURE);
-            put(AggregationField.COUNTRYEXPOSURE, tbl.COUNTRY_EXPOSURE);
-            put(AggregationField.DIVISIONEXPOSURE, tbl.DIVISION_EXPOSURE);
-            put(AggregationField.AGE, tbl.AGE);
-            put(AggregationField.SEX, tbl.SEX);
-            put(AggregationField.HOSPITALIZED, tbl.HOSPITALIZED);
-            put(AggregationField.DIED, tbl.DIED);
-            put(AggregationField.FULLYVACCINATED, tbl.FULLY_VACCINATED);
-            put(AggregationField.HOST, tbl.HOST);
-            put(AggregationField.SAMPLINGSTRATEGY, tbl.SAMPLING_STRATEGY);
-            put(AggregationField.PANGOLINEAGE, tbl.PANGO_LINEAGE);
-            put(AggregationField.NEXTSTRAINCLADE, tbl.NEXTSTRAIN_CLADE);
-            put(AggregationField.GISAIDCLADE, tbl.GISAID_CLADE);
-            put(AggregationField.SUBMITTINGLAB, tbl.SUBMITTING_LAB);
-            put(AggregationField.ORIGINATINGLAB, tbl.ORIGINATING_LAB);
-        }};
-        return aggregationFields.stream()
-            .map(ALL_FIELDS::get)
-            .collect(Collectors.toList());
     }
 
 
@@ -753,144 +371,21 @@ public class SampleService {
     }
 
 
-    private List<Integer> getIdsWithNucMutations(List<NucMutation> nucMutations) throws SQLException {
-        if (nucMutations == null || nucMutations.isEmpty()) {
-            throw new RuntimeException("At least one nucleotide mutation must be provided.");
-        }
-        Map<Integer, NucMutation> positionToMutation = new HashMap<>();
-        List<Integer> positions = new ArrayList<>();
-        for (NucMutation nucMutation : nucMutations) {
-            positionToMutation.put(nucMutation.getPosition(), nucMutation);
-            positions.add(nucMutation.getPosition());
-        }
-        String sql = """
-                  select position, data_compressed
-                  from y_main_sequence_columnar
-                  where position = any(?::int[]);
-            """;
-        List<Integer> foundIds = null;
-        try (Connection conn = getDatabaseConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement(sql)) {
-                statement.setArray(1, conn.createArrayOf("int", positions.toArray()));
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        int position = rs.getInt("position");
-                        NucMutation searchedMutation = positionToMutation.get(position);
-                        byte[] compressed = rs.getBytes("data_compressed");
-                        char[] nucleotides = columnarCompressor.decompress(compressed).toCharArray();
-                        if (foundIds == null) {
-                            // If this is the first round, search all sequences
-                            foundIds = new ArrayList<>();
-                            for (int i = 0; i < nucleotides.length; i++) {
-                                if (NucMutation.isMatchingMutation(nucleotides[i], searchedMutation)) {
-                                    foundIds.add(i);
-                                }
-                            }
-                        } else {
-                            // In the subsequent rounds, we will just continue filter the foundIds.
-                            List<Integer> nextFoundIds = new ArrayList<>();
-                            for (Integer foundId : foundIds) {
-                                if (NucMutation.isMatchingMutation(nucleotides[foundId], searchedMutation)) {
-                                    nextFoundIds.add(foundId);
-                                }
-                            }
-                            foundIds = nextFoundIds;
-                        }
-                        if (foundIds.isEmpty()) {
-                            break;
-                        }
-                    }
-                }
+    private <T> List<T> applyOrderAndLimit(List<T> data, OrderAndLimitConfig orderAndLimitConfig) {
+        List<T> copy = new ArrayList<>(data);
+        // orderBy
+        String orderBy = orderAndLimitConfig.getOrderBy();
+        if (orderBy != null && !orderBy.isBlank() && !orderBy.equals(OrderAndLimitConfig.SpecialOrdering.ARBITRARY)) {
+            if (orderBy.equals(OrderAndLimitConfig.SpecialOrdering.RANDOM)) {
+                Collections.shuffle(copy);
+            } else {
+                throw new UnsupportedOrdering(orderBy);
             }
         }
-        return foundIds;
-    }
-
-
-    private List<Integer> getIdsWithAAMutations(List<AAMutation> aaMutations) throws SQLException {
-        if (aaMutations == null || aaMutations.isEmpty()) {
-            throw new RuntimeException("At least one amino acid mutation must be provided.");
+        // limit
+        if (orderAndLimitConfig.getLimit() != null) {
+            copy = copy.subList(0, orderAndLimitConfig.getLimit());
         }
-        // The gene position will be encoded as e.g., S:501
-        Map<String, AAMutation> genePositionToMutation = new HashMap<>();
-        for (AAMutation aaMutation : aaMutations) {
-            genePositionToMutation.put(encodeGenePosition(aaMutation), aaMutation);
-        }
-        List<Integer> foundIds = null;
-        try (Connection conn = getDatabaseConnection()) {
-            DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainAaSequenceColumnar tbl = YMainAaSequenceColumnar.Y_MAIN_AA_SEQUENCE_COLUMNAR;
-            Condition condition = DSL.falseCondition();
-            for (AAMutation m : aaMutations) {
-                condition = condition.or(tbl.GENE.eq(m.getGene()).and(tbl.POSITION.eq(m.getPosition())));
-            }
-            var statement = ctx
-                .select(tbl.GENE, tbl.POSITION, tbl.DATA_COMPRESSED)
-                .from(tbl)
-                .where(condition);
-            for (Record3<String, Integer, byte[]> record : statement.fetch()) {
-                String gene = record.value1();
-                int position = record.value2();
-                byte[] compressed = record.value3();
-                char[] aaCodons = columnarCompressor.decompress(compressed).toCharArray();
-                AAMutation searchedMutation = genePositionToMutation.get(encodeGenePosition(gene, position));
-                if (foundIds == null) {
-                    // If this is the first round, search all sequences
-                    foundIds = new ArrayList<>();
-                    for (int i = 0; i < aaCodons.length; i++) {
-                        if (AAMutation.isMatchingMutation(aaCodons[i], searchedMutation)) {
-                            foundIds.add(i);
-                        }
-                    }
-                } else {
-                    // In the subsequent rounds, we will just continue filter the foundIds.
-                    List<Integer> nextFoundIds = new ArrayList<>();
-                    for (Integer foundId : foundIds) {
-                        if (AAMutation.isMatchingMutation(aaCodons[foundId], searchedMutation)) {
-                            nextFoundIds.add(foundId);
-                        }
-                    }
-                    foundIds = nextFoundIds;
-                }
-                if (foundIds.isEmpty()) {
-                    break;
-                }
-            }
-        }
-        return foundIds;
-    }
-
-
-    private String encodeGenePosition(AAMutation aaMutation) {
-        return encodeGenePosition(aaMutation.getGene(), aaMutation.getPosition());
-    }
-
-
-    private String encodeGenePosition(String gene, int position) {
-        return gene + ":" + position;
-    }
-
-
-    public List<PangoLineageAlias> getPangolinLineageAliases() throws SQLException {
-        String sql = """
-                    select
-                      alias,
-                      full_name
-                    from pangolin_lineage_alias;
-            """;
-        try (Connection conn = getDatabaseConnection()) {
-            try (Statement statement = conn.createStatement()) {
-                try (ResultSet rs = statement.executeQuery(sql)) {
-                    List<PangoLineageAlias> aliases = new ArrayList<>();
-                    while (rs.next()) {
-                        aliases.add(new PangoLineageAlias(
-                            rs.getString("alias"),
-                            rs.getString("full_name")
-                        ));
-                    }
-                    return aliases;
-                }
-            }
-        }
+        return copy;
     }
 }

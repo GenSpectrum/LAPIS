@@ -1,8 +1,7 @@
 package ch.ethz.lapis.api.entity;
 
-import ch.ethz.lapis.api.query.DataStore;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
-import ch.ethz.lapis.api.query2.Database;
+import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
 
@@ -68,17 +67,7 @@ public class NucMutation implements VariantQueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(DataStore dataStore) {
-        char[] data = dataStore.getNucArray(position);
-        boolean[] result = new boolean[data.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = isMatchingMutation(data[i], this);
-        }
-        return result;
-    }
-
-    @Override
-    public boolean[] evaluate2(Database database) {
+    public boolean[] evaluate(Database database) {
         char[] data = database.getNucArray(position);
         boolean[] result = new boolean[data.length];
         for (int i = 0; i < result.length; i++) {

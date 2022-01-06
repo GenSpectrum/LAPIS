@@ -1,4 +1,4 @@
-package ch.ethz.lapis.api.query2;
+package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.util.PangoLineageAlias;
