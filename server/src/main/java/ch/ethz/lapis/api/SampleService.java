@@ -2,6 +2,7 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.Versioned;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
@@ -45,10 +46,11 @@ public class SampleService {
     }
 
 
-    public List<SampleAggregated> getAggregatedSamples(
+    public Versioned<List<SampleAggregated>> getAggregatedSamples(
         SampleAggregatedRequest request
     ) throws SQLException {
-        return new QueryEngine().aggregate(Database.getOrLoadInstance(dbPool), request);
+        Database database = Database.getOrLoadInstance(dbPool);
+        return new Versioned<>(database.getDataVersion(), new QueryEngine().aggregate(database, request));
     }
 
 

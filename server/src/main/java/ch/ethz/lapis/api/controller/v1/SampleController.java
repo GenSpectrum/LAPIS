@@ -4,10 +4,7 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
-import ch.ethz.lapis.api.entity.AggregationField;
-import ch.ethz.lapis.api.entity.ApiCacheKey;
-import ch.ethz.lapis.api.entity.OpennessLevel;
-import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.*;
 import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
 import ch.ethz.lapis.api.exception.*;
@@ -76,12 +73,12 @@ public class SampleController {
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
                 stopWatch.round("Query data");
-                List<SampleAggregated> aggregatedSamples = sampleService.getAggregatedSamples(request);
+                Versioned<List<SampleAggregated>> aggregatedSamples = sampleService.getAggregatedSamples(request);
                 stopWatch.round("Result formatting");
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),
-                    aggregatedSamples
-                ), dataVersionService.getVersion(), openness);
+                    aggregatedSamples.getContent()
+                ), aggregatedSamples.getDataVersion(), openness);
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);
