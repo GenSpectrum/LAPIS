@@ -259,7 +259,8 @@ public class QueryEngine {
             walker.walk(listener, tree);
             return listener.getExpr();
         } catch (ParseCancellationException e) {
-            System.err.println("Malformed variant query: " + variantQuery.substring(0, 200));
+            System.err.println("Malformed variant query: " +
+                variantQuery.substring(0, Math.min(200, variantQuery.length())));
             throw new MalformedVariantQueryException();
         }
     }

@@ -386,7 +386,7 @@ public class SampleService {
         }
         // limit
         if (orderAndLimitConfig.getLimit() != null) {
-            copy = copy.subList(0, orderAndLimitConfig.getLimit());
+            copy = copy.subList(0, Math.min(orderAndLimitConfig.getLimit(), copy.size()));
         }
         return copy;
     }
