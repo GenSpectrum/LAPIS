@@ -2,4 +2,4 @@
 
 ## Demo
 
-CoV-Spectrum hosts a public instance of LAPIS using GenBank SARS-CoV-2 data provided by Nextstrain: https://cov-spectrum.ethz.ch/public
+CoV-Spectrum hosts a public instance of LAPIS using GenBank SARS-CoV-2 data provided by Nextstrain: https://lapis.cov-spectrum.org
