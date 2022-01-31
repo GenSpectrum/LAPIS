@@ -78,12 +78,15 @@ public class NucMutation implements VariantQueryExpr {
 
     public static boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {
         Character mutationBase = searchedMutation.getMutation();
-        if (searchedMutation.getMutation() == null) {
+        if (mutationBase == null) {
             // Check whether the base is mutated, i.e., not equal the base of the reference genome and not unknown (N)
             return foundBase != 'N' && foundBase != referenceGenome.getNucleotideBase(searchedMutation.getPosition());
         } else if (mutationBase == '.') {
             // Check whether the base is not mutated, i.e., equals the base of the reference genome
             return foundBase == referenceGenome.getNucleotideBase(searchedMutation.getPosition());
+        } else if (mutationBase == '~') {
+            // Check whether the base is unknown/ambiguous, i.e., it is not A, T, C or G
+            return !(foundBase == 'A' || foundBase == 'T' || foundBase == 'C' || foundBase == 'G');
         } else {
             return foundBase == searchedMutation.getMutation();
         }
