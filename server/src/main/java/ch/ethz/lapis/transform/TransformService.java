@@ -336,7 +336,7 @@ public class TransformService {
         }
         System.out.println(LocalDateTime.now() + " Data loaded");
 
-        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 2500);
+        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1500);
         transformer.transform(
             compressedSequences,
             alignedSeqCompressor::decompress,
@@ -403,7 +403,7 @@ public class TransformService {
                 System.out.println(LocalDateTime.now() + "Gene " + gene + " - No data found.");
             }
 
-            SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 2500);
+            SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1500);
             transformer.transform(
                 aaSequences,
                 aaSeqCompressor::decompress,
