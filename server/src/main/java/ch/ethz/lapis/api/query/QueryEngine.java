@@ -1,5 +1,31 @@
 package ch.ethz.lapis.api.query;
 
+import static ch.ethz.lapis.api.query.Database.Columns.AGE;
+import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY;
+import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATE_SUBMITTED;
+import static ch.ethz.lapis.api.query.Database.Columns.DIED;
+import static ch.ethz.lapis.api.query.Database.Columns.DIVISION;
+import static ch.ethz.lapis.api.query.Database.Columns.DIVISION_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.FULLY_VACCINATED;
+import static ch.ethz.lapis.api.query.Database.Columns.GENBANK_ACCESSION;
+import static ch.ethz.lapis.api.query.Database.Columns.GISAID_CLADE;
+import static ch.ethz.lapis.api.query.Database.Columns.GISAID_EPI_ISL;
+import static ch.ethz.lapis.api.query.Database.Columns.HOSPITALIZED;
+import static ch.ethz.lapis.api.query.Database.Columns.HOST;
+import static ch.ethz.lapis.api.query.Database.Columns.LOCATION;
+import static ch.ethz.lapis.api.query.Database.Columns.NEXTSTRAIN_CLADE;
+import static ch.ethz.lapis.api.query.Database.Columns.ORIGINATING_LAB;
+import static ch.ethz.lapis.api.query.Database.Columns.PANGO_LINEAGE;
+import static ch.ethz.lapis.api.query.Database.Columns.REGION;
+import static ch.ethz.lapis.api.query.Database.Columns.REGION_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.SAMPLING_STRATEGY;
+import static ch.ethz.lapis.api.query.Database.Columns.SEX;
+import static ch.ethz.lapis.api.query.Database.Columns.SRA_ACCESSION;
+import static ch.ethz.lapis.api.query.Database.Columns.STRAIN;
+import static ch.ethz.lapis.api.query.Database.Columns.SUBMITTING_LAB;
+
 import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
@@ -9,17 +35,21 @@ import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static ch.ethz.lapis.api.query.Database.Columns.*;
 
 public class QueryEngine {
 
@@ -208,6 +238,29 @@ public class QueryEngine {
         } else {
             for (int i = 0; i < matched.length; i++) {
                 matched[i] = matched[i] && value.equalsIgnoreCase(data[i]);
+            }
+        }
+    }
+
+    private void eq(boolean[] matched, String[] data, Collection<String> possibleValues, boolean caseSensitive) {
+        if (possibleValues == null || possibleValues.isEmpty()) {
+            return;
+        }
+        Set<String> possibleValuesSet;
+        if (caseSensitive) {
+            possibleValuesSet = new HashSet<>(possibleValues);
+        } else {
+            // Turning everything to lower case
+            possibleValuesSet = possibleValues.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        }
+
+        if (caseSensitive) {
+            for (int i = 0; i < matched.length; i++) {
+                matched[i] = matched[i] && possibleValuesSet.contains(data[i]);
+            }
+        } else {
+            for (int i = 0; i < matched.length; i++) {
+                matched[i] = matched[i] && possibleValuesSet.contains(data[i] != null ? data[i].toLowerCase() : null);
             }
         }
     }

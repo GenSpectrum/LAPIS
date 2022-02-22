@@ -1,47 +1,49 @@
 package ch.ethz.lapis.api.entity.req;
 
+import java.util.List;
+
 public class SampleDetailRequest extends SampleFilter<SampleDetailRequest> {
 
-    private String genbankAccession;
+    private List<String> genbankAccession;
 
-    private String sraAccession;
+    private List<String> sraAccession;
 
-    private String gisaidEpiIsl;
+    private List<String> gisaidEpiIsl;
 
-    private String strain;
+    private List<String> strain;
 
-    public String getGenbankAccession() {
+    public List<String> getGenbankAccession() {
         return genbankAccession;
     }
 
-    public SampleDetailRequest setGenbankAccession(String genbankAccession) {
+    public SampleDetailRequest setGenbankAccession(List<String> genbankAccession) {
         this.genbankAccession = genbankAccession;
         return this;
     }
 
-    public String getSraAccession() {
+    public List<String> getSraAccession() {
         return sraAccession;
     }
 
-    public SampleDetailRequest setSraAccession(String sraAccession) {
+    public SampleDetailRequest setSraAccession(List<String> sraAccession) {
         this.sraAccession = sraAccession;
         return this;
     }
 
-    public String getGisaidEpiIsl() {
+    public List<String> getGisaidEpiIsl() {
         return gisaidEpiIsl;
     }
 
-    public SampleDetailRequest setGisaidEpiIsl(String gisaidEpiIsl) {
+    public SampleDetailRequest setGisaidEpiIsl(List<String> gisaidEpiIsl) {
         this.gisaidEpiIsl = gisaidEpiIsl;
         return this;
     }
 
-    public String getStrain() {
+    public List<String> getStrain() {
         return strain;
     }
 
-    public SampleDetailRequest setStrain(String strain) {
+    public SampleDetailRequest setStrain(List<String> strain) {
         this.strain = strain;
         return this;
     }
