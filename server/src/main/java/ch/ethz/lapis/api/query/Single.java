@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.BitSet;
+
 public class Single implements VariantQueryExpr {
     private VariantQueryExpr value;
 
@@ -9,7 +11,7 @@ public class Single implements VariantQueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(Database database) {
+    public BitSet evaluate(Database database) {
         return value.evaluate(database);
     }
 

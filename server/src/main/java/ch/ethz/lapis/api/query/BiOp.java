@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.BitSet;
+
 public class BiOp implements VariantQueryExpr {
 
     public enum OpType {
@@ -27,20 +29,15 @@ public class BiOp implements VariantQueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(Database database) {
-        boolean[] leftEvaluated = left.evaluate(database);
-        boolean[] rightEvaluated = right.evaluate(database);
-        boolean[] result = new boolean[leftEvaluated.length];
+    public BitSet evaluate(Database database) {
+        BitSet leftEvaluated = left.evaluate(database);
+        BitSet rightEvaluated = right.evaluate(database);
         if (opType == OpType.AND) {
-            for (int i = 0; i < result.length; i++) {
-                result[i] = leftEvaluated[i] && rightEvaluated[i];
-            }
+            leftEvaluated.and(rightEvaluated);
         } else if (opType == OpType.OR) {
-            for (int i = 0; i < result.length; i++) {
-                result[i] = leftEvaluated[i] || rightEvaluated[i];
-            }
+            leftEvaluated.or(rightEvaluated);
         }
-        return result;
+        return leftEvaluated;
     }
 
     public OpType getOpType() {

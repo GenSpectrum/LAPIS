@@ -4,6 +4,7 @@ import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
+import java.util.BitSet;
 
 public class AAMutation implements VariantQueryExpr {
 
@@ -83,11 +84,11 @@ public class AAMutation implements VariantQueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(Database database) {
+    public BitSet evaluate(Database database) {
         char[] data = database.getAAArray(gene, position);
-        boolean[] result = new boolean[data.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = isMatchingMutation(data[i], this);
+        BitSet result = new BitSet(data.length);
+        for (int i = 0; i < data.length; i++) {
+            result.set(i, isMatchingMutation(data[i], this));
         }
         return result;
     }

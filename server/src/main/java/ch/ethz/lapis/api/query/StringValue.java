@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.BitSet;
+
 public class StringValue implements QueryExpr {
 
     private final String value;
@@ -13,16 +15,16 @@ public class StringValue implements QueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(Database database) {
+    public BitSet evaluate(Database database) {
         String[] data = database.getStringColumn(columnName);
-        boolean[] result = new boolean[data.length];
+        BitSet result = new BitSet(data.length);
         if (caseSensitive) {
-            for (int i = 0; i < result.length; i++) {
-                result[i] = value.equals(data[i]);
+            for (int i = 0; i < data.length; i++) {
+                result.set(i, value.equals(data[i]));
             }
         } else {
-            for (int i = 0; i < result.length; i++) {
-                result[i] = value.equalsIgnoreCase(data[i]);
+            for (int i = 0; i < data.length; i++) {
+                result.set(i, value.equalsIgnoreCase(data[i]));
             }
         }
         return result;

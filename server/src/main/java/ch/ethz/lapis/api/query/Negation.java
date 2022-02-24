@@ -1,14 +1,13 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.BitSet;
+
 public class Negation extends Single {
 
     @Override
-    public boolean[] evaluate(Database database) {
-        boolean[] childEvaluated = super.evaluate(database);
-        boolean[] result = new boolean[childEvaluated.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = !childEvaluated[i];
-        }
-        return result;
+    public BitSet evaluate(Database database) {
+        BitSet childEvaluated = super.evaluate(database);
+        childEvaluated.flip(0, database.size());
+        return childEvaluated;
     }
 }

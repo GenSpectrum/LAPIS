@@ -1,7 +1,9 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.BitSet;
+
 public interface QueryExpr {
 
-    boolean[] evaluate(Database database);
+    BitSet evaluate(Database database);
 
 }

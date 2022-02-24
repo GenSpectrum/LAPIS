@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
+import java.util.BitSet;
 
 public class PangoQuery implements VariantQueryExpr {
 
@@ -30,7 +31,7 @@ public class PangoQuery implements VariantQueryExpr {
     }
 
     @Override
-    public boolean[] evaluate(Database database) {
+    public BitSet evaluate(Database database) {
         String pangoLineage = this.pangoLineage.toUpperCase();
         if (includeSubLineage) {
             pangoLineage += "*";
@@ -39,9 +40,9 @@ public class PangoQuery implements VariantQueryExpr {
         PangoLineageQueryConverter.PangoLineageQueryMatch match = queryConverter.convert(pangoLineage);
 
         String[] data = database.getStringColumn(Database.Columns.PANGO_LINEAGE);
-        boolean[] result = new boolean[data.length];
+        BitSet result = new BitSet(data.length);
 
-        for (int i = 0; i < result.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             boolean r = false;
             String d = data[i];
             if (d != null) {
@@ -52,7 +53,7 @@ public class PangoQuery implements VariantQueryExpr {
                     r = r || d.startsWith(s);
                 }
             }
-            result[i] = r;
+            result.set(i, r);
         }
         return result;
     }

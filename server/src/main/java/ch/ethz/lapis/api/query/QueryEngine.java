@@ -1,31 +1,5 @@
 package ch.ethz.lapis.api.query;
 
-import static ch.ethz.lapis.api.query.Database.Columns.AGE;
-import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY;
-import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.DATE;
-import static ch.ethz.lapis.api.query.Database.Columns.DATE_SUBMITTED;
-import static ch.ethz.lapis.api.query.Database.Columns.DIED;
-import static ch.ethz.lapis.api.query.Database.Columns.DIVISION;
-import static ch.ethz.lapis.api.query.Database.Columns.DIVISION_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.FULLY_VACCINATED;
-import static ch.ethz.lapis.api.query.Database.Columns.GENBANK_ACCESSION;
-import static ch.ethz.lapis.api.query.Database.Columns.GISAID_CLADE;
-import static ch.ethz.lapis.api.query.Database.Columns.GISAID_EPI_ISL;
-import static ch.ethz.lapis.api.query.Database.Columns.HOSPITALIZED;
-import static ch.ethz.lapis.api.query.Database.Columns.HOST;
-import static ch.ethz.lapis.api.query.Database.Columns.LOCATION;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTSTRAIN_CLADE;
-import static ch.ethz.lapis.api.query.Database.Columns.ORIGINATING_LAB;
-import static ch.ethz.lapis.api.query.Database.Columns.PANGO_LINEAGE;
-import static ch.ethz.lapis.api.query.Database.Columns.REGION;
-import static ch.ethz.lapis.api.query.Database.Columns.REGION_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.SAMPLING_STRATEGY;
-import static ch.ethz.lapis.api.query.Database.Columns.SEX;
-import static ch.ethz.lapis.api.query.Database.Columns.SRA_ACCESSION;
-import static ch.ethz.lapis.api.query.Database.Columns.STRAIN;
-import static ch.ethz.lapis.api.query.Database.Columns.SUBMITTING_LAB;
-
 import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
@@ -35,27 +9,23 @@ import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ch.ethz.lapis.api.query.Database.Columns.*;
+
 public class QueryEngine {
 
     public List<SampleAggregated> aggregate(Database database, SampleAggregatedRequest request) {
         // Filter
-        boolean[] matched = matchSampleFilter(database, request);
+        BitSet matched = matchSampleFilter(database, request);
         int numberRows = database.size();
 
         // Group by
@@ -64,7 +34,7 @@ public class QueryEngine {
         if (fields.isEmpty()) {
             int count = 0;
             for (int i = 0; i < numberRows; i++) {
-                if (matched[i]) {
+                if (matched.get(i)) {
                     ++count;
                 }
             }
@@ -72,7 +42,7 @@ public class QueryEngine {
         } else {
             Map<List<Object>, int[]> counts = new HashMap<>();
             for (int i = 0; i < numberRows; i++) {
-                if (matched[i]) {
+                if (matched.get(i)) {
                     int finalI = i;
                     List<Object> key = fields.stream()
                         .map(f -> database.getColumn(aggregationFieldToColumnName(f))[finalI])
@@ -118,17 +88,16 @@ public class QueryEngine {
     }
 
     public List<Integer> filterIds(Database database, SampleFilter<?> sampleFilter) {
-        boolean[] matched = matchSampleFilter(database, sampleFilter);
+        BitSet matched = matchSampleFilter(database, sampleFilter);
         List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < matched.length; i++) {
-            if (matched[i]) {
-                ids.add(i);
-            }
+        int offset = 0;
+        while ((offset = matched.nextSetBit(offset)) != -1) {
+            ids.add(offset);
         }
         return ids;
     }
 
-    public boolean[] matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
+    public BitSet matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
         // Filter variant
         var nucMutations = sampleFilter.getNucMutations();
         var useNucMutations = nucMutations != null && !nucMutations.isEmpty();
@@ -186,12 +155,12 @@ public class QueryEngine {
         }
 
         int numberRows = database.size();
-        boolean[] matched;
+        BitSet matched;
         if (variantQueryExpr != null) {
             matched = variantQueryExpr.evaluate(database);
         } else {
-            matched = new boolean[numberRows];
-            Arrays.fill(matched, true);
+            matched = new BitSet(numberRows);
+            matched.set(0, numberRows);
         }
 
         // Filter metadata
@@ -227,22 +196,22 @@ public class QueryEngine {
         return matched;
     }
 
-    private void eq(boolean[] matched, String[] data, String value, boolean caseSensitive) {
+    private void eq(BitSet matched, String[] data, String value, boolean caseSensitive) {
         if (value == null) {
             return;
         }
         if (caseSensitive) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && value.equals(data[i]);
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, value.equals(data[i]));
             }
         } else {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && value.equalsIgnoreCase(data[i]);
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, value.equalsIgnoreCase(data[i]));
             }
         }
     }
 
-    private void eq(boolean[] matched, String[] data, Collection<String> possibleValues, boolean caseSensitive) {
+    private void eq(BitSet matched, String[] data, Collection<String> possibleValues, boolean caseSensitive) {
         if (possibleValues == null || possibleValues.isEmpty()) {
             return;
         }
@@ -255,45 +224,47 @@ public class QueryEngine {
         }
 
         if (caseSensitive) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && possibleValuesSet.contains(data[i]);
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, possibleValuesSet.contains(data[i]));
             }
         } else {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && possibleValuesSet.contains(data[i] != null ? data[i].toLowerCase() : null);
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) {
+                    matched.set(i, possibleValuesSet.contains(data[i] != null ? data[i].toLowerCase() : null));
+                }
             }
         }
     }
 
-    private void eq(boolean[] matched, Boolean[] data, Boolean value) {
+    private void eq(BitSet matched, Boolean[] data, Boolean value) {
         if (value == null) {
             return;
         }
-        for (int i = 0; i < matched.length; i++) {
-            matched[i] = matched[i] && data[i] != null && value == data[i];
+        for (int i = 0; i < data.length; i++) {
+            if (matched.get(i)) matched.set(i, data[i] != null && value == data[i]);
         }
     }
 
-    private void between(boolean[] matched, Integer[] data, Integer from, Integer to) {
+    private void between(BitSet matched, Integer[] data, Integer from, Integer to) {
         if (from == null && to == null) {
             return;
         }
         if (from != null && to != null) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from && data[i] <= to;
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, data[i] != null && data[i] >= from && data[i] <= to);
             }
         } else if (from != null) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from;
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, data[i] != null && data[i] >= from);
             }
         } else {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] <= to;
+            for (int i = 0; i < data.length; i++) {
+                if (matched.get(i)) matched.set(i, data[i] != null && data[i] <= to);
             }
         }
     }
 
-    private void between(boolean[] matched, Integer[] data, LocalDate dateFrom, LocalDate dateTo) {
+    private void between(BitSet matched, Integer[] data, LocalDate dateFrom, LocalDate dateTo) {
         Integer dateFromInt = Database.dateToInt(dateFrom);
         Integer dateToInt = Database.dateToInt(dateTo);
         between(matched, data, dateFromInt, dateToInt);
