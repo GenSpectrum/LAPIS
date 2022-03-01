@@ -255,12 +255,15 @@ public class SampleService {
             int count = 0;
             Map<String, int[]> mutations = new HashMap<>();
             for (var r : records) {
-                for (String mut : r.value1().split(",")) {
-                    if (mut.isBlank()) {
-                        continue;
+                String mutsString = r.value1();
+                if (mutsString != null) {
+                    for (String mut : mutsString.split(",")) {
+                        if (mut.isBlank()) {
+                            continue;
+                        }
+                        mutations.compute(mut, (k, v) -> v == null ?
+                            new int[] { 0 } : v)[0]++;
                     }
-                    mutations.compute(mut, (k, v) -> v == null ?
-                        new int[] { 0 } : v)[0]++;
                 }
                 count++;
             }
