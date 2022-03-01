@@ -1,6 +1,6 @@
 # Use Cases
 
-We demonstrate two use cases for this API. You can switch between examples in Python and R in the top right.
+We demonstrate two use cases for this API in R.
 
 ## Plot the global distribution of all sequences
 
@@ -9,7 +9,7 @@ library(jsonlite)
 library(ggplot2)
 
 # Query the API
-response <- fromJSON("https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=region")
+response <- fromJSON("https://lapis.cov-spectrum.org/open/v1/sample/aggregated?fields=region")
 
 # Check for errors
 errors <- response$errors
@@ -43,9 +43,6 @@ ggplot(
     axis.text.x = element_blank())
 ```
 
-```python
-Not implemented yet. Please take a look at the R example.
-```
 
 Steps:
 
@@ -64,7 +61,7 @@ library(ggplot2)
 # Query the API
 date_from <- format(Sys.Date() - as.difftime(100, unit = "days"), "%Y-%m-%d")
 query <- paste0(
-  "https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?",
+  "https://lapis.cov-spectrum.org/open/v1/sample/aggregated?",
   "fields=date",
   "&country=Switzerland",
   "&dateFrom=", date_from,
@@ -99,6 +96,3 @@ ggplot(
   ggtitle("Count of delta samples in Switzerland in the past 100 days")
 ```
 
-```python
-Not implemented yet. Please take a look at the R example.
-```

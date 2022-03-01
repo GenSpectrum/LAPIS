@@ -3,12 +3,12 @@ title: LAPIS Documentation
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - r
-  - python
 
 toc_footers:
   - <a href="https://github.com/cevo-public/LAPIS">Github</a>
+  - <a href="https://lapis.cov-spectrum.org/openapi/">OpenAPI-specification</a>
   - <a href="https://bsse.ethz.ch/cevo">Developed by cEvo@ETH Zurich</a>
-  - <a href="https://github.com/slatedocs/slate">Documentation Powered by Slate</a>
+  - <a href="https://github.com/slatedocs/slate">Documentation powered by Slate</a>
 
 includes:
   - use-cases
@@ -24,8 +24,11 @@ LAPIS (Lightweight API for Sequences) is an open web application programming int
 
 - Filter sequences by metadata or mutations
 - Aggregate data by any metadata field you like
-- Get the metadata as JSON (easily parsed to a data table, see below)
+- Get the full metadata
 - Get the sequences as FASTA (aligned or unaligned)
+- Responses can be formatted as JSON and as CSV
+
+An OpenAPI-specification is available [here](https://lapis.cov-spectrum.org/openapi/).
 
 This instance uses fully public data from [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) pre-proceessed and hosted by [Nextstrain](https://nextstrain.org/blog/2021-07-08-ncov-open-announcement). We update the data every day. More information about the underlying software and the code can be found in our [Github repository](https://github.com/cevo-public/LAPIS). 
 
@@ -43,10 +46,10 @@ The API has six main endpoints related to samples. These endpoints provide diffe
 - `/sample/fasta` - use to get original (unaligned) sequences
 - `/sample/fasta-aligned` - use to get aligned sequences
 
-The API returns a response (data) based on a query to one of the endpoints. You can view a responses in your browser, or use the data programatically. We'll provide some examples in r and python.
+The API returns a response (data) based on a query to one of the endpoints. You can view a response in your browser, or use the data programatically. We'll provide some examples in R.
 
 <aside class="notice">
-The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints currently only return at most 1000 sequences per request. We will increase the limit in the future.
+The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints has a limit of 100,000 sequences per request. We do not support pagination (yet). However, you could, for example, use the <code>dateFrom</code> and <code>dateTo</code> filters to load the sequences chunk by chunk.
 </aside>
 
 ## Query Format
@@ -54,12 +57,12 @@ The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints 
 > **Query example:**
 >
 > Get the total number of available sequences:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/aggregated' target="_blank">
 >   /sample/aggregated
 > </a>
 
 To query an endpoint, use the web link with prefix
-`https://cov-spectrum.ethz.ch/public/api/v1` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
+`https://lapis.cov-spectrum.org/open/v1` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but you can click to try the full link in your browser.
 
 ## Response Format
 
@@ -73,10 +76,12 @@ To query an endpoint, use the web link with prefix
 }
 ```
 
-Responses are returned in [JSON](https://www.json.org/json-en.html) format with three top level attributes:
+The responses can be formatted in JSON or CSV. The default is JSON. To get CSV responses, append the query parameter `dataFormat=csv`.
+
+Responses returned in the [JSON](https://www.json.org/json-en.html) format have three top level attributes:
 
 - "info" - data about the API itself
-- "errors" - an array (hopefully empty!) of things that wrong. See section "Errors" (TODO) for further details.
+- "errors" - an array (hopefully empty!) of things that wrong.
 - "data" - the actual data
 
 
@@ -85,7 +90,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 > **Examples:**
 >
 > Get the number of all samples in Switzerland in 2021:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31' target="_blank">
 >   /sample/aggregated?country=Switzerland&dateFrom=2021-01-01&dateTo=2021-12-31
 > </a>
 
@@ -98,7 +103,7 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
 ```
 
 > Get details about samples from lineage AY.1 in Geneva, Switzerland:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1' target="_blank">
 >   /sample/details?country=Switzerland&division=Geneva&pangoLineage=AY.1
 > </a>
 
@@ -128,7 +133,8 @@ Responses are returned in [JSON](https://www.json.org/json-en.html) format with 
       "originatingLab": null,
       "genbankAccession": "OU268406",
       "sraAccession": null,
-      "gisaidEpiIsl": "EPI_ISL_2405325"
+      "gisaidEpiIsl": "EPI_ISL_2405325",
+      "strain":"Switzerland/GE-HUG-34284688/2021"
     },
     ...
   ]
@@ -168,6 +174,7 @@ The endpoints `details`, `aa-mutations`, `nuc-mutations`, `fasta`, and `fasta-al
 - genbankAccession
 - sraAccession
 - gisaidEpiIsl
+- strain
 
 To determine which values are available for each attribute, see the example in section "Aggregation".
 
@@ -175,12 +182,12 @@ To determine which values are available for each attribute, see the example in s
 
 
 > Get the total number of samples of the lineage B.1.617.2 without sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
+> <a href="https://lapis.cov-spectrum.org/open/v1/sample/aggregated?pangoLineage=B.1.617.2" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2
 > </a>
 
 > Get the total number of samples of the lineage B.1.617.2 including sub-lineages:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
+> <a href="https://lapis.cov-spectrum.org/open/v1/sample/aggregated?pangoLineage=B.1.617.2*" target="_blank">
 >   /sample/aggregated?pangoLineage=B.1.617.2*
 > </a>
 
@@ -195,12 +202,12 @@ An official pango lineage name can only have at most three number components. A 
 ## Filter Mutations
 
 > Get the total number of samples with the synonymous nucleotide mutations 913T and 5986T and the amino acid mutation S:484K:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K" target="_blank">
+> <a href="https://lapis.cov-spectrum.org/open/v1/sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K" target="_blank">
 >   /sample/aggregated?nucMutations=913T,5986T&aaMutations=S:484K
 > </a>
 
 > Get the total number of samples for which we do not know whether the S:501 position is mutated:<br/>
-> <a href="https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?aaMutations=S:501X" target="_blank">
+> <a href="https://lapis.cov-spectrum.org/open/v1/sample/aggregated?aaMutations=S:501X" target="_blank">
 >   /sample/aggregated?aaMutations=S:501X
 > </a>
 
@@ -210,7 +217,7 @@ A nucleotide mutation has the format `<position><base>`. A "base" can be one of 
 
 An amino acid mutation has the format `<gene>:<position><base>`. The following genes are available: E, M, N, ORF1a, ORF1b, ORF3a, ORF6, ORF7a, ORF7b, ORF8, ORF9b, S. A "base" can be one of the 20 amino acid codes. It can also be `-` for deletion and `X` for unknown.
 
-Additional features are coming soon. For example, it will be possible to filter for any mutations at a certain position.
+The `<base>` can be omitted to filter for any mutation. You can write a `.` for the `<base>` to filter for sequences for which it is confirmed that no mutation occurred, i.e., has the same base as the reference genome at the specified position.
 
 
 # Aggregation
@@ -218,7 +225,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 > **Examples:**
 >
 > Get the number of B.1.1.7 samples per country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/aggregated?fields=country&pangoLineage=B.1.1.7' target="_blank">
 >   /sample/aggregated?fields=country&pangoLineage=B.1.1.7
 > </a>
 
@@ -235,7 +242,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get the number of samples per Nextstrain clade and country:<br/>
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=nextstrainClade,country' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/aggregated?fields=nextstrainClade,country' target="_blank">
 >   /sample/aggregated?fields=nextstrainClade,country
 > </a>
 
@@ -252,7 +259,7 @@ Additional features are coming soon. For example, it will be possible to filter 
 ```
 
 > Get all the possible values for attribute "division" in Swtizerland:<br/> 
-> <a href='https://cov-spectrum.ethz.ch/public/api/v1/sample/aggregated?fields=division&country=Switzerland' target="_blank">
+> <a href='https://lapis.cov-spectrum.org/open/v1/sample/aggregated?fields=division&country=Switzerland' target="_blank">
 >   /sample/aggregated?division,country=Switzerland
 > </a>
 
