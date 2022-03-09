@@ -479,11 +479,13 @@ public class TransformService {
         try (Connection conn = databasePool.getConnection()) {
 
             try (Statement statement = conn.createStatement()) {
-                // Change pangoLineage "None" to null
+                // Change pangoLineage "None" and "" to null
                 String sql1 = """
                     update y_main_metadata_staging m
                     set pango_lineage = null
-                    where m.pango_lineage = 'None';
+                    where
+                      m.pango_lineage = 'None'
+                      or m.pango_lineage = '';
                 """;
                 statement.execute(sql1);
                 // Clean up the sampling strategy field a bit
