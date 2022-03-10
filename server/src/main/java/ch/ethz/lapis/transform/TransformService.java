@@ -485,7 +485,8 @@ public class TransformService {
                     set pango_lineage = null
                     where
                       m.pango_lineage = 'None'
-                      or m.pango_lineage = '';
+                      or m.pango_lineage = ''
+                      or m.pango_lineage = 'unclassifiable';
                 """;
                 statement.execute(sql1);
                 // Clean up the sampling strategy field a bit
