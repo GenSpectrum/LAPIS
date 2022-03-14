@@ -6,6 +6,7 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.javatuples.Pair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -294,6 +295,85 @@ public class GisaidService {
         try (DirectoryStream<Path> directory = Files.newDirectoryStream(workdir)) {
             for (Path path : directory) {
                 Files.delete(path);
+            }
+        }
+    }
+
+    public void fetchMissingSubmitterInformation() throws SQLException, InterruptedException {
+        // Get entries without submitter information
+        // We fill missing Swiss data with priority.
+        String getMissingSql = """
+                select gisaid_epi_isl
+                from y_gisaid
+                where
+                  submitting_lab is null
+                  and originating_lab is null
+                  and authors is null
+                order by case when country = 'Switzerland' then 0 else 1 end;
+            """;
+        List<String> missingGisaidIds = new ArrayList<>();
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(getMissingSql)) {
+                    while (rs.next()) {
+                        missingGisaidIds.add(rs.getString("gisaid_epi_isl"));
+                    }
+                }
+            }
+        }
+        if (missingGisaidIds.isEmpty()) {
+            System.out.println("No submitter information is missing");
+            return;
+        }
+
+        // Fetch submitter information
+        System.out.println("Found " + missingGisaidIds.size() + " GISAID entries with missing submitter information.");
+        SubmitterInformationFetcher fetcher = new SubmitterInformationFetcher();
+        List<Pair<String, SubmitterInformation>> submitterInformationList = new ArrayList<>();
+        int i = 0;
+        for (String gisaidId : missingGisaidIds) {
+            Optional<SubmitterInformation> submitterInformation = fetcher.fetchSubmitterInformation(gisaidId);
+            if (submitterInformation.isPresent()) {
+                submitterInformationList.add(new Pair<>(gisaidId, submitterInformation.get()));
+            } else {
+                System.out.println("No information fetched for " + gisaidId);
+                // TODO Check the status header to understand whether we are really getting rate-limited.
+                // Read the Retry-After to determine when to continue
+                System.out.println("Maybe rate-limited? Let's wait for 20 minutes");
+                Thread.sleep(1000 * 60 * 20);
+            }
+            i++;
+            Thread.sleep(1000);
+            if (i % 20 == 0) {
+                System.out.println("Progress: " + i + "/" + missingGisaidIds.size());
+            }
+            if (i % 100 == 0 || i == missingGisaidIds.size()) {
+                // Write submitter information to database
+                String writeSql = """
+                    update y_gisaid
+                    set
+                      originating_lab = ?,
+                      submitting_lab = ?,
+                      authors = ?
+                    where gisaid_epi_isl = ?;
+                """;
+                try (Connection conn = databasePool.getConnection()) {
+                    conn.setAutoCommit(false);
+                    try (PreparedStatement statement = conn.prepareStatement(writeSql)) {
+                        for (Pair<String, SubmitterInformation> p : submitterInformationList) {
+                            String gisaidEpiIsl = p.getValue0();
+                            SubmitterInformation info = p.getValue1();
+                            statement.setString(1, info.getOriginatingLab());
+                            statement.setString(2, info.getSubmittingLab());
+                            statement.setString(3, info.getAuthors());
+                            statement.setString(4, gisaidEpiIsl);
+                            statement.addBatch();
+                        }
+                        Utils.executeClearCommitBatch(conn, statement);
+                    }
+                }
+                System.out.println("Wrote " + submitterInformationList.size() + " entries to database.");
+                submitterInformationList = new ArrayList<>();
             }
         }
     }

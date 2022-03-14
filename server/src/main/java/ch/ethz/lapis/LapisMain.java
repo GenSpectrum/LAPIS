@@ -55,6 +55,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             Set<String> availableSteps = new HashSet<>() {{
                 add(UpdateSteps.loadNG);
                 add(UpdateSteps.loadGisaid);
+                add(UpdateSteps.loadGisaidMissingSubmitters);
                 add(UpdateSteps.loadS3C);
                 add(UpdateSteps.loadPangolinAssignment);
                 add(UpdateSteps.transformNG);
@@ -78,6 +79,10 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
                         config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
                     ).updateData();
+                    case UpdateSteps.loadGisaidMissingSubmitters -> new GisaidService(
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
+                    ).fetchMissingSubmitterInformation();
                     case UpdateSteps.loadS3C -> new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
                     case UpdateSteps.loadPangolinAssignment -> new CovLineagesService(dbPool, config.getWorkdir())
                         .pullGisaidPangoLineageAssignments();

@@ -79,7 +79,9 @@ public class BatchProcessingWorker {
 
             // Fetch the submitter information for all APPEND sequences
             for (GisaidEntry entry : batch.getEntries()) {
-                if (entry.getImportMode() == ImportMode.APPEND) {
+                // Due to rate limitation, we only fetch submitter information for Swiss sequences for now
+                if (entry.getImportMode() == ImportMode.APPEND && "Switzerland".equals(entry.getCountry())) {
+                    Thread.sleep(3000);
                     submitterInformationFetcher.fetchSubmitterInformation(entry.getGisaidEpiIsl())
                         .ifPresent(entry::setSubmitterInformation);
                 }
