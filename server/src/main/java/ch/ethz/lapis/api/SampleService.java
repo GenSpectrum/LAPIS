@@ -306,17 +306,19 @@ public class SampleService {
             TableField<YMainSequenceRecord, byte[]> seqColumn = aligned ?
                 seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
 
-            SelectLimitPercentStep<Record2<String, byte[]>> statement;
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-            statement = ctx
+            SelectJoinStep<Record2<String, byte[]>> statement = ctx
                 .select(metaTbl.GENBANK_ACCESSION, seqColumn)
                 .from(
                     idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
                         .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                )
-                .limit(orderAndLimit.getLimit() != null ? Math.min(100000, orderAndLimit.getLimit()) : 100000);
-            Cursor<Record2<String, byte[]>> cursor = statement.fetchSize(1000).fetchLazy();
+                );
+            if (orderAndLimit.getLimit() == null) {
+                orderAndLimit.setLimit(100000);
+            }
+            Select<Record2<String, byte[]>> statement2 = applyOrderAndLimit(statement, orderAndLimit);
+            Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy();
             for (Record2<String, byte[]> r : cursor) {
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
                 outputStream.write(r.get(metaTbl.GENBANK_ACCESSION).getBytes(StandardCharsets.UTF_8));
