@@ -279,9 +279,11 @@ public class GisaidService {
             unhandledException.printStackTrace();
         }
 
-        if (unhandledExceptions.isEmpty()) {
-            updateDataVersion(startTime);
+        if (emergencyBrake.get() || !unhandledExceptions.isEmpty()) {
+            throw new RuntimeException("GisaidService update() failed");
         }
+
+        updateDataVersion(startTime);
 
         // Clean up the work directory
         try (DirectoryStream<Path> directory = Files.newDirectoryStream(workdir)) {
