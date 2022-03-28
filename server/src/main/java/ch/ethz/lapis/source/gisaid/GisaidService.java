@@ -41,7 +41,7 @@ public class GisaidService {
     private final ComboPooledDataSource databasePool;
     private final Path workdir;
     private final int maxNumberWorkers;
-    private final Path nextalignPath;
+    private final Path nextcladePath;
     private final GisaidApiConfig gisaidApiConfig;
     private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
     private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
@@ -52,14 +52,14 @@ public class GisaidService {
         ComboPooledDataSource databasePool,
         String workdir,
         int maxNumberWorkers,
-        String nextalignPath,
+        String nextcladePath,
         GisaidApiConfig gisaidApiConfig,
         String geoLocationRulesFile
     ) {
         this.databasePool = databasePool;
         this.workdir = Path.of(workdir);
         this.maxNumberWorkers = maxNumberWorkers;
-        this.nextalignPath = Path.of(nextalignPath);
+        this.nextcladePath = Path.of(nextcladePath);
         this.gisaidApiConfig = gisaidApiConfig;
         this.geoLocationRulesFile = Path.of(geoLocationRulesFile);
     }
@@ -85,12 +85,6 @@ public class GisaidService {
 
     public void updateData() throws IOException, SQLException, ParseException, InterruptedException {
         LocalDateTime startTime = LocalDateTime.now();
-
-        // Write the reference sequence and genemap.gff to the workdir
-        Path referenceFasta = workdir.resolve("reference.fasta");
-        Files.writeString(referenceFasta, ">REFERENCE\n" + Utils.getReferenceSeq() + "\n\n");
-        Path geneMapGff = workdir.resolve("genemap.gff");
-        Files.writeString(geneMapGff, Utils.getGeneMapGff());
 
         // Load geo location rules
         GeoLocationMapper geoLocationMapper = new GeoLocationMapper(geoLocationRulesFile);
@@ -150,11 +144,9 @@ public class GisaidService {
                 BatchProcessingWorker worker = new BatchProcessingWorker(
                     finalI,
                     workerWorkDir,
-                    referenceFasta,
                     databasePool,
                     false,
-                    nextalignPath,
-                    geneMapGff,
+                    nextcladePath,
                     nucSeqCompressor,
                     aaSeqCompressor,
                     oldHashes

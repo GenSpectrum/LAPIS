@@ -13,9 +13,10 @@ RUN ./gradlew clean build -x test
 FROM openjdk:16-bullseye AS server
 WORKDIR /app
 
-# Download nextalign
-RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64" -o "nextalign"
-RUN chmod +x nextalign
+# Download Nextclade
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64" -o "nextclade"
+RUN chmod +x nextclade
+RUN ./nextclade dataset get --name 'sars-cov-2' --output-dir 'nextclade-data'
 
 # Download geo location corrections list from Nextstrain
 RUN curl https://raw.githubusercontent.com/nextstrain/ncov-ingest/master/source-data/gisaid_geoLocationRules.tsv -o gisaid_geoLocationRules.tsv
