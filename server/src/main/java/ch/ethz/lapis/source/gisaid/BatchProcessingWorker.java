@@ -7,14 +7,21 @@ import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.Date;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -23,12 +30,10 @@ public class BatchProcessingWorker {
 
     private final int id;
     private final Path workDir;
-    private final Path referenceFasta;
     private final ComboPooledDataSource databasePool;
     private final boolean updateSubmitterInformation;
     private final SubmitterInformationFetcher submitterInformationFetcher = new SubmitterInformationFetcher();
-    private final Path nextalignPath;
-    private final Path geneMapGff;
+    private final Path nextcladePath;
     private final SeqCompressor nucSeqCompressor;
     private final SeqCompressor aaSeqCompressor;
     private final Map<String, GisaidHashes> oldHashes;
@@ -36,19 +41,13 @@ public class BatchProcessingWorker {
     /**
      * @param id             An unique identifier for the worker
      * @param workDir        An empty work directory for the worker
-     * @param referenceFasta The path to the fasta file containing the reference
-     * @param nextalignPath
-     * @param geneMapGff
-     * @param nucSeqCompressor
      */
     public BatchProcessingWorker(
         int id,
         Path workDir,
-        Path referenceFasta,
         ComboPooledDataSource databasePool,
         boolean updateSubmitterInformation,
-        Path nextalignPath,
-        Path geneMapGff,
+        Path nextcladePath,
         SeqCompressor nucSeqCompressor,
         SeqCompressor aaSeqCompressor,
         Map<String, GisaidHashes> oldHashes
@@ -56,10 +55,8 @@ public class BatchProcessingWorker {
         this.databasePool = databasePool;
         this.id = id;
         this.workDir = workDir;
-        this.referenceFasta = referenceFasta;
         this.updateSubmitterInformation = updateSubmitterInformation;
-        this.nextalignPath = nextalignPath;
-        this.geneMapGff = geneMapGff;
+        this.nextcladePath = nextcladePath;
         this.nucSeqCompressor = nucSeqCompressor;
         this.aaSeqCompressor = aaSeqCompressor;
         this.oldHashes = oldHashes;
@@ -87,8 +84,8 @@ public class BatchProcessingWorker {
                 }
             }
 
-            // Determine the entries that are new are have a changed sequence. Those sequences need to be processed
-            // Nextalign.
+            // Determine the entries that are new and have a changed sequence. Those sequences need to be processed
+            // Nextclade.
             List<GisaidEntry> sequencePreprocessingNeeded = batch.getEntries().stream()
                 .filter(s -> s.getImportMode() == ImportMode.APPEND || s.isSequenceChanged())
                 .collect(Collectors.toList());
@@ -101,17 +98,18 @@ public class BatchProcessingWorker {
                 System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
                 Files.writeString(originalSeqFastaPath, formatSeqAsFasta(sequencePreprocessingNeeded));
 
-                // Run Nextalign
-                System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
-                Map<String, NextalignResultEntry> nextalignResults = runNextalign(batch, originalSeqFastaPath);
+                // Run Nextclade
+                System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextclade..");
+                Map<String, NextcladeResultEntry> nextcladeResults = runNextclade(batch, originalSeqFastaPath);
                 ReferenceGenomeData refGenome = ReferenceGenomeData.getInstance();
                 for (GisaidEntry entry : batch.getEntries()) {
-                    NextalignResultEntry nre = nextalignResults.get(entry.getGisaidEpiIsl());
+                    NextcladeResultEntry nre = nextcladeResults.get(entry.getGisaidEpiIsl());
                     if (nre != null) {
-                        // Add the Nextalign results to the entry
+                        // Add the Nextclade results to the entry
                         entry
                             .setSeqAligned(nre.alignedNucSeq)
-                            .setGeneAASeqsCompressed(aaSeqCompressor.compress(formatGeneAASeqs(nre.geneAASeqs)));
+                            .setGeneAASeqsCompressed(aaSeqCompressor.compress(formatGeneAASeqs(nre.geneAASeqs)))
+                            .setNextcladeTsvEntry(nre.nextcladeTsvEntry);
 
                         // Extract the amino acid and nucleotide mutations
                         if (entry.getSeqAligned() != null) {
@@ -253,19 +251,18 @@ public class BatchProcessingWorker {
         return fasta.toString();
     }
 
-    private Map<String, NextalignResultEntry> runNextalign(
+    private Map<String, NextcladeResultEntry> runNextclade(
         Batch batch,
         Path originalSeqFastaPath
     ) throws IOException, InterruptedException {
         List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Path outputPath = workDir.resolve("output");
-        String command = nextalignPath.toAbsolutePath() +
-            " --sequences=" + originalSeqFastaPath.toAbsolutePath() +
-            " --reference=" + referenceFasta.toAbsolutePath() +
-            " --genemap=" + geneMapGff.toAbsolutePath() +
-            " --genes=" + String.join(",", genes) +
+        String command = nextcladePath.toAbsolutePath() +
+            " --input-fasta=" + originalSeqFastaPath.toAbsolutePath() +
+            " --input-dataset=/app/nextclade-data" + // TODO Move it to the configs
             " --output-dir=" + outputPath.toAbsolutePath() +
-            " --output-basename=nextalign" +
+            " --output-basename=nextclade" +
+            " --output-tsv=" + outputPath.resolve("nextclade.tsv").toAbsolutePath() +
             " --silent" +
             " --jobs=1";
 
@@ -273,15 +270,23 @@ public class BatchProcessingWorker {
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
         if (!exited) {
             process.destroyForcibly();
-            throw new RuntimeException("Nextalign timed out (after 20 minutes)");
+            throw new RuntimeException("Nextclade timed out (after 20 minutes)");
         }
         if (process.exitValue() != 0) {
-            throw new RuntimeException("Nextalign exited with code " + process.exitValue());
+            throw new RuntimeException("Nextclade exited with code " + process.exitValue());
+        }
+
+        // Read nextclade.tsv (which contains QC data and more)
+        NextcladeTsvFileReader nextcladeTsvReader = new NextcladeTsvFileReader(new BufferedInputStream(
+            new FileInputStream(outputPath.resolve("nextclade.tsv").toFile())));
+        Map<String, NextcladeTsvEntry> nextcladeTsvEntries = new HashMap<>();
+        for (NextcladeTsvEntry nextcladeTsvEntry : nextcladeTsvReader) {
+            nextcladeTsvEntries.put(nextcladeTsvEntry.getSeqName(), nextcladeTsvEntry);
         }
 
         // Read the aligned nucleotide sequence
         Map<String, String> nucSeqs = new HashMap<>();
-        FastaFileReader nucFastaReader = new FastaFileReader(outputPath.resolve("nextalign.aligned.fasta"), false);
+        FastaFileReader nucFastaReader = new FastaFileReader(outputPath.resolve("nextclade.aligned.fasta"), false);
         for (FastaEntry fastaEntry : nucFastaReader) {
             nucSeqs.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
         }
@@ -293,7 +298,7 @@ public class BatchProcessingWorker {
         }
         for (String gene : genes) {
             FastaFileReader geneFastaReader = new FastaFileReader(
-                outputPath.resolve("nextalign.gene." + gene + ".fasta"),
+                outputPath.resolve("nextclade.gene." + gene + ".fasta"),
                 false);
             for (FastaEntry fastaEntry : geneFastaReader) {
                 geneAASeqs.get(fastaEntry.getSampleName()).add(
@@ -302,9 +307,10 @@ public class BatchProcessingWorker {
             }
         }
 
-        Map<String, NextalignResultEntry> result = new HashMap<>();
-        nucSeqs.forEach((sampleName, sequence) -> {
-            result.put(sampleName, new NextalignResultEntry(sequence, geneAASeqs.get(sampleName)));
+        Map<String, NextcladeResultEntry> result = new HashMap<>();
+        nextcladeTsvEntries.forEach((sampleName, nextcladeTsvEntry) -> {
+            result.put(sampleName, new NextcladeResultEntry(nucSeqs.get(sampleName), geneAASeqs.get(sampleName),
+                nextcladeTsvEntry));
         });
         return result;
     }
@@ -322,20 +328,22 @@ public class BatchProcessingWorker {
 
     private void writeToDatabase(Batch batch) throws SQLException {
         // If APPEND mode: Insert everything
-        // If UPDATE mode + only metadata changed: update metadata and "updated_at" timestamp
-        // If UPDATE mode + sequence changed: delete the old entry and re-insert
+        // If UPDATE mode + metadata changed: update metadata and "updated_at" timestamp
+        // If UPDATE mode + sequence changed: update the sequences, the Nextclade results, and "updated_at" timestamp
+        // TODO Currently, we do two updates if both metadata and sequences have changed.
+        //  It would be more efficient to one query for both.
         List<GisaidEntry> toUpdateMetadata = new ArrayList<>();
-        List<GisaidEntry> toDelete = new ArrayList<>();
+        List<GisaidEntry> toUpdateSequence = new ArrayList<>();
         List<GisaidEntry> toInsert = new ArrayList<>();
         for (GisaidEntry sequence : batch.getEntries()) {
             if (sequence.getImportMode() == ImportMode.APPEND) {
                 toInsert.add(sequence);
             } else if (sequence.getImportMode() == ImportMode.UPDATE) {
-                if (!sequence.isSequenceChanged()) {
+                if (sequence.isMetadataChanged()) {
                     toUpdateMetadata.add(sequence);
-                } else {
-                    toDelete.add(sequence);
-                    toInsert.add(sequence);
+                }
+                if (sequence.isSequenceChanged()) {
+                    toUpdateSequence.add(sequence);
                 }
             }
         }
@@ -343,7 +351,7 @@ public class BatchProcessingWorker {
             conn.setAutoCommit(false);
 
             // 1. Update the metadata
-            String updateSequenceSql = """
+            String updateMetadataSql = """
                     update y_gisaid
                     set
                       updated_at = now(),
@@ -367,11 +375,10 @@ public class BatchProcessingWorker {
                       originating_lab = coalesce(?, originating_lab),
                       submitting_lab = coalesce(?, submitting_lab),
                       authors = coalesce(?, authors),
-                      metadata_hash = ?,
-                      seq_original_hash = ?
+                      metadata_hash = ?
                     where gisaid_epi_isl = ?;
                 """;
-            try (PreparedStatement statement = conn.prepareStatement(updateSequenceSql)) {
+            try (PreparedStatement statement = conn.prepareStatement(updateMetadataSql)) {
                 for (GisaidEntry entry : toUpdateMetadata) {
                     SubmitterInformation si = entry.getSubmitterInformation();
                     statement.setString(1, entry.getStrain());
@@ -394,29 +401,145 @@ public class BatchProcessingWorker {
                     statement.setString(16, si != null ? si.getSubmittingLab() : null);
                     statement.setString(17, si != null ? si.getAuthors() : null);
                     statement.setString(18, entry.getMetadataHash());
-                    statement.setString(19, entry.getSeqOriginalHash());
-                    statement.setString(20, entry.getGisaidEpiIsl());
+                    statement.setString(19, entry.getGisaidEpiIsl());
                     statement.addBatch();
                 }
                 statement.executeBatch();
                 statement.clearBatch();
             }
 
-            // 2. Delete sequences
-            String deleteSequenceSql = """
-                    delete from y_gisaid
+            // 2. Update sequences
+            String updateSequenceSql = """
+                    update y_gisaid
+                    set
+                      updated_at = now(),
+                      seq_original_hash = ?,
+                      seq_original_compressed = ?,
+                      seq_aligned_compressed = ?,
+                      aa_seqs_compressed = ?,
+                      aa_mutations = ?,
+                      nuc_substitutions = ?,
+                      nuc_deletions = ?,
+                      nuc_insertions = ?,
+                      nextclade_clade = ?,
+                      nextclade_clade_long = ?,
+                      nextclade_pango_lineage = ?,
+                      nextclade_total_substitutions = ?,
+                      nextclade_total_deletions = ?,
+                      nextclade_total_insertions = ?,
+                      nextclade_total_frame_shifts = ?,
+                      nextclade_total_aminoacid_substitutions = ?,
+                      nextclade_total_aminoacid_deletions = ?,
+                      nextclade_total_aminoacid_insertions = ?,
+                      nextclade_total_missing = ?,
+                      nextclade_total_non_acgtns = ?,
+                      nextclade_total_pcr_primer_changes = ?,
+                      nextclade_pcr_primer_changes = ?,
+                      nextclade_alignment_score = ?,
+                      nextclade_alignment_start = ?,
+                      nextclade_alignment_end = ?,
+                      nextclade_qc_overall_score = ?,
+                      nextclade_qc_overall_status = ?,
+                      nextclade_qc_missing_data_missing_data_threshold = ?,
+                      nextclade_qc_missing_data_score = ?,
+                      nextclade_qc_missing_data_status = ?,
+                      nextclade_qc_missing_data_total_missing = ?,
+                      nextclade_qc_mixed_sites_mixed_sites_threshold = ?,
+                      nextclade_qc_mixed_sites_score = ?,
+                      nextclade_qc_mixed_sites_status = ?,
+                      nextclade_qc_mixed_sites_total_mixed_sites = ?,
+                      nextclade_qc_private_mutations_cutoff = ?,
+                      nextclade_qc_private_mutations_excess = ?,
+                      nextclade_qc_private_mutations_score = ?,
+                      nextclade_qc_private_mutations_status = ?,
+                      nextclade_qc_private_mutations_total = ?,
+                      nextclade_qc_snp_clusters_clustered_snps = ?,
+                      nextclade_qc_snp_clusters_score = ?,
+                      nextclade_qc_snp_clusters_status = ?,
+                      nextclade_qc_snp_clusters_total_snps = ?,
+                      nextclade_qc_frame_shifts_frame_shifts = ?,
+                      nextclade_qc_frame_shifts_total_frame_shifts = ?,
+                      nextclade_qc_frame_shifts_frame_shifts_ignored = ?,
+                      nextclade_qc_frame_shifts_total_frame_shifts_ignored = ?,
+                      nextclade_qc_frame_shifts_score = ?,
+                      nextclade_qc_frame_shifts_status = ?,
+                      nextclade_qc_stop_codons_stop_codons = ?,
+                      nextclade_qc_stop_codons_total_stop_codons = ?,
+                      nextclade_qc_stop_codons_score = ?,
+                      nextclade_qc_stop_codons_status = ?,
+                      nextclade_errors = ?
                     where gisaid_epi_isl = ?;
                 """;
-            try (PreparedStatement statement = conn.prepareStatement(deleteSequenceSql)) {
-                for (GisaidEntry entry : toDelete) {
-                    statement.setString(1, entry.getGisaidEpiIsl());
+            try (PreparedStatement statement = conn.prepareStatement(updateSequenceSql)) {
+                for (GisaidEntry entry : toUpdateSequence) {
+                    statement.setString(1, entry.getSeqOriginalHash());
+                    statement.setBytes(2, entry.getSeqOriginal() != null ?
+                        nucSeqCompressor.compress(entry.getSeqOriginal()) : null);
+                    statement.setBytes(3, entry.getSeqAligned() != null ?
+                        nucSeqCompressor.compress(entry.getSeqAligned()) : null);
+                    statement.setBytes(4, entry.getGeneAASeqsCompressed());
+                    statement.setString(5, entry.getAaMutations());
+                    statement.setString(6, entry.getNucSubstitutions());
+                    statement.setString(7, entry.getNucDeletions());
+                    statement.setString(8, entry.getNucInsertions());
+                    // Nextclade
+                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
+                    statement.setString(9, nc.getClade());
+                    statement.setString(10, nc.getCladeLong());
+                    statement.setString(11, nc.getPangoLineage());
+                    statement.setObject(12, nc.getTotalSubstitutions());
+                    statement.setObject(13, nc.getTotalDeletions());
+                    statement.setObject(14, nc.getTotalInsertions());
+                    statement.setObject(15, nc.getTotalFrameShifts());
+                    statement.setObject(16, nc.getTotalAminoacidSubstitutions());
+                    statement.setObject(17, nc.getTotalAminoacidDeletions());
+                    statement.setObject(18, nc.getTotalAminoacidInsertions());
+                    statement.setObject(19, nc.getTotalMissing());
+                    statement.setObject(20, nc.getTotalNonACGTNs());
+                    statement.setObject(21, nc.getTotalPcrPrimerChanges());
+                    statement.setObject(22, nc.getPcrPrimerChanges());
+                    statement.setObject(23, nc.getAlignmentScore());
+                    statement.setObject(24, nc.getAlignmentStart());
+                    statement.setObject(25, nc.getAlignmentEnd());
+                    statement.setObject(26, nc.getQcOverallScore());
+                    statement.setString(27, nc.getQcOverallStatus());
+                    statement.setObject(28, nc.getQcMissingDataMissingDataThreshold());
+                    statement.setObject(29, nc.getQcMissingDataScore());
+                    statement.setString(30, nc.getQcMissingDataStatus());
+                    statement.setObject(31, nc.getQcMissingDataTotalMissing());
+                    statement.setObject(32, nc.getQcMixedSitesMixedSitesThreshold());
+                    statement.setObject(33, nc.getQcMixedSitesScore());
+                    statement.setString(34, nc.getQcMixedSitesStatus());
+                    statement.setObject(35, nc.getQcMixedSitesTotalMixedSites());
+                    statement.setObject(36, nc.getQcPrivateMutationsCutoff());
+                    statement.setObject(37, nc.getQcPrivateMutationsExcess());
+                    statement.setObject(38, nc.getQcPrivateMutationsScore());
+                    statement.setString(39, nc.getQcPrivateMutationsStatus());
+                    statement.setObject(40, nc.getQcPrivateMutationsTotal());
+                    statement.setString(41, nc.getQcSnpClustersClusteredSNPs());
+                    statement.setObject(42, nc.getQcSnpClustersScore());
+                    statement.setString(43, nc.getQcSnpClustersStatus());
+                    statement.setObject(44, nc.getQcSnpClustersTotalSNPs());
+                    statement.setString(45, nc.getQcFrameShiftsFrameShifts());
+                    statement.setObject(46, nc.getQcFrameShiftsTotalFrameShifts());
+                    statement.setString(47, nc.getQcFrameShiftsFrameShiftsIgnored());
+                    statement.setObject(48, nc.getQcFrameShiftsTotalFrameShiftsIgnored());
+                    statement.setObject(49, nc.getQcFrameShiftsScore());
+                    statement.setString(50, nc.getQcFrameShiftsStatus());
+                    statement.setString(51, nc.getQcStopCodonsStopCodons());
+                    statement.setObject(52, nc.getQcStopCodonsTotalStopCodons());
+                    statement.setObject(53, nc.getQcStopCodonsScore());
+                    statement.setString(54, nc.getQcStopCodonsStatus());
+                    statement.setString(55, nc.getErrors());
+                    statement.setString(56, entry.getGisaidEpiIsl());
                     statement.addBatch();
+                    statement.clearParameters();
                 }
                 statement.executeBatch();
                 statement.clearBatch();
             }
 
-            // 3. Insert into gisaid_api_sequence
+            // 3. Insert into y_gisaid
             String insertSequenceSql = """
                     insert into y_gisaid (
                       updated_at,
@@ -425,7 +548,23 @@ public class BatchProcessingWorker {
                       pango_lineage, gisaid_clade, originating_lab, submitting_lab, authors,
                       seq_original_compressed, seq_aligned_compressed, aa_seqs_compressed, aa_mutations,
                       nuc_substitutions, nuc_deletions, nuc_insertions,
-                      metadata_hash, seq_original_hash
+                      metadata_hash, seq_original_hash,
+                      nextclade_clade, nextclade_clade_long, nextclade_pango_lineage, nextclade_total_substitutions, nextclade_total_deletions,
+                      nextclade_total_insertions, nextclade_total_frame_shifts, nextclade_total_aminoacid_substitutions,
+                      nextclade_total_aminoacid_deletions, nextclade_total_aminoacid_insertions, nextclade_total_missing,
+                      nextclade_total_non_acgtns, nextclade_total_pcr_primer_changes, nextclade_pcr_primer_changes,
+                      nextclade_alignment_score, nextclade_alignment_start, nextclade_alignment_end,
+                      nextclade_qc_overall_score, nextclade_qc_overall_status, nextclade_qc_missing_data_missing_data_threshold,
+                      nextclade_qc_missing_data_score, nextclade_qc_missing_data_status, nextclade_qc_missing_data_total_missing,
+                      nextclade_qc_mixed_sites_mixed_sites_threshold, nextclade_qc_mixed_sites_score, nextclade_qc_mixed_sites_status,
+                      nextclade_qc_mixed_sites_total_mixed_sites, nextclade_qc_private_mutations_cutoff, nextclade_qc_private_mutations_excess,
+                      nextclade_qc_private_mutations_score, nextclade_qc_private_mutations_status, nextclade_qc_private_mutations_total,
+                      nextclade_qc_snp_clusters_clustered_snps, nextclade_qc_snp_clusters_score, nextclade_qc_snp_clusters_status,
+                      nextclade_qc_snp_clusters_total_snps, nextclade_qc_frame_shifts_frame_shifts, nextclade_qc_frame_shifts_total_frame_shifts,
+                      nextclade_qc_frame_shifts_frame_shifts_ignored, nextclade_qc_frame_shifts_total_frame_shifts_ignored,
+                      nextclade_qc_frame_shifts_score, nextclade_qc_frame_shifts_status, nextclade_qc_stop_codons_stop_codons,
+                      nextclade_qc_stop_codons_total_stop_codons, nextclade_qc_stop_codons_score, nextclade_qc_stop_codons_status,
+                      nextclade_errors
                     )
                     values (
                       now(),
@@ -433,7 +572,14 @@ public class BatchProcessingWorker {
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
-                      ?, ?
+                      ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
+                      ?, ?, ?, ?
                     );
                 """;
             try (PreparedStatement insertStatement = conn.prepareStatement(insertSequenceSql)) {
@@ -473,7 +619,57 @@ public class BatchProcessingWorker {
                     insertStatement.setString(28, entry.getNucInsertions());
                     insertStatement.setString(29, entry.getMetadataHash());
                     insertStatement.setString(30, entry.getSeqOriginalHash());
+                    // Nextclade
+                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
+                    insertStatement.setString(31, nc.getClade());
+                    insertStatement.setString(32, nc.getCladeLong());
+                    insertStatement.setString(33, nc.getPangoLineage());
+                    insertStatement.setObject(34, nc.getTotalSubstitutions());
+                    insertStatement.setObject(35, nc.getTotalDeletions());
+                    insertStatement.setObject(36, nc.getTotalInsertions());
+                    insertStatement.setObject(37, nc.getTotalFrameShifts());
+                    insertStatement.setObject(38, nc.getTotalAminoacidSubstitutions());
+                    insertStatement.setObject(39, nc.getTotalAminoacidDeletions());
+                    insertStatement.setObject(40, nc.getTotalAminoacidInsertions());
+                    insertStatement.setObject(41, nc.getTotalMissing());
+                    insertStatement.setObject(42, nc.getTotalNonACGTNs());
+                    insertStatement.setObject(43, nc.getTotalPcrPrimerChanges());
+                    insertStatement.setString(44, nc.getPcrPrimerChanges());
+                    insertStatement.setObject(45, nc.getAlignmentScore());
+                    insertStatement.setObject(46, nc.getAlignmentStart());
+                    insertStatement.setObject(47, nc.getAlignmentEnd());
+                    insertStatement.setObject(48, nc.getQcOverallScore());
+                    insertStatement.setString(49, nc.getQcOverallStatus());
+                    insertStatement.setObject(50, nc.getQcMissingDataMissingDataThreshold());
+                    insertStatement.setObject(51, nc.getQcMissingDataScore());
+                    insertStatement.setString(52, nc.getQcMissingDataStatus());
+                    insertStatement.setObject(53, nc.getQcMissingDataTotalMissing());
+                    insertStatement.setObject(54, nc.getQcMixedSitesMixedSitesThreshold());
+                    insertStatement.setObject(55, nc.getQcMixedSitesScore());
+                    insertStatement.setString(56, nc.getQcMixedSitesStatus());
+                    insertStatement.setObject(57, nc.getQcMixedSitesTotalMixedSites());
+                    insertStatement.setObject(58, nc.getQcPrivateMutationsCutoff());
+                    insertStatement.setObject(59, nc.getQcPrivateMutationsExcess());
+                    insertStatement.setObject(60, nc.getQcPrivateMutationsScore());
+                    insertStatement.setString(61, nc.getQcPrivateMutationsStatus());
+                    insertStatement.setObject(62, nc.getQcPrivateMutationsTotal());
+                    insertStatement.setString(63, nc.getQcSnpClustersClusteredSNPs());
+                    insertStatement.setObject(64, nc.getQcSnpClustersScore());
+                    insertStatement.setString(65, nc.getQcSnpClustersStatus());
+                    insertStatement.setObject(66, nc.getQcSnpClustersTotalSNPs());
+                    insertStatement.setString(67, nc.getQcFrameShiftsFrameShifts());
+                    insertStatement.setObject(68, nc.getQcFrameShiftsTotalFrameShifts());
+                    insertStatement.setString(69, nc.getQcFrameShiftsFrameShiftsIgnored());
+                    insertStatement.setObject(70, nc.getQcFrameShiftsTotalFrameShiftsIgnored());
+                    insertStatement.setObject(71, nc.getQcFrameShiftsScore());
+                    insertStatement.setString(72, nc.getQcFrameShiftsStatus());
+                    insertStatement.setString(73, nc.getQcStopCodonsStopCodons());
+                    insertStatement.setObject(74, nc.getQcStopCodonsTotalStopCodons());
+                    insertStatement.setObject(75, nc.getQcStopCodonsScore());
+                    insertStatement.setString(76, nc.getQcStopCodonsStatus());
+                    insertStatement.setString(77, nc.getErrors());
                     insertStatement.addBatch();
+                    insertStatement.clearParameters();
                 }
                 insertStatement.executeBatch();
                 insertStatement.clearBatch();
@@ -496,14 +692,20 @@ public class BatchProcessingWorker {
         }
     }
 
-    private static class NextalignResultEntry {
+    private static class NextcladeResultEntry {
 
         private final String alignedNucSeq;
         private final List<GeneAASeq> geneAASeqs;
+        private final NextcladeTsvEntry nextcladeTsvEntry;
 
-        public NextalignResultEntry(String alignedNucSeq, List<GeneAASeq> geneAASeqs) {
+        public NextcladeResultEntry(
+            String alignedNucSeq,
+            List<GeneAASeq> geneAASeqs,
+            NextcladeTsvEntry nextcladeTsvEntry
+        ) {
             this.alignedNucSeq = alignedNucSeq;
             this.geneAASeqs = geneAASeqs;
+            this.nextcladeTsvEntry = nextcladeTsvEntry;
         }
     }
 }

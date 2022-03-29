@@ -36,6 +36,7 @@ public class GisaidEntry {
     private String nucSubstitutions;
     private String nucDeletions;
     private String nucInsertions;
+    private NextcladeTsvEntry nextcladeTsvEntry;
 
 
     public ImportMode getImportMode() {
@@ -287,6 +288,16 @@ public class GisaidEntry {
 
     public GisaidEntry setNucInsertions(String nucInsertions) {
         this.nucInsertions = nucInsertions;
+        return this;
+    }
+
+    public NextcladeTsvEntry getNextcladeTsvEntry() {
+        return nextcladeTsvEntry;
+    }
+
+    public GisaidEntry setNextcladeTsvEntry(
+        NextcladeTsvEntry nextcladeTsvEntry) {
+        this.nextcladeTsvEntry = nextcladeTsvEntry;
         return this;
     }
 }

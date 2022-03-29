@@ -76,11 +76,11 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath()
                     ).updateData();
                     case UpdateSteps.loadGisaid -> new GisaidService(
-                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath(),
                         config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
                     ).updateData();
                     case UpdateSteps.loadGisaidMissingSubmitters -> new GisaidService(
-                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath(),
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath(),
                         config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
                     ).fetchMissingSubmitterInformation();
                     case UpdateSteps.loadS3C -> new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
