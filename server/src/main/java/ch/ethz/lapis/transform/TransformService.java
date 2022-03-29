@@ -159,7 +159,10 @@ public class TransformService {
                   id, source, source_primary_key, genbank_accession, sra_accession, gisaid_epi_isl,
                   strain, date, date_submitted, region, country, division, location, region_exposure,
                   country_exposure, division_exposure, host, age, sex, sampling_strategy, pango_lineage,
-                  nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors
+                  nextclade_pango_lineage, nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors,
+                  nextclade_qc_overall_score, nextclade_qc_missing_data_score, nextclade_qc_mixed_sites_score,
+                  nextclade_qc_private_mutations_score, nextclade_qc_snp_clusters_score,
+                  nextclade_qc_frame_shifts_score, nextclade_qc_stop_codons_score
                 )
                 select
                   row_number() over () - 1 as id,
@@ -183,11 +186,19 @@ public class TransformService {
                   sex,
                   sampling_strategy,
                   pango_lineage,
-                  null,
+                  nextclade_pango_lineage,
+                  nextclade_clade,
                   gisaid_clade,
                   originating_lab,
                   submitting_lab,
-                  authors
+                  authors,
+                  nextclade_qc_overall_score,
+                  nextclade_qc_missing_data_score,
+                  nextclade_qc_mixed_sites_score,
+                  nextclade_qc_private_mutations_score,
+                  nextclade_qc_snp_clusters_score,
+                  nextclade_qc_frame_shifts_score,
+                  nextclade_qc_stop_codons_score
                 from y_gisaid
                 where
                   seq_aligned_compressed is not null;
