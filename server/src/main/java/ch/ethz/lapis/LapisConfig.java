@@ -12,6 +12,7 @@ public class LapisConfig implements Config {
     private HttpProxyConfig httpProxy;
     private String workdir;
     private Integer maxNumberWorkers;
+    private String nextalignPath;
     private String nextcladePath;
     private String geoLocationRulesPath;
     private GisaidApiConfig gisaidApiConfig;
@@ -54,6 +55,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setMaxNumberWorkers(Integer maxNumberWorkers) {
         this.maxNumberWorkers = maxNumberWorkers;
+        return this;
+    }
+
+    public String getNextalignPath() {
+        return nextalignPath;
+    }
+
+    public LapisConfig setNextalignPath(String nextalignPath) {
+        this.nextalignPath = nextalignPath;
         return this;
     }
 

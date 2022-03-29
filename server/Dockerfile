@@ -13,6 +13,10 @@ RUN ./gradlew clean build -x test
 FROM openjdk:16-bullseye AS server
 WORKDIR /app
 
+# Download nextalign
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-Linux-x86_64" -o "nextalign"
+RUN chmod +x nextalign
+
 # Download Nextclade
 RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64" -o "nextclade"
 RUN chmod +x nextclade

@@ -73,7 +73,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             for (String updateStep : updateSteps) {
                 switch (updateStep) {
                     case UpdateSteps.loadNG -> new NextstrainGenbankService(
-                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath()
+                        dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextalignPath()
                     ).updateData();
                     case UpdateSteps.loadGisaid -> new GisaidService(
                         dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath(),
