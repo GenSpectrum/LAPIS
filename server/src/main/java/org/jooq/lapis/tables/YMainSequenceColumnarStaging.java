@@ -96,12 +96,12 @@ public class YMainSequenceColumnarStaging extends TableImpl<YMainSequenceColumna
 
     @Override
     public UniqueKey<YMainSequenceColumnarStagingRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_SEQUENCE_COLUMNAR_PKEY;
+        return Keys.Y_MAIN_SEQUENCE_COLUMNAR_STAGING_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainSequenceColumnarStagingRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainSequenceColumnarStagingRecord>>asList(Keys.Y_MAIN_SEQUENCE_COLUMNAR_PKEY);
+        return Arrays.<UniqueKey<YMainSequenceColumnarStagingRecord>>asList(Keys.Y_MAIN_SEQUENCE_COLUMNAR_STAGING_PKEY);
     }
 
     @Override

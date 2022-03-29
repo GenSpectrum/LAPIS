@@ -101,12 +101,12 @@ public class YMainAaSequenceColumnar extends TableImpl<YMainAaSequenceColumnarRe
 
     @Override
     public UniqueKey<YMainAaSequenceColumnarRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_AA_SEQUENCE_COLUMNAR_STAGING_PKEY;
+        return Keys.Y_MAIN_AA_SEQUENCE_COLUMNAR_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainAaSequenceColumnarRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainAaSequenceColumnarRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_COLUMNAR_STAGING_PKEY);
+        return Arrays.<UniqueKey<YMainAaSequenceColumnarRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_COLUMNAR_PKEY);
     }
 
     @Override

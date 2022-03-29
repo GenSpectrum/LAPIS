@@ -193,6 +193,51 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      */
     public final TableField<YMainMetadataStagingRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
 
+    /**
+     * The column <code>y_main_metadata_staging.pango_lineage_usher</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> PANGO_LINEAGE_USHER = createField(DSL.name("pango_lineage_usher"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_overall_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_OVERALL_SCORE = createField(DSL.name("nextclade_qc_overall_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_missing_data_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_MISSING_DATA_SCORE = createField(DSL.name("nextclade_qc_missing_data_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_mixed_sites_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_MIXED_SITES_SCORE = createField(DSL.name("nextclade_qc_mixed_sites_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_private_mutations_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE = createField(DSL.name("nextclade_qc_private_mutations_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_snp_clusters_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_SNP_CLUSTERS_SCORE = createField(DSL.name("nextclade_qc_snp_clusters_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_frame_shifts_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_FRAME_SHIFTS_SCORE = createField(DSL.name("nextclade_qc_frame_shifts_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_qc_stop_codons_score</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
+
     private YMainMetadataStaging(Name alias, Table<YMainMetadataStagingRecord> aliased) {
         this(alias, aliased, null);
     }
@@ -233,17 +278,17 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIED_IDX, Indexes.Y_MAIN_METADATA_STAGING_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
+        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_DIED_IDX, Indexes.Y_MAIN_METADATA_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_USHER_IDX, Indexes.Y_MAIN_METADATA_STAGING_AGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOST_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_STAGING_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_IDX, Indexes.Y_MAIN_METADATA_STAGING_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_STAGING_SEX_IDX, Indexes.Y_MAIN_METADATA_STAGING_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_STRAIN_IDX, Indexes.Y_MAIN_METADATA_STAGING_SUBMITTING_LAB_IDX);
     }
 
     @Override
     public UniqueKey<YMainMetadataStagingRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_METADATA_PKEY;
+        return Keys.Y_MAIN_METADATA_STAGING_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainMetadataStagingRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainMetadataStagingRecord>>asList(Keys.Y_MAIN_METADATA_PKEY);
+        return Arrays.<UniqueKey<YMainMetadataStagingRecord>>asList(Keys.Y_MAIN_METADATA_STAGING_PKEY);
     }
 
     @Override

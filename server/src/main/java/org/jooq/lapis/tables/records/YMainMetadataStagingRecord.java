@@ -425,6 +425,132 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         return (Boolean) get(28);
     }
 
+    /**
+     * Setter for <code>y_main_metadata_staging.pango_lineage_usher</code>.
+     */
+    public void setPangoLineageUsher(String value) {
+        set(29, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.pango_lineage_usher</code>.
+     */
+    public String getPangoLineageUsher() {
+        return (String) get(29);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
+     */
+    public void setNextcladePangoLineage(String value) {
+        set(30, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
+     */
+    public String getNextcladePangoLineage() {
+        return (String) get(30);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_overall_score</code>.
+     */
+    public void setNextcladeQcOverallScore(Double value) {
+        set(31, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_overall_score</code>.
+     */
+    public Double getNextcladeQcOverallScore() {
+        return (Double) get(31);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_missing_data_score</code>.
+     */
+    public void setNextcladeQcMissingDataScore(Double value) {
+        set(32, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_missing_data_score</code>.
+     */
+    public Double getNextcladeQcMissingDataScore() {
+        return (Double) get(32);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_mixed_sites_score</code>.
+     */
+    public void setNextcladeQcMixedSitesScore(Double value) {
+        set(33, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_mixed_sites_score</code>.
+     */
+    public Double getNextcladeQcMixedSitesScore() {
+        return (Double) get(33);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_private_mutations_score</code>.
+     */
+    public void setNextcladeQcPrivateMutationsScore(Double value) {
+        set(34, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_private_mutations_score</code>.
+     */
+    public Double getNextcladeQcPrivateMutationsScore() {
+        return (Double) get(34);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_snp_clusters_score</code>.
+     */
+    public void setNextcladeQcSnpClustersScore(Double value) {
+        set(35, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_snp_clusters_score</code>.
+     */
+    public Double getNextcladeQcSnpClustersScore() {
+        return (Double) get(35);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_frame_shifts_score</code>.
+     */
+    public void setNextcladeQcFrameShiftsScore(Double value) {
+        set(36, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_frame_shifts_score</code>.
+     */
+    public Double getNextcladeQcFrameShiftsScore() {
+        return (Double) get(36);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata_staging.nextclade_qc_stop_codons_score</code>.
+     */
+    public void setNextcladeQcStopCodonsScore(Double value) {
+        set(37, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.nextclade_qc_stop_codons_score</code>.
+     */
+    public Double getNextcladeQcStopCodonsScore() {
+        return (Double) get(37);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -448,7 +574,7 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
     /**
      * Create a detached, initialised YMainMetadataStagingRecord
      */
-    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Boolean hospitalized, Boolean died, Boolean fullyVaccinated) {
+    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String pangoLineageUsher, String nextcladePangoLineage, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore) {
         super(YMainMetadataStaging.Y_MAIN_METADATA_STAGING);
 
         setId(id);
@@ -480,5 +606,14 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         setHospitalized(hospitalized);
         setDied(died);
         setFullyVaccinated(fullyVaccinated);
+        setPangoLineageUsher(pangoLineageUsher);
+        setNextcladePangoLineage(nextcladePangoLineage);
+        setNextcladeQcOverallScore(nextcladeQcOverallScore);
+        setNextcladeQcMissingDataScore(nextcladeQcMissingDataScore);
+        setNextcladeQcMixedSitesScore(nextcladeQcMixedSitesScore);
+        setNextcladeQcPrivateMutationsScore(nextcladeQcPrivateMutationsScore);
+        setNextcladeQcSnpClustersScore(nextcladeQcSnpClustersScore);
+        setNextcladeQcFrameShiftsScore(nextcladeQcFrameShiftsScore);
+        setNextcladeQcStopCodonsScore(nextcladeQcStopCodonsScore);
     }
 }
