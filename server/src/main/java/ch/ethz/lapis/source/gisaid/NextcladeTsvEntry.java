@@ -3,6 +3,7 @@ package ch.ethz.lapis.source.gisaid;
 public class NextcladeTsvEntry {
     private String seqName;
     private String clade;
+    private String cladeLong;
     private String pangoLineage;
     private Integer totalSubstitutions;
     private Integer totalDeletions;
@@ -14,22 +15,22 @@ public class NextcladeTsvEntry {
     private Integer totalMissing;
     private Integer totalNonACGTNs;
     private Integer totalPcrPrimerChanges;
-    private Integer pcrPrimerChanges;
-    private Integer alignmentScore;
+    private String pcrPrimerChanges;
+    private Float alignmentScore;
     private Integer alignmentStart;
     private Integer alignmentEnd;
     private Float qcOverallScore;
     private String qcOverallStatus;
-    private Integer qcMissingDataMissingDataThreshold;
+    private Float qcMissingDataMissingDataThreshold;
     private Float qcMissingDataScore;
     private String qcMissingDataStatus;
     private Integer qcMissingDataTotalMissing;
-    private Integer qcMixedSitesMixedSitesThreshold;
-    private Integer qcMixedSitesScore;
+    private Float qcMixedSitesMixedSitesThreshold;
+    private Float qcMixedSitesScore;
     private String qcMixedSitesStatus;
     private Integer qcMixedSitesTotalMixedSites;
-    private Integer qcPrivateMutationsCutoff;
-    private Integer qcPrivateMutationsExcess;
+    private Float qcPrivateMutationsCutoff;
+    private Float qcPrivateMutationsExcess;
     private Float qcPrivateMutationsScore;
     private String qcPrivateMutationsStatus;
     private Integer qcPrivateMutationsTotal;
@@ -41,11 +42,11 @@ public class NextcladeTsvEntry {
     private Integer qcFrameShiftsTotalFrameShifts;
     private String qcFrameShiftsFrameShiftsIgnored;
     private Integer qcFrameShiftsTotalFrameShiftsIgnored;
-    private Integer qcFrameShiftsScore;
+    private Float qcFrameShiftsScore;
     private String qcFrameShiftsStatus;
     private String qcStopCodonsStopCodons;
     private Integer qcStopCodonsTotalStopCodons;
-    private Integer qcStopCodonsScore;
+    private Float qcStopCodonsScore;
     private String qcStopCodonsStatus;
     private String errors;
 
@@ -64,6 +65,15 @@ public class NextcladeTsvEntry {
 
     public NextcladeTsvEntry setClade(String clade) {
         this.clade = clade;
+        return this;
+    }
+
+    public String getCladeLong() {
+        return cladeLong;
+    }
+
+    public NextcladeTsvEntry setCladeLong(String cladeLong) {
+        this.cladeLong = cladeLong;
         return this;
     }
 
@@ -167,20 +177,20 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getPcrPrimerChanges() {
+    public String getPcrPrimerChanges() {
         return pcrPrimerChanges;
     }
 
-    public NextcladeTsvEntry setPcrPrimerChanges(Integer pcrPrimerChanges) {
+    public NextcladeTsvEntry setPcrPrimerChanges(String pcrPrimerChanges) {
         this.pcrPrimerChanges = pcrPrimerChanges;
         return this;
     }
 
-    public Integer getAlignmentScore() {
+    public Float getAlignmentScore() {
         return alignmentScore;
     }
 
-    public NextcladeTsvEntry setAlignmentScore(Integer alignmentScore) {
+    public NextcladeTsvEntry setAlignmentScore(Float alignmentScore) {
         this.alignmentScore = alignmentScore;
         return this;
     }
@@ -221,12 +231,12 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getQcMissingDataMissingDataThreshold() {
+    public Float getQcMissingDataMissingDataThreshold() {
         return qcMissingDataMissingDataThreshold;
     }
 
     public NextcladeTsvEntry setQcMissingDataMissingDataThreshold(
-        Integer qcMissingDataMissingDataThreshold) {
+        Float qcMissingDataMissingDataThreshold) {
         this.qcMissingDataMissingDataThreshold = qcMissingDataMissingDataThreshold;
         return this;
     }
@@ -258,21 +268,21 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getQcMixedSitesMixedSitesThreshold() {
+    public Float getQcMixedSitesMixedSitesThreshold() {
         return qcMixedSitesMixedSitesThreshold;
     }
 
     public NextcladeTsvEntry setQcMixedSitesMixedSitesThreshold(
-        Integer qcMixedSitesMixedSitesThreshold) {
+        Float qcMixedSitesMixedSitesThreshold) {
         this.qcMixedSitesMixedSitesThreshold = qcMixedSitesMixedSitesThreshold;
         return this;
     }
 
-    public Integer getQcMixedSitesScore() {
+    public Float getQcMixedSitesScore() {
         return qcMixedSitesScore;
     }
 
-    public NextcladeTsvEntry setQcMixedSitesScore(Integer qcMixedSitesScore) {
+    public NextcladeTsvEntry setQcMixedSitesScore(Float qcMixedSitesScore) {
         this.qcMixedSitesScore = qcMixedSitesScore;
         return this;
     }
@@ -296,20 +306,20 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getQcPrivateMutationsCutoff() {
+    public Float getQcPrivateMutationsCutoff() {
         return qcPrivateMutationsCutoff;
     }
 
-    public NextcladeTsvEntry setQcPrivateMutationsCutoff(Integer qcPrivateMutationsCutoff) {
+    public NextcladeTsvEntry setQcPrivateMutationsCutoff(Float qcPrivateMutationsCutoff) {
         this.qcPrivateMutationsCutoff = qcPrivateMutationsCutoff;
         return this;
     }
 
-    public Integer getQcPrivateMutationsExcess() {
+    public Float getQcPrivateMutationsExcess() {
         return qcPrivateMutationsExcess;
     }
 
-    public NextcladeTsvEntry setQcPrivateMutationsExcess(Integer qcPrivateMutationsExcess) {
+    public NextcladeTsvEntry setQcPrivateMutationsExcess(Float qcPrivateMutationsExcess) {
         this.qcPrivateMutationsExcess = qcPrivateMutationsExcess;
         return this;
     }
@@ -417,11 +427,11 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getQcFrameShiftsScore() {
+    public Float getQcFrameShiftsScore() {
         return qcFrameShiftsScore;
     }
 
-    public NextcladeTsvEntry setQcFrameShiftsScore(Integer qcFrameShiftsScore) {
+    public NextcladeTsvEntry setQcFrameShiftsScore(Float qcFrameShiftsScore) {
         this.qcFrameShiftsScore = qcFrameShiftsScore;
         return this;
     }
@@ -454,11 +464,11 @@ public class NextcladeTsvEntry {
         return this;
     }
 
-    public Integer getQcStopCodonsScore() {
+    public Float getQcStopCodonsScore() {
         return qcStopCodonsScore;
     }
 
-    public NextcladeTsvEntry setQcStopCodonsScore(Integer qcStopCodonsScore) {
+    public NextcladeTsvEntry setQcStopCodonsScore(Float qcStopCodonsScore) {
         this.qcStopCodonsScore = qcStopCodonsScore;
         return this;
     }

@@ -49,6 +49,19 @@ public class Utils {
     }
 
 
+    // This function casts a float value to an integer.
+    public static Integer nullableForcedIntegerValue(String s) {
+        if (s == null || s.isBlank()) {
+            return null;
+        }
+        try {
+            return (int) Float.parseFloat(s);
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+
     public static LocalDate nullableLocalDateValue(String s) {
         if (s == null || s.isBlank()) {
             return null;
