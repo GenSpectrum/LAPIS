@@ -162,12 +162,27 @@ All six **sample** endpoints can be filtered by the following attributes:
 - host
 - samplingStrategy
 - pangoLineage (see section "Filter Pango Lineages")
+- nextcladePangoLineage
 - nextstrainClade
 - gisaidClade
 - submittingLab
 - originatingLab
 - nucMutations (see section "Filter Mutations")
 - aaMutations (see section "Filter Mutations")
+- nextcladeQcOverallScoreFrom
+- nextcladeQcOverallScoreTo
+- nextcladeQcMissingDataScoreFrom
+- nextcladeQcMissingDataScoreTo
+- nextcladeQcMixedSitesScoreFrom
+- nextcladeQcMixedSitesScoreTo
+- nextcladeQcPrivateMutationsScoreFrom
+- nextcladeQcPrivateMutationsScoreTo
+- nextcladeQcSnpClustersScoreFrom
+- nextcladeQcSnpClustersScoreTo
+- nextcladeQcFrameShiftsScoreFrom
+- nextcladeQcFrameShiftsScoreTo
+- nextcladeQcStopCodonsScoreFrom
+- nextcladeQcStopCodonsScoreTo
 
 The endpoints `details`, `aa-mutations`, `nuc-mutations`, `fasta`, and `fasta-aligned` can additionally be filtered by these attributes:
 
@@ -293,6 +308,7 @@ Above, we used the `/sample/aggregated` endpoint to get the total counts of sequ
 - host
 - samplingStrategy
 - pangoLineage
+- nextcladePangoLineage
 - nextstrainClade
 - gisaidClade
 - submittingLab
