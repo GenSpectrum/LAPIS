@@ -57,7 +57,8 @@ public class VariantQueryListener extends VariantQueryBaseListener {
     public void enterPango_query(VariantQueryParser.Pango_queryContext ctx) {
         PangoQuery pangoQuery = new PangoQuery(
             ctx.pango_lineage().getText(),
-            ctx.pango_include_sub() != null
+            ctx.pango_include_sub() != null,
+            Database.Columns.PANGO_LINEAGE
         );
         exprStack.peek().putValue(pangoQuery);
     }

@@ -38,10 +38,25 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private String host;
     private String samplingStrategy;
     private String pangoLineage;
+    private String nextcladePangoLineage;
     private String nextstrainClade;
     private String gisaidClade;
     private String submittingLab;
     private String originatingLab;
+    private Float nextcladeQcOverallScoreFrom;
+    private Float nextcladeQcOverallScoreTo;
+    private Float nextcladeQcMissingDataScoreFrom;
+    private Float nextcladeQcMissingDataScoreTo;
+    private Float nextcladeQcMixedSitesScoreFrom;
+    private Float nextcladeQcMixedSitesScoreTo;
+    private Float nextcladeQcPrivateMutationsScoreFrom;
+    private Float nextcladeQcPrivateMutationsScoreTo;
+    private Float nextcladeQcSnpClustersScoreFrom;
+    private Float nextcladeQcSnpClustersScoreTo;
+    private Float nextcladeQcFrameShiftsScoreFrom;
+    private Float nextcladeQcFrameShiftsScoreTo;
+    private Float nextcladeQcStopCodonsScoreFrom;
+    private Float nextcladeQcStopCodonsScoreTo;
 
     private List<NucMutation> nucMutations = new ArrayList<>();
     private List<AAMutation> aaMutations = new ArrayList<>();
@@ -228,6 +243,15 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
+    public String getNextcladePangoLineage() {
+        return nextcladePangoLineage;
+    }
+
+    public T setNextcladePangoLineage(String nextcladePangoLineage) {
+        this.nextcladePangoLineage = nextcladePangoLineage;
+        return (T) this;
+    }
+
     public String getNextstrainClade() {
         return nextstrainClade;
     }
@@ -288,6 +312,132 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setVariantQuery(String variantQuery) {
         this.variantQuery = variantQuery;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcOverallScoreFrom() {
+        return nextcladeQcOverallScoreFrom;
+    }
+
+    public T setNextcladeQcOverallScoreFrom(Float nextcladeQcOverallScoreFrom) {
+        this.nextcladeQcOverallScoreFrom = nextcladeQcOverallScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcOverallScoreTo() {
+        return nextcladeQcOverallScoreTo;
+    }
+
+    public T setNextcladeQcOverallScoreTo(Float nextcladeQcOverallScoreTo) {
+        this.nextcladeQcOverallScoreTo = nextcladeQcOverallScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcMissingDataScoreFrom() {
+        return nextcladeQcMissingDataScoreFrom;
+    }
+
+    public T setNextcladeQcMissingDataScoreFrom(Float nextcladeQcMissingDataScoreFrom) {
+        this.nextcladeQcMissingDataScoreFrom = nextcladeQcMissingDataScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcMissingDataScoreTo() {
+        return nextcladeQcMissingDataScoreTo;
+    }
+
+    public T setNextcladeQcMissingDataScoreTo(Float nextcladeQcMissingDataScoreTo) {
+        this.nextcladeQcMissingDataScoreTo = nextcladeQcMissingDataScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcMixedSitesScoreFrom() {
+        return nextcladeQcMixedSitesScoreFrom;
+    }
+
+    public T setNextcladeQcMixedSitesScoreFrom(Float nextcladeQcMixedSitesScoreFrom) {
+        this.nextcladeQcMixedSitesScoreFrom = nextcladeQcMixedSitesScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcMixedSitesScoreTo() {
+        return nextcladeQcMixedSitesScoreTo;
+    }
+
+    public T setNextcladeQcMixedSitesScoreTo(Float nextcladeQcMixedSitesScoreTo) {
+        this.nextcladeQcMixedSitesScoreTo = nextcladeQcMixedSitesScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcPrivateMutationsScoreFrom() {
+        return nextcladeQcPrivateMutationsScoreFrom;
+    }
+
+    public T setNextcladeQcPrivateMutationsScoreFrom(Float nextcladeQcPrivateMutationsScoreFrom) {
+        this.nextcladeQcPrivateMutationsScoreFrom = nextcladeQcPrivateMutationsScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcPrivateMutationsScoreTo() {
+        return nextcladeQcPrivateMutationsScoreTo;
+    }
+
+    public T setNextcladeQcPrivateMutationsScoreTo(Float nextcladeQcPrivateMutationsScoreTo) {
+        this.nextcladeQcPrivateMutationsScoreTo = nextcladeQcPrivateMutationsScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcSnpClustersScoreFrom() {
+        return nextcladeQcSnpClustersScoreFrom;
+    }
+
+    public T setNextcladeQcSnpClustersScoreFrom(Float nextcladeQcSnpClustersScoreFrom) {
+        this.nextcladeQcSnpClustersScoreFrom = nextcladeQcSnpClustersScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcSnpClustersScoreTo() {
+        return nextcladeQcSnpClustersScoreTo;
+    }
+
+    public T setNextcladeQcSnpClustersScoreTo(Float nextcladeQcSnpClustersScoreTo) {
+        this.nextcladeQcSnpClustersScoreTo = nextcladeQcSnpClustersScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcFrameShiftsScoreFrom() {
+        return nextcladeQcFrameShiftsScoreFrom;
+    }
+
+    public T setNextcladeQcFrameShiftsScoreFrom(Float nextcladeQcFrameShiftsScoreFrom) {
+        this.nextcladeQcFrameShiftsScoreFrom = nextcladeQcFrameShiftsScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcFrameShiftsScoreTo() {
+        return nextcladeQcFrameShiftsScoreTo;
+    }
+
+    public T setNextcladeQcFrameShiftsScoreTo(Float nextcladeQcFrameShiftsScoreTo) {
+        this.nextcladeQcFrameShiftsScoreTo = nextcladeQcFrameShiftsScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcStopCodonsScoreFrom() {
+        return nextcladeQcStopCodonsScoreFrom;
+    }
+
+    public T setNextcladeQcStopCodonsScoreFrom(Float nextcladeQcStopCodonsScoreFrom) {
+        this.nextcladeQcStopCodonsScoreFrom = nextcladeQcStopCodonsScoreFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeQcStopCodonsScoreTo() {
+        return nextcladeQcStopCodonsScoreTo;
+    }
+
+    public T setNextcladeQcStopCodonsScoreTo(Float nextcladeQcStopCodonsScoreTo) {
+        this.nextcladeQcStopCodonsScoreTo = nextcladeQcStopCodonsScoreTo;
         return (T) this;
     }
 }

@@ -4,6 +4,7 @@ import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.util.PangoLineageAlias;
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -38,10 +39,18 @@ public class Database {
         public static final String FULLY_VACCINATED = "fully_vaccinated"; // Boolean
         public static final String SAMPLING_STRATEGY = "sampling_strategy"; // String
         public static final String PANGO_LINEAGE = "pango_lineage"; // String
+        public static final String NEXTCLADE_PANGO_LINEAGE = "nextclade_pango_lineage"; // String
         public static final String NEXTSTRAIN_CLADE = "nextstrain_clade"; // String
         public static final String GISAID_CLADE = "gisaid_clade"; // String
         public static final String ORIGINATING_LAB = "originating_lab"; // String
         public static final String SUBMITTING_LAB = "submitting_lab"; // String
+        public static final String NEXTCLADE_QC_OVERALL_SCORE = "nextclade_qc_overall_score"; // Float
+        public static final String NEXTCLADE_QC_MISSING_DATA_SCORE = "nextclade_qc_missing_data_score"; // Float
+        public static final String NEXTCLADE_QC_MIXED_SITES_SCORE = "nextclade_qc_mixed_sites_score"; // Float
+        public static final String NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE = "nextclade_qc_private_mutations_score"; // Float
+        public static final String NEXTCLADE_QC_SNP_CLUSTERS_SCORE = "nextclade_qc_snp_clusters_score"; // Float
+        public static final String NEXTCLADE_QC_FRAME_SHIFTS_SCORE = "nextclade_qc_frame_shifts_score"; // Float
+        public static final String NEXTCLADE_QC_STOP_CODONS_SCORE = "nextclade_qc_stop_codons_score"; // Float
     }
 
     public static final String[] ALL_COLUMNS = new String[] {
@@ -56,14 +65,20 @@ public class Database {
         Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
         Columns.REGION, Columns.COUNTRY, Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE,
         Columns.COUNTRY_EXPOSURE, Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.SEX,
-        Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE, Columns.GISAID_CLADE,
-        Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
+        Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTCLADE_PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
+        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
     };
     public static final String[] DATE_COLUMNS = new String[] {
         Columns.DATE, Columns.DATE_SUBMITTED
     };
     public static final String[] INTEGER_COLUMNS = new String[] {
         Columns.AGE
+    };
+    public static final String[] FLOAT_COLUMNS = new String[] {
+        Columns.NEXTCLADE_QC_OVERALL_SCORE, Columns.NEXTCLADE_QC_MISSING_DATA_SCORE,
+        Columns.NEXTCLADE_QC_MIXED_SITES_SCORE, Columns.NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE,
+        Columns.NEXTCLADE_QC_SNP_CLUSTERS_SCORE, Columns.NEXTCLADE_QC_FRAME_SHIFTS_SCORE,
+        Columns.NEXTCLADE_QC_STOP_CODONS_SCORE
     };
     public static final String[] BOOLEAN_COLUMNS = new String[] {
         Columns.HOSPITALIZED, Columns.DIED, Columns.FULLY_VACCINATED
@@ -78,6 +93,7 @@ public class Database {
     private final ComboPooledDataSource databasePool;
     private final Map<String, String[]> stringColumns = new HashMap<>();
     private final Map<String, Integer[]> integerColumns = new HashMap<>();
+    private final Map<String, Float[]> floatColumns = new HashMap<>();
     private final Map<String, Boolean[]> booleanColumns = new HashMap<>();
 
     private Database(
@@ -117,6 +133,11 @@ public class Database {
     }
 
 
+    public Float[] getFloatColumn(String columnName) {
+        return floatColumns.get(columnName);
+    }
+
+
     public Boolean[] getBoolColumn(String columnName) {
         return booleanColumns.get(columnName);
     }
@@ -128,6 +149,9 @@ public class Database {
         }
         if (integerColumns.containsKey(columnName)) {
             return integerColumns.get(columnName);
+        }
+        if (floatColumns.containsKey(columnName)) {
+            return floatColumns.get(columnName);
         }
         if (booleanColumns.containsKey(columnName)) {
             return booleanColumns.get(columnName);
@@ -280,6 +304,9 @@ public class Database {
                 for (String integerColumn : INTEGER_COLUMNS) {
                     database.integerColumns.put(integerColumn, new Integer[numberRows]);
                 }
+                for (String floatColumn : FLOAT_COLUMNS) {
+                    database.floatColumns.put(floatColumn, new Float[numberRows]);
+                }
                 for (String dateColumn : DATE_COLUMNS) {
                     database.integerColumns.put(dateColumn, new Integer[numberRows]);
                 }
@@ -299,6 +326,10 @@ public class Database {
                         }
                         for (String integerColumn : INTEGER_COLUMNS) {
                             database.integerColumns.get(integerColumn)[i] = rs.getObject(integerColumn, Integer.class);
+                        }
+                        for (String floatColumn : FLOAT_COLUMNS) {
+                            database.floatColumns.get(floatColumn)[i] = Utils.nullableDoubleToFloat(
+                                rs.getObject(floatColumn, Double.class));
                         }
                         for (String dateColumn : DATE_COLUMNS) {
                             Date dateObj = rs.getDate(dateColumn);
