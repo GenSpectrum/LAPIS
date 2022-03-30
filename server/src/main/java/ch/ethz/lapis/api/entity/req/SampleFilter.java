@@ -35,7 +35,7 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Boolean hospitalized;
     private Boolean died;
     private Boolean fullyVaccinated;
-    private String host;
+    private List<String> host;
     private String samplingStrategy;
     private String pangoLineage;
     private String nextcladePangoLineage;
@@ -216,11 +216,11 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
-    public String getHost() {
+    public List<String> getHost() {
         return host;
     }
 
-    public T setHost(String host) {
+    public T setHost(List<String> host) {
         this.host = host;
         return (T) this;
     }
