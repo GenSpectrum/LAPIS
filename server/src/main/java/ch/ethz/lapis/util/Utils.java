@@ -82,6 +82,14 @@ public class Utils {
     }
 
 
+    public static Float nullableDoubleToFloat(Double d) {
+        if (d == null) {
+            return null;
+        }
+        return (float) ((double) d);
+    }
+
+
     public static String getStackTraceString(Throwable e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

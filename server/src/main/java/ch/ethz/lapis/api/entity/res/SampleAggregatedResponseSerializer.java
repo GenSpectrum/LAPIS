@@ -39,6 +39,7 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case HOST -> gen.writeStringField("host", sample.getHost());
                     case SAMPLINGSTRATEGY -> gen.writeStringField("samplingStrategy", sample.getSamplingStrategy());
                     case PANGOLINEAGE -> gen.writeStringField("pangoLineage", sample.getPangoLineage());
+                    case NEXTCLADEPANGOLINEAGE -> gen.writeStringField("nextcladePangoLineage", sample.getNextcladePangoLineage());
                     case NEXTSTRAINCLADE -> gen.writeStringField("nextstrainClade", sample.getNextstrainClade());
                     case GISAIDCLADE -> gen.writeStringField("gisaidClade", sample.getGisaidCloade());
                     case SUBMITTINGLAB -> gen.writeStringField("submittingLab", sample.getSubmittingLab());

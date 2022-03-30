@@ -21,6 +21,7 @@ import org.jooq.lapis.tables.YMainSequenceColumnar;
 import org.jooq.lapis.tables.YMainSequenceColumnarStaging;
 import org.jooq.lapis.tables.YMainSequenceStaging;
 import org.jooq.lapis.tables.YNextstrainGenbank;
+import org.jooq.lapis.tables.YS3c;
 
 
 /**
@@ -92,6 +93,11 @@ public class DefaultSchema extends SchemaImpl {
     public final YNextstrainGenbank Y_NEXTSTRAIN_GENBANK = YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK;
 
     /**
+     * The table <code>y_s3c</code>.
+     */
+    public final YS3c Y_S3C = YS3c.Y_S3C;
+
+    /**
      * No further instances allowed
      */
     private DefaultSchema() {
@@ -117,6 +123,7 @@ public class DefaultSchema extends SchemaImpl {
             YMainSequenceColumnar.Y_MAIN_SEQUENCE_COLUMNAR,
             YMainSequenceColumnarStaging.Y_MAIN_SEQUENCE_COLUMNAR_STAGING,
             YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING,
-            YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK);
+            YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK,
+            YS3c.Y_S3C);
     }
 }

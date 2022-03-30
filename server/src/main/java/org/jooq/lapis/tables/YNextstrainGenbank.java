@@ -177,11 +177,6 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
     public final TableField<YNextstrainGenbankRecord, byte[]> SEQ_ALIGNED_COMPRESSED = createField(DSL.name("seq_aligned_compressed"), SQLDataType.BLOB, this, "");
 
     /**
-     * The column <code>y_nextstrain_genbank.aa_seqs</code>.
-     */
-    public final TableField<YNextstrainGenbankRecord, String> AA_SEQS = createField(DSL.name("aa_seqs"), SQLDataType.CLOB, this, "");
-
-    /**
      * The column <code>y_nextstrain_genbank.aa_mutations</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
@@ -200,6 +195,26 @@ public class YNextstrainGenbank extends TableImpl<YNextstrainGenbankRecord> {
      * The column <code>y_nextstrain_genbank.nuc_insertions</code>.
      */
     public final TableField<YNextstrainGenbankRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_genbank.aa_seqs_compressed</code>.
+     */
+    public final TableField<YNextstrainGenbankRecord, byte[]> AA_SEQS_COMPRESSED = createField(DSL.name("aa_seqs_compressed"), SQLDataType.BLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_genbank.metadata_hash</code>.
+     */
+    public final TableField<YNextstrainGenbankRecord, String> METADATA_HASH = createField(DSL.name("metadata_hash"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_genbank.seq_original_hash</code>.
+     */
+    public final TableField<YNextstrainGenbankRecord, String> SEQ_ORIGINAL_HASH = createField(DSL.name("seq_original_hash"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_genbank.seq_aligned_hash</code>.
+     */
+    public final TableField<YNextstrainGenbankRecord, String> SEQ_ALIGNED_HASH = createField(DSL.name("seq_aligned_hash"), SQLDataType.CLOB, this, "");
 
     private YNextstrainGenbank(Name alias, Table<YNextstrainGenbankRecord> aliased) {
         this(alias, aliased, null);

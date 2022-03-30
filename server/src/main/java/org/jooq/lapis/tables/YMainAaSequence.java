@@ -57,9 +57,9 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     public final TableField<YMainAaSequenceRecord, String> GENE = createField(DSL.name("gene"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>y_main_aa_sequence.aa_seq</code>.
+     * The column <code>y_main_aa_sequence.aa_seq_compressed</code>.
      */
-    public final TableField<YMainAaSequenceRecord, String> AA_SEQ = createField(DSL.name("aa_seq"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<YMainAaSequenceRecord, byte[]> AA_SEQ_COMPRESSED = createField(DSL.name("aa_seq_compressed"), SQLDataType.BLOB, this, "");
 
     private YMainAaSequence(Name alias, Table<YMainAaSequenceRecord> aliased) {
         this(alias, aliased, null);
@@ -101,12 +101,12 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
 
     @Override
     public UniqueKey<YMainAaSequenceRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_AA_SEQUENCE_STAGING_PKEY;
+        return Keys.Y_MAIN_AA_SEQUENCE_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainAaSequenceRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainAaSequenceRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_STAGING_PKEY);
+        return Arrays.<UniqueKey<YMainAaSequenceRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_PKEY);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<Integer, String, String> fieldsRow() {
+    public Row3<Integer, String, byte[]> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }

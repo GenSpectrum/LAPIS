@@ -196,11 +196,19 @@ create table y_main_metadata
   fully_vaccinated boolean,
   sampling_strategy text,
   pango_lineage text,
+  nextclade_pango_lineage text,
   nextstrain_clade text,
   gisaid_clade text,
   originating_lab text,
   submitting_lab text,
-  authors text
+  authors text,
+  nextclade_qc_overall_score float,
+  nextclade_qc_missing_data_score float,
+  nextclade_qc_mixed_sites_score float,
+  nextclade_qc_private_mutations_score float,
+  nextclade_qc_snp_clusters_score float,
+  nextclade_qc_frame_shifts_score float,
+  nextclade_qc_stop_codons_score float
 );
 
 create index on y_main_metadata (genbank_accession);
@@ -223,6 +231,7 @@ create index on y_main_metadata (died);
 create index on y_main_metadata (fully_vaccinated);
 create index on y_main_metadata (sampling_strategy);
 create index on y_main_metadata (pango_lineage);
+create index on y_main_metadata (nextclade_pango_lineage);
 create index on y_main_metadata (nextstrain_clade);
 create index on y_main_metadata (gisaid_clade);
 create index on y_main_metadata (originating_lab);

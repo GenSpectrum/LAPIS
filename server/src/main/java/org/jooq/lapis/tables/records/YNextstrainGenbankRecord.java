@@ -384,73 +384,115 @@ public class YNextstrainGenbankRecord extends UpdatableRecordImpl<YNextstrainGen
     }
 
     /**
-     * Setter for <code>y_nextstrain_genbank.aa_seqs</code>.
-     */
-    public void setAaSeqs(String value) {
-        set(26, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_genbank.aa_seqs</code>.
-     */
-    public String getAaSeqs() {
-        return (String) get(26);
-    }
-
-    /**
      * Setter for <code>y_nextstrain_genbank.aa_mutations</code>.
      */
     public void setAaMutations(String value) {
-        set(27, value);
+        set(26, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_genbank.aa_mutations</code>.
      */
     public String getAaMutations() {
-        return (String) get(27);
+        return (String) get(26);
     }
 
     /**
      * Setter for <code>y_nextstrain_genbank.nuc_substitutions</code>.
      */
     public void setNucSubstitutions(String value) {
-        set(28, value);
+        set(27, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_genbank.nuc_substitutions</code>.
      */
     public String getNucSubstitutions() {
-        return (String) get(28);
+        return (String) get(27);
     }
 
     /**
      * Setter for <code>y_nextstrain_genbank.nuc_deletions</code>.
      */
     public void setNucDeletions(String value) {
-        set(29, value);
+        set(28, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_genbank.nuc_deletions</code>.
      */
     public String getNucDeletions() {
-        return (String) get(29);
+        return (String) get(28);
     }
 
     /**
      * Setter for <code>y_nextstrain_genbank.nuc_insertions</code>.
      */
     public void setNucInsertions(String value) {
-        set(30, value);
+        set(29, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_genbank.nuc_insertions</code>.
      */
     public String getNucInsertions() {
-        return (String) get(30);
+        return (String) get(29);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_genbank.aa_seqs_compressed</code>.
+     */
+    public void setAaSeqsCompressed(byte[] value) {
+        set(30, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_genbank.aa_seqs_compressed</code>.
+     */
+    public byte[] getAaSeqsCompressed() {
+        return (byte[]) get(30);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_genbank.metadata_hash</code>.
+     */
+    public void setMetadataHash(String value) {
+        set(31, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_genbank.metadata_hash</code>.
+     */
+    public String getMetadataHash() {
+        return (String) get(31);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_genbank.seq_original_hash</code>.
+     */
+    public void setSeqOriginalHash(String value) {
+        set(32, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_genbank.seq_original_hash</code>.
+     */
+    public String getSeqOriginalHash() {
+        return (String) get(32);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_genbank.seq_aligned_hash</code>.
+     */
+    public void setSeqAlignedHash(String value) {
+        set(33, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_genbank.seq_aligned_hash</code>.
+     */
+    public String getSeqAlignedHash() {
+        return (String) get(33);
     }
 
     // -------------------------------------------------------------------------
@@ -476,7 +518,7 @@ public class YNextstrainGenbankRecord extends UpdatableRecordImpl<YNextstrainGen
     /**
      * Create a detached, initialised YNextstrainGenbankRecord
      */
-    public YNextstrainGenbankRecord(String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, String dateOriginal, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, byte[] seqOriginalCompressed, byte[] seqAlignedCompressed, String aaSeqs, String aaMutations, String nucSubstitutions, String nucDeletions, String nucInsertions) {
+    public YNextstrainGenbankRecord(String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, String dateOriginal, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, byte[] seqOriginalCompressed, byte[] seqAlignedCompressed, String aaMutations, String nucSubstitutions, String nucDeletions, String nucInsertions, byte[] aaSeqsCompressed, String metadataHash, String seqOriginalHash, String seqAlignedHash) {
         super(YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK);
 
         setGenbankAccession(genbankAccession);
@@ -505,10 +547,13 @@ public class YNextstrainGenbankRecord extends UpdatableRecordImpl<YNextstrainGen
         setAuthors(authors);
         setSeqOriginalCompressed(seqOriginalCompressed);
         setSeqAlignedCompressed(seqAlignedCompressed);
-        setAaSeqs(aaSeqs);
         setAaMutations(aaMutations);
         setNucSubstitutions(nucSubstitutions);
         setNucDeletions(nucDeletions);
         setNucInsertions(nucInsertions);
+        setAaSeqsCompressed(aaSeqsCompressed);
+        setMetadataHash(metadataHash);
+        setSeqOriginalHash(seqOriginalHash);
+        setSeqAlignedHash(seqAlignedHash);
     }
 }

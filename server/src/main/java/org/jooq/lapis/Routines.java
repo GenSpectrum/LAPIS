@@ -6,6 +6,7 @@ package org.jooq.lapis;
 
 import org.jooq.Configuration;
 import org.jooq.lapis.routines.YSwitchInStagingTables;
+import org.jooq.lapis.routines.YSwitchInStagingTablesWithoutTruncate;
 
 
 /**
@@ -22,6 +23,17 @@ public class Routines {
           Configuration configuration
     ) {
         YSwitchInStagingTables p = new YSwitchInStagingTables();
+
+        p.execute(configuration);
+    }
+
+    /**
+     * Call <code>y_switch_in_staging_tables_without_truncate</code>
+     */
+    public static void ySwitchInStagingTablesWithoutTruncate(
+          Configuration configuration
+    ) {
+        YSwitchInStagingTablesWithoutTruncate p = new YSwitchInStagingTablesWithoutTruncate();
 
         p.execute(configuration);
     }

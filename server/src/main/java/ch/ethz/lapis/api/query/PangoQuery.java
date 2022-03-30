@@ -8,9 +8,16 @@ public class PangoQuery implements VariantQueryExpr {
 
     private final boolean includeSubLineage;
 
-    public PangoQuery(String pangoLineage, boolean includeSubLineage) {
+    private final String columnName;
+
+    public PangoQuery(String pangoLineage, boolean includeSubLineage, String columnName) {
         this.pangoLineage = pangoLineage;
         this.includeSubLineage = includeSubLineage;
+        if (!columnName.equals(Database.Columns.PANGO_LINEAGE)
+            && !columnName.equals(Database.Columns.NEXTCLADE_PANGO_LINEAGE)) {
+            throw new RuntimeException("Column " + columnName + " is not known for containing a Pango lineage.");
+        }
+        this.columnName = columnName;
     }
 
     public String getPangoLineage() {
@@ -38,7 +45,7 @@ public class PangoQuery implements VariantQueryExpr {
         PangoLineageQueryConverter queryConverter = database.getPangoLineageQueryConverter();
         PangoLineageQueryConverter.PangoLineageQueryMatch match = queryConverter.convert(pangoLineage);
 
-        String[] data = database.getStringColumn(Database.Columns.PANGO_LINEAGE);
+        String[] data = database.getStringColumn(columnName);
         boolean[] result = new boolean[data.length];
 
         for (int i = 0; i < result.length; i++) {

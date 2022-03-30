@@ -21,6 +21,7 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
     private String host;
     private String samplingStrategy;
     private String pangoLineage;
+    private String nextcladePangoLineage;
     private String nextstrainClade;
     private String gisaidCloade;
     private String submittingLab;
@@ -176,6 +177,15 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
 
     public T setPangoLineage(String pangoLineage) {
         this.pangoLineage = pangoLineage;
+        return (T) this;
+    }
+
+    public String getNextcladePangoLineage() {
+        return nextcladePangoLineage;
+    }
+
+    public T setNextcladePangoLineage(String nextcladePangoLineage) {
+        this.nextcladePangoLineage = nextcladePangoLineage;
         return (T) this;
     }
 
