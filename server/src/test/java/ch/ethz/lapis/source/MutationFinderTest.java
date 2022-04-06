@@ -10,8 +10,13 @@ public class MutationFinderTest {
     public void testFindNucUnknowns() {
         Assertions.assertEquals(
             List.of(3, 5, 6, 9),
-            MutationFinder.findNucUnknowns("aaNcyyGGrtt"),
+            MutationFinder.findNucUnknowns("aaNcyyGGr-tt"),
             "Non-empty case"
+        );
+        Assertions.assertEquals(
+            List.of(1, 2, 5, 7, 8, 11, 15, 16, 17),
+            MutationFinder.findNucUnknowns("--aaNcyyGGr-tt---"),
+            "Leading and tailing deletions"
         );
         Assertions.assertEquals(
             List.of(),
@@ -24,7 +29,7 @@ public class MutationFinderTest {
     public void testFindAAUnknowns() {
         Assertions.assertEquals(
             List.of(4, 5, 8),
-            MutationFinder.findAAUnknowns("AArXXnDXCe"),
+            MutationFinder.findAAUnknowns("AArXXnDX-Ce"),
             "Non-empty case"
         );
         Assertions.assertEquals(

@@ -63,13 +63,29 @@ public class MutationFinder {
 
 
     /**
-     * Everything that is not A, T, C or G is considered as unknown.
+     * Everything that is not A, T, C, G or - is considered as unknown.
      */
     public static List<Integer> findNucUnknowns(String aaSeq) {
         char[] seq = aaSeq.toUpperCase().toCharArray();
+
+        // Masking leading and tailing deletions because they are often actually unknowns but appear here as
+        // deletions due to aligning.
+        for (int i = 0; i < seq.length; i++) {
+            if (seq[i] != '-') {
+                break;
+            }
+            seq[i] = 'N';
+        }
+        for (int i = seq.length - 1; i >= 0; i--) {
+            if (seq[i] != '-') {
+                break;
+            }
+            seq[i] = 'N';
+        }
+
         List<Integer> positions = new ArrayList<>();
         for (int i = 0; i < seq.length; i++) {
-            if (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C' && seq[i] != 'G') {
+            if (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C' && seq[i] != 'G' && seq[i] != '-') {
                 positions.add(i + 1);
             }
         }
