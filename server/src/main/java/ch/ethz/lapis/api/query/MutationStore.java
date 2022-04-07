@@ -178,6 +178,21 @@ public class MutationStore {
             this.proportion = proportion;
             return this;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MutationCount that = (MutationCount) o;
+            return count == that.count
+                && Double.compare(that.proportion, proportion) == 0
+                && Objects.equals(mutation, that.mutation);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mutation, count, proportion);
+        }
     }
 
 
