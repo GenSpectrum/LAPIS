@@ -1,19 +1,14 @@
 package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
-import ch.ethz.lapis.util.PangoLineageAlias;
-import ch.ethz.lapis.util.PangoLineageQueryConverter;
-import ch.ethz.lapis.util.SeqCompressor;
-import ch.ethz.lapis.util.Utils;
-import ch.ethz.lapis.util.ZstdSeqCompressor;
+import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Database {
 
@@ -95,6 +90,8 @@ public class Database {
     private final Map<String, Integer[]> integerColumns = new HashMap<>();
     private final Map<String, Float[]> floatColumns = new HashMap<>();
     private final Map<String, Boolean[]> booleanColumns = new HashMap<>();
+    private final MutationStore nucMutationStore;
+    private final Map<String, MutationStore> aaMutationStores; // One store per gene
 
     private Database(
         long dataVersion,
@@ -106,6 +103,11 @@ public class Database {
         this.size = size;
         this.databasePool = databasePool;
         this.pangoLineageQueryConverter = pangoLineageQueryConverter;
+        this.nucMutationStore = new MutationStore(size);
+        this.aaMutationStores = new HashMap<>();
+        for (String name : ReferenceGenomeData.getInstance().getGeneNames()) {
+            this.aaMutationStores.put(name, new MutationStore(size));
+        }
     }
 
 
@@ -269,6 +271,16 @@ public class Database {
                 from y_main_metadata
                 order by id;
                 """;
+            String sequenceSql = """
+                select
+                  id,
+                  aa_mutations,
+                  coalesce(aa_unknowns, '') as aa_unknowns,
+                  nuc_substitutions,
+                  nuc_deletions,
+                  coalesce(nuc_unknowns, '') as nuc_unknowns
+                from y_main_sequence;
+                """;
             Database database;
             try (Statement statement = conn.createStatement()) {
                 // Fetch data version
@@ -318,7 +330,7 @@ public class Database {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 50000 == 0) {
-                            System.out.println("Loading data to in-memory database: " + i + "/" + numberRows);
+                            System.out.println("Loading metadata to in-memory database: " + i + "/" + numberRows);
                         }
                         for (String stringColumn : STRING_COLUMNS) {
                             String s = rs.getString(stringColumn);
@@ -342,6 +354,63 @@ public class Database {
                         ++i;
                     }
                 }
+                // Fetch mutations
+                statement.setFetchSize(20000);
+                try (ResultSet rs = statement.executeQuery(sequenceSql)) {
+                    int i = 0;
+                    while (rs.next()) {
+                        if (i % 50000 == 0) {
+                            System.out.println("Loading mutations to in-memory database: " + i + "/" + numberRows);
+                        }
+                        // Nuc mutations
+                        String nucMutationsString = rs.getString("nuc_substitutions") +
+                            "," + rs.getString("nuc_deletions");
+                        List<MutationStore.Mutation> nucMutations = new ArrayList<>();
+                        for (String mut : nucMutationsString.split(",")) {
+                            if (mut.isBlank()) {
+                                continue;
+                            }
+                            nucMutations.add(MutationStore.Mutation.parse(mut));
+                        }
+                        String nucUnknownsString = rs.getString("nuc_unknowns");
+                        List<String> nucUnknowns = Arrays.stream(nucUnknownsString.split(","))
+                            .filter(s -> !s.isBlank())
+                            .collect(Collectors.toList());
+                        database.nucMutationStore.putEntry(i, nucMutations, nucUnknowns);
+                        // AA mutations
+                        String aaMutationsString = rs.getString("aa_mutations");
+                        String aaUnknownsString = rs.getString("aa_unknowns");
+                        Map<String, List<MutationStore.Mutation>> aaMutationsPerGene = new HashMap<>();
+                        Map<String, List<String>> aaUnknownsPerGene = new HashMap<>();
+                        for (String name : ReferenceGenomeData.getInstance().getGeneNames()) {
+                            aaMutationsPerGene.put(name, new ArrayList<>());
+                            aaUnknownsPerGene.put(name, new ArrayList<>());
+                        }
+                        for (String mutWithGene : aaMutationsString.split(",")) {
+                            if (mutWithGene.isBlank()) {
+                                continue;
+                            }
+                            String[] parts = mutWithGene.split(":");
+                            String gene = parts[0];
+                            String mut = parts[1];
+                            aaMutationsPerGene.get(gene).add(MutationStore.Mutation.parse(mut));
+                        }
+                        Arrays.stream(aaUnknownsString.split(","))
+                            .filter(s -> !s.isBlank())
+                            .forEach(unknownsWithGene -> {
+                                String[] parts = unknownsWithGene.split(":");
+                                String gene = parts[0];
+                                String unknowns = parts[1];
+                                aaUnknownsPerGene.get(gene).add(unknowns);
+                            });
+                        int finalI = i;
+                        database.aaMutationStores.forEach((gene, mutationStore) -> {
+                            mutationStore.putEntry(finalI, aaMutationsPerGene.get(gene), aaUnknownsPerGene.get(gene));
+                        });
+                        ++i;
+                    }
+                }
+
             }
             conn.setAutoCommit(true);
             return database;

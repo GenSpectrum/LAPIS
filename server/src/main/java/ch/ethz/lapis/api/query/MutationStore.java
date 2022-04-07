@@ -149,6 +149,18 @@ public class MutationStore {
         public int hashCode() {
             return Objects.hash(position, mutationTo);
         }
+
+        @Override
+        public String toString() {
+            return position + "" + mutationTo;
+        }
+
+        /**
+         * This expects a well-formatted input of the shape "A1234B"
+         */
+        public static Mutation parse(String code) {
+            return new Mutation(Short.parseShort(code.substring(1, code.length() - 1)), code.charAt(code.length() - 1));
+        }
     }
 
 
@@ -192,6 +204,15 @@ public class MutationStore {
         @Override
         public int hashCode() {
             return Objects.hash(mutation, count, proportion);
+        }
+
+        @Override
+        public String toString() {
+            return "MutationCount{" +
+                "mutation=" + mutation +
+                ", count=" + count +
+                ", proportion=" + proportion +
+                '}';
         }
     }
 
