@@ -7,6 +7,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -160,6 +161,17 @@ public class Database {
         }
         return null;
     }
+
+
+    public MutationStore getNucMutationStore() {
+        return nucMutationStore;
+    }
+
+
+    public Map<String, MutationStore> getAaMutationStores() {
+        return aaMutationStores;
+    }
+
 
     private static List<PangoLineageAlias> getPangolinLineageAliases(Connection conn) throws SQLException {
         String sql = """
@@ -329,8 +341,9 @@ public class Database {
                 try (ResultSet rs = statement.executeQuery(metadataSql)) {
                     int i = 0;
                     while (rs.next()) {
-                        if (i % 50000 == 0) {
-                            System.out.println("Loading metadata to in-memory database: " + i + "/" + numberRows);
+                        if (i % 100000 == 0) {
+                            System.out.println(LocalDateTime.now() +
+                                " Loading metadata to in-memory database: " + i + "/" + numberRows);
                         }
                         for (String stringColumn : STRING_COLUMNS) {
                             String s = rs.getString(stringColumn);
@@ -359,8 +372,9 @@ public class Database {
                 try (ResultSet rs = statement.executeQuery(sequenceSql)) {
                     int i = 0;
                     while (rs.next()) {
-                        if (i % 50000 == 0) {
-                            System.out.println("Loading mutations to in-memory database: " + i + "/" + numberRows);
+                        if (i % 100000 == 0) {
+                            System.out.println(LocalDateTime.now() +
+                                " Loading mutations to in-memory database: " + i + "/" + numberRows);
                         }
                         // Nuc mutations
                         String nucMutationsString = rs.getString("nuc_substitutions") +
