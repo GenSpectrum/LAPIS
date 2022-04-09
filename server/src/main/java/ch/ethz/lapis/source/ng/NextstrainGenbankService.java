@@ -281,6 +281,7 @@ public class NextstrainGenbankService {
             if (!terminated) {
                 executor.shutdownNow();
             }
+            throw new RuntimeException("NextstrainGenbankService updateAAMutations() failed");
         } else {
             // Wait until all batches are finished.
             executor.shutdown();
