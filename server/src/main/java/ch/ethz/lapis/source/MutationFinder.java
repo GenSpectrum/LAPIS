@@ -60,4 +60,102 @@ public class MutationFinder {
         }
         return mutations;
     }
+
+
+    /**
+     * Everything that is not A, T, C, G or - is considered as unknown.
+     */
+    public static List<Integer> findNucUnknowns(String aaSeq) {
+        char[] seq = aaSeq.toUpperCase().toCharArray();
+
+        // Masking leading and tailing deletions because they are often actually unknowns but appear here as
+        // deletions due to aligning.
+        for (int i = 0; i < seq.length; i++) {
+            if (seq[i] != '-') {
+                break;
+            }
+            seq[i] = 'N';
+        }
+        for (int i = seq.length - 1; i >= 0; i--) {
+            if (seq[i] != '-') {
+                break;
+            }
+            seq[i] = 'N';
+        }
+
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < seq.length; i++) {
+            if (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C' && seq[i] != 'G' && seq[i] != '-') {
+                positions.add(i + 1);
+            }
+        }
+        return positions;
+    }
+
+
+    /**
+     * X is considered as unknown.
+     */
+    public static List<Integer> findAAUnknowns(String alignedSeq) {
+        char[] seq = alignedSeq.toUpperCase().toCharArray();
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < seq.length; i++) {
+            if (seq[i] == 'X') {
+                positions.add(i + 1);
+            }
+        }
+        return positions;
+    }
+
+
+    /**
+     * This takes a list of position integers and introduces range representations if appropriate. Example:
+     * 1,5,6,7,8,20 will be transformed to 1,5-8,20
+     */
+    public static List<String> compressPositionsAsStrings(List<Integer> positions) {
+        List<String> result = new ArrayList<>();
+        Integer rangeStart = null;
+        Integer rangeEnd = null;
+
+        for (int pos : positions) {
+            if (rangeStart == null) {
+                // Initial case
+                rangeStart = pos;
+                rangeEnd = pos;
+            } else if (pos == rangeEnd + 1) {
+                // If the range is being continued
+                rangeEnd = pos;
+            } else {
+                // If the range ended
+                if (rangeEnd - rangeStart > 1) {
+                    // If there is at least one number in between
+                    result.add(rangeStart + "-" + rangeEnd);
+                } else if (rangeEnd - rangeStart > 0) {
+                    // If there are two different numbers
+                    result.add(rangeStart.toString());
+                    result.add(rangeEnd.toString());
+                } else {
+                    // If there is a single number
+                    result.add(rangeStart.toString());
+                }
+                rangeStart = pos;
+                rangeEnd = pos;
+            }
+        }
+        if (rangeStart != null) {
+            // Finishing up - same code like above
+            if (rangeEnd - rangeStart > 1) {
+                // If there is at least one number in between
+                result.add(rangeStart + "-" + rangeEnd);
+            } else if (rangeEnd - rangeStart > 0) {
+                // If there are two different numbers
+                result.add(rangeStart.toString());
+                result.add(rangeEnd.toString());
+            } else {
+                // If there is a single number
+                result.add(rangeStart.toString());
+            }
+        }
+        return result;
+    }
 }

@@ -12,7 +12,9 @@ import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
+import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -227,58 +229,50 @@ public class SampleService {
         SequenceType sequenceType,
         float minProportion
     ) throws SQLException {
+        Database database = Database.getOrLoadInstance(dbPool);
+        ReferenceGenomeData reference = ReferenceGenomeData.getInstance();
         // Filter
-        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        List<Integer> ids = new QueryEngine().filterIds(database, request);
         if (ids.isEmpty()) {
             return new SampleMutationsResponse();
         }
-
-        // Fetch data
-        try (Connection conn = getDatabaseConnection()) {
-            DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;
-            YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
-
-            TableOnConditionStep<Record> baseTbl;
-            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-            baseTbl = idsTbl
-                .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID));
-            String mutationColumnName = switch (sequenceType) {
-                case AMINO_ACID -> "aa_mutations";
-                case NUCLEOTIDE -> "nuc_substitutions || ',' || nuc_deletions";
-            };
-            var statement = ctx
-                        .select(DSL.field(mutationColumnName).cast(String.class))
-                        .from(baseTbl);
-            Result<Record1<String>> records = statement.fetch();
-            int count = 0;
-            Map<String, int[]> mutations = new HashMap<>();
-            for (var r : records) {
-                String mutsString = r.value1();
-                if (mutsString != null) {
-                    for (String mut : mutsString.split(",")) {
-                        if (mut.isBlank()) {
-                            continue;
-                        }
-                        mutations.compute(mut, (k, v) -> v == null ?
-                            new int[] { 0 } : v)[0]++;
-                    }
-                }
-                count++;
-            }
-            int minCount = (int) Math.ceil(minProportion * count);
-            List<SampleMutationsResponse.MutationEntry> mutationEntries = new ArrayList<>();
-            for (Map.Entry<String, int[]> entry : mutations.entrySet()) {
-                int mutCount = entry.getValue()[0];
-                if (mutCount < minCount) {
+        // Count mutations
+        SampleMutationsResponse response = new SampleMutationsResponse();
+        if (sequenceType == SequenceType.NUCLEOTIDE) {
+            List<MutationStore.MutationCount> mutationCounts = database.getNucMutationStore().countMutations(ids);
+            for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                if (mutationCount.getProportion() < minProportion) {
                     continue;
                 }
-                String mut = entry.getKey();
-                mutationEntries.add(new SampleMutationsResponse.MutationEntry(mut, mutCount * 1.0 / count, mutCount));
+                MutationStore.Mutation mutation = mutationCount.getMutation();
+                String mutString = "%s%s%s".formatted(
+                    reference.getNucleotideBase(mutation.position),
+                    mutation.position,
+                    mutation.mutationTo
+                );
+                response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                    mutationCount.getProportion(), mutationCount.getCount()));
             }
-            return new SampleMutationsResponse(mutationEntries);
+        } else {
+            database.getAaMutationStores().forEach((gene, mutationStore) -> {
+                List<MutationStore.MutationCount> mutationCounts = mutationStore.countMutations(ids);
+                for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                    if (mutationCount.getProportion() < minProportion) {
+                        continue;
+                    }
+                    MutationStore.Mutation mutation = mutationCount.getMutation();
+                    String mutString = "%s:%s%s%s".formatted(
+                        gene,
+                        reference.getGeneAABase(gene, mutation.position),
+                        mutation.position,
+                        mutation.mutationTo
+                    );
+                    response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                        mutationCount.getProportion(), mutationCount.getCount()));
+                }
+            });
         }
+        return response;
     }
 
 

@@ -54,9 +54,11 @@ create table y_nextstrain_genbank
   seq_aligned_compressed bytea,
   aa_seqs_compressed bytea,
   aa_mutations text,
+  aa_unknowns text,
   nuc_substitutions text,
   nuc_deletions text,
-  nuc_insertions text
+  nuc_insertions text,
+  nuc_unknowns text
 );
 
 
@@ -92,9 +94,11 @@ create table y_gisaid
   seq_aligned_compressed bytea,
   aa_seqs_compressed bytea,
   aa_mutations text,
+  aa_unknowns text,
   nuc_substitutions text,
   nuc_deletions text,
   nuc_insertions text,
+  nuc_unknowns text,
 
   -- Nextclade stuff
   nextclade_clade text,
@@ -243,9 +247,11 @@ create table y_main_sequence
   seq_original_compressed bytea,
   seq_aligned_compressed bytea,
   aa_mutations text,
+  aa_unknowns text,
   nuc_substitutions text,
   nuc_deletions text,
-  nuc_insertions text
+  nuc_insertions text,
+  nuc_unknowns text
 );
 
 create table y_main_sequence_columnar

@@ -33,9 +33,11 @@ public class GisaidEntry {
     private byte[] geneAASeqsCompressed;
 
     private String aaMutations;
+    private String aaUnknowns;
     private String nucSubstitutions;
     private String nucDeletions;
     private String nucInsertions;
+    private String nucUnknowns;
     private NextcladeTsvEntry nextcladeTsvEntry;
 
 
@@ -264,6 +266,15 @@ public class GisaidEntry {
         return this;
     }
 
+    public String getAaUnknowns() {
+        return aaUnknowns;
+    }
+
+    public GisaidEntry setAaUnknowns(String aaUnknowns) {
+        this.aaUnknowns = aaUnknowns;
+        return this;
+    }
+
     public String getNucSubstitutions() {
         return nucSubstitutions;
     }
@@ -288,6 +299,15 @@ public class GisaidEntry {
 
     public GisaidEntry setNucInsertions(String nucInsertions) {
         this.nucInsertions = nucInsertions;
+        return this;
+    }
+
+    public String getNucUnknowns() {
+        return nucUnknowns;
+    }
+
+    public GisaidEntry setNucUnknowns(String nucUnknowns) {
+        this.nucUnknowns = nucUnknowns;
         return this;
     }
 

@@ -180,6 +180,9 @@ public class NextstrainGenbankService {
     }
 
 
+    /**
+     * This function will also compute and write aa_unknowns and nuc_unknowns.
+     */
     private void updateAAMutations() throws IOException, InterruptedException {
         // TODO Check if Nextalign is installed
 
@@ -281,6 +284,7 @@ public class NextstrainGenbankService {
             if (!terminated) {
                 executor.shutdownNow();
             }
+            throw new RuntimeException("NextstrainGenbankService updateAAMutations() failed");
         } else {
             // Wait until all batches are finished.
             executor.shutdown();

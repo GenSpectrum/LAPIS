@@ -125,17 +125,19 @@ public class TransformService {
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
-                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, nuc_substitutions,
-                  nuc_deletions, nuc_insertions
+                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_unknowns, nuc_substitutions,
+                  nuc_deletions, nuc_insertions, nuc_unknowns
                 )
                 select
                   mm.id,
                   ng.seq_original_compressed,
                   ng.seq_aligned_compressed,
                   ng.aa_mutations,
+                  ng.aa_unknowns,
                   ng.nuc_substitutions,
                   ng.nuc_deletions,
-                  ng.nuc_insertions
+                  ng.nuc_insertions,
+                  ng.nuc_unknowns
                 from
                   y_nextstrain_genbank ng
                   join y_main_metadata_staging mm
@@ -205,17 +207,19 @@ public class TransformService {
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
-                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, nuc_substitutions,
-                  nuc_deletions, nuc_insertions
+                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_unknowns, nuc_substitutions,
+                  nuc_deletions, nuc_insertions, nuc_unknowns
                 )
                 select
                   mm.id,
                   g.seq_original_compressed,
                   g.seq_aligned_compressed,
                   g.aa_mutations,
+                  g.aa_unknowns,
                   g.nuc_substitutions,
                   g.nuc_deletions,
-                  g.nuc_insertions
+                  g.nuc_insertions,
+                  g.nuc_unknowns
                 from
                   y_gisaid g
                   join y_main_metadata_staging mm
