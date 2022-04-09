@@ -54,9 +54,11 @@ create table y_nextstrain_genbank
   seq_aligned_compressed bytea,
   aa_seqs_compressed bytea,
   aa_mutations text,
+  aa_unknowns text,
   nuc_substitutions text,
   nuc_deletions text,
-  nuc_insertions text
+  nuc_insertions text,
+  nuc_unknowns text
 );
 
 

@@ -180,6 +180,9 @@ public class NextstrainGenbankService {
     }
 
 
+    /**
+     * This function will also compute and write aa_unknowns and nuc_unknowns.
+     */
     private void updateAAMutations() throws IOException, InterruptedException {
         // TODO Check if Nextalign is installed
 

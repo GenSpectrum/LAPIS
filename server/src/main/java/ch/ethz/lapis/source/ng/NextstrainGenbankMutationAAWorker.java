@@ -1,5 +1,6 @@
 package ch.ethz.lapis.source.ng;
 
+import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.io.FileUtils;
@@ -11,10 +12,16 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * This class will also compute and write aa_unknowns and nuc_unknowns.
+ */
 public class NextstrainGenbankMutationAAWorker {
 
     private final int id;
@@ -41,6 +48,10 @@ public class NextstrainGenbankMutationAAWorker {
         this.nextalignPath = nextalignPath;
     }
 
+    /**
+     * It expects aligned sequences as input because it directly uses the provided sequences for finding the
+     * nuc_unknowns.
+     */
     public void run(List<FastaEntry> batch) throws Exception {
         System.out.println(LocalDateTime.now() + " [" + id + "] Received " + batch.size() + " sequences.");
 
@@ -51,13 +62,38 @@ public class NextstrainGenbankMutationAAWorker {
         System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
         Map<String, List<GeneAASeq>> geneAASeqs = runNextalign(seqFastaPath, batch);
 
+        // Find the nuc_unknowns and aa_unknowns
+        Map<String, String> nucUnknownsMap = new HashMap<>();
+        Map<String, String> aaUnknownsMap = new HashMap<>();
+        for (FastaEntry fastaEntry : batch) {
+            String seq = fastaEntry.getSeq();
+            String nucUnknowns = String.join(",", MutationFinder.compressPositionsAsStrings(
+                MutationFinder.findNucUnknowns(seq)));
+            nucUnknownsMap.put(fastaEntry.getSampleName(), nucUnknowns);
+        }
+        geneAASeqs.forEach((sampleName, aaSeqs) -> {
+            List<String> aaUnknownsComponents = new ArrayList<>();
+            for (GeneAASeq aaSeq : aaSeqs) {
+                List<String> thisAAUnknowns = MutationFinder.compressPositionsAsStrings(
+                    MutationFinder.findAAUnknowns(aaSeq.seq));
+                aaUnknownsComponents.addAll(thisAAUnknowns.stream()
+                    .map(u -> aaSeq.gene + ":" + u)
+                    .collect(Collectors.toList()));
+            }
+            String aaUnknowns = String.join(",", aaUnknownsComponents);
+            aaUnknownsMap.put(sampleName, aaUnknowns);
+        });
+
         // Write to database
         System.out.println(LocalDateTime.now() + " [" + id + "] Write to database");
         String sql = """
-                insert into y_nextstrain_genbank (strain, aa_seqs_compressed)
-                values (?, ?)
+                insert into y_nextstrain_genbank (strain, aa_seqs_compressed, nuc_unknowns, aa_unknowns)
+                values (?, ?, ?, ?)
                 on conflict (strain) do update
-                set aa_seqs_compressed = ?;
+                set
+                  aa_seqs_compressed = ?,
+                  nuc_unknowns = ?,
+                  aa_unknowns = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -66,9 +102,15 @@ public class NextstrainGenbankMutationAAWorker {
                     String sampleName = mapEntry.getKey();
                     String aaSeqs = formatGeneAASeqs(mapEntry.getValue());
                     byte[] aaSeqsCompressed = aaSeqCompressor.compress(aaSeqs);
+                    String nucUnknowns = nucUnknownsMap.get(sampleName);
+                    String aaUnknowns = aaUnknownsMap.get(sampleName);
                     statement.setString(1, sampleName);
                     statement.setBytes(2, aaSeqsCompressed);
-                    statement.setBytes(3, aaSeqsCompressed);
+                    statement.setString(3, nucUnknowns);
+                    statement.setString(4, aaUnknowns);
+                    statement.setBytes(5, aaSeqsCompressed);
+                    statement.setString(6, nucUnknowns);
+                    statement.setString(7, aaUnknowns);
                     statement.addBatch();
                     Utils.executeClearCommitBatch(conn, statement);
                 }
