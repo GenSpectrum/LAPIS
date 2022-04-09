@@ -376,6 +376,7 @@ public class Database {
                             System.out.println(LocalDateTime.now() +
                                 " Loading mutations to in-memory database: " + i + "/" + numberRows);
                         }
+                        int id = rs.getInt("id");
                         // Nuc mutations
                         String nucMutationsString = rs.getString("nuc_substitutions") +
                             "," + rs.getString("nuc_deletions");
@@ -390,7 +391,7 @@ public class Database {
                         List<String> nucUnknowns = Arrays.stream(nucUnknownsString.split(","))
                             .filter(s -> !s.isBlank())
                             .collect(Collectors.toList());
-                        database.nucMutationStore.putEntry(i, nucMutations, nucUnknowns);
+                        database.nucMutationStore.putEntry(id, nucMutations, nucUnknowns);
                         // AA mutations
                         String aaMutationsString = rs.getString("aa_mutations");
                         String aaUnknownsString = rs.getString("aa_unknowns");
@@ -417,9 +418,8 @@ public class Database {
                                 String unknowns = parts[1];
                                 aaUnknownsPerGene.get(gene).add(unknowns);
                             });
-                        int finalI = i;
                         database.aaMutationStores.forEach((gene, mutationStore) -> {
-                            mutationStore.putEntry(finalI, aaMutationsPerGene.get(gene), aaUnknownsPerGene.get(gene));
+                            mutationStore.putEntry(id, aaMutationsPerGene.get(gene), aaUnknownsPerGene.get(gene));
                         });
                         ++i;
                     }
