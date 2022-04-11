@@ -158,7 +158,7 @@ public class CacheService {
                 String[] split = subKey.split("###", 2);
                 String endpoint = split[0];
                 String requestJson = split[1];
-                System.out.println("Pre-computing " + "(" + i + "/" + keys.size() + ") - " + subKey);
+                System.out.println("Pre-computing " + "(" + i + "/" + keys.size() + ")");
                 Object request = objectMapper.readValue(requestJson, endpointToClass.get(endpoint));
                 endpointToPreComputation.get(endpoint).accept(sampleController, request);
             } catch (JsonProcessingException e) {

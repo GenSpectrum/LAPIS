@@ -98,7 +98,6 @@ public class SampleController {
             }
         }
         stopWatch.stop();
-        System.out.println("/aggregated - " + stopWatch.getFormattedResultString());
         return new SampleResponseBuilder<String>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setETag(generateETag(cacheKey))
@@ -392,11 +391,9 @@ public class SampleController {
         CacheService cacheService = cacheServiceOpt.get();
         String cached = cacheService.getCompressedString(cacheKey);
         if (cached != null) {
-            System.out.println("Cache hit");
             return cached;
         }
         String response = compute.get();
-        System.out.println("Cache miss");
         cacheService.setCompressedString(cacheKey, response);
         return response;
     }
