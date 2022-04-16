@@ -67,7 +67,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
             }};
             for (String updateStep : updateSteps) {
                 if (!availableSteps.contains(updateStep)) {
-                    throw new RuntimeException("Unknown update step. - TODO: write help page");
+                    throw new RuntimeException("Unknown update step: " + updateStep);
                 }
             }
             for (String updateStep : updateSteps) {
