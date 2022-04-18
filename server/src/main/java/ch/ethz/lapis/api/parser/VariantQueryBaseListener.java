@@ -325,6 +325,54 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCharacter(VariantQueryParser.CharacterContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterN_of(VariantQueryParser.N_ofContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitN_of(VariantQueryParser.N_ofContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterN_of_exactly(VariantQueryParser.N_of_exactlyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitN_of_exactly(VariantQueryParser.N_of_exactlyContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterN_of_n(VariantQueryParser.N_of_nContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitN_of_n(VariantQueryParser.N_of_nContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterN_of_exprs(VariantQueryParser.N_of_exprsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitN_of_exprs(VariantQueryParser.N_of_exprsContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
