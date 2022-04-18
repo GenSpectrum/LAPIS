@@ -94,6 +94,20 @@ public class VariantQueryListener extends VariantQueryBaseListener {
         exprStack.peek().putValue(nucMutation);
     }
 
+    @Override
+    public void enterN_of(VariantQueryParser.N_ofContext ctx) {
+        boolean exactMode = ctx.n_of_exactly() != null;
+        int n = Integer.parseInt(ctx.n_of_n().getText());
+        NOf nOf = new NOf(exactMode, n);
+        exprStack.peek().putValue(nOf);
+        exprStack.push(nOf);
+    }
+
+    @Override
+    public void exitN_of(VariantQueryParser.N_ofContext ctx) {
+        exprStack.pop();
+    }
+
     public VariantQueryExpr getExpr() {
         return exprStack.peek();
     }
