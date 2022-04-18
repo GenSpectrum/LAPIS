@@ -87,7 +87,7 @@ Z: 'Z';
 MINUS: '-';
 DOT: '.';
 ASTERISK: '*';
-ORF: 'ORF1A' | 'ORF1B' | 'ORF3A' | 'ORF6' | 'ORF7A' | 'ORF7B' | 'ORF8' | 'ORF9b';
+ORF: 'ORF1A' | 'ORF1B' | 'ORF3A' | 'ORF6' | 'ORF7A' | 'ORF7B' | 'ORF8' | 'ORF9B';
 
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;
