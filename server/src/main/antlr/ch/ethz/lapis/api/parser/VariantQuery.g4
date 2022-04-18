@@ -6,6 +6,7 @@
  *   - NEXTSTRAIN:21K | GISAID:GR  ("NEXTSTRAIN:" -> Nextstrain clade, "GISAID:" -> GISAID clade)
  *   - S:N501  (The spike gene has a mutation at position 501; a deletion is considered as a mutation)
  *   - !123- & 123  (The nucleotide at position 123 is not deleted, but it is mutated)
+ *   - [2-OF: S:N501Y, P.1* & 123-, [EXACTLY-2-OF: 123, 234T, NEXTSTRAIN:21K]]
 */
 grammar VariantQuery;
 @header {
@@ -23,7 +24,7 @@ expr:
   | expr '|' expr    # Or
   | '(' expr ')'     # Par
   ;
-single: aa_mut | nuc_mut | pango_query | gisaid_clade_query | nextstrain_clade_query;
+single: aa_mut | nuc_mut | pango_query | gisaid_clade_query | nextstrain_clade_query | n_of;
 
 nuc_mut : nuc? position nuc_mutated?;
 aa_mut : gene ':' aa? position aa_mutated?;
@@ -50,6 +51,10 @@ nextstrain_clade_query: nextstrain_clade_prefix nextstrain_clade;
 
 character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
+n_of: '[' n_of_exactly? n_of_n '-OF:' n_of_exprs ']';
+n_of_exactly: 'EXACTLY-';
+n_of_n: NUMBER+;
+n_of_exprs: expr (',' expr)*;
 
 // lexer rules
 

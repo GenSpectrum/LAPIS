@@ -279,4 +279,44 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCharacter(VariantQueryParser.CharacterContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#n_of}.
+	 * @param ctx the parse tree
+	 */
+	void enterN_of(VariantQueryParser.N_ofContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#n_of}.
+	 * @param ctx the parse tree
+	 */
+	void exitN_of(VariantQueryParser.N_ofContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#n_of_exactly}.
+	 * @param ctx the parse tree
+	 */
+	void enterN_of_exactly(VariantQueryParser.N_of_exactlyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#n_of_exactly}.
+	 * @param ctx the parse tree
+	 */
+	void exitN_of_exactly(VariantQueryParser.N_of_exactlyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#n_of_n}.
+	 * @param ctx the parse tree
+	 */
+	void enterN_of_n(VariantQueryParser.N_of_nContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#n_of_n}.
+	 * @param ctx the parse tree
+	 */
+	void exitN_of_n(VariantQueryParser.N_of_nContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#n_of_exprs}.
+	 * @param ctx the parse tree
+	 */
+	void enterN_of_exprs(VariantQueryParser.N_of_exprsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#n_of_exprs}.
+	 * @param ctx the parse tree
+	 */
+	void exitN_of_exprs(VariantQueryParser.N_of_exprsContext ctx);
 }
