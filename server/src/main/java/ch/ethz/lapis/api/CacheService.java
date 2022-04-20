@@ -115,9 +115,9 @@ public class CacheService {
         setCacheDataVersion(newDataVersion);
 
         // Pre-compute
-        new Thread(() -> {
-            preCompute(keys);
-        }).start();
+//        new Thread(() -> {
+//            preCompute(keys);
+//        }).start();
     }
 
     private List<String> getAllApiKeys() {
