@@ -382,7 +382,7 @@ public class Database {
                             "," + rs.getString("nuc_deletions");
                         List<MutationStore.Mutation> nucMutations = new ArrayList<>();
                         for (String mut : nucMutationsString.split(",")) {
-                            if (mut.isBlank()) {
+                            if (mut.isBlank() || mut.equals("null")) {
                                 continue;
                             }
                             nucMutations.add(MutationStore.Mutation.parse(mut));
