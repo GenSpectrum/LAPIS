@@ -286,10 +286,10 @@ public class Database {
             String sequenceSql = """
                 select
                   id,
-                  aa_mutations,
+                  coalesce(aa_mutations, '') as aa_mutations,
                   coalesce(aa_unknowns, '') as aa_unknowns,
-                  nuc_substitutions,
-                  nuc_deletions,
+                  coalesce(nuc_substitutions, '') as nuc_substitutions,
+                  coalesce(nuc_deletions, '') as nuc_deletions,
                   coalesce(nuc_unknowns, '') as nuc_unknowns
                 from y_main_sequence;
                 """;
