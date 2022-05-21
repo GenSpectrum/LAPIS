@@ -14,4 +14,7 @@ public class UpdateSteps {
     public static final String finalTransforms = "final-transforms";
     public static final String switchInStaging = "switch-in-staging";
 
+    public static final String loadMpox = "load-mpox";
+    public static final String transformMpox = "mergeFromMpox";
+
 }

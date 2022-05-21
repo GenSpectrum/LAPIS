@@ -74,6 +74,19 @@ public class Utils {
     }
 
 
+    public static LocalDate nullableLocalDateValueAcceptingPartialDates(String s) {
+        if (s == null || s.isBlank()) {
+            return null;
+        }
+        s = s.replaceAll("XX", "01");
+        try {
+            return LocalDate.parse(s);
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
+    }
+
+
     public static Date nullableSqlDateValue(LocalDate d) {
         if (d == null) {
             return null;

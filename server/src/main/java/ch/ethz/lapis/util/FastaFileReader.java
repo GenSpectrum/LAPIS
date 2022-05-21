@@ -1,14 +1,11 @@
 package ch.ethz.lapis.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.tukaani.xz.XZInputStream;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Iterator;
-import org.tukaani.xz.XZInputStream;
 
 public class FastaFileReader implements Iterator<FastaEntry>, Iterable<FastaEntry>, AutoCloseable {
 
@@ -63,7 +60,7 @@ public class FastaFileReader implements Iterator<FastaEntry>, Iterable<FastaEntr
             }
             if (nextLine.startsWith(">")) {
                 if (sampleName == null) {
-                    sampleName = nextLine.substring(1);
+                    sampleName = nextLine.substring(1).replaceAll(" .*", "");
                 } else {
                     break;
                 }

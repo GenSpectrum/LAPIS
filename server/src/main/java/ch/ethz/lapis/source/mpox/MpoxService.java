@@ -1,0 +1,185 @@
+package ch.ethz.lapis.source.mpox;
+
+import ch.ethz.lapis.util.*;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+public class MpoxService {
+
+    private final ComboPooledDataSource databasePool;
+    private final Path workdir;
+    private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.MPOX_REFERENCE);
+
+
+    public MpoxService(
+        ComboPooledDataSource databasePool,
+        String workdir
+    ) {
+        this.databasePool = databasePool;
+        this.workdir = Path.of(workdir);
+    }
+
+
+    public void updateData() throws IOException, SQLException, InterruptedException {
+        LocalDateTime startTime = LocalDateTime.now();
+
+        // Delete existing data: no need to do any change detection for such a small dataset
+        deleteAll();
+
+        // The files and different types of data will be inserted/updated independently and one after the other in the
+        // following order:
+        //   1. original sequences
+        //   2. aligned sequences
+        //   3. metadata
+
+        updateSeqOriginalOrAligned(false);
+        updateSeqOriginalOrAligned(true);
+        updateMetadata();
+
+        updateDataVersion(startTime);
+    }
+
+
+    private void deleteAll() throws SQLException {
+        String sql = """
+                delete from y_nextstrain_mpox;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql);
+            }
+        }
+    }
+
+
+    private void updateSeqOriginalOrAligned(boolean aligned) throws IOException, SQLException {
+        String filename = !aligned ? "sequences.fasta" : "aligned.fasta";
+        String sql = """
+                insert into y_nextstrain_mpox (strain, seq_original_compressed, seq_original_hash)
+                values (?, ?, ?)
+                on conflict (strain) do update
+                set
+                  seq_original_compressed = ?,
+                  seq_original_hash = ?;
+            """;
+        if (aligned) {
+            sql = sql.replaceAll("_original_", "_aligned_");
+        }
+        int i = 0;
+        try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), false)) {
+                    for (FastaEntry entry : fastaReader) {
+                        String seq = aligned ? entry.getSeq().toUpperCase() : entry.getSeq();
+                        String sampleName = entry.getSampleName();
+                        String currentHash = Utils.hashMd5(seq);
+                        byte[] compressed = seqCompressor.compress(seq);
+                        statement.setString(1, sampleName);
+                        statement.setBytes(2, compressed);
+                        statement.setString(3, currentHash);
+                        statement.setBytes(4, compressed);
+                        statement.setString(5, currentHash);
+                        statement.addBatch();
+                        i++;
+                        if (i % 10000 == 0) {
+                            Utils.executeClearCommitBatch(conn, statement);
+                        }
+                    }
+                    Utils.executeClearCommitBatch(conn, statement);
+                }
+            }
+            conn.setAutoCommit(true);
+        }
+
+    }
+
+
+    private void updateMetadata() throws IOException, SQLException {
+        InputStream fileInputStream = new FileInputStream(workdir.resolve("metadata.tsv").toFile());
+
+        String sql = """
+                insert into y_nextstrain_mpox (
+                  metadata_hash, strain, sra_accession, date, date_original,
+                  country, host
+                )
+                values (?, ?, ?, ?, ?, ?, ?)
+                on conflict (strain) do update
+                set
+                  metadata_hash = ?,
+                  sra_accession = ?,
+                  date = ?,
+                  date_original = ?,
+                  country = ?,
+                  host = ?;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                try (MpoxMetadataFileReader metadataReader = new MpoxMetadataFileReader(fileInputStream)) {
+                    int i = 0;
+                    for (MpoxMetadataEntry entry : metadataReader) {
+                        if (entry.getStrain() == null) {
+                            continue;
+                        }
+                        String currentHash = Utils.hashMd5(entry);
+
+                        statement.setString(1, currentHash);
+                        statement.setString(2, entry.getStrain());
+                        statement.setString(3, entry.getSraAccession());
+                        statement.setDate(4, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setString(5, entry.getDateOriginal());
+                        statement.setString(6, entry.getCountry());
+                        statement.setString(7, entry.getHost());
+
+                        statement.setString(8, currentHash);
+                        statement.setString(9, entry.getSraAccession());
+                        statement.setDate(10, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setString(11, entry.getDateOriginal());
+                        statement.setString(12, entry.getCountry());
+                        statement.setString(13, entry.getHost());
+
+                        statement.addBatch();
+                        if (i++ % 10000 == 0) {
+                            Utils.executeClearCommitBatch(conn, statement);
+                        }
+                    }
+                    Utils.executeClearCommitBatch(conn, statement);
+                }
+            }
+            conn.setAutoCommit(true);
+        }
+    }
+
+
+    private void updateDataVersion(LocalDateTime startTime) throws SQLException {
+        ZoneId zoneId = ZoneId.systemDefault();
+        long epoch = startTime.atZone(zoneId).toEpochSecond();
+        String sql = """
+                insert into data_version (dataset, timestamp)
+                values ('mpox', ?)
+                on conflict (dataset) do update
+                set
+                  timestamp = ?;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setLong(1, epoch);
+                statement.setLong(2, epoch);
+                statement.execute();
+            }
+        }
+    }
+
+
+}

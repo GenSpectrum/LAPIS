@@ -5,6 +5,7 @@ import ch.ethz.lapis.core.GlobalProxyManager;
 import ch.ethz.lapis.core.SubProgram;
 import ch.ethz.lapis.source.covlineages.CovLineagesService;
 import ch.ethz.lapis.source.gisaid.GisaidService;
+import ch.ethz.lapis.source.mpox.MpoxService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
@@ -64,6 +65,9 @@ public class LapisMain extends SubProgram<LapisConfig> {
                 add(UpdateSteps.mergeFromPangolinAssignment);
                 add(UpdateSteps.finalTransforms);
                 add(UpdateSteps.switchInStaging);
+
+                add(UpdateSteps.loadMpox);
+                add(UpdateSteps.transformMpox);
             }};
             for (String updateStep : updateSteps) {
                 if (!availableSteps.contains(updateStep)) {
@@ -98,6 +102,8 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         new TransformService(dbPool, config.getMaxNumberWorkers()).finalTransforms();
                     case UpdateSteps.switchInStaging -> new TransformService(dbPool, config.getMaxNumberWorkers())
                         .switchInStagingTables();
+
+                    case UpdateSteps.loadMpox -> new MpoxService(dbPool, config.getWorkdir()).updateData();
                 }
             }
         }
