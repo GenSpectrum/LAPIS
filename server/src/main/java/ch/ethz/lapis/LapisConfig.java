@@ -140,6 +140,6 @@ public class LapisConfig implements Config {
     }
 
     public enum Source {
-        NG, GISAID
+        NG, GISAID, MPOX
     }
 }

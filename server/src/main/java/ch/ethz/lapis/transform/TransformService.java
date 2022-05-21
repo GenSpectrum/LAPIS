@@ -26,7 +26,7 @@ public class TransformService {
 
     private final ComboPooledDataSource databasePool;
     private final int maxNumberWorkers;
-    private final SeqCompressor alignedSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private final SeqCompressor alignedSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.MPOX_REFERENCE);
     private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
     private static final SeqCompressor columnarCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE);
 
@@ -57,6 +57,12 @@ public class TransformService {
                 where
                   ng.aa_seqs_compressed is not null;
             """);
+            // Fill the table y_main_sequence_columnar_staging
+            System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
+            transformSeqsToColumnar();
+            // Fill the table y_main_aa_sequence_columnar_staging
+            System.out.println(LocalDateTime.now() + " transformAASeqsToColumnar()");
+            transformAASeqsToColumnar();
         } else if (source == LapisConfig.Source.GISAID) {
             System.out.println(LocalDateTime.now() + " pullFromGisaidTable()");
             pullFromGisaidTable();
@@ -73,13 +79,19 @@ public class TransformService {
                 where
                   g.aa_seqs_compressed is not null;
             """);
+            // Fill the table y_main_sequence_columnar_staging
+            System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
+            transformSeqsToColumnar();
+            // Fill the table y_main_aa_sequence_columnar_staging
+            System.out.println(LocalDateTime.now() + " transformAASeqsToColumnar()");
+            transformAASeqsToColumnar();
+        } else if (source == LapisConfig.Source.MPOX) {
+            System.out.println(LocalDateTime.now() + " pullFromNextstrainMpoxTable()");
+            pullFromNextstrainMpoxTable();
+            // Fill the table y_main_sequence_columnar_staging
+            System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
+            transformSeqsToColumnar();
         }
-        // Fill the table y_main_sequence_columnar_staging
-        System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
-        transformSeqsToColumnar();
-        // Fill the table y_main_aa_sequence_columnar_staging
-        System.out.println(LocalDateTime.now() + " transformAASeqsToColumnar()");
-        transformAASeqsToColumnar();
     }
 
 
@@ -237,6 +249,57 @@ public class TransformService {
     }
 
 
+    public void pullFromNextstrainMpoxTable() throws SQLException {
+        String sql1 = """
+                    insert into y_main_metadata_staging (
+                      id, source, source_primary_key, strain, sra_accession,
+                      date, country, host
+                    )
+                    select
+                      row_number() over () - 1 as id,
+                      'mpox' as source,
+                      strain as source_primary_key,
+                      strain,
+                      sra_accession,
+                      date,
+                      country,
+                      host
+                    from y_nextstrain_mpox
+                    where
+                      seq_aligned_compressed is not null;
+            """;
+        String sql2 = """
+                insert into y_main_sequence_staging (
+                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_unknowns, nuc_substitutions,
+                  nuc_deletions, nuc_insertions, nuc_unknowns
+                )
+                select
+                  mm.id,
+                  nm.seq_original_compressed,
+                  nm.seq_aligned_compressed,
+                  nm.aa_mutations,
+                  nm.aa_unknowns,
+                  nm.nuc_substitutions,
+                  nm.nuc_deletions,
+                  nm.nuc_insertions,
+                  nm.nuc_unknowns
+                from
+                  y_nextstrain_mpox nm
+                  join y_main_metadata_staging mm
+                    on mm.source = 'mpox' and mm.source_primary_key = nm.strain;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (Statement statement = conn.createStatement()) {
+                statement.execute(sql1);
+                statement.execute(sql2);
+            }
+            conn.commit();
+            conn.setAutoCommit(true);
+        }
+    }
+
+
     /**
      *
      * @param fetchAASeqsSql A SQL query string that gives a result set with two columns: "id" and "aa_seqs_compressed"
@@ -351,7 +414,7 @@ public class TransformService {
         }
         System.out.println(LocalDateTime.now() + " Data loaded");
 
-        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1500);
+        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 20000);
         transformer.transform(
             compressedSequences,
             alignedSeqCompressor::decompress,

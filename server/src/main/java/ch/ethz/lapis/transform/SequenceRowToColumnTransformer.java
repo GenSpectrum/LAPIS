@@ -112,7 +112,7 @@ public class SequenceRowToColumnTransformer {
 
                 // Transform char arrays to string, compress them and insert
                 // This will be done in parallel again.
-                int finalizationBatchSize = 20;
+                int finalizationBatchSize = 1000;
                 int numberFinalizationTasks = (int) Math.ceil(countPos * 1.0 / finalizationBatchSize);
                 List<Callable<Void>> tasks2 = new ArrayList<>();
                 for (int finalizationIndex = 0; finalizationIndex < numberFinalizationTasks; finalizationIndex++) {

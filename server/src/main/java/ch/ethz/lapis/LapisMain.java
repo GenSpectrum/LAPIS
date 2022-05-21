@@ -104,6 +104,8 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         .switchInStagingTables();
 
                     case UpdateSteps.loadMpox -> new MpoxService(dbPool, config.getWorkdir()).updateData();
+                    case UpdateSteps.transformMpox -> new TransformService(dbPool, config.getMaxNumberWorkers())
+                        .mergeAndTransform(LapisConfig.Source.MPOX);
                 }
             }
         }
