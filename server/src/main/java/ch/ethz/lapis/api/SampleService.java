@@ -40,7 +40,7 @@ public class SampleService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
     private static final SeqCompressor referenceSeqCompressor
-        = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+        = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.MPOX_REFERENCE);
 
 
     private Connection getDatabaseConnection() throws SQLException {
@@ -302,7 +302,7 @@ public class SampleService {
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
-                .select(metaTbl.GENBANK_ACCESSION, seqColumn)
+                .select(metaTbl.STRAIN, seqColumn)
                 .from(
                     idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
@@ -314,10 +314,14 @@ public class SampleService {
             Select<Record2<String, byte[]>> statement2 = applyOrderAndLimit(statement, orderAndLimit);
             Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy();
             for (Record2<String, byte[]> r : cursor) {
+                byte[] seqCompressed = r.get(seqColumn);
+                if (seqCompressed == null) {
+                    continue;
+                }
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(metaTbl.GENBANK_ACCESSION).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(r.get(metaTbl.STRAIN).getBytes(StandardCharsets.UTF_8));
                 outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
+                outputStream.write(referenceSeqCompressor.decompress(seqCompressed)
                     .getBytes(StandardCharsets.UTF_8));
                 outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
             }
