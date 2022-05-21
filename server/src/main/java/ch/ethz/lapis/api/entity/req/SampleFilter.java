@@ -39,7 +39,7 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private String samplingStrategy;
     private String pangoLineage;
     private String nextcladePangoLineage;
-    private String nextstrainClade;
+    private String clade;
     private String gisaidClade;
     private String submittingLab;
     private String originatingLab;
@@ -252,12 +252,12 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
-    public String getNextstrainClade() {
-        return nextstrainClade;
+    public String getClade() {
+        return clade;
     }
 
-    public T setNextstrainClade(String nextstrainClade) {
-        this.nextstrainClade = nextstrainClade;
+    public T setClade(String clade) {
+        this.clade = clade;
         return (T) this;
     }
 

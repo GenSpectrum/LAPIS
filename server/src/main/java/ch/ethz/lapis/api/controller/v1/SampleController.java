@@ -412,7 +412,7 @@ public class SampleController {
 
     private void checkVariantFilter(SampleFilter<?> request) {
         if (request.getVariantQuery() != null &&
-            (request.getPangoLineage() != null || request.getNextstrainClade() != null
+            (request.getPangoLineage() != null || request.getClade() != null
                 || request.getGisaidClade() != null
                 || (request.getAaMutations() != null && !request.getAaMutations().isEmpty())
                 || (request.getNucMutations() != null && !request.getNucMutations().isEmpty()))) {

@@ -116,9 +116,9 @@ public class MpoxService {
         String sql = """
                 insert into y_nextstrain_mpox (
                   metadata_hash, strain, sra_accession, date, date_original,
-                  country, host
+                  country, host, clade
                 )
-                values (?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (strain) do update
                 set
                   metadata_hash = ?,
@@ -126,7 +126,8 @@ public class MpoxService {
                   date = ?,
                   date_original = ?,
                   country = ?,
-                  host = ?;
+                  host = ?,
+                  clade = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -146,13 +147,15 @@ public class MpoxService {
                         statement.setString(5, entry.getDateOriginal());
                         statement.setString(6, entry.getCountry());
                         statement.setString(7, entry.getHost());
+                        statement.setString(8, entry.getClade());
 
-                        statement.setString(8, currentHash);
-                        statement.setString(9, entry.getSraAccession());
-                        statement.setDate(10, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setString(11, entry.getDateOriginal());
-                        statement.setString(12, entry.getCountry());
-                        statement.setString(13, entry.getHost());
+                        statement.setString(9, currentHash);
+                        statement.setString(10, entry.getSraAccession());
+                        statement.setDate(11, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setString(12, entry.getDateOriginal());
+                        statement.setString(13, entry.getCountry());
+                        statement.setString(14, entry.getHost());
+                        statement.setString(15, entry.getClade());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

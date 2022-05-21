@@ -181,6 +181,7 @@ create table y_nextstrain_mpox
   country text,
   division text,
   host text,
+  clade text,
   seq_original_compressed bytea,
   seq_aligned_compressed bytea,
   aa_seqs_compressed bytea,

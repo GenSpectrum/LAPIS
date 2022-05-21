@@ -42,7 +42,8 @@ public class MpoxMetadataFileReader
             .setDateOriginal(cleanString(csv.get("date")))
             .setDate(Utils.nullableLocalDateValueAcceptingPartialDates(csv.get("date")))
             .setCountry(cleanString(csv.get("country")))
-            .setHost(cleanString(csv.get("host")));
+            .setHost(cleanString(csv.get("host")))
+            .setClade(cleanString(csv.get("clade")));
     }
 
     @Override

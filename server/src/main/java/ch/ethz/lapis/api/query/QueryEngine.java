@@ -75,7 +75,7 @@ public class QueryEngine {
                         case SAMPLINGSTRATEGY -> sampleAggregated.setSamplingStrategy((String) key.get(i));
                         case PANGOLINEAGE -> sampleAggregated.setPangoLineage((String) key.get(i));
                         case NEXTCLADEPANGOLINEAGE -> sampleAggregated.setNextcladePangoLineage((String) key.get(i));
-                        case NEXTSTRAINCLADE -> sampleAggregated.setNextstrainClade((String) key.get(i));
+                        case CLADE -> sampleAggregated.setClade((String) key.get(i));
                         case GISAIDCLADE -> sampleAggregated.setGisaidCloade((String) key.get(i));
                         case SUBMITTINGLAB -> sampleAggregated.setSubmittingLab((String) key.get(i));
                         case ORIGINATINGLAB -> sampleAggregated.setOriginatingLab((String) key.get(i));
@@ -114,7 +114,7 @@ public class QueryEngine {
         var useNextcladePangoLineage = nextcladePangoLineage != null;
         var gisaidClade = sf.getGisaidClade();
         var useGisaidClade = gisaidClade != null;
-        var nextstrainClade = sf.getNextstrainClade();
+        var nextstrainClade = sf.getClade();
         var useNextstrainClade = nextstrainClade != null;
         var variantQuery = sf.getVariantQuery();
         var useVariantQuery = variantQuery != null;
@@ -358,7 +358,7 @@ public class QueryEngine {
             case SAMPLINGSTRATEGY -> SAMPLING_STRATEGY;
             case PANGOLINEAGE -> PANGO_LINEAGE;
             case NEXTCLADEPANGOLINEAGE -> NEXTCLADE_PANGO_LINEAGE;
-            case NEXTSTRAINCLADE -> NEXTSTRAIN_CLADE;
+            case CLADE -> NEXTSTRAIN_CLADE;
             case GISAIDCLADE -> GISAID_CLADE;
             case SUBMITTINGLAB -> SUBMITTING_LAB;
             case ORIGINATINGLAB -> ORIGINATING_LAB;

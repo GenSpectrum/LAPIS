@@ -129,7 +129,7 @@ public class SampleService {
                     .setHost(r.get(tbl.HOST))
                     .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
                     .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
-                    .setNextstrainClade(r.get(tbl.NEXTSTRAIN_CLADE))
+                    .setClade(r.get(tbl.NEXTSTRAIN_CLADE))
                     .setGisaidCloade(r.get(tbl.GISAID_CLADE))
                     .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
                     .setOriginatingLab(r.get(tbl.ORIGINATING_LAB));

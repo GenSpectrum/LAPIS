@@ -11,6 +11,7 @@ public class MpoxMetadataEntry implements Serializable {
     private String dateOriginal;
     private String country;
     private String host;
+    private String clade;
 
     public String getStrain() {
         return strain;
@@ -63,6 +64,15 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setHost(String host) {
         this.host = host;
+        return this;
+    }
+
+    public String getClade() {
+        return clade;
+    }
+
+    public MpoxMetadataEntry setClade(String clade) {
+        this.clade = clade;
         return this;
     }
 }
