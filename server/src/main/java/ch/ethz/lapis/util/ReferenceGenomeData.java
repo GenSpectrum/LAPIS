@@ -1,5 +1,10 @@
 package ch.ethz.lapis.util;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,10 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public class ReferenceGenomeData {
@@ -24,7 +25,7 @@ public class ReferenceGenomeData {
 
     private ReferenceGenomeData() {
         try {
-            InputStream in = getClass().getResourceAsStream("/reference-genome.json");
+            InputStream in = getClass().getResourceAsStream("/mpox-reference-genome.json");
             JSONObject json = (JSONObject) new JSONParser().parse(new InputStreamReader(in, StandardCharsets.UTF_8));
             nucleotideSequence = (String) json.get("nucleotide_sequence");
             nucleotideSequenceArr = nucleotideSequence.toCharArray();

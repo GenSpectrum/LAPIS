@@ -1,5 +1,7 @@
 package ch.ethz.lapis.source.mpox;
 
+import ch.ethz.lapis.source.MutationFinder;
+import ch.ethz.lapis.source.MutationNuc;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -13,6 +15,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MpoxService {
 
@@ -41,10 +45,12 @@ public class MpoxService {
         //   1. original sequences
         //   2. aligned sequences
         //   3. metadata
+        //   4. nucleotide mutations
 
         updateSeqOriginalOrAligned(false);
         updateSeqOriginalOrAligned(true);
         updateMetadata();
+        updateNucleotideMutations();
 
         updateDataVersion(startTime);
     }
@@ -101,7 +107,6 @@ public class MpoxService {
             }
             conn.setAutoCommit(true);
         }
-
     }
 
 
@@ -151,6 +156,62 @@ public class MpoxService {
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {
+                            Utils.executeClearCommitBatch(conn, statement);
+                        }
+                    }
+                    Utils.executeClearCommitBatch(conn, statement);
+                }
+            }
+            conn.setAutoCommit(true);
+        }
+    }
+
+
+    private void updateNucleotideMutations() throws IOException, SQLException {
+        String filename = "aligned.fasta";
+        String sql = """
+                insert into y_nextstrain_mpox (strain, nuc_substitutions, nuc_deletions, nuc_unknowns)
+                values (?, ?, ?, ?)
+                on conflict (strain) do update
+                set
+                  nuc_substitutions = ?,
+                  nuc_deletions = ?,
+                  nuc_unknowns = ?;
+            """;
+        int i = 0;
+        try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), false)) {
+                    ReferenceGenomeData refGenome = ReferenceGenomeData.getInstance();
+                    for (FastaEntry entry : fastaReader) {
+                        String seq = entry.getSeq().toUpperCase();
+                        List<MutationNuc> nucMutations = MutationFinder.findNucMutations(seq);
+                        String nucSubstitutions = nucMutations.stream()
+                            .filter(m -> !m.getMutation().equals("-"))
+                            .map(m -> String.valueOf(refGenome.getNucleotideBase(m.getPosition())) + m.getPosition()
+                                + m.getMutation())
+                            .collect(Collectors.joining(","));
+                        String nucDeletions = nucMutations.stream()
+                            .filter(m -> m.getMutation().equals("-"))
+                            .map(m -> String.valueOf(refGenome.getNucleotideBase(m.getPosition())) + m.getPosition()
+                                + m.getMutation())
+                            .collect(Collectors.joining(","));
+                        String nucUnknowns = String.join(",", MutationFinder.compressPositionsAsStrings(
+                            MutationFinder.findNucUnknowns(seq)));
+
+                        String sampleName = entry.getSampleName();
+                        statement.setString(1, sampleName);
+                        statement.setString(2, nucSubstitutions);
+                        statement.setString(3, nucDeletions);
+                        statement.setString(4, nucUnknowns);
+
+                        statement.setString(5, nucSubstitutions);
+                        statement.setString(6, nucDeletions);
+                        statement.setString(7, nucUnknowns);
+                        statement.addBatch();
+                        i++;
+                        if (i % 10000 == 0) {
                             Utils.executeClearCommitBatch(conn, statement);
                         }
                     }

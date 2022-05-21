@@ -12,7 +12,7 @@ public class MutationStore {
      * The largest position at which a mutation or unknown was found. Following the conventions, the position counter
      * starts with 1.
      */
-    private short maxPosition = 0;
+    private int maxPosition = 0;
 
 
     public MutationStore(int capacity) {
@@ -41,12 +41,12 @@ public class MutationStore {
             }
         }
         // Parse the compressed unknown position strings
-        List<Short> unknownPositionsList = new ArrayList<>();
+        List<Integer> unknownPositionsList = new ArrayList<>();
         List<Boolean> unknownIsStartRangeList = new ArrayList<>();
         for (String s : unknownsCompressedPositions) {
             if (!s.contains("-")) {
                 // It's a single value
-                short position = Short.parseShort(s);
+                int position = Integer.parseInt(s);
                 unknownPositionsList.add(position);
                 unknownIsStartRangeList.add(false);
                 if (position > maxPosition) {
@@ -55,8 +55,8 @@ public class MutationStore {
             } else {
                 // It's a range
                 String[] parts = s.split("-");
-                short rangeStart = Short.parseShort(parts[0]);
-                short rangeEnd = Short.parseShort(parts[1]);
+                int rangeStart = Integer.parseInt(parts[0]);
+                int rangeEnd = Integer.parseInt(parts[1]);
                 unknownPositionsList.add(rangeStart);
                 unknownPositionsList.add(rangeEnd);
                 unknownIsStartRangeList.add(true);
@@ -66,7 +66,7 @@ public class MutationStore {
                 }
             }
         }
-        short[] unknownPositions = new short[unknownPositionsList.size()];
+        int[] unknownPositions = new int[unknownPositionsList.size()];
         boolean[] unknownIsStartRange = new boolean[unknownPositionsList.size()];
         for (int j = 0; j < unknownPositionsList.size(); j++) {
             unknownPositions[j] = unknownPositionsList.get(j);
@@ -99,11 +99,11 @@ public class MutationStore {
             for (int i = 0; i < entry.unknownPositions.length; i++) {
                 boolean isStartRange = entry.unknownIsStartRange[i];
                 if (!isStartRange) {
-                    short position = entry.unknownPositions[i];
+                    int position = entry.unknownPositions[i];
                     unknownCounts[position]++;
                 } else {
-                    short startRange = entry.unknownPositions[i];
-                    short endRange = entry.unknownPositions[i+1];
+                    int startRange = entry.unknownPositions[i];
+                    int endRange = entry.unknownPositions[i+1];
                     for (int position = startRange; position <= endRange; position++) {
                         unknownCounts[position]++;
                     }
@@ -129,10 +129,10 @@ public class MutationStore {
 
 
     public static class Mutation {
-        public final short position;
+        public final int position;
         public final char mutationTo;
 
-        public Mutation(short position, char mutationTo) {
+        public Mutation(int position, char mutationTo) {
             this.position = position;
             this.mutationTo = mutationTo;
         }
@@ -159,7 +159,7 @@ public class MutationStore {
          * This expects a well-formatted input of the shape "A1234B"
          */
         public static Mutation parse(String code) {
-            return new Mutation(Short.parseShort(code.substring(1, code.length() - 1)), code.charAt(code.length() - 1));
+            return new Mutation(Integer.parseInt(code.substring(1, code.length() - 1)), code.charAt(code.length() - 1));
         }
     }
 
@@ -246,10 +246,10 @@ public class MutationStore {
 
     private static class InternalEntry {
         private final int[] mutationIds;
-        private final short[] unknownPositions;
+        private final int[] unknownPositions;
         private final boolean[] unknownIsStartRange;
 
-        public InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
+        public InternalEntry(int[] mutationIds, int[] unknownPositions, boolean[] unknownIsStartRange) {
             this.mutationIds = mutationIds;
             this.unknownPositions = unknownPositions;
             this.unknownIsStartRange = unknownIsStartRange;
