@@ -1,7 +1,9 @@
 create schema open;
 create schema gisaid;
+create schema mpox;
 
-grant usage on schema open, gisaid to y_user;
+grant usage on schema open, gisaid, mpox to lapis_api;
+grant usage on schema open, gisaid, mpox to lapis_proc;
 
 -- Basic information
 
@@ -161,6 +163,30 @@ create table y_s3c (
   hospitalized boolean,
   died boolean,
   fully_vaccinated boolean
+);
+
+
+-- Source: mpox from Nextstrain
+
+create table y_nextstrain_mpox
+(
+  metadata_hash text,
+  seq_original_hash text,
+  seq_aligned_hash text,
+  strain text,
+  sra_accession text,
+  date date,
+  country text,
+  host text,
+  seq_original_compressed bytea,
+  seq_aligned_compressed bytea,
+  aa_seqs_compressed bytea,
+  aa_mutations text,
+  aa_unknowns text,
+  nuc_substitutions text,
+  nuc_deletions text,
+  nuc_insertions text,
+  nuc_unknowns text
 );
 
 
