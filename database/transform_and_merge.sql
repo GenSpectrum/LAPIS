@@ -45,7 +45,7 @@ begin
 end;
 $$ language plpgsql;
 revoke all on function y_switch_in_staging_tables() from public;
-grant execute on function y_switch_in_staging_tables() to y_user;
+grant execute on function y_switch_in_staging_tables() to lapis_proc;
 
 create or replace function y_switch_in_staging_tables_without_truncate() returns void security definer as $$
 begin
@@ -69,7 +69,7 @@ begin
 end;
 $$ language plpgsql;
 revoke all on function y_switch_in_staging_tables_without_truncate() from public;
-grant execute on function y_switch_in_staging_tables_without_truncate() to y_user;
+grant execute on function y_switch_in_staging_tables_without_truncate() to lapis_proc;
 
 vacuum analyse y_main_metadata, y_main_sequence, y_main_sequence_columnar,
   y_main_aa_sequence, y_main_aa_sequence_columnar;
