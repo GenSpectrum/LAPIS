@@ -23,6 +23,7 @@ public class MpoxService {
     private final ComboPooledDataSource databasePool;
     private final Path workdir;
     private final SeqCompressor seqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.MPOX_REFERENCE);
+    private int alignedSequenceLength = 0; // Will be set later.
 
 
     public MpoxService(
@@ -34,7 +35,7 @@ public class MpoxService {
     }
 
 
-    public void updateData() throws IOException, SQLException, InterruptedException {
+    public void updateData() throws IOException, SQLException {
         LocalDateTime startTime = LocalDateTime.now();
 
         // Delete existing data: no need to do any change detection for such a small dataset
@@ -50,6 +51,7 @@ public class MpoxService {
         updateSeqOriginalOrAligned(false);
         updateSeqOriginalOrAligned(true);
         updateMetadata();
+        fillSequencesWithoutAlignment();
         updateNucleotideMutations();
 
         updateDataVersion(startTime);
@@ -88,6 +90,9 @@ public class MpoxService {
                 try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), false)) {
                     for (FastaEntry entry : fastaReader) {
                         String seq = aligned ? entry.getSeq().toUpperCase() : entry.getSeq();
+                        if (aligned && alignedSequenceLength == 0) {
+                            alignedSequenceLength = seq.length();
+                        }
                         String sampleName = entry.getSampleName();
                         String currentHash = Utils.hashMd5(seq);
                         byte[] compressed = seqCompressor.compress(seq);
@@ -106,6 +111,33 @@ public class MpoxService {
                 }
             }
             conn.setAutoCommit(true);
+        }
+    }
+
+
+    /**
+     * If a sequences could not be aligned, we will put NNNNNNN as a placeholder. This makes it possible to include all
+     * sequences.
+     */
+    private void fillSequencesWithoutAlignment() throws SQLException {
+        String placeholderSequence = "N".repeat(alignedSequenceLength);
+        byte[] compressed = seqCompressor.compress(placeholderSequence);
+        String hash = Utils.hashMd5(placeholderSequence);
+        String sql = """
+                update y_nextstrain_mpox
+                set
+                  seq_aligned_compressed = ?,
+                  seq_aligned_hash = ?
+                where
+                  seq_aligned_compressed is null
+                  and seq_original_compressed is not null;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setBytes(1, compressed);
+                statement.setString(2, hash);
+                statement.execute();
+            }
         }
     }
 
