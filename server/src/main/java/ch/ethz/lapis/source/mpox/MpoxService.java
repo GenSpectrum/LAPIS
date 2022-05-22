@@ -116,15 +116,16 @@ public class MpoxService {
         String sql = """
                 insert into y_nextstrain_mpox (
                   metadata_hash, strain, sra_accession, date, date_original,
-                  country, host, clade
+                  region, country, host, clade
                 )
-                values (?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (strain) do update
                 set
                   metadata_hash = ?,
                   sra_accession = ?,
                   date = ?,
                   date_original = ?,
+                  region = ?,
                   country = ?,
                   host = ?,
                   clade = ?;
@@ -145,17 +146,19 @@ public class MpoxService {
                         statement.setString(3, entry.getSraAccession());
                         statement.setDate(4, Utils.nullableSqlDateValue(entry.getDate()));
                         statement.setString(5, entry.getDateOriginal());
-                        statement.setString(6, entry.getCountry());
-                        statement.setString(7, entry.getHost());
-                        statement.setString(8, entry.getClade());
+                        statement.setString(6, entry.getRegion());
+                        statement.setString(7, entry.getCountry());
+                        statement.setString(8, entry.getHost());
+                        statement.setString(9, entry.getClade());
 
-                        statement.setString(9, currentHash);
-                        statement.setString(10, entry.getSraAccession());
-                        statement.setDate(11, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setString(12, entry.getDateOriginal());
-                        statement.setString(13, entry.getCountry());
-                        statement.setString(14, entry.getHost());
-                        statement.setString(15, entry.getClade());
+                        statement.setString(10, currentHash);
+                        statement.setString(11, entry.getSraAccession());
+                        statement.setDate(12, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setString(13, entry.getDateOriginal());
+                        statement.setString(14, entry.getRegion());
+                        statement.setString(15, entry.getCountry());
+                        statement.setString(16, entry.getHost());
+                        statement.setString(17, entry.getClade());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

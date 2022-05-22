@@ -41,6 +41,7 @@ public class MpoxMetadataFileReader
             .setSraAccession(cleanString(csv.get("accession")))
             .setDateOriginal(cleanString(csv.get("date")))
             .setDate(Utils.nullableLocalDateValueAcceptingPartialDates(csv.get("date")))
+            .setRegion(cleanString(csv.get("region")))
             .setCountry(cleanString(csv.get("country")))
             .setHost(cleanString(csv.get("host")))
             .setClade(cleanString(csv.get("clade")));

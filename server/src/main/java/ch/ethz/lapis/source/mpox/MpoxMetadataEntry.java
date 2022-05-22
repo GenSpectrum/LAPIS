@@ -9,6 +9,7 @@ public class MpoxMetadataEntry implements Serializable {
     private String sraAccession;
     private LocalDate date;
     private String dateOriginal;
+    private String region;
     private String country;
     private String host;
     private String clade;
@@ -46,6 +47,15 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setDateOriginal(String dateOriginal) {
         this.dateOriginal = dateOriginal;
+        return this;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public MpoxMetadataEntry setRegion(String region) {
+        this.region = region;
         return this;
     }
 
