@@ -48,10 +48,6 @@ The API has five main endpoints related to samples. These endpoints provide diff
 
 The API returns a response (data) based on a query to one of the endpoints. You can view a response in your browser, or use the data programatically. We'll provide some examples in R.
 
-<aside class="notice">
-The <code>/sample/fasta</code> and <code>/sample/fasta-aligned</code> endpoints has a limit of 100,000 sequences per request. We do not support pagination (yet). However, you could, for example, use the <code>dateFrom</code> and <code>dateTo</code> filters to load the sequences chunk by chunk.
-</aside>
-
 ## Query Format
 
 > **Query example:**
