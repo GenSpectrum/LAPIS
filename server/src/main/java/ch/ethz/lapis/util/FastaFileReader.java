@@ -60,7 +60,9 @@ public class FastaFileReader implements Iterator<FastaEntry>, Iterable<FastaEntr
             }
             if (nextLine.startsWith(">")) {
                 if (sampleName == null) {
-                    sampleName = nextLine.substring(1).replaceAll(" .*", "");
+                    sampleName = nextLine.substring(1)
+                        .replaceAll(" .*", "")
+                        .replaceAll("\\|.*", "");
                 } else {
                     break;
                 }
