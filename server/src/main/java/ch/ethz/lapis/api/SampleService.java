@@ -61,6 +61,7 @@ public class SampleService {
                         AccessKey.LEVEL level = switch (rs.getString("level")) {
                             case "full" -> AccessKey.LEVEL.FULL;
                             case "aggregated" -> AccessKey.LEVEL.AGGREGATED;
+                            default -> null;
                         };
                         keys.add(new AccessKey(rs.getString("key"), level));
                     }

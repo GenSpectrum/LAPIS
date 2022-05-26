@@ -40,15 +40,15 @@ public class CacheService {
     private static final Map<String, BiConsumer<SampleController, Object>> endpointToPreComputation = new HashMap<>() {{
         put(SupportedEndpoints.SAMPLE_AGGREGATED, (sampleController, obj) -> {
             SampleAggregatedRequest request = (SampleAggregatedRequest) obj;
-            sampleController.getAggregated(request, new GeneralConfig());
+            sampleController.getAggregated(request, new GeneralConfig(), "");
         });
         put(SupportedEndpoints.SAMPLE_AA_MUTATIONS, (sampleController, obj) -> {
             MutationRequest request = (MutationRequest) obj;
-            sampleController.getAAMutations(request, new GeneralConfig());
+            sampleController.getAAMutations(request, new GeneralConfig(), "");
         });
         put(SupportedEndpoints.SAMPLE_NUC_MUTATIONS, (sampleController, obj) -> {
             MutationRequest request = (MutationRequest) obj;
-            sampleController.getNucMutations(request, new GeneralConfig());
+            sampleController.getNucMutations(request, new GeneralConfig(), "");
         });
     }};
     private final JedisPool pool = new JedisPool(LapisMain.globalConfig.getRedisHost(),
