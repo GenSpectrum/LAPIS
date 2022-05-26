@@ -487,11 +487,11 @@ public class SampleController {
         if (openness != OpennessLevel.PROTECTED) {
             return;
         }
-        if (
-            !accessKeys.containsKey(accessKey) ||
-                (!endpointServesAggregatedData && accessKeys.get(accessKey) != AccessKey.LEVEL.FULL)
-        ) {
-            // throw new ForbiddenException();
+        if (endpointServesAggregatedData) {
+            return; // Just for the intermediate phase
+        }
+        if (!accessKeys.containsKey(accessKey) || accessKeys.get(accessKey) != AccessKey.LEVEL.FULL) {
+            throw new ForbiddenException();
         }
     }
 
