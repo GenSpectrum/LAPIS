@@ -19,6 +19,14 @@ create table data_version
 );
 
 
+create table access_key
+(
+  key text primary key,
+  level text not null,
+  comment text
+);
+
+
 -- Source: Nextstrain/GenBank
 
 create table y_nextstrain_genbank
@@ -291,5 +299,6 @@ on
   y_main_sequence,
   y_main_sequence_columnar,
   y_main_aa_sequence,
-  y_main_aa_sequence_columnar
+  y_main_aa_sequence_columnar,
+  access_key
 to y_user;

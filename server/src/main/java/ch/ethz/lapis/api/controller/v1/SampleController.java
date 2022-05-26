@@ -22,7 +22,9 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -37,6 +39,7 @@ public class SampleController {
     private final DataVersionService dataVersionService;
     private final ObjectMapper objectMapper;
     private final OpennessLevel openness = LapisMain.globalConfig.getApiOpennessLevel();
+    private final Map<String, AccessKey.LEVEL> accessKeys;
 
 
     public SampleController(
@@ -49,6 +52,20 @@ public class SampleController {
         this.sampleService = sampleService;
         this.dataVersionService = dataVersionService;
         this.objectMapper = objectMapper;
+        if (openness == OpennessLevel.PROTECTED) {
+            // TODO The keys are currently only loaded during program start. Later changes will not have an effect
+            //  until the next restart.
+            accessKeys = new HashMap<>();
+            try {
+                for (AccessKey accessKey : sampleService.getAccessKeys()) {
+                    accessKeys.put(accessKey.getKey(), accessKey.getLevel());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            accessKeys = null;
+        }
     }
 
 
@@ -61,8 +78,10 @@ public class SampleController {
     @GetMapping("/aggregated")
     public ResponseEntity<String> getAggregated(
         SampleAggregatedRequest request,
-        GeneralConfig generalConfig
+        GeneralConfig generalConfig,
+        String accessKey
     ) {
+        checkAuthorization(accessKey, true);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
@@ -114,8 +133,10 @@ public class SampleController {
     public ResponseEntity<String> getDetails(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
     ) throws SQLException, JsonProcessingException {
+        checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -148,8 +169,10 @@ public class SampleController {
     public ResponseEntity<String> getContributors(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
     ) throws SQLException, IOException {
+        checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -188,8 +211,10 @@ public class SampleController {
     public ResponseEntity<String> getStrainNames(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    )  {
+        checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
@@ -219,8 +244,10 @@ public class SampleController {
     public ResponseEntity<String> getGisaidEpiIsls(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
@@ -247,7 +274,12 @@ public class SampleController {
 
 
     @GetMapping("/aa-mutations")
-    public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
+    public ResponseEntity<String> getAAMutations(
+        MutationRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -292,7 +324,12 @@ public class SampleController {
 
 
     @GetMapping("/nuc-mutations")
-    public ResponseEntity<String> getNucMutations(MutationRequest request, GeneralConfig generalConfig) {
+    public ResponseEntity<String> getNucMutations(
+        MutationRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
@@ -340,8 +377,10 @@ public class SampleController {
     public ResponseEntity<StreamingResponseBody> getFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
     ) {
+        checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
@@ -364,8 +403,10 @@ public class SampleController {
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         SampleDetailRequest request,
         GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
     ) {
+        checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID) {
@@ -439,6 +480,19 @@ public class SampleController {
             }
         }
         throw new UnsupportedDataFormatException(dataFormat);
+    }
+
+    private void checkAuthorization(String accessKey, boolean endpointServesAggregatedData) {
+        // This function will only get active if the instance is protected.
+        if (openness != OpennessLevel.PROTECTED) {
+            return;
+        }
+        if (
+            !accessKeys.containsKey(accessKey) ||
+                (!endpointServesAggregatedData && accessKeys.get(accessKey) != AccessKey.LEVEL.FULL)
+        ) {
+            // throw new ForbiddenException();
+        }
     }
 
 }

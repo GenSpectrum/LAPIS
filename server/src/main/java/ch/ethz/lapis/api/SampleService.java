@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
+import ch.ethz.lapis.api.entity.AccessKey;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.Versioned;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
@@ -31,7 +32,9 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,26 @@ public class SampleService {
 
     private Connection getDatabaseConnection() throws SQLException {
         return dbPool.getConnection();
+    }
+
+
+    public List<AccessKey> getAccessKeys() throws SQLException {
+        String sql = "select key, level from access_key;";
+        List<AccessKey> keys = new ArrayList<>();
+        try (Connection conn = getDatabaseConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    while (rs.next()) {
+                        AccessKey.LEVEL level = switch (rs.getString("level")) {
+                            case "full" -> AccessKey.LEVEL.FULL;
+                            case "aggregated" -> AccessKey.LEVEL.AGGREGATED;
+                        };
+                        keys.add(new AccessKey(rs.getString("key"), level));
+                    }
+                }
+            }
+        }
+        return keys;
     }
 
 
