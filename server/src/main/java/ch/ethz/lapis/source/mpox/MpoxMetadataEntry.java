@@ -8,6 +8,9 @@ public class MpoxMetadataEntry implements Serializable {
     private String strain;
     private String sraAccession;
     private LocalDate date;
+    private Integer year;
+    private Integer month;
+    private Integer day;
     private String dateOriginal;
     private String region;
     private String country;
@@ -38,6 +41,33 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setDate(LocalDate date) {
         this.date = date;
+        return this;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public MpoxMetadataEntry setYear(Integer year) {
+        this.year = year;
+        return this;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public MpoxMetadataEntry setMonth(Integer month) {
+        this.month = month;
+        return this;
+    }
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public MpoxMetadataEntry setDay(Integer day) {
+        this.day = day;
         return this;
     }
 

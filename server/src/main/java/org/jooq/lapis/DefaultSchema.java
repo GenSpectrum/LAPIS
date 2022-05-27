@@ -20,8 +20,7 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.YMainSequenceColumnar;
 import org.jooq.lapis.tables.YMainSequenceColumnarStaging;
 import org.jooq.lapis.tables.YMainSequenceStaging;
-import org.jooq.lapis.tables.YNextstrainGenbank;
-import org.jooq.lapis.tables.YS3c;
+import org.jooq.lapis.tables.YNextstrainMpox;
 
 
 /**
@@ -88,14 +87,9 @@ public class DefaultSchema extends SchemaImpl {
     public final YMainSequenceStaging Y_MAIN_SEQUENCE_STAGING = YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING;
 
     /**
-     * The table <code>y_nextstrain_genbank</code>.
+     * The table <code>y_nextstrain_mpox</code>.
      */
-    public final YNextstrainGenbank Y_NEXTSTRAIN_GENBANK = YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK;
-
-    /**
-     * The table <code>y_s3c</code>.
-     */
-    public final YS3c Y_S3C = YS3c.Y_S3C;
+    public final YNextstrainMpox Y_NEXTSTRAIN_MPOX = YNextstrainMpox.Y_NEXTSTRAIN_MPOX;
 
     /**
      * No further instances allowed
@@ -123,7 +117,6 @@ public class DefaultSchema extends SchemaImpl {
             YMainSequenceColumnar.Y_MAIN_SEQUENCE_COLUMNAR,
             YMainSequenceColumnarStaging.Y_MAIN_SEQUENCE_COLUMNAR_STAGING,
             YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING,
-            YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK,
-            YS3c.Y_S3C);
+            YNextstrainMpox.Y_NEXTSTRAIN_MPOX);
     }
 }

@@ -74,19 +74,6 @@ public class Utils {
     }
 
 
-    public static LocalDate nullableLocalDateValueAcceptingPartialDates(String s) {
-        if (s == null || s.isBlank()) {
-            return null;
-        }
-        s = s.replaceAll("XX", "01");
-        try {
-            return LocalDate.parse(s);
-        } catch (DateTimeParseException ignored) {
-            return null;
-        }
-    }
-
-
     public static Date nullableSqlDateValue(LocalDate d) {
         if (d == null) {
             return null;
@@ -186,6 +173,30 @@ public class Utils {
             return DatatypeConverter.printHexBinary(digest).toUpperCase();
         } catch (IOException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    public static void compareFastaFiles(FastaFileReader file1, FastaFileReader file2) {
+        Map<String, String> sequences1 = new HashMap<>();
+        for (FastaEntry fastaEntry : file1) {
+            sequences1.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
+        }
+        Map<String, String> sequences2 = new HashMap<>();
+        for (FastaEntry fastaEntry : file2) {
+            sequences2.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
+        }
+        System.out.println("Files are equal? " + sequences1.equals(sequences2));
+        if (!sequences1.equals(sequences2)) {
+            sequences2.forEach((name2, seq2) -> {
+                if (!sequences1.containsKey(name2)) {
+                    System.out.println("File1 does not have " + name2);
+                } else {
+                    if (!sequences1.get(name2).equals(seq2)) {
+                        System.out.println("File1 contains a different sequence for " + name2);
+                    }
+                }
+            });
         }
     }
 

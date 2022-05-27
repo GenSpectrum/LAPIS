@@ -59,7 +59,7 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
     /**
      * The column <code>y_main_aa_sequence.aa_seq_compressed</code>.
      */
-    public final TableField<YMainAaSequenceRecord, byte[]> AA_SEQ_COMPRESSED = createField(DSL.name("aa_seq_compressed"), SQLDataType.BLOB, this, "");
+    public final TableField<YMainAaSequenceRecord, byte[]> AA_SEQ_COMPRESSED = createField(DSL.name("aa_seq_compressed"), SQLDataType.BLOB.nullable(false), this, "");
 
     private YMainAaSequence(Name alias, Table<YMainAaSequenceRecord> aliased) {
         this(alias, aliased, null);

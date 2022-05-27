@@ -144,6 +144,21 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     public final TableField<YMainMetadataRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_main_metadata.hospitalized</code>.
+     */
+    public final TableField<YMainMetadataRecord, Boolean> HOSPITALIZED = createField(DSL.name("hospitalized"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata.died</code>.
+     */
+    public final TableField<YMainMetadataRecord, Boolean> DIED = createField(DSL.name("died"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata.fully_vaccinated</code>.
+     */
+    public final TableField<YMainMetadataRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
+
+    /**
      * The column <code>y_main_metadata.sampling_strategy</code>.
      */
     public final TableField<YMainMetadataRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
@@ -152,6 +167,11 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
      * The column <code>y_main_metadata.pango_lineage</code>.
      */
     public final TableField<YMainMetadataRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_pango_lineage</code>.
+     */
+    public final TableField<YMainMetadataRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata.nextstrain_clade</code>.
@@ -177,31 +197,6 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
      * The column <code>y_main_metadata.authors</code>.
      */
     public final TableField<YMainMetadataRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.hospitalized</code>.
-     */
-    public final TableField<YMainMetadataRecord, Boolean> HOSPITALIZED = createField(DSL.name("hospitalized"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata.died</code>.
-     */
-    public final TableField<YMainMetadataRecord, Boolean> DIED = createField(DSL.name("died"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata.fully_vaccinated</code>.
-     */
-    public final TableField<YMainMetadataRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata.pango_lineage_usher</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> PANGO_LINEAGE_USHER = createField(DSL.name("pango_lineage_usher"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.nextclade_pango_lineage</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata.nextclade_qc_overall_score</code>.
@@ -237,6 +232,21 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
      * The column <code>y_main_metadata.nextclade_qc_stop_codons_score</code>.
      */
     public final TableField<YMainMetadataRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata.year</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.month</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.day</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
 
     private YMainMetadata(Name alias, Table<YMainMetadataRecord> aliased) {
         this(alias, aliased, null);
@@ -278,7 +288,7 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIED_IDX, Indexes.Y_MAIN_METADATA_STAGING_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_STAGING_PANGO_LINEAGE_USHER_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
+        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
     }
 
     @Override

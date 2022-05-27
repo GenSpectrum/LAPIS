@@ -176,6 +176,9 @@ create table y_nextstrain_mpox
   strain text primary key,
   sra_accession text,
   date date,
+  year integer,
+  month integer,
+  day integer,
   date_original text,
   region text,
   country text,
@@ -214,6 +217,9 @@ create table y_main_metadata
   gisaid_epi_isl text,
   strain text,
   date date,
+  year integer,
+  month integer,
+  day integer,
   date_submitted date,
   region text,
   country text,
@@ -250,6 +256,9 @@ create index on y_main_metadata (sra_accession);
 create index on y_main_metadata (gisaid_epi_isl);
 create index on y_main_metadata (strain);
 create index on y_main_metadata (date);
+create index on y_main_metadata (year);
+create index on y_main_metadata (month);
+create index on y_main_metadata (day);
 create index on y_main_metadata (date_submitted);
 create index on y_main_metadata (region);
 create index on y_main_metadata (country);
