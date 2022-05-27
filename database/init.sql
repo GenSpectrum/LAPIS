@@ -258,7 +258,7 @@ create index on y_main_metadata (strain);
 create index on y_main_metadata (date);
 create index on y_main_metadata (year);
 create index on y_main_metadata (month);
-create index on y_main_metadata (date);
+create index on y_main_metadata (day);
 create index on y_main_metadata (date_submitted);
 create index on y_main_metadata (region);
 create index on y_main_metadata (country);
