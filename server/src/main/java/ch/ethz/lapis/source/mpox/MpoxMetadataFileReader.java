@@ -1,6 +1,6 @@
 package ch.ethz.lapis.source.mpox;
 
-import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.ParsedDate;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -36,15 +36,23 @@ public class MpoxMetadataFileReader
     @Override
     public MpoxMetadataEntry next() {
         CSVRecord csv = iterator.next();
-        return new MpoxMetadataEntry()
+        ParsedDate parsedDate = ParsedDate.parse(csv.get("date"));
+        MpoxMetadataEntry entry = new MpoxMetadataEntry()
             .setStrain(cleanString(csv.get("strain")))
             .setSraAccession(cleanString(csv.get("accession")))
             .setDateOriginal(cleanString(csv.get("date")))
-            .setDate(Utils.nullableLocalDateValueAcceptingPartialDates(csv.get("date")))
             .setRegion(cleanString(csv.get("region")))
             .setCountry(cleanString(csv.get("country")))
             .setHost(cleanString(csv.get("host")))
             .setClade(cleanString(csv.get("clade")));
+        if (parsedDate != null) {
+            entry
+                .setDate(parsedDate.getDate())
+                .setYear(parsedDate.getYear())
+                .setMonth(parsedDate.getMonth())
+                .setDay(parsedDate.getDay());
+        }
+        return entry;
     }
 
     @Override
