@@ -144,6 +144,21 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     public final TableField<YMainMetadataStagingRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_main_metadata_staging.hospitalized</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> HOSPITALIZED = createField(DSL.name("hospitalized"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.died</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> DIED = createField(DSL.name("died"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.fully_vaccinated</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
+
+    /**
      * The column <code>y_main_metadata_staging.sampling_strategy</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
@@ -152,6 +167,11 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      * The column <code>y_main_metadata_staging.pango_lineage</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.nextstrain_clade</code>.
@@ -177,31 +197,6 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      * The column <code>y_main_metadata_staging.authors</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.hospitalized</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, Boolean> HOSPITALIZED = createField(DSL.name("hospitalized"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.died</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, Boolean> DIED = createField(DSL.name("died"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.fully_vaccinated</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, Boolean> FULLY_VACCINATED = createField(DSL.name("fully_vaccinated"), SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.pango_lineage_usher</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> PANGO_LINEAGE_USHER = createField(DSL.name("pango_lineage_usher"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.nextclade_qc_overall_score</code>.
@@ -237,6 +232,21 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      * The column <code>y_main_metadata_staging.nextclade_qc_stop_codons_score</code>.
      */
     public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.year</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.month</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.day</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
 
     private YMainMetadataStaging(Name alias, Table<YMainMetadataStagingRecord> aliased) {
         this(alias, aliased, null);
@@ -278,7 +288,7 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_DIED_IDX, Indexes.Y_MAIN_METADATA_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_USHER_IDX, Indexes.Y_MAIN_METADATA_STAGING_AGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_AUTHORS_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOST_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_STAGING_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_IDX, Indexes.Y_MAIN_METADATA_STAGING_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_STAGING_SEX_IDX, Indexes.Y_MAIN_METADATA_STAGING_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_STRAIN_IDX, Indexes.Y_MAIN_METADATA_STAGING_SUBMITTING_LAB_IDX);
+        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_STAGING_AGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_IDX, Indexes.Y_MAIN_METADATA_STAGING_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_STAGING_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOST_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_STAGING_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_IDX, Indexes.Y_MAIN_METADATA_STAGING_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_STAGING_SEX_IDX, Indexes.Y_MAIN_METADATA_STAGING_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_STRAIN_IDX, Indexes.Y_MAIN_METADATA_STAGING_SUBMITTING_LAB_IDX);
     }
 
     @Override

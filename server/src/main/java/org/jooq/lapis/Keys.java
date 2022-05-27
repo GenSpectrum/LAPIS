@@ -18,8 +18,7 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.YMainSequenceColumnar;
 import org.jooq.lapis.tables.YMainSequenceColumnarStaging;
 import org.jooq.lapis.tables.YMainSequenceStaging;
-import org.jooq.lapis.tables.YNextstrainGenbank;
-import org.jooq.lapis.tables.YS3c;
+import org.jooq.lapis.tables.YNextstrainMpox;
 import org.jooq.lapis.tables.records.YMainAaSequenceColumnarRecord;
 import org.jooq.lapis.tables.records.YMainAaSequenceColumnarStagingRecord;
 import org.jooq.lapis.tables.records.YMainAaSequenceRecord;
@@ -30,8 +29,7 @@ import org.jooq.lapis.tables.records.YMainSequenceColumnarRecord;
 import org.jooq.lapis.tables.records.YMainSequenceColumnarStagingRecord;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.jooq.lapis.tables.records.YMainSequenceStagingRecord;
-import org.jooq.lapis.tables.records.YNextstrainGenbankRecord;
-import org.jooq.lapis.tables.records.YS3cRecord;
+import org.jooq.lapis.tables.records.YNextstrainMpoxRecord;
 
 
 /**
@@ -55,7 +53,5 @@ public class Keys {
     public static final UniqueKey<YMainSequenceColumnarRecord> Y_MAIN_SEQUENCE_COLUMNAR_PKEY = Internal.createUniqueKey(YMainSequenceColumnar.Y_MAIN_SEQUENCE_COLUMNAR, DSL.name("y_main_sequence_columnar_pkey"), new TableField[] { YMainSequenceColumnar.Y_MAIN_SEQUENCE_COLUMNAR.POSITION }, true);
     public static final UniqueKey<YMainSequenceColumnarStagingRecord> Y_MAIN_SEQUENCE_COLUMNAR_STAGING_PKEY = Internal.createUniqueKey(YMainSequenceColumnarStaging.Y_MAIN_SEQUENCE_COLUMNAR_STAGING, DSL.name("y_main_sequence_columnar_staging_pkey"), new TableField[] { YMainSequenceColumnarStaging.Y_MAIN_SEQUENCE_COLUMNAR_STAGING.POSITION }, true);
     public static final UniqueKey<YMainSequenceStagingRecord> Y_MAIN_SEQUENCE_STAGING_PKEY = Internal.createUniqueKey(YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING, DSL.name("y_main_sequence_staging_pkey"), new TableField[] { YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING.ID }, true);
-    public static final UniqueKey<YNextstrainGenbankRecord> Y_NEXTSTRAIN_GENBANK_PKEY = Internal.createUniqueKey(YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK, DSL.name("y_nextstrain_genbank_pkey"), new TableField[] { YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK.STRAIN }, true);
-    public static final UniqueKey<YS3cRecord> Y_S3C_GISAID_EPI_ISL_KEY = Internal.createUniqueKey(YS3c.Y_S3C, DSL.name("y_s3c_gisaid_epi_isl_key"), new TableField[] { YS3c.Y_S3C.GISAID_EPI_ISL }, true);
-    public static final UniqueKey<YS3cRecord> Y_S3C_SRA_ACCESSION_KEY = Internal.createUniqueKey(YS3c.Y_S3C, DSL.name("y_s3c_sra_accession_key"), new TableField[] { YS3c.Y_S3C.SRA_ACCESSION }, true);
+    public static final UniqueKey<YNextstrainMpoxRecord> Y_NEXTSTRAIN_MPOX_PKEY = Internal.createUniqueKey(YNextstrainMpox.Y_NEXTSTRAIN_MPOX, DSL.name("y_nextstrain_mpox_pkey"), new TableField[] { YNextstrainMpox.Y_NEXTSTRAIN_MPOX.STRAIN }, true);
 }

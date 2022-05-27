@@ -286,269 +286,297 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
     }
 
     /**
-     * Setter for <code>y_main_metadata.sampling_strategy</code>.
-     */
-    public void setSamplingStrategy(String value) {
-        set(19, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.sampling_strategy</code>.
-     */
-    public String getSamplingStrategy() {
-        return (String) get(19);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.pango_lineage</code>.
-     */
-    public void setPangoLineage(String value) {
-        set(20, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.pango_lineage</code>.
-     */
-    public String getPangoLineage() {
-        return (String) get(20);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.nextstrain_clade</code>.
-     */
-    public void setNextstrainClade(String value) {
-        set(21, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.nextstrain_clade</code>.
-     */
-    public String getNextstrainClade() {
-        return (String) get(21);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.gisaid_clade</code>.
-     */
-    public void setGisaidClade(String value) {
-        set(22, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.gisaid_clade</code>.
-     */
-    public String getGisaidClade() {
-        return (String) get(22);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.originating_lab</code>.
-     */
-    public void setOriginatingLab(String value) {
-        set(23, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.originating_lab</code>.
-     */
-    public String getOriginatingLab() {
-        return (String) get(23);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.submitting_lab</code>.
-     */
-    public void setSubmittingLab(String value) {
-        set(24, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.submitting_lab</code>.
-     */
-    public String getSubmittingLab() {
-        return (String) get(24);
-    }
-
-    /**
-     * Setter for <code>y_main_metadata.authors</code>.
-     */
-    public void setAuthors(String value) {
-        set(25, value);
-    }
-
-    /**
-     * Getter for <code>y_main_metadata.authors</code>.
-     */
-    public String getAuthors() {
-        return (String) get(25);
-    }
-
-    /**
      * Setter for <code>y_main_metadata.hospitalized</code>.
      */
     public void setHospitalized(Boolean value) {
-        set(26, value);
+        set(19, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.hospitalized</code>.
      */
     public Boolean getHospitalized() {
-        return (Boolean) get(26);
+        return (Boolean) get(19);
     }
 
     /**
      * Setter for <code>y_main_metadata.died</code>.
      */
     public void setDied(Boolean value) {
-        set(27, value);
+        set(20, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.died</code>.
      */
     public Boolean getDied() {
-        return (Boolean) get(27);
+        return (Boolean) get(20);
     }
 
     /**
      * Setter for <code>y_main_metadata.fully_vaccinated</code>.
      */
     public void setFullyVaccinated(Boolean value) {
-        set(28, value);
+        set(21, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.fully_vaccinated</code>.
      */
     public Boolean getFullyVaccinated() {
-        return (Boolean) get(28);
+        return (Boolean) get(21);
     }
 
     /**
-     * Setter for <code>y_main_metadata.pango_lineage_usher</code>.
+     * Setter for <code>y_main_metadata.sampling_strategy</code>.
      */
-    public void setPangoLineageUsher(String value) {
-        set(29, value);
+    public void setSamplingStrategy(String value) {
+        set(22, value);
     }
 
     /**
-     * Getter for <code>y_main_metadata.pango_lineage_usher</code>.
+     * Getter for <code>y_main_metadata.sampling_strategy</code>.
      */
-    public String getPangoLineageUsher() {
-        return (String) get(29);
+    public String getSamplingStrategy() {
+        return (String) get(22);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.pango_lineage</code>.
+     */
+    public void setPangoLineage(String value) {
+        set(23, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.pango_lineage</code>.
+     */
+    public String getPangoLineage() {
+        return (String) get(23);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_pango_lineage</code>.
      */
     public void setNextcladePangoLineage(String value) {
-        set(30, value);
+        set(24, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_pango_lineage</code>.
      */
     public String getNextcladePangoLineage() {
-        return (String) get(30);
+        return (String) get(24);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.nextstrain_clade</code>.
+     */
+    public void setNextstrainClade(String value) {
+        set(25, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.nextstrain_clade</code>.
+     */
+    public String getNextstrainClade() {
+        return (String) get(25);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.gisaid_clade</code>.
+     */
+    public void setGisaidClade(String value) {
+        set(26, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.gisaid_clade</code>.
+     */
+    public String getGisaidClade() {
+        return (String) get(26);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.originating_lab</code>.
+     */
+    public void setOriginatingLab(String value) {
+        set(27, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.originating_lab</code>.
+     */
+    public String getOriginatingLab() {
+        return (String) get(27);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.submitting_lab</code>.
+     */
+    public void setSubmittingLab(String value) {
+        set(28, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.submitting_lab</code>.
+     */
+    public String getSubmittingLab() {
+        return (String) get(28);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.authors</code>.
+     */
+    public void setAuthors(String value) {
+        set(29, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.authors</code>.
+     */
+    public String getAuthors() {
+        return (String) get(29);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_overall_score</code>.
      */
     public void setNextcladeQcOverallScore(Double value) {
-        set(31, value);
+        set(30, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_overall_score</code>.
      */
     public Double getNextcladeQcOverallScore() {
-        return (Double) get(31);
+        return (Double) get(30);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_missing_data_score</code>.
      */
     public void setNextcladeQcMissingDataScore(Double value) {
-        set(32, value);
+        set(31, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_missing_data_score</code>.
      */
     public Double getNextcladeQcMissingDataScore() {
-        return (Double) get(32);
+        return (Double) get(31);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_mixed_sites_score</code>.
      */
     public void setNextcladeQcMixedSitesScore(Double value) {
-        set(33, value);
+        set(32, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_mixed_sites_score</code>.
      */
     public Double getNextcladeQcMixedSitesScore() {
-        return (Double) get(33);
+        return (Double) get(32);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_private_mutations_score</code>.
      */
     public void setNextcladeQcPrivateMutationsScore(Double value) {
-        set(34, value);
+        set(33, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_private_mutations_score</code>.
      */
     public Double getNextcladeQcPrivateMutationsScore() {
-        return (Double) get(34);
+        return (Double) get(33);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_snp_clusters_score</code>.
      */
     public void setNextcladeQcSnpClustersScore(Double value) {
-        set(35, value);
+        set(34, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_snp_clusters_score</code>.
      */
     public Double getNextcladeQcSnpClustersScore() {
-        return (Double) get(35);
+        return (Double) get(34);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_frame_shifts_score</code>.
      */
     public void setNextcladeQcFrameShiftsScore(Double value) {
-        set(36, value);
+        set(35, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_frame_shifts_score</code>.
      */
     public Double getNextcladeQcFrameShiftsScore() {
-        return (Double) get(36);
+        return (Double) get(35);
     }
 
     /**
      * Setter for <code>y_main_metadata.nextclade_qc_stop_codons_score</code>.
      */
     public void setNextcladeQcStopCodonsScore(Double value) {
-        set(37, value);
+        set(36, value);
     }
 
     /**
      * Getter for <code>y_main_metadata.nextclade_qc_stop_codons_score</code>.
      */
     public Double getNextcladeQcStopCodonsScore() {
-        return (Double) get(37);
+        return (Double) get(36);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.year</code>.
+     */
+    public void setYear(Integer value) {
+        set(37, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.year</code>.
+     */
+    public Integer getYear() {
+        return (Integer) get(37);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.month</code>.
+     */
+    public void setMonth(Integer value) {
+        set(38, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.month</code>.
+     */
+    public Integer getMonth() {
+        return (Integer) get(38);
+    }
+
+    /**
+     * Setter for <code>y_main_metadata.day</code>.
+     */
+    public void setDay(Integer value) {
+        set(39, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata.day</code>.
+     */
+    public Integer getDay() {
+        return (Integer) get(39);
     }
 
     // -------------------------------------------------------------------------
@@ -574,7 +602,7 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
     /**
      * Create a detached, initialised YMainMetadataRecord
      */
-    public YMainMetadataRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, String samplingStrategy, String pangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String pangoLineageUsher, String nextcladePangoLineage, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore) {
+    public YMainMetadataRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String samplingStrategy, String pangoLineage, String nextcladePangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore, Integer year, Integer month, Integer day) {
         super(YMainMetadata.Y_MAIN_METADATA);
 
         setId(id);
@@ -596,18 +624,17 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
         setHost(host);
         setAge(age);
         setSex(sex);
+        setHospitalized(hospitalized);
+        setDied(died);
+        setFullyVaccinated(fullyVaccinated);
         setSamplingStrategy(samplingStrategy);
         setPangoLineage(pangoLineage);
+        setNextcladePangoLineage(nextcladePangoLineage);
         setNextstrainClade(nextstrainClade);
         setGisaidClade(gisaidClade);
         setOriginatingLab(originatingLab);
         setSubmittingLab(submittingLab);
         setAuthors(authors);
-        setHospitalized(hospitalized);
-        setDied(died);
-        setFullyVaccinated(fullyVaccinated);
-        setPangoLineageUsher(pangoLineageUsher);
-        setNextcladePangoLineage(nextcladePangoLineage);
         setNextcladeQcOverallScore(nextcladeQcOverallScore);
         setNextcladeQcMissingDataScore(nextcladeQcMissingDataScore);
         setNextcladeQcMixedSitesScore(nextcladeQcMixedSitesScore);
@@ -615,5 +642,8 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
         setNextcladeQcSnpClustersScore(nextcladeQcSnpClustersScore);
         setNextcladeQcFrameShiftsScore(nextcladeQcFrameShiftsScore);
         setNextcladeQcStopCodonsScore(nextcladeQcStopCodonsScore);
+        setYear(year);
+        setMonth(month);
+        setDay(day);
     }
 }

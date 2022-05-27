@@ -14,8 +14,7 @@ import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.YMainSequenceColumnar;
 import org.jooq.lapis.tables.YMainSequenceColumnarStaging;
 import org.jooq.lapis.tables.YMainSequenceStaging;
-import org.jooq.lapis.tables.YNextstrainGenbank;
-import org.jooq.lapis.tables.YS3c;
+import org.jooq.lapis.tables.YNextstrainMpox;
 
 
 /**
@@ -75,12 +74,7 @@ public class Tables {
     public static final YMainSequenceStaging Y_MAIN_SEQUENCE_STAGING = YMainSequenceStaging.Y_MAIN_SEQUENCE_STAGING;
 
     /**
-     * The table <code>y_nextstrain_genbank</code>.
+     * The table <code>y_nextstrain_mpox</code>.
      */
-    public static final YNextstrainGenbank Y_NEXTSTRAIN_GENBANK = YNextstrainGenbank.Y_NEXTSTRAIN_GENBANK;
-
-    /**
-     * The table <code>y_s3c</code>.
-     */
-    public static final YS3c Y_S3C = YS3c.Y_S3C;
+    public static final YNextstrainMpox Y_NEXTSTRAIN_MPOX = YNextstrainMpox.Y_NEXTSTRAIN_MPOX;
 }
