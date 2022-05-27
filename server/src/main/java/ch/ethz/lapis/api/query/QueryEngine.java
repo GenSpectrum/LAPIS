@@ -6,9 +6,11 @@ import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
+import ch.ethz.lapis.core.Utils;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -17,6 +19,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ch.ethz.lapis.api.query.Database.Columns.*;
@@ -57,6 +60,8 @@ public class QueryEngine {
                 for (int i = 0; i < fields.size(); i++) {
                     switch (fields.get(i)) {
                         case DATE -> sampleAggregated.setDate(Database.intToDate((Integer) key.get(i)));
+                        case YEAR -> sampleAggregated.setYear((Integer) key.get(i));
+                        case MONTH -> sampleAggregated.setMonth((Integer) key.get(i));
                         case DATESUBMITTED -> sampleAggregated
                             .setDateSubmitted(Database.intToDate((Integer) key.get(i)));
                         case REGION -> sampleAggregated.setRegion((String) key.get(i));
@@ -102,6 +107,20 @@ public class QueryEngine {
     public boolean[] matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
         Database db = database;
         SampleFilter<?> sf = sampleFilter;
+
+        // TODO This shouldn't be done here?
+        //  Validate yearMonthFrom and yearMonthTo
+        Pattern pattern = Pattern.compile("(\\d{4})([-]\\d{2})?([-]\\d{2})?");
+        if (sf.getYearMonthFrom() != null) {
+            if (!pattern.matcher(sf.getYearMonthFrom()).matches()) {
+                throw new BadRequestException("yearMonthFrom is malformed, it has to be yyyy-mm");
+            }
+        }
+        if (sf.getYearMonthTo() != null) {
+            if (!pattern.matcher(sf.getYearMonthTo()).matches()) {
+                throw new BadRequestException("getYearMonthTo is malformed, it has to be yyyy-mm");
+            }
+        }
 
         // Filter variant
         var nucMutations = sf.getNucMutations();
@@ -193,6 +212,9 @@ public class QueryEngine {
 
         // Filter metadata
         between(matched, db.getIntColumn(DATE), sf.getDateFrom(), sf.getDateTo());
+        between(matched, db.getIntColumn(YEAR), sf.getYearFrom(), sf.getYearTo());
+        betweenYearMonth(matched, db.getIntColumn(YEAR), db.getIntColumn(MONTH),
+            sf.getYearMonthFrom(), sf.getYearMonthTo());
         between(matched, db.getIntColumn(DATE_SUBMITTED),
             sf.getDateSubmittedFrom(), sf.getDateSubmittedTo());
         eq(matched, db.getStringColumn(REGION), sf.getRegion(), true);
@@ -331,6 +353,50 @@ public class QueryEngine {
         between(matched, data, dateFromInt, dateToInt);
     }
 
+
+    private void betweenYearMonth(
+        boolean[] matched,
+        Integer[] years,
+        Integer[] months,
+        String yearMonthFrom,
+        String yearMonthTo
+    ) {
+        if (yearMonthFrom == null && yearMonthTo == null) {
+            return;
+        }
+        Integer yearFromInt = null;
+        Integer monthFromInt = null;
+        Integer yearToInt = null;
+        Integer monthToInt = null;
+        if (yearMonthFrom != null) {
+            String[] split = yearMonthFrom.split("-");
+            yearFromInt = Utils.nullableIntegerValue(split[0]);
+            monthFromInt = Utils.nullableIntegerValue(split[1]);
+        }
+        if (yearMonthTo != null) {
+            String[] split = yearMonthTo.split("-");
+            yearToInt = Utils.nullableIntegerValue(split[0]);
+            monthToInt = Utils.nullableIntegerValue(split[1]);
+        }
+        if (yearMonthFrom != null && yearMonthTo != null) {
+            for (int i = 0; i < matched.length; i++) {
+                matched[i] = matched[i] && years[i] != null && months[i] != null
+                    && ((years[i] >= yearFromInt && months[i] >= monthFromInt) || years[i] > yearFromInt)
+                    && ((years[i] <= yearToInt && months[i] <= monthToInt) || years[i] < yearToInt);
+            }
+        } else if (yearMonthFrom != null) {
+            for (int i = 0; i < matched.length; i++) {
+                matched[i] = matched[i] && years[i] != null && months[i] != null
+                    && ((years[i] >= yearFromInt && months[i] >= monthFromInt) || years[i] > yearFromInt);
+            }
+        } else {
+            for (int i = 0; i < matched.length; i++) {
+                matched[i] = matched[i] && years[i] != null && months[i] != null
+                    && ((years[i] <= yearToInt && months[i] <= monthToInt) || years[i] < yearToInt);
+            }
+        }
+    }
+
     private VariantQueryExpr parseVariantQueryExpr(String variantQuery) {
         try {
             VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
@@ -353,6 +419,8 @@ public class QueryEngine {
     private String aggregationFieldToColumnName(AggregationField field) {
         return switch (field) {
             case DATE -> DATE;
+            case YEAR -> YEAR;
+            case MONTH -> MONTH;
             case DATESUBMITTED -> DATE_SUBMITTED;
             case REGION -> REGION;
             case COUNTRY -> COUNTRY;

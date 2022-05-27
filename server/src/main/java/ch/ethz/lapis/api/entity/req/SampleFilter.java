@@ -32,6 +32,11 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dateSubmittedTo;
 
+    private Integer yearFrom;
+    private Integer yearTo;
+    private String yearMonthFrom;
+    private String yearMonthTo;
+
     private String region;
     private String country;
     private String division;
@@ -146,6 +151,42 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setDateSubmittedTo(LocalDate dateSubmittedTo) {
         this.dateSubmittedTo = dateSubmittedTo;
+        return (T) this;
+    }
+
+    public Integer getYearFrom() {
+        return yearFrom;
+    }
+
+    public T setYearFrom(Integer yearFrom) {
+        this.yearFrom = yearFrom;
+        return (T) this;
+    }
+
+    public Integer getYearTo() {
+        return yearTo;
+    }
+
+    public T setYearTo(Integer yearTo) {
+        this.yearTo = yearTo;
+        return (T) this;
+    }
+
+    public String getYearMonthFrom() {
+        return yearMonthFrom;
+    }
+
+    public T setYearMonthFrom(String yearMonthFrom) {
+        this.yearMonthFrom = yearMonthFrom;
+        return (T) this;
+    }
+
+    public String getYearMonthTo() {
+        return yearMonthTo;
+    }
+
+    public T setYearMonthTo(String yearMonthTo) {
+        this.yearMonthTo = yearMonthTo;
         return (T) this;
     }
 

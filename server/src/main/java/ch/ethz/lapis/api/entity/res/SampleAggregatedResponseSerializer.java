@@ -23,6 +23,8 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
             for (AggregationField field : resultSet.getFields()) {
                 switch (field) {
                     case DATE -> gen.writeObjectField("date", sample.getDate());
+                    case YEAR -> gen.writeObjectField("year", sample.getYear());
+                    case MONTH -> gen.writeObjectField("month", sample.getMonth());
                     case DATESUBMITTED -> gen.writeObjectField("dateSubmitted", sample.getDateSubmitted());
                     case REGION -> gen.writeStringField("region", sample.getRegion());
                     case COUNTRY -> gen.writeStringField("country", sample.getCountry());
