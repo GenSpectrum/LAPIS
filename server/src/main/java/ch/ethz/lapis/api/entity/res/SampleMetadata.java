@@ -5,6 +5,8 @@ import java.time.LocalDate;
 public abstract class SampleMetadata<T extends SampleMetadata<T>> {
 
     private LocalDate date;
+    private Integer year;
+    private Integer month;
     private LocalDate dateSubmitted;
     private String region;
     private String country;
@@ -33,6 +35,24 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
 
     public T setDate(LocalDate date) {
         this.date = date;
+        return (T) this;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public T setYear(Integer year) {
+        this.year = year;
+        return (T) this;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public T setMonth(Integer month) {
+        this.month = month;
         return (T) this;
     }
 
