@@ -110,7 +110,7 @@ public class QueryEngine {
 
         // TODO This shouldn't be done here?
         //  Validate yearMonthFrom and yearMonthTo
-        Pattern pattern = Pattern.compile("(\\d{4})([-]\\d{2})?([-]\\d{2})?");
+        Pattern pattern = Pattern.compile("\\d{4}-\\d{2}");
         if (sf.getYearMonthFrom() != null) {
             if (!pattern.matcher(sf.getYearMonthFrom()).matches()) {
                 throw new BadRequestException("yearMonthFrom is malformed, it has to be yyyy-mm");

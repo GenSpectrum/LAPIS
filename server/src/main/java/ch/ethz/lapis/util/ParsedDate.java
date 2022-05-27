@@ -73,7 +73,7 @@ public class ParsedDate {
         } catch (DateTimeParseException ignored) {}
         // Parse date parts
         s = s.replaceAll("X", "0");
-        Pattern pattern = Pattern.compile("(\\d{4})([-]\\d{2})?([-]\\d{2})?");
+        Pattern pattern = Pattern.compile("(\\d{4})(-\\d{2})?(-\\d{2})?");
         Matcher m = pattern.matcher(s);
         if (m.matches()) {
             Integer g1 = m.group(1) != null ? Integer.parseInt(m.group(1)) : null;
