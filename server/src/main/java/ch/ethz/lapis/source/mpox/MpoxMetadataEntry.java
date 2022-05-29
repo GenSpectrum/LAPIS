@@ -12,10 +12,12 @@ public class MpoxMetadataEntry implements Serializable {
     private Integer month;
     private Integer day;
     private String dateOriginal;
+    private LocalDate dateSubmitted;
     private String region;
     private String country;
     private String host;
     private String clade;
+    private String authors;
 
     public String getStrain() {
         return strain;
@@ -80,6 +82,15 @@ public class MpoxMetadataEntry implements Serializable {
         return this;
     }
 
+    public LocalDate getDateSubmitted() {
+        return dateSubmitted;
+    }
+
+    public MpoxMetadataEntry setDateSubmitted(LocalDate dateSubmitted) {
+        this.dateSubmitted = dateSubmitted;
+        return this;
+    }
+
     public String getRegion() {
         return region;
     }
@@ -113,6 +124,15 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setClade(String clade) {
         this.clade = clade;
+        return this;
+    }
+
+    public String getAuthors() {
+        return authors;
+    }
+
+    public MpoxMetadataEntry setAuthors(String authors) {
+        this.authors = authors;
         return this;
     }
 }

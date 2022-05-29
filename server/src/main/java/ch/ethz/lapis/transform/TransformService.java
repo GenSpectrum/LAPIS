@@ -253,7 +253,7 @@ public class TransformService {
         String sql1 = """
                     insert into y_main_metadata_staging (
                       id, source, source_primary_key, strain, sra_accession,
-                      date, year, month, day, region, country, division, host, nextstrain_clade
+                      date, year, month, day, date_submitted, region, country, division, host, nextstrain_clade, authors
                     )
                     select
                       row_number() over () - 1 as id,
@@ -265,11 +265,13 @@ public class TransformService {
                       year,
                       month,
                       day,
+                      date_submitted,
                       region,
                       country,
                       division,
                       host,
-                      clade
+                      clade,
+                      authors
                     from y_nextstrain_mpox
                     where
                       seq_aligned_compressed is not null;

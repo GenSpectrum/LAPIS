@@ -1,5 +1,6 @@
 package ch.ethz.lapis.source.mpox;
 
+import ch.ethz.lapis.core.Utils;
 import ch.ethz.lapis.util.ParsedDate;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -41,10 +42,12 @@ public class MpoxMetadataFileReader
             .setStrain(cleanString(csv.get("strain")))
             .setSraAccession(cleanString(csv.get("accession")))
             .setDateOriginal(cleanString(csv.get("date")))
+            .setDateSubmitted(Utils.nullableLocalDateValue(cleanString(csv.get("date_submitted"))))
             .setRegion(cleanString(csv.get("region")))
             .setCountry(cleanString(csv.get("country")))
             .setHost(cleanString(csv.get("host")))
-            .setClade(cleanString(csv.get("clade")));
+            .setClade(cleanString(csv.get("clade")))
+            .setAuthors(cleanString(csv.get("authors")));
         if (parsedDate != null) {
             entry
                 .setDate(parsedDate.getDate())

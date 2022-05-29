@@ -147,10 +147,10 @@ public class MpoxService {
 
         String sql = """
                 insert into y_nextstrain_mpox (
-                  metadata_hash, strain, sra_accession, date, year, month, day, date_original,
-                  region, country, host, clade
+                  metadata_hash, strain, sra_accession, date, year, month, day, date_original, date_submitted,
+                  region, country, host, clade, authors
                 )
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (strain) do update
                 set
                   metadata_hash = ?,
@@ -160,10 +160,12 @@ public class MpoxService {
                   month = ?,
                   day = ?,
                   date_original = ?,
+                  date_submitted = ?,
                   region = ?,
                   country = ?,
                   host = ?,
-                  clade = ?;
+                  clade = ?,
+                  authors = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -184,22 +186,26 @@ public class MpoxService {
                         statement.setObject(6, entry.getMonth());
                         statement.setObject(7, entry.getDay());
                         statement.setString(8, entry.getDateOriginal());
-                        statement.setString(9, entry.getRegion());
-                        statement.setString(10, entry.getCountry());
-                        statement.setString(11, entry.getHost());
-                        statement.setString(12, entry.getClade());
+                        statement.setDate(9, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(10, entry.getRegion());
+                        statement.setString(11, entry.getCountry());
+                        statement.setString(12, entry.getHost());
+                        statement.setString(13, entry.getClade());
+                        statement.setString(14, entry.getAuthors());
 
-                        statement.setString(13, currentHash);
-                        statement.setString(14, entry.getSraAccession());
-                        statement.setDate(15, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setObject(16, entry.getYear());
-                        statement.setObject(17, entry.getMonth());
-                        statement.setObject(18, entry.getDay());
-                        statement.setString(19, entry.getDateOriginal());
-                        statement.setString(20, entry.getRegion());
-                        statement.setString(21, entry.getCountry());
-                        statement.setString(22, entry.getHost());
-                        statement.setString(23, entry.getClade());
+                        statement.setString(15, currentHash);
+                        statement.setString(16, entry.getSraAccession());
+                        statement.setDate(17, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setObject(18, entry.getYear());
+                        statement.setObject(19, entry.getMonth());
+                        statement.setObject(20, entry.getDay());
+                        statement.setString(21, entry.getDateOriginal());
+                        statement.setDate(22, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(23, entry.getRegion());
+                        statement.setString(24, entry.getCountry());
+                        statement.setString(25, entry.getHost());
+                        statement.setString(26, entry.getClade());
+                        statement.setString(27, entry.getAuthors());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {
