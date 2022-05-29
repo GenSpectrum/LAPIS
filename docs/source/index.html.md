@@ -217,7 +217,7 @@ Above, we used the `/sample/aggregated` endpoint to get the total counts of sequ
 
 The `date` field returns and the `dateFrom` and `dateTo` parameters expect a string formatted as YYYY-MM-DD (e.g., 2022-05-29). There are however samples for which we do not know the exact date but only a partial date: e.g., only the year or the year and the month. In those cases, the `date` is considered as unknown and will return a `null`. That means that the query `dateFrom=2022-01-01` will not return samples for which we do not know the exact date but only that it is from May 2022.
 
-To support partial dates, LAPIS additionally has the fields `year` and `month`. They are returned by the `details` endpoint and can be used as an aggregation field (e.g., `fields=year,month` is possible). Further, LAPIS offers `yearFrom`, `yearTo`, `yearMonthFrom` and `yearMonthTo` filters. `yearMonth` has to be formatted as YYYY-MM. For example, the queries `yearFrom=2022` and `yearFrom=2022-05` will return all samples from May 2022.
+To support partial dates, LAPIS additionally has the fields `year` and `month`. They are returned by the `details` endpoint and can be used as an aggregation field (e.g., `fields=year,month` is possible). Further, LAPIS offers `yearFrom`, `yearTo`, `yearMonthFrom` and `yearMonthTo` filters. `yearMonth` has to be formatted as YYYY-MM. For example, the queries `yearFrom=2022` and `yearMonthFrom=2022-05` will include all samples from May 2022.
 
 
 ## Background
