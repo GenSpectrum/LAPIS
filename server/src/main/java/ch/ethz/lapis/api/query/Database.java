@@ -314,8 +314,7 @@ public class Database {
 
                 }
                 // Fetch pango lineage aliases
-                List<PangoLineageAlias> aliases = getPangolinLineageAliases(conn);
-                PangoLineageQueryConverter pangoLineageQueryConverter = new PangoLineageQueryConverter(aliases);
+                PangoLineageQueryConverter pangoLineageQueryConverter = null;
                 // Create database object
                 database = new Database(
                     dataVersion,
