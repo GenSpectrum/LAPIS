@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./docs
+        working-directory: ./docs/slate
     steps:
       - uses: actions/checkout@v2
       - name: Set environment variable "BRANCH"
