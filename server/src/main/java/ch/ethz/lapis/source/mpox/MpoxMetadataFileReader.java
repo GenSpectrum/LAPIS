@@ -37,17 +37,17 @@ public class MpoxMetadataFileReader
     @Override
     public MpoxMetadataEntry next() {
         CSVRecord csv = iterator.next();
-        ParsedDate parsedDate = ParsedDate.parse(csv.get("date"));
+        ParsedDate parsedDate = ParsedDate.parse(optionalGetFromCsv(csv, "date"));
         MpoxMetadataEntry entry = new MpoxMetadataEntry()
             .setStrain(cleanString(csv.get("strain")))
-            .setSraAccession(cleanString(csv.get("accession")))
-            .setDateOriginal(cleanString(csv.get("date")))
-            .setDateSubmitted(Utils.nullableLocalDateValue(cleanString(csv.get("date_submitted"))))
-            .setRegion(cleanString(csv.get("region")))
-            .setCountry(cleanString(csv.get("country")))
-            .setHost(cleanString(csv.get("host")))
-            .setClade(cleanString(csv.get("clade")))
-            .setAuthors(cleanString(csv.get("authors")));
+            .setSraAccession(cleanString(optionalGetFromCsv(csv, "accession")))
+            .setDateOriginal(cleanString(optionalGetFromCsv(csv, "date")))
+            .setDateSubmitted(Utils.nullableLocalDateValue(cleanString(optionalGetFromCsv(csv, "date_submitted"))))
+            .setRegion(cleanString(optionalGetFromCsv(csv, "region")))
+            .setCountry(cleanString(optionalGetFromCsv(csv, "country")))
+            .setHost(cleanString(optionalGetFromCsv(csv, "host")))
+            .setClade(cleanString(optionalGetFromCsv(csv, "clade")))
+            .setAuthors(cleanString(optionalGetFromCsv(csv, "authors")));
         if (parsedDate != null) {
             entry
                 .setDate(parsedDate.getDate())
@@ -79,5 +79,13 @@ public class MpoxMetadataFileReader
             return null;
         }
         return s;
+    }
+
+    private String optionalGetFromCsv(CSVRecord csvRecord, String field) {
+        try {
+            return csvRecord.get("field");
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }
