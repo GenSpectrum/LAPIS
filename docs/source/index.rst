@@ -29,3 +29,4 @@ If you are hosting an own public instance and would like it to be added to the l
    :maxdepth: 5
 
    Monkeypox <reference/monkeypox>
+   SARS-CoV-2 <reference/sars_cov_2>
