@@ -83,7 +83,7 @@ public class MpoxMetadataFileReader
 
     private String optionalGetFromCsv(CSVRecord csvRecord, String field) {
         try {
-            return csvRecord.get("field");
+            return csvRecord.get(field);
         } catch (IllegalArgumentException e) {
             return null;
         }
