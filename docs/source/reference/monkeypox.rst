@@ -17,7 +17,7 @@ The API has the following endpoints related to samples. These endpoints provide 
 - ``/sample/fasta`` - to get original (unaligned) sequences
 - ``/sample/fasta-aligned`` - to get aligned sequences
 
-The API returns a response (data) based on a query to one of the endpoints. You can view a response in your browser, or use the data programmatically. We'll provide some examples in R.
+The API returns a response (data) based on a query to one of the endpoints. You can view a response in your browser, or use the data programmatically.
 
 Query Format
 ~~~~~~~~~~~~
