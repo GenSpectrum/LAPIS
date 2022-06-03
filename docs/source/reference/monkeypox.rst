@@ -23,10 +23,10 @@ Query Format
 ~~~~~~~~~~~~
 
 To query an endpoint, use the web link with prefix
-``https://mpox-lapis.gen-spectrum.org/v1`` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but a click takes you to the full link in your browser.
+``https://mpox-lapis.genspectrum.org/v1`` and the suffix for the relevant endpoint. In the examples, we only show the suffixes to keep things simple, but a click takes you to the full link in your browser.
 
 **Query example:**
-Get the total number of available sequences: `/sample/aggregated <https://mpox-lapis.gen-spectrum.org/v1/sample/aggregated>`_
+Get the total number of available sequences: `/sample/aggregated <https://mpox-lapis.genspectrum.org/v1/sample/aggregated>`_
 
 
 Response Format
