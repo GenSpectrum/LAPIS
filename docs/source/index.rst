@@ -17,15 +17,15 @@ Two instances are publicly available:
 If you are hosting an own public instance and would like it to be added to the list, please send us an email or `submit a pull request <https://github.com/cevo-public/LAPIS/blob/rtd/docs/source/index.rst>`_ to change this page.
 
 .. toctree::
-   :titlesonly:
    :caption: Tutorials
    :hidden:
+   :maxdepth: 5
 
    For developers and maintainers <tutorials/developers_and_maintainers/index>
 
 .. toctree::
-   :titlesonly:
    :caption: Reference
    :hidden:
+   :maxdepth: 5
 
    Monkeypox <reference/monkeypox>

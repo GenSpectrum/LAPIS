@@ -130,3 +130,6 @@ Why is the query ``dateFrom=2022-01-01`` not returning samples from May 2022 tha
     aggregated(dateFrom=t0)
     = aggregated(dateFrom=t0,dateTo=t1) + aggregated(dateFrom=t1+1)
     = sum(aggregated(dateFrom=t0,fields=date))
+
+.. toctree::
+   :maxdepth: 3

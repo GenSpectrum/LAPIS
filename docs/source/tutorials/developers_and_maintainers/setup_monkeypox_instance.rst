@@ -128,3 +128,7 @@ Then, execute the following command:
 
 
 Wait half a minute and then open http://localhost:2345/v1/sample/aggregated in your browser.
+
+
+.. toctree::
+   :maxdepth: 3
