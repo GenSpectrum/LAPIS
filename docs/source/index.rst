@@ -22,3 +22,10 @@ If you are hosting an own public instance and would like it to be added to the l
    :hidden:
 
    For developers and maintainers <tutorials/developers_and_maintainers/index>
+
+.. toctree::
+   :titlesonly:
+   :caption: Reference
+   :hidden:
+
+   Monkeypox <reference/monkeypox>
