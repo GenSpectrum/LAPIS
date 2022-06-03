@@ -487,8 +487,8 @@ public class SampleController {
         if (openness != OpennessLevel.PROTECTED) {
             return;
         }
-        if (endpointServesAggregatedData) {
-            return; // Just for the intermediate phase
+        if (endpointServesAggregatedData && accessKeys.containsKey(accessKey)) {
+            return;
         }
         if (!accessKeys.containsKey(accessKey) || accessKeys.get(accessKey) != AccessKey.LEVEL.FULL) {
             throw new ForbiddenException();
