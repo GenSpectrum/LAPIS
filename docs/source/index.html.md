@@ -20,7 +20,7 @@ code_clipboard: true
 
 # Introduction
 
-LAPIS (Lightweight API for Sequences) is an open web application programming interface (API) allowing easy querying of genomic sequencing data. Originally developed for SARS-CoV-2 and used by [CoV-Spectrum](https://cov-spectrum.org), it is now also available for monkeypox. The API for monkeypox uses all monkeypox data on [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) and from authors who shared them directly with us. The data were pre-proceessed and aligned by the Nextstrain team. We will update the data as soon as they come in. The core features are:
+LAPIS (Lightweight API for Sequences) is an open web application programming interface (API) allowing easy querying of genomic sequencing data. Originally developed for SARS-CoV-2 and used by [CoV-Spectrum](https://cov-spectrum.org), it is now also available for monkeypox. The API for monkeypox uses all monkeypox data on [NCBI GenBank](https://www.ncbi.nlm.nih.gov/genbank/) and from authors who shared them directly with us. Please note that we cannot provide sequences within LAPIS which are from databases not in the public domain (such as e.g. GISAID EpiPox) due to re-sharing restrictions. The provided data were pre-proceessed and aligned by the Nextstrain team. GenBank allows automatic pulling of data such that LAPIS offers always the latest data. The trees on https://nextstrain.org/monkeypox are based on data pulled through LAPIS. The core features are:
 
 - Filter sequences by metadata or mutations
 - Aggregate data by any metadata field you like
