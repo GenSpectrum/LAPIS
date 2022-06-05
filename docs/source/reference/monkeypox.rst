@@ -1,3 +1,5 @@
+.. _referenceMonkeypox:
+
 Reference: monkeypox instance
 =============================
 

@@ -1,3 +1,5 @@
+.. _referenceSarsCoV2:
+
 Reference: SARS-CoV-2 instance
 ==============================
 
