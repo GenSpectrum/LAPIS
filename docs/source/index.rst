@@ -14,7 +14,7 @@ Two instances are publicly available:
 - For monkeypox (data from GenBank): https://mpox-lapis.genspectrum.org (:ref:`reference <referenceMonkeypox>`)
 - For SARS-CoV-2 (data from GenBank): https://lapis.cov-spectrum.org/open (:ref:`reference <referenceSarsCoV2>`)
 
-If you are hosting an own public instance and would like it to be added to the list, please send us an email or `submit a pull request <https://github.com/cevo-public/LAPIS/blob/rtd/docs/source/index.rst>`_ to change this page.
+If you are hosting an own public instance and would like it to be added to the list, please send us an email or `submit a pull request <https://github.com/cevo-public/LAPIS/blob/main/docs/source/index.rst>`_ to change this page.
 
 .. toctree::
    :caption: Tutorials
