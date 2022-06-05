@@ -71,6 +71,7 @@ All **sample** endpoints can be filtered by the following attributes:
 - country
 - division
 - host
+- variantQuery (see :ref:`variantQuery`)
 - clade
 - nucMutations (see section "Filter Mutations")
 

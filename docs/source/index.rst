@@ -30,6 +30,7 @@ If you are hosting an own public instance and would like it to be added to the l
 
    concepts/data_versions.rst
    concepts/date_handling.rst
+   concepts/variant_query.rst
 
 .. toctree::
    :caption: Reference

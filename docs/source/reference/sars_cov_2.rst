@@ -75,6 +75,7 @@ All **sample** endpoints can be filtered by the following attributes:
 - sex
 - host
 - samplingStrategy
+- variantQuery (see :ref:`variantQuery`)
 - pangoLineage (see section "Filter Pango Lineages")
 - nextcladePangoLineage
 - nextstrainClade
