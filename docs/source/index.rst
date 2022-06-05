@@ -24,6 +24,13 @@ If you are hosting an own public instance and would like it to be added to the l
    For developers and maintainers <tutorials/developers_and_maintainers/index>
 
 .. toctree::
+   :caption: Concepts
+   :hidden:
+   :maxdepth: 5
+
+   concepts/data_versions.rst
+
+.. toctree::
    :caption: Reference
    :hidden:
    :maxdepth: 5
