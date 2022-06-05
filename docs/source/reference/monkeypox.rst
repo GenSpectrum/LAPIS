@@ -34,24 +34,7 @@ Get the total number of available sequences: `/sample/aggregated <https://mpox-l
 Response Format
 ~~~~~~~~~~~~~~~
 
-The responses can be formatted in JSON or CSV. The default is JSON. To get CSV responses, append the query parameter ``dataFormat=csv``.
-
-Responses returned in the `JSON <https://www.json.org/json-en.html>`_ format have three top level attributes:
-
-- "info" - data about the API itself
-- "errors" - an array (hopefully empty!) of things that went wrong
-- "data" - the actual resposne data
-
-
-**Response example**:
-
-.. code-block:: json
-
-    {
-      "info":{"apiVersion":1,"dataVersion":1653160874,"deprecationDate":null,"deprecationInfo":null,"acknowledgement":null},
-      "errors":[],
-      "data":[{"count":84}]
-    }
+See :ref:`responseFormat`
 
 
 Filters
