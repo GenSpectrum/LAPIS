@@ -3,6 +3,8 @@
 Reference: SARS-CoV-2 instance
 ==============================
 
+.. image:: https://img.shields.io/badge/Instance-SARS--CoV--2-blue
+
 The API for SARS-CoV-2 uses all SARS-CoV-2 data on `NCBI GenBank <https://www.ncbi.nlm.nih.gov/genbank/>`_ The sequences were pre-processed by `Nextstrain <https://nextstrain.org/blog/2021-07-08-ncov-open-announcement>`_.
 
 Overview

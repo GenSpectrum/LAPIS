@@ -3,6 +3,8 @@
 Reference: monkeypox instance
 =============================
 
+.. image:: https://img.shields.io/badge/Instance-Monkeypox-blue
+
 The API for monkeypox uses all monkeypox data on `NCBI GenBank <https://www.ncbi.nlm.nih.gov/genbank/>`_ and from authors who shared them directly with us. The sequences are aligned with `Nextclade <http://nextclade.vercel.app/>`_.
 
 
