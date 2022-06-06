@@ -30,6 +30,7 @@ If you are hosting an own public instance and would like it to be added to the l
 
    concepts/data_versions.rst
    concepts/date_handling.rst
+   concepts/mutation_filters.rst
    concepts/pango_lineage_query.rst
    concepts/response_format.rst
    concepts/variant_query.rst

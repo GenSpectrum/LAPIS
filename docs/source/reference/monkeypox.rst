@@ -60,7 +60,7 @@ All **sample** endpoints can be filtered by the following attributes:
 - host
 - variantQuery (see :ref:`variantQuery`)
 - clade
-- nucMutations (see section "Filter Mutations")
+- nucMutations
 
 The endpoints ``details``, ``contributors``, ``nuc-mutations``, ``fasta``, and ``fasta-aligned`` can additionally be filtered by these attributes:
 
@@ -73,11 +73,7 @@ To determine which values are available for each attribute, see the example in s
 Mutation filters
 ~~~~~~~~~~~~~~~~
 
-It is possible to filter for nucleotide bases/mutations. Multiple mutations can be provided by specifying a comma-separated list.
-
-A nucleotide mutation has the format ``<position><base>``. A "base" can be one of the four nucleotides ``A``, ``T``, ``C``, and ``G``. It can also be ``-`` for deletion and `N` for unknown.
-
-The ``<base>`` can be omitted to filter for any mutation. You can write a ``.`` for the ``<base>`` to filter for sequences for which it is confirmed that no mutation occurred, i.e., has the same base as the reference genome at the specified position.
+See :ref:`mutationFilters`
 
 
 Aggregation

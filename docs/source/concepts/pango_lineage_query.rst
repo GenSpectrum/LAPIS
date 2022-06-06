@@ -1,3 +1,5 @@
+.. _pangoLineageQuery:
+
 Pango lineage query
 ===================
 

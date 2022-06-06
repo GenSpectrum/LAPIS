@@ -63,14 +63,14 @@ All **sample** endpoints can be filtered by the following attributes:
 - host
 - samplingStrategy
 - variantQuery (see :ref:`variantQuery`)
-- pangoLineage (see section "Filter Pango Lineages")
+- pangoLineage
 - nextcladePangoLineage
 - nextstrainClade
 - gisaidClade
 - submittingLab
 - originatingLab
-- nucMutations (see section "Filter Mutations")
-- aaMutations (see section "Filter Mutations")
+- nucMutations
+- aaMutations
 - nextcladeQcOverallScoreFrom
 - nextcladeQcOverallScoreTo
 - nextcladeQcMissingDataScoreFrom
@@ -99,23 +99,13 @@ To determine which values are available for each attribute, see the example in s
 Mutation filters
 ~~~~~~~~~~~~~~~~
 
-It is possible to filter for nucleotide bases/mutations. Multiple mutations can be provided by specifying a comma-separated list.
-
-A nucleotide mutation has the format ``<position><base>``. A "base" can be one of the four nucleotides ``A``, ``T``, ``C``, and ``G``. It can also be ``-`` for deletion and `N` for unknown.
-
-An amino acid mutation has the format ``<gene>:<position><base>``. The following genes are available: E, M, N, ORF1a, ORF1b, ORF3a, ORF6, ORF7a, ORF7b, ORF8, ORF9b, S. A "base" can be one of the 20 amino acid codes. It can also be ``-`` for deletion and ``X`` for unknown.
-
-The `<base>` can be omitted to filter for any mutation. You can write a `.` for the `<base>` to filter for sequences for which it is confirmed that no mutation occurred, i.e., has the same base as the reference genome at the specified position.
+See :ref:`mutationFilters`
 
 
 Pango lineage filter
 ~~~~~~~~~~~~~~~~~~~~
 
-Pango lineage names inherit the hierarchical nature of genetic lineages. For example, B.1.1 is a sub-lineage of B.1. More information about the pango nomenclature can be found on the website of the `Pango network <https://www.pango.network/>`_.
-
-With the ``pangoLineage`` filter, it is possible to not only filter for a very specific lineage but also to include its sub-lineages. To include sub-lineages, add a ``*`` at the end. For example, writing B.1.351 will only give samples of B.1.351. Writing B.1.351* or B.1.351.* (there is no difference between these two options) will return B.1.351, B.1.351.1, B.1.351.2, etc.
-
-An official pango lineage name can only have at most three number components. A sub-lineage of a lineage with a maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can be found `here <https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json>`_. B.1.617.2 has the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. LAPIS is aware of aliases. Filtering B.1.617.2* will include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the same results as AY.1.
+See :ref:`pangoLineageQuery`
 
 
 Aggregation
