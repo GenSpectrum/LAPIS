@@ -67,7 +67,7 @@ public class SampleController {
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
-        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         stopWatch.round("Cache check");
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
         String body = useCacheOrCompute(cacheKey, () -> {
@@ -85,14 +85,16 @@ public class SampleController {
             }
         });
         // If a CSV is requested, deserialize the JSON and serialize as CSV
-        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+        DataFormat dataFormat = generalConfig.getDataFormat();
+        if (dataFormat.equals(DataFormat.CSV) || dataFormat.equals(DataFormat.TSV)) {
             try {
                 V1Response<List<SampleAggregated>> res = objectMapper.readValue(body, new TypeReference<>() {});
                 List<String> csvFields = request.getFields().stream()
                     .map(AggregationField::name)
                     .collect(Collectors.toList());
                 csvFields.add("count");
-                body = new CsvSerializer().serialize(res.getData(), SampleAggregated.class, csvFields);
+                body = new CsvSerializer(CsvSerializer.getDelimiterFromDataFormat(dataFormat))
+                    .serialize(res.getData(), SampleAggregated.class, csvFields);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -118,7 +120,7 @@ public class SampleController {
     ) throws SQLException, JsonProcessingException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
-        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         if (openness == OpennessLevel.GISAID) {
             throw new GisaidLimitationException();
         }
@@ -130,7 +132,8 @@ public class SampleController {
                     openness);
                 yield objectMapper.writeValueAsString(response);
             }
-            case CSV -> new CsvSerializer().serialize(samples, SampleDetail.class);
+            case CSV -> new CsvSerializer(CsvSerializer.Delimiter.CSV).serialize(samples, SampleDetail.class);
+            case TSV -> new CsvSerializer(CsvSerializer.Delimiter.TSV).serialize(samples, SampleDetail.class);
             default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
         };
         return new SampleResponseBuilder<String>()
@@ -152,7 +155,7 @@ public class SampleController {
     ) throws SQLException, IOException {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
-        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         if (request.getAgeFrom() != null
             || request.getAgeTo() != null
             || request.getSex() != null
@@ -170,7 +173,8 @@ public class SampleController {
                     openness);
                 yield objectMapper.writeValueAsString(response);
             }
-            case CSV -> new CsvSerializer().serialize(contributors, Contributor.class);
+            case CSV -> new CsvSerializer(CsvSerializer.Delimiter.CSV).serialize(contributors, Contributor.class);
+            case TSV -> new CsvSerializer(CsvSerializer.Delimiter.TSV).serialize(contributors, Contributor.class);
             default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
         };
         return new SampleResponseBuilder<String>()
@@ -250,7 +254,7 @@ public class SampleController {
     public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
-        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -271,10 +275,12 @@ public class SampleController {
             }
         });
         // If a CSV is requested, deserialize the JSON and serialize as CSV
-        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+        DataFormat dataFormat = generalConfig.getDataFormat();
+        if (dataFormat.equals(DataFormat.CSV) || dataFormat.equals(DataFormat.TSV)) {
             try {
                 V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
-                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+                body = new CsvSerializer(CsvSerializer.getDelimiterFromDataFormat(dataFormat))
+                    .serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -295,7 +301,7 @@ public class SampleController {
     public ResponseEntity<String> getNucMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
-        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV));
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         if (openness == OpennessLevel.GISAID && (
             request.getGisaidEpiIsl() != null
                 || request.getGenbankAccession() != null
@@ -316,10 +322,12 @@ public class SampleController {
             }
         });
         // If a CSV is requested, deserialize the JSON and serialize as CSV
-        if (generalConfig.getDataFormat().equals(DataFormat.CSV)) {
+        DataFormat dataFormat = generalConfig.getDataFormat();
+        if (dataFormat.equals(DataFormat.CSV) || dataFormat.equals(DataFormat.TSV)) {
             try {
                 V1Response<SampleMutationsResponse> res = objectMapper.readValue(body, new TypeReference<>() {});
-                body = new CsvSerializer().serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
+                body = new CsvSerializer(CsvSerializer.getDelimiterFromDataFormat(dataFormat))
+                    .serialize(res.getData(), SampleMutationsResponse.MutationEntry.class);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
