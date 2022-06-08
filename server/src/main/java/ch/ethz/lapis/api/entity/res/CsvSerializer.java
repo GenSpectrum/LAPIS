@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api.entity.res;
 
+import ch.ethz.lapis.api.entity.req.DataFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.javatuples.Pair;
@@ -16,6 +17,28 @@ import java.util.stream.Collectors;
 
 
 public class CsvSerializer {
+
+    public static enum Delimiter {
+        CSV,
+        TSV
+    }
+
+    public static Delimiter getDelimiterFromDataFormat(DataFormat dataFormat) {
+        return switch (dataFormat) {
+            case CSV -> Delimiter.CSV;
+            case TSV -> Delimiter.TSV;
+            default -> throw new IllegalArgumentException();
+        };
+    }
+
+    private final CSVFormat csvFormat;
+
+    public CsvSerializer(Delimiter delimiter) {
+        csvFormat = switch (delimiter) {
+            case CSV -> CSVFormat.DEFAULT;
+            case TSV -> CSVFormat.TDF;
+        };
+    }
 
     public <T> String serialize(List<T> objects, Class<T> c) {
         return serialize(objects, c, null);
@@ -64,7 +87,7 @@ public class CsvSerializer {
             .toArray(String[]::new);
         // Write CSV
         StringWriter out = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(header))) {
+        try (CSVPrinter printer = new CSVPrinter(out, csvFormat.withHeader(header))) {
             for (T obj : objects) {
                 Object[] record = selectedFields.stream()
                     .map(f -> {
