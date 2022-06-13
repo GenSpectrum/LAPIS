@@ -1,0 +1,29 @@
+## Build app ##
+
+FROM openjdk:16 AS builder
+WORKDIR /build/
+
+COPY . .
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build -x test
+
+
+## Run server ##
+
+FROM openjdk:16-bullseye AS server
+WORKDIR /app
+
+# Prepare server
+RUN apt-get update
+RUN apt-get install -y wget xz-utils
+
+# Download Nextclade
+RUN wget "https://github.com/nextstrain/nextclade/releases/download/2.0.0-alpha.10/nextclade-x86_64-unknown-linux-gnu" -O "nextclade"
+RUN chmod +x nextclade
+RUN ./nextclade dataset get --name "monkeypox" --output-dir "nextclade-data"
+
+COPY --from=builder /build/build/libs/lapis-1.0-SNAPSHOT.jar /app/lapis.jar
+COPY mpox-proc.sh .
+RUN chmod +x mpox-proc.sh
+
+ENTRYPOINT ["/app/mpox-proc.sh"]
