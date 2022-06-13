@@ -297,7 +297,7 @@ public class SampleService {
                 outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
                 outputStream.write(referenceSeqCompressor.decompress(seqCompressed)
                     .getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
