@@ -252,13 +252,24 @@ public class TransformService {
     public void pullFromNextstrainMpoxTable() throws SQLException {
         String sql1 = """
                     insert into y_main_metadata_staging (
-                      id, source, source_primary_key, strain, sra_accession,
-                      date, year, month, day, date_submitted, region, country, division, host, nextstrain_clade, authors
+                      id, source, source_primary_key, accession, strain, sra_accession,
+                      date, year, month, day, date_submitted, region, country, division, location,
+                      host, clade, authors, institution,
+
+                      nextclade_qc_overall_score, nextclade_qc_missing_data_score, nextclade_qc_mixed_sites_score,
+                      nextclade_qc_private_mutations_score, nextclade_qc_snp_clusters_score,
+                      nextclade_qc_frame_shifts_score, nextclade_qc_stop_codons_score, nextclade_alignment_score,
+                      nextclade_alignment_start, nextclade_alignment_end, nextclade_total_substitutions,
+                      nextclade_total_deletions, nextclade_total_insertions, nextclade_total_frame_shifts,
+                      nextclade_total_aminoacid_substitutions, nextclade_total_aminoacid_deletions,
+                      nextclade_total_aminoacid_insertions, nextclade_total_missing, nextclade_total_non_acgtns,
+                      nextclade_total_pcr_primer_changes
                     )
                     select
                       row_number() over () - 1 as id,
                       'mpox' as source,
-                      strain as source_primary_key,
+                      accession as source_primary_key,
+                      accession,
                       strain,
                       sra_accession,
                       date,
@@ -269,9 +280,32 @@ public class TransformService {
                       region,
                       country,
                       division,
+                      location,
                       host,
                       clade,
-                      authors
+                      authors,
+                      institution,
+
+                      nextclade_qc_overall_score,
+                      nextclade_qc_missing_data_score,
+                      nextclade_qc_mixed_sites_score,
+                      nextclade_qc_private_mutations_score,
+                      nextclade_qc_snp_clusters_score,
+                      nextclade_qc_frame_shifts_score,
+                      nextclade_qc_stop_codons_score,
+                      nextclade_alignment_score,
+                      nextclade_alignment_start,
+                      nextclade_alignment_end,
+                      nextclade_total_substitutions,
+                      nextclade_total_deletions,
+                      nextclade_total_insertions,
+                      nextclade_total_frame_shifts,
+                      nextclade_total_aminoacid_substitutions,
+                      nextclade_total_aminoacid_deletions,
+                      nextclade_total_aminoacid_insertions,
+                      nextclade_total_missing,
+                      nextclade_total_non_acgtns,
+                      nextclade_total_pcr_primer_changes
                     from y_nextstrain_mpox
                     where
                       seq_aligned_compressed is not null;
@@ -294,7 +328,7 @@ public class TransformService {
                 from
                   y_nextstrain_mpox nm
                   join y_main_metadata_staging mm
-                    on mm.source = 'mpox' and mm.source_primary_key = nm.strain;
+                    on mm.source = 'mpox' and mm.source_primary_key = nm.accession;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
