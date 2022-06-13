@@ -2,6 +2,7 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.NucMutation;
+import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.api.parser.VariantQueryBaseListener;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.api.query.*;
@@ -55,12 +56,7 @@ public class VariantQueryListener extends VariantQueryBaseListener {
 
     @Override
     public void enterPango_query(VariantQueryParser.Pango_queryContext ctx) {
-        PangoQuery pangoQuery = new PangoQuery(
-            ctx.pango_lineage().getText(),
-            ctx.pango_include_sub() != null,
-            Database.Columns.PANGO_LINEAGE
-        );
-        exprStack.peek().putValue(pangoQuery);
+        throw new BadRequestException("This operation is not supported.");
     }
 
     @Override

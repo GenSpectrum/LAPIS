@@ -40,12 +40,8 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case FULLYVACCINATED -> gen.writeObjectField("fullyVaccinated", sample.getFullyVaccinated());
                     case HOST -> gen.writeStringField("host", sample.getHost());
                     case SAMPLINGSTRATEGY -> gen.writeStringField("samplingStrategy", sample.getSamplingStrategy());
-                    case PANGOLINEAGE -> gen.writeStringField("pangoLineage", sample.getPangoLineage());
-                    case NEXTCLADEPANGOLINEAGE -> gen.writeStringField("nextcladePangoLineage", sample.getNextcladePangoLineage());
                     case CLADE -> gen.writeStringField("clade", sample.getClade());
-                    case GISAIDCLADE -> gen.writeStringField("gisaidClade", sample.getGisaidCloade());
-                    case SUBMITTINGLAB -> gen.writeStringField("submittingLab", sample.getSubmittingLab());
-                    case ORIGINATINGLAB -> gen.writeStringField("originatingLab", sample.getOriginatingLab());
+                    case INSTITUTION -> gen.writeStringField("submittingLab", sample.getInstitution());
                     default -> throw new RuntimeException("Unexpected field name: " + field);
                 }
             }

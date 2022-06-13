@@ -78,12 +78,8 @@ public class QueryEngine {
                         case FULLYVACCINATED -> sampleAggregated.setFullyVaccinated((Boolean) key.get(i));
                         case HOST -> sampleAggregated.setHost((String) key.get(i));
                         case SAMPLINGSTRATEGY -> sampleAggregated.setSamplingStrategy((String) key.get(i));
-                        case PANGOLINEAGE -> sampleAggregated.setPangoLineage((String) key.get(i));
-                        case NEXTCLADEPANGOLINEAGE -> sampleAggregated.setNextcladePangoLineage((String) key.get(i));
                         case CLADE -> sampleAggregated.setClade((String) key.get(i));
-                        case GISAIDCLADE -> sampleAggregated.setGisaidCloade((String) key.get(i));
-                        case SUBMITTINGLAB -> sampleAggregated.setSubmittingLab((String) key.get(i));
-                        case ORIGINATINGLAB -> sampleAggregated.setOriginatingLab((String) key.get(i));
+                        case INSTITUTION -> sampleAggregated.setInstitution((String) key.get(i));
                     }
                 }
                 result.add(sampleAggregated);
@@ -127,19 +123,12 @@ public class QueryEngine {
         var useNucMutations = nucMutations != null && !nucMutations.isEmpty();
         var aaMutations = sf.getAaMutations();
         var useAaMutations = aaMutations != null && !aaMutations.isEmpty();
-        var pangoLineage = sf.getPangoLineage();
-        var usePangoLineage = pangoLineage != null;
-        var nextcladePangoLineage = sf.getNextcladePangoLineage();
-        var useNextcladePangoLineage = nextcladePangoLineage != null;
-        var gisaidClade = sf.getGisaidClade();
-        var useGisaidClade = gisaidClade != null;
-        var nextstrainClade = sf.getClade();
-        var useNextstrainClade = nextstrainClade != null;
+        var clade = sf.getClade();
+        var useClade = clade != null;
         var variantQuery = sf.getVariantQuery();
         var useVariantQuery = variantQuery != null;
 
-        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || usePangoLineage || useNextcladePangoLineage
-            || useGisaidClade || useNextstrainClade;
+        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || useClade;
         if (useVariantQuery && useOtherVariantSpecifying) {
             throw new RuntimeException("It is not allowed to use variantQuery and another variant-specifying " +
                 "field at the same time.");
@@ -150,31 +139,8 @@ public class QueryEngine {
             variantQueryExpr = parseVariantQueryExpr(variantQuery);
         } else if (useOtherVariantSpecifying) {
             List<VariantQueryExpr> components = new ArrayList<>();
-            if (usePangoLineage) {
-                PangoQuery pq;
-                if (pangoLineage.endsWith("*")) {
-                    pq = new PangoQuery(pangoLineage.substring(0, pangoLineage.length() - 1), true,
-                        Database.Columns.PANGO_LINEAGE);
-                } else {
-                    pq = new PangoQuery(pangoLineage, false, Database.Columns.PANGO_LINEAGE);
-                }
-                components.add(pq);
-            }
-            if (useNextcladePangoLineage) {
-                PangoQuery pq;
-                if (nextcladePangoLineage.endsWith("*")) {
-                    pq = new PangoQuery(nextcladePangoLineage.substring(0, nextcladePangoLineage.length() - 1), true,
-                        NEXTCLADE_PANGO_LINEAGE);
-                } else {
-                    pq = new PangoQuery(nextcladePangoLineage, false, NEXTCLADE_PANGO_LINEAGE);
-                }
-                components.add(pq);
-            }
-            if (useNextstrainClade) {
-                components.add(new NextstrainClade(nextstrainClade));
-            }
-            if (useGisaidClade) {
-                components.add(new GisaidClade(gisaidClade));
+            if (useClade) {
+                components.add(new NextstrainClade(clade));
             }
             if (useAaMutations) {
                 components.addAll(aaMutations);
@@ -221,8 +187,7 @@ public class QueryEngine {
         eq(matched, db.getBoolColumn(FULLY_VACCINATED), sf.getFullyVaccinated());
         eq(matched, db.getStringColumn(HOST), sf.getHost(), true);
         eq(matched, db.getStringColumn(SAMPLING_STRATEGY), sf.getSamplingStrategy(), true);
-        eq(matched, db.getStringColumn(SUBMITTING_LAB), sf.getSubmittingLab(), true);
-        eq(matched, db.getStringColumn(ORIGINATING_LAB), sf.getOriginatingLab(), true);
+        eq(matched, db.getStringColumn(INSTITUTION), sf.getInstitution(), true);
         between(matched, db.getFloatColumn(NEXTCLADE_QC_OVERALL_SCORE),
             sf.getNextcladeQcOverallScoreFrom(), sf.getNextcladeQcOverallScoreTo());
         between(matched, db.getFloatColumn(NEXTCLADE_QC_MISSING_DATA_SCORE),
@@ -237,13 +202,32 @@ public class QueryEngine {
             sf.getNextcladeQcFrameShiftsScoreFrom(), sf.getNextcladeQcFrameShiftsScoreTo());
         between(matched, db.getFloatColumn(NEXTCLADE_QC_STOP_CODONS_SCORE),
             sf.getNextcladeQcStopCodonsScoreFrom(), sf.getNextcladeQcStopCodonsScoreTo());
+        between(matched, db.getFloatColumn(NEXTCLADE_ALIGNMENT_SCORE),
+            sf.getNextcladeAlignmentScoreFrom(), sf.getNextcladeAlignmentScoreTo());
+        between(matched, db.getIntColumn(NEXTCLADE_ALIGNMENT_START),
+            sf.getNextcladeAlignmentStartFrom(), sf.getNextcladeAlignmentStartTo());
+        between(matched, db.getIntColumn(NEXTCLADE_ALIGNMENT_END),
+            sf.getNextcladeAlignmentEndFrom(), sf.getNextcladeAlignmentEndTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_SUBSTITUTIONS),
+            sf.getNextcladeTotalSubstitutionsFrom(), sf.getNextcladeTotalSubstitutionsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_DELETIONS),
+            sf.getNextcladeTotalDeletionsFrom(), sf.getNextcladeTotalDeletionsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_INSERTIONS),
+            sf.getNextcladeTotalInsertionsFrom(), sf.getNextcladeTotalInsertionsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_FRAME_SHIFTS),
+            sf.getNextcladeTotalFrameShiftsFrom(), sf.getNextcladeTotalFrameShiftsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS),
+            sf.getNextcladeTotalAminoacidSubstitutionsFrom(), sf.getNextcladeTotalAminoacidSubstitutionsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_AMINOACID_DELETIONS),
+            sf.getNextcladeTotalAminoacidDeletionsFrom(), sf.getNextcladeTotalAminoacidDeletionsTo());
+        between(matched, db.getIntColumn(NEXTCLADE_TOTAL_AMINOACID_INSERTIONS),
+            sf.getNextcladeTotalAminoacidInsertionsFrom(), sf.getNextcladeTotalAminoacidInsertionsTo());
 
         // Filter IDs
         if (sf instanceof SampleDetailRequest) {
             SampleDetailRequest sdr = (SampleDetailRequest) sf;
-            eq(matched, db.getStringColumn(GENBANK_ACCESSION), sdr.getGenbankAccession(), true);
+            eq(matched, db.getStringColumn(ACCESSION), sdr.getAccession(), true);
             eq(matched, db.getStringColumn(SRA_ACCESSION), sdr.getSraAccession(), true);
-            eq(matched, db.getStringColumn(GISAID_EPI_ISL), sdr.getGisaidEpiIsl(), true);
             eq(matched, db.getStringColumn(STRAIN), sdr.getStrain(), true);
         }
 
@@ -424,12 +408,8 @@ public class QueryEngine {
             case FULLYVACCINATED -> FULLY_VACCINATED;
             case HOST -> HOST;
             case SAMPLINGSTRATEGY -> SAMPLING_STRATEGY;
-            case PANGOLINEAGE -> PANGO_LINEAGE;
-            case NEXTCLADEPANGOLINEAGE -> NEXTCLADE_PANGO_LINEAGE;
-            case CLADE -> NEXTSTRAIN_CLADE;
-            case GISAIDCLADE -> GISAID_CLADE;
-            case SUBMITTINGLAB -> SUBMITTING_LAB;
-            case ORIGINATINGLAB -> ORIGINATING_LAB;
+            case CLADE -> CLADE;
+            case INSTITUTION -> INSTITUTION;
             default -> throw new IllegalStateException("Unexpected value: " + field);
         };
     }

@@ -6,8 +6,7 @@ public class Contributor {
     private String sraAccession;
     private String gisaidEpiIsl;
     private String strain;
-    private String submittingLab;
-    private String originatingLab;
+    private String institution;
     private String authors;
 
     public String getGenbankAccession() {
@@ -46,21 +45,12 @@ public class Contributor {
         return this;
     }
 
-    public String getSubmittingLab() {
-        return submittingLab;
+    public String getInstitution() {
+        return institution;
     }
 
-    public Contributor setSubmittingLab(String submittingLab) {
-        this.submittingLab = submittingLab;
-        return this;
-    }
-
-    public String getOriginatingLab() {
-        return originatingLab;
-    }
-
-    public Contributor setOriginatingLab(String originatingLab) {
-        this.originatingLab = originatingLab;
+    public Contributor setInstitution(String institution) {
+        this.institution = institution;
         return this;
     }
 

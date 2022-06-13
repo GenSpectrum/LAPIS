@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 
 public class PangoQuery implements VariantQueryExpr {
@@ -11,13 +12,7 @@ public class PangoQuery implements VariantQueryExpr {
     private final String columnName;
 
     public PangoQuery(String pangoLineage, boolean includeSubLineage, String columnName) {
-        this.pangoLineage = pangoLineage;
-        this.includeSubLineage = includeSubLineage;
-        if (!columnName.equals(Database.Columns.PANGO_LINEAGE)
-            && !columnName.equals(Database.Columns.NEXTCLADE_PANGO_LINEAGE)) {
-            throw new RuntimeException("Column " + columnName + " is not known for containing a Pango lineage.");
-        }
-        this.columnName = columnName;
+        throw new BadRequestException("This operation is not supported.");
     }
 
     public String getPangoLineage() {

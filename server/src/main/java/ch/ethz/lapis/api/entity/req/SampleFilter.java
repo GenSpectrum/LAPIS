@@ -42,12 +42,8 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Boolean fullyVaccinated;
     private List<String> host;
     private String samplingStrategy;
-    private String pangoLineage;
-    private String nextcladePangoLineage;
     private String clade;
-    private String gisaidClade;
-    private String submittingLab;
-    private String originatingLab;
+    private String institution;
     private Float nextcladeQcOverallScoreFrom;
     private Float nextcladeQcOverallScoreTo;
     private Float nextcladeQcMissingDataScoreFrom;
@@ -62,6 +58,32 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Float nextcladeQcFrameShiftsScoreTo;
     private Float nextcladeQcStopCodonsScoreFrom;
     private Float nextcladeQcStopCodonsScoreTo;
+    private Float nextcladeAlignmentScoreFrom;
+    private Float nextcladeAlignmentScoreTo;
+    private Integer nextcladeAlignmentStartFrom;
+    private Integer nextcladeAlignmentStartTo;
+    private Integer nextcladeAlignmentEndFrom;
+    private Integer nextcladeAlignmentEndTo;
+    private Integer nextcladeTotalSubstitutionsFrom;
+    private Integer nextcladeTotalSubstitutionsTo;
+    private Integer nextcladeTotalDeletionsFrom;
+    private Integer nextcladeTotalDeletionsTo;
+    private Integer nextcladeTotalInsertionsFrom;
+    private Integer nextcladeTotalInsertionsTo;
+    private Integer nextcladeTotalFrameShiftsFrom;
+    private Integer nextcladeTotalFrameShiftsTo;
+    private Integer nextcladeTotalAminoacidSubstitutionsFrom;
+    private Integer nextcladeTotalAminoacidSubstitutionsTo;
+    private Integer nextcladeTotalAminoacidDeletionsFrom;
+    private Integer nextcladeTotalAminoacidDeletionsTo;
+    private Integer nextcladeTotalAminoacidInsertionsFrom;
+    private Integer nextcladeTotalAminoacidInsertionsTo;
+    private Integer nextcladeTotalMissingFrom;
+    private Integer nextcladeTotalMissingTo;
+    private Integer nextcladeTotalNonAcgtnsFrom;
+    private Integer nextcladeTotalNonAcgtnsTo;
+    private Integer nextcladeTotalPcrPrimerChangesFrom;
+    private Integer nextcladeTotalPcrPrimerChangesTo;
 
     private List<NucMutation> nucMutations = new ArrayList<>();
     private List<AAMutation> aaMutations = new ArrayList<>();
@@ -275,24 +297,6 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
-    public String getPangoLineage() {
-        return pangoLineage;
-    }
-
-    public T setPangoLineage(String pangoLineage) {
-        this.pangoLineage = pangoLineage;
-        return (T) this;
-    }
-
-    public String getNextcladePangoLineage() {
-        return nextcladePangoLineage;
-    }
-
-    public T setNextcladePangoLineage(String nextcladePangoLineage) {
-        this.nextcladePangoLineage = nextcladePangoLineage;
-        return (T) this;
-    }
-
     public String getClade() {
         return clade;
     }
@@ -302,30 +306,12 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
-    public String getGisaidClade() {
-        return gisaidClade;
+    public String getInstitution() {
+        return institution;
     }
 
-    public T setGisaidClade(String gisaidClade) {
-        this.gisaidClade = gisaidClade;
-        return (T) this;
-    }
-
-    public String getSubmittingLab() {
-        return submittingLab;
-    }
-
-    public T setSubmittingLab(String submittingLab) {
-        this.submittingLab = submittingLab;
-        return (T) this;
-    }
-
-    public String getOriginatingLab() {
-        return originatingLab;
-    }
-
-    public T setOriginatingLab(String originatingLab) {
-        this.originatingLab = originatingLab;
+    public T setInstitution(String institution) {
+        this.institution = institution;
         return (T) this;
     }
 
@@ -480,5 +466,239 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     public T setNextcladeQcStopCodonsScoreTo(Float nextcladeQcStopCodonsScoreTo) {
         this.nextcladeQcStopCodonsScoreTo = nextcladeQcStopCodonsScoreTo;
         return (T) this;
+    }
+
+    public Float getNextcladeAlignmentScoreFrom() {
+        return nextcladeAlignmentScoreFrom;
+    }
+
+    public T setNextcladeAlignmentScoreFrom(Float nextcladeAlignmentScoreFrom) {
+        this.nextcladeAlignmentScoreFrom = nextcladeAlignmentScoreFrom;
+         return (T) this;
+    }
+
+    public Float getNextcladeAlignmentScoreTo() {
+        return nextcladeAlignmentScoreTo;
+    }
+
+    public T setNextcladeAlignmentScoreTo(Float nextcladeAlignmentScoreTo) {
+        this.nextcladeAlignmentScoreTo = nextcladeAlignmentScoreTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeAlignmentStartFrom() {
+        return nextcladeAlignmentStartFrom;
+    }
+
+    public T setNextcladeAlignmentStartFrom(Integer nextcladeAlignmentStartFrom) {
+        this.nextcladeAlignmentStartFrom = nextcladeAlignmentStartFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeAlignmentStartTo() {
+        return nextcladeAlignmentStartTo;
+    }
+
+    public T setNextcladeAlignmentStartTo(Integer nextcladeAlignmentStartTo) {
+        this.nextcladeAlignmentStartTo = nextcladeAlignmentStartTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeAlignmentEndFrom() {
+        return nextcladeAlignmentEndFrom;
+    }
+
+    public T setNextcladeAlignmentEndFrom(Integer nextcladeAlignmentEndFrom) {
+        this.nextcladeAlignmentEndFrom = nextcladeAlignmentEndFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeAlignmentEndTo() {
+        return nextcladeAlignmentEndTo;
+    }
+
+    public T setNextcladeAlignmentEndTo(Integer nextcladeAlignmentEndTo) {
+        this.nextcladeAlignmentEndTo = nextcladeAlignmentEndTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalSubstitutionsFrom() {
+        return nextcladeTotalSubstitutionsFrom;
+    }
+
+    public T setNextcladeTotalSubstitutionsFrom(Integer nextcladeTotalSubstitutionsFrom) {
+        this.nextcladeTotalSubstitutionsFrom = nextcladeTotalSubstitutionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalSubstitutionsTo() {
+        return nextcladeTotalSubstitutionsTo;
+    }
+
+    public T setNextcladeTotalSubstitutionsTo(Integer nextcladeTotalSubstitutionsTo) {
+        this.nextcladeTotalSubstitutionsTo = nextcladeTotalSubstitutionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalDeletionsFrom() {
+        return nextcladeTotalDeletionsFrom;
+    }
+
+    public T setNextcladeTotalDeletionsFrom(Integer nextcladeTotalDeletionsFrom) {
+        this.nextcladeTotalDeletionsFrom = nextcladeTotalDeletionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalDeletionsTo() {
+        return nextcladeTotalDeletionsTo;
+    }
+
+    public T setNextcladeTotalDeletionsTo(Integer nextcladeTotalDeletionsTo) {
+        this.nextcladeTotalDeletionsTo = nextcladeTotalDeletionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalInsertionsFrom() {
+        return nextcladeTotalInsertionsFrom;
+    }
+
+    public T setNextcladeTotalInsertionsFrom(Integer nextcladeTotalInsertionsFrom) {
+        this.nextcladeTotalInsertionsFrom = nextcladeTotalInsertionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalInsertionsTo() {
+        return nextcladeTotalInsertionsTo;
+    }
+
+    public T setNextcladeTotalInsertionsTo(Integer nextcladeTotalInsertionsTo) {
+        this.nextcladeTotalInsertionsTo = nextcladeTotalInsertionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalFrameShiftsFrom() {
+        return nextcladeTotalFrameShiftsFrom;
+    }
+
+    public T setNextcladeTotalFrameShiftsFrom(Integer nextcladeTotalFrameShiftsFrom) {
+        this.nextcladeTotalFrameShiftsFrom = nextcladeTotalFrameShiftsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalFrameShiftsTo() {
+        return nextcladeTotalFrameShiftsTo;
+    }
+
+    public T setNextcladeTotalFrameShiftsTo(Integer nextcladeTotalFrameShiftsTo) {
+        this.nextcladeTotalFrameShiftsTo = nextcladeTotalFrameShiftsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidSubstitutionsFrom() {
+        return nextcladeTotalAminoacidSubstitutionsFrom;
+    }
+
+    public T setNextcladeTotalAminoacidSubstitutionsFrom(Integer nextcladeTotalAminoacidSubstitutionsFrom) {
+        this.nextcladeTotalAminoacidSubstitutionsFrom = nextcladeTotalAminoacidSubstitutionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidSubstitutionsTo() {
+        return nextcladeTotalAminoacidSubstitutionsTo;
+    }
+
+    public T setNextcladeTotalAminoacidSubstitutionsTo(Integer nextcladeTotalAminoacidSubstitutionsTo) {
+        this.nextcladeTotalAminoacidSubstitutionsTo = nextcladeTotalAminoacidSubstitutionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidDeletionsFrom() {
+        return nextcladeTotalAminoacidDeletionsFrom;
+    }
+
+    public T setNextcladeTotalAminoacidDeletionsFrom(Integer nextcladeTotalAminoacidDeletionsFrom) {
+        this.nextcladeTotalAminoacidDeletionsFrom = nextcladeTotalAminoacidDeletionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidDeletionsTo() {
+        return nextcladeTotalAminoacidDeletionsTo;
+    }
+
+    public T setNextcladeTotalAminoacidDeletionsTo(Integer nextcladeTotalAminoacidDeletionsTo) {
+        this.nextcladeTotalAminoacidDeletionsTo = nextcladeTotalAminoacidDeletionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidInsertionsFrom() {
+        return nextcladeTotalAminoacidInsertionsFrom;
+    }
+
+    public T setNextcladeTotalAminoacidInsertionsFrom(Integer nextcladeTotalAminoacidInsertionsFrom) {
+        this.nextcladeTotalAminoacidInsertionsFrom = nextcladeTotalAminoacidInsertionsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalAminoacidInsertionsTo() {
+        return nextcladeTotalAminoacidInsertionsTo;
+    }
+
+    public T setNextcladeTotalAminoacidInsertionsTo(Integer nextcladeTotalAminoacidInsertionsTo) {
+        this.nextcladeTotalAminoacidInsertionsTo = nextcladeTotalAminoacidInsertionsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalMissingFrom() {
+        return nextcladeTotalMissingFrom;
+    }
+
+    public T setNextcladeTotalMissingFrom(Integer nextcladeTotalMissingFrom) {
+        this.nextcladeTotalMissingFrom = nextcladeTotalMissingFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalMissingTo() {
+        return nextcladeTotalMissingTo;
+    }
+
+    public T setNextcladeTotalMissingTo(Integer nextcladeTotalMissingTo) {
+        this.nextcladeTotalMissingTo = nextcladeTotalMissingTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalNonAcgtnsFrom() {
+        return nextcladeTotalNonAcgtnsFrom;
+    }
+
+    public T setNextcladeTotalNonAcgtnsFrom(Integer nextcladeTotalNonAcgtnsFrom) {
+        this.nextcladeTotalNonAcgtnsFrom = nextcladeTotalNonAcgtnsFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalNonAcgtnsTo() {
+        return nextcladeTotalNonAcgtnsTo;
+    }
+
+    public T setNextcladeTotalNonAcgtnsTo(Integer nextcladeTotalNonAcgtnsTo) {
+        this.nextcladeTotalNonAcgtnsTo = nextcladeTotalNonAcgtnsTo;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalPcrPrimerChangesFrom() {
+        return nextcladeTotalPcrPrimerChangesFrom;
+    }
+
+    public T setNextcladeTotalPcrPrimerChangesFrom(Integer nextcladeTotalPcrPrimerChangesFrom) {
+        this.nextcladeTotalPcrPrimerChangesFrom = nextcladeTotalPcrPrimerChangesFrom;
+         return (T) this;
+    }
+
+    public Integer getNextcladeTotalPcrPrimerChangesTo() {
+        return nextcladeTotalPcrPrimerChangesTo;
+    }
+
+    public T setNextcladeTotalPcrPrimerChangesTo(Integer nextcladeTotalPcrPrimerChangesTo) {
+        this.nextcladeTotalPcrPrimerChangesTo = nextcladeTotalPcrPrimerChangesTo;
+         return (T) this;
     }
 }

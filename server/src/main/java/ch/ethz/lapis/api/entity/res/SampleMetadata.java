@@ -22,12 +22,8 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
     private Boolean fullyVaccinated;
     private String host;
     private String samplingStrategy;
-    private String pangoLineage;
-    private String nextcladePangoLineage;
     private String clade;
-    private String gisaidCloade;
-    private String submittingLab;
-    private String originatingLab;
+    private String institution;
 
     public LocalDate getDate() {
         return date;
@@ -191,24 +187,6 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
         return (T) this;
     }
 
-    public String getPangoLineage() {
-        return pangoLineage;
-    }
-
-    public T setPangoLineage(String pangoLineage) {
-        this.pangoLineage = pangoLineage;
-        return (T) this;
-    }
-
-    public String getNextcladePangoLineage() {
-        return nextcladePangoLineage;
-    }
-
-    public T setNextcladePangoLineage(String nextcladePangoLineage) {
-        this.nextcladePangoLineage = nextcladePangoLineage;
-        return (T) this;
-    }
-
     public String getClade() {
         return clade;
     }
@@ -218,30 +196,12 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
         return (T) this;
     }
 
-    public String getGisaidCloade() {
-        return gisaidCloade;
+    public String getInstitution() {
+        return institution;
     }
 
-    public T setGisaidCloade(String gisaidCloade) {
-        this.gisaidCloade = gisaidCloade;
-        return (T) this;
-    }
-
-    public String getSubmittingLab() {
-        return submittingLab;
-    }
-
-    public T setSubmittingLab(String submittingLab) {
-        this.submittingLab = submittingLab;
-        return (T) this;
-    }
-
-    public String getOriginatingLab() {
-        return originatingLab;
-    }
-
-    public T setOriginatingLab(String originatingLab) {
-        this.originatingLab = originatingLab;
+    public T setInstitution(String institution) {
+        this.institution = institution;
         return (T) this;
     }
 }
