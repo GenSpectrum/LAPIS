@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Schema;
@@ -22,7 +21,6 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.jooq.lapis.DefaultSchema;
-import org.jooq.lapis.Indexes;
 import org.jooq.lapis.Keys;
 import org.jooq.lapis.tables.records.YMainMetadataRecord;
 
@@ -64,19 +62,9 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     public final TableField<YMainMetadataRecord, String> SOURCE_PRIMARY_KEY = createField(DSL.name("source_primary_key"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>y_main_metadata.genbank_accession</code>.
+     * The column <code>y_main_metadata.accession</code>.
      */
-    public final TableField<YMainMetadataRecord, String> GENBANK_ACCESSION = createField(DSL.name("genbank_accession"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.sra_accession</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.gisaid_epi_isl</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> GISAID_EPI_ISL = createField(DSL.name("gisaid_epi_isl"), SQLDataType.CLOB, this, "");
+    public final TableField<YMainMetadataRecord, String> ACCESSION = createField(DSL.name("accession"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata.strain</code>.
@@ -84,9 +72,29 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     public final TableField<YMainMetadataRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_main_metadata.sra_accession</code>.
+     */
+    public final TableField<YMainMetadataRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_main_metadata.date</code>.
      */
     public final TableField<YMainMetadataRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE, this, "");
+
+    /**
+     * The column <code>y_main_metadata.year</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.month</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.day</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>y_main_metadata.date_submitted</code>.
@@ -164,39 +172,19 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     public final TableField<YMainMetadataRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>y_main_metadata.pango_lineage</code>.
+     * The column <code>y_main_metadata.clade</code>.
      */
-    public final TableField<YMainMetadataRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.nextclade_pango_lineage</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.nextstrain_clade</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> NEXTSTRAIN_CLADE = createField(DSL.name("nextstrain_clade"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.gisaid_clade</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> GISAID_CLADE = createField(DSL.name("gisaid_clade"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.originating_lab</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> ORIGINATING_LAB = createField(DSL.name("originating_lab"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata.submitting_lab</code>.
-     */
-    public final TableField<YMainMetadataRecord, String> SUBMITTING_LAB = createField(DSL.name("submitting_lab"), SQLDataType.CLOB, this, "");
+    public final TableField<YMainMetadataRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata.authors</code>.
      */
     public final TableField<YMainMetadataRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata.institution</code>.
+     */
+    public final TableField<YMainMetadataRecord, String> INSTITUTION = createField(DSL.name("institution"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata.nextclade_qc_overall_score</code>.
@@ -234,19 +222,69 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     public final TableField<YMainMetadataRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
 
     /**
-     * The column <code>y_main_metadata.year</code>.
+     * The column <code>y_main_metadata.nextclade_alignment_score</code>.
      */
-    public final TableField<YMainMetadataRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataRecord, Double> NEXTCLADE_ALIGNMENT_SCORE = createField(DSL.name("nextclade_alignment_score"), SQLDataType.DOUBLE, this, "");
 
     /**
-     * The column <code>y_main_metadata.month</code>.
+     * The column <code>y_main_metadata.nextclade_alignment_start</code>.
      */
-    public final TableField<YMainMetadataRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_ALIGNMENT_START = createField(DSL.name("nextclade_alignment_start"), SQLDataType.INTEGER, this, "");
 
     /**
-     * The column <code>y_main_metadata.day</code>.
+     * The column <code>y_main_metadata.nextclade_alignment_end</code>.
      */
-    public final TableField<YMainMetadataRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_ALIGNMENT_END = createField(DSL.name("nextclade_alignment_end"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_substitutions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_SUBSTITUTIONS = createField(DSL.name("nextclade_total_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_deletions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_DELETIONS = createField(DSL.name("nextclade_total_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_insertions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_INSERTIONS = createField(DSL.name("nextclade_total_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_frame_shifts</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_FRAME_SHIFTS = createField(DSL.name("nextclade_total_frame_shifts"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_aminoacid_substitutions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS = createField(DSL.name("nextclade_total_aminoacid_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_aminoacid_deletions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_DELETIONS = createField(DSL.name("nextclade_total_aminoacid_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_aminoacid_insertions</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_INSERTIONS = createField(DSL.name("nextclade_total_aminoacid_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_missing</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_MISSING = createField(DSL.name("nextclade_total_missing"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_non_acgtns</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_NON_ACGTNS = createField(DSL.name("nextclade_total_non_acgtns"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata.nextclade_total_pcr_primer_changes</code>.
+     */
+    public final TableField<YMainMetadataRecord, Integer> NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES = createField(DSL.name("nextclade_total_pcr_primer_changes"), SQLDataType.INTEGER, this, "");
 
     private YMainMetadata(Name alias, Table<YMainMetadataRecord> aliased) {
         this(alias, aliased, null);
@@ -287,18 +325,13 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
     }
 
     @Override
-    public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_AGE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_DATE_IDX, Indexes.Y_MAIN_METADATA_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_DIED_IDX, Indexes.Y_MAIN_METADATA_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_DIVISION_IDX, Indexes.Y_MAIN_METADATA_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_HOST_IDX, Indexes.Y_MAIN_METADATA_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_REGION_IDX, Indexes.Y_MAIN_METADATA_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_SEX_IDX, Indexes.Y_MAIN_METADATA_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STRAIN_IDX, Indexes.Y_MAIN_METADATA_SUBMITTING_LAB_IDX);
-    }
-
-    @Override
     public UniqueKey<YMainMetadataRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_METADATA_PKEY;
+        return Keys.Y_MAIN_METADATA_STAGING_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainMetadataRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainMetadataRecord>>asList(Keys.Y_MAIN_METADATA_PKEY);
+        return Arrays.<UniqueKey<YMainMetadataRecord>>asList(Keys.Y_MAIN_METADATA_STAGING_PKEY);
     }
 
     @Override

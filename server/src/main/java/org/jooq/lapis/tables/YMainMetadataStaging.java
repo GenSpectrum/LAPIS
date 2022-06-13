@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Schema;
@@ -22,7 +21,6 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 import org.jooq.lapis.DefaultSchema;
-import org.jooq.lapis.Indexes;
 import org.jooq.lapis.Keys;
 import org.jooq.lapis.tables.records.YMainMetadataStagingRecord;
 
@@ -64,19 +62,9 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     public final TableField<YMainMetadataStagingRecord, String> SOURCE_PRIMARY_KEY = createField(DSL.name("source_primary_key"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
-     * The column <code>y_main_metadata_staging.genbank_accession</code>.
+     * The column <code>y_main_metadata_staging.accession</code>.
      */
-    public final TableField<YMainMetadataStagingRecord, String> GENBANK_ACCESSION = createField(DSL.name("genbank_accession"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.sra_accession</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.gisaid_epi_isl</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> GISAID_EPI_ISL = createField(DSL.name("gisaid_epi_isl"), SQLDataType.CLOB, this, "");
+    public final TableField<YMainMetadataStagingRecord, String> ACCESSION = createField(DSL.name("accession"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.strain</code>.
@@ -84,9 +72,29 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     public final TableField<YMainMetadataStagingRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_main_metadata_staging.sra_accession</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_main_metadata_staging.date</code>.
      */
     public final TableField<YMainMetadataStagingRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.year</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.month</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.day</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.date_submitted</code>.
@@ -164,39 +172,19 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     public final TableField<YMainMetadataStagingRecord, String> SAMPLING_STRATEGY = createField(DSL.name("sampling_strategy"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>y_main_metadata_staging.pango_lineage</code>.
+     * The column <code>y_main_metadata_staging.clade</code>.
      */
-    public final TableField<YMainMetadataStagingRecord, String> PANGO_LINEAGE = createField(DSL.name("pango_lineage"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.nextclade_pango_lineage</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> NEXTCLADE_PANGO_LINEAGE = createField(DSL.name("nextclade_pango_lineage"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.nextstrain_clade</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> NEXTSTRAIN_CLADE = createField(DSL.name("nextstrain_clade"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.gisaid_clade</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> GISAID_CLADE = createField(DSL.name("gisaid_clade"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.originating_lab</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> ORIGINATING_LAB = createField(DSL.name("originating_lab"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_main_metadata_staging.submitting_lab</code>.
-     */
-    public final TableField<YMainMetadataStagingRecord, String> SUBMITTING_LAB = createField(DSL.name("submitting_lab"), SQLDataType.CLOB, this, "");
+    public final TableField<YMainMetadataStagingRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.authors</code>.
      */
     public final TableField<YMainMetadataStagingRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.institution</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> INSTITUTION = createField(DSL.name("institution"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_main_metadata_staging.nextclade_qc_overall_score</code>.
@@ -234,19 +222,69 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
 
     /**
-     * The column <code>y_main_metadata_staging.year</code>.
+     * The column <code>y_main_metadata_staging.nextclade_alignment_score</code>.
      */
-    public final TableField<YMainMetadataStagingRecord, Integer> YEAR = createField(DSL.name("year"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataStagingRecord, Double> NEXTCLADE_ALIGNMENT_SCORE = createField(DSL.name("nextclade_alignment_score"), SQLDataType.DOUBLE, this, "");
 
     /**
-     * The column <code>y_main_metadata_staging.month</code>.
+     * The column <code>y_main_metadata_staging.nextclade_alignment_start</code>.
      */
-    public final TableField<YMainMetadataStagingRecord, Integer> MONTH = createField(DSL.name("month"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_ALIGNMENT_START = createField(DSL.name("nextclade_alignment_start"), SQLDataType.INTEGER, this, "");
 
     /**
-     * The column <code>y_main_metadata_staging.day</code>.
+     * The column <code>y_main_metadata_staging.nextclade_alignment_end</code>.
      */
-    public final TableField<YMainMetadataStagingRecord, Integer> DAY = createField(DSL.name("day"), SQLDataType.INTEGER, this, "");
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_ALIGNMENT_END = createField(DSL.name("nextclade_alignment_end"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_substitutions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_SUBSTITUTIONS = createField(DSL.name("nextclade_total_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_deletions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_DELETIONS = createField(DSL.name("nextclade_total_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_insertions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_INSERTIONS = createField(DSL.name("nextclade_total_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_frame_shifts</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_FRAME_SHIFTS = createField(DSL.name("nextclade_total_frame_shifts"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_aminoacid_substitutions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS = createField(DSL.name("nextclade_total_aminoacid_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_aminoacid_deletions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_DELETIONS = createField(DSL.name("nextclade_total_aminoacid_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_aminoacid_insertions</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_INSERTIONS = createField(DSL.name("nextclade_total_aminoacid_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_missing</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_MISSING = createField(DSL.name("nextclade_total_missing"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_non_acgtns</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_NON_ACGTNS = createField(DSL.name("nextclade_total_non_acgtns"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_main_metadata_staging.nextclade_total_pcr_primer_changes</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES = createField(DSL.name("nextclade_total_pcr_primer_changes"), SQLDataType.INTEGER, this, "");
 
     private YMainMetadataStaging(Name alias, Table<YMainMetadataStagingRecord> aliased) {
         this(alias, aliased, null);
@@ -287,18 +325,13 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
     }
 
     @Override
-    public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.Y_MAIN_METADATA_STAGING_AGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_COUNTRY_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DATE_SUBMITTED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIED_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_DIVISION_IDX, Indexes.Y_MAIN_METADATA_STAGING_FULLY_VACCINATED_IDX, Indexes.Y_MAIN_METADATA_STAGING_GENBANK_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_GISAID_EPI_ISL_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOSPITALIZED_IDX, Indexes.Y_MAIN_METADATA_STAGING_HOST_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTCLADE_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_NEXTSTRAIN_CLADE_IDX, Indexes.Y_MAIN_METADATA_STAGING_ORIGINATING_LAB_IDX, Indexes.Y_MAIN_METADATA_STAGING_PANGO_LINEAGE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_EXPOSURE_IDX, Indexes.Y_MAIN_METADATA_STAGING_REGION_IDX, Indexes.Y_MAIN_METADATA_STAGING_SAMPLING_STRATEGY_IDX, Indexes.Y_MAIN_METADATA_STAGING_SEX_IDX, Indexes.Y_MAIN_METADATA_STAGING_SRA_ACCESSION_IDX, Indexes.Y_MAIN_METADATA_STAGING_STRAIN_IDX, Indexes.Y_MAIN_METADATA_STAGING_SUBMITTING_LAB_IDX);
-    }
-
-    @Override
     public UniqueKey<YMainMetadataStagingRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_METADATA_STAGING_PKEY;
+        return Keys.Y_MAIN_METADATA_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainMetadataStagingRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainMetadataStagingRecord>>asList(Keys.Y_MAIN_METADATA_STAGING_PKEY);
+        return Arrays.<UniqueKey<YMainMetadataStagingRecord>>asList(Keys.Y_MAIN_METADATA_PKEY);
     }
 
     @Override

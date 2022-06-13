@@ -101,12 +101,12 @@ public class YMainAaSequence extends TableImpl<YMainAaSequenceRecord> {
 
     @Override
     public UniqueKey<YMainAaSequenceRecord> getPrimaryKey() {
-        return Keys.Y_MAIN_AA_SEQUENCE_PKEY;
+        return Keys.Y_MAIN_AA_SEQUENCE_STAGING_PKEY;
     }
 
     @Override
     public List<UniqueKey<YMainAaSequenceRecord>> getKeys() {
-        return Arrays.<UniqueKey<YMainAaSequenceRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_PKEY);
+        return Arrays.<UniqueKey<YMainAaSequenceRecord>>asList(Keys.Y_MAIN_AA_SEQUENCE_STAGING_PKEY);
     }
 
     @Override

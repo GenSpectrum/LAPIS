@@ -62,9 +62,19 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
     public final TableField<YNextstrainMpoxRecord, String> SEQ_ALIGNED_HASH = createField(DSL.name("seq_aligned_hash"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_nextstrain_mpox.accession</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> ACCESSION = createField(DSL.name("accession"), SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.accession_rev</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> ACCESSION_REV = createField(DSL.name("accession_rev"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_nextstrain_mpox.strain</code>.
      */
-    public final TableField<YNextstrainMpoxRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<YNextstrainMpoxRecord, String> STRAIN = createField(DSL.name("strain"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_nextstrain_mpox.sra_accession</code>.
@@ -97,6 +107,11 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
     public final TableField<YNextstrainMpoxRecord, String> DATE_ORIGINAL = createField(DSL.name("date_original"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_nextstrain_mpox.date_submitted</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, LocalDate> DATE_SUBMITTED = createField(DSL.name("date_submitted"), SQLDataType.LOCALDATE, this, "");
+
+    /**
      * The column <code>y_nextstrain_mpox.region</code>.
      */
     public final TableField<YNextstrainMpoxRecord, String> REGION = createField(DSL.name("region"), SQLDataType.CLOB, this, "");
@@ -112,14 +127,24 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
     public final TableField<YNextstrainMpoxRecord, String> DIVISION = createField(DSL.name("division"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_nextstrain_mpox.location</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> LOCATION = createField(DSL.name("location"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_nextstrain_mpox.host</code>.
      */
     public final TableField<YNextstrainMpoxRecord, String> HOST = createField(DSL.name("host"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>y_nextstrain_mpox.clade</code>.
+     * The column <code>y_nextstrain_mpox.authors</code>.
      */
-    public final TableField<YNextstrainMpoxRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
+    public final TableField<YNextstrainMpoxRecord, String> AUTHORS = createField(DSL.name("authors"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.institution</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> INSTITUTION = createField(DSL.name("institution"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_nextstrain_mpox.seq_original_compressed</code>.
@@ -165,6 +190,231 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
      * The column <code>y_nextstrain_mpox.nuc_unknowns</code>.
      */
     public final TableField<YNextstrainMpoxRecord, String> NUC_UNKNOWNS = createField(DSL.name("nuc_unknowns"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.clade</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_substitutions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_SUBSTITUTIONS = createField(DSL.name("nextclade_total_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_deletions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_DELETIONS = createField(DSL.name("nextclade_total_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_insertions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_INSERTIONS = createField(DSL.name("nextclade_total_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_frame_shifts</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_FRAME_SHIFTS = createField(DSL.name("nextclade_total_frame_shifts"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_aminoacid_substitutions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS = createField(DSL.name("nextclade_total_aminoacid_substitutions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_aminoacid_deletions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_DELETIONS = createField(DSL.name("nextclade_total_aminoacid_deletions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_aminoacid_insertions</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_AMINOACID_INSERTIONS = createField(DSL.name("nextclade_total_aminoacid_insertions"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_missing</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_MISSING = createField(DSL.name("nextclade_total_missing"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_non_acgtns</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_NON_ACGTNS = createField(DSL.name("nextclade_total_non_acgtns"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_total_pcr_primer_changes</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES = createField(DSL.name("nextclade_total_pcr_primer_changes"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_pcr_primer_changes</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_PCR_PRIMER_CHANGES = createField(DSL.name("nextclade_pcr_primer_changes"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_alignment_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_ALIGNMENT_SCORE = createField(DSL.name("nextclade_alignment_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_alignment_start</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_ALIGNMENT_START = createField(DSL.name("nextclade_alignment_start"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_alignment_end</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_ALIGNMENT_END = createField(DSL.name("nextclade_alignment_end"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_overall_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_OVERALL_SCORE = createField(DSL.name("nextclade_qc_overall_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_overall_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_OVERALL_STATUS = createField(DSL.name("nextclade_qc_overall_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_missing_data_missing_data_threshold</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_MISSING_DATA_MISSING_DATA_THRESHOLD = createField(DSL.name("nextclade_qc_missing_data_missing_data_threshold"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_missing_data_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_MISSING_DATA_SCORE = createField(DSL.name("nextclade_qc_missing_data_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_missing_data_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_MISSING_DATA_STATUS = createField(DSL.name("nextclade_qc_missing_data_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_missing_data_total_missing</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_MISSING_DATA_TOTAL_MISSING = createField(DSL.name("nextclade_qc_missing_data_total_missing"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_mixed_sites_threshold</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_MIXED_SITES_MIXED_SITES_THRESHOLD = createField(DSL.name("nextclade_qc_mixed_sites_mixed_sites_threshold"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_MIXED_SITES_SCORE = createField(DSL.name("nextclade_qc_mixed_sites_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_MIXED_SITES_STATUS = createField(DSL.name("nextclade_qc_mixed_sites_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_total_mixed_sites</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_MIXED_SITES_TOTAL_MIXED_SITES = createField(DSL.name("nextclade_qc_mixed_sites_total_mixed_sites"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_private_mutations_cutoff</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_PRIVATE_MUTATIONS_CUTOFF = createField(DSL.name("nextclade_qc_private_mutations_cutoff"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_private_mutations_excess</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_PRIVATE_MUTATIONS_EXCESS = createField(DSL.name("nextclade_qc_private_mutations_excess"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_private_mutations_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE = createField(DSL.name("nextclade_qc_private_mutations_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_private_mutations_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_PRIVATE_MUTATIONS_STATUS = createField(DSL.name("nextclade_qc_private_mutations_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_private_mutations_total</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_PRIVATE_MUTATIONS_TOTAL = createField(DSL.name("nextclade_qc_private_mutations_total"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_clustered_snps</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_SNP_CLUSTERS_CLUSTERED_SNPS = createField(DSL.name("nextclade_qc_snp_clusters_clustered_snps"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_SNP_CLUSTERS_SCORE = createField(DSL.name("nextclade_qc_snp_clusters_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_SNP_CLUSTERS_STATUS = createField(DSL.name("nextclade_qc_snp_clusters_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_total_snps</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_SNP_CLUSTERS_TOTAL_SNPS = createField(DSL.name("nextclade_qc_snp_clusters_total_snps"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_FRAME_SHIFTS_FRAME_SHIFTS = createField(DSL.name("nextclade_qc_frame_shifts_frame_shifts"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_FRAME_SHIFTS_TOTAL_FRAME_SHIFTS = createField(DSL.name("nextclade_qc_frame_shifts_total_frame_shifts"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts_ignored</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_FRAME_SHIFTS_FRAME_SHIFTS_IGNORED = createField(DSL.name("nextclade_qc_frame_shifts_frame_shifts_ignored"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts_ignored</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_FRAME_SHIFTS_TOTAL_FRAME_SHIFTS_IGNORED = createField(DSL.name("nextclade_qc_frame_shifts_total_frame_shifts_ignored"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_FRAME_SHIFTS_SCORE = createField(DSL.name("nextclade_qc_frame_shifts_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_FRAME_SHIFTS_STATUS = createField(DSL.name("nextclade_qc_frame_shifts_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_stop_codons_stop_codons</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_STOP_CODONS_STOP_CODONS = createField(DSL.name("nextclade_qc_stop_codons_stop_codons"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_stop_codons_total_stop_codons</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Integer> NEXTCLADE_QC_STOP_CODONS_TOTAL_STOP_CODONS = createField(DSL.name("nextclade_qc_stop_codons_total_stop_codons"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_stop_codons_score</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, Double> NEXTCLADE_QC_STOP_CODONS_SCORE = createField(DSL.name("nextclade_qc_stop_codons_score"), SQLDataType.DOUBLE, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_qc_stop_codons_status</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_QC_STOP_CODONS_STATUS = createField(DSL.name("nextclade_qc_stop_codons_status"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.nextclade_errors</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> NEXTCLADE_ERRORS = createField(DSL.name("nextclade_errors"), SQLDataType.CLOB, this, "");
 
     private YNextstrainMpox(Name alias, Table<YNextstrainMpoxRecord> aliased) {
         this(alias, aliased, null);
