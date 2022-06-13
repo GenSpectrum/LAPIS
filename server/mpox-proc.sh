@@ -19,4 +19,4 @@ echo "----- Run Nextclade -----"
 
 # Import
 echo "----- Import into LAPIS -----"
-java -Xmx2g -jar /app/lapis.jar --config /app/lapis-config.yml Lapis --update load-mpox,transform-mpox,switch-in-staging
+java -Xmx2g -jar /app/lapis.jar --config /app/lapis-config.yml Lapis --update-data load-mpox,transform-mpox,switch-in-staging
