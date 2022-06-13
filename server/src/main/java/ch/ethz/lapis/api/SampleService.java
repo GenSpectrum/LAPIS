@@ -276,7 +276,7 @@ public class SampleService {
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
-                .select(metaTbl.STRAIN, seqColumn)
+                .select(metaTbl.ACCESSION, seqColumn)
                 .from(
                     idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
@@ -293,7 +293,7 @@ public class SampleService {
                     continue;
                 }
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(metaTbl.STRAIN).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(r.get(metaTbl.ACCESSION).getBytes(StandardCharsets.UTF_8));
                 outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
                 outputStream.write(referenceSeqCompressor.decompress(seqCompressed)
                     .getBytes(StandardCharsets.UTF_8));
