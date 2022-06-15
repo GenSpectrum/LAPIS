@@ -308,7 +308,8 @@ public class TransformService {
                       nextclade_total_pcr_primer_changes
                     from y_nextstrain_mpox
                     where
-                      seq_aligned_compressed is not null;
+                      seq_aligned_compressed is not null
+                      and nextclade_alignment_end - nextclade_alignment_start >= 100000;
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
