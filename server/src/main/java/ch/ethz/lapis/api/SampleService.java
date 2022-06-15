@@ -168,7 +168,7 @@ public class SampleService {
             Result<Record> records = statement2.fetch();
             for (var r : records) {
                 Contributor contributor = new Contributor()
-                    .setGenbankAccession(r.get(tbl.ACCESSION))
+                    .setAccession(r.get(tbl.ACCESSION))
                     .setSraAccession(r.get(tbl.SRA_ACCESSION))
                     .setStrain(r.get(tbl.STRAIN))
                     .setInstitution(r.get(tbl.INSTITUTION))

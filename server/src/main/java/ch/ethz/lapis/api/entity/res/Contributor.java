@@ -2,19 +2,18 @@ package ch.ethz.lapis.api.entity.res;
 
 public class Contributor {
 
-    private String genbankAccession;
+    private String accession;
     private String sraAccession;
-    private String gisaidEpiIsl;
     private String strain;
     private String institution;
     private String authors;
 
-    public String getGenbankAccession() {
-        return genbankAccession;
+    public String getAccession() {
+        return accession;
     }
 
-    public Contributor setGenbankAccession(String genbankAccession) {
-        this.genbankAccession = genbankAccession;
+    public Contributor setAccession(String accession) {
+        this.accession = accession;
         return this;
     }
 
@@ -24,15 +23,6 @@ public class Contributor {
 
     public Contributor setSraAccession(String sraAccession) {
         this.sraAccession = sraAccession;
-        return this;
-    }
-
-    public String getGisaidEpiIsl() {
-        return gisaidEpiIsl;
-    }
-
-    public Contributor setGisaidEpiIsl(String gisaidEpiIsl) {
-        this.gisaidEpiIsl = gisaidEpiIsl;
         return this;
     }
 
