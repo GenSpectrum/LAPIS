@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 public class MpoxMetadataEntry implements Serializable {
 
+    private String accession;
+    private String accessionRev;
     private String strain;
     private String sraAccession;
     private LocalDate date;
@@ -15,9 +17,30 @@ public class MpoxMetadataEntry implements Serializable {
     private LocalDate dateSubmitted;
     private String region;
     private String country;
+    private String division;
+    private String location;
     private String host;
     private String clade;
     private String authors;
+    private String institution;
+
+    public String getAccession() {
+        return accession;
+    }
+
+    public MpoxMetadataEntry setAccession(String accession) {
+        this.accession = accession;
+        return this;
+    }
+
+    public String getAccessionRev() {
+        return accessionRev;
+    }
+
+    public MpoxMetadataEntry setAccessionRev(String accessionRev) {
+        this.accessionRev = accessionRev;
+        return this;
+    }
 
     public String getStrain() {
         return strain;
@@ -109,6 +132,24 @@ public class MpoxMetadataEntry implements Serializable {
         return this;
     }
 
+    public String getDivision() {
+        return division;
+    }
+
+    public MpoxMetadataEntry setDivision(String division) {
+        this.division = division;
+        return this;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public MpoxMetadataEntry setLocation(String location) {
+        this.location = location;
+        return this;
+    }
+
     public String getHost() {
         return host;
     }
@@ -133,6 +174,15 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setAuthors(String authors) {
         this.authors = authors;
+        return this;
+    }
+
+    public String getInstitution() {
+        return institution;
+    }
+
+    public MpoxMetadataEntry setInstitution(String institution) {
+        this.institution = institution;
         return this;
     }
 }

@@ -4,20 +4,18 @@ import java.util.List;
 
 public class SampleDetailRequest extends SampleFilter<SampleDetailRequest> {
 
-    private List<String> genbankAccession;
+    private List<String> accession;
 
     private List<String> sraAccession;
 
-    private List<String> gisaidEpiIsl;
-
     private List<String> strain;
 
-    public List<String> getGenbankAccession() {
-        return genbankAccession;
+    public List<String> getAccession() {
+        return accession;
     }
 
-    public SampleDetailRequest setGenbankAccession(List<String> genbankAccession) {
-        this.genbankAccession = genbankAccession;
+    public SampleDetailRequest setAccession(List<String> accession) {
+        this.accession = accession;
         return this;
     }
 
@@ -27,15 +25,6 @@ public class SampleDetailRequest extends SampleFilter<SampleDetailRequest> {
 
     public SampleDetailRequest setSraAccession(List<String> sraAccession) {
         this.sraAccession = sraAccession;
-        return this;
-    }
-
-    public List<String> getGisaidEpiIsl() {
-        return gisaidEpiIsl;
-    }
-
-    public SampleDetailRequest setGisaidEpiIsl(List<String> gisaidEpiIsl) {
-        this.gisaidEpiIsl = gisaidEpiIsl;
         return this;
     }
 

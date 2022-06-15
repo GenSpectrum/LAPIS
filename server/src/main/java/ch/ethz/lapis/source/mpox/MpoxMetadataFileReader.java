@@ -39,15 +39,20 @@ public class MpoxMetadataFileReader
         CSVRecord csv = iterator.next();
         ParsedDate parsedDate = ParsedDate.parse(optionalGetFromCsv(csv, "date"));
         MpoxMetadataEntry entry = new MpoxMetadataEntry()
+            .setAccession(cleanString(optionalGetFromCsv(csv, "accession")))
+            .setAccessionRev(cleanString(optionalGetFromCsv(csv, "genbank_accession_rev")))
             .setStrain(cleanString(csv.get("strain")))
-            .setSraAccession(cleanString(optionalGetFromCsv(csv, "accession")))
+            .setSraAccession(cleanString(optionalGetFromCsv(csv, "sra_accession")))
             .setDateOriginal(cleanString(optionalGetFromCsv(csv, "date")))
             .setDateSubmitted(Utils.nullableLocalDateValue(cleanString(optionalGetFromCsv(csv, "date_submitted"))))
             .setRegion(cleanString(optionalGetFromCsv(csv, "region")))
             .setCountry(cleanString(optionalGetFromCsv(csv, "country")))
+            .setDivision(cleanString(optionalGetFromCsv(csv, "division")))
+            .setLocation(cleanString(optionalGetFromCsv(csv, "location")))
             .setHost(cleanString(optionalGetFromCsv(csv, "host")))
             .setClade(cleanString(optionalGetFromCsv(csv, "clade")))
-            .setAuthors(cleanString(optionalGetFromCsv(csv, "authors")));
+            .setAuthors(cleanString(optionalGetFromCsv(csv, "authors")))
+            .setInstitution(cleanString(optionalGetFromCsv(csv, "institution")));
         if (parsedDate != null) {
             entry
                 .setDate(parsedDate.getDate())

@@ -219,49 +219,11 @@ public class SampleController {
     }
 
 
-    @GetMapping("/gisaid-epi-isl")
-    public ResponseEntity<String> getGisaidEpiIsls(
-        SampleDetailRequest request,
-        GeneralConfig generalConfig,
-        OrderAndLimitConfig limitAndOrder
-    ) throws SQLException {
-        checkDataVersion(generalConfig.getDataVersion());
-        checkVariantFilter(request);
-        if (openness == OpennessLevel.GISAID && (
-            request.getAgeFrom() != null
-                || request.getAgeTo() != null
-                || request.getSex() != null
-                || request.getHospitalized() != null
-                || request.getDied() != null
-                || request.getFullyVaccinated() != null
-        )) {
-            throw new ForbiddenException();
-        }
-        List<String> gisaidEpiIsls = sampleService.getGisaidEpiIsls(request, limitAndOrder);
-        String body = String.join("\n", gisaidEpiIsls);
-        return new SampleResponseBuilder<String>()
-            .setAllowCaching(generalConfig.getDataVersion() != null)
-            .setDataVersion(dataVersionService.getVersion())
-            .setForDownload(generalConfig.isDownloadAsFile())
-            .setDataFormat(DataFormat.TEXT)
-            .setDownloadFileName("gisaid_epi_isl")
-            .setBody(body)
-            .build();
-    }
-
-
     @GetMapping("/aa-mutations")
     public ResponseEntity<String> getAAMutations(MutationRequest request, GeneralConfig generalConfig) {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
-        if (openness == OpennessLevel.GISAID && (
-            request.getGisaidEpiIsl() != null
-                || request.getGenbankAccession() != null
-                || request.getSraAccession() != null
-        )) {
-            throw new GisaidLimitationException();
-        }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AA_MUTATIONS, request);
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
@@ -302,13 +264,6 @@ public class SampleController {
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
-        if (openness == OpennessLevel.GISAID && (
-            request.getGisaidEpiIsl() != null
-                || request.getGenbankAccession() != null
-                || request.getSraAccession() != null
-        )) {
-            throw new GisaidLimitationException();
-        }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_NUC_MUTATIONS, request);
         String body = useCacheOrCompute(cacheKey, () -> {
             try {
@@ -420,8 +375,7 @@ public class SampleController {
 
     private void checkVariantFilter(SampleFilter<?> request) {
         if (request.getVariantQuery() != null &&
-            (request.getPangoLineage() != null || request.getClade() != null
-                || request.getGisaidClade() != null
+            (request.getClade() != null
                 || (request.getAaMutations() != null && !request.getAaMutations().isEmpty())
                 || (request.getNucMutations() != null && !request.getNucMutations().isEmpty()))) {
             throw new RedundantVariantDefinition();

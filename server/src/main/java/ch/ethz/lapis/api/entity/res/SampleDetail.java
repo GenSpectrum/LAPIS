@@ -2,20 +2,18 @@ package ch.ethz.lapis.api.entity.res;
 
 public class SampleDetail extends SampleMetadata<SampleDetail> {
 
-    private String genbankAccession;
+    private String accession;
 
     private String sraAccession;
 
-    private String gisaidEpiIsl;
-
     private String strain;
 
-    public String getGenbankAccession() {
-        return genbankAccession;
+    public String getAccession() {
+        return accession;
     }
 
-    public SampleDetail setGenbankAccession(String genbankAccession) {
-        this.genbankAccession = genbankAccession;
+    public SampleDetail setAccession(String accession) {
+        this.accession = accession;
         return this;
     }
 
@@ -25,15 +23,6 @@ public class SampleDetail extends SampleMetadata<SampleDetail> {
 
     public SampleDetail setSraAccession(String sraAccession) {
         this.sraAccession = sraAccession;
-        return this;
-    }
-
-    public String getGisaidEpiIsl() {
-        return gisaidEpiIsl;
-    }
-
-    public SampleDetail setGisaidEpiIsl(String gisaidEpiIsl) {
-        this.gisaidEpiIsl = gisaidEpiIsl;
         return this;
     }
 

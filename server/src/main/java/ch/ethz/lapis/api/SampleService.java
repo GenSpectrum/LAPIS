@@ -73,9 +73,8 @@ public class SampleService {
             YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
 
             List<Field<?>> selectFields = new ArrayList<>() {{
-                add(tbl.GENBANK_ACCESSION);
+                add(tbl.ACCESSION);
                 add(tbl.SRA_ACCESSION);
-                add(tbl.GISAID_EPI_ISL);
                 add(tbl.STRAIN);
                 add(tbl.DATE);
                 add(tbl.YEAR);
@@ -95,11 +94,8 @@ public class SampleService {
                 add(tbl.FULLY_VACCINATED);
                 add(tbl.HOST);
                 add(tbl.SAMPLING_STRATEGY);
-                add(tbl.PANGO_LINEAGE);
-                add(tbl.NEXTSTRAIN_CLADE);
-                add(tbl.GISAID_CLADE);
-                add(tbl.SUBMITTING_LAB);
-                add(tbl.ORIGINATING_LAB);
+                add(tbl.CLADE);
+                add(tbl.INSTITUTION);
             }};
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
@@ -110,9 +106,8 @@ public class SampleService {
             Result<Record> records = statement2.fetch();
             for (var r : records) {
                 SampleDetail sample = new SampleDetail()
-                    .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
+                    .setAccession(r.get(tbl.ACCESSION))
                     .setSraAccession(r.get(tbl.SRA_ACCESSION))
-                    .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
                     .setStrain(r.get(tbl.STRAIN))
                     .setDate(r.get(tbl.DATE))
                     .setYear(r.get(tbl.YEAR))
@@ -132,11 +127,8 @@ public class SampleService {
                     .setFullyVaccinated(r.get(tbl.FULLY_VACCINATED))
                     .setHost(r.get(tbl.HOST))
                     .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
-                    .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
-                    .setClade(r.get(tbl.NEXTSTRAIN_CLADE))
-                    .setGisaidCloade(r.get(tbl.GISAID_CLADE))
-                    .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
-                    .setOriginatingLab(r.get(tbl.ORIGINATING_LAB));
+                    .setClade(r.get(tbl.CLADE))
+                    .setInstitution(r.get(tbl.INSTITUTION));
                 samples.add(sample);
             }
         }
@@ -161,12 +153,10 @@ public class SampleService {
             YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
 
             List<Field<?>> selectFields = new ArrayList<>() {{
-                add(tbl.GENBANK_ACCESSION);
+                add(tbl.ACCESSION);
                 add(tbl.SRA_ACCESSION);
-                add(tbl.GISAID_EPI_ISL);
                 add(tbl.STRAIN);
-                add(tbl.SUBMITTING_LAB);
-                add(tbl.ORIGINATING_LAB);
+                add(tbl.INSTITUTION);
                 add(tbl.AUTHORS);
             }};
 
@@ -178,12 +168,10 @@ public class SampleService {
             Result<Record> records = statement2.fetch();
             for (var r : records) {
                 Contributor contributor = new Contributor()
-                    .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
+                    .setAccession(r.get(tbl.ACCESSION))
                     .setSraAccession(r.get(tbl.SRA_ACCESSION))
-                    .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
                     .setStrain(r.get(tbl.STRAIN))
-                    .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
-                    .setOriginatingLab(r.get(tbl.ORIGINATING_LAB))
+                    .setInstitution(r.get(tbl.INSTITUTION))
                     .setAuthors(r.get(tbl.AUTHORS));
                 contributors.add(contributor);
             }
@@ -207,24 +195,6 @@ public class SampleService {
         // Fetch data
         String[] strainColumn = database.getStringColumn(Database.Columns.STRAIN);
         return ids.stream().map(id -> strainColumn[id]).collect(Collectors.toList());
-    }
-
-
-    public List<String> getGisaidEpiIsls(
-        SampleDetailRequest request,
-        OrderAndLimitConfig orderAndLimit
-    ) {
-        Database database = Database.getOrLoadInstance(dbPool);
-        // Filter
-        List<Integer> ids = new QueryEngine().filterIds(database, request);
-        if (ids.isEmpty()) {
-            return new ArrayList<>();
-        }
-        // Order and limit
-        ids = applyOrderAndLimit(ids, orderAndLimit);
-        // Fetch data
-        String[] gisaidEpiIslColumn = database.getStringColumn(Database.Columns.GISAID_EPI_ISL);
-        return ids.stream().map(id -> gisaidEpiIslColumn[id]).collect(Collectors.toList());
     }
 
 
@@ -306,7 +276,7 @@ public class SampleService {
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
-                .select(metaTbl.STRAIN, seqColumn)
+                .select(metaTbl.ACCESSION, seqColumn)
                 .from(
                     idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
@@ -323,11 +293,11 @@ public class SampleService {
                     continue;
                 }
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(metaTbl.STRAIN).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(r.get(metaTbl.ACCESSION).getBytes(StandardCharsets.UTF_8));
                 outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
                 outputStream.write(referenceSeqCompressor.decompress(seqCompressed)
                     .getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e);

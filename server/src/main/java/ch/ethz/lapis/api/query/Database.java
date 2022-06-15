@@ -14,9 +14,8 @@ import java.util.stream.Collectors;
 public class Database {
 
     public static class Columns {
-        public static final String GENBANK_ACCESSION = "genbank_accession"; // String
+        public static final String ACCESSION = "accession"; // String
         public static final String SRA_ACCESSION  = "sra_accession"; // String
-        public static final String GISAID_EPI_ISL  = "gisaid_epi_isl"; // String
         public static final String STRAIN  = "strain"; // String
         public static final String DATE = "date"; // Date
         public static final String YEAR = "year"; // Integer
@@ -36,12 +35,8 @@ public class Database {
         public static final String DIED = "died"; // Boolean
         public static final String FULLY_VACCINATED = "fully_vaccinated"; // Boolean
         public static final String SAMPLING_STRATEGY = "sampling_strategy"; // String
-        public static final String PANGO_LINEAGE = "pango_lineage"; // String
-        public static final String NEXTCLADE_PANGO_LINEAGE = "nextclade_pango_lineage"; // String
-        public static final String NEXTSTRAIN_CLADE = "nextstrain_clade"; // String
-        public static final String GISAID_CLADE = "gisaid_clade"; // String
-        public static final String ORIGINATING_LAB = "originating_lab"; // String
-        public static final String SUBMITTING_LAB = "submitting_lab"; // String
+        public static final String CLADE = "clade"; // String
+        public static final String INSTITUTION = "institution"; // String
         public static final String NEXTCLADE_QC_OVERALL_SCORE = "nextclade_qc_overall_score"; // Float
         public static final String NEXTCLADE_QC_MISSING_DATA_SCORE = "nextclade_qc_missing_data_score"; // Float
         public static final String NEXTCLADE_QC_MIXED_SITES_SCORE = "nextclade_qc_mixed_sites_score"; // Float
@@ -49,34 +44,43 @@ public class Database {
         public static final String NEXTCLADE_QC_SNP_CLUSTERS_SCORE = "nextclade_qc_snp_clusters_score"; // Float
         public static final String NEXTCLADE_QC_FRAME_SHIFTS_SCORE = "nextclade_qc_frame_shifts_score"; // Float
         public static final String NEXTCLADE_QC_STOP_CODONS_SCORE = "nextclade_qc_stop_codons_score"; // Float
-    }
+        public static final String NEXTCLADE_ALIGNMENT_SCORE = "nextclade_alignment_score"; // Float
+        public static final String NEXTCLADE_ALIGNMENT_START = "nextclade_alignment_start"; // Integer
+        public static final String NEXTCLADE_ALIGNMENT_END = "nextclade_alignment_end"; // Integer
+        public static final String NEXTCLADE_TOTAL_SUBSTITUTIONS = "nextclade_total_substitutions"; // Integer
+        public static final String NEXTCLADE_TOTAL_DELETIONS = "nextclade_total_deletions"; // Integer
+        public static final String NEXTCLADE_TOTAL_INSERTIONS = "nextclade_total_insertions"; // Integer
+        public static final String NEXTCLADE_TOTAL_FRAME_SHIFTS = "nextclade_total_frame_shifts"; // Integer
+        public static final String NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS = "nextclade_total_aminoacid_substitutions"; // Integer
+        public static final String NEXTCLADE_TOTAL_AMINOACID_DELETIONS = "nextclade_total_aminoacid_deletions"; // Integer
+        public static final String NEXTCLADE_TOTAL_AMINOACID_INSERTIONS = "nextclade_total_aminoacid_insertions"; // Integer
+        public static final String NEXTCLADE_TOTAL_MISSING = "nextclade_total_missing"; // Integer
+        public static final String NEXTCLADE_TOTAL_NON_ACGTNS = "nextclade_total_non_acgtns"; // Integer
+        public static final String NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES = "nextclade_total_pcr_primer_changes"; // Integer
 
-    public static final String[] ALL_COLUMNS = new String[] {
-        Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
-        Columns.DATE, Columns.YEAR, Columns.MONTH, Columns.DATE_SUBMITTED, Columns.REGION, Columns.COUNTRY,
-        Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE, Columns.COUNTRY_EXPOSURE,
-        Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.AGE, Columns.SEX, Columns.HOSPITALIZED, Columns.DIED,
-        Columns.FULLY_VACCINATED, Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
-        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
-    };
+    }
     public static final String[] STRING_COLUMNS = new String[] {
-        Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
+        Columns.ACCESSION, Columns.SRA_ACCESSION, Columns.STRAIN,
         Columns.REGION, Columns.COUNTRY, Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE,
         Columns.COUNTRY_EXPOSURE, Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.SEX,
-        Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTCLADE_PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
-        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
+        Columns.SAMPLING_STRATEGY, Columns.CLADE, Columns.INSTITUTION
     };
     public static final String[] DATE_COLUMNS = new String[] {
         Columns.DATE, Columns.DATE_SUBMITTED
     };
     public static final String[] INTEGER_COLUMNS = new String[] {
-        Columns.AGE, Columns.YEAR, Columns.MONTH
+        Columns.AGE, Columns.YEAR, Columns.MONTH,
+        Columns.NEXTCLADE_ALIGNMENT_START, Columns.NEXTCLADE_ALIGNMENT_END, Columns.NEXTCLADE_TOTAL_SUBSTITUTIONS,
+        Columns.NEXTCLADE_TOTAL_DELETIONS, Columns.NEXTCLADE_TOTAL_INSERTIONS, Columns.NEXTCLADE_TOTAL_FRAME_SHIFTS,
+        Columns.NEXTCLADE_TOTAL_AMINOACID_SUBSTITUTIONS, Columns.NEXTCLADE_TOTAL_AMINOACID_DELETIONS,
+        Columns.NEXTCLADE_TOTAL_AMINOACID_INSERTIONS, Columns.NEXTCLADE_TOTAL_MISSING,
+        Columns.NEXTCLADE_TOTAL_NON_ACGTNS, Columns.NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES
     };
     public static final String[] FLOAT_COLUMNS = new String[] {
         Columns.NEXTCLADE_QC_OVERALL_SCORE, Columns.NEXTCLADE_QC_MISSING_DATA_SCORE,
         Columns.NEXTCLADE_QC_MIXED_SITES_SCORE, Columns.NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE,
         Columns.NEXTCLADE_QC_SNP_CLUSTERS_SCORE, Columns.NEXTCLADE_QC_FRAME_SHIFTS_SCORE,
-        Columns.NEXTCLADE_QC_STOP_CODONS_SCORE
+        Columns.NEXTCLADE_QC_STOP_CODONS_SCORE, Columns.NEXTCLADE_ALIGNMENT_SCORE
     };
     public static final String[] BOOLEAN_COLUMNS = new String[] {
         Columns.HOSPITALIZED, Columns.DIED, Columns.FULLY_VACCINATED

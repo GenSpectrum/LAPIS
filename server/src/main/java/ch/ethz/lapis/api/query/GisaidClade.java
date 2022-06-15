@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.exception.BadRequestException;
+
 public class GisaidClade implements VariantQueryExpr {
 
     private final String clade;
@@ -14,6 +16,6 @@ public class GisaidClade implements VariantQueryExpr {
 
     @Override
     public boolean[] evaluate(Database database) {
-        return new StringValue(clade, Database.Columns.GISAID_CLADE, false).evaluate(database);
+        throw new BadRequestException("This operation is not supported.");
     }
 }
