@@ -3,7 +3,8 @@
  *   - B.1.1.7  (pango lineage)
  *   - P.1* | (S:484K & B.1.1.7)  ("*" means that sub-lineages are included)
  *   - P.1* | S:484K & B.1.1.7  (AND takes precedence over OR, i.e., this is equivalent to the query above)
- *   - NEXTSTRAIN:21K | GISAID:GR  ("NEXTSTRAIN:" -> Nextstrain clade, "GISAID:" -> GISAID clade)
+ *   - NEXTSTRAINCLADE:21K | GISAID:GR  ("NEXTSTRAINCLADE:" -> Nextstrain clade, "GISAID:" -> GISAID clade)
+ *   - NEXTCLADEPANGOLINEAGE:B.1.1.7
  *   - S:N501  (The spike gene has a mutation at position 501; a deletion is considered as a mutation)
  *   - !123- & 123  (The nucleotide at position 123 is not deleted, but it is mutated)
  *   - [2-OF: S:N501Y, P.1* & 123-, [EXACTLY-2-OF: 123, 234T, NEXTSTRAIN:21K]]
@@ -24,7 +25,7 @@ expr:
   | expr '|' expr    # Or
   | '(' expr ')'     # Par
   ;
-single: aa_mut | nuc_mut | pango_query | gisaid_clade_query | nextstrain_clade_query | n_of;
+single: aa_mut | nuc_mut | pango_query | nextclade_pango_query | gisaid_clade_query | nextstrain_clade_query | n_of;
 
 nuc_mut : nuc? position nuc_mutated?;
 aa_mut : gene ':' aa? position aa_mutated?;
@@ -41,12 +42,14 @@ pango_include_sub: DOT? ASTERISK;
 // We accept inputs like B.1.617.2.1 which we would translate to AY.1. This is unofficial, but useful.
 pango_lineage: character character? pango_number_component*;
 pango_number_component: '.' NUMBER NUMBER? NUMBER?;
+nextclade_pango_lineage_prefix: N E X T C L A D E P A N G O L I N E A G E ':';
+nextclade_pango_query: nextclade_pango_lineage_prefix pango_query;
 
 gisaid_clade: character character?;
 gisaid_clade_prefix: G I S A I D ':';
 gisaid_clade_query: gisaid_clade_prefix gisaid_clade;
 nextstrain_clade: NUMBER NUMBER character;
-nextstrain_clade_prefix: N E X T S T R A I N ':';
+nextstrain_clade_prefix: N E X T S T R A I N C L A D E ':';
 nextstrain_clade_query: nextstrain_clade_prefix nextstrain_clade;
 
 character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;

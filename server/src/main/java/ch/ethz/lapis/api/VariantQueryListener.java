@@ -64,6 +64,17 @@ public class VariantQueryListener extends VariantQueryBaseListener {
     }
 
     @Override
+    public void enterNextclade_pango_query(VariantQueryParser.Nextclade_pango_queryContext ctx) {
+        var pangoQueryContext = ctx.pango_query();
+        PangoQuery pangoQuery = new PangoQuery(
+            pangoQueryContext.pango_lineage().getText(),
+            pangoQueryContext.pango_include_sub() != null,
+            Database.Columns.NEXTCLADE_PANGO_LINEAGE
+        );
+        exprStack.peek().putValue(pangoQuery);
+    }
+
+    @Override
     public void enterNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx) {
         NextstrainClade nextstrainClade = new NextstrainClade(ctx.nextstrain_clade().getText());
         exprStack.peek().putValue(nextstrainClade);

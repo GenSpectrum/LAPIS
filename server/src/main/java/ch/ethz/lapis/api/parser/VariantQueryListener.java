@@ -210,6 +210,26 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 */
 	void exitPango_number_component(VariantQueryParser.Pango_number_componentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#nextclade_pango_lineage_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void enterNextclade_pango_lineage_prefix(VariantQueryParser.Nextclade_pango_lineage_prefixContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#nextclade_pango_lineage_prefix}.
+	 * @param ctx the parse tree
+	 */
+	void exitNextclade_pango_lineage_prefix(VariantQueryParser.Nextclade_pango_lineage_prefixContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#nextclade_pango_query}.
+	 * @param ctx the parse tree
+	 */
+	void enterNextclade_pango_query(VariantQueryParser.Nextclade_pango_queryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#nextclade_pango_query}.
+	 * @param ctx the parse tree
+	 */
+	void exitNextclade_pango_query(VariantQueryParser.Nextclade_pango_queryContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#gisaid_clade}.
 	 * @param ctx the parse tree
 	 */

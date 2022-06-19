@@ -246,6 +246,30 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNextclade_pango_lineage_prefix(VariantQueryParser.Nextclade_pango_lineage_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNextclade_pango_lineage_prefix(VariantQueryParser.Nextclade_pango_lineage_prefixContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNextclade_pango_query(VariantQueryParser.Nextclade_pango_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNextclade_pango_query(VariantQueryParser.Nextclade_pango_queryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGisaid_clade(VariantQueryParser.Gisaid_cladeContext ctx) { }
 	/**
 	 * {@inheritDoc}
