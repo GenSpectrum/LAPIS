@@ -33,11 +33,11 @@ Get the sequences that fulfill exactly 2 out of 4 conditions:
 	[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]
 
 
-For |sc2-only|, it is also possible to use pango lineage queries:
+For |sc2-only|, it is also possible to use pango lineage queries (either called by pangolin or by Nextclade) and filter by Nextstrain clades:
 
 .. code-block:: bash
 
-	BA.4* | BA.5* | (BA.2* & 12160A & 9866C & (27788T | 27259A))
+	BA.5* | nextcladePangoLineage:BA.5* | nextstrainClade:22B
 
 
 .. |sc2-only| image:: https://img.shields.io/badge/Instance-SARS--CoV--2-blue
