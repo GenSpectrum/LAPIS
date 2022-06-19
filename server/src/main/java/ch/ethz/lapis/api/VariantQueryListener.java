@@ -55,6 +55,9 @@ public class VariantQueryListener extends VariantQueryBaseListener {
 
     @Override
     public void enterPango_query(VariantQueryParser.Pango_queryContext ctx) {
+        if (ctx.getParent() instanceof VariantQueryParser.Nextclade_pango_queryContext) {
+            return;
+        }
         PangoQuery pangoQuery = new PangoQuery(
             ctx.pango_lineage().getText(),
             ctx.pango_include_sub() != null,
