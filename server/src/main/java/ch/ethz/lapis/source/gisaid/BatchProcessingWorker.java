@@ -286,11 +286,16 @@ public class BatchProcessingWorker {
         Process process = Runtime.getRuntime().exec(command);
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
         if (!exited) {
+            String sequenceIdsCsv = batch.getEntries().stream()
+                .map(GisaidEntry::getGisaidEpiIsl).collect(Collectors.joining(","));
             process.destroyForcibly();
-            throw new RuntimeException("Nextclade timed out (after 20 minutes)");
+            throw new RuntimeException("Nextclade timed out (after 20 minutes); sequences: " + sequenceIdsCsv);
         }
         if (process.exitValue() != 0) {
-            throw new RuntimeException("Nextclade exited with code " + process.exitValue());
+            String sequenceIdsCsv = batch.getEntries().stream()
+                .map(GisaidEntry::getGisaidEpiIsl).collect(Collectors.joining(","));
+            throw new RuntimeException("Nextclade exited with code " + process.exitValue() + "; sequences:"
+                + sequenceIdsCsv);
         }
 
         // Read nextclade.tsv (which contains QC data and more)
