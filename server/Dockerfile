@@ -18,7 +18,7 @@ RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download
 RUN chmod +x nextalign
 
 # Download Nextclade
-RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-Linux-x86_64" -o "nextclade"
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/download/2.0.0-beta.3/nextclade-x86_64-unknown-linux-gnu" -o "nextclade"
 RUN chmod +x nextclade
 RUN ./nextclade dataset get --name 'sars-cov-2' --output-dir 'nextclade-data'
 

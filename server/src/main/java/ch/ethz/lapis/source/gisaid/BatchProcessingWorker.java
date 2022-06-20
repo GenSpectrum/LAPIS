@@ -275,13 +275,13 @@ public class BatchProcessingWorker {
         List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Path outputPath = workDir.resolve("output");
         String command = nextcladePath.toAbsolutePath() +
-            " --input-fasta=" + originalSeqFastaPath.toAbsolutePath() +
+            " run" +
             " --input-dataset=/app/nextclade-data" + // TODO Move it to the configs
-            " --output-dir=" + outputPath.toAbsolutePath() +
+            " --output-all=" + outputPath.toAbsolutePath() +
             " --output-basename=nextclade" +
-            " --output-tsv=" + outputPath.resolve("nextclade.tsv").toAbsolutePath() +
             " --silent" +
-            " --jobs=1";
+            " --jobs=1" +
+            " " + originalSeqFastaPath.toAbsolutePath();
 
         Process process = Runtime.getRuntime().exec(command);
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
@@ -315,7 +315,7 @@ public class BatchProcessingWorker {
         }
         for (String gene : genes) {
             FastaFileReader geneFastaReader = new FastaFileReader(
-                outputPath.resolve("nextclade.gene." + gene + ".fasta"),
+                outputPath.resolve("nextclade_gene_" + gene + ".translation.fasta"),
                 false);
             for (FastaEntry fastaEntry : geneFastaReader) {
                 geneAASeqs.get(fastaEntry.getSampleName()).add(
