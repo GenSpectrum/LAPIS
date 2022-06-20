@@ -5,6 +5,7 @@ import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.source.MutationNuc;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedInputStream;
@@ -90,13 +91,31 @@ public class BatchProcessingWorker {
                 .filter(s -> s.getImportMode() == ImportMode.APPEND || s.isSequenceChanged())
                 .collect(Collectors.toList());
 
-            System.out.println(LocalDateTime.now() + " [" + id + "] " + sequencePreprocessingNeeded.size() + " out of " + batchSize +
+            // Exclude sequences that contain invalid characters
+            Pattern r = Pattern.compile("[\\sACGTUMRWSYKVHDBNX-]*", Pattern.CASE_INSENSITIVE);
+            List<GisaidEntry> validSequences = new ArrayList<>();
+            List<GisaidEntry> invalidSequences = new ArrayList<>();
+            for (GisaidEntry entry : sequencePreprocessingNeeded) {
+                if (r.matcher(entry.getSeqOriginal()).matches()) {
+                    validSequences.add(entry);
+                } else {
+                    invalidSequences.add(entry);
+                }
+            }
+            if (!invalidSequences.isEmpty()) {
+                System.out.println(
+                    LocalDateTime.now() + " [" + id + "] Found sequences that contain invalid characters: "
+                        + invalidSequences.stream().map(GisaidEntry::getGisaidEpiIsl)
+                        .collect(Collectors.joining(",")));
+            }
+
+            System.out.println(LocalDateTime.now() + " [" + id + "] " + validSequences.size() + " out of " + batchSize +
                 " sequences are new or have changed sequence.");
-            if (!sequencePreprocessingNeeded.isEmpty()) {
+            if (!validSequences.isEmpty()) {
                 // Write the batch to a fasta file
                 Path originalSeqFastaPath = workDir.resolve("original.fasta");
                 System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
-                Files.writeString(originalSeqFastaPath, formatSeqAsFasta(sequencePreprocessingNeeded));
+                Files.writeString(originalSeqFastaPath, formatSeqAsFasta(validSequences));
 
                 // Run Nextclade
                 System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextclade..");
