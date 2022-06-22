@@ -14,8 +14,8 @@ unxz sequences.fasta.xz
 echo "----- Run Nextclade -----"
 ./nextclade run \
   --input-dataset nextclade-data \
-  --input-fasta sequences.fasta \
-  --output-all nextclade-output
+  --output-all nextclade-output \
+  sequences.fasta
 
 # Import
 echo "----- Import into LAPIS -----"
