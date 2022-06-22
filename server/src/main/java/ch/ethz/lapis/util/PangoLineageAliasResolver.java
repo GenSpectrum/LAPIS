@@ -1,15 +1,18 @@
 package ch.ethz.lapis.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PangoLineageAliasResolver {
 
     private final List<PangoLineageAlias> aliases;
+    private final Map<String, String> aliasToFullName = new HashMap<>();
 
     public PangoLineageAliasResolver(List<PangoLineageAlias> aliases) {
         this.aliases = aliases;
+        for (PangoLineageAlias alias : aliases) {
+            aliasToFullName.put(alias.getAlias(), alias.getFullName());
+        }
     }
 
     /**
@@ -17,52 +20,56 @@ public class PangoLineageAliasResolver {
      *   - B.1.1.1.2 -> [C.2]
      *   - B.1.1.1   -> [C]
      *   - B.1.1.1*  -> [C.*]
-     *   - B.1.1*    -> [C.*, D.*, K.*, ...]
+     *   - B.1.1*    -> [C.*, D.*, K.*, ..., BA.*, BE.*, ...]
      *   - B.1.1.12* -> []
+     *   - BA.* -> [BE.*, BF.*, ...]
      */
     public List<String> findAlias(String query) {
-        // We need to consider the following cases:
-        //   Prefix search:
-        //     - yes
-        //     - no
-        //   Query length vs. alias' full name length (The full names of the aliases always have 3 number components):
-        //     - Query has less than 3 number components
-        //     - Query has at least 3 number components
-        //
-        // No prefix search + same length/query is longer: 0 or 1 match   -> alias' full name is a prefix of the query
-        // No prefix search + query is shorter: 0 match
-        // Prefix search    + same length/query is longer: 0 or 1 match   -> alias' full name is a prefix of the query
-        // Prefix search    + query is shorter: multiple matches possible -> query is a prefix of the alias' full name
-
-        boolean prefixSearch = query.endsWith("*");
+        // Normalize/parse the query
+        boolean subLineageSearch = query.endsWith("*");
         String queryRoot = query.toUpperCase(); // The query without a tailing * and upper-case
-        if (prefixSearch) {
+        if (subLineageSearch) {
             queryRoot = queryRoot.substring(0, queryRoot.length() - 1);
             if (queryRoot.endsWith(".")) {
                 queryRoot = queryRoot.substring(0, queryRoot.length() - 1);
             }
         }
-        final String finalQueryRoot = queryRoot;
-        final boolean queryIsShorter = queryRoot.chars().filter(c -> c == '.').count() < 3;
 
-        if (!queryIsShorter) {
-            return aliases.stream()
-                .filter(a -> finalQueryRoot.equals(a.getFullName())
-                    || finalQueryRoot.startsWith(a.getFullName() + "."))
-                .map(a -> a.getAlias() + finalQueryRoot.substring(a.getFullName().length())
-                    + (prefixSearch ? ".*" : ""))
-                .collect(Collectors.toList());
+        // Find the full name of the query
+        String queryTextComponent = queryRoot.split("\\.")[0];
+        if (aliasToFullName.containsKey(queryTextComponent)) {
+            queryRoot = queryRoot.replace(queryTextComponent, aliasToFullName.get(queryTextComponent));
         }
-        if (!prefixSearch && queryIsShorter) {
-            return new ArrayList<>();
+        String finalQueryRoot = queryRoot;
+
+        // The results without tailing * will be collected here:
+        List<String> resultRoots = new ArrayList<>();
+
+        // Find the "short version" of the query
+        String queryShort = finalQueryRoot;
+        Optional<PangoLineageAlias> queryAliasOpt = aliases.stream()
+            .filter(a -> finalQueryRoot.startsWith(a.getFullName() + "."))
+            .sorted(Comparator.comparingInt(a -> -a.getFullName().length()))
+            .findAny();
+        if (queryAliasOpt.isPresent()) {
+            PangoLineageAlias alias = queryAliasOpt.get();
+            queryShort = queryShort.replace(alias.getFullName(), alias.getAlias());
         }
-        if (prefixSearch && queryIsShorter) {
-            return aliases.stream()
-                .filter(a -> a.getFullName().equals(finalQueryRoot)
-                    || a.getFullName().startsWith(finalQueryRoot + "."))
-                .map(a -> a.getAlias() + ".*")
-                .collect(Collectors.toList());
+        if (!queryRoot.equals(queryShort)) {
+            resultRoots.add(queryShort);
         }
-        throw new RuntimeException("Unexpected error: This should be unreachable. Query: " + query);
+
+        // If no sub lineages need to be included, we are done.
+        if (!subLineageSearch) {
+            return resultRoots;
+        }
+
+        // If sub lineages need to be included, we have to add aliases for which the query is a prefix.
+        List<String> subLineageAliases = aliases.stream()
+            .filter(a -> a.getFullName().equals(finalQueryRoot) || a.getFullName().startsWith(finalQueryRoot + "."))
+            .map(PangoLineageAlias::getAlias)
+            .collect(Collectors.toList());
+        resultRoots.addAll(subLineageAliases);
+        return resultRoots.stream().map(s -> s + "*").collect(Collectors.toList());
     }
 }
