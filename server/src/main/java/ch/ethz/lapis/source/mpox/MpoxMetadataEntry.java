@@ -21,6 +21,7 @@ public class MpoxMetadataEntry implements Serializable {
     private String location;
     private String host;
     private String clade;
+    private String lineage;
     private String authors;
     private String institution;
 
@@ -165,6 +166,15 @@ public class MpoxMetadataEntry implements Serializable {
 
     public MpoxMetadataEntry setClade(String clade) {
         this.clade = clade;
+        return this;
+    }
+
+    public String getLineage() {
+        return lineage;
+    }
+
+    public MpoxMetadataEntry setLineage(String lineage) {
+        this.lineage = lineage;
         return this;
     }
 

@@ -51,6 +51,7 @@ public class MpoxMetadataFileReader
             .setLocation(cleanString(optionalGetFromCsv(csv, "location")))
             .setHost(cleanString(optionalGetFromCsv(csv, "host")))
             .setClade(cleanString(optionalGetFromCsv(csv, "clade")))
+            .setLineage(cleanString(optionalGetFromCsv(csv, "lineage")))
             .setAuthors(cleanString(optionalGetFromCsv(csv, "authors")))
             .setInstitution(cleanString(optionalGetFromCsv(csv, "institution")));
         if (parsedDate != null) {

@@ -150,9 +150,10 @@ public class MpoxService {
         String sql = """
                 insert into y_nextstrain_mpox (
                   metadata_hash, accession, accession_rev, strain, sra_accession, date, year, month, day,
-                  date_original, date_submitted, region, country, division, location, clade, host, authors, institution
+                  date_original, date_submitted, region, country, division, location, clade, lineage, host,
+                  authors, institution
                 )
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (accession) do update
                 set
                   metadata_hash = ?,
@@ -170,6 +171,7 @@ public class MpoxService {
                   division = ?,
                   location = ?,
                   clade = ?,
+                  lineage = ?,
                   host = ?,
                   authors = ?,
                   institution = ?;
@@ -201,29 +203,31 @@ public class MpoxService {
                         statement.setString(14, entry.getDivision());
                         statement.setString(15, entry.getLocation());
                         statement.setString(16, entry.getClade());
-                        statement.setString(17, entry.getHost());
-                        statement.setString(18, entry.getAuthors());
-                        statement.setString(19, entry.getInstitution());
+                        statement.setString(17, entry.getLineage());
+                        statement.setString(18, entry.getHost());
+                        statement.setString(19, entry.getAuthors());
+                        statement.setString(20, entry.getInstitution());
                         // We use the clade from Nextclade
 
-                        statement.setString(20, currentHash);
-                        statement.setString(21, entry.getAccessionRev());
-                        statement.setString(22, entry.getStrain());
-                        statement.setString(23, entry.getSraAccession());
-                        statement.setDate(24, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setObject(25, entry.getYear());
-                        statement.setObject(26, entry.getMonth());
-                        statement.setObject(27, entry.getDay());
-                        statement.setString(28, entry.getDateOriginal());
-                        statement.setDate(29, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(30, entry.getRegion());
-                        statement.setString(31, entry.getCountry());
-                        statement.setString(32, entry.getDivision());
-                        statement.setString(33, entry.getLocation());
-                        statement.setString(34, entry.getClade());
-                        statement.setString(35, entry.getHost());
-                        statement.setString(36, entry.getAuthors());
-                        statement.setString(37, entry.getInstitution());
+                        statement.setString(21, currentHash);
+                        statement.setString(22, entry.getAccessionRev());
+                        statement.setString(23, entry.getStrain());
+                        statement.setString(24, entry.getSraAccession());
+                        statement.setDate(25, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setObject(26, entry.getYear());
+                        statement.setObject(27, entry.getMonth());
+                        statement.setObject(28, entry.getDay());
+                        statement.setString(29, entry.getDateOriginal());
+                        statement.setDate(30, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(31, entry.getRegion());
+                        statement.setString(32, entry.getCountry());
+                        statement.setString(33, entry.getDivision());
+                        statement.setString(34, entry.getLocation());
+                        statement.setString(35, entry.getClade());
+                        statement.setString(36, entry.getLineage());
+                        statement.setString(37, entry.getHost());
+                        statement.setString(38, entry.getAuthors());
+                        statement.setString(39, entry.getInstitution());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

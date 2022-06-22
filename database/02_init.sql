@@ -29,6 +29,8 @@ create table y_nextstrain_mpox
   country text,
   division text,
   location text,
+  clade text,
+  lineage text,
   host text,
   authors text,
   institution text,
@@ -43,7 +45,6 @@ create table y_nextstrain_mpox
   nuc_unknowns text,
 
   -- Nextclade stuff
-  clade text,
   nextclade_total_substitutions int,
   nextclade_total_deletions int,
   nextclade_total_insertions int,
@@ -120,6 +121,7 @@ create table y_main_metadata
   fully_vaccinated boolean,
   sampling_strategy text,
   clade text,
+  lineage text,
   authors text,
   institution text,
 
