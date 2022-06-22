@@ -20,7 +20,7 @@ RUN apt-get install -y wget xz-utils
 # Download Nextclade
 RUN wget "https://github.com/nextstrain/nextclade/releases/download/2.0.0-alpha.12/nextclade-x86_64-unknown-linux-gnu" -O "nextclade"
 RUN chmod +x nextclade
-RUN ./nextclade dataset get --name "monkeypox" --output-dir "nextclade-data"
+RUN ./nextclade dataset get --name "MPXV" --output-dir "nextclade-data"
 
 COPY --from=builder /build/build/libs/lapis-1.0-SNAPSHOT.jar /app/lapis.jar
 COPY mpox-proc.sh .
