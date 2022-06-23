@@ -11,6 +11,21 @@ const GENES: &'static [&'static str] = &["E", "M", "N", "ORF1a", "ORF1b", "ORF3a
     "ORF7b", "ORF8", "ORF9b", "S"];
 
 
+pub fn get_db_client(config: &DatabaseConfig) -> Client {
+    let mut db_config = postgres::config::Config::new();
+    db_config.host(&config.host)
+        .port(config.port)
+        .user(&config.username)
+        .password(&config.password)
+        .dbname(&config.dbname);
+    let mut client = db_config.connect(NoTls)
+        .expect("Database connection failed");
+    client.execute(&format!("set search_path to '{}'", &config.schema), &[])
+        .expect("The search_path of the database could not be changed.");
+    client
+}
+
+
 pub struct Database {
     pub size: u32,
     nuc_mutation_store: MutationStore,
@@ -19,17 +34,7 @@ pub struct Database {
 
 impl Database {
     pub fn load(config: &DatabaseConfig) -> Database {
-        // Connect to database
-        let mut db_config = postgres::config::Config::new();
-        db_config.host(&config.host)
-            .port(config.port)
-            .user(&config.username)
-            .password(&config.password)
-            .dbname(&config.dbname);
-        let mut client = db_config.connect(NoTls)
-            .expect("Database connection failed");
-        client.execute(&format!("set search_path to '{}'", &config.schema), &[])
-            .expect("The search_path of the database could not be changed.");
+        let mut client = get_db_client(config);
 
         // Load size
         let length_sql = "select count(*) from y_main_metadata;";

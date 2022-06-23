@@ -2,14 +2,11 @@ mod base;
 
 use config::{Config, File, FileFormat};
 use crate::base::db::{MutationStore,  DatabaseConfig, Database};
+use crate::base::db;
 use serde::Deserialize;
 use chrono::Local;
 use std::{thread, time};
-
-#[derive(Debug, Deserialize)]
-struct ProgramConfig {
-    database: DatabaseConfig
-}
+use crate::base::ProgramConfig;
 
 
 fn main() {
@@ -21,6 +18,8 @@ fn main() {
     let config_unparsed = builder.build().expect("The config file cannot be loaded.");
     let config: ProgramConfig = config_unparsed.try_deserialize()
         .expect("The config file is invalid.");
+
+    db::generate_db_tables(&config.database, &config.schema);
 
     let db = Database::load(&config.database);
 

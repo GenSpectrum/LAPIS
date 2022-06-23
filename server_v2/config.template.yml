@@ -5,3 +5,15 @@ database:
   username:
   password:
   schema:
+schema:
+  instanceName: mpox
+  additionalMetadata:
+    - name: strain
+      type: string
+    - name: accession
+      type: string
+    - name: clade
+      type: string
+    - name: lineage
+      type: string
+  primaryKey: accession
