@@ -15,3 +15,6 @@ pub use self::counter::*;
 
 mod seq_pos_column;
 pub use self::seq_pos_column::*;
+
+mod generator;
+pub use self::generator::*;
