@@ -409,7 +409,7 @@ public class MpoxService {
                         statement.setString(81, nc.getQcFrameShiftsFrameShiftsIgnored());
                         statement.setObject(82, nc.getQcFrameShiftsTotalFrameShiftsIgnored());
                         statement.setObject(83, nc.getQcFrameShiftsScore());
-                        statement.setString(87, nc.getQcFrameShiftsStatus());
+                        statement.setString(84, nc.getQcFrameShiftsStatus());
                         statement.setString(85, nc.getQcStopCodonsStopCodons());
                         statement.setObject(86, nc.getQcStopCodonsTotalStopCodons());
                         statement.setObject(87, nc.getQcStopCodonsScore());
