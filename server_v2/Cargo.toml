@@ -1,0 +1,17 @@
+[package]
+name = "lapis_v2"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+config = "0.13.1"
+chrono = "0.4.19"
+postgres = "0.19.2"
+postgres-cursor = "0.4.0"
+rand = "0.8.5"
+roaring = "0.9.0"
+croaring = "0.6.1"
+serde = { version = "1.0.136", features = ["derive"] }
+zstd = "0.11.1"
