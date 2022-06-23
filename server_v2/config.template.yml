@@ -1,0 +1,7 @@
+database:
+  host:
+  port: 5432
+  dbname: lapis
+  username:
+  password:
+  schema:
