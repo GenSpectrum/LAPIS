@@ -1,4 +1,5 @@
 pub(crate) mod db;
+pub(crate) mod proc;
 
 mod config;
 pub use self::config::*;
