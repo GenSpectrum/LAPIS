@@ -12,8 +12,20 @@ schema:
       type: string
     - name: accession
       type: string
+    - name: region
+      type: string
+    - name: country
+      type: string
+    - name: division
+      type: string
+    - name: location
+      type: string
     - name: clade
       type: string
     - name: lineage
+      type: string
+    - name: authors
+      type: string
+    - name: institution
       type: string
   primaryKey: accession
