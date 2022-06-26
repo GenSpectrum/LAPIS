@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 config = "0.13.1"
 chrono = "0.4.19"
+bio = "0.41"
 csv = "1.1"
 postgres = { versino = "0.19.3", features = ["with-chrono-0_4"] }
 postgres-cursor = "0.4.0"
