@@ -1,9 +1,9 @@
-use crate::base::SchemaConfig;
-use crate::{db, DatabaseConfig};
-use chrono::{NaiveDate, ParseResult};
+use crate::base::{seq_compression, SchemaConfig};
+use crate::{db, DatabaseConfig, SeqCompressor};
+use bio::io::fasta;
+use chrono::NaiveDate;
 use postgres::types::ToSql;
-use regex::{Captures, Regex};
-use std::borrow::Borrow;
+use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
@@ -12,8 +12,27 @@ use std::path::Path;
 /// - metadata.tsv
 /// - sequences.fasta
 /// - aligned.fasta
-pub fn load_source_data(data_dir: &Path, schema: &SchemaConfig, db_config: &DatabaseConfig) {
-    load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
+pub fn load_source_data(
+    data_dir: &Path,
+    schema: &SchemaConfig,
+    db_config: &DatabaseConfig,
+    seq_compressor: &mut SeqCompressor,
+) {
+    // load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
+    load_sequences(
+        "original",
+        &data_dir.join(Path::new("sequences.fasta")),
+        schema,
+        db_config,
+        seq_compressor,
+    );
+    load_sequences(
+        "aligned",
+        &data_dir.join(Path::new("aligned.fasta")),
+        schema,
+        db_config,
+        seq_compressor,
+    );
 }
 
 /// Loads metadata.tsv
@@ -93,6 +112,44 @@ set
         db_client.execute(&statement, &x[..]).unwrap();
     }
     println!("Done");
+}
+
+/// sequence_type: "original" or "aligned"
+fn load_sequences(
+    sequence_type: &str,
+    file_path: &Path,
+    schema: &SchemaConfig,
+    db_config: &DatabaseConfig,
+    seq_compressor: &mut SeqCompressor,
+) {
+    let insert_sql = format!(
+        "
+insert into source_data ({}, seq_{}_compressed, seq_{}_hash)
+values ($1, $2, null)
+on conflict ({}) do update
+set
+  seq_{}_compressed = $2,
+  seq_{}_hash = null;
+        ",
+        schema.primary_key,
+        sequence_type,
+        sequence_type,
+        schema.primary_key,
+        sequence_type,
+        sequence_type
+    );
+
+    let mut db_client = db::get_db_client(db_config);
+    let statement = db_client.prepare(insert_sql.as_str()).unwrap();
+    let file = File::open(file_path).unwrap();
+    let mut reader = fasta::Reader::new(file);
+    for result in reader.records() {
+        let record = result.unwrap();
+        let compressed_seq = seq_compressor.compress_bytes(record.seq());
+        db_client
+            .execute(&statement, &[&record.id(), &compressed_seq])
+            .unwrap();
+    }
 }
 
 fn handle_null(s: &str) -> Option<String> {
