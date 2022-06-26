@@ -1,8 +1,7 @@
+use crate::base::db::{BiDict, Counter};
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 use std::str::FromStr;
-use crate::base::db::{BiDict, Counter};
-
 
 // Basic public structs
 
@@ -41,7 +40,6 @@ impl FromStr for Mutation {
     }
 }
 
-
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub struct AaMutation {
     pub gene: String,
@@ -60,9 +58,8 @@ pub type NucMutation = Mutation;
 pub struct FormattedMutationCount {
     pub mutation: String,
     pub count: u32,
-    pub proportion: f64
+    pub proportion: f64,
 }
-
 
 // MutationStore
 
@@ -92,11 +89,7 @@ impl MutationStore {
         }
     }
 
-    pub fn push(
-        &mut self,
-        mutations: &Vec<Mutation>,
-        unknowns_compressed_positions: &Vec<&str>,
-    ) {
+    pub fn push(&mut self, mutations: &Vec<Mutation>, unknowns_compressed_positions: &Vec<&str>) {
         // Encode the mutations using the MutationDict
         let mut mutation_ids: Vec<u32> = Vec::with_capacity(mutations.len());
         for mutation in mutations.iter() {
@@ -111,17 +104,23 @@ impl MutationStore {
             let parts: Vec<&str> = s.split("-").collect();
             if parts.len() == 1 {
                 // It's a single value
-                let position: MutPosSize = parts[0].parse()
+                let position: MutPosSize = parts[0]
+                    .parse()
                     .expect(&format!("Unexpected compressed unknowns string: {}", s));
-                unknowns.push(UnknownPosition { position, is_start_range: false });
+                unknowns.push(UnknownPosition {
+                    position,
+                    is_start_range: false,
+                });
                 if position > self.max_position {
                     self.max_position = position;
                 }
             } else {
                 // It's a range
-                let range_start: MutPosSize = parts[0].parse()
+                let range_start: MutPosSize = parts[0]
+                    .parse()
                     .expect(&format!("Unexpected compressed unknowns string: {}", s));
-                let range_end: MutPosSize = parts[1].parse()
+                let range_end: MutPosSize = parts[1]
+                    .parse()
                     .expect(&format!("Unexpected compressed unknowns string: {}", s));
                 unknowns.push(UnknownPosition {
                     position: range_start,
@@ -137,7 +136,10 @@ impl MutationStore {
             }
         }
         // Create and store entry
-        self.data.push(InternalEntry { mutation_ids, unknowns })
+        self.data.push(InternalEntry {
+            mutation_ids,
+            unknowns,
+        })
     }
 
     pub fn count_mutations(&self, ids: &Vec<u32>) -> Vec<MutationCount> {
@@ -169,13 +171,17 @@ impl MutationStore {
         // Translate the mutations back and calculate the proportions:
         //   proportion = count / (total number of entries - number of unknowns)
         let total_entries = ids.len() as u32;
-        let mut mutation_counts: Vec<MutationCount> = Vec::with_capacity(
-            mutation_id_counts.data.len());
+        let mut mutation_counts: Vec<MutationCount> =
+            Vec::with_capacity(mutation_id_counts.data.len());
         for (mutation_id, count) in mutation_id_counts.data {
             let mutation = self.mutation_dict.id_to_value(mutation_id);
             let denominator = total_entries - unknown_counts[mutation.position as usize];
             let proportion = (count as f64) / (denominator as f64);
-            mutation_counts.push(MutationCount { mutation, count, proportion });
+            mutation_counts.push(MutationCount {
+                mutation,
+                count,
+                proportion,
+            });
         }
         mutation_counts
     }
