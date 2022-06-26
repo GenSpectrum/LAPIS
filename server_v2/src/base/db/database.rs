@@ -1,30 +1,31 @@
-use std::collections::HashMap;
-use chrono::Local;
+use crate::base::db::{FormattedMutationCount, MutPosSize, Mutation, SeqPosColumn};
 use crate::{DatabaseConfig, MutationStore};
+use chrono::Local;
 use postgres;
 use postgres::{Client, NoTls};
 use postgres_cursor::Cursor;
-use crate::base::db::{FormattedMutationCount, Mutation, MutPosSize, SeqPosColumn};
+use std::collections::HashMap;
 
-
-const GENES: &'static [&'static str] = &["E", "M", "N", "ORF1a", "ORF1b", "ORF3a", "ORF6", "ORF7a",
-    "ORF7b", "ORF8", "ORF9b", "S"];
-
+const GENES: &'static [&'static str] = &[
+    "E", "M", "N", "ORF1a", "ORF1b", "ORF3a", "ORF6", "ORF7a", "ORF7b", "ORF8", "ORF9b", "S",
+];
 
 pub fn get_db_client(config: &DatabaseConfig) -> Client {
     let mut db_config = postgres::config::Config::new();
-    db_config.host(&config.host)
+    db_config
+        .host(&config.host)
         .port(config.port)
         .user(&config.username)
         .password(&config.password)
         .dbname(&config.dbname);
-    let mut client = db_config.connect(NoTls)
+    let mut client = db_config
+        .connect(NoTls)
         .expect("Database connection failed");
-    client.execute(&format!("set search_path to '{}'", &config.schema), &[])
+    client
+        .execute(&format!("set search_path to '{}'", &config.schema), &[])
         .expect("The search_path of the database could not be changed.");
     client
 }
-
 
 pub struct Database {
     pub size: u32,
@@ -38,8 +39,11 @@ impl Database {
 
         // Load size
         let length_sql = "select count(*) from y_main_metadata;";
-        let size = client.query(length_sql, &[]).unwrap()
-            .get(0).unwrap()
+        let size = client
+            .query(length_sql, &[])
+            .unwrap()
+            .get(0)
+            .unwrap()
             .get::<usize, i64>(0) as u32;
         println!("{} Number entries: {}", Local::now(), size);
 
@@ -47,7 +51,7 @@ impl Database {
         println!("{} Let's get started", Local::now());
         for position in 1..29904 {
             if position % 100 == 0 {
-                println!("{} {}/{}", Local::now(), position/100, 29903/100);
+                println!("{} {}/{}", Local::now(), position / 100, 29903 / 100);
             }
             let columnar_sequence = load_nuc_columnar(&mut client, position, size);
             let nuc_pos_column = SeqPosColumn::from(columnar_sequence);
@@ -66,7 +70,9 @@ impl Database {
     }
 
     pub fn nuc_muts(&self, ids: &Vec<u32>) -> Vec<FormattedMutationCount> {
-        self.nuc_mutation_store.count_mutations(ids).iter()
+        self.nuc_mutation_store
+            .count_mutations(ids)
+            .iter()
             .filter(|x| x.proportion >= 0.05)
             .map(|x| FormattedMutationCount {
                 mutation: x.mutation.to_string(),
@@ -80,8 +86,7 @@ impl Database {
 fn load_mutations(
     client: &mut Client,
     size: u32,
-) -> (MutationStore, HashMap<String, MutationStore>)
-{
+) -> (MutationStore, HashMap<String, MutationStore>) {
     let mut nuc_mutation_store = MutationStore::with_capacity(size);
     let mut aa_mutation_stores = HashMap::new();
     for gene in GENES {
@@ -117,12 +122,14 @@ fn load_mutations(
             let nuc_substitutions: String = row.get("nuc_substitutions");
             let nuc_deletions: String = row.get("nuc_deletions");
             let nuc_unknowns_string: String = row.get("nuc_unknowns");
-            let nuc_mutations: Vec<Mutation> = nuc_substitutions.split(",")
+            let nuc_mutations: Vec<Mutation> = nuc_substitutions
+                .split(",")
                 .chain(nuc_deletions.split(","))
                 .filter(|x| !x.is_empty())
                 .map(|x| x.parse().unwrap())
                 .collect();
-            let nuc_unknowns: Vec<&str> = nuc_unknowns_string.split(",")
+            let nuc_unknowns: Vec<&str> = nuc_unknowns_string
+                .split(",")
                 .filter(|x| !x.is_empty())
                 .collect();
             nuc_mutation_store.push(&nuc_mutations, &nuc_unknowns);
@@ -135,23 +142,32 @@ fn load_mutations(
                 aa_mutations_per_gene.insert(gene.to_string(), Vec::new());
                 aa_unknowns_per_gene.insert(gene.to_string(), Vec::new());
             }
-            aa_mutations.split(",")
+            aa_mutations
+                .split(",")
                 .filter(|x| !x.is_empty())
                 .for_each(|x| {
                     let parts: Vec<&str> = x.split(":").collect();
                     let mutation: Mutation = parts[1].parse().unwrap();
-                    aa_mutations_per_gene.get_mut(parts[0]).unwrap().push(mutation);
+                    aa_mutations_per_gene
+                        .get_mut(parts[0])
+                        .unwrap()
+                        .push(mutation);
                 });
-            aa_unknowns.split(",")
+            aa_unknowns
+                .split(",")
                 .filter(|x| !x.is_empty())
                 .for_each(|x| {
                     let parts: Vec<&str> = x.split(":").collect();
-                    aa_unknowns_per_gene.get_mut(parts[0]).unwrap().push(parts[1]);
+                    aa_unknowns_per_gene
+                        .get_mut(parts[0])
+                        .unwrap()
+                        .push(parts[1]);
                 });
             for (gene, aa_mutation_store) in &mut aa_mutation_stores {
                 aa_mutation_store.push(
                     aa_mutations_per_gene.get(gene).unwrap(),
-                    aa_unknowns_per_gene.get(gene).unwrap());
+                    aa_unknowns_per_gene.get(gene).unwrap(),
+                );
             }
         }
     }
@@ -159,20 +175,17 @@ fn load_mutations(
     (nuc_mutation_store, aa_mutation_stores)
 }
 
-fn load_nuc_columnar(
-    client: &mut Client,
-    position: MutPosSize,
-    size: u32
-) -> Vec<char>
-{
+fn load_nuc_columnar(client: &mut Client, position: MutPosSize, size: u32) -> Vec<char> {
     let sql = "
         select data_compressed
         from y_main_sequence_columnar
         where position = $1;
     ";
     let rows = client.query(sql, &[&(position as i32)]).unwrap();
-    let row = rows.get(0)
-        .expect(&format!("No nuc columnar data available at position {}", position));
+    let row = rows.get(0).expect(&format!(
+        "No nuc columnar data available at position {}",
+        position
+    ));
     let compressed_bytes: Vec<u8> = row.get("data_compressed");
     let decompressed_bytes = zstd::bulk::decompress(&*compressed_bytes, size as usize).unwrap();
     let decompressed: Vec<char> = decompressed_bytes.iter().map(|b| *b as char).collect();

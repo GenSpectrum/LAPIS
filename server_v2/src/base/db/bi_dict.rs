@@ -13,7 +13,7 @@ impl<T: Eq + Hash + Clone> BiDict<T> {
         BiDict {
             values: Vec::new(),
             entry_to_id_map: HashMap::new(),
-            next_id: 0
+            next_id: 0,
         }
     }
 

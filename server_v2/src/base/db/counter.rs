@@ -8,7 +8,7 @@ pub struct Counter<T: Hash + Eq + Clone> {
 impl<T: Hash + Eq + Clone> Counter<T> {
     pub fn new() -> Counter<T> {
         Counter {
-            data: HashMap::new()
+            data: HashMap::new(),
         }
     }
 

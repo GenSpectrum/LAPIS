@@ -1,12 +1,12 @@
+use crate::base::SchemaConfig;
+use crate::{db, DatabaseConfig};
+use chrono::{NaiveDate, ParseResult};
+use postgres::types::ToSql;
+use regex::{Captures, Regex};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
-use chrono::{NaiveDate, ParseResult};
-use postgres::types::ToSql;
-use regex::{Captures, Regex};
-use crate::base::SchemaConfig;
-use crate::{DatabaseConfig, db};
 
 /// Expects the following three files in `data_dir`:
 /// - metadata.tsv
@@ -32,16 +32,25 @@ set
   date_original = $5,
   {};
     ",
-        schema.additional_metadata.iter().enumerate()
+        schema
+            .additional_metadata
+            .iter()
+            .enumerate()
             .map(|(i, x)| x.name.as_str())
             .collect::<Vec<_>>()
             .join(", "),
-        schema.additional_metadata.iter().enumerate()
+        schema
+            .additional_metadata
+            .iter()
+            .enumerate()
             .map(|(i, x)| format!("${}", 6 + i))
             .collect::<Vec<_>>()
             .join(", "),
         schema.primary_key,
-        schema.additional_metadata.iter().enumerate()
+        schema
+            .additional_metadata
+            .iter()
+            .enumerate()
             .map(|(i, x)| format!("{} = ${}", x.name, 6 + i))
             .collect::<Vec<_>>()
             .join(",\n  "),
@@ -50,16 +59,15 @@ set
     let mut db_client = db::get_db_client(db_config);
     type Record = HashMap<String, String>;
     let file = File::open(file_path).unwrap();
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .from_reader(file);
+    let mut reader = csv::ReaderBuilder::new().delimiter(b'\t').from_reader(file);
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     for result in reader.deserialize() {
         let record: Record = result.unwrap();
         let mut x: Vec<&(dyn ToSql + Sync)> = Vec::new();
         let date_string = handle_null(record.get("date").unwrap());
-        let (date, year, month, day)
-            = date_string.as_ref().map(|x| parse_date(x.as_str()))
+        let (date, year, month, day) = date_string
+            .as_ref()
+            .map(|x| parse_date(x.as_str()))
             .unwrap_or((None, None, None, None));
         x.push(&date);
         x.push(&year);
@@ -73,13 +81,13 @@ set
             let nullable = handle_null(s);
             record_vec_parsed.push(match nullable {
                 None => None,
-                Some(x) => Some(Box::new(x))
+                Some(x) => Some(Box::new(x)),
             });
         }
         for value in &record_vec_parsed {
             x.push(match value {
                 None => &(Option::<String>::None),
-                Some(x) => x.as_ref()
+                Some(x) => x.as_ref(),
             });
         }
         db_client.execute(&statement, &x[..]).unwrap();
@@ -102,27 +110,47 @@ fn parse_date(s: &str) -> (Option<NaiveDate>, Option<i32>, Option<i32>, Option<i
     match regex_match {
         None => (None, None, None, None),
         Some(m) => {
-            let year = m.get(1).map(|x| {
-                match x.as_str().parse::<i32>().ok() {
+            let year = m
+                .get(1)
+                .map(|x| match x.as_str().parse::<i32>().ok() {
                     None => None,
-                    Some(x) => if x > 0 { Some(x) } else { None }
-                }
-            }).flatten();
-            let month = m.get(2).map(|x| {
-                match x.as_str()[1..].parse::<i32>().ok() {
+                    Some(x) => {
+                        if x > 0 {
+                            Some(x)
+                        } else {
+                            None
+                        }
+                    }
+                })
+                .flatten();
+            let month = m
+                .get(2)
+                .map(|x| match x.as_str()[1..].parse::<i32>().ok() {
                     None => None,
-                    Some(x) => if x > 0 && x <= 12 { Some(x) } else { None }
-                }
-            }).flatten();
-            let day = m.get(3).map(|x| {
-                match x.as_str()[1..].parse::<i32>().ok() {
+                    Some(x) => {
+                        if x > 0 && x <= 12 {
+                            Some(x)
+                        } else {
+                            None
+                        }
+                    }
+                })
+                .flatten();
+            let day = m
+                .get(3)
+                .map(|x| match x.as_str()[1..].parse::<i32>().ok() {
                     None => None,
-                    Some(x) => if x > 0 && x <= 31 { Some(x) } else { None }
-                }
-            }).flatten();
+                    Some(x) => {
+                        if x > 0 && x <= 31 {
+                            Some(x)
+                        } else {
+                            None
+                        }
+                    }
+                })
+                .flatten();
             let parsed_date = NaiveDate::parse_from_str(s, "%Y-%m-%d").ok();
             (parsed_date, year, month, day)
         }
     }
 }
-
