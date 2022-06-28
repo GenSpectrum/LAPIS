@@ -9,6 +9,7 @@ edition = "2021"
 config = "0.13.1"
 chrono = "0.4.19"
 bio = "0.41"
+crossbeam = "0.8"
 csv = "1.1"
 postgres = { versino = "0.19.3", features = ["with-chrono-0_4"] }
 postgres-cursor = "0.4.0"
@@ -17,4 +18,4 @@ regex = "1"
 roaring = "0.9.0"
 croaring = "0.6.1"
 serde = { version = "1.0.137", features = ["derive"] }
-zstd = "0.11.2"
+zstd = { version = "0.11.2", features = ["experimental"] }
