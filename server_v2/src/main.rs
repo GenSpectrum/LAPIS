@@ -8,6 +8,8 @@ use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
 use crate::base::ProgramConfig;
 use crate::base::{db, RefGenomeConfig};
+use crate::db::{operators, Database};
+use crate::operators::Operator;
 use chrono::Local;
 use config::{Config, File, FileFormat};
 use std::sync::Mutex;
@@ -33,7 +35,12 @@ fn main() {
     //     &config.database,
     //     &mut nuc_seq_compressor,
     // );
-    base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
+    // base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
+
+    let db = Database::load(&config.schema, &config.database);
+    let result = operators::ex0().evaluate(&db);
+    let result1 = operators::ex1().evaluate(&db);
+    println!("Done");
 
     // let db = Database::load(&config.database);
     //

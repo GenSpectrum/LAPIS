@@ -1,6 +1,5 @@
 pub(crate) mod db;
 pub(crate) mod proc;
-pub(crate) mod query;
 pub(crate) mod util;
 
 mod config;
