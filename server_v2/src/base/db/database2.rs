@@ -27,14 +27,14 @@ pub fn get_db_client(config: &DatabaseConfig) -> Client {
     client
 }
 
-pub struct Database {
+pub struct Database2 {
     pub size: u32,
     nuc_mutation_store: MutationStore,
     aa_mutation_stores: HashMap<String, MutationStore>,
 }
 
-impl Database {
-    pub fn load(config: &DatabaseConfig) -> Database {
+impl Database2 {
+    pub fn load(config: &DatabaseConfig) -> Database2 {
         let mut client = get_db_client(config);
 
         // Load size
@@ -62,7 +62,7 @@ impl Database {
         let (nuc_mutation_store, aa_mutation_stores) = load_mutations(&mut client, size);
 
         // Finished
-        Database {
+        Database2 {
             size,
             nuc_mutation_store,
             aa_mutation_stores,

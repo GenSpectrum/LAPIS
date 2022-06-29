@@ -1,8 +1,8 @@
 mod config;
 pub use self::config::*;
 
-mod database;
-pub use self::database::*;
+mod database2;
+pub use self::database2::*;
 
 mod mutation;
 pub use self::mutation::*;
