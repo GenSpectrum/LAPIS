@@ -2,7 +2,7 @@ extern crate core;
 
 mod base;
 
-use crate::base::db::{Database, DatabaseConfig, MutationStore};
+use crate::base::db::{DatabaseConfig, MutationStore};
 use crate::base::proc::SequenceRowToColumnTransformer;
 use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
@@ -10,48 +10,11 @@ use crate::base::ProgramConfig;
 use crate::base::{db, RefGenomeConfig};
 use chrono::Local;
 use config::{Config, File, FileFormat};
-use serde::Deserialize;
-use std::borrow::Borrow;
-use std::path::Path;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-use std::{thread, time};
-
-// fn test() {
-//     let transformer = SequenceRowToColumnTransformer::new(2, 5);
-//     let mut compressor = SeqCompressor::new();
-//     let sequences = vec!["ABCDEFGHIJKLMNOP", "abcdefghijklmnop", "0123456789abcdef"];
-//     let compressed_sequences: Vec<Option<Vec<u8>>> = sequences
-//         .iter()
-//         .map(|s| Some(compressor.compress_bytes(s.as_bytes())))
-//         .collect();
-//     let results = Arc::new(Mutex::new(Vec::<(usize, Vec<Vec<u8>>)>::new()));
-//     let results_ref_copy = results.clone();
-//     let consume = move |pos_offset, transformed_seqs| {
-//         let mut y = results_ref_copy.lock().unwrap();
-//         y.push((pos_offset, transformed_seqs));
-//     };
-//     transformer.transform(
-//         &compressed_sequences,
-//         &compressor,
-//         &compressor,
-//         Arc::new(Mutex::new(consume)),
-//         b'!',
-//     );
-//     let mut x = results.lock().unwrap();
-//     x.sort_by_key(|x| x.0);
-//     let y: Vec<_> = x.iter()
-//         .map(|x| &x.1)
-//         .flatten()
-//         .map(|x| String::from_utf8(compressor.decompress(x)).unwrap())
-//         .collect();
-//     println!("{:?}", y);
-//     println!("Done");
-// }
+use std::sync::Mutex;
+use std::time;
 
 fn main() {
     println!("{} Welcome", Local::now());
-    // test();
     // todo!("Stop here");
 
     let config = read_config();

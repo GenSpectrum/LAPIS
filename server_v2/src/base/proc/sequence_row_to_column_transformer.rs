@@ -161,3 +161,48 @@ struct SharedData {
 }
 
 unsafe impl Send for SharedData {}
+
+#[cfg(test)]
+mod tests {
+    use crate::{SeqCompressor, SequenceRowToColumnTransformer};
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn test() {
+        let transformer = SequenceRowToColumnTransformer::new(2, 5);
+        let mut compressor = SeqCompressor::new();
+        let sequences = vec!["ABCDEFGHIJKLMNOP", "abcdefghijklmnop", "0123456789abcdef"];
+        let compressed_sequences: Vec<Option<Vec<u8>>> = sequences
+            .iter()
+            .map(|s| Some(compressor.compress_bytes(s.as_bytes())))
+            .collect();
+        let results = Arc::new(Mutex::new(Vec::<(usize, Vec<Vec<u8>>)>::new()));
+        let results_ref_copy = results.clone();
+        let consume = move |pos_offset, transformed_seqs| {
+            let mut y = results_ref_copy.lock().unwrap();
+            y.push((pos_offset, transformed_seqs));
+        };
+        transformer.transform(
+            &compressed_sequences,
+            &compressor,
+            &compressor,
+            consume,
+            b'!',
+        );
+        let mut x = results.lock().unwrap();
+        x.sort_by_key(|x| x.0);
+        let y: Vec<_> = x
+            .iter()
+            .map(|x| &x.1)
+            .flatten()
+            .map(|x| String::from_utf8(compressor.decompress(x)).unwrap())
+            .collect();
+        assert_eq!(
+            y,
+            vec![
+                "Aa0", "Bb1", "Cc2", "Dd3", "Ee4", "Ff5", "Gg6", "Hh7", "Ii8", "Jj9", "Kka", "Llb",
+                "Mmc", "Nnd", "Ooe", "Ppf"
+            ]
+        );
+    }
+}
