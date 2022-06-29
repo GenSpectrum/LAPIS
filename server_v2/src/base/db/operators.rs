@@ -60,8 +60,7 @@ impl Operator for And {
         if self.children.is_empty() {
             return vec![true; database.number_entries];
         }
-        let children_evaluated: Vec<Vec<bool>> =
-            self.children.iter().map(|c| c.evaluate(database)).collect();
+        let children_evaluated: Vec<Vec<bool>> = self.children.iter().map(|c| c.evaluate(database)).collect();
         let mut result = Vec::with_capacity(database.number_entries);
         for i in 0..database.number_entries {
             let mut b = true;
@@ -105,8 +104,7 @@ impl Operator for Or {
         if self.children.is_empty() {
             return vec![false; database.number_entries];
         }
-        let children_evaluated: Vec<Vec<bool>> =
-            self.children.iter().map(|c| c.evaluate(database)).collect();
+        let children_evaluated: Vec<Vec<bool>> = self.children.iter().map(|c| c.evaluate(database)).collect();
         let mut result = Vec::with_capacity(database.number_entries);
         for i in 0..database.number_entries {
             let mut b = false;
@@ -131,9 +129,7 @@ impl Neg {
         if let Value::Object(obj) = json {
             let child = obj.get("child")?;
             let child_parsed = from_json_value(child)?;
-            return Some(Neg {
-                child: child_parsed,
-            });
+            return Some(Neg { child: child_parsed });
         }
         None
     }
@@ -177,13 +173,7 @@ impl Operator for StrEq {
         match data {
             Column::Str(data) => data
                 .iter()
-                .map(|s| {
-                    if let Some(s) = s {
-                        *s == self.value
-                    } else {
-                        false
-                    }
-                })
+                .map(|s| if let Some(s) = s { *s == self.value } else { false })
                 .collect(),
             _ => panic!(""),
         }
@@ -285,8 +275,7 @@ impl Operator for NOf {
         if self.n == 0 {
             return vec![true; database.number_entries];
         }
-        let children_evaluated: Vec<Vec<bool>> =
-            self.children.iter().map(|c| c.evaluate(database)).collect();
+        let children_evaluated: Vec<Vec<bool>> = self.children.iter().map(|c| c.evaluate(database)).collect();
         let mut result = Vec::with_capacity(database.number_entries);
         for i in 0..database.number_entries {
             let mut number_trues: u32 = 0;

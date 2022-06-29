@@ -5,11 +5,7 @@ use std::sync::{Arc, Mutex};
 
 /// Moves data from the `source_data` table to the `main_` tables and performs the necessary
 /// processing including transforming the sequences to a columnar format
-pub fn source_to_main(
-    schema: &SchemaConfig,
-    db_config: &DatabaseConfig,
-    seq_compressor: &mut SeqCompressor,
-) {
+pub fn source_to_main(schema: &SchemaConfig, db_config: &DatabaseConfig, seq_compressor: &mut SeqCompressor) {
     copy_data(schema, db_config);
     transform_seqs_to_columnar(db_config, seq_compressor);
 }
@@ -105,9 +101,7 @@ values ($1, $2);
                 println!("Pos {} ({}/{})", pos_offset, i, transformed_seqs.len());
             }
             let pos: i32 = (pos_offset + i) as i32;
-            transaction
-                .execute(&statement, &[&pos, compressed])
-                .unwrap();
+            transaction.execute(&statement, &[&pos, compressed]).unwrap();
         }
         transaction.commit().unwrap();
     };

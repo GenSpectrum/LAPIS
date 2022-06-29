@@ -58,18 +58,13 @@ fn main() {
 fn read_config() -> ProgramConfig {
     let builder = Config::builder().add_source(File::new("config.yml", FileFormat::Yaml));
     let config_unparsed = builder.build().expect("The config file cannot be loaded.");
-    let config: ProgramConfig = config_unparsed
-        .try_deserialize()
-        .expect("The config file is invalid.");
+    let config: ProgramConfig = config_unparsed.try_deserialize().expect("The config file is invalid.");
     config
 }
 
 fn read_ref_genome_config() -> RefGenomeConfig {
-    let builder =
-        Config::builder().add_source(File::new("config_ref_genome.yml", FileFormat::Yaml));
-    let config_unparsed = builder
-        .build()
-        .expect("The ref genome config file cannot be loaded.");
+    let builder = Config::builder().add_source(File::new("config_ref_genome.yml", FileFormat::Yaml));
+    let config_unparsed = builder.build().expect("The ref genome config file cannot be loaded.");
     let config: RefGenomeConfig = config_unparsed
         .try_deserialize()
         .expect("The ref genome config file is invalid.");

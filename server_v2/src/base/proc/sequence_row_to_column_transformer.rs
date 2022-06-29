@@ -54,10 +54,8 @@ impl SequenceRowToColumnTransformer {
             None => panic!(),
             Some(seq) => decompressor.clone().decompress(seq).len(),
         };
-        let number_iterations =
-            (sequence_length as f32 / self.position_range_size as f32).ceil() as usize;
-        let number_tasks_per_iteration =
-            (compressed_sequences.len() as f32 / self.batch_size as f32).ceil() as usize;
+        let number_iterations = (sequence_length as f32 / self.position_range_size as f32).ceil() as usize;
+        let number_tasks_per_iteration = (compressed_sequences.len() as f32 / self.batch_size as f32).ceil() as usize;
 
         // Create a thread pool with a fixed number of threads
         let mut executor = ExecutorService::new(self.number_workers);
@@ -76,10 +74,7 @@ impl SequenceRowToColumnTransformer {
             // Decompress the sequences and transform
             for task_index in 0..number_tasks_per_iteration {
                 let start_seq = self.batch_size * task_index;
-                let end_seq = cmp::min(
-                    self.batch_size * (task_index + 1),
-                    compressed_sequences.len(),
-                );
+                let end_seq = cmp::min(self.batch_size * (task_index + 1), compressed_sequences.len());
                 let shared_data = shared_data.clone();
                 let mut decompressor = decompressor.clone();
                 let task = move |_: usize| unsafe {
@@ -118,16 +113,12 @@ impl SequenceRowToColumnTransformer {
             // Transform char arrays to string, compress them and insert
             // This will be done in parallel again.
             let finalization_batch_size = 2000;
-            let number_finalization_tasks =
-                (count_pos as f32 / finalization_batch_size as f32).ceil() as usize;
+            let number_finalization_tasks = (count_pos as f32 / finalization_batch_size as f32).ceil() as usize;
             println!("number_finalization_tasks: {}", number_finalization_tasks);
             for finalization_index in 0..number_finalization_tasks {
-                let finalization_pos_start =
-                    start_pos + finalization_batch_size * finalization_index;
-                let finalization_pos_end = cmp::min(
-                    start_pos + finalization_batch_size * (finalization_index + 1),
-                    end_pos,
-                );
+                let finalization_pos_start = start_pos + finalization_batch_size * finalization_index;
+                let finalization_pos_end =
+                    cmp::min(start_pos + finalization_batch_size * (finalization_index + 1), end_pos);
                 let shared_data = shared_data.clone();
                 let mut compressor = compressor.clone();
 
@@ -182,13 +173,7 @@ mod tests {
             let mut y = results_ref_copy.lock().unwrap();
             y.push((pos_offset, transformed_seqs));
         };
-        transformer.transform(
-            &compressed_sequences,
-            &compressor,
-            &compressor,
-            consume,
-            b'!',
-        );
+        transformer.transform(&compressed_sequences, &compressor, &compressor, consume, b'!');
         let mut x = results.lock().unwrap();
         x.sort_by_key(|x| x.0);
         let y: Vec<_> = x
@@ -200,8 +185,8 @@ mod tests {
         assert_eq!(
             y,
             vec![
-                "Aa0", "Bb1", "Cc2", "Dd3", "Ee4", "Ff5", "Gg6", "Hh7", "Ii8", "Jj9", "Kka", "Llb",
-                "Mmc", "Nnd", "Ooe", "Ppf"
+                "Aa0", "Bb1", "Cc2", "Dd3", "Ee4", "Ff5", "Gg6", "Hh7", "Ii8", "Jj9", "Kka", "Llb", "Mmc", "Nnd",
+                "Ooe", "Ppf"
             ]
         );
     }

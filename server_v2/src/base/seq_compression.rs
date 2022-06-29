@@ -27,8 +27,8 @@ impl SeqCompressor {
     }
 
     pub fn decompress(&mut self, compressed: &[u8]) -> Vec<u8> {
-        let size = zstd::bulk::Decompressor::upper_bound(compressed)
-            .expect("The size of the compressed data is unknown.");
+        let size =
+            zstd::bulk::Decompressor::upper_bound(compressed).expect("The size of the compressed data is unknown.");
         let decompressed_bytes = self.decompressor.decompress(compressed, size).unwrap();
         decompressed_bytes
     }

@@ -18,9 +18,7 @@ pub fn get_db_client(config: &DatabaseConfig) -> Client {
         .user(&config.username)
         .password(&config.password)
         .dbname(&config.dbname);
-    let mut client = db_config
-        .connect(NoTls)
-        .expect("Database connection failed");
+    let mut client = db_config.connect(NoTls).expect("Database connection failed");
     client
         .execute(&format!("set search_path to '{}'", &config.schema), &[])
         .expect("The search_path of the database could not be changed.");
@@ -83,10 +81,7 @@ impl Database2 {
     }
 }
 
-fn load_mutations(
-    client: &mut Client,
-    size: u32,
-) -> (MutationStore, HashMap<String, MutationStore>) {
+fn load_mutations(client: &mut Client, size: u32) -> (MutationStore, HashMap<String, MutationStore>) {
     let mut nuc_mutation_store = MutationStore::with_capacity(size);
     let mut aa_mutation_stores = HashMap::new();
     for gene in GENES {
@@ -128,10 +123,7 @@ fn load_mutations(
                 .filter(|x| !x.is_empty())
                 .map(|x| x.parse().unwrap())
                 .collect();
-            let nuc_unknowns: Vec<&str> = nuc_unknowns_string
-                .split(",")
-                .filter(|x| !x.is_empty())
-                .collect();
+            let nuc_unknowns: Vec<&str> = nuc_unknowns_string.split(",").filter(|x| !x.is_empty()).collect();
             nuc_mutation_store.push(&nuc_mutations, &nuc_unknowns);
             // AA mutations
             let aa_mutations: String = row.get("aa_mutations");
@@ -142,27 +134,15 @@ fn load_mutations(
                 aa_mutations_per_gene.insert(gene.to_string(), Vec::new());
                 aa_unknowns_per_gene.insert(gene.to_string(), Vec::new());
             }
-            aa_mutations
-                .split(",")
-                .filter(|x| !x.is_empty())
-                .for_each(|x| {
-                    let parts: Vec<&str> = x.split(":").collect();
-                    let mutation: Mutation = parts[1].parse().unwrap();
-                    aa_mutations_per_gene
-                        .get_mut(parts[0])
-                        .unwrap()
-                        .push(mutation);
-                });
-            aa_unknowns
-                .split(",")
-                .filter(|x| !x.is_empty())
-                .for_each(|x| {
-                    let parts: Vec<&str> = x.split(":").collect();
-                    aa_unknowns_per_gene
-                        .get_mut(parts[0])
-                        .unwrap()
-                        .push(parts[1]);
-                });
+            aa_mutations.split(",").filter(|x| !x.is_empty()).for_each(|x| {
+                let parts: Vec<&str> = x.split(":").collect();
+                let mutation: Mutation = parts[1].parse().unwrap();
+                aa_mutations_per_gene.get_mut(parts[0]).unwrap().push(mutation);
+            });
+            aa_unknowns.split(",").filter(|x| !x.is_empty()).for_each(|x| {
+                let parts: Vec<&str> = x.split(":").collect();
+                aa_unknowns_per_gene.get_mut(parts[0]).unwrap().push(parts[1]);
+            });
             for (gene, aa_mutation_store) in &mut aa_mutation_stores {
                 aa_mutation_store.push(
                     aa_mutations_per_gene.get(gene).unwrap(),
@@ -182,10 +162,9 @@ fn load_nuc_columnar(client: &mut Client, position: MutPosSize, size: u32) -> Ve
         where position = $1;
     ";
     let rows = client.query(sql, &[&(position as i32)]).unwrap();
-    let row = rows.get(0).expect(&format!(
-        "No nuc columnar data available at position {}",
-        position
-    ));
+    let row = rows
+        .get(0)
+        .expect(&format!("No nuc columnar data available at position {}", position));
     let compressed_bytes: Vec<u8> = row.get("data_compressed");
     let decompressed_bytes = zstd::bulk::decompress(&*compressed_bytes, size as usize).unwrap();
     let decompressed: Vec<char> = decompressed_bytes.iter().map(|b| *b as char).collect();

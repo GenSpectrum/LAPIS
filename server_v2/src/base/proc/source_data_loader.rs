@@ -131,12 +131,7 @@ set
   seq_{}_compressed = $2,
   seq_{}_hash = null;
         ",
-        schema.primary_key,
-        sequence_type,
-        sequence_type,
-        schema.primary_key,
-        sequence_type,
-        sequence_type
+        schema.primary_key, sequence_type, sequence_type, schema.primary_key, sequence_type, sequence_type
     );
 
     let mut db_client = db::get_db_client(db_config);
@@ -146,9 +141,7 @@ set
     for result in reader.records() {
         let record = result.unwrap();
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
-        db_client
-            .execute(&statement, &[&record.id(), &compressed_seq])
-            .unwrap();
+        db_client.execute(&statement, &[&record.id(), &compressed_seq]).unwrap();
     }
 }
 

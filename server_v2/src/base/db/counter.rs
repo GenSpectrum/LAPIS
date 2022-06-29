@@ -7,9 +7,7 @@ pub struct Counter<T: Hash + Eq + Clone> {
 
 impl<T: Hash + Eq + Clone> Counter<T> {
     pub fn new() -> Counter<T> {
-        Counter {
-            data: HashMap::new(),
-        }
+        Counter { data: HashMap::new() }
     }
 
     pub fn update(&mut self, list: &Vec<T>) {

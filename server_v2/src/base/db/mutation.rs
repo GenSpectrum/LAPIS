@@ -136,10 +136,7 @@ impl MutationStore {
             }
         }
         // Create and store entry
-        self.data.push(InternalEntry {
-            mutation_ids,
-            unknowns,
-        })
+        self.data.push(InternalEntry { mutation_ids, unknowns })
     }
 
     pub fn count_mutations(&self, ids: &Vec<u32>) -> Vec<MutationCount> {
@@ -171,8 +168,7 @@ impl MutationStore {
         // Translate the mutations back and calculate the proportions:
         //   proportion = count / (total number of entries - number of unknowns)
         let total_entries = ids.len() as u32;
-        let mut mutation_counts: Vec<MutationCount> =
-            Vec::with_capacity(mutation_id_counts.data.len());
+        let mut mutation_counts: Vec<MutationCount> = Vec::with_capacity(mutation_id_counts.data.len());
         for (mutation_id, count) in mutation_id_counts.data {
             let mutation = self.mutation_dict.id_to_value(mutation_id);
             let denominator = total_entries - unknown_counts[mutation.position as usize];

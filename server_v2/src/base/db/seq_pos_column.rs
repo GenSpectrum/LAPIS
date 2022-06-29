@@ -9,9 +9,7 @@ impl SeqPosColumn {
     pub fn from(columnar_sequence: Vec<char>) -> Self {
         let mut data: HashMap<char, RoaringBitmap> = HashMap::new();
         for (i, x) in columnar_sequence.iter().enumerate() {
-            let map = data
-                .entry(x.clone())
-                .or_insert_with(|| RoaringBitmap::new());
+            let map = data.entry(x.clone()).or_insert_with(|| RoaringBitmap::new());
             map.insert(i as u32);
         }
 

@@ -25,8 +25,7 @@ pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
         additional_attrs_sql_parts.push(part);
     }
     let additional_attrs_sql = additional_attrs_sql_parts.join(",\n  ");
-    let additional_attrs_with_primary_key_sql =
-        additional_attrs_sql_parts_with_primary_key.join(",\n  ");
+    let additional_attrs_with_primary_key_sql = additional_attrs_sql_parts_with_primary_key.join(",\n  ");
 
     let create_source_table_sql = format!(
         "
@@ -172,8 +171,6 @@ $$ language plpgsql;",
         .execute(create_metadata_table.as_str(), &[])
         .expect("Table init failed");
     for create_basics_sql in create_basics_sqls {
-        client
-            .execute(create_basics_sql, &[])
-            .expect("Table init failed");
+        client.execute(create_basics_sql, &[]).expect("Table init failed");
     }
 }
