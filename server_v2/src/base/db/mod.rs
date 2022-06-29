@@ -18,3 +18,5 @@ pub use self::seq_pos_column::*;
 
 mod generator;
 pub use self::generator::*;
+
+pub mod operators;
