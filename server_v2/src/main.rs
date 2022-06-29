@@ -1,6 +1,7 @@
 extern crate core;
 
 mod base;
+mod play;
 
 use crate::base::db::{Database, DatabaseConfig, MutationStore};
 use crate::base::proc::SequenceRowToColumnTransformer;
@@ -52,11 +53,13 @@ use std::{thread, time};
 fn main() {
     println!("{} Welcome", Local::now());
     // test();
-    // todo!("Stop here");
 
     let config = read_config();
     let ref_genome_config = read_ref_genome_config();
     let mut nuc_seq_compressor = SeqCompressor::with_dict(ref_genome_config.sequence.as_bytes());
+
+    play::hash_uppercase(&config.database, &mut nuc_seq_compressor);
+    todo!("Stop here");
 
     // db::generate_db_tables(&config.database, &config.schema);
     // base::proc::load_source_data(

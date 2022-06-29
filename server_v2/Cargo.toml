@@ -11,6 +11,8 @@ chrono = "0.4.19"
 bio = "0.41"
 crossbeam = "0.8"
 csv = "1.1"
+md-5 = "0.10.1"
+base16ct = "0.1.1"
 postgres = { versino = "0.19.3", features = ["with-chrono-0_4"] }
 postgres-cursor = "0.4.0"
 rand = "0.8.5"
