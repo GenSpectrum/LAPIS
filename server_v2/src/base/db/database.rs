@@ -1,6 +1,8 @@
+use crate::base::constants::NucCode;
 use crate::base::SchemaConfig;
 use crate::db::get_db_client;
-use crate::DatabaseConfig;
+use crate::{DatabaseConfig, SeqCompressor};
+use postgres::Row;
 use std::collections::HashMap;
 
 pub struct Database {
@@ -48,6 +50,24 @@ impl Database {
             number_entries,
             metadata,
             db_config: db_config.clone(),
+        }
+    }
+
+    pub fn load_nuc_column(&self, position: u32) -> Vec<NucCode> {
+        let sql = "select data_compressed from main_sequence_columnar where position = $1;";
+        let mut client = get_db_client(&self.db_config);
+        let rows = client.query(sql, &[&(position as i32)]).unwrap();
+        let data = rows.get(0);
+        match data {
+            None => panic!("No data is available for nucleotide position {}", position),
+            Some(row) => {
+                let compressed: Vec<u8> = row.get("data_compressed");
+                SeqCompressor::new()
+                    .decompress(&compressed)
+                    .iter()
+                    .map(|x| NucCode::from_byte_ignore_weird(*x))
+                    .collect()
+            }
         }
     }
 }

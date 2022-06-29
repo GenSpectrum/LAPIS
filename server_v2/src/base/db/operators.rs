@@ -115,7 +115,8 @@ pub struct NucEq {
 
 impl Operator for NucEq {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
-        todo!()
+        let data = database.load_nuc_column(self.position);
+        data.iter().map(|x| *x == self.value).collect()
     }
 }
 

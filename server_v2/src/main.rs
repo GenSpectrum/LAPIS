@@ -40,6 +40,7 @@ fn main() {
     let db = Database::load(&config.schema, &config.database);
     let result = operators::ex0().evaluate(&db);
     let result1 = operators::ex1().evaluate(&db);
+    let result2 = operators::ex2().evaluate(&db);
     println!("Done");
 
     // let db = Database::load(&config.database);
