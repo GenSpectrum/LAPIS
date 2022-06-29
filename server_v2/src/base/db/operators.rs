@@ -2,13 +2,57 @@ use crate::base::constants::NucCode;
 use crate::db::Column;
 use crate::Database;
 use chrono::NaiveDate;
+use serde_json::Value;
 
 pub trait Operator {
     fn evaluate(&self, database: &Database) -> Vec<bool>;
 }
 
+pub fn from_json(json: &str) -> Option<Box<dyn Operator>> {
+    let value: Value = serde_json::from_str(json).ok()?;
+    from_json_value(&value)
+}
+
+fn from_json_value(json: &Value) -> Option<Box<dyn Operator>> {
+    if let Value::Object(obj) = json {
+        let op_type = obj.get("type")?;
+        if let Value::String(op_type) = op_type {
+            return match op_type.as_str() {
+                "And" => Some(Box::new(And::from_json(json)?)),
+                "Or" => Some(Box::new(Or::from_json(json)?)),
+                "Neg" => Some(Box::new(Neg::from_json(json)?)),
+                "StrEq" => Some(Box::new(StrEq::from_json(json)?)),
+                "DateBetw" => Some(Box::new(DateBetw::from_json(json)?)),
+                "NucEq" => Some(Box::new(NucEq::from_json(json)?)),
+                "NOf" => Some(Box::new(NOf::from_json(json)?)),
+                _ => None,
+            };
+        }
+    }
+    None
+}
+
 pub struct And {
     pub children: Vec<Box<dyn Operator>>,
+}
+
+impl And {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let children = obj.get("children")?;
+            let mut children_parsed = Vec::new();
+            if let Value::Array(children) = children {
+                for child in children {
+                    let child_parsed = from_json_value(child)?;
+                    children_parsed.push(child_parsed);
+                }
+                return Some(And {
+                    children: children_parsed,
+                });
+            }
+        }
+        None
+    }
 }
 
 impl Operator for And {
@@ -37,6 +81,25 @@ pub struct Or {
     pub children: Vec<Box<dyn Operator>>,
 }
 
+impl Or {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let children = obj.get("children")?;
+            let mut children_parsed = Vec::new();
+            if let Value::Array(children) = children {
+                for child in children {
+                    let child_parsed = from_json_value(child)?;
+                    children_parsed.push(child_parsed);
+                }
+                return Some(Or {
+                    children: children_parsed,
+                });
+            }
+        }
+        None
+    }
+}
+
 impl Operator for Or {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         if self.children.is_empty() {
@@ -60,7 +123,20 @@ impl Operator for Or {
 }
 
 pub struct Neg {
-    pub child: dyn Operator,
+    pub child: Box<dyn Operator>,
+}
+
+impl Neg {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let child = obj.get("child")?;
+            let child_parsed = from_json_value(child)?;
+            return Some(Neg {
+                child: child_parsed,
+            });
+        }
+        None
+    }
 }
 
 impl Operator for Neg {
@@ -72,6 +148,24 @@ impl Operator for Neg {
 pub struct StrEq {
     pub column: String,
     pub value: String,
+}
+
+impl StrEq {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let column = obj.get("column")?;
+            let value = obj.get("value")?;
+            if let Value::String(column) = column {
+                if let Value::String(value) = value {
+                    return Some(StrEq {
+                        column: column.clone(),
+                        value: value.clone(),
+                    });
+                }
+            }
+        }
+        None
+    }
 }
 
 impl Operator for StrEq {
@@ -102,6 +196,12 @@ pub struct DateBetw {
     pub to: Option<NaiveDate>,
 }
 
+impl DateBetw {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        todo!()
+    }
+}
+
 impl Operator for DateBetw {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         todo!()
@@ -111,6 +211,29 @@ impl Operator for DateBetw {
 pub struct NucEq {
     pub position: u32,
     pub value: NucCode,
+}
+
+impl NucEq {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let position = obj.get("position")?;
+            let value = obj.get("value")?;
+            if let Value::Number(position) = position {
+                let position = position.as_u64()?;
+                if let Value::String(value) = value {
+                    let value_bytes = value.as_bytes();
+                    if value_bytes.len() == 1 {
+                        let nuc_code = NucCode::from_byte(value_bytes[0])?;
+                        return Some(NucEq {
+                            position: position as u32,
+                            value: nuc_code,
+                        });
+                    }
+                }
+            }
+        }
+        None
+    }
 }
 
 impl Operator for NucEq {
@@ -124,6 +247,34 @@ pub struct NOf {
     pub n: u32,
     pub exactly: bool,
     pub children: Vec<Box<dyn Operator>>,
+}
+
+impl NOf {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let n = obj.get("n")?;
+            let exactly = obj.get("exactly")?;
+            let children = obj.get("children")?;
+            let mut children_parsed = Vec::new();
+            if let Value::Array(children) = children {
+                for child in children {
+                    let child_parsed = from_json_value(child)?;
+                    children_parsed.push(child_parsed);
+                }
+                if let Value::Number(n) = n {
+                    let n = n.as_u64()?;
+                    if let Value::Bool(exactly) = exactly {
+                        return Some(NOf {
+                            n: n as u32,
+                            exactly: *exactly,
+                            children: children_parsed,
+                        });
+                    }
+                }
+            }
+        }
+        None
+    }
 }
 
 impl Operator for NOf {
@@ -182,5 +333,47 @@ pub fn ex2() -> NucEq {
     NucEq {
         position: 25407,
         value: NucCode::A,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::operators::{from_json, StrEq};
+
+    #[test]
+    fn parse_json() {
+        let json = r#"
+{
+  "type": "And",
+  "children": [
+    {
+      "type": "StrEq",
+      "column": "country",
+      "value": "Switzerland"
+    },
+    {
+      "type": "Or",
+      "children": [
+        {
+          "type": "NucEq",
+          "position": 25407,
+          "value": "A"
+        },
+        {
+          "type": "Neg",
+          "child": {
+            "type": "StrEq",
+            "column": "clade",
+            "value": "hMPXV-1"
+          }
+        }
+      ]
+    }
+  ]
+}
+        "#;
+        let parsed = from_json(json).unwrap();
+        // TODO This test currently does not check for correctness.
+        //  I don't know how to make Operator (which is a trait..) comparable.
     }
 }
