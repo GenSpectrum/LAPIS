@@ -1,4 +1,4 @@
-use crate::db::query::Query;
+use crate::db::query::{Query, QuerySelect};
 use crate::Database;
 use actix_web::rt::task::spawn_blocking;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
@@ -24,17 +24,26 @@ async fn hello() -> impl Responder {
 }
 
 #[post("/query")]
-async fn query(bytes: web::Bytes, data: web::Data<Arc<Database>>) -> impl Responder {
+async fn query(bytes: web::Bytes, database: web::Data<Arc<Database>>) -> impl Responder {
     let req_body = std::str::from_utf8(&bytes).ok();
     if let Some(req_body) = req_body {
         let req_body = req_body.to_string();
         let result = spawn_blocking(move || {
             let query = Query::from_json(req_body.as_str())?;
-            Some(query.filter.evaluate(&data))
+            let filtered = query.filter.evaluate(&database);
+            match query.select {
+                QuerySelect::Aggregated(query) => Some(query.evaluate(&filtered, &database).to_json(&database)),
+                QuerySelect::Details(_) => {
+                    todo!()
+                }
+                QuerySelect::NucSequences(_) => {
+                    todo!()
+                }
+            }
         })
         .await;
         if let Ok(Some(result)) = result {
-            return HttpResponse::Ok().body(format!("{:?}", result));
+            return HttpResponse::Ok().body(result);
         }
     }
     return HttpResponse::BadRequest().body("Malformed or not allowed query");
