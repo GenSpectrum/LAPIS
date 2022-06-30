@@ -8,8 +8,8 @@ use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
 use crate::base::{db, RefGenomeConfig};
 use crate::base::{server, ProgramConfig};
-use crate::db::{operators, Database};
-use crate::operators::Operator;
+use crate::db::{filters, Database};
+use crate::filters::Filter;
 use chrono::Local;
 use config::{Config, File, FileFormat};
 use std::sync::Arc;
@@ -37,9 +37,9 @@ fn main() {
     // base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
 
     let db = Arc::new(Database::load(&config.schema, &config.database));
-    let result = operators::ex0().evaluate(&db);
-    let result1 = operators::ex1().evaluate(&db);
-    let result2 = operators::ex2().evaluate(&db);
+    let result = filters::ex0().evaluate(&db);
+    let result1 = filters::ex1().evaluate(&db);
+    let result2 = filters::ex2().evaluate(&db);
 
     server::main(db).unwrap();
 

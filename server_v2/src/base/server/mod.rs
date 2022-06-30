@@ -1,4 +1,5 @@
-use crate::{operators, Database};
+use crate::db::query::Query;
+use crate::Database;
 use actix_web::rt::task::spawn_blocking;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use std::sync::Arc;
@@ -24,16 +25,12 @@ async fn hello() -> impl Responder {
 
 #[post("/query")]
 async fn query(bytes: web::Bytes, data: web::Data<Arc<Database>>) -> impl Responder {
-    let query_str = std::str::from_utf8(&bytes).ok();
-    if let Some(query_str) = query_str {
-        let query_str = query_str.to_string();
+    let req_body = std::str::from_utf8(&bytes).ok();
+    if let Some(req_body) = req_body {
+        let req_body = req_body.to_string();
         let result = spawn_blocking(move || {
-            let query = operators::from_json(query_str.as_str());
-            if let Some(query) = query {
-                Some(query.evaluate(&data))
-            } else {
-                None
-            }
+            let query = Query::from_json(req_body.as_str())?;
+            Some(query.filter.evaluate(&data))
         })
         .await;
         if let Ok(Some(result)) = result {

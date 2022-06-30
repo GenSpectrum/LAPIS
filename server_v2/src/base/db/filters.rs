@@ -4,16 +4,16 @@ use crate::Database;
 use chrono::NaiveDate;
 use serde_json::Value;
 
-pub trait Operator {
+pub trait Filter {
     fn evaluate(&self, database: &Database) -> Vec<bool>;
 }
 
-pub fn from_json(json: &str) -> Option<Box<dyn Operator>> {
+pub fn from_json(json: &str) -> Option<Box<dyn Filter>> {
     let value: Value = serde_json::from_str(json).ok()?;
     from_json_value(&value)
 }
 
-fn from_json_value(json: &Value) -> Option<Box<dyn Operator>> {
+pub fn from_json_value(json: &Value) -> Option<Box<dyn Filter>> {
     if let Value::Object(obj) = json {
         let op_type = obj.get("type")?;
         if let Value::String(op_type) = op_type {
@@ -33,7 +33,7 @@ fn from_json_value(json: &Value) -> Option<Box<dyn Operator>> {
 }
 
 pub struct And {
-    pub children: Vec<Box<dyn Operator>>,
+    pub children: Vec<Box<dyn Filter>>,
 }
 
 impl And {
@@ -55,7 +55,7 @@ impl And {
     }
 }
 
-impl Operator for And {
+impl Filter for And {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         if self.children.is_empty() {
             return vec![true; database.number_entries];
@@ -77,7 +77,7 @@ impl Operator for And {
 }
 
 pub struct Or {
-    pub children: Vec<Box<dyn Operator>>,
+    pub children: Vec<Box<dyn Filter>>,
 }
 
 impl Or {
@@ -99,7 +99,7 @@ impl Or {
     }
 }
 
-impl Operator for Or {
+impl Filter for Or {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         if self.children.is_empty() {
             return vec![false; database.number_entries];
@@ -121,7 +121,7 @@ impl Operator for Or {
 }
 
 pub struct Neg {
-    pub child: Box<dyn Operator>,
+    pub child: Box<dyn Filter>,
 }
 
 impl Neg {
@@ -135,7 +135,7 @@ impl Neg {
     }
 }
 
-impl Operator for Neg {
+impl Filter for Neg {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         self.child.evaluate(database).iter().map(|b| !b).collect()
     }
@@ -164,7 +164,7 @@ impl StrEq {
     }
 }
 
-impl Operator for StrEq {
+impl Filter for StrEq {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         let data = database
             .metadata
@@ -192,7 +192,7 @@ impl DateBetw {
     }
 }
 
-impl Operator for DateBetw {
+impl Filter for DateBetw {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         todo!()
     }
@@ -226,7 +226,7 @@ impl NucEq {
     }
 }
 
-impl Operator for NucEq {
+impl Filter for NucEq {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         let data = database.load_nuc_column(self.position);
         data.iter().map(|x| *x == self.value).collect()
@@ -236,7 +236,7 @@ impl Operator for NucEq {
 pub struct NOf {
     pub n: u32,
     pub exactly: bool,
-    pub children: Vec<Box<dyn Operator>>,
+    pub children: Vec<Box<dyn Filter>>,
 }
 
 impl NOf {
@@ -267,7 +267,7 @@ impl NOf {
     }
 }
 
-impl Operator for NOf {
+impl Filter for NOf {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
         if self.n as usize > self.children.len() {
             return vec![false; database.number_entries];
@@ -327,7 +327,7 @@ pub fn ex2() -> NucEq {
 
 #[cfg(test)]
 mod tests {
-    use crate::operators::{from_json, StrEq};
+    use crate::filters::{from_json, StrEq};
 
     #[test]
     fn parse_json() {
@@ -363,6 +363,6 @@ mod tests {
         "#;
         let parsed = from_json(json).unwrap();
         // TODO This test currently does not check for correctness.
-        //  I don't know how to make Operator (which is a trait..) comparable.
+        //  I don't know how to make Filter (which is a trait..) comparable.
     }
 }
