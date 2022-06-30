@@ -1,4 +1,4 @@
-use crate::base::{seq_compression, SchemaConfig};
+use crate::base::SchemaConfig;
 use crate::{db, DatabaseConfig, SeqCompressor};
 use bio::io::fasta;
 use chrono::NaiveDate;

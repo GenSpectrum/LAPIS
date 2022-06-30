@@ -12,8 +12,7 @@ use crate::db::{operators, Database};
 use crate::operators::Operator;
 use chrono::Local;
 use config::{Config, File, FileFormat};
-use std::sync::{Arc, Mutex};
-use std::time;
+use std::sync::Arc;
 
 fn main() {
     println!("{} Welcome", Local::now());
@@ -42,7 +41,7 @@ fn main() {
     let result1 = operators::ex1().evaluate(&db);
     let result2 = operators::ex2().evaluate(&db);
 
-    server::main(db);
+    server::main(db).unwrap();
 
     println!("Done");
 

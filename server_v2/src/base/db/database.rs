@@ -2,7 +2,6 @@ use crate::base::constants::NucCode;
 use crate::base::SchemaConfig;
 use crate::db::get_db_client;
 use crate::{DatabaseConfig, SeqCompressor};
-use postgres::Row;
 use std::collections::HashMap;
 
 pub struct Database {

@@ -1,7 +1,5 @@
 use crate::base::SchemaConfig;
 use crate::{db, DatabaseConfig, SeqCompressor, SequenceRowToColumnTransformer};
-use postgres_cursor::Cursor;
-use std::sync::{Arc, Mutex};
 
 /// Moves data from the `source_data` table to the `main_` tables and performs the necessary
 /// processing including transforming the sequences to a columnar format
@@ -59,8 +57,8 @@ from
     );
 
     let mut db_client = db::get_db_client(db_config);
-    db_client.execute(sql1.as_str(), &[]);
-    db_client.execute(sql2.as_str(), &[]);
+    db_client.execute(sql1.as_str(), &[]).unwrap();
+    db_client.execute(sql2.as_str(), &[]).unwrap();
 }
 
 fn transform_seqs_to_columnar(db_config: &DatabaseConfig, seq_compressor: &mut SeqCompressor) {

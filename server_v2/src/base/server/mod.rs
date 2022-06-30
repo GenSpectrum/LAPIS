@@ -1,6 +1,6 @@
 use crate::{operators, Database};
 use actix_web::rt::task::spawn_blocking;
-use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use std::sync::Arc;
 
 #[actix_web::main]
