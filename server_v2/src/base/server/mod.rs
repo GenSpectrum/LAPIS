@@ -1,4 +1,5 @@
 use crate::{operators, Database};
+use actix_web::rt::task::spawn_blocking;
 use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use std::sync::Arc;
 
@@ -25,9 +26,17 @@ async fn hello() -> impl Responder {
 async fn query(bytes: web::Bytes, data: web::Data<Arc<Database>>) -> impl Responder {
     let query_str = std::str::from_utf8(&bytes).ok();
     if let Some(query_str) = query_str {
-        let query = operators::from_json(query_str);
-        if let Some(query) = query {
-            let result = query.evaluate(&data);
+        let query_str = query_str.to_string();
+        let result = spawn_blocking(move || {
+            let query = operators::from_json(query_str.as_str());
+            if let Some(query) = query {
+                Some(query.evaluate(&data))
+            } else {
+                None
+            }
+        })
+        .await;
+        if let Ok(Some(result)) = result {
             return HttpResponse::Ok().body(format!("{:?}", result));
         }
     }
