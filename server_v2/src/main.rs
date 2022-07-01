@@ -12,11 +12,11 @@ use crate::db::{filters, Database};
 use crate::filters::Filter;
 use chrono::Local;
 use config::{Config, File, FileFormat};
+use std::path::Path;
 use std::sync::Arc;
 
 fn main() {
     println!("{} Welcome", Local::now());
-    // todo!("Stop here");
 
     let config = read_config();
     let ref_genome_config = read_ref_genome_config();
@@ -28,20 +28,21 @@ fn main() {
     //     &config.schema,
     //     &config.database,
     // );
-    // base::proc::load_source_data(
-    //     Path::new("E:/polybox/tmp_mpox/data"),
-    //     &config.schema,
-    //     &config.database,
-    //     &mut nuc_seq_compressor,
-    // );
+    base::proc::load_source_data(
+        Path::new("E:/polybox/tmp_mpox/data"),
+        &config.schema,
+        &config.database,
+        &ref_genome_config,
+        &mut nuc_seq_compressor,
+    );
     // base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
 
-    let db = Arc::new(Database::load(&config.schema, &config.database));
-    let result = filters::ex0().evaluate(&db);
-    let result1 = filters::ex1().evaluate(&db);
-    let result2 = filters::ex2().evaluate(&db);
+    // let db = Arc::new(Database::load(&config.schema, &config.database));
+    // let result = filters::ex0().evaluate(&db);
+    // let result1 = filters::ex1().evaluate(&db);
+    // let result2 = filters::ex2().evaluate(&db);
 
-    server::main(db).unwrap();
+    // server::main(db).unwrap();
 
     println!("Done");
 

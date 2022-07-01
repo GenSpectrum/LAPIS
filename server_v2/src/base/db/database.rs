@@ -117,7 +117,7 @@ impl Database {
                 SeqCompressor::new()
                     .decompress(&compressed)
                     .iter()
-                    .map(|x| NucCode::from_byte_ignore_weird(*x))
+                    .map(|x| NucCode::from_byte_ignore_weird(x))
                     .collect()
             }
         }

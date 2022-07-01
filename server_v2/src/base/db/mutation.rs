@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 // Basic public structs
 
-pub type MutPosSize = u16;
+pub type MutPosSize = u32;
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub struct Mutation {

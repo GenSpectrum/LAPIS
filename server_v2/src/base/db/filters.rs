@@ -328,7 +328,7 @@ impl NucEq {
                 if let Value::String(value) = value {
                     let value_bytes = value.as_bytes();
                     if value_bytes.len() == 1 {
-                        let nuc_code = NucCode::from_byte(value_bytes[0])?;
+                        let nuc_code = NucCode::from_byte(&value_bytes[0])?;
                         return Some(NucEq {
                             position: position as u32,
                             value: nuc_code,

@@ -1,5 +1,7 @@
+use crate::base::constants::NucCode;
+use crate::base::proc::mutation_finder;
 use crate::base::{DataType, SchemaConfig};
-use crate::{db, DatabaseConfig, SeqCompressor};
+use crate::{db, DatabaseConfig, RefGenomeConfig, SeqCompressor};
 use bio::io::fasta;
 use chrono::NaiveDate;
 use postgres::types::ToSql;
@@ -16,21 +18,21 @@ pub fn load_source_data(
     data_dir: &Path,
     schema: &SchemaConfig,
     db_config: &DatabaseConfig,
+    ref_genome_config: &RefGenomeConfig,
     seq_compressor: &mut SeqCompressor,
 ) {
     load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
-    load_sequences(
-        "original",
+    load_sequences_original(
         &data_dir.join(Path::new("sequences.fasta")),
         schema,
         db_config,
         seq_compressor,
     );
-    load_sequences(
-        "aligned",
+    load_sequences_aligned(
         &data_dir.join(Path::new("aligned.fasta")),
         schema,
         db_config,
+        ref_genome_config,
         seq_compressor,
     );
 }
@@ -117,9 +119,7 @@ set
     }
 }
 
-/// sequence_type: "original" or "aligned"
-fn load_sequences(
-    sequence_type: &str,
+fn load_sequences_original(
     file_path: &Path,
     schema: &SchemaConfig,
     db_config: &DatabaseConfig,
@@ -127,14 +127,14 @@ fn load_sequences(
 ) {
     let insert_sql = format!(
         "
-insert into source_data ({}, seq_{}_compressed, seq_{}_hash)
+insert into source_data ({}, seq_original_compressed, seq_original_hash)
 values ($1, $2, null)
 on conflict ({}) do update
 set
-  seq_{}_compressed = $2,
-  seq_{}_hash = null;
+  seq_original_compressed = $2,
+  seq_original_hash = null;
         ",
-        schema.primary_key, sequence_type, sequence_type, schema.primary_key, sequence_type, sequence_type
+        schema.primary_key, schema.primary_key
     );
 
     let mut db_client = db::get_db_client(db_config);
@@ -145,6 +145,81 @@ set
         let record = result.unwrap();
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
         db_client.execute(&statement, &[&record.id(), &compressed_seq]).unwrap();
+    }
+}
+
+/// We also determine and import the mutations when loading the aligned sequences
+fn load_sequences_aligned(
+    file_path: &Path,
+    schema: &SchemaConfig,
+    db_config: &DatabaseConfig,
+    ref_genome_config: &RefGenomeConfig,
+    seq_compressor: &mut SeqCompressor,
+) {
+    let insert_sql = format!(
+        "
+insert into source_data ({}, seq_aligned_compressed, seq_aligned_hash, nuc_substitutions, nuc_deletions, nuc_unknowns)
+values ($1, $2, null, $3, $4, $5)
+on conflict ({}) do update
+set
+  seq_aligned_compressed = $2,
+  seq_aligned_hash = null,
+  nuc_substitutions = $3,
+  nuc_deletions = $4,
+  nuc_unknowns = $5;
+        ",
+        schema.primary_key, schema.primary_key
+    );
+
+    let mut db_client = db::get_db_client(db_config);
+    let statement = db_client.prepare(insert_sql.as_str()).unwrap();
+    let file = File::open(file_path).unwrap();
+    let mut reader = fasta::Reader::new(file);
+    let ref_seq = NucCode::from_seq_string(&ref_genome_config.sequence).unwrap();
+    for result in reader.records() {
+        let record = result.unwrap();
+        let compressed_seq = seq_compressor.compress_bytes(record.seq());
+
+        let mut nuc_substitutions = None;
+        let mut nuc_deletions = None;
+        let mut nuc_unknowns = None;
+        let seq = NucCode::from_seq_bytes(record.seq());
+        if let Some(seq) = seq {
+            let mutations = mutation_finder::find_nuc_mutations(seq.clone(), &ref_seq);
+            let mut _nuc_substitutions = Vec::new();
+            let mut _nuc_deletions = Vec::new();
+            for mutation in &mutations {
+                let ref_code = ref_seq.get(mutation.position).unwrap();
+                let formatted = format!(
+                    "{}{}{}",
+                    ref_code.to_string(),
+                    mutation.position,
+                    mutation.to.to_string()
+                );
+                if mutation.to == NucCode::GAP {
+                    _nuc_deletions.push(formatted);
+                } else {
+                    _nuc_substitutions.push(formatted);
+                }
+            }
+            nuc_substitutions = Some(_nuc_substitutions.join(","));
+            nuc_deletions = Some(_nuc_deletions.join(","));
+            let unknowns_positions = mutation_finder::find_nuc_unknowns(seq);
+            nuc_unknowns = Some(mutation_finder::compress_positions_as_strings(&unknowns_positions).join(","));
+        }
+
+        db_client
+            .execute(
+                &statement,
+                &[
+                    &record.id(),
+                    &compressed_seq,
+                    &nuc_substitutions,
+                    &nuc_deletions,
+                    &nuc_unknowns,
+                ],
+            )
+            .unwrap();
     }
 }
 

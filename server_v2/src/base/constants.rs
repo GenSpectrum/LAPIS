@@ -1,6 +1,6 @@
 use crate::base::constants::NucCode::*;
 
-#[derive(PartialEq)]
+#[derive(Clone, Hash, Eq, PartialEq)]
 pub enum NucCode {
     A,
     C,
@@ -23,7 +23,7 @@ pub enum NucCode {
 }
 
 impl NucCode {
-    pub fn from_byte(byte: u8) -> Option<NucCode> {
+    pub fn from_byte(byte: &u8) -> Option<NucCode> {
         match byte {
             0x41 => Some(A),
             0x43 => Some(C),
@@ -47,8 +47,20 @@ impl NucCode {
         }
     }
 
+    pub fn from_seq_string(seq: &str) -> Option<Vec<NucCode>> {
+        NucCode::from_seq_bytes(seq.as_bytes())
+    }
+
+    pub fn from_seq_bytes(bytes: &[u8]) -> Option<Vec<NucCode>> {
+        let mut result = Vec::with_capacity(bytes.len());
+        for b in bytes {
+            result.push(NucCode::from_byte(b)?);
+        }
+        Some(result)
+    }
+
     /// This function maps unexpected bytes to `N`
-    pub fn from_byte_ignore_weird(byte: u8) -> NucCode {
+    pub fn from_byte_ignore_weird(byte: &u8) -> NucCode {
         match byte {
             0x41 => A,
             0x43 => C,
@@ -70,5 +82,31 @@ impl NucCode {
             0x2D => GAP,
             _ => N,
         }
+    }
+}
+
+impl ToString for NucCode {
+    fn to_string(&self) -> String {
+        match self {
+            A => "A",
+            C => "C",
+            G => "G",
+            T => "T",
+            U => "U",
+            M => "M",
+            R => "R",
+            W => "W",
+            S => "S",
+            Y => "Y",
+            K => "K",
+            V => "V",
+            H => "H",
+            D => "D",
+            B => "B",
+            N => "N",
+            X => "X",
+            GAP => "-",
+        }
+        .to_string()
     }
 }
