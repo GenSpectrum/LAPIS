@@ -2,7 +2,6 @@ use crate::base::constants::NucCode;
 use crate::base::util;
 use crate::db::Column;
 use crate::Database;
-use chrono::NaiveDate;
 use serde_json::Value;
 
 pub trait Filter {
@@ -23,6 +22,7 @@ pub fn from_json_value(json: &Value) -> Option<Box<dyn Filter>> {
                 "Or" => Some(Box::new(Or::from_json(json)?)),
                 "Neg" => Some(Box::new(Neg::from_json(json)?)),
                 "StrEq" => Some(Box::new(StrEq::from_json(json)?)),
+                "IntBetw" => Some(Box::new(IntBetw::from_json(json)?)),
                 "DateBetw" => Some(Box::new(DateBetw::from_json(json)?)),
                 "NucEq" => Some(Box::new(NucEq::from_json(json)?)),
                 "NOf" => Some(Box::new(NOf::from_json(json)?)),
@@ -181,10 +181,87 @@ impl Filter for StrEq {
     }
 }
 
-pub struct DateBetw {
+pub struct IntBetw {
     pub column: String,
     pub from: Option<i32>,
     pub to: Option<i32>,
+}
+
+impl IntBetw {
+    pub fn from_json(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            let column = match obj.get("column")? {
+                Value::String(s) => s,
+                _ => {
+                    return None;
+                }
+            };
+            let from = if let Some(date) = obj.get("from") {
+                match date {
+                    Value::Null => None,
+                    Value::Number(i) => Some(i.as_i64()? as i32),
+                    _ => {
+                        return None;
+                    }
+                }
+            } else {
+                None
+            };
+            let to = if let Some(date) = obj.get("to") {
+                match date {
+                    Value::Null => None,
+                    Value::Number(i) => Some(i.as_i64()? as i32),
+                    _ => {
+                        return None;
+                    }
+                }
+            } else {
+                None
+            };
+            return Some(IntBetw {
+                column: column.clone(),
+                from,
+                to,
+            });
+        }
+        None
+    }
+}
+
+impl Filter for IntBetw {
+    fn evaluate(&self, database: &Database) -> Vec<bool> {
+        let data = database
+            .metadata
+            .get(&*self.column)
+            .expect(&*format!("Metadata column {} is missing", self.column));
+        match data {
+            Column::Int(data) => data
+                .iter()
+                .map(|s| {
+                    if let Some(i) = s {
+                        if let Some(from) = self.from {
+                            if *i < from {
+                                return false;
+                            }
+                        }
+                        if let Some(to) = self.to {
+                            if *i > to {
+                                return false;
+                            }
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .collect(),
+            _ => panic!(""),
+        }
+    }
+}
+
+pub struct DateBetw {
+    pub int_betw: IntBetw,
 }
 
 impl DateBetw {
@@ -219,9 +296,11 @@ impl DateBetw {
                 None
             };
             return Some(DateBetw {
-                column: column.clone(),
-                from,
-                to,
+                int_betw: IntBetw {
+                    column: column.clone(),
+                    from,
+                    to,
+                },
             });
         }
         None
@@ -230,33 +309,7 @@ impl DateBetw {
 
 impl Filter for DateBetw {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
-        let data = database
-            .metadata
-            .get(&*self.column)
-            .expect(&*format!("Metadata column {} is missing", self.column));
-        match data {
-            Column::Int(data) => data
-                .iter()
-                .map(|s| {
-                    if let Some(i) = s {
-                        if let Some(from) = self.from {
-                            if *i < from {
-                                return false;
-                            }
-                        }
-                        if let Some(to) = self.to {
-                            if *i > to {
-                                return false;
-                            }
-                        }
-                        true
-                    } else {
-                        false
-                    }
-                })
-                .collect(),
-            _ => panic!(""),
-        }
+        self.int_betw.evaluate(database)
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::base::SchemaConfig;
+use crate::base::{DataType, SchemaConfig};
 use crate::{db, DatabaseConfig, SeqCompressor};
 use bio::io::fasta;
 use chrono::NaiveDate;
@@ -18,7 +18,7 @@ pub fn load_source_data(
     db_config: &DatabaseConfig,
     seq_compressor: &mut SeqCompressor,
 ) {
-    // load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
+    load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
     load_sequences(
         "original",
         &data_dir.join(Path::new("sequences.fasta")),
@@ -82,17 +82,17 @@ set
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     for result in reader.deserialize() {
         let record: Record = result.unwrap();
-        let mut x: Vec<&(dyn ToSql + Sync)> = Vec::new();
+        let mut values: Vec<&(dyn ToSql + Sync)> = Vec::new();
         let date_string = handle_null(record.get("date").unwrap());
         let (date, year, month, day) = date_string
             .as_ref()
             .map(|x| parse_date(x.as_str()))
             .unwrap_or((None, None, None, None));
-        x.push(&date);
-        x.push(&year);
-        x.push(&month);
-        x.push(&day);
-        x.push(&date_string);
+        values.push(&date);
+        values.push(&year);
+        values.push(&month);
+        values.push(&day);
+        values.push(&date_string);
 
         let mut record_vec_parsed: Vec<Option<Box<dyn ToSql + Sync>>> = Vec::new();
         for attr in &schema.additional_metadata {
@@ -100,18 +100,21 @@ set
             let nullable = handle_null(s);
             record_vec_parsed.push(match nullable {
                 None => None,
-                Some(x) => Some(Box::new(x)),
+                Some(x) => Some(match attr.data_type {
+                    DataType::String => Box::new(x),
+                    DataType::Integer => Box::new(x.parse::<i32>().unwrap()),
+                    DataType::Date => Box::new(NaiveDate::parse_from_str(x.as_str(), "%Y-%m-%d").unwrap()),
+                }),
             });
         }
         for value in &record_vec_parsed {
-            x.push(match value {
+            values.push(match value {
                 None => &(Option::<String>::None),
                 Some(x) => x.as_ref(),
             });
         }
-        db_client.execute(&statement, &x[..]).unwrap();
+        db_client.execute(&statement, &values[..]).unwrap();
     }
-    println!("Done");
 }
 
 /// sequence_type: "original" or "aligned"

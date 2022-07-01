@@ -9,8 +9,9 @@ pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
     let mut additional_attrs_sql_parts_with_primary_key: Vec<String> = Vec::new();
     for attr in &schema.additional_metadata {
         let data_type = match attr.data_type {
-            DataType::Date => "text",
-            _ => todo!(),
+            DataType::String => "text",
+            DataType::Integer => "integer",
+            DataType::Date => "date",
         };
         let part = format!("{} {}", attr.name, data_type);
         additional_attrs_sql_parts_with_primary_key.push(format!(
