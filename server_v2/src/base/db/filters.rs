@@ -1,4 +1,5 @@
 use crate::base::constants::NucCode;
+use crate::base::util;
 use crate::db::Column;
 use crate::Database;
 use chrono::NaiveDate;
@@ -182,19 +183,80 @@ impl Filter for StrEq {
 
 pub struct DateBetw {
     pub column: String,
-    pub from: Option<NaiveDate>,
-    pub to: Option<NaiveDate>,
+    pub from: Option<i32>,
+    pub to: Option<i32>,
 }
 
 impl DateBetw {
     pub fn from_json(json: &Value) -> Option<Self> {
-        todo!()
+        if let Value::Object(obj) = json {
+            let column = match obj.get("column")? {
+                Value::String(s) => s,
+                _ => {
+                    return None;
+                }
+            };
+            let from = if let Some(date) = obj.get("from") {
+                match date {
+                    Value::Null => None,
+                    Value::String(s) => Some(util::encode_date_as_int(&util::parse_date(s)?)),
+                    _ => {
+                        return None;
+                    }
+                }
+            } else {
+                None
+            };
+            let to = if let Some(date) = obj.get("to") {
+                match date {
+                    Value::Null => None,
+                    Value::String(s) => Some(util::encode_date_as_int(&util::parse_date(s)?)),
+                    _ => {
+                        return None;
+                    }
+                }
+            } else {
+                None
+            };
+            return Some(DateBetw {
+                column: column.clone(),
+                from,
+                to,
+            });
+        }
+        None
     }
 }
 
 impl Filter for DateBetw {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
-        todo!()
+        let data = database
+            .metadata
+            .get(&*self.column)
+            .expect(&*format!("Metadata column {} is missing", self.column));
+        match data {
+            Column::Int(data) => data
+                .iter()
+                .map(|s| {
+                    if let Some(i) = s {
+                        if let Some(from) = self.from {
+                            if *i < from {
+                                return false;
+                            }
+                        }
+                        if let Some(to) = self.to {
+                            if *i > to {
+                                return false;
+                            }
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .collect(),
+            _ => panic!(""),
+        }
     }
 }
 

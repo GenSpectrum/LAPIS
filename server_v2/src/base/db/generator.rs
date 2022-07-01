@@ -1,4 +1,4 @@
-use crate::base::{db, SchemaConfig};
+use crate::base::{db, DataType, SchemaConfig};
 use crate::DatabaseConfig;
 
 pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
@@ -8,9 +8,9 @@ pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
     let mut additional_attrs_sql_parts: Vec<String> = Vec::new();
     let mut additional_attrs_sql_parts_with_primary_key: Vec<String> = Vec::new();
     for attr in &schema.additional_metadata {
-        let data_type = match attr.data_type.as_str() {
-            "string" => "text",
-            _ => panic!("Invalid data type: {}", attr.data_type),
+        let data_type = match attr.data_type {
+            DataType::Date => "text",
+            _ => todo!(),
         };
         let part = format!("{} {}", attr.name, data_type);
         additional_attrs_sql_parts_with_primary_key.push(format!(

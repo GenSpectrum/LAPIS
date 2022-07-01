@@ -1,3 +1,5 @@
+use crate::base::util::decode_date_from_int;
+use crate::base::{DataType, SchemaConfigMetadata};
 use crate::db::query::QuerySelect::{Aggregated, Details, NucSequences};
 use crate::db::Column;
 use crate::{filters, Database, Filter};
@@ -86,6 +88,7 @@ impl AggregatedQuery {
                         let data = database.metadata.get(field).unwrap();
                         match data {
                             Column::Str(xs) => key.put_str(xs.get(i).unwrap().clone()),
+                            Column::Int(xs) => key.put_int(xs.get(i).unwrap().clone()),
                         }
                     }
                     let count = count_map.get_mut(&key);
@@ -123,9 +126,10 @@ impl AggregatedQueryResult {
                 .map(|(key, count)| {
                     let mut map = serde_json::Map::<String, Value>::with_capacity(self.fields.len() + 1);
                     let mut str_field_count = 0;
+                    let mut int_field_count = 0;
                     for field in &self.fields {
-                        match database.metadata.get(field).unwrap() {
-                            Column::Str(_) => {
+                        match database.column_schema_map.get(field).unwrap().data_type {
+                            DataType::String => {
                                 let value = key.strs.get(str_field_count).unwrap();
                                 map.insert(
                                     field.clone(),
@@ -135,6 +139,30 @@ impl AggregatedQueryResult {
                                     },
                                 );
                                 str_field_count += 1;
+                            }
+                            DataType::Integer => {
+                                let value = key.ints.get(int_field_count).unwrap();
+                                map.insert(
+                                    field.clone(),
+                                    match value {
+                                        None => Value::Null,
+                                        Some(value) => Value::Number(serde_json::Number::from(*value)),
+                                    },
+                                );
+                                int_field_count += 1;
+                            }
+                            DataType::Date => {
+                                let value = key.ints.get(int_field_count).unwrap();
+                                map.insert(
+                                    field.clone(),
+                                    match value {
+                                        None => Value::Null,
+                                        Some(value) => {
+                                            Value::String(decode_date_from_int(value).format("%Y-%m-%d").to_string())
+                                        }
+                                    },
+                                );
+                                int_field_count += 1;
                             }
                         }
                     }
@@ -153,14 +181,21 @@ impl AggregatedQueryResult {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AggregationKey {
     pub strs: Vec<Option<String>>,
+    pub ints: Vec<Option<i32>>,
 }
 
 impl AggregationKey {
     pub fn new() -> Self {
-        AggregationKey { strs: Vec::new() }
+        AggregationKey {
+            strs: Vec::new(),
+            ints: Vec::new(),
+        }
     }
     pub fn put_str(&mut self, s: Option<String>) {
         self.strs.push(s);
+    }
+    pub fn put_int(&mut self, i: Option<i32>) {
+        self.ints.push(i);
     }
 }
 
