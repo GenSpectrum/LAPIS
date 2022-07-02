@@ -409,37 +409,6 @@ impl Filter for NOf {
     }
 }
 
-// ------ Temporary examples ------
-
-pub fn ex0() -> StrEq {
-    StrEq {
-        column: "country".to_string(),
-        value: "Switzerland".to_string(),
-    }
-}
-
-pub fn ex1() -> And {
-    And {
-        children: vec![
-            Box::new(StrEq {
-                column: "region".to_string(),
-                value: "Europe".to_string(),
-            }),
-            Box::new(StrEq {
-                column: "clade".to_string(),
-                value: "hMPXV-1".to_string(),
-            }),
-        ],
-    }
-}
-
-pub fn ex2() -> NucEq {
-    NucEq {
-        position: 25407,
-        value: NucCode::A,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::filters::{from_json, StrEq};

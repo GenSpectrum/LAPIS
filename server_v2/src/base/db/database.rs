@@ -1,11 +1,26 @@
 use crate::base::constants::NucCode;
 use crate::base::{util, DataType, SchemaConfig, SchemaConfigMetadata};
-use crate::db::{get_db_client, Mutation};
+use crate::db::Mutation;
 use crate::{DatabaseConfig, MutationStore, SeqCompressor};
 use chrono::{Local, NaiveDate};
-use postgres::Client;
+use postgres::{Client, NoTls};
 use postgres_cursor::Cursor;
 use std::collections::HashMap;
+
+pub fn get_db_client(config: &DatabaseConfig) -> Client {
+    let mut db_config = postgres::config::Config::new();
+    db_config
+        .host(&config.host)
+        .port(config.port)
+        .user(&config.username)
+        .password(&config.password)
+        .dbname(&config.dbname);
+    let mut client = db_config.connect(NoTls).expect("Database connection failed");
+    client
+        .execute(&format!("set search_path to '{}'", &config.schema), &[])
+        .expect("The search_path of the database could not be changed.");
+    client
+}
 
 pub struct Database {
     pub number_entries: usize,
@@ -131,7 +146,6 @@ fn load_metadata(
                         _ => panic!("Unexpected column type"),
                     }
                 }
-                _ => {}
             }
         }
     }

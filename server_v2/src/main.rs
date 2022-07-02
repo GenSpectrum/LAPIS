@@ -22,36 +22,25 @@ fn main() {
     let ref_genome_config = read_ref_genome_config();
     let mut nuc_seq_compressor = SeqCompressor::with_dict(ref_genome_config.sequence.as_bytes());
 
-    // db::generate_db_tables(&config.database, &config.schema);
+    db::generate_db_tables(&config.database, &config.schema);
     // base::proc::load_source_data(
     //     Path::new("/Users/chachen/polybox/tmp_mpox/data"),
     //     &config.schema,
     //     &config.database,
     // );
-    // base::proc::load_source_data(
-    //     Path::new("E:/polybox/tmp_mpox/data"),
-    //     &config.schema,
-    //     &config.database,
-    //     &ref_genome_config,
-    //     &mut nuc_seq_compressor,
-    // );
-    // base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
+    base::proc::load_source_data(
+        Path::new("E:/polybox/tmp_mpox/data"),
+        &config.schema,
+        &config.database,
+        &ref_genome_config,
+        &mut nuc_seq_compressor,
+    );
+    base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
 
     let db = Arc::new(Database::load(&config.schema, &config.database));
     server::main(db).unwrap();
 
     println!("Done");
-
-    // let db = Database::load(&config.database);
-    //
-    // for _ in 0..20 {
-    //     let ids = random_ids(db.size, 0.2);
-    //     let start = time::Instant::now();
-    //     let nucs = db.nuc_muts(&ids);
-    //     let duration = start.elapsed();
-    //     println!("In {} sequences, I found a total of {} nucleotide mutations ({}ms)", ids.len(), nucs.len(), duration.as_millis());
-    //     thread::sleep(time::Duration::from_secs(3));
-    // }
 }
 
 fn read_config() -> ProgramConfig {
@@ -68,15 +57,4 @@ fn read_ref_genome_config() -> RefGenomeConfig {
         .try_deserialize()
         .expect("The ref genome config file is invalid.");
     config
-}
-
-fn random_ids(max: u32, prob: f64) -> Vec<u32> {
-    let mut ids = Vec::new();
-    for i in 0..max {
-        let rand_value: f64 = rand::random();
-        if rand_value < prob {
-            ids.push(i);
-        }
-    }
-    ids
 }

@@ -56,15 +56,14 @@ set
         schema
             .additional_metadata
             .iter()
-            .enumerate()
-            .map(|(i, x)| x.name.as_str())
+            .map(|x| x.name.as_str())
             .collect::<Vec<_>>()
             .join(", "),
         schema
             .additional_metadata
             .iter()
             .enumerate()
-            .map(|(i, x)| format!("${}", 6 + i))
+            .map(|(i, _)| format!("${}", 6 + i))
             .collect::<Vec<_>>()
             .join(", "),
         schema.primary_key,
@@ -140,7 +139,7 @@ set
     let mut db_client = db::get_db_client(db_config);
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     let file = File::open(file_path).unwrap();
-    let mut reader = fasta::Reader::new(file);
+    let reader = fasta::Reader::new(file);
     for result in reader.records() {
         let record = result.unwrap();
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
@@ -174,7 +173,7 @@ set
     let mut db_client = db::get_db_client(db_config);
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     let file = File::open(file_path).unwrap();
-    let mut reader = fasta::Reader::new(file);
+    let reader = fasta::Reader::new(file);
     let ref_seq = NucCode::from_seq_string(&ref_genome_config.sequence).unwrap();
     for result in reader.records() {
         let record = result.unwrap();

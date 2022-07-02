@@ -1,8 +1,5 @@
 use crate::base::db::{BiDict, Counter};
 use crate::mutation;
-use std::fmt::{Display, Formatter};
-use std::rc::Rc;
-use std::str::FromStr;
 use std::sync::Arc;
 
 // Basic public structs
@@ -10,12 +7,6 @@ use std::sync::Arc;
 pub type MutPosSize = usize;
 
 pub type Mutation = mutation::NucMutation;
-
-pub struct FormattedMutationCount {
-    pub mutation: String,
-    pub count: u32,
-    pub proportion: f64,
-}
 
 // MutationStore
 
