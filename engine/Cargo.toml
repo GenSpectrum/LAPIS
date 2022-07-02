@@ -1,5 +1,5 @@
 [package]
-name = "lapis_v2"
+name = "lapis_v2_engine"
 version = "0.1.0"
 edition = "2021"
 
