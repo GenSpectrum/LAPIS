@@ -7,6 +7,7 @@ use std::sync::Arc;
 #[actix_web::main]
 pub async fn main(database: Arc<Database>) -> std::io::Result<()> {
     let database = database.clone();
+    println!("Database loaded. Starting HTTP server..");
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(database.clone()))
@@ -39,6 +40,7 @@ async fn query(bytes: web::Bytes, database: web::Data<Arc<Database>>) -> impl Re
                 QuerySelect::NucSequences(_) => {
                     todo!()
                 }
+                QuerySelect::NucMutations(query) => Some(query.evaluate(&filtered, &database).to_json()),
             }
         })
         .await;

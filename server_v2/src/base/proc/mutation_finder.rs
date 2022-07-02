@@ -1,13 +1,7 @@
 use crate::base::constants::NucCode;
 use crate::base::constants::NucCode::*;
+use crate::mutation::NucMutation;
 use bio::data_structures::suffix_array::SuffixArray;
-use std::hash::Hash;
-
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct NucMutation {
-    pub position: usize,
-    pub to: NucCode,
-}
 
 pub fn find_nuc_mutations(mut aligned_seq: Vec<NucCode>, reference: &Vec<NucCode>) -> Vec<NucMutation> {
     // Masking leading and tailing deletions because they are often actually unknowns but appear here as

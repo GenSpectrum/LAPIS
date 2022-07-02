@@ -1,4 +1,6 @@
 use crate::base::constants::NucCode::*;
+use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub enum NucCode {
@@ -85,9 +87,9 @@ impl NucCode {
     }
 }
 
-impl ToString for NucCode {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for NucCode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let code = match self {
             A => "A",
             C => "C",
             G => "G",
@@ -107,6 +109,21 @@ impl ToString for NucCode {
             X => "X",
             GAP => "-",
         }
-        .to_string()
+        .to_string();
+        write!(f, "{}", code)
+    }
+}
+
+impl FromStr for NucCode {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let bytes = s.as_bytes();
+        if bytes.len() == 1 {
+            let byte = bytes.get(0).unwrap();
+            NucCode::from_byte(byte).ok_or(())
+        } else {
+            Err(())
+        }
     }
 }

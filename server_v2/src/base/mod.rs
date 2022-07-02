@@ -15,3 +15,5 @@ pub use self::schema_config::*;
 pub mod seq_compression;
 
 pub mod constants;
+
+pub mod mutation;

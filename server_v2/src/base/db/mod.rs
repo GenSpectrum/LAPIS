@@ -7,8 +7,8 @@ pub use self::database::*;
 mod database2;
 pub use self::database2::*;
 
-mod mutation;
-pub use self::mutation::*;
+mod mutation_store;
+pub use self::mutation_store::*;
 
 mod bi_dict;
 pub use self::bi_dict::*;

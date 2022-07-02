@@ -1,59 +1,15 @@
 use crate::base::db::{BiDict, Counter};
+use crate::mutation;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 use std::str::FromStr;
+use std::sync::Arc;
 
 // Basic public structs
 
-pub type MutPosSize = u32;
+pub type MutPosSize = usize;
 
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct Mutation {
-    pub position: MutPosSize,
-    pub to: char,
-}
-
-impl Display for Mutation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self.position, self.to)
-    }
-}
-
-impl FromStr for Mutation {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let chars: Vec<char> = s.chars().collect();
-        if chars[0].is_digit(10) {
-            // We expect the format 1234A.
-            Ok(Mutation {
-                position: s[0..s.len() - 1].parse().unwrap(),
-                to: *chars.last().unwrap(),
-            })
-        } else {
-            // We expect the format C1234A.
-            Ok(Mutation {
-                position: s[1..s.len() - 1].parse().unwrap(),
-                to: *chars.last().unwrap(),
-            })
-        }
-    }
-}
-
-#[derive(Clone, Hash, Eq, PartialEq)]
-pub struct AaMutation {
-    pub gene: String,
-    pub position: MutPosSize,
-    pub to: char,
-}
-
-impl Display for AaMutation {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}{}", self.gene, self.position, self.to)
-    }
-}
-
-pub type NucMutation = Mutation;
+pub type Mutation = mutation::NucMutation;
 
 pub struct FormattedMutationCount {
     pub mutation: String,
@@ -71,7 +27,7 @@ pub struct MutationStore {
 
 #[derive(Clone, PartialEq)]
 pub struct MutationCount {
-    pub mutation: Rc<Mutation>,
+    pub mutation: Arc<Mutation>,
     pub count: u32,
     pub proportion: f64,
 }

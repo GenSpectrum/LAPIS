@@ -1,10 +1,10 @@
+use crate::base::constants::NucCode;
 use crate::base::util::decode_date_from_int;
-use crate::base::{DataType, SchemaConfigMetadata};
-use crate::db::query::QuerySelect::{Aggregated, Details, NucSequences};
-use crate::db::Column;
+use crate::base::DataType;
+use crate::db::query::QuerySelect::{Aggregated, Details, NucMutations, NucSequences};
+use crate::db::{Column, MutationCount};
 use crate::{filters, Database, Filter};
 use serde_json::Value;
-use std::any::Any;
 use std::collections::HashMap;
 use std::hash::Hash;
 
@@ -25,6 +25,7 @@ impl Query {
                         "aggregated" => Some(Aggregated(AggregatedQuery::from_json_value(query_select)?)),
                         "details" => Some(Details(DetailsQuery::from_json_value(query_select)?)),
                         "nucSequences" => Some(NucSequences(NucSequencesQuery::from_json_value(query_select)?)),
+                        "nucMutations" => Some(NucMutations(NucMutationsQuery::from_json_value(query_select)?)),
                         _ => None,
                     }?;
                     return Some(Query {
@@ -44,6 +45,7 @@ pub enum QuerySelect {
     Aggregated(AggregatedQuery),
     Details(DetailsQuery),
     NucSequences(NucSequencesQuery),
+    NucMutations(NucMutationsQuery),
 }
 
 pub struct AggregatedQuery {
@@ -236,5 +238,76 @@ impl NucSequencesQuery {
             }
         }
         None
+    }
+}
+
+pub struct NucMutationsQuery {
+    pub min_proportion: f64,
+    pub include_deletions: bool,
+}
+
+impl NucMutationsQuery {
+    pub fn from_json_value(json: &Value) -> Option<Self> {
+        if let Value::Object(obj) = json {
+            if let Value::Number(min_proportion) = obj.get("minProportion")? {
+                if let Value::Bool(include_deletions) = obj.get("includeDeletions")? {
+                    return Some(NucMutationsQuery {
+                        min_proportion: min_proportion.as_f64()?,
+                        include_deletions: *include_deletions,
+                    });
+                }
+            }
+        }
+        None
+    }
+
+    pub fn evaluate(&self, filtered: &Vec<bool>, database: &Database) -> NucMutationsQueryResult {
+        let mut ids = Vec::new();
+        for (i, b) in filtered.iter().enumerate() {
+            if *b {
+                ids.push(i as u32);
+            }
+        }
+        let mut counts: Vec<MutationCount> = database
+            .nuc_mutation_store
+            .count_mutations(&ids)
+            .into_iter()
+            .filter(|count| count.proportion >= self.min_proportion)
+            .collect();
+        if !self.include_deletions {
+            counts = counts
+                .into_iter()
+                .filter(|count| count.mutation.to != NucCode::GAP)
+                .collect();
+        }
+        NucMutationsQueryResult { counts }
+    }
+}
+
+pub struct NucMutationsQueryResult {
+    counts: Vec<MutationCount>,
+}
+
+impl NucMutationsQueryResult {
+    pub fn to_json(&self) -> String {
+        let json_value = Value::Array(
+            self.counts
+                .iter()
+                .map(|count| {
+                    let mut map = serde_json::Map::new();
+                    map.insert("mutation".to_string(), Value::String(count.mutation.to_string()));
+                    map.insert(
+                        "count".to_string(),
+                        Value::Number(serde_json::Number::from(count.count)),
+                    );
+                    map.insert(
+                        "proportion".to_string(),
+                        Value::Number(serde_json::Number::from_f64(count.proportion).unwrap()),
+                    );
+                    Value::Object(map)
+                })
+                .collect(),
+        );
+        serde_json::to_string(&json_value).unwrap()
     }
 }

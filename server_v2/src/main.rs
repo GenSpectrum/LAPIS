@@ -6,7 +6,7 @@ use crate::base::db::{DatabaseConfig, MutationStore};
 use crate::base::proc::SequenceRowToColumnTransformer;
 use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
-use crate::base::{db, RefGenomeConfig};
+use crate::base::{db, mutation, RefGenomeConfig};
 use crate::base::{server, ProgramConfig};
 use crate::db::{filters, Database};
 use crate::filters::Filter;
@@ -28,21 +28,17 @@ fn main() {
     //     &config.schema,
     //     &config.database,
     // );
-    base::proc::load_source_data(
-        Path::new("E:/polybox/tmp_mpox/data"),
-        &config.schema,
-        &config.database,
-        &ref_genome_config,
-        &mut nuc_seq_compressor,
-    );
+    // base::proc::load_source_data(
+    //     Path::new("E:/polybox/tmp_mpox/data"),
+    //     &config.schema,
+    //     &config.database,
+    //     &ref_genome_config,
+    //     &mut nuc_seq_compressor,
+    // );
     // base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
 
-    // let db = Arc::new(Database::load(&config.schema, &config.database));
-    // let result = filters::ex0().evaluate(&db);
-    // let result1 = filters::ex1().evaluate(&db);
-    // let result2 = filters::ex2().evaluate(&db);
-
-    // server::main(db).unwrap();
+    let db = Arc::new(Database::load(&config.schema, &config.database));
+    server::main(db).unwrap();
 
     println!("Done");
 
