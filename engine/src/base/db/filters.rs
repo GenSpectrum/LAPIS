@@ -8,11 +8,6 @@ pub trait Filter {
     fn evaluate(&self, database: &Database) -> Vec<bool>;
 }
 
-pub fn from_json(json: &str) -> Option<Box<dyn Filter>> {
-    let value: Value = serde_json::from_str(json).ok()?;
-    from_json_value(&value)
-}
-
 pub fn from_json_value(json: &Value) -> Option<Box<dyn Filter>> {
     if let Value::Object(obj) = json {
         let op_type = obj.get("type")?;

@@ -154,10 +154,10 @@ fn load_metadata(
 
 fn load_mutations(db_config: &DatabaseConfig, size: u32) -> (MutationStore, HashMap<String, MutationStore>) {
     let mut client = get_db_client(db_config);
-    let GENES: Vec<String> = vec![];
+    let genes: Vec<String> = vec![];
     let mut nuc_mutation_store = MutationStore::with_capacity(size);
     let mut aa_mutation_stores = HashMap::new();
-    for gene in &GENES {
+    for gene in &genes {
         aa_mutation_stores.insert(gene.to_string(), MutationStore::with_capacity(size));
     }
 
@@ -203,7 +203,7 @@ fn load_mutations(db_config: &DatabaseConfig, size: u32) -> (MutationStore, Hash
             let aa_unknowns: String = row.get("aa_unknowns");
             let mut aa_mutations_per_gene: HashMap<String, Vec<Mutation>> = HashMap::new();
             let mut aa_unknowns_per_gene: HashMap<String, Vec<&str>> = HashMap::new();
-            for gene in &GENES {
+            for gene in &genes {
                 aa_mutations_per_gene.insert(gene.to_string(), Vec::new());
                 aa_unknowns_per_gene.insert(gene.to_string(), Vec::new());
             }

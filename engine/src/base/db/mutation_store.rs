@@ -24,10 +24,6 @@ pub struct MutationCount {
 }
 
 impl MutationStore {
-    pub fn new() -> Self {
-        MutationStore::with_capacity(0)
-    }
-
     pub fn with_capacity(capacity: u32) -> Self {
         MutationStore {
             data: Vec::with_capacity(capacity as usize),
