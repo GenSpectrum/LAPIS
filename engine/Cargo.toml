@@ -1,6 +1,10 @@
 [package]
 name = "lapis_v2_engine"
 version = "0.1.0"
+authors = ["Chaoran Chen"]
+repository = "https://github.com/cevo-public/LAPIS"
+documentation = "https://lapis-docs.readthedocs.io/"
+description = "An efficient query engine for genomic sequence data"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,6 +13,7 @@ edition = "2021"
 actix-web = "4"
 bio = "0.41"
 chrono = "0.4.19"
+clap = { version = "3.2.8", features = ["derive"] }
 config = "0.13.1"
 crossbeam = "0.8"
 csv = "1.1"

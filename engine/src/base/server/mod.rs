@@ -5,7 +5,7 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use std::sync::Arc;
 
 #[actix_web::main]
-pub async fn main(database: Arc<Database>) -> std::io::Result<()> {
+pub async fn main(database: Arc<Database>, port: u16) -> std::io::Result<()> {
     let database = database.clone();
     println!("Database loaded. Starting HTTP server..");
     HttpServer::new(move || {
@@ -14,7 +14,7 @@ pub async fn main(database: Arc<Database>) -> std::io::Result<()> {
             .service(hello)
             .service(query)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", port))?
     .run()
     .await
 }
