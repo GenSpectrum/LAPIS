@@ -1,7 +1,7 @@
 use crate::base::constants::NucCode;
 use crate::base::proc::mutation_finder;
-use crate::base::{DataType, SchemaConfig};
-use crate::{db, DatabaseConfig, ExecutorService, RefGenomeConfig, SeqCompressor};
+use crate::base::{DataType, DatabaseConfig, SchemaConfig};
+use crate::{db, ExecutorService, ProgramConfig, SeqCompressor};
 use bio::io::fasta;
 use chrono::{Datelike, NaiveDate};
 use postgres::types::ToSql;
@@ -14,31 +14,15 @@ use std::path::Path;
 /// - metadata.tsv
 /// - sequences.fasta
 /// - aligned.fasta
-pub fn load_source_data(
-    data_dir: &Path,
-    schema: &SchemaConfig,
-    db_config: &DatabaseConfig,
-    ref_genome_config: &RefGenomeConfig,
-    seq_compressor: &mut SeqCompressor,
-) {
-    load_metadata(&data_dir.join(Path::new("metadata.tsv")), schema, db_config);
-    load_sequences_original(
-        &data_dir.join(Path::new("sequences.fasta")),
-        schema,
-        db_config,
-        seq_compressor,
-    );
-    load_sequences_aligned(
-        &data_dir.join(Path::new("aligned.fasta")),
-        schema,
-        db_config,
-        ref_genome_config,
-        seq_compressor,
-    );
+pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+    load_metadata(&data_dir.join(Path::new("metadata.tsv")), config);
+    load_sequences_original(&data_dir.join(Path::new("sequences.fasta")), config, seq_compressor);
+    load_sequences_aligned(&data_dir.join(Path::new("aligned.fasta")), config, seq_compressor);
 }
 
 /// Loads metadata.tsv
-fn load_metadata(file_path: &Path, schema: &SchemaConfig, db_config: &DatabaseConfig) {
+fn load_metadata(file_path: &Path, config: &ProgramConfig) {
+    let ProgramConfig { schema, database, .. } = config;
     let insert_sql = format!(
         "
 insert into source_data (metadata_hash, date, year, month, day, date_original, {})
@@ -88,13 +72,13 @@ set
         record_buffer.push(record);
         if record_buffer.len() >= 1000 {
             let records = record_buffer;
-            let task = create_load_metadata_task(records, schema.clone(), db_config.clone(), insert_sql.clone());
+            let task = create_load_metadata_task(records, schema.clone(), database.clone(), insert_sql.clone());
             executor_service.submit_task(task);
             record_buffer = Vec::with_capacity(1000);
         }
     }
     if !record_buffer.is_empty() {
-        let task = create_load_metadata_task(record_buffer, schema.clone(), db_config.clone(), insert_sql.clone());
+        let task = create_load_metadata_task(record_buffer, schema.clone(), database.clone(), insert_sql.clone());
         executor_service.submit_task(task);
     }
     executor_service.close();
@@ -163,12 +147,7 @@ fn create_load_metadata_task(
     })
 }
 
-fn load_sequences_original(
-    file_path: &Path,
-    schema: &SchemaConfig,
-    db_config: &DatabaseConfig,
-    seq_compressor: &mut SeqCompressor,
-) {
+fn load_sequences_original(file_path: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_original_compressed, seq_original_hash)
@@ -178,10 +157,10 @@ set
   seq_original_compressed = $2,
   seq_original_hash = null;
         ",
-        schema.primary_key, schema.primary_key
+        config.schema.primary_key, config.schema.primary_key
     );
 
-    let mut db_client = db::get_db_client(db_config);
+    let mut db_client = db::get_db_client(&config.database);
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     let file = File::open(file_path).unwrap();
     let reader = fasta::Reader::new(file);
@@ -193,13 +172,7 @@ set
 }
 
 /// We also determine and import the mutations when loading the aligned sequences
-fn load_sequences_aligned(
-    file_path: &Path,
-    schema: &SchemaConfig,
-    db_config: &DatabaseConfig,
-    ref_genome_config: &RefGenomeConfig,
-    seq_compressor: &mut SeqCompressor,
-) {
+fn load_sequences_aligned(file_path: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_aligned_compressed, seq_aligned_hash, nuc_substitutions, nuc_deletions, nuc_unknowns)
@@ -212,7 +185,7 @@ set
   nuc_deletions = $4,
   nuc_unknowns = $5;
         ",
-        schema.primary_key, schema.primary_key
+        config.schema.primary_key, config.schema.primary_key
     );
 
     // The inserts to the database will be performed in parallel.
@@ -220,7 +193,7 @@ set
 
     let file = File::open(file_path).unwrap();
     let reader = fasta::Reader::new(file);
-    let ref_seq = NucCode::from_seq_string(&ref_genome_config.sequence).unwrap();
+    let ref_seq = NucCode::from_seq_string(&config.ref_genome.sequence).unwrap();
     let mut record_buffer = Vec::with_capacity(1000);
     for result in reader.records() {
         let record = result.unwrap();
@@ -229,7 +202,7 @@ set
             let records = record_buffer;
             let task = create_load_sequences_aligned_task(
                 records,
-                db_config.clone(),
+                config.database.clone(),
                 insert_sql.clone(),
                 seq_compressor.clone(),
                 ref_seq.clone(),
@@ -241,7 +214,7 @@ set
     if !record_buffer.is_empty() {
         let task = create_load_sequences_aligned_task(
             record_buffer,
-            db_config.clone(),
+            config.database.clone(),
             insert_sql.clone(),
             seq_compressor.clone(),
             ref_seq.clone(),

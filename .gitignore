@@ -1,3 +1,6 @@
+# Program
+**/config_credentials.yml
+
 # Editors
 .idea/
 *.iml

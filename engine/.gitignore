@@ -1,3 +1,1 @@
 target/
-config*.yml
-!config*.template.yml

@@ -1,13 +1,13 @@
-use crate::base::{db, DataType, SchemaConfig};
-use crate::DatabaseConfig;
+use crate::base::{db, DataType};
+use crate::ProgramConfig;
 
-pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
-    let mut client = db::get_db_client(db_config);
+pub fn generate_db_tables(config: &ProgramConfig) {
+    let mut client = db::get_db_client(&config.database);
 
     // Generate SQL
     let mut additional_attrs_sql_parts: Vec<String> = Vec::new();
     let mut additional_attrs_sql_parts_with_primary_key: Vec<String> = Vec::new();
-    for attr in &schema.additional_metadata {
+    for attr in &config.schema.additional_metadata {
         let data_type = match attr.data_type {
             DataType::String => "text",
             DataType::Integer => "integer",
@@ -17,7 +17,7 @@ pub fn generate_db_tables(db_config: &DatabaseConfig, schema: &SchemaConfig) {
         additional_attrs_sql_parts_with_primary_key.push(format!(
             "{}{}",
             part,
-            if attr.name == schema.primary_key {
+            if attr.name == config.schema.primary_key {
                 " primary key"
             } else {
                 ""

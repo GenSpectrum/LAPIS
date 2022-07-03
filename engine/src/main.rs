@@ -2,11 +2,11 @@ extern crate core;
 
 mod base;
 
-use crate::base::db::{DatabaseConfig, MutationStore};
+use crate::base::db::MutationStore;
 use crate::base::proc::SequenceRowToColumnTransformer;
 use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
-use crate::base::{db, mutation, RefGenomeConfig};
+use crate::base::{db, mutation};
 use crate::base::{server, ProgramConfig};
 use crate::db::{filters, Database};
 use crate::filters::Filter;
@@ -21,7 +21,7 @@ use std::sync::Arc;
 struct Cli {
     #[clap(long, parse(from_os_str))]
     /// Path to the directory with the config files
-    config_dir: std::path::PathBuf,
+    config_dir: PathBuf,
     #[clap(subcommand)]
     command: Commands,
 }
@@ -51,18 +51,11 @@ fn main() {
     println!("{} Welcome", Local::now());
     match cli.command {
         Commands::Init {} => {
-            db::generate_db_tables(&config.database, &config.schema);
+            db::generate_db_tables(&config);
         }
         Commands::Import { data_dir } => {
-            let ref_genome_config = read_ref_genome_config(&cli.config_dir);
-            let mut nuc_seq_compressor = SeqCompressor::with_dict(ref_genome_config.sequence.as_bytes());
-            base::proc::load_source_data(
-                &data_dir,
-                &config.schema,
-                &config.database,
-                &ref_genome_config,
-                &mut nuc_seq_compressor,
-            );
+            let mut nuc_seq_compressor = SeqCompressor::with_dict(config.ref_genome.sequence.as_bytes());
+            base::proc::load_source_data(&data_dir, &config, &mut nuc_seq_compressor);
             base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
         }
         Commands::Server { port } => {
@@ -71,27 +64,26 @@ fn main() {
         }
     }
 
-    println!("Done");
+    println!("{} Done", Local::now());
 }
 
 fn read_config(config_dir: &PathBuf) -> ProgramConfig {
     let path = config_dir.join("config.yml").into_os_string().into_string().unwrap();
-    let builder = Config::builder().add_source(File::new(&path, FileFormat::Yaml));
-    let config_unparsed = builder.build().expect("The config file cannot be loaded.");
-    let config: ProgramConfig = config_unparsed.try_deserialize().expect("The config file is invalid.");
-    config
-}
-
-fn read_ref_genome_config(config_dir: &PathBuf) -> RefGenomeConfig {
-    let path = config_dir
+    let path2 = config_dir
+        .join("config_credentials.yml")
+        .into_os_string()
+        .into_string()
+        .unwrap();
+    let path3 = config_dir
         .join("config_ref_genome.yml")
         .into_os_string()
         .into_string()
         .unwrap();
-    let builder = Config::builder().add_source(File::new(&path, FileFormat::Yaml));
-    let config_unparsed = builder.build().expect("The ref genome config file cannot be loaded.");
-    let config: RefGenomeConfig = config_unparsed
-        .try_deserialize()
-        .expect("The ref genome config file is invalid.");
+    let builder = Config::builder()
+        .add_source(File::new(&path, FileFormat::Yaml))
+        .add_source(File::new(&path2, FileFormat::Yaml))
+        .add_source(File::new(&path3, FileFormat::Yaml));
+    let config_unparsed = builder.build().expect("The config file cannot be loaded.");
+    let config: ProgramConfig = config_unparsed.try_deserialize().expect("The config file is invalid.");
     config
 }

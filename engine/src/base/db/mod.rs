@@ -1,6 +1,3 @@
-mod config;
-pub use self::config::*;
-
 mod database;
 pub use self::database::*;
 

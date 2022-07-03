@@ -1,0 +1,46 @@
+schema:
+  instanceName: mpox
+  additionalMetadata:
+    - name: strain
+      type: string
+    - name: gisaid_epi_isl
+      type: string
+    - name: genbank_accession
+      type: string
+    - name: sra_accession
+      type: string
+    - name: date_submitted
+      type: date
+    - name: sampling_strategy
+      type: string
+    - name: region
+      type: string
+    - name: country
+      type: string
+    - name: division
+      type: string
+    - name: location
+      type: string
+    - name: region_exposure
+      type: string
+    - name: country_exposure
+      type: string
+    - name: division_exposure
+      type: string
+    - name: host
+      type: string
+    - name: age
+      type: integer
+    - name: sex
+      type: string
+    - name: Nextstrain_clade
+      type: string
+    - name: pango_lineage
+      type: string
+    - name: originating_lab
+      type: string
+    - name: submitting_lab
+      type: string
+    - name: authors
+      type: string
+  primaryKey: strain

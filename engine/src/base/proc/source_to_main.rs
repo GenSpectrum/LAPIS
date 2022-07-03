@@ -1,5 +1,5 @@
-use crate::base::SchemaConfig;
-use crate::{db, DatabaseConfig, SeqCompressor, SequenceRowToColumnTransformer};
+use crate::base::{DatabaseConfig, SchemaConfig};
+use crate::{db, SeqCompressor, SequenceRowToColumnTransformer};
 
 /// Moves data from the `source_data` table to the `main_` tables and performs the necessary
 /// processing including transforming the sequences to a columnar format

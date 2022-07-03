@@ -1,7 +1,7 @@
 use crate::base::constants::NucCode;
-use crate::base::{util, DataType, SchemaConfig, SchemaConfigMetadata};
+use crate::base::{util, DataType, DatabaseConfig, SchemaConfig, SchemaConfigMetadata};
 use crate::db::Mutation;
-use crate::{DatabaseConfig, MutationStore, SeqCompressor};
+use crate::{MutationStore, SeqCompressor};
 use chrono::{Local, NaiveDate};
 use postgres::{Client, NoTls};
 use postgres_cursor::Cursor;
