@@ -139,14 +139,16 @@ public class NextstrainGenbankMutationAAWorker {
         List<String> genes = ReferenceGenomeData.getInstance().getGeneNames();
         Path outputPath = workDir.resolve("output");
         String command = nextalignPath.toAbsolutePath() +
+            " run" +
             " --sequences=" + seqFastaPath.toAbsolutePath() +
-            " --reference=" + referenceFasta.toAbsolutePath() +
-            " --genemap=" + geneMapGff.toAbsolutePath() +
+            " --input-ref=" + referenceFasta.toAbsolutePath() +
+            " --input-gene-map=" + geneMapGff.toAbsolutePath() +
             " --genes=" + String.join(",", genes) +
-            " --output-dir=" + outputPath.toAbsolutePath() +
+            " --output-all=" + outputPath.toAbsolutePath() +
             " --output-basename=nextalign" +
             " --silent" +
-            " --jobs=1";
+            " --jobs=1" +
+            " " + seqFastaPath.toAbsolutePath();
 
         Process process = Runtime.getRuntime().exec(command);
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
