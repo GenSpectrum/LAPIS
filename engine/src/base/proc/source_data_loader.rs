@@ -215,56 +215,99 @@ set
         schema.primary_key, schema.primary_key
     );
 
-    let mut db_client = db::get_db_client(db_config);
-    let statement = db_client.prepare(insert_sql.as_str()).unwrap();
+    // The inserts to the database will be performed in parallel.
+    let mut executor_service = ExecutorService::new(20);
+
     let file = File::open(file_path).unwrap();
     let reader = fasta::Reader::new(file);
     let ref_seq = NucCode::from_seq_string(&ref_genome_config.sequence).unwrap();
+    let mut record_buffer = Vec::with_capacity(1000);
     for result in reader.records() {
         let record = result.unwrap();
-        let compressed_seq = seq_compressor.compress_bytes(record.seq());
-
-        let mut nuc_substitutions = None;
-        let mut nuc_deletions = None;
-        let mut nuc_unknowns = None;
-        let seq = NucCode::from_seq_bytes(record.seq());
-        if let Some(seq) = seq {
-            let mutations = mutation_finder::find_nuc_mutations(seq.clone(), &ref_seq);
-            let mut _nuc_substitutions = Vec::new();
-            let mut _nuc_deletions = Vec::new();
-            for mutation in &mutations {
-                let ref_code = ref_seq.get(mutation.position).unwrap();
-                let formatted = format!(
-                    "{}{}{}",
-                    ref_code.to_string(),
-                    mutation.position,
-                    mutation.to.to_string()
-                );
-                if mutation.to == NucCode::GAP {
-                    _nuc_deletions.push(formatted);
-                } else {
-                    _nuc_substitutions.push(formatted);
-                }
-            }
-            nuc_substitutions = Some(_nuc_substitutions.join(","));
-            nuc_deletions = Some(_nuc_deletions.join(","));
-            let unknowns_positions = mutation_finder::find_nuc_unknowns(seq);
-            nuc_unknowns = Some(mutation_finder::compress_positions_as_strings(&unknowns_positions).join(","));
+        record_buffer.push(record);
+        if record_buffer.len() >= 1000 {
+            let records = record_buffer;
+            let task = create_load_sequences_aligned_task(
+                records,
+                db_config.clone(),
+                insert_sql.clone(),
+                seq_compressor.clone(),
+                ref_seq.clone(),
+            );
+            executor_service.submit_task(task);
+            record_buffer = Vec::with_capacity(1000);
         }
-
-        db_client
-            .execute(
-                &statement,
-                &[
-                    &record.id(),
-                    &compressed_seq,
-                    &nuc_substitutions,
-                    &nuc_deletions,
-                    &nuc_unknowns,
-                ],
-            )
-            .unwrap();
     }
+    if !record_buffer.is_empty() {
+        let task = create_load_sequences_aligned_task(
+            record_buffer,
+            db_config.clone(),
+            insert_sql.clone(),
+            seq_compressor.clone(),
+            ref_seq.clone(),
+        );
+        executor_service.submit_task(task);
+    }
+    executor_service.close();
+    executor_service.join();
+}
+
+fn create_load_sequences_aligned_task(
+    records: Vec<fasta::Record>,
+    db_config: DatabaseConfig,
+    insert_sql: String,
+    mut seq_compressor: SeqCompressor,
+    ref_seq: Vec<NucCode>,
+) -> Box<dyn 'static + FnOnce(usize) + Send> {
+    Box::new(move |_| {
+        let mut db_client = db::get_db_client(&db_config);
+        let statement = db_client.prepare(insert_sql.as_str()).unwrap();
+
+        for record in records {
+            let compressed_seq = seq_compressor.compress_bytes(record.seq());
+
+            let mut nuc_substitutions = None;
+            let mut nuc_deletions = None;
+            let mut nuc_unknowns = None;
+            let seq = NucCode::from_seq_bytes(record.seq());
+            if let Some(seq) = seq {
+                let mutations = mutation_finder::find_nuc_mutations(seq.clone(), &ref_seq);
+                let mut _nuc_substitutions = Vec::new();
+                let mut _nuc_deletions = Vec::new();
+                for mutation in &mutations {
+                    let ref_code = ref_seq.get(mutation.position - 1).unwrap();
+                    let formatted = format!(
+                        "{}{}{}",
+                        ref_code.to_string(),
+                        mutation.position,
+                        mutation.to.to_string()
+                    );
+                    if mutation.to == NucCode::GAP {
+                        _nuc_deletions.push(formatted);
+                    } else {
+                        _nuc_substitutions.push(formatted);
+                    }
+                }
+                nuc_substitutions = Some(_nuc_substitutions.join(","));
+                nuc_deletions = Some(_nuc_deletions.join(","));
+                let unknowns_positions = mutation_finder::find_nuc_unknowns(seq);
+                nuc_unknowns = Some(mutation_finder::compress_positions_as_strings(&unknowns_positions).join(","));
+            }
+
+            db_client
+                .execute(
+                    &statement,
+                    &[
+                        &record.id(),
+                        &compressed_seq,
+                        &nuc_substitutions,
+                        &nuc_deletions,
+                        &nuc_unknowns,
+                    ],
+                )
+                .unwrap();
+        }
+    })
 }
 
 fn handle_null(s: &str) -> Option<String> {
