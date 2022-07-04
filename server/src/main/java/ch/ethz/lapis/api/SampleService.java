@@ -331,7 +331,7 @@ public class SampleService {
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             TableField<YMainMetadataRecord, String> sequenceIdentifierColumn =
-                LapisMain.globalConfig.getApiOpennessLevel() != OpennessLevel.GISAID ?
+                LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN ?
                 metaTbl.GENBANK_ACCESSION : metaTbl.GISAID_EPI_ISL;
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
                 .select(sequenceIdentifierColumn, seqColumn)
