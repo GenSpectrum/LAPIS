@@ -254,7 +254,7 @@ public class TransformService {
                     insert into y_main_metadata_staging (
                       id, source, source_primary_key, accession, strain, sra_accession,
                       date, year, month, day, date_submitted, region, country, division, location,
-                      host, clade, authors, institution,
+                      host, clade, lineage, authors, institution,
 
                       nextclade_qc_overall_score, nextclade_qc_missing_data_score, nextclade_qc_mixed_sites_score,
                       nextclade_qc_private_mutations_score, nextclade_qc_snp_clusters_score,
@@ -283,6 +283,7 @@ public class TransformService {
                       location,
                       host,
                       clade,
+                      lineage,
                       authors,
                       institution,
 
