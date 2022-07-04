@@ -286,6 +286,11 @@ public class YMainMetadataStaging extends TableImpl<YMainMetadataStagingRecord> 
      */
     public final TableField<YMainMetadataStagingRecord, Integer> NEXTCLADE_TOTAL_PCR_PRIMER_CHANGES = createField(DSL.name("nextclade_total_pcr_primer_changes"), SQLDataType.INTEGER, this, "");
 
+    /**
+     * The column <code>y_main_metadata_staging.lineage</code>.
+     */
+    public final TableField<YMainMetadataStagingRecord, String> LINEAGE = createField(DSL.name("lineage"), SQLDataType.CLOB, this, "");
+
     private YMainMetadataStaging(Name alias, Table<YMainMetadataStagingRecord> aliased) {
         this(alias, aliased, null);
     }

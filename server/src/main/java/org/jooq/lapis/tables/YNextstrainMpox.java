@@ -132,6 +132,16 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
     public final TableField<YNextstrainMpoxRecord, String> LOCATION = createField(DSL.name("location"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_nextstrain_mpox.clade</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_nextstrain_mpox.lineage</code>.
+     */
+    public final TableField<YNextstrainMpoxRecord, String> LINEAGE = createField(DSL.name("lineage"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_nextstrain_mpox.host</code>.
      */
     public final TableField<YNextstrainMpoxRecord, String> HOST = createField(DSL.name("host"), SQLDataType.CLOB, this, "");
@@ -190,11 +200,6 @@ public class YNextstrainMpox extends TableImpl<YNextstrainMpoxRecord> {
      * The column <code>y_nextstrain_mpox.nuc_unknowns</code>.
      */
     public final TableField<YNextstrainMpoxRecord, String> NUC_UNKNOWNS = createField(DSL.name("nuc_unknowns"), SQLDataType.CLOB, this, "");
-
-    /**
-     * The column <code>y_nextstrain_mpox.clade</code>.
-     */
-    public final TableField<YNextstrainMpoxRecord, String> CLADE = createField(DSL.name("clade"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_nextstrain_mpox.nextclade_total_substitutions</code>.

@@ -691,6 +691,20 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         return (Integer) get(47);
     }
 
+    /**
+     * Setter for <code>y_main_metadata_staging.lineage</code>.
+     */
+    public void setLineage(String value) {
+        set(48, value);
+    }
+
+    /**
+     * Getter for <code>y_main_metadata_staging.lineage</code>.
+     */
+    public String getLineage() {
+        return (String) get(48);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -714,7 +728,7 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
     /**
      * Create a detached, initialised YMainMetadataStagingRecord
      */
-    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String accession, String strain, String sraAccession, LocalDate date, Integer year, Integer month, Integer day, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String samplingStrategy, String clade, String authors, String institution, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges) {
+    public YMainMetadataStagingRecord(Integer id, String source, String sourcePrimaryKey, String accession, String strain, String sraAccession, LocalDate date, Integer year, Integer month, Integer day, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String samplingStrategy, String clade, String authors, String institution, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges, String lineage) {
         super(YMainMetadataStaging.Y_MAIN_METADATA_STAGING);
 
         setId(id);
@@ -765,5 +779,6 @@ public class YMainMetadataStagingRecord extends UpdatableRecordImpl<YMainMetadat
         setNextcladeTotalMissing(nextcladeTotalMissing);
         setNextcladeTotalNonAcgtns(nextcladeTotalNonAcgtns);
         setNextcladeTotalPcrPrimerChanges(nextcladeTotalPcrPrimerChanges);
+        setLineage(lineage);
     }
 }

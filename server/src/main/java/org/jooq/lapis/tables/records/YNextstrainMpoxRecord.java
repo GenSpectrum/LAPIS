@@ -258,801 +258,815 @@ public class YNextstrainMpoxRecord extends UpdatableRecordImpl<YNextstrainMpoxRe
     }
 
     /**
-     * Setter for <code>y_nextstrain_mpox.host</code>.
-     */
-    public void setHost(String value) {
-        set(17, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.host</code>.
-     */
-    public String getHost() {
-        return (String) get(17);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.authors</code>.
-     */
-    public void setAuthors(String value) {
-        set(18, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.authors</code>.
-     */
-    public String getAuthors() {
-        return (String) get(18);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.institution</code>.
-     */
-    public void setInstitution(String value) {
-        set(19, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.institution</code>.
-     */
-    public String getInstitution() {
-        return (String) get(19);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.seq_original_compressed</code>.
-     */
-    public void setSeqOriginalCompressed(byte[] value) {
-        set(20, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.seq_original_compressed</code>.
-     */
-    public byte[] getSeqOriginalCompressed() {
-        return (byte[]) get(20);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.seq_aligned_compressed</code>.
-     */
-    public void setSeqAlignedCompressed(byte[] value) {
-        set(21, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.seq_aligned_compressed</code>.
-     */
-    public byte[] getSeqAlignedCompressed() {
-        return (byte[]) get(21);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.aa_seqs_compressed</code>.
-     */
-    public void setAaSeqsCompressed(byte[] value) {
-        set(22, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.aa_seqs_compressed</code>.
-     */
-    public byte[] getAaSeqsCompressed() {
-        return (byte[]) get(22);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.aa_mutations</code>.
-     */
-    public void setAaMutations(String value) {
-        set(23, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.aa_mutations</code>.
-     */
-    public String getAaMutations() {
-        return (String) get(23);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.aa_unknowns</code>.
-     */
-    public void setAaUnknowns(String value) {
-        set(24, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.aa_unknowns</code>.
-     */
-    public String getAaUnknowns() {
-        return (String) get(24);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.nuc_substitutions</code>.
-     */
-    public void setNucSubstitutions(String value) {
-        set(25, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.nuc_substitutions</code>.
-     */
-    public String getNucSubstitutions() {
-        return (String) get(25);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.nuc_deletions</code>.
-     */
-    public void setNucDeletions(String value) {
-        set(26, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.nuc_deletions</code>.
-     */
-    public String getNucDeletions() {
-        return (String) get(26);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.nuc_insertions</code>.
-     */
-    public void setNucInsertions(String value) {
-        set(27, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.nuc_insertions</code>.
-     */
-    public String getNucInsertions() {
-        return (String) get(27);
-    }
-
-    /**
-     * Setter for <code>y_nextstrain_mpox.nuc_unknowns</code>.
-     */
-    public void setNucUnknowns(String value) {
-        set(28, value);
-    }
-
-    /**
-     * Getter for <code>y_nextstrain_mpox.nuc_unknowns</code>.
-     */
-    public String getNucUnknowns() {
-        return (String) get(28);
-    }
-
-    /**
      * Setter for <code>y_nextstrain_mpox.clade</code>.
      */
     public void setClade(String value) {
-        set(29, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.clade</code>.
      */
     public String getClade() {
+        return (String) get(17);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.lineage</code>.
+     */
+    public void setLineage(String value) {
+        set(18, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.lineage</code>.
+     */
+    public String getLineage() {
+        return (String) get(18);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.host</code>.
+     */
+    public void setHost(String value) {
+        set(19, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.host</code>.
+     */
+    public String getHost() {
+        return (String) get(19);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.authors</code>.
+     */
+    public void setAuthors(String value) {
+        set(20, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.authors</code>.
+     */
+    public String getAuthors() {
+        return (String) get(20);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.institution</code>.
+     */
+    public void setInstitution(String value) {
+        set(21, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.institution</code>.
+     */
+    public String getInstitution() {
+        return (String) get(21);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.seq_original_compressed</code>.
+     */
+    public void setSeqOriginalCompressed(byte[] value) {
+        set(22, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.seq_original_compressed</code>.
+     */
+    public byte[] getSeqOriginalCompressed() {
+        return (byte[]) get(22);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.seq_aligned_compressed</code>.
+     */
+    public void setSeqAlignedCompressed(byte[] value) {
+        set(23, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.seq_aligned_compressed</code>.
+     */
+    public byte[] getSeqAlignedCompressed() {
+        return (byte[]) get(23);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.aa_seqs_compressed</code>.
+     */
+    public void setAaSeqsCompressed(byte[] value) {
+        set(24, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.aa_seqs_compressed</code>.
+     */
+    public byte[] getAaSeqsCompressed() {
+        return (byte[]) get(24);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.aa_mutations</code>.
+     */
+    public void setAaMutations(String value) {
+        set(25, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.aa_mutations</code>.
+     */
+    public String getAaMutations() {
+        return (String) get(25);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.aa_unknowns</code>.
+     */
+    public void setAaUnknowns(String value) {
+        set(26, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.aa_unknowns</code>.
+     */
+    public String getAaUnknowns() {
+        return (String) get(26);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.nuc_substitutions</code>.
+     */
+    public void setNucSubstitutions(String value) {
+        set(27, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.nuc_substitutions</code>.
+     */
+    public String getNucSubstitutions() {
+        return (String) get(27);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.nuc_deletions</code>.
+     */
+    public void setNucDeletions(String value) {
+        set(28, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.nuc_deletions</code>.
+     */
+    public String getNucDeletions() {
+        return (String) get(28);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.nuc_insertions</code>.
+     */
+    public void setNucInsertions(String value) {
+        set(29, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.nuc_insertions</code>.
+     */
+    public String getNucInsertions() {
         return (String) get(29);
+    }
+
+    /**
+     * Setter for <code>y_nextstrain_mpox.nuc_unknowns</code>.
+     */
+    public void setNucUnknowns(String value) {
+        set(30, value);
+    }
+
+    /**
+     * Getter for <code>y_nextstrain_mpox.nuc_unknowns</code>.
+     */
+    public String getNucUnknowns() {
+        return (String) get(30);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_substitutions</code>.
      */
     public void setNextcladeTotalSubstitutions(Integer value) {
-        set(30, value);
+        set(31, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_substitutions</code>.
      */
     public Integer getNextcladeTotalSubstitutions() {
-        return (Integer) get(30);
+        return (Integer) get(31);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_deletions</code>.
      */
     public void setNextcladeTotalDeletions(Integer value) {
-        set(31, value);
+        set(32, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_deletions</code>.
      */
     public Integer getNextcladeTotalDeletions() {
-        return (Integer) get(31);
+        return (Integer) get(32);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_insertions</code>.
      */
     public void setNextcladeTotalInsertions(Integer value) {
-        set(32, value);
+        set(33, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_insertions</code>.
      */
     public Integer getNextcladeTotalInsertions() {
-        return (Integer) get(32);
+        return (Integer) get(33);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_frame_shifts</code>.
      */
     public void setNextcladeTotalFrameShifts(Integer value) {
-        set(33, value);
+        set(34, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_frame_shifts</code>.
      */
     public Integer getNextcladeTotalFrameShifts() {
-        return (Integer) get(33);
+        return (Integer) get(34);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_substitutions</code>.
      */
     public void setNextcladeTotalAminoacidSubstitutions(Integer value) {
-        set(34, value);
+        set(35, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_substitutions</code>.
      */
     public Integer getNextcladeTotalAminoacidSubstitutions() {
-        return (Integer) get(34);
+        return (Integer) get(35);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_deletions</code>.
      */
     public void setNextcladeTotalAminoacidDeletions(Integer value) {
-        set(35, value);
+        set(36, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_deletions</code>.
      */
     public Integer getNextcladeTotalAminoacidDeletions() {
-        return (Integer) get(35);
+        return (Integer) get(36);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_insertions</code>.
      */
     public void setNextcladeTotalAminoacidInsertions(Integer value) {
-        set(36, value);
+        set(37, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_aminoacid_insertions</code>.
      */
     public Integer getNextcladeTotalAminoacidInsertions() {
-        return (Integer) get(36);
+        return (Integer) get(37);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_missing</code>.
      */
     public void setNextcladeTotalMissing(Integer value) {
-        set(37, value);
+        set(38, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_missing</code>.
      */
     public Integer getNextcladeTotalMissing() {
-        return (Integer) get(37);
+        return (Integer) get(38);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_non_acgtns</code>.
      */
     public void setNextcladeTotalNonAcgtns(Integer value) {
-        set(38, value);
+        set(39, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_non_acgtns</code>.
      */
     public Integer getNextcladeTotalNonAcgtns() {
-        return (Integer) get(38);
+        return (Integer) get(39);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_total_pcr_primer_changes</code>.
      */
     public void setNextcladeTotalPcrPrimerChanges(Integer value) {
-        set(39, value);
+        set(40, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_total_pcr_primer_changes</code>.
      */
     public Integer getNextcladeTotalPcrPrimerChanges() {
-        return (Integer) get(39);
+        return (Integer) get(40);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_pcr_primer_changes</code>.
      */
     public void setNextcladePcrPrimerChanges(String value) {
-        set(40, value);
+        set(41, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_pcr_primer_changes</code>.
      */
     public String getNextcladePcrPrimerChanges() {
-        return (String) get(40);
+        return (String) get(41);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_alignment_score</code>.
      */
     public void setNextcladeAlignmentScore(Double value) {
-        set(41, value);
+        set(42, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_alignment_score</code>.
      */
     public Double getNextcladeAlignmentScore() {
-        return (Double) get(41);
+        return (Double) get(42);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_alignment_start</code>.
      */
     public void setNextcladeAlignmentStart(Integer value) {
-        set(42, value);
+        set(43, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_alignment_start</code>.
      */
     public Integer getNextcladeAlignmentStart() {
-        return (Integer) get(42);
+        return (Integer) get(43);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_alignment_end</code>.
      */
     public void setNextcladeAlignmentEnd(Integer value) {
-        set(43, value);
+        set(44, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_alignment_end</code>.
      */
     public Integer getNextcladeAlignmentEnd() {
-        return (Integer) get(43);
+        return (Integer) get(44);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_overall_score</code>.
      */
     public void setNextcladeQcOverallScore(Double value) {
-        set(44, value);
+        set(45, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_overall_score</code>.
      */
     public Double getNextcladeQcOverallScore() {
-        return (Double) get(44);
+        return (Double) get(45);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_overall_status</code>.
      */
     public void setNextcladeQcOverallStatus(String value) {
-        set(45, value);
+        set(46, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_overall_status</code>.
      */
     public String getNextcladeQcOverallStatus() {
-        return (String) get(45);
+        return (String) get(46);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_missing_data_threshold</code>.
      */
     public void setNextcladeQcMissingDataMissingDataThreshold(Double value) {
-        set(46, value);
+        set(47, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_missing_data_threshold</code>.
      */
     public Double getNextcladeQcMissingDataMissingDataThreshold() {
-        return (Double) get(46);
+        return (Double) get(47);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_score</code>.
      */
     public void setNextcladeQcMissingDataScore(Double value) {
-        set(47, value);
+        set(48, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_score</code>.
      */
     public Double getNextcladeQcMissingDataScore() {
-        return (Double) get(47);
+        return (Double) get(48);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_status</code>.
      */
     public void setNextcladeQcMissingDataStatus(String value) {
-        set(48, value);
+        set(49, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_status</code>.
      */
     public String getNextcladeQcMissingDataStatus() {
-        return (String) get(48);
+        return (String) get(49);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_total_missing</code>.
      */
     public void setNextcladeQcMissingDataTotalMissing(Integer value) {
-        set(49, value);
+        set(50, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_missing_data_total_missing</code>.
      */
     public Integer getNextcladeQcMissingDataTotalMissing() {
-        return (Integer) get(49);
+        return (Integer) get(50);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_mixed_sites_threshold</code>.
      */
     public void setNextcladeQcMixedSitesMixedSitesThreshold(Double value) {
-        set(50, value);
+        set(51, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_mixed_sites_threshold</code>.
      */
     public Double getNextcladeQcMixedSitesMixedSitesThreshold() {
-        return (Double) get(50);
+        return (Double) get(51);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_score</code>.
      */
     public void setNextcladeQcMixedSitesScore(Double value) {
-        set(51, value);
+        set(52, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_score</code>.
      */
     public Double getNextcladeQcMixedSitesScore() {
-        return (Double) get(51);
+        return (Double) get(52);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_status</code>.
      */
     public void setNextcladeQcMixedSitesStatus(String value) {
-        set(52, value);
+        set(53, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_status</code>.
      */
     public String getNextcladeQcMixedSitesStatus() {
-        return (String) get(52);
+        return (String) get(53);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_total_mixed_sites</code>.
      */
     public void setNextcladeQcMixedSitesTotalMixedSites(Integer value) {
-        set(53, value);
+        set(54, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_mixed_sites_total_mixed_sites</code>.
      */
     public Integer getNextcladeQcMixedSitesTotalMixedSites() {
-        return (Integer) get(53);
+        return (Integer) get(54);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_cutoff</code>.
      */
     public void setNextcladeQcPrivateMutationsCutoff(Double value) {
-        set(54, value);
+        set(55, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_cutoff</code>.
      */
     public Double getNextcladeQcPrivateMutationsCutoff() {
-        return (Double) get(54);
+        return (Double) get(55);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_excess</code>.
      */
     public void setNextcladeQcPrivateMutationsExcess(Double value) {
-        set(55, value);
+        set(56, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_excess</code>.
      */
     public Double getNextcladeQcPrivateMutationsExcess() {
-        return (Double) get(55);
+        return (Double) get(56);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_score</code>.
      */
     public void setNextcladeQcPrivateMutationsScore(Double value) {
-        set(56, value);
+        set(57, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_score</code>.
      */
     public Double getNextcladeQcPrivateMutationsScore() {
-        return (Double) get(56);
+        return (Double) get(57);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_status</code>.
      */
     public void setNextcladeQcPrivateMutationsStatus(String value) {
-        set(57, value);
+        set(58, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_status</code>.
      */
     public String getNextcladeQcPrivateMutationsStatus() {
-        return (String) get(57);
+        return (String) get(58);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_total</code>.
      */
     public void setNextcladeQcPrivateMutationsTotal(Integer value) {
-        set(58, value);
+        set(59, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_private_mutations_total</code>.
      */
     public Integer getNextcladeQcPrivateMutationsTotal() {
-        return (Integer) get(58);
+        return (Integer) get(59);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_clustered_snps</code>.
      */
     public void setNextcladeQcSnpClustersClusteredSnps(String value) {
-        set(59, value);
+        set(60, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_clustered_snps</code>.
      */
     public String getNextcladeQcSnpClustersClusteredSnps() {
-        return (String) get(59);
+        return (String) get(60);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_score</code>.
      */
     public void setNextcladeQcSnpClustersScore(Double value) {
-        set(60, value);
+        set(61, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_score</code>.
      */
     public Double getNextcladeQcSnpClustersScore() {
-        return (Double) get(60);
+        return (Double) get(61);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_status</code>.
      */
     public void setNextcladeQcSnpClustersStatus(String value) {
-        set(61, value);
+        set(62, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_status</code>.
      */
     public String getNextcladeQcSnpClustersStatus() {
-        return (String) get(61);
+        return (String) get(62);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_total_snps</code>.
      */
     public void setNextcladeQcSnpClustersTotalSnps(Integer value) {
-        set(62, value);
+        set(63, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_snp_clusters_total_snps</code>.
      */
     public Integer getNextcladeQcSnpClustersTotalSnps() {
-        return (Integer) get(62);
+        return (Integer) get(63);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts</code>.
      */
     public void setNextcladeQcFrameShiftsFrameShifts(String value) {
-        set(63, value);
+        set(64, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts</code>.
      */
     public String getNextcladeQcFrameShiftsFrameShifts() {
-        return (String) get(63);
+        return (String) get(64);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts</code>.
      */
     public void setNextcladeQcFrameShiftsTotalFrameShifts(Integer value) {
-        set(64, value);
+        set(65, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts</code>.
      */
     public Integer getNextcladeQcFrameShiftsTotalFrameShifts() {
-        return (Integer) get(64);
+        return (Integer) get(65);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts_ignored</code>.
      */
     public void setNextcladeQcFrameShiftsFrameShiftsIgnored(String value) {
-        set(65, value);
+        set(66, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_frame_shifts_ignored</code>.
      */
     public String getNextcladeQcFrameShiftsFrameShiftsIgnored() {
-        return (String) get(65);
+        return (String) get(66);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts_ignored</code>.
      */
     public void setNextcladeQcFrameShiftsTotalFrameShiftsIgnored(Integer value) {
-        set(66, value);
+        set(67, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_total_frame_shifts_ignored</code>.
      */
     public Integer getNextcladeQcFrameShiftsTotalFrameShiftsIgnored() {
-        return (Integer) get(66);
+        return (Integer) get(67);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_score</code>.
      */
     public void setNextcladeQcFrameShiftsScore(Double value) {
-        set(67, value);
+        set(68, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_score</code>.
      */
     public Double getNextcladeQcFrameShiftsScore() {
-        return (Double) get(67);
+        return (Double) get(68);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_status</code>.
      */
     public void setNextcladeQcFrameShiftsStatus(String value) {
-        set(68, value);
+        set(69, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_frame_shifts_status</code>.
      */
     public String getNextcladeQcFrameShiftsStatus() {
-        return (String) get(68);
+        return (String) get(69);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_stop_codons</code>.
      */
     public void setNextcladeQcStopCodonsStopCodons(String value) {
-        set(69, value);
+        set(70, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_stop_codons</code>.
      */
     public String getNextcladeQcStopCodonsStopCodons() {
-        return (String) get(69);
+        return (String) get(70);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_total_stop_codons</code>.
      */
     public void setNextcladeQcStopCodonsTotalStopCodons(Integer value) {
-        set(70, value);
+        set(71, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_total_stop_codons</code>.
      */
     public Integer getNextcladeQcStopCodonsTotalStopCodons() {
-        return (Integer) get(70);
+        return (Integer) get(71);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_score</code>.
      */
     public void setNextcladeQcStopCodonsScore(Double value) {
-        set(71, value);
+        set(72, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_score</code>.
      */
     public Double getNextcladeQcStopCodonsScore() {
-        return (Double) get(71);
+        return (Double) get(72);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_status</code>.
      */
     public void setNextcladeQcStopCodonsStatus(String value) {
-        set(72, value);
+        set(73, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_qc_stop_codons_status</code>.
      */
     public String getNextcladeQcStopCodonsStatus() {
-        return (String) get(72);
+        return (String) get(73);
     }
 
     /**
      * Setter for <code>y_nextstrain_mpox.nextclade_errors</code>.
      */
     public void setNextcladeErrors(String value) {
-        set(73, value);
+        set(74, value);
     }
 
     /**
      * Getter for <code>y_nextstrain_mpox.nextclade_errors</code>.
      */
     public String getNextcladeErrors() {
-        return (String) get(73);
+        return (String) get(74);
     }
 
     // -------------------------------------------------------------------------
@@ -1078,7 +1092,7 @@ public class YNextstrainMpoxRecord extends UpdatableRecordImpl<YNextstrainMpoxRe
     /**
      * Create a detached, initialised YNextstrainMpoxRecord
      */
-    public YNextstrainMpoxRecord(String metadataHash, String seqOriginalHash, String seqAlignedHash, String accession, String accessionRev, String strain, String sraAccession, LocalDate date, Integer year, Integer month, Integer day, String dateOriginal, LocalDate dateSubmitted, String region, String country, String division, String location, String host, String authors, String institution, byte[] seqOriginalCompressed, byte[] seqAlignedCompressed, byte[] aaSeqsCompressed, String aaMutations, String aaUnknowns, String nucSubstitutions, String nucDeletions, String nucInsertions, String nucUnknowns, String clade, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges, String nextcladePcrPrimerChanges, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Double nextcladeQcOverallScore, String nextcladeQcOverallStatus, Double nextcladeQcMissingDataMissingDataThreshold, Double nextcladeQcMissingDataScore, String nextcladeQcMissingDataStatus, Integer nextcladeQcMissingDataTotalMissing, Double nextcladeQcMixedSitesMixedSitesThreshold, Double nextcladeQcMixedSitesScore, String nextcladeQcMixedSitesStatus, Integer nextcladeQcMixedSitesTotalMixedSites, Double nextcladeQcPrivateMutationsCutoff, Double nextcladeQcPrivateMutationsExcess, Double nextcladeQcPrivateMutationsScore, String nextcladeQcPrivateMutationsStatus, Integer nextcladeQcPrivateMutationsTotal, String nextcladeQcSnpClustersClusteredSnps, Double nextcladeQcSnpClustersScore, String nextcladeQcSnpClustersStatus, Integer nextcladeQcSnpClustersTotalSnps, String nextcladeQcFrameShiftsFrameShifts, Integer nextcladeQcFrameShiftsTotalFrameShifts, String nextcladeQcFrameShiftsFrameShiftsIgnored, Integer nextcladeQcFrameShiftsTotalFrameShiftsIgnored, Double nextcladeQcFrameShiftsScore, String nextcladeQcFrameShiftsStatus, String nextcladeQcStopCodonsStopCodons, Integer nextcladeQcStopCodonsTotalStopCodons, Double nextcladeQcStopCodonsScore, String nextcladeQcStopCodonsStatus, String nextcladeErrors) {
+    public YNextstrainMpoxRecord(String metadataHash, String seqOriginalHash, String seqAlignedHash, String accession, String accessionRev, String strain, String sraAccession, LocalDate date, Integer year, Integer month, Integer day, String dateOriginal, LocalDate dateSubmitted, String region, String country, String division, String location, String clade, String lineage, String host, String authors, String institution, byte[] seqOriginalCompressed, byte[] seqAlignedCompressed, byte[] aaSeqsCompressed, String aaMutations, String aaUnknowns, String nucSubstitutions, String nucDeletions, String nucInsertions, String nucUnknowns, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges, String nextcladePcrPrimerChanges, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Double nextcladeQcOverallScore, String nextcladeQcOverallStatus, Double nextcladeQcMissingDataMissingDataThreshold, Double nextcladeQcMissingDataScore, String nextcladeQcMissingDataStatus, Integer nextcladeQcMissingDataTotalMissing, Double nextcladeQcMixedSitesMixedSitesThreshold, Double nextcladeQcMixedSitesScore, String nextcladeQcMixedSitesStatus, Integer nextcladeQcMixedSitesTotalMixedSites, Double nextcladeQcPrivateMutationsCutoff, Double nextcladeQcPrivateMutationsExcess, Double nextcladeQcPrivateMutationsScore, String nextcladeQcPrivateMutationsStatus, Integer nextcladeQcPrivateMutationsTotal, String nextcladeQcSnpClustersClusteredSnps, Double nextcladeQcSnpClustersScore, String nextcladeQcSnpClustersStatus, Integer nextcladeQcSnpClustersTotalSnps, String nextcladeQcFrameShiftsFrameShifts, Integer nextcladeQcFrameShiftsTotalFrameShifts, String nextcladeQcFrameShiftsFrameShiftsIgnored, Integer nextcladeQcFrameShiftsTotalFrameShiftsIgnored, Double nextcladeQcFrameShiftsScore, String nextcladeQcFrameShiftsStatus, String nextcladeQcStopCodonsStopCodons, Integer nextcladeQcStopCodonsTotalStopCodons, Double nextcladeQcStopCodonsScore, String nextcladeQcStopCodonsStatus, String nextcladeErrors) {
         super(YNextstrainMpox.Y_NEXTSTRAIN_MPOX);
 
         setMetadataHash(metadataHash);
@@ -1098,6 +1112,8 @@ public class YNextstrainMpoxRecord extends UpdatableRecordImpl<YNextstrainMpoxRe
         setCountry(country);
         setDivision(division);
         setLocation(location);
+        setClade(clade);
+        setLineage(lineage);
         setHost(host);
         setAuthors(authors);
         setInstitution(institution);
@@ -1110,7 +1126,6 @@ public class YNextstrainMpoxRecord extends UpdatableRecordImpl<YNextstrainMpoxRe
         setNucDeletions(nucDeletions);
         setNucInsertions(nucInsertions);
         setNucUnknowns(nucUnknowns);
-        setClade(clade);
         setNextcladeTotalSubstitutions(nextcladeTotalSubstitutions);
         setNextcladeTotalDeletions(nextcladeTotalDeletions);
         setNextcladeTotalInsertions(nextcladeTotalInsertions);
