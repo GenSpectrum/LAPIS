@@ -2,6 +2,7 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.entity.AccessKey;
+import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.Versioned;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
@@ -24,6 +25,7 @@ import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.lapis.tables.YMainMetadata;
 import org.jooq.lapis.tables.YMainSequence;
+import org.jooq.lapis.tables.records.YMainMetadataRecord;
 import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -325,8 +330,11 @@ public class SampleService {
                 seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
+            TableField<YMainMetadataRecord, String> sequenceIdentifierColumn =
+                LapisMain.globalConfig.getApiOpennessLevel() != OpennessLevel.GISAID ?
+                metaTbl.GENBANK_ACCESSION : metaTbl.GISAID_EPI_ISL;
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
-                .select(metaTbl.GENBANK_ACCESSION, seqColumn)
+                .select(sequenceIdentifierColumn, seqColumn)
                 .from(
                     idsTbl
                         .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
@@ -339,7 +347,7 @@ public class SampleService {
             Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy();
             for (Record2<String, byte[]> r : cursor) {
                 outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(metaTbl.GENBANK_ACCESSION).getBytes(StandardCharsets.UTF_8));
+                outputStream.write(r.get(sequenceIdentifierColumn).getBytes(StandardCharsets.UTF_8));
                 outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
                 outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
                     .getBytes(StandardCharsets.UTF_8));
