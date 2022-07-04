@@ -1,6 +1,5 @@
 package ch.ethz.lapis.api.query;
 
-import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 
 public class PangoQuery implements VariantQueryExpr {
@@ -12,7 +11,9 @@ public class PangoQuery implements VariantQueryExpr {
     private final String columnName;
 
     public PangoQuery(String pangoLineage, boolean includeSubLineage, String columnName) {
-        throw new BadRequestException("This operation is not supported.");
+        this.pangoLineage = pangoLineage;
+        this.includeSubLineage = includeSubLineage;
+        this.columnName = columnName;
     }
 
     public String getPangoLineage() {
