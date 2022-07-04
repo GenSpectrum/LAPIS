@@ -73,7 +73,7 @@ public class MpoxService {
 
 
     private void updateSeqOriginalOrAligned(boolean aligned) throws IOException, SQLException {
-        String filename = !aligned ? "sequences.fasta" : "nextclade-output/sequences.aligned.fasta";
+        String filename = !aligned ? "sequences.fasta" : "nextclade-output/nextclade.aligned.fasta";
         String sql = """
                 insert into y_nextstrain_mpox (accession, seq_original_compressed, seq_original_hash)
                 values (?, ?, ?)
@@ -243,7 +243,7 @@ public class MpoxService {
 
 
     private void updateNextcladeData() throws IOException, SQLException {
-        InputStream fileInputStream = new FileInputStream(workdir.resolve("nextclade-output/sequences.tsv").toFile());
+        InputStream fileInputStream = new FileInputStream(workdir.resolve("nextclade-output/nextclade.tsv").toFile());
 
         String sql = """
                 insert into y_nextstrain_mpox (
@@ -430,7 +430,7 @@ public class MpoxService {
 
 
     private void updateNucleotideMutations() throws IOException, SQLException {
-        String filename = "nextclade-output/sequences.aligned.fasta";
+        String filename = "nextclade-output/nextclade.aligned.fasta";
         String sql = """
                 insert into y_nextstrain_mpox (accession, nuc_substitutions, nuc_deletions, nuc_unknowns)
                 values (?, ?, ?, ?)
