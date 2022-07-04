@@ -79,6 +79,7 @@ public class QueryEngine {
                         case HOST -> sampleAggregated.setHost((String) key.get(i));
                         case SAMPLINGSTRATEGY -> sampleAggregated.setSamplingStrategy((String) key.get(i));
                         case CLADE -> sampleAggregated.setClade((String) key.get(i));
+                        case LINEAGE -> sampleAggregated.setLineage((String) key.get(i));
                         case INSTITUTION -> sampleAggregated.setInstitution((String) key.get(i));
                     }
                 }
@@ -125,10 +126,12 @@ public class QueryEngine {
         var useAaMutations = aaMutations != null && !aaMutations.isEmpty();
         var clade = sf.getClade();
         var useClade = clade != null;
+        var lineage = sf.getLineage();
+        var useLineage = lineage != null;
         var variantQuery = sf.getVariantQuery();
         var useVariantQuery = variantQuery != null;
 
-        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || useClade;
+        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || useClade || useLineage;
         if (useVariantQuery && useOtherVariantSpecifying) {
             throw new RuntimeException("It is not allowed to use variantQuery and another variant-specifying " +
                 "field at the same time.");
@@ -141,6 +144,16 @@ public class QueryEngine {
             List<VariantQueryExpr> components = new ArrayList<>();
             if (useClade) {
                 components.add(new NextstrainClade(clade));
+            }
+            if (useLineage) {
+                PangoQuery pq;
+                if (lineage.endsWith("*")) {
+                    pq = new PangoQuery(lineage.substring(0, lineage.length() - 1), true,
+                        Database.Columns.LINEAGE);
+                } else {
+                    pq = new PangoQuery(lineage, false, Database.Columns.LINEAGE);
+                }
+                components.add(pq);
             }
             if (useAaMutations) {
                 components.addAll(aaMutations);
@@ -409,6 +422,7 @@ public class QueryEngine {
             case HOST -> HOST;
             case SAMPLINGSTRATEGY -> SAMPLING_STRATEGY;
             case CLADE -> CLADE;
+            case LINEAGE -> LINEAGE;
             case INSTITUTION -> INSTITUTION;
             default -> throw new IllegalStateException("Unexpected value: " + field);
         };

@@ -43,6 +43,7 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private List<String> host;
     private String samplingStrategy;
     private String clade;
+    private String lineage;
     private String institution;
     private Float nextcladeQcOverallScoreFrom;
     private Float nextcladeQcOverallScoreTo;
@@ -303,6 +304,15 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setClade(String clade) {
         this.clade = clade;
+        return (T) this;
+    }
+
+    public String getLineage() {
+        return lineage;
+    }
+
+    public T setLineage(String lineage) {
+        this.lineage = lineage;
         return (T) this;
     }
 

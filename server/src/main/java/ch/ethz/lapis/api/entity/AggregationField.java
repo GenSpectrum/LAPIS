@@ -21,6 +21,7 @@ public enum AggregationField {
     HOST,
     SAMPLINGSTRATEGY,
     CLADE,
+    LINEAGE,
     INSTITUTION
 
 }

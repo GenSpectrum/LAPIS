@@ -36,6 +36,7 @@ public class Database {
         public static final String FULLY_VACCINATED = "fully_vaccinated"; // Boolean
         public static final String SAMPLING_STRATEGY = "sampling_strategy"; // String
         public static final String CLADE = "clade"; // String
+        public static final String LINEAGE = "lineage"; // String
         public static final String INSTITUTION = "institution"; // String
         public static final String NEXTCLADE_QC_OVERALL_SCORE = "nextclade_qc_overall_score"; // Float
         public static final String NEXTCLADE_QC_MISSING_DATA_SCORE = "nextclade_qc_missing_data_score"; // Float
@@ -63,7 +64,7 @@ public class Database {
         Columns.ACCESSION, Columns.SRA_ACCESSION, Columns.STRAIN,
         Columns.REGION, Columns.COUNTRY, Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE,
         Columns.COUNTRY_EXPOSURE, Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.SEX,
-        Columns.SAMPLING_STRATEGY, Columns.CLADE, Columns.INSTITUTION
+        Columns.SAMPLING_STRATEGY, Columns.CLADE, Columns.LINEAGE, Columns.INSTITUTION
     };
     public static final String[] DATE_COLUMNS = new String[] {
         Columns.DATE, Columns.DATE_SUBMITTED
@@ -318,7 +319,7 @@ public class Database {
 
                 }
                 // Fetch pango lineage aliases
-                PangoLineageQueryConverter pangoLineageQueryConverter = null;
+                PangoLineageQueryConverter pangoLineageQueryConverter = new PangoLineageQueryConverter(new ArrayList<>());
                 // Create database object
                 database = new Database(
                     dataVersion,

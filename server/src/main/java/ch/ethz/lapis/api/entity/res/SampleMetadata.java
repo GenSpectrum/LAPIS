@@ -23,6 +23,7 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
     private String host;
     private String samplingStrategy;
     private String clade;
+    private String lineage;
     private String institution;
 
     public LocalDate getDate() {
@@ -193,6 +194,15 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
 
     public T setClade(String clade) {
         this.clade = clade;
+        return (T) this;
+    }
+
+    public String getLineage() {
+        return lineage;
+    }
+
+    public T setLineage(String lineage) {
+        this.lineage = lineage;
         return (T) this;
     }
 

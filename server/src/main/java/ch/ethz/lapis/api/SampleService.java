@@ -95,6 +95,7 @@ public class SampleService {
                 add(tbl.HOST);
                 add(tbl.SAMPLING_STRATEGY);
                 add(tbl.CLADE);
+                add(tbl.LINEAGE);
                 add(tbl.INSTITUTION);
             }};
 
@@ -128,6 +129,7 @@ public class SampleService {
                     .setHost(r.get(tbl.HOST))
                     .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
                     .setClade(r.get(tbl.CLADE))
+                    .setLineage(r.get(tbl.LINEAGE))
                     .setInstitution(r.get(tbl.INSTITUTION));
                 samples.add(sample);
             }

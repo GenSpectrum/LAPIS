@@ -41,6 +41,7 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case HOST -> gen.writeStringField("host", sample.getHost());
                     case SAMPLINGSTRATEGY -> gen.writeStringField("samplingStrategy", sample.getSamplingStrategy());
                     case CLADE -> gen.writeStringField("clade", sample.getClade());
+                    case LINEAGE -> gen.writeStringField("lineage", sample.getLineage());
                     case INSTITUTION -> gen.writeStringField("institution", sample.getInstitution());
                     default -> throw new RuntimeException("Unexpected field name: " + field);
                 }
