@@ -5,7 +5,6 @@ import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.source.MutationNuc;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedInputStream;
@@ -24,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -80,8 +80,10 @@ public class BatchProcessingWorker {
                 // Due to rate limitation, we only fetch submitter information for Swiss sequences for now
                 if (entry.getImportMode() == ImportMode.APPEND && "Switzerland".equals(entry.getCountry())) {
                     Thread.sleep(3000);
-                    submitterInformationFetcher.fetchSubmitterInformation(entry.getGisaidEpiIsl())
-                        .ifPresent(entry::setSubmitterInformation);
+                    var result = submitterInformationFetcher.fetchSubmitterInformation(entry.getGisaidEpiIsl());
+                    if (result.getStatus() == SubmitterInformationFetcher.SubmitterInformationFetchingStatus.SUCCESSFUL) {
+                        entry.setSubmitterInformation(result.getValue());
+                    }
                 }
             }
 

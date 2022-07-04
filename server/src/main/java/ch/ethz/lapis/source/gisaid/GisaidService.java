@@ -326,18 +326,21 @@ public class GisaidService {
         List<Pair<String, SubmitterInformation>> submitterInformationList = new ArrayList<>();
         int i = 0;
         for (String gisaidId : missingGisaidIds) {
-            Optional<SubmitterInformation> submitterInformation = fetcher.fetchSubmitterInformation(gisaidId);
-            if (submitterInformation.isPresent()) {
-                submitterInformationList.add(new Pair<>(gisaidId, submitterInformation.get()));
-            } else {
-                System.out.println("No information fetched for " + gisaidId);
-                // TODO Check the status header to understand whether we are really getting rate-limited.
-                // Read the Retry-After to determine when to continue
-                System.out.println("Maybe rate-limited? Let's wait for 20 minutes");
-                Thread.sleep(1000 * 60 * 20);
+            var result = fetcher.fetchSubmitterInformation(gisaidId);
+            switch (result.getStatus()) {
+                case SUCCESSFUL -> submitterInformationList.add(new Pair<>(gisaidId, result.getValue()));
+                case NOT_FOUND -> {}
+                case TOO_MANY_REQUESTS -> {
+                    System.out.println("Maybe rate-limited? Let's wait for 20 minutes");
+                    Thread.sleep(1000 * 60 * 20);
+                }
+                case UNEXPECTED_ERROR -> {
+                    System.out.println("Unsure what happened.. Let's wait for 20 minutes");
+                    Thread.sleep(1000 * 60 * 20);
+                }
             }
             i++;
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             if (i % 20 == 0) {
                 System.out.println("Progress: " + i + "/" + missingGisaidIds.size());
             }
