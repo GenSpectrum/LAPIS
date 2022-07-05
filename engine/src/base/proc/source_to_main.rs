@@ -6,6 +6,7 @@ use crate::{db, SeqCompressor, SequenceRowToColumnTransformer};
 pub fn source_to_main(schema: &SchemaConfig, db_config: &DatabaseConfig, seq_compressor: &mut SeqCompressor) {
     copy_data(schema, db_config);
     transform_seqs_to_columnar(db_config, seq_compressor);
+    deploy_staging(db_config);
 }
 
 fn copy_data(schema: &SchemaConfig, db_config: &DatabaseConfig) {
@@ -111,4 +112,10 @@ values ($1, $2);
         consume,
         b'!',
     );
+}
+
+fn deploy_staging(db_config: &DatabaseConfig) {
+    let sql = "select switch_in_staging_tables();";
+    let mut db_client = db::get_db_client(db_config);
+    db_client.execute(sql, &[]).unwrap();
 }
