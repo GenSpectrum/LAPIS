@@ -1,6 +1,8 @@
 use chrono::{Duration, NaiveDate};
 use flate2::read::GzDecoder;
 use lzma::LzmaReader;
+use md5::{Digest, Md5};
+use std::collections::HashMap;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::File;
@@ -37,4 +39,26 @@ pub fn open_file_with_guessed_compression(path: &Path) -> Result<Box<dyn Read>, 
     }
     // Return the file without decompression
     Ok(Box::new(buffered))
+}
+
+/// Serializes the value to bytes and then hashes it
+pub fn hash_md5<T: ?Sized>(value: &T) -> String
+where
+    T: serde::Serialize,
+{
+    let encoded: Vec<u8> = bincode::serialize(&value).unwrap();
+    let hash = Md5::digest(encoded);
+    let mut buf = [0u8; 32];
+    base16ct::lower::encode_str(&hash, &mut buf).unwrap().to_string()
+}
+
+/// Turns a hash map to a key-sorted vector and then hashes it
+pub fn hash_md5_for_hash_map<K, V>(value: &HashMap<K, V>) -> String
+where
+    K: Ord + Clone + serde::Serialize,
+    V: Clone + serde::Serialize,
+{
+    let mut ls: Vec<(K, V)> = (*value).clone().into_iter().collect();
+    ls.sort_by(|(k1, _), (k2, _)| k1.cmp(k2));
+    hash_md5(&ls)
 }

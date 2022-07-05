@@ -266,10 +266,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "base16ct"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "349a06037c7bf932dd7e7d1f653678b2038b9ad46a74102f1fc7bd7872678cce"
+
+[[package]]
 name = "base64"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
+
+[[package]]
+name = "bincode"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "bio"
@@ -1125,6 +1140,8 @@ name = "lapis_v2_engine"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "base16ct",
+ "bincode",
  "bio",
  "chrono",
  "clap",
@@ -1132,6 +1149,7 @@ dependencies = [
  "crossbeam",
  "csv",
  "flate2",
+ "md-5",
  "postgres",
  "postgres-cursor",
  "rand",

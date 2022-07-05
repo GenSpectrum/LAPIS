@@ -1,6 +1,6 @@
 use crate::base::constants::NucCode;
 use crate::base::proc::mutation_finder;
-use crate::base::util::open_file_with_guessed_compression;
+use crate::base::util::{hash_md5, hash_md5_for_hash_map, open_file_with_guessed_compression};
 use crate::base::{DataType, DatabaseConfig, SchemaConfig};
 use crate::{db, ExecutorService, ProgramConfig, SeqCompressor};
 use bio::io::fasta;
@@ -40,15 +40,15 @@ fn load_metadata<R: Read>(reader: R, config: &ProgramConfig) {
     let insert_sql = format!(
         "
 insert into source_data (metadata_hash, date, year, month, day, date_original, {})
-values (null, $1, $2, $3, $4, $5, {})
+values ($1, $2, $3, $4, $5, $6, {})
 on conflict ({}) do update
 set
-  metadata_hash = null,
-  date = $1,
-  year = $2,
-  month  = $3,
-  day  = $4,
-  date_original = $5,
+  metadata_hash = $1,
+  date = $2,
+  year = $3,
+  month  = $4,
+  day  = $5,
+  date_original = $6,
   {};
     ",
         schema
@@ -61,7 +61,7 @@ set
             .additional_metadata
             .iter()
             .enumerate()
-            .map(|(i, _)| format!("${}", 6 + i))
+            .map(|(i, _)| format!("${}", 7 + i))
             .collect::<Vec<_>>()
             .join(", "),
         schema.primary_key,
@@ -69,7 +69,7 @@ set
             .additional_metadata
             .iter()
             .enumerate()
-            .map(|(i, x)| format!("{} = ${}", x.name, 6 + i))
+            .map(|(i, x)| format!("{} = ${}", x.name, 7 + i))
             .collect::<Vec<_>>()
             .join(",\n  "),
     );
@@ -113,8 +113,14 @@ fn create_load_metadata_task(
                 continue;
             }
 
-            // Handle date
+            // The values to be inserted
             let mut values: Vec<&(dyn ToSql + Sync)> = Vec::new();
+
+            // Hash record
+            let hash = hash_md5_for_hash_map(&record);
+            values.push(&hash);
+
+            // Handle date
             let date_string = handle_null(record.get("date").unwrap());
             let (date, year, month, day) = date_string
                 .as_ref()
@@ -163,11 +169,11 @@ fn load_sequences_original<R: Read>(reader: R, config: &ProgramConfig, seq_compr
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_original_compressed, seq_original_hash)
-values ($1, $2, null)
+values ($1, $2, $3)
 on conflict ({}) do update
 set
   seq_original_compressed = $2,
-  seq_original_hash = null;
+  seq_original_hash = $3;
         ",
         config.schema.primary_key, config.schema.primary_key
     );
@@ -177,8 +183,11 @@ set
     let reader = fasta::Reader::new(reader);
     for result in reader.records() {
         let record = result.unwrap();
+        let hash = hash_md5(&record.seq());
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
-        db_client.execute(&statement, &[&record.id(), &compressed_seq]).unwrap();
+        db_client
+            .execute(&statement, &[&record.id(), &compressed_seq, &hash])
+            .unwrap();
     }
 }
 
@@ -187,14 +196,14 @@ fn load_sequences_aligned<R: Read>(reader: R, config: &ProgramConfig, seq_compre
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_aligned_compressed, seq_aligned_hash, nuc_substitutions, nuc_deletions, nuc_unknowns)
-values ($1, $2, null, $3, $4, $5)
+values ($1, $2, $3, $4, 5, $6)
 on conflict ({}) do update
 set
   seq_aligned_compressed = $2,
-  seq_aligned_hash = null,
-  nuc_substitutions = $3,
-  nuc_deletions = $4,
-  nuc_unknowns = $5;
+  seq_aligned_hash = $3,
+  nuc_substitutions = $4,
+  nuc_deletions = $5,
+  nuc_unknowns = $6;
         ",
         config.schema.primary_key, config.schema.primary_key
     );
@@ -247,6 +256,7 @@ fn create_load_sequences_aligned_task(
         let statement = db_client.prepare(insert_sql.as_str()).unwrap();
 
         for record in records {
+            let hash = hash_md5(&record.seq());
             let compressed_seq = seq_compressor.compress_bytes(record.seq());
 
             let mut nuc_substitutions = None;
@@ -283,6 +293,7 @@ fn create_load_sequences_aligned_task(
                     &[
                         &record.id(),
                         &compressed_seq,
+                        &hash,
                         &nuc_substitutions,
                         &nuc_deletions,
                         &nuc_unknowns,
