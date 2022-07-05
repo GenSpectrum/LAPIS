@@ -1,5 +1,6 @@
 use crate::base::constants::NucCode;
 use crate::base::proc::mutation_finder;
+use crate::base::util::open_file_with_guessed_compression;
 use crate::base::{DataType, DatabaseConfig, SchemaConfig};
 use crate::{db, ExecutorService, ProgramConfig, SeqCompressor};
 use bio::io::fasta;
@@ -7,7 +8,7 @@ use chrono::{Datelike, NaiveDate};
 use postgres::types::ToSql;
 use regex::Regex;
 use std::collections::HashMap;
-use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 /// Expects the following three files in `data_dir`:
@@ -15,13 +16,26 @@ use std::path::Path;
 /// - sequences.fasta
 /// - aligned.fasta
 pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
-    load_metadata(&data_dir.join(Path::new("metadata.tsv")), config);
-    load_sequences_original(&data_dir.join(Path::new("sequences.fasta")), config, seq_compressor);
-    load_sequences_aligned(&data_dir.join(Path::new("aligned.fasta")), config, seq_compressor);
+    let path_metadata = data_dir.join(Path::new("metadata.tsv.gz"));
+    load_metadata(open_file_with_guessed_compression(&path_metadata).unwrap(), config);
+
+    let path_seq_original = data_dir.join(Path::new("sequences.fasta.xz"));
+    load_sequences_original(
+        open_file_with_guessed_compression(&path_seq_original).unwrap(),
+        config,
+        seq_compressor,
+    );
+
+    let path_seq_aligned = data_dir.join(Path::new("aligned.fasta.xz"));
+    load_sequences_aligned(
+        open_file_with_guessed_compression(&path_seq_aligned).unwrap(),
+        config,
+        seq_compressor,
+    );
 }
 
 /// Loads metadata.tsv
-fn load_metadata(file_path: &Path, config: &ProgramConfig) {
+fn load_metadata<R: Read>(reader: R, config: &ProgramConfig) {
     let ProgramConfig { schema, database, .. } = config;
     let insert_sql = format!(
         "
@@ -62,9 +76,7 @@ set
 
     // The inserts to the database will be performed in parallel.
     let mut executor_service = ExecutorService::new(20);
-
-    let file = File::open(file_path).unwrap();
-    let mut reader = csv::ReaderBuilder::new().delimiter(b'\t').from_reader(file);
+    let mut reader = csv::ReaderBuilder::new().delimiter(b'\t').from_reader(reader);
 
     let mut record_buffer = Vec::with_capacity(1000);
     for result in reader.deserialize() {
@@ -147,7 +159,7 @@ fn create_load_metadata_task(
     })
 }
 
-fn load_sequences_original(file_path: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+fn load_sequences_original<R: Read>(reader: R, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_original_compressed, seq_original_hash)
@@ -162,8 +174,7 @@ set
 
     let mut db_client = db::get_db_client(&config.database);
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
-    let file = File::open(file_path).unwrap();
-    let reader = fasta::Reader::new(file);
+    let reader = fasta::Reader::new(reader);
     for result in reader.records() {
         let record = result.unwrap();
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
@@ -172,7 +183,7 @@ set
 }
 
 /// We also determine and import the mutations when loading the aligned sequences
-fn load_sequences_aligned(file_path: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+fn load_sequences_aligned<R: Read>(reader: R, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_aligned_compressed, seq_aligned_hash, nuc_substitutions, nuc_deletions, nuc_unknowns)
@@ -191,8 +202,7 @@ set
     // The inserts to the database will be performed in parallel.
     let mut executor_service = ExecutorService::new(20);
 
-    let file = File::open(file_path).unwrap();
-    let reader = fasta::Reader::new(file);
+    let reader = fasta::Reader::new(reader);
     let ref_seq = NucCode::from_seq_string(&config.ref_genome.sequence).unwrap();
     let mut record_buffer = Vec::with_capacity(1000);
     for result in reader.records() {
