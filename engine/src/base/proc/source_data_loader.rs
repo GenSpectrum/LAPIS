@@ -1,8 +1,8 @@
 use crate::base::constants::NucCode;
 use crate::base::proc::mutation_finder;
 use crate::base::util::{hash_md5, hash_md5_for_hash_map, open_file_with_guessed_compression};
-use crate::base::{DataType, DatabaseConfig, SchemaConfig};
-use crate::{db, ExecutorService, ProgramConfig, SeqCompressor};
+use crate::base::{DataType, SchemaConfig};
+use crate::{ConnectionPool, ExecutorService, ProgramConfig, SeqCompressor};
 use bio::io::fasta;
 use chrono::{Datelike, NaiveDate};
 use postgres::types::ToSql;
@@ -16,14 +16,20 @@ use std::sync::Arc;
 /// - metadata.tsv
 /// - sequences.fasta
 /// - aligned.fasta
-pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
-    let old_hashes = Arc::new(fetch_hashes(config));
+pub fn load_source_data(
+    data_dir: &Path,
+    config: &ProgramConfig,
+    seq_compressor: &mut SeqCompressor,
+    db_pool: &mut ConnectionPool,
+) {
+    let old_hashes = Arc::new(fetch_hashes(config, db_pool));
 
     let path_metadata = data_dir.join(Path::new("metadata.tsv.gz"));
     load_metadata(
         open_file_with_guessed_compression(&path_metadata).unwrap(),
         config,
         old_hashes.clone(),
+        db_pool,
     );
 
     let path_seq_original = data_dir.join(Path::new("sequences.fasta.xz"));
@@ -32,6 +38,7 @@ pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor:
         config,
         seq_compressor,
         old_hashes.clone(),
+        db_pool,
     );
 
     let path_seq_aligned = data_dir.join(Path::new("aligned.fasta.xz"));
@@ -40,12 +47,18 @@ pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor:
         config,
         seq_compressor,
         old_hashes,
+        db_pool,
     );
 }
 
 /// Loads metadata.tsv
-fn load_metadata<R: Read>(reader: R, config: &ProgramConfig, old_hashes: Arc<HashMap<String, Hashes>>) {
-    let ProgramConfig { schema, database, .. } = config;
+fn load_metadata<R: Read>(
+    reader: R,
+    config: &ProgramConfig,
+    old_hashes: Arc<HashMap<String, Hashes>>,
+    db_pool: &ConnectionPool,
+) {
+    let ProgramConfig { schema, .. } = config;
     let insert_sql = format!(
         "
 insert into source_data (metadata_hash, date, year, month, day, date_original, {})
@@ -96,9 +109,9 @@ set
             let task = create_load_metadata_task(
                 records,
                 schema.clone(),
-                database.clone(),
                 insert_sql.clone(),
                 old_hashes.clone(),
+                db_pool.clone(),
             );
             executor_service.submit_task(task);
             record_buffer = Vec::with_capacity(1000);
@@ -108,9 +121,9 @@ set
         let task = create_load_metadata_task(
             record_buffer,
             schema.clone(),
-            database.clone(),
             insert_sql.clone(),
             old_hashes.clone(),
+            db_pool.clone(),
         );
         executor_service.submit_task(task);
     }
@@ -121,12 +134,12 @@ set
 fn create_load_metadata_task(
     records: Vec<HashMap<String, String>>,
     schema: SchemaConfig,
-    db_config: DatabaseConfig,
     insert_sql: String,
     old_hashes: Arc<HashMap<String, Hashes>>,
+    db_pool: ConnectionPool,
 ) -> Box<dyn 'static + FnOnce(usize) + Send> {
     Box::new(move |_| {
-        let mut db_client = db::get_db_client(&db_config);
+        let mut db_client = db_pool.get();
         let statement = db_client.prepare(insert_sql.as_str()).unwrap();
         for record in records {
             // Skip the entry if the primary key is missing
@@ -201,6 +214,7 @@ fn load_sequences_original<R: Read>(
     config: &ProgramConfig,
     seq_compressor: &mut SeqCompressor,
     old_hashes: Arc<HashMap<String, Hashes>>,
+    db_pool: &mut ConnectionPool,
 ) {
     let insert_sql = format!(
         "
@@ -214,7 +228,7 @@ set
         config.schema.primary_key, config.schema.primary_key
     );
 
-    let mut db_client = db::get_db_client(&config.database);
+    let mut db_client = db_pool.get();
     let statement = db_client.prepare(insert_sql.as_str()).unwrap();
     let reader = fasta::Reader::new(reader);
     for result in reader.records() {
@@ -244,6 +258,7 @@ fn load_sequences_aligned<R: Read>(
     config: &ProgramConfig,
     seq_compressor: &mut SeqCompressor,
     old_hashes: Arc<HashMap<String, Hashes>>,
+    db_pool: &mut ConnectionPool,
 ) {
     let insert_sql = format!(
         "
@@ -273,11 +288,11 @@ set
             let records = record_buffer;
             let task = create_load_sequences_aligned_task(
                 records,
-                config.database.clone(),
                 insert_sql.clone(),
                 seq_compressor.clone(),
                 ref_seq.clone(),
                 old_hashes.clone(),
+                db_pool.clone(),
             );
             executor_service.submit_task(task);
             record_buffer = Vec::with_capacity(1000);
@@ -286,11 +301,11 @@ set
     if !record_buffer.is_empty() {
         let task = create_load_sequences_aligned_task(
             record_buffer,
-            config.database.clone(),
             insert_sql.clone(),
             seq_compressor.clone(),
             ref_seq.clone(),
             old_hashes.clone(),
+            db_pool.clone(),
         );
         executor_service.submit_task(task);
     }
@@ -300,14 +315,14 @@ set
 
 fn create_load_sequences_aligned_task(
     records: Vec<fasta::Record>,
-    db_config: DatabaseConfig,
     insert_sql: String,
     mut seq_compressor: SeqCompressor,
     ref_seq: Vec<NucCode>,
     old_hashes: Arc<HashMap<String, Hashes>>,
+    db_pool: ConnectionPool,
 ) -> Box<dyn 'static + FnOnce(usize) + Send> {
     Box::new(move |_| {
-        let mut db_client = db::get_db_client(&db_config);
+        let mut db_client = db_pool.get();
         let statement = db_client.prepare(insert_sql.as_str()).unwrap();
 
         for record in records {
@@ -447,8 +462,8 @@ struct Hashes {
     seq_aligned: Option<String>,
 }
 
-fn fetch_hashes(config: &ProgramConfig) -> HashMap<String, Hashes> {
-    let mut db_client = db::get_db_client(&config.database);
+fn fetch_hashes(config: &ProgramConfig, db_pool: &mut ConnectionPool) -> HashMap<String, Hashes> {
+    let mut db_client = db_pool.get();
     let sql = format!(
         "select {}, metadata_hash, seq_original_hash, seq_aligned_hash from source_data;",
         config.schema.primary_key

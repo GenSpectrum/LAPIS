@@ -1,15 +1,15 @@
-use crate::base::{DatabaseConfig, SchemaConfig};
-use crate::{db, SeqCompressor, SequenceRowToColumnTransformer};
+use crate::base::SchemaConfig;
+use crate::{ConnectionPool, SeqCompressor, SequenceRowToColumnTransformer};
 
 /// Moves data from the `source_data` table to the `main_` tables and performs the necessary
 /// processing including transforming the sequences to a columnar format
-pub fn source_to_main(schema: &SchemaConfig, db_config: &DatabaseConfig, seq_compressor: &mut SeqCompressor) {
-    copy_data(schema, db_config);
-    transform_seqs_to_columnar(db_config, seq_compressor);
-    deploy_staging(db_config);
+pub fn source_to_main(schema: &SchemaConfig, db_pool: &mut ConnectionPool, seq_compressor: &mut SeqCompressor) {
+    copy_data(schema, db_pool);
+    transform_seqs_to_columnar(db_pool, seq_compressor);
+    deploy_staging(db_pool);
 }
 
-fn copy_data(schema: &SchemaConfig, db_config: &DatabaseConfig) {
+fn copy_data(schema: &SchemaConfig, db_pool: &mut ConnectionPool) {
     let additional_field_names = schema
         .additional_metadata
         .iter()
@@ -57,12 +57,12 @@ from
         schema.primary_key, schema.primary_key,
     );
 
-    let mut db_client = db::get_db_client(db_config);
+    let mut db_client = db_pool.get();
     db_client.execute(sql1.as_str(), &[]).unwrap();
     db_client.execute(sql2.as_str(), &[]).unwrap();
 }
 
-fn transform_seqs_to_columnar(db_config: &DatabaseConfig, seq_compressor: &mut SeqCompressor) {
+fn transform_seqs_to_columnar(db_pool: &mut ConnectionPool, seq_compressor: &mut SeqCompressor) {
     // Load all compressed and aligned sequences and their IDs
     let sql1 = "
 select s.id, s.seq_aligned_compressed
@@ -71,7 +71,7 @@ order by s.id;
     ";
     let mut compressed_sequences = vec![];
     let mut id_counter = 0;
-    let mut db_client = db::get_db_client(db_config);
+    let mut db_client = db_pool.get();
     for row in db_client.query(sql1, &[]).unwrap() {
         let id: i32 = row.get("id");
         let compressed: Option<Vec<u8>> = row.get("seq_aligned_compressed");
@@ -86,13 +86,13 @@ order by s.id;
 
     // Transform
     let transformer = SequenceRowToColumnTransformer::new(16, 50000);
-    let db_config = db_config.clone();
+    let db_pool = db_pool.clone();
     let consume = move |pos_offset, transformed_seqs: Vec<Vec<u8>>| {
         let sql2 = "
 insert into main_sequence_columnar_staging (position, data_compressed)
 values ($1, $2);
         ";
-        let mut db_client = db::get_db_client(&db_config);
+        let mut db_client = db_pool.get();
         let mut transaction = db_client.transaction().unwrap();
         let statement = transaction.prepare(sql2).unwrap();
         for (i, compressed) in transformed_seqs.iter().enumerate() {
@@ -114,8 +114,8 @@ values ($1, $2);
     );
 }
 
-fn deploy_staging(db_config: &DatabaseConfig) {
+fn deploy_staging(db_pool: &mut ConnectionPool) {
     let sql = "select switch_in_staging_tables();";
-    let mut db_client = db::get_db_client(db_config);
+    let mut db_client = db_pool.get();
     db_client.execute(sql, &[]).unwrap();
 }

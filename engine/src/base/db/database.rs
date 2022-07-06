@@ -3,32 +3,52 @@ use crate::base::{util, DataType, DatabaseConfig, SchemaConfig, SchemaConfigMeta
 use crate::db::Mutation;
 use crate::{MutationStore, SeqCompressor};
 use chrono::{Local, NaiveDate};
-use postgres::{Client, NoTls};
+use postgres::NoTls;
 use postgres_cursor::Cursor;
+use r2d2_postgres::r2d2::{Pool, PooledConnection};
+use r2d2_postgres::{r2d2, PostgresConnectionManager};
 use std::collections::HashMap;
 
-pub fn get_db_client(config: &DatabaseConfig) -> Client {
-    let mut db_config = postgres::config::Config::new();
-    db_config
-        .host(&config.host)
-        .port(config.port)
-        .user(&config.username)
-        .password(&config.password)
-        .dbname(&config.dbname);
-    let mut client = db_config.connect(NoTls).expect("Database connection failed");
-    client
-        .execute(&format!("set search_path to '{}'", &config.schema), &[])
-        .expect("The search_path of the database could not be changed.");
-    client
+/// This is a simple wrapper around r2d2::Pool that accepts our DatabaseConfig. It also sets the database schema.
+#[derive(Debug, Clone)]
+pub struct ConnectionPool {
+    r2d2_pool: Pool<PostgresConnectionManager<NoTls>>,
+    db_schema: String,
+}
+
+impl ConnectionPool {
+    pub fn new(config: &DatabaseConfig) -> Result<Self, r2d2::Error> {
+        let mut db_config = postgres::config::Config::new();
+        db_config
+            .host(&config.host)
+            .port(config.port)
+            .user(&config.username)
+            .password(&config.password)
+            .dbname(&config.dbname);
+        let manager = PostgresConnectionManager::new(db_config, NoTls);
+        let r2d2_pool = Pool::new(manager)?;
+        Ok(ConnectionPool {
+            r2d2_pool,
+            db_schema: config.schema.clone(),
+        })
+    }
+
+    pub fn get(&self) -> PooledConnection<PostgresConnectionManager<NoTls>> {
+        let mut client = self.r2d2_pool.get().unwrap();
+        client
+            .execute(&format!("set search_path to '{}'", self.db_schema), &[])
+            .expect("The search_path of the database could not be changed.");
+        client
+    }
 }
 
 pub struct Database {
     pub number_entries: usize,
     pub metadata: HashMap<String, Column>,
-    pub db_config: DatabaseConfig,
     pub column_schema: Vec<SchemaConfigMetadata>,
     pub column_schema_map: HashMap<String, SchemaConfigMetadata>,
     pub nuc_mutation_store: MutationStore,
+    pub db_pool: ConnectionPool,
 }
 
 #[derive(Debug)]
@@ -38,7 +58,7 @@ pub enum Column {
 }
 
 impl Database {
-    pub fn load(schema: &SchemaConfig, db_config: &DatabaseConfig) -> Database {
+    pub fn load(schema: &SchemaConfig, mut db_pool: ConnectionPool) -> Database {
         let mut all_columns = schema.additional_metadata.clone();
         all_columns.push(SchemaConfigMetadata {
             name: "date".to_string(),
@@ -57,8 +77,8 @@ impl Database {
             data_type: DataType::Integer,
         });
 
-        let (number_entries, metadata) = load_metadata(db_config, &all_columns);
-        let (nuc_mutation_store, _) = load_mutations(db_config, number_entries as u32);
+        let (number_entries, metadata) = load_metadata(&mut db_pool, &all_columns);
+        let (nuc_mutation_store, _) = load_mutations(&mut db_pool, number_entries as u32);
 
         let mut column_schema_map = HashMap::new();
         for column in &all_columns {
@@ -67,16 +87,16 @@ impl Database {
         Database {
             number_entries,
             metadata,
-            db_config: db_config.clone(),
             column_schema: all_columns,
             column_schema_map,
             nuc_mutation_store,
+            db_pool,
         }
     }
 
     pub fn load_nuc_column(&self, position: u32) -> Vec<NucCode> {
         let sql = "select data_compressed from main_sequence_columnar where position = $1;";
-        let mut client = get_db_client(&self.db_config);
+        let mut client = self.db_pool.get();
         let rows = client.query(sql, &[&(position as i32)]).unwrap();
         let data = rows.get(0);
         match data {
@@ -94,11 +114,11 @@ impl Database {
 }
 
 fn load_metadata(
-    db_config: &DatabaseConfig,
+    db_pool: &mut ConnectionPool,
     all_columns: &Vec<SchemaConfigMetadata>,
 ) -> (usize, HashMap<String, Column>) {
     let sql = "select * from main_metadata order by id;";
-    let mut client = get_db_client(db_config);
+    let mut client = db_pool.get();
     let mut metadata = HashMap::new();
     let mut number_entries: usize = 0;
     for attr in all_columns {
@@ -152,8 +172,8 @@ fn load_metadata(
     (number_entries, metadata)
 }
 
-fn load_mutations(db_config: &DatabaseConfig, size: u32) -> (MutationStore, HashMap<String, MutationStore>) {
-    let mut client = get_db_client(db_config);
+fn load_mutations(db_pool: &mut ConnectionPool, size: u32) -> (MutationStore, HashMap<String, MutationStore>) {
+    let mut client = db_pool.get();
     let genes: Vec<String> = vec![];
     let mut nuc_mutation_store = MutationStore::with_capacity(size);
     let mut aa_mutation_stores = HashMap::new();

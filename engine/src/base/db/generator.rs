@@ -1,8 +1,8 @@
-use crate::base::{db, DataType};
-use crate::ProgramConfig;
+use crate::base::DataType;
+use crate::{ConnectionPool, ProgramConfig};
 
-pub fn generate_db_tables(config: &ProgramConfig) {
-    let mut client = db::get_db_client(&config.database);
+pub fn generate_db_tables(config: &ProgramConfig, db_pool: &mut ConnectionPool) {
+    let mut client = db_pool.get();
 
     // Generate SQL
     let mut additional_attrs_sql_parts: Vec<String> = Vec::new();

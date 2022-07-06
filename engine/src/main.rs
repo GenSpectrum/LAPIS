@@ -8,7 +8,7 @@ use crate::base::seq_compression::SeqCompressor;
 use crate::base::util::ExecutorService;
 use crate::base::{db, mutation};
 use crate::base::{server, ProgramConfig};
-use crate::db::{filters, Database};
+use crate::db::{filters, ConnectionPool, Database};
 use crate::filters::Filter;
 use chrono::Local;
 use clap::{Parser, Subcommand};
@@ -47,19 +47,20 @@ enum Commands {
 fn main() {
     let cli: Cli = Cli::parse();
     let config = read_config(&cli.config_dir);
+    let mut db_pool = ConnectionPool::new(&config.database).expect("Connection to database failed");
 
     println!("{} Welcome", Local::now());
     match cli.command {
         Commands::Init {} => {
-            db::generate_db_tables(&config);
+            db::generate_db_tables(&config, &mut db_pool);
         }
         Commands::Import { data_dir } => {
             let mut nuc_seq_compressor = SeqCompressor::with_dict(config.ref_genome.sequence.as_bytes());
-            base::proc::load_source_data(&data_dir, &config, &mut nuc_seq_compressor);
-            base::proc::source_to_main(&config.schema, &config.database, &mut nuc_seq_compressor);
+            base::proc::load_source_data(&data_dir, &config, &mut nuc_seq_compressor, &mut db_pool);
+            base::proc::source_to_main(&config.schema, &mut db_pool, &mut nuc_seq_compressor);
         }
         Commands::Server { port } => {
-            let db = Arc::new(Database::load(&config.schema, &config.database));
+            let db = Arc::new(Database::load(&config.schema, db_pool));
             server::main(db, port).unwrap();
         }
     }

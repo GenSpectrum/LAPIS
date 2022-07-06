@@ -23,6 +23,7 @@ flate2 = "1.0"
 md-5 = "0.10.1"
 postgres = { version = "0.19.3", features = ["with-chrono-0_4"] }
 postgres-cursor = "0.4.0"
+r2d2_postgres = "0.18.1"
 rand = "0.8.5"
 regex = "1"
 rust-lzma = "0.5"
