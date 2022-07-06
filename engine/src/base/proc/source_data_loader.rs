@@ -10,20 +10,28 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::io::Read;
 use std::path::Path;
+use std::sync::Arc;
 
 /// Expects the following three files in `data_dir`:
 /// - metadata.tsv
 /// - sequences.fasta
 /// - aligned.fasta
 pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+    let old_hashes = Arc::new(fetch_hashes(config));
+
     let path_metadata = data_dir.join(Path::new("metadata.tsv.gz"));
-    load_metadata(open_file_with_guessed_compression(&path_metadata).unwrap(), config);
+    load_metadata(
+        open_file_with_guessed_compression(&path_metadata).unwrap(),
+        config,
+        old_hashes.clone(),
+    );
 
     let path_seq_original = data_dir.join(Path::new("sequences.fasta.xz"));
     load_sequences_original(
         open_file_with_guessed_compression(&path_seq_original).unwrap(),
         config,
         seq_compressor,
+        old_hashes.clone(),
     );
 
     let path_seq_aligned = data_dir.join(Path::new("aligned.fasta.xz"));
@@ -31,11 +39,12 @@ pub fn load_source_data(data_dir: &Path, config: &ProgramConfig, seq_compressor:
         open_file_with_guessed_compression(&path_seq_aligned).unwrap(),
         config,
         seq_compressor,
+        old_hashes,
     );
 }
 
 /// Loads metadata.tsv
-fn load_metadata<R: Read>(reader: R, config: &ProgramConfig) {
+fn load_metadata<R: Read>(reader: R, config: &ProgramConfig, old_hashes: Arc<HashMap<String, Hashes>>) {
     let ProgramConfig { schema, database, .. } = config;
     let insert_sql = format!(
         "
@@ -84,13 +93,25 @@ set
         record_buffer.push(record);
         if record_buffer.len() >= 1000 {
             let records = record_buffer;
-            let task = create_load_metadata_task(records, schema.clone(), database.clone(), insert_sql.clone());
+            let task = create_load_metadata_task(
+                records,
+                schema.clone(),
+                database.clone(),
+                insert_sql.clone(),
+                old_hashes.clone(),
+            );
             executor_service.submit_task(task);
             record_buffer = Vec::with_capacity(1000);
         }
     }
     if !record_buffer.is_empty() {
-        let task = create_load_metadata_task(record_buffer, schema.clone(), database.clone(), insert_sql.clone());
+        let task = create_load_metadata_task(
+            record_buffer,
+            schema.clone(),
+            database.clone(),
+            insert_sql.clone(),
+            old_hashes.clone(),
+        );
         executor_service.submit_task(task);
     }
     executor_service.close();
@@ -102,6 +123,7 @@ fn create_load_metadata_task(
     schema: SchemaConfig,
     db_config: DatabaseConfig,
     insert_sql: String,
+    old_hashes: Arc<HashMap<String, Hashes>>,
 ) -> Box<dyn 'static + FnOnce(usize) + Send> {
     Box::new(move |_| {
         let mut db_client = db::get_db_client(&db_config);
@@ -112,12 +134,21 @@ fn create_load_metadata_task(
             if let None = primary_key {
                 continue;
             }
+            let primary_key = primary_key.unwrap();
 
             // The values to be inserted
             let mut values: Vec<&(dyn ToSql + Sync)> = Vec::new();
 
             // Hash record
             let hash = hash_md5_for_hash_map(&record);
+            let old_hash = old_hashes.get(&primary_key);
+            if let Some(old_hash) = &old_hash {
+                if let Some(old_hash) = &old_hash.metadata {
+                    if *old_hash == hash {
+                        continue;
+                    }
+                }
+            }
             values.push(&hash);
 
             // Handle date
@@ -165,7 +196,12 @@ fn create_load_metadata_task(
     })
 }
 
-fn load_sequences_original<R: Read>(reader: R, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+fn load_sequences_original<R: Read>(
+    reader: R,
+    config: &ProgramConfig,
+    seq_compressor: &mut SeqCompressor,
+    old_hashes: Arc<HashMap<String, Hashes>>,
+) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_original_compressed, seq_original_hash)
@@ -183,7 +219,18 @@ set
     let reader = fasta::Reader::new(reader);
     for result in reader.records() {
         let record = result.unwrap();
+
+        // Hash record
         let hash = hash_md5(&record.seq());
+        let old_hash = old_hashes.get(record.id());
+        if let Some(old_hash) = &old_hash {
+            if let Some(old_hash) = &old_hash.seq_original {
+                if *old_hash == hash {
+                    continue;
+                }
+            }
+        }
+
         let compressed_seq = seq_compressor.compress_bytes(record.seq());
         db_client
             .execute(&statement, &[&record.id(), &compressed_seq, &hash])
@@ -192,7 +239,12 @@ set
 }
 
 /// We also determine and import the mutations when loading the aligned sequences
-fn load_sequences_aligned<R: Read>(reader: R, config: &ProgramConfig, seq_compressor: &mut SeqCompressor) {
+fn load_sequences_aligned<R: Read>(
+    reader: R,
+    config: &ProgramConfig,
+    seq_compressor: &mut SeqCompressor,
+    old_hashes: Arc<HashMap<String, Hashes>>,
+) {
     let insert_sql = format!(
         "
 insert into source_data ({}, seq_aligned_compressed, seq_aligned_hash, nuc_substitutions, nuc_deletions, nuc_unknowns)
@@ -225,6 +277,7 @@ set
                 insert_sql.clone(),
                 seq_compressor.clone(),
                 ref_seq.clone(),
+                old_hashes.clone(),
             );
             executor_service.submit_task(task);
             record_buffer = Vec::with_capacity(1000);
@@ -237,6 +290,7 @@ set
             insert_sql.clone(),
             seq_compressor.clone(),
             ref_seq.clone(),
+            old_hashes.clone(),
         );
         executor_service.submit_task(task);
     }
@@ -250,13 +304,24 @@ fn create_load_sequences_aligned_task(
     insert_sql: String,
     mut seq_compressor: SeqCompressor,
     ref_seq: Vec<NucCode>,
+    old_hashes: Arc<HashMap<String, Hashes>>,
 ) -> Box<dyn 'static + FnOnce(usize) + Send> {
     Box::new(move |_| {
         let mut db_client = db::get_db_client(&db_config);
         let statement = db_client.prepare(insert_sql.as_str()).unwrap();
 
         for record in records {
+            // Hash record
             let hash = hash_md5(&record.seq());
+            let old_hash = old_hashes.get(record.id());
+            if let Some(old_hash) = &old_hash {
+                if let Some(old_hash) = &old_hash.seq_aligned {
+                    if *old_hash == hash {
+                        continue;
+                    }
+                }
+            }
+
             let compressed_seq = seq_compressor.compress_bytes(record.seq());
 
             let mut nuc_substitutions = None;
@@ -374,4 +439,30 @@ fn parse_date(s: &str) -> (Option<NaiveDate>, Option<i32>, Option<i32>, Option<i
             }
         }
     }
+}
+
+struct Hashes {
+    metadata: Option<String>,
+    seq_original: Option<String>,
+    seq_aligned: Option<String>,
+}
+
+fn fetch_hashes(config: &ProgramConfig) -> HashMap<String, Hashes> {
+    let mut db_client = db::get_db_client(&config.database);
+    let sql = format!(
+        "select {}, metadata_hash, seq_original_hash, seq_aligned_hash from source_data;",
+        config.schema.primary_key
+    );
+    let mut map: HashMap<String, Hashes> = HashMap::new();
+    for row in db_client.query(&sql, &[]).unwrap() {
+        map.insert(
+            row.get(config.schema.primary_key.as_str()),
+            Hashes {
+                metadata: row.get("metadata_hash"),
+                seq_original: row.get("seq_original_hash"),
+                seq_aligned: row.get("seq_aligned_hash"),
+            },
+        );
+    }
+    map
 }
