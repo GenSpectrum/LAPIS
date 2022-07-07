@@ -108,7 +108,7 @@ public class CacheService {
         if (currentDataVersion != null && currentDataVersion == newDataVersion) {
             return;
         }
-        List<String> keys = getAllApiKeys();
+//        List<String> keys = getAllApiKeys();
         try (Jedis jedis = pool.getResource()) {
             jedis.flushAll(FlushMode.SYNC);
         }
