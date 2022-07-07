@@ -8,15 +8,28 @@ import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
+import ch.ethz.lapis.util.ZstdSeqCompressor.DICT;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.XZOutputStream;
 
 
 @SpringBootApplication
@@ -30,6 +43,42 @@ public class LapisMain extends SubProgram<LapisConfig> {
         super("Lapis", LapisConfig.class);
     }
 
+    public void exportAllSeqs(ComboPooledDataSource dbPool) throws SQLException, IOException {
+        BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream("sequences.fasta.xz"));
+        XZOutputStream xzOut = new XZOutputStream(fileOut, new LZMA2Options());
+        SeqCompressor referenceSeqCompressor = new ZstdSeqCompressor(DICT.REFERENCE);
+
+        String sql = """
+            select gisaid_epi_isl, seq_original_compressed
+            from y_gisaid
+            where seq_original_compressed is not null;
+            """;
+        try (Connection conn = dbPool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (Statement statement = conn.createStatement()) {
+                statement.setFetchSize(10000);
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    int i = 0;
+                    while (rs.next()) {
+                        if (i % 100000 == 0) {
+                            System.out.println(LocalDateTime.now() + " " + (i / 100000));
+                        }
+                        i++;
+                        xzOut.write(">".getBytes(StandardCharsets.UTF_8));
+                        xzOut.write(rs.getString("gisaid_epi_isl").getBytes(StandardCharsets.UTF_8));
+                        xzOut.write("\n".getBytes(StandardCharsets.UTF_8));
+                        xzOut.write(referenceSeqCompressor.decompress(rs.getBytes("seq_original_compressed"))
+                            .getBytes(StandardCharsets.UTF_8));
+                        xzOut.write("\n".getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+            }
+        } finally {
+            xzOut.close();
+            fileOut.close();
+        }
+    }
+
     @Override
     public void run(String[] args, LapisConfig config) throws Exception {
         if (args.length == 0) {
@@ -37,6 +86,10 @@ public class LapisMain extends SubProgram<LapisConfig> {
         }
         globalConfig = config;
         dbPool = DatabaseService.createDatabaseConnectionPool(LapisMain.globalConfig.getVineyard());
+
+        exportAllSeqs(dbPool);
+        System.exit(0);
+
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
         if ("--api".equals(args[0])) {
             String[] argsForSpring = Arrays.copyOfRange(args, 1, args.length);
