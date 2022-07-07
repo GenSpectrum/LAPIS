@@ -338,7 +338,7 @@ impl NucEq {
 
 impl Filter for NucEq {
     fn evaluate(&self, database: &Database) -> Vec<bool> {
-        let data = database.load_nuc_column(self.position);
+        let data = database.load_nuc_column(self.position).unwrap();
         data.iter().map(|x| *x == self.value).collect()
     }
 }

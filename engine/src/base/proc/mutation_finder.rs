@@ -3,7 +3,11 @@ use crate::base::constants::NucCode::*;
 use crate::mutation::NucMutation;
 use bio::data_structures::suffix_array::SuffixArray;
 
-pub fn find_nuc_mutations(mut aligned_seq: Vec<NucCode>, reference: &Vec<NucCode>) -> Vec<NucMutation> {
+pub fn find_nuc_mutations(mut aligned_seq: Vec<NucCode>, reference: &Vec<NucCode>) -> Result<Vec<NucMutation>, String> {
+    if aligned_seq.len() != reference.len() {
+        return Err("aligned_seq and reference do not have the same length.".to_string());
+    }
+
     // Masking leading and tailing deletions because they are often actually unknowns but appear here as
     // deletions due to aligning.
     for x in aligned_seq.iter_mut() {
@@ -33,7 +37,7 @@ pub fn find_nuc_mutations(mut aligned_seq: Vec<NucCode>, reference: &Vec<NucCode
         }
     }
 
-    mutations
+    Ok(mutations)
 }
 
 /// Everything that is not A, T, C, G or - is considered as unknown.

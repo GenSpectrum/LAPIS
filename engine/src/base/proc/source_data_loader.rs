@@ -153,7 +153,7 @@ fn create_load_metadata_task(
             let mut values: Vec<&(dyn ToSql + Sync)> = Vec::new();
 
             // Hash record
-            let hash = hash_md5_for_hash_map(&record);
+            let hash = hash_md5_for_hash_map(&record).expect("Hashing of the record failed.");
             let old_hash = old_hashes.get(&primary_key);
             if let Some(old_hash) = &old_hash {
                 if let Some(old_hash) = &old_hash.metadata {
@@ -235,7 +235,7 @@ set
         let record = result.unwrap();
 
         // Hash record
-        let hash = hash_md5(&record.seq());
+        let hash = hash_md5(&record.seq()).expect("Hashing of the sequence failed.");
         let old_hash = old_hashes.get(record.id());
         if let Some(old_hash) = &old_hash {
             if let Some(old_hash) = &old_hash.seq_original {
@@ -327,7 +327,7 @@ fn create_load_sequences_aligned_task(
 
         for record in records {
             // Hash record
-            let hash = hash_md5(&record.seq());
+            let hash = hash_md5(&record.seq()).expect("Hashing of the sequence failed.");
             let old_hash = old_hashes.get(record.id());
             if let Some(old_hash) = &old_hash {
                 if let Some(old_hash) = &old_hash.seq_aligned {
@@ -344,7 +344,7 @@ fn create_load_sequences_aligned_task(
             let mut nuc_unknowns = None;
             let seq = NucCode::from_seq_bytes(record.seq());
             if let Some(seq) = seq {
-                let mutations = mutation_finder::find_nuc_mutations(seq.clone(), &ref_seq);
+                let mutations = mutation_finder::find_nuc_mutations(seq.clone(), &ref_seq).unwrap();
                 let mut _nuc_substitutions = Vec::new();
                 let mut _nuc_deletions = Vec::new();
                 for mutation in &mutations {

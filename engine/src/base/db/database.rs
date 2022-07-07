@@ -8,6 +8,7 @@ use postgres_cursor::Cursor;
 use r2d2_postgres::r2d2::{Pool, PooledConnection};
 use r2d2_postgres::{r2d2, PostgresConnectionManager};
 use std::collections::HashMap;
+use std::time::Duration;
 
 /// This is a simple wrapper around r2d2::Pool that accepts our DatabaseConfig. It also sets the database schema.
 #[derive(Debug, Clone)]
@@ -34,7 +35,10 @@ impl ConnectionPool {
     }
 
     pub fn get(&self) -> PooledConnection<PostgresConnectionManager<NoTls>> {
-        let mut client = self.r2d2_pool.get().unwrap();
+        let mut client = self
+            .r2d2_pool
+            .get_timeout(Duration::from_secs(60))
+            .expect("The database connection could be obtained from the pool within 60s.");
         client
             .execute(&format!("set search_path to '{}'", self.db_schema), &[])
             .expect("The search_path of the database could not be changed.");
@@ -94,20 +98,20 @@ impl Database {
         }
     }
 
-    pub fn load_nuc_column(&self, position: u32) -> Vec<NucCode> {
+    pub fn load_nuc_column(&self, position: u32) -> Result<Vec<NucCode>, String> {
         let sql = "select data_compressed from main_sequence_columnar where position = $1;";
         let mut client = self.db_pool.get();
         let rows = client.query(sql, &[&(position as i32)]).unwrap();
         let data = rows.get(0);
         match data {
-            None => panic!("No data is available for nucleotide position {}", position),
+            None => Err(format!("No data is available for nucleotide position {}", position)),
             Some(row) => {
                 let compressed: Vec<u8> = row.get("data_compressed");
-                SeqCompressor::new()
+                Ok(SeqCompressor::new()
                     .decompress(&compressed)
                     .iter()
                     .map(|x| NucCode::from_byte_ignore_weird(x))
-                    .collect()
+                    .collect())
             }
         }
     }
