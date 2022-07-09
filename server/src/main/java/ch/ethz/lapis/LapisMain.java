@@ -12,6 +12,10 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor.DICT;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,12 +29,41 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.XZOutputStream;
 
+// Euler commands to export all nuc and aa sequences
+
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, seq_original_compressed as seq_compressed from y_gisaid where seq_original_compressed is not null;" nuc output/sequences.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, seq_aligned_compressed as seq_compressed from y_gisaid where seq_aligned_compressed is not null;" nuc output/aligned.fasta
+//
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'E';" aa output/gene_E.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'N';" aa output/gene_N.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'M';" aa output/gene_M.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF7a';" aa output/gene_ORF7a.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF8';" aa output/gene_ORF8.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF6';" aa output/gene_ORF6.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF3a';" aa output/gene_ORF3a.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF9b';" aa output/gene_ORF9b.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF7b';" aa output/gene_ORF7b.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'S';" aa output/gene_S.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF1a';" aa output/gene_ORF1a.fasta
+// bsub -N -n 1 -R "rusage[mem=8000]" -W 24:00 java -Xmx8g -jar lapis.jar --config ./config.yml Lapis "select gisaid_epi_isl, aa_seq_compressed as seq_compressed from y_main_aa_sequence a join y_main_metadata m on a.id = m.id where aa_seq_compressed is not null and gene = 'ORF1b';" aa output/gene_ORF1b.fasta
+
+// Compress them
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_E.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_M.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_N.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF1a.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF1b.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF3a.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF6.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF7a.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF7b.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF8.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_ORF9b.fasta
+// bsub -N -n 1 -R "rusage[mem=500]" -W 4:00 xz -k output/gene_S.fasta
+//
+// bsub -N -n 8 -R "rusage[mem=500]" -W 24:00 xz -vkT8 output/aligned.fasta
+// bsub -N -n 8 -R "rusage[mem=500]" -W 24:00 xz -vkT8 output/sequences.fasta
 
 @SpringBootApplication
 @EnableScheduling
@@ -43,16 +76,25 @@ public class LapisMain extends SubProgram<LapisConfig> {
         super("Lapis", LapisConfig.class);
     }
 
-    public void exportAllSeqs(ComboPooledDataSource dbPool) throws SQLException, IOException {
-        BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream("sequences.fasta.xz"));
-        XZOutputStream xzOut = new XZOutputStream(fileOut, new LZMA2Options());
-        SeqCompressor referenceSeqCompressor = new ZstdSeqCompressor(DICT.REFERENCE);
+    public void exportAllSeqs(
+        ComboPooledDataSource dbPool,
+        String sql,
+        String type,
+        String fileOutName
+    ) throws SQLException, IOException {
+        BufferedOutputStream fileOut = new BufferedOutputStream(new FileOutputStream(fileOutName));
+//        XZOutputStream xzOut = new XZOutputStream(fileOut, new LZMA2Options());
+        SeqCompressor seqCompressor = switch (type) {
+            case "aa" ->  new ZstdSeqCompressor(DICT.AA_REFERENCE);
+            case "nuc" -> new ZstdSeqCompressor(DICT.REFERENCE);
+            default -> throw new RuntimeException("Expected type: " + type);
+        };
 
-        String sql = """
-            select gisaid_epi_isl, seq_original_compressed
-            from y_gisaid
-            where seq_original_compressed is not null;
-            """;
+//        String sql = """
+//            select gisaid_epi_isl, seq_original_compressed as seq_compressed
+//            from y_gisaid
+//            where seq_original_compressed is not null;
+//            """;
         try (Connection conn = dbPool.getConnection()) {
             conn.setAutoCommit(false);
             try (Statement statement = conn.createStatement()) {
@@ -64,17 +106,18 @@ public class LapisMain extends SubProgram<LapisConfig> {
                             System.out.println(LocalDateTime.now() + " " + (i / 100000));
                         }
                         i++;
-                        xzOut.write(">".getBytes(StandardCharsets.UTF_8));
-                        xzOut.write(rs.getString("gisaid_epi_isl").getBytes(StandardCharsets.UTF_8));
-                        xzOut.write("\n".getBytes(StandardCharsets.UTF_8));
-                        xzOut.write(referenceSeqCompressor.decompress(rs.getBytes("seq_original_compressed"))
+                        fileOut.write(">".getBytes(StandardCharsets.UTF_8));
+                        fileOut.write(rs.getString("gisaid_epi_isl").getBytes(StandardCharsets.UTF_8));
+                        fileOut.write("\n".getBytes(StandardCharsets.UTF_8));
+                        fileOut.write(seqCompressor.decompress(rs.getBytes("seq_compressed"))
+                            .replace("\n", "")
                             .getBytes(StandardCharsets.UTF_8));
-                        xzOut.write("\n".getBytes(StandardCharsets.UTF_8));
+                        fileOut.write("\n".getBytes(StandardCharsets.UTF_8));
                     }
                 }
             }
         } finally {
-            xzOut.close();
+//            xzOut.close();
             fileOut.close();
         }
     }
@@ -87,7 +130,10 @@ public class LapisMain extends SubProgram<LapisConfig> {
         globalConfig = config;
         dbPool = DatabaseService.createDatabaseConnectionPool(LapisMain.globalConfig.getVineyard());
 
-        exportAllSeqs(dbPool);
+        System.out.println("Query: " + args[0]);
+        System.out.println("Type: " + args[1]);
+        System.out.println("File: " + args[2]);
+        exportAllSeqs(dbPool, args[0], args[1], args[2]);
         System.exit(0);
 
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
