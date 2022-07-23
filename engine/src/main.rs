@@ -1,6 +1,7 @@
 extern crate core;
 
 mod base;
+mod play;
 
 use crate::base::db::MutationStore;
 use crate::base::proc::SequenceRowToColumnTransformer;
@@ -48,6 +49,10 @@ fn main() {
     let cli: Cli = Cli::parse();
     let config = read_config(&cli.config_dir);
     let mut db_pool = ConnectionPool::new(&config.database).expect("Connection to database failed");
+
+    let mut nuc_seq_compressor = SeqCompressor::with_dict(config.ref_genome.sequence.as_bytes());
+    play::hash_uppercase(&db_pool, &mut nuc_seq_compressor);
+    todo!("Stop here");
 
     println!("{} Welcome", Local::now());
     match cli.command {
