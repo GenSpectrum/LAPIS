@@ -2,6 +2,7 @@ package ch.ethz.lapis.source.gisaid;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
+import ch.ethz.lapis.util.ParsedDate;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
@@ -26,7 +27,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -381,13 +381,7 @@ public class GisaidService {
     ) {
         // Parse date
         String dateOriginal = (String) json.get("covv_collection_date");
-        LocalDate date = null;
-        try {
-            if (dateOriginal != null) {
-                date = LocalDate.parse(dateOriginal);
-            }
-        } catch (DateTimeParseException ignored) {
-        }
+        ParsedDate pd = ParsedDate.parse(dateOriginal);
 
         // Parse geo data
         String locationString = (String) json.get("covv_location");
@@ -434,7 +428,10 @@ public class GisaidService {
         return new GisaidEntry()
             .setGisaidEpiIsl((String) json.get("covv_accession_id"))
             .setStrain((String) json.get("covv_virus_name"))
-            .setDate(date)
+            .setDate(pd != null ? pd.getDate() : null)
+            .setYear(pd != null ? pd.getYear() : null)
+            .setMonth(pd != null ? pd.getMonth() : null)
+            .setDay(pd != null ? pd.getDay() : null)
             .setDateOriginal(dateOriginal)
             .setRegion(geoLocation.getRegion())
             .setCountry(geoLocation.getCountry())

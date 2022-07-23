@@ -11,6 +11,9 @@ public class NextstrainGenbankMetadataEntry implements Serializable {
     private String genbankAccession;
     private String sraAccession;
     private LocalDate date;
+    private Integer year;
+    private Integer month;
+    private Integer day;
     private String dateOriginal;
     private String region;
     private String country;
@@ -82,6 +85,33 @@ public class NextstrainGenbankMetadataEntry implements Serializable {
 
     public NextstrainGenbankMetadataEntry setDate(LocalDate date) {
         this.date = date;
+        return this;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public NextstrainGenbankMetadataEntry setYear(Integer year) {
+        this.year = year;
+        return this;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public NextstrainGenbankMetadataEntry setMonth(Integer month) {
+        this.month = month;
+        return this;
+    }
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public NextstrainGenbankMetadataEntry setDay(Integer day) {
+        this.day = day;
         return this;
     }
 

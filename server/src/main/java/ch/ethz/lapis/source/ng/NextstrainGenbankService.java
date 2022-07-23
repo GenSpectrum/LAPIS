@@ -299,13 +299,13 @@ public class NextstrainGenbankService {
 
         String sql = """
                 insert into y_nextstrain_genbank (
-                  genbank_accession, sra_accession, gisaid_epi_isl, strain, date, date_original,
+                  genbank_accession, sra_accession, gisaid_epi_isl, strain, date, year, month, day, date_original,
                   date_submitted, region, country, division, location, region_exposure, country_exposure,
                   division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextstrain_clade,
                   gisaid_clade, originating_lab, submitting_lab, authors, metadata_hash
                 )
                 values (
-                  ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?
@@ -316,6 +316,9 @@ public class NextstrainGenbankService {
                   sra_accession = ?,
                   gisaid_epi_isl = ?,
                   date = ?,
+                  year = ?,
+                  month = ?,
+                  day = ?,
                   date_original = ?,
                   date_submitted = ?,
                   region = ?,
@@ -361,51 +364,57 @@ public class NextstrainGenbankService {
                         statement.setString(3, entry.getGisaidEpiIsl());
                         statement.setString(4, entry.getStrain());
                         statement.setDate(5, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setString(6, entry.getDateOriginal());
-                        statement.setDate(7, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(8, entry.getRegion());
-                        statement.setString(9, entry.getCountry());
-                        statement.setString(10, entry.getDivision());
-                        statement.setString(11, entry.getLocation());
-                        statement.setString(12, entry.getRegionExposure());
-                        statement.setString(13, entry.getCountryExposure());
-                        statement.setString(14, entry.getDivisionExposure());
-                        statement.setString(15, entry.getHost());
-                        statement.setObject(16, entry.getAge());
-                        statement.setString(17, entry.getSex());
-                        statement.setString(18, entry.getSamplingStrategy());
-                        statement.setString(19, entry.getPangoLineage());
-                        statement.setString(20, entry.getNextstrainClade());
-                        statement.setString(21, entry.getGisaidClade());
-                        statement.setString(22, entry.getOriginatingLab());
-                        statement.setString(23, entry.getSubmittingLab());
-                        statement.setString(24, entry.getAuthors());
-                        statement.setString(25, currentHash);
+                        statement.setObject(6, entry.getYear());
+                        statement.setObject(7, entry.getMonth());
+                        statement.setObject(8, entry.getDay());
+                        statement.setString(9, entry.getDateOriginal());
+                        statement.setDate(10, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(11, entry.getRegion());
+                        statement.setString(12, entry.getCountry());
+                        statement.setString(13, entry.getDivision());
+                        statement.setString(14, entry.getLocation());
+                        statement.setString(15, entry.getRegionExposure());
+                        statement.setString(16, entry.getCountryExposure());
+                        statement.setString(17, entry.getDivisionExposure());
+                        statement.setString(18, entry.getHost());
+                        statement.setObject(19, entry.getAge());
+                        statement.setString(20, entry.getSex());
+                        statement.setString(21, entry.getSamplingStrategy());
+                        statement.setString(22, entry.getPangoLineage());
+                        statement.setString(23, entry.getNextstrainClade());
+                        statement.setString(24, entry.getGisaidClade());
+                        statement.setString(25, entry.getOriginatingLab());
+                        statement.setString(26, entry.getSubmittingLab());
+                        statement.setString(27, entry.getAuthors());
+                        statement.setString(28, currentHash);
 
-                        statement.setString(26, entry.getGenbankAccession());
-                        statement.setString(27, entry.getSraAccession());
-                        statement.setString(28, entry.getGisaidEpiIsl());
-                        statement.setDate(29, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setString(30, entry.getDateOriginal());
-                        statement.setDate(31, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(32, entry.getRegion());
-                        statement.setString(33, entry.getCountry());
-                        statement.setString(34, entry.getDivision());
-                        statement.setString(35, entry.getLocation());
-                        statement.setString(36, entry.getRegionExposure());
-                        statement.setString(37, entry.getCountryExposure());
-                        statement.setString(38, entry.getDivisionExposure());
-                        statement.setString(39, entry.getHost());
-                        statement.setObject(40, entry.getAge());
-                        statement.setString(41, entry.getSex());
-                        statement.setString(42, entry.getSamplingStrategy());
-                        statement.setString(43, entry.getPangoLineage());
-                        statement.setString(44, entry.getNextstrainClade());
-                        statement.setString(45, entry.getGisaidClade());
-                        statement.setString(46, entry.getOriginatingLab());
-                        statement.setString(47, entry.getSubmittingLab());
-                        statement.setString(48, entry.getAuthors());
-                        statement.setString(49, currentHash);
+                        statement.setString(29, entry.getGenbankAccession());
+                        statement.setString(30, entry.getSraAccession());
+                        statement.setString(31, entry.getGisaidEpiIsl());
+                        statement.setDate(32, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setObject(33, entry.getYear());
+                        statement.setObject(34, entry.getMonth());
+                        statement.setObject(35, entry.getDay());
+                        statement.setString(36, entry.getDateOriginal());
+                        statement.setDate(37, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(38, entry.getRegion());
+                        statement.setString(39, entry.getCountry());
+                        statement.setString(40, entry.getDivision());
+                        statement.setString(41, entry.getLocation());
+                        statement.setString(42, entry.getRegionExposure());
+                        statement.setString(46, entry.getCountryExposure());
+                        statement.setString(44, entry.getDivisionExposure());
+                        statement.setString(45, entry.getHost());
+                        statement.setObject(46, entry.getAge());
+                        statement.setString(47, entry.getSex());
+                        statement.setString(48, entry.getSamplingStrategy());
+                        statement.setString(49, entry.getPangoLineage());
+                        statement.setString(50, entry.getNextstrainClade());
+                        statement.setString(51, entry.getGisaidClade());
+                        statement.setString(52, entry.getOriginatingLab());
+                        statement.setString(53, entry.getSubmittingLab());
+                        statement.setString(54, entry.getAuthors());
+                        statement.setString(55, currentHash);
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

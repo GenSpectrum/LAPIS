@@ -14,6 +14,9 @@ public class GisaidEntry {
     private String gisaidEpiIsl;
     private String strain;
     private LocalDate date;
+    private Integer year;
+    private Integer month;
+    private Integer day;
     private String dateOriginal;
     private String region;
     private String country;
@@ -110,6 +113,33 @@ public class GisaidEntry {
 
     public GisaidEntry setDate(LocalDate date) {
         this.date = date;
+        return this;
+    }
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public GisaidEntry setYear(Integer year) {
+        this.year = year;
+        return this;
+    }
+
+    public Integer getMonth() {
+        return month;
+    }
+
+    public GisaidEntry setMonth(Integer month) {
+        this.month = month;
+        return this;
+    }
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public GisaidEntry setDay(Integer day) {
+        this.day = day;
         return this;
     }
 

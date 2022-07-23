@@ -1,13 +1,15 @@
 package ch.ethz.lapis.source.ng;
 
+import ch.ethz.lapis.util.ParsedDate;
 import ch.ethz.lapis.util.Utils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 public class NextstrainGenbankMetadataFileReader
     implements Iterator<NextstrainGenbankMetadataEntry>, Iterable<NextstrainGenbankMetadataEntry>, AutoCloseable {
@@ -35,6 +37,7 @@ public class NextstrainGenbankMetadataFileReader
     @Override
     public NextstrainGenbankMetadataEntry next() {
         CSVRecord csv = iterator.next();
+        ParsedDate pd = ParsedDate.parse(csv.get("date"));
         return new NextstrainGenbankMetadataEntry()
             .setStrain(cleanString(csv.get("strain")))
             .setVirus(cleanString(csv.get("gisaid_epi_isl")))
@@ -42,7 +45,10 @@ public class NextstrainGenbankMetadataFileReader
             .setGenbankAccession(cleanString(csv.get("genbank_accession")))
             .setSraAccession(cleanString(csv.get("sra_accession")))
             .setDateOriginal(cleanString(csv.get("date")))
-            .setDate(Utils.nullableLocalDateValue(csv.get("date")))
+            .setDate(pd != null ? pd.getDate() : null)
+            .setYear(pd != null ? pd.getYear() : null)
+            .setMonth(pd != null ? pd.getMonth() : null)
+            .setDay(pd != null ? pd.getDay() : null)
             .setRegion(cleanString(csv.get("region")))
             .setCountry(cleanString(csv.get("country")))
             .setDivision(cleanString(csv.get("division")))

@@ -400,6 +400,9 @@ public class BatchProcessingWorker {
                       updated_at = now(),
                       strain = ?,
                       date = ?,
+                      year = ?,
+                      month = ?,
+                      day = ?,
                       date_original = ?,
                       date_submitted = ?,
                       region = ?,
@@ -427,24 +430,27 @@ public class BatchProcessingWorker {
                     statement.setString(1, entry.getStrain());
                     statement.setDate(2, entry.getDate() != null ?
                         Date.valueOf(entry.getDate()) : null);
-                    statement.setString(3, entry.getDateOriginal());
-                    statement.setDate(4, entry.getDateSubmitted() != null ?
+                    statement.setObject(3, entry.getYear());
+                    statement.setObject(4, entry.getMonth());
+                    statement.setObject(5, entry.getDay());
+                    statement.setString(6, entry.getDateOriginal());
+                    statement.setDate(7, entry.getDateSubmitted() != null ?
                         Date.valueOf(entry.getDateSubmitted()) : null);
-                    statement.setString(5, entry.getRegion());
-                    statement.setString(6, entry.getCountry());
-                    statement.setString(7, entry.getDivision());
-                    statement.setString(8, entry.getLocation());
-                    statement.setString(9, entry.getHost());
-                    statement.setObject(10, entry.getAge());
-                    statement.setString(11, entry.getSex());
-                    statement.setString(12, entry.getSamplingStrategy());
-                    statement.setString(13, entry.getPangoLineage());
-                    statement.setString(14, entry.getGisaidClade());
-                    statement.setString(15, si != null ? si.getOriginatingLab() : null);
-                    statement.setString(16, si != null ? si.getSubmittingLab() : null);
-                    statement.setString(17, si != null ? si.getAuthors() : null);
-                    statement.setString(18, entry.getMetadataHash());
-                    statement.setString(19, entry.getGisaidEpiIsl());
+                    statement.setString(8, entry.getRegion());
+                    statement.setString(9, entry.getCountry());
+                    statement.setString(10, entry.getDivision());
+                    statement.setString(11, entry.getLocation());
+                    statement.setString(12, entry.getHost());
+                    statement.setObject(13, entry.getAge());
+                    statement.setString(14, entry.getSex());
+                    statement.setString(15, entry.getSamplingStrategy());
+                    statement.setString(16, entry.getPangoLineage());
+                    statement.setString(17, entry.getGisaidClade());
+                    statement.setString(18, si != null ? si.getOriginatingLab() : null);
+                    statement.setString(19, si != null ? si.getSubmittingLab() : null);
+                    statement.setString(20, si != null ? si.getAuthors() : null);
+                    statement.setString(21, entry.getMetadataHash());
+                    statement.setString(22, entry.getGisaidEpiIsl());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -590,7 +596,8 @@ public class BatchProcessingWorker {
             String insertSequenceSql = """
                     insert into y_gisaid (
                       updated_at,
-                      gisaid_epi_isl, strain, date, date_original, date_submitted, region, country, division, location,
+                      gisaid_epi_isl, strain, date, year, month, day, date_original, date_submitted,
+                      region, country, division, location,
                       region_exposure, country_exposure, division_exposure, host, age, sex, sampling_strategy,
                       pango_lineage, gisaid_clade, originating_lab, submitting_lab, authors,
                       seq_original_compressed, seq_aligned_compressed, aa_seqs_compressed, aa_mutations, aa_unknowns,
@@ -619,7 +626,7 @@ public class BatchProcessingWorker {
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
-                      ?, ?, ?, ?,
+                      ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
@@ -636,87 +643,90 @@ public class BatchProcessingWorker {
                     insertStatement.setString(2, entry.getStrain());
                     insertStatement.setDate(3, entry.getDate() != null ?
                         Date.valueOf(entry.getDate()) : null);
-                    insertStatement.setString(4, entry.getDateOriginal());
-                    insertStatement.setDate(5, entry.getDateSubmitted() != null ?
+                    insertStatement.setObject(4, entry.getYear());
+                    insertStatement.setObject(5, entry.getMonth());
+                    insertStatement.setObject(6, entry.getDay());
+                    insertStatement.setString(7, entry.getDateOriginal());
+                    insertStatement.setDate(8, entry.getDateSubmitted() != null ?
                         Date.valueOf(entry.getDateSubmitted()) : null);
-                    insertStatement.setString(6, entry.getRegion());
-                    insertStatement.setString(7, entry.getCountry());
-                    insertStatement.setString(8, entry.getDivision());
-                    insertStatement.setString(9, entry.getLocation());
-                    insertStatement.setString(10, null);
-                    insertStatement.setString(11, null);
-                    insertStatement.setString(12, null);
-                    insertStatement.setString(13, entry.getHost());
-                    insertStatement.setObject(14, entry.getAge());
-                    insertStatement.setString(15, entry.getSex());
-                    insertStatement.setString(16, entry.getSamplingStrategy());
-                    insertStatement.setString(17, entry.getPangoLineage());
-                    insertStatement.setString(18, entry.getGisaidClade());
-                    insertStatement.setString(19, si != null ? si.getOriginatingLab() : null);
-                    insertStatement.setString(20, si != null ? si.getSubmittingLab() : null);
-                    insertStatement.setString(21, si != null ? si.getAuthors() : null);
-                    insertStatement.setBytes(22, entry.getSeqOriginal() != null ?
+                    insertStatement.setString(9, entry.getRegion());
+                    insertStatement.setString(10, entry.getCountry());
+                    insertStatement.setString(11, entry.getDivision());
+                    insertStatement.setString(12, entry.getLocation());
+                    insertStatement.setString(13, null);
+                    insertStatement.setString(14, null);
+                    insertStatement.setString(15, null);
+                    insertStatement.setString(16, entry.getHost());
+                    insertStatement.setObject(17, entry.getAge());
+                    insertStatement.setString(18, entry.getSex());
+                    insertStatement.setString(19, entry.getSamplingStrategy());
+                    insertStatement.setString(20, entry.getPangoLineage());
+                    insertStatement.setString(21, entry.getGisaidClade());
+                    insertStatement.setString(22, si != null ? si.getOriginatingLab() : null);
+                    insertStatement.setString(23, si != null ? si.getSubmittingLab() : null);
+                    insertStatement.setString(24, si != null ? si.getAuthors() : null);
+                    insertStatement.setBytes(25, entry.getSeqOriginal() != null ?
                         nucSeqCompressor.compress(entry.getSeqOriginal()) : null);
-                    insertStatement.setBytes(23, entry.getSeqAligned() != null ?
+                    insertStatement.setBytes(26, entry.getSeqAligned() != null ?
                         nucSeqCompressor.compress(entry.getSeqAligned()) : null);
-                    insertStatement.setBytes(24, entry.getGeneAASeqsCompressed());
-                    insertStatement.setString(25, entry.getAaMutations());
-                    insertStatement.setString(26, entry.getAaUnknowns());
-                    insertStatement.setString(27, entry.getNucSubstitutions());
-                    insertStatement.setString(28, entry.getNucDeletions());
-                    insertStatement.setString(29, entry.getNucInsertions());
-                    insertStatement.setString(30, entry.getNucUnknowns());
-                    insertStatement.setString(31, entry.getMetadataHash());
-                    insertStatement.setString(32, entry.getSeqOriginalHash());
+                    insertStatement.setBytes(27, entry.getGeneAASeqsCompressed());
+                    insertStatement.setString(28, entry.getAaMutations());
+                    insertStatement.setString(29, entry.getAaUnknowns());
+                    insertStatement.setString(30, entry.getNucSubstitutions());
+                    insertStatement.setString(31, entry.getNucDeletions());
+                    insertStatement.setString(32, entry.getNucInsertions());
+                    insertStatement.setString(33, entry.getNucUnknowns());
+                    insertStatement.setString(34, entry.getMetadataHash());
+                    insertStatement.setString(35, entry.getSeqOriginalHash());
                     // Nextclade
                     NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
-                    insertStatement.setString(33, nc != null ? nc.getClade() : null);
-                    insertStatement.setString(34, nc != null ? nc.getCladeLong() : null);
-                    insertStatement.setString(35, nc != null ? nc.getPangoLineage() : null);
-                    insertStatement.setObject(36, nc != null ? nc.getTotalSubstitutions() : null);
-                    insertStatement.setObject(37, nc != null ? nc.getTotalDeletions() : null);
-                    insertStatement.setObject(38, nc != null ? nc.getTotalInsertions() : null);
-                    insertStatement.setObject(39, nc != null ? nc.getTotalFrameShifts() : null);
-                    insertStatement.setObject(40, nc != null ? nc.getTotalAminoacidSubstitutions() : null);
-                    insertStatement.setObject(41, nc != null ? nc.getTotalAminoacidDeletions() : null);
-                    insertStatement.setObject(42, nc != null ? nc.getTotalAminoacidInsertions() : null);
-                    insertStatement.setObject(43, nc != null ? nc.getTotalMissing() : null);
-                    insertStatement.setObject(44, nc != null ? nc.getTotalNonACGTNs() : null);
-                    insertStatement.setObject(45, nc != null ? nc.getTotalPcrPrimerChanges() : null);
-                    insertStatement.setString(46, nc != null ? nc.getPcrPrimerChanges() : null);
-                    insertStatement.setObject(47, nc != null ? nc.getAlignmentScore() : null);
-                    insertStatement.setObject(48, nc != null ? nc.getAlignmentStart() : null);
-                    insertStatement.setObject(49, nc != null ? nc.getAlignmentEnd() : null);
-                    insertStatement.setObject(50, nc != null ? nc.getQcOverallScore() : null);
-                    insertStatement.setString(51, nc != null ? nc.getQcOverallStatus() : null);
-                    insertStatement.setObject(52, nc != null ? nc.getQcMissingDataMissingDataThreshold() : null);
-                    insertStatement.setObject(53, nc != null ? nc.getQcMissingDataScore() : null);
-                    insertStatement.setString(54, nc != null ? nc.getQcMissingDataStatus() : null);
-                    insertStatement.setObject(55, nc != null ? nc.getQcMissingDataTotalMissing() : null);
-                    insertStatement.setObject(56, nc != null ? nc.getQcMixedSitesMixedSitesThreshold() : null);
-                    insertStatement.setObject(57, nc != null ? nc.getQcMixedSitesScore() : null);
-                    insertStatement.setString(58, nc != null ? nc.getQcMixedSitesStatus() : null);
-                    insertStatement.setObject(59, nc != null ? nc.getQcMixedSitesTotalMixedSites() : null);
-                    insertStatement.setObject(60, nc != null ? nc.getQcPrivateMutationsCutoff() : null);
-                    insertStatement.setObject(61, nc != null ? nc.getQcPrivateMutationsExcess() : null);
-                    insertStatement.setObject(62, nc != null ? nc.getQcPrivateMutationsScore() : null);
-                    insertStatement.setString(63, nc != null ? nc.getQcPrivateMutationsStatus() : null);
-                    insertStatement.setObject(64, nc != null ? nc.getQcPrivateMutationsTotal() : null);
-                    insertStatement.setString(65, nc != null ? nc.getQcSnpClustersClusteredSNPs() : null);
-                    insertStatement.setObject(66, nc != null ? nc.getQcSnpClustersScore() : null);
-                    insertStatement.setString(67, nc != null ? nc.getQcSnpClustersStatus() : null);
-                    insertStatement.setObject(68, nc != null ? nc.getQcSnpClustersTotalSNPs() : null);
-                    insertStatement.setString(69, nc != null ? nc.getQcFrameShiftsFrameShifts() : null);
-                    insertStatement.setObject(70, nc != null ? nc.getQcFrameShiftsTotalFrameShifts() : null);
-                    insertStatement.setString(71, nc != null ? nc.getQcFrameShiftsFrameShiftsIgnored() : null);
-                    insertStatement.setObject(72, nc != null ? nc.getQcFrameShiftsTotalFrameShiftsIgnored() : null);
-                    insertStatement.setObject(73, nc != null ? nc.getQcFrameShiftsScore() : null);
-                    insertStatement.setString(74, nc != null ? nc.getQcFrameShiftsStatus() : null);
-                    insertStatement.setString(75, nc != null ? nc.getQcStopCodonsStopCodons() : null);
-                    insertStatement.setObject(76, nc != null ? nc.getQcStopCodonsTotalStopCodons() : null);
-                    insertStatement.setObject(77, nc != null ? nc.getQcStopCodonsScore() : null);
-                    insertStatement.setString(78, nc != null ? nc.getQcStopCodonsStatus() : null);
-                    insertStatement.setString(79, nc != null ? nc.getErrors() : null);
+                    insertStatement.setString(36, nc != null ? nc.getClade() : null);
+                    insertStatement.setString(37, nc != null ? nc.getCladeLong() : null);
+                    insertStatement.setString(38, nc != null ? nc.getPangoLineage() : null);
+                    insertStatement.setObject(39, nc != null ? nc.getTotalSubstitutions() : null);
+                    insertStatement.setObject(40, nc != null ? nc.getTotalDeletions() : null);
+                    insertStatement.setObject(41, nc != null ? nc.getTotalInsertions() : null);
+                    insertStatement.setObject(42, nc != null ? nc.getTotalFrameShifts() : null);
+                    insertStatement.setObject(43, nc != null ? nc.getTotalAminoacidSubstitutions() : null);
+                    insertStatement.setObject(44, nc != null ? nc.getTotalAminoacidDeletions() : null);
+                    insertStatement.setObject(45, nc != null ? nc.getTotalAminoacidInsertions() : null);
+                    insertStatement.setObject(46, nc != null ? nc.getTotalMissing() : null);
+                    insertStatement.setObject(47, nc != null ? nc.getTotalNonACGTNs() : null);
+                    insertStatement.setObject(48, nc != null ? nc.getTotalPcrPrimerChanges() : null);
+                    insertStatement.setString(49, nc != null ? nc.getPcrPrimerChanges() : null);
+                    insertStatement.setObject(50, nc != null ? nc.getAlignmentScore() : null);
+                    insertStatement.setObject(51, nc != null ? nc.getAlignmentStart() : null);
+                    insertStatement.setObject(52, nc != null ? nc.getAlignmentEnd() : null);
+                    insertStatement.setObject(53, nc != null ? nc.getQcOverallScore() : null);
+                    insertStatement.setString(54, nc != null ? nc.getQcOverallStatus() : null);
+                    insertStatement.setObject(55, nc != null ? nc.getQcMissingDataMissingDataThreshold() : null);
+                    insertStatement.setObject(56, nc != null ? nc.getQcMissingDataScore() : null);
+                    insertStatement.setString(57, nc != null ? nc.getQcMissingDataStatus() : null);
+                    insertStatement.setObject(58, nc != null ? nc.getQcMissingDataTotalMissing() : null);
+                    insertStatement.setObject(59, nc != null ? nc.getQcMixedSitesMixedSitesThreshold() : null);
+                    insertStatement.setObject(60, nc != null ? nc.getQcMixedSitesScore() : null);
+                    insertStatement.setString(61, nc != null ? nc.getQcMixedSitesStatus() : null);
+                    insertStatement.setObject(62, nc != null ? nc.getQcMixedSitesTotalMixedSites() : null);
+                    insertStatement.setObject(63, nc != null ? nc.getQcPrivateMutationsCutoff() : null);
+                    insertStatement.setObject(64, nc != null ? nc.getQcPrivateMutationsExcess() : null);
+                    insertStatement.setObject(65, nc != null ? nc.getQcPrivateMutationsScore() : null);
+                    insertStatement.setString(66, nc != null ? nc.getQcPrivateMutationsStatus() : null);
+                    insertStatement.setObject(67, nc != null ? nc.getQcPrivateMutationsTotal() : null);
+                    insertStatement.setString(68, nc != null ? nc.getQcSnpClustersClusteredSNPs() : null);
+                    insertStatement.setObject(69, nc != null ? nc.getQcSnpClustersScore() : null);
+                    insertStatement.setString(70, nc != null ? nc.getQcSnpClustersStatus() : null);
+                    insertStatement.setObject(71, nc != null ? nc.getQcSnpClustersTotalSNPs() : null);
+                    insertStatement.setString(72, nc != null ? nc.getQcFrameShiftsFrameShifts() : null);
+                    insertStatement.setObject(73, nc != null ? nc.getQcFrameShiftsTotalFrameShifts() : null);
+                    insertStatement.setString(74, nc != null ? nc.getQcFrameShiftsFrameShiftsIgnored() : null);
+                    insertStatement.setObject(75, nc != null ? nc.getQcFrameShiftsTotalFrameShiftsIgnored() : null);
+                    insertStatement.setObject(76, nc != null ? nc.getQcFrameShiftsScore() : null);
+                    insertStatement.setString(77, nc != null ? nc.getQcFrameShiftsStatus() : null);
+                    insertStatement.setString(78, nc != null ? nc.getQcStopCodonsStopCodons() : null);
+                    insertStatement.setObject(79, nc != null ? nc.getQcStopCodonsTotalStopCodons() : null);
+                    insertStatement.setObject(80, nc != null ? nc.getQcStopCodonsScore() : null);
+                    insertStatement.setString(81, nc != null ? nc.getQcStopCodonsStatus() : null);
+                    insertStatement.setString(82, nc != null ? nc.getErrors() : null);
                     insertStatement.addBatch();
                     insertStatement.clearParameters();
                 }
