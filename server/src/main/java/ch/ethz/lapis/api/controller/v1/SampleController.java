@@ -277,6 +277,39 @@ public class SampleController {
     }
 
 
+    @GetMapping("/genbank-accession")
+    public ResponseEntity<String> getGenbankAccessions(
+        SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        checkAuthorization(accessKey, true);
+        checkDataVersion(generalConfig.getDataVersion());
+        checkVariantFilter(request);
+        if (openness == OpennessLevel.GISAID && (
+            request.getAgeFrom() != null
+                || request.getAgeTo() != null
+                || request.getSex() != null
+                || request.getHospitalized() != null
+                || request.getDied() != null
+                || request.getFullyVaccinated() != null
+        )) {
+            throw new ForbiddenException();
+        }
+        List<String> genbankAccessions = sampleService.getGenbankAccessions(request, limitAndOrder);
+        String body = String.join("\n", genbankAccessions);
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDataFormat(DataFormat.TEXT)
+            .setDownloadFileName("accessions")
+            .setBody(body)
+            .build();
+    }
+
+
     @GetMapping("/aa-mutations")
     public ResponseEntity<String> getAAMutations(
         MutationRequest request,

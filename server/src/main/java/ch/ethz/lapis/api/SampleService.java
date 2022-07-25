@@ -14,6 +14,7 @@ import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.Database.Columns;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
 import ch.ethz.lapis.util.ReferenceGenomeData;
@@ -250,6 +251,24 @@ public class SampleService {
         // Fetch data
         String[] gisaidEpiIslColumn = database.getStringColumn(Database.Columns.GISAID_EPI_ISL);
         return ids.stream().map(id -> gisaidEpiIslColumn[id]).collect(Collectors.toList());
+    }
+
+
+    public List<String> getGenbankAccessions(
+        SampleDetailRequest request,
+        OrderAndLimitConfig orderAndLimit
+    ) {
+        Database database = Database.getOrLoadInstance(dbPool);
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(database, request);
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // Order and limit
+        ids = applyOrderAndLimit(ids, orderAndLimit);
+        // Fetch data
+        String[] genbankAccessionColumn = database.getStringColumn(Columns.GENBANK_ACCESSION);
+        return ids.stream().map(id -> genbankAccessionColumn[id]).collect(Collectors.toList());
     }
 
 
