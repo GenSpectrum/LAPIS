@@ -402,7 +402,7 @@ public class NextstrainGenbankService {
                         statement.setString(40, entry.getDivision());
                         statement.setString(41, entry.getLocation());
                         statement.setString(42, entry.getRegionExposure());
-                        statement.setString(46, entry.getCountryExposure());
+                        statement.setString(43, entry.getCountryExposure());
                         statement.setString(44, entry.getDivisionExposure());
                         statement.setString(45, entry.getHost());
                         statement.setObject(46, entry.getAge());
