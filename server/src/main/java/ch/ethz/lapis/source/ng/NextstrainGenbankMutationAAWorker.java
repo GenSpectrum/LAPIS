@@ -140,7 +140,6 @@ public class NextstrainGenbankMutationAAWorker {
         Path outputPath = workDir.resolve("output");
         String command = nextalignPath.toAbsolutePath() +
             " run" +
-            " --sequences=" + seqFastaPath.toAbsolutePath() +
             " --input-ref=" + referenceFasta.toAbsolutePath() +
             " --input-gene-map=" + geneMapGff.toAbsolutePath() +
             " --genes=" + String.join(",", genes) +
