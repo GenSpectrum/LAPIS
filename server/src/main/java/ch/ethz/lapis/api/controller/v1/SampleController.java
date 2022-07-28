@@ -4,21 +4,38 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
-import ch.ethz.lapis.api.entity.*;
-import ch.ethz.lapis.api.entity.req.*;
-import ch.ethz.lapis.api.entity.res.*;
-import ch.ethz.lapis.api.exception.*;
+import ch.ethz.lapis.api.entity.AccessKey;
+import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.ApiCacheKey;
+import ch.ethz.lapis.api.entity.OpennessLevel;
+import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.req.DataFormat;
+import ch.ethz.lapis.api.entity.req.GeneralConfig;
+import ch.ethz.lapis.api.entity.req.MutationRequest;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
+import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
+import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
+import ch.ethz.lapis.api.entity.req.SampleFilter;
+import ch.ethz.lapis.api.entity.res.Contributor;
+import ch.ethz.lapis.api.entity.res.ContributorResponse;
+import ch.ethz.lapis.api.entity.res.CsvSerializer;
+import ch.ethz.lapis.api.entity.res.Information;
+import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
+import ch.ethz.lapis.api.entity.res.SampleDetail;
+import ch.ethz.lapis.api.entity.res.SampleDetailResponse;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
+import ch.ethz.lapis.api.entity.res.V1Response;
+import ch.ethz.lapis.api.exception.ForbiddenException;
+import ch.ethz.lapis.api.exception.GisaidLimitationException;
+import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
+import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
+import ch.ethz.lapis.api.exception.UnsupportedDataFormatException;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -28,6 +45,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 
 @RestController
@@ -81,7 +106,12 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
-        checkAuthorization(accessKey, true);
+        if (request.getStrain() != null || request.getGenbankAccession() != null || request.getGisaidEpiIsl() != null
+            || request.getSraAccession() != null) {
+            checkAuthorization(accessKey, false);
+        } else {
+            checkAuthorization(accessKey, true);
+        }
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
@@ -131,6 +161,16 @@ public class SampleController {
     }
 
 
+    @PostMapping("/aggregated")
+    public ResponseEntity<String> getAggregatedPost(
+        @RequestBody SampleAggregatedRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getAggregated(request, generalConfig, accessKey);
+    }
+
+
     @GetMapping("/details")
     public ResponseEntity<String> getDetails(
         SampleDetailRequest request,
@@ -167,6 +207,16 @@ public class SampleController {
             .build();
     }
 
+
+    @PostMapping("/details")
+    public ResponseEntity<String> getDetailsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) throws SQLException, JsonProcessingException {
+        return getDetails(request, generalConfig, limitAndOrder, accessKey);
+    }
 
     @GetMapping("/contributors")
     public ResponseEntity<String> getContributors(
@@ -211,6 +261,17 @@ public class SampleController {
     }
 
 
+    @PostMapping("/contributors")
+    public ResponseEntity<String> getContributorsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) throws SQLException, IOException {
+        return getContributors(request, generalConfig, limitAndOrder, accessKey);
+    }
+
+
     @GetMapping("/strain-names")
     public ResponseEntity<String> getStrainNames(
         SampleDetailRequest request,
@@ -241,6 +302,17 @@ public class SampleController {
             .setDownloadFileName("strain_names")
             .setBody(body)
             .build();
+    }
+
+
+    @PostMapping("/strain-names")
+    public ResponseEntity<String> getStrainNamesPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        return getStrainNames(request, generalConfig, limitAndOrder, accessKey);
     }
 
 
@@ -277,6 +349,17 @@ public class SampleController {
     }
 
 
+    @PostMapping("/gisaid-epi-isl")
+    public ResponseEntity<String> getGisaidEpiIslsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        return getGisaidEpiIsls(request, generalConfig, limitAndOrder, accessKey);
+    }
+
+
     @GetMapping("/genbank-accession")
     public ResponseEntity<String> getGenbankAccessions(
         SampleDetailRequest request,
@@ -307,6 +390,17 @@ public class SampleController {
             .setDownloadFileName("accessions")
             .setBody(body)
             .build();
+    }
+
+
+    @PostMapping("/genbank-accession")
+    public ResponseEntity<String> getGenbankAccessionsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        return getGenbankAccessions(request, generalConfig, limitAndOrder, accessKey);
     }
 
 
@@ -362,6 +456,16 @@ public class SampleController {
     }
 
 
+    @PostMapping("/aa-mutations")
+    public ResponseEntity<String> getAAMutationsPost(
+        @RequestBody MutationRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getAAMutations(request, generalConfig, accessKey);
+    }
+
+
     @GetMapping("/nuc-mutations")
     public ResponseEntity<String> getNucMutations(
         MutationRequest request,
@@ -414,6 +518,16 @@ public class SampleController {
     }
 
 
+    @PostMapping("/nuc-mutations")
+    public ResponseEntity<String> getNucMutationsPost(
+        @RequestBody MutationRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getNucMutations(request, generalConfig, accessKey);
+    }
+
+
     @GetMapping("/fasta")
     public ResponseEntity<StreamingResponseBody> getFasta(
         SampleDetailRequest request,
@@ -440,6 +554,17 @@ public class SampleController {
     }
 
 
+    @PostMapping("/fasta")
+    public ResponseEntity<StreamingResponseBody> getFastaPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        return getFasta(request, generalConfig, limitAndOrder, accessKey);
+    }
+
+
     @GetMapping("/fasta-aligned")
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         SampleDetailRequest request,
@@ -463,6 +588,17 @@ public class SampleController {
             .setDownloadFileName("aligned_sequences")
             .setBody(responseBody)
             .build();
+    }
+
+
+    @PostMapping("/fasta-aligned")
+    public ResponseEntity<StreamingResponseBody> getAlignedFastaPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey
+    ) {
+        return getAlignedFasta(request, generalConfig, limitAndOrder, accessKey);
     }
 
 

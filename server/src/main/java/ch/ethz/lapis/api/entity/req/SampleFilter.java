@@ -10,6 +10,14 @@ import java.util.List;
 
 public abstract class SampleFilter<T extends SampleFilter<T>> {
 
+    private List<String> genbankAccession;
+
+    private List<String> sraAccession;
+
+    private List<String> gisaidEpiIsl;
+
+    private List<String> strain;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dateFrom;
 
@@ -62,6 +70,42 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private List<AAMutation> aaMutations = new ArrayList<>();
 
     private String variantQuery;
+
+    public List<String> getGenbankAccession() {
+        return genbankAccession;
+    }
+
+    public T setGenbankAccession(List<String> genbankAccession) {
+        this.genbankAccession = genbankAccession;
+        return (T) this;
+    }
+
+    public List<String> getSraAccession() {
+        return sraAccession;
+    }
+
+    public T setSraAccession(List<String> sraAccession) {
+        this.sraAccession = sraAccession;
+        return (T) this;
+    }
+
+    public List<String> getGisaidEpiIsl() {
+        return gisaidEpiIsl;
+    }
+
+    public T setGisaidEpiIsl(List<String> gisaidEpiIsl) {
+        this.gisaidEpiIsl = gisaidEpiIsl;
+        return (T) this;
+    }
+
+    public List<String> getStrain() {
+        return strain;
+    }
+
+    public T setStrain(List<String> strain) {
+        this.strain = strain;
+        return (T) this;
+    }
 
     public LocalDate getDateFrom() {
         return dateFrom;
