@@ -165,7 +165,7 @@ public class NextstrainGenbankMutationAAWorker {
             geneAASeqs.put(fastaEntry.getSampleName(), new ArrayList<>());
         }
         for (String gene : genes) {
-            FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign.gene." + gene + ".fasta"),
+            FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign_gene_" + gene + ".translation.fasta"),
                 false);
             for (FastaEntry fastaEntry : fastaReader) {
                 geneAASeqs.get(fastaEntry.getSampleName()).add(
