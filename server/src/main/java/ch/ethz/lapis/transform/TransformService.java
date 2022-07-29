@@ -102,7 +102,7 @@ public class TransformService {
                       date,
                       year,
                       month,
-                      day
+                      day,
                       date_submitted,
                       region,
                       country,
