@@ -519,12 +519,12 @@ public class BatchProcessingWorker {
                       nextclade_qc_stop_codons_score = ?,
                       nextclade_qc_stop_codons_status = ?,
                       nextclade_errors = ?,
-                      nuc_insertions = ?,
                       aa_insertions = ?
                     where gisaid_epi_isl = ?;
                 """;
             try (PreparedStatement statement = conn.prepareStatement(updateSequenceSql)) {
                 for (GisaidEntry entry : toUpdateSequence) {
+                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
                     statement.setString(1, entry.getSeqOriginalHash());
                     statement.setBytes(2, entry.getSeqOriginal() != null ?
                         nucSeqCompressor.compress(entry.getSeqOriginal()) : null);
@@ -535,10 +535,9 @@ public class BatchProcessingWorker {
                     statement.setString(6, entry.getAaUnknowns());
                     statement.setString(7, entry.getNucSubstitutions());
                     statement.setString(8, entry.getNucDeletions());
-                    statement.setString(9, entry.getNucInsertions());
+                    statement.setString(9, nc != null ? nc.getInsertions() : null);
                     statement.setString(10, entry.getNucUnknowns());
                     // Nextclade
-                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
                     statement.setString(11, nc != null ? nc.getClade() : null);
                     statement.setString(12, nc != null ? nc.getCladeLong() : null);
                     statement.setString(13, nc != null ? nc.getPangoLineage() : null);
@@ -586,9 +585,8 @@ public class BatchProcessingWorker {
                     statement.setObject(55, nc != null ? nc.getQcStopCodonsScore() : null);
                     statement.setString(56, nc != null ? nc.getQcStopCodonsStatus() : null);
                     statement.setString(57, nc != null ? nc.getErrors() : null);
-                    statement.setString(58, nc != null ? nc.getInsertions() : null);
-                    statement.setString(59, nc != null ? nc.getAaInsertions() : null);
-                    statement.setString(60, entry.getGisaidEpiIsl());
+                    statement.setString(58, nc != null ? nc.getAaInsertions() : null);
+                    statement.setString(59, entry.getGisaidEpiIsl());
                     statement.addBatch();
                     statement.clearParameters();
                 }
@@ -622,7 +620,7 @@ public class BatchProcessingWorker {
                       nextclade_qc_frame_shifts_frame_shifts_ignored, nextclade_qc_frame_shifts_total_frame_shifts_ignored,
                       nextclade_qc_frame_shifts_score, nextclade_qc_frame_shifts_status, nextclade_qc_stop_codons_stop_codons,
                       nextclade_qc_stop_codons_total_stop_codons, nextclade_qc_stop_codons_score, nextclade_qc_stop_codons_status,
-                      nextclade_errors, nuc_insertions, aa_insertions
+                      nextclade_errors, aa_insertions
                     )
                     values (
                       now(),
@@ -637,11 +635,12 @@ public class BatchProcessingWorker {
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
-                      ?, ?, ?, ?, ?, ?
+                      ?, ?, ?, ?, ?
                     );
                 """;
             try (PreparedStatement insertStatement = conn.prepareStatement(insertSequenceSql)) {
                 for (GisaidEntry entry : toInsert) {
+                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
                     SubmitterInformation si = entry.getSubmitterInformation();
                     insertStatement.setString(1, entry.getGisaidEpiIsl());
                     insertStatement.setString(2, entry.getStrain());
@@ -678,12 +677,11 @@ public class BatchProcessingWorker {
                     insertStatement.setString(29, entry.getAaUnknowns());
                     insertStatement.setString(30, entry.getNucSubstitutions());
                     insertStatement.setString(31, entry.getNucDeletions());
-                    insertStatement.setString(32, entry.getNucInsertions());
+                    insertStatement.setString(32, nc != null ? nc.getInsertions() : null);
                     insertStatement.setString(33, entry.getNucUnknowns());
                     insertStatement.setString(34, entry.getMetadataHash());
                     insertStatement.setString(35, entry.getSeqOriginalHash());
                     // Nextclade
-                    NextcladeTsvEntry nc = entry.getNextcladeTsvEntry();
                     insertStatement.setString(36, nc != null ? nc.getClade() : null);
                     insertStatement.setString(37, nc != null ? nc.getCladeLong() : null);
                     insertStatement.setString(38, nc != null ? nc.getPangoLineage() : null);
@@ -731,8 +729,7 @@ public class BatchProcessingWorker {
                     insertStatement.setObject(80, nc != null ? nc.getQcStopCodonsScore() : null);
                     insertStatement.setString(81, nc != null ? nc.getQcStopCodonsStatus() : null);
                     insertStatement.setString(82, nc != null ? nc.getErrors() : null);
-                    insertStatement.setString(83, nc != null ? nc.getInsertions() : null);
-                    insertStatement.setString(84, nc != null ? nc.getAaInsertions() : null);
+                    insertStatement.setString(83, nc != null ? nc.getAaInsertions() : null);
                     insertStatement.addBatch();
                     insertStatement.clearParameters();
                 }
