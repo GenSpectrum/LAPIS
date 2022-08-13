@@ -18,7 +18,7 @@ dependencies {
     implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
     implementation 'org.yaml:snakeyaml:1.29'
-    implementation 'org.postgresql:postgresql:42.3.1'
+    implementation 'org.postgresql:postgresql:42.3.3'
     implementation 'com.mchange:c3p0:0.9.5.5'
     implementation 'org.javatuples:javatuples:1.2'
     implementation 'org.apache.commons:commons-csv:1.8'
