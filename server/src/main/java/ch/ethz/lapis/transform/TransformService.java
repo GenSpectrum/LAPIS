@@ -213,14 +213,15 @@ public class TransformService {
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
-                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_unknowns, nuc_substitutions,
-                  nuc_deletions, nuc_insertions, nuc_unknowns
+                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_insertions, aa_unknowns,
+                  nuc_substitutions, nuc_deletions, nuc_insertions, nuc_unknowns
                 )
                 select
                   mm.id,
                   g.seq_original_compressed,
                   g.seq_aligned_compressed,
                   g.aa_mutations,
+                  g.aa_insertions,
                   g.aa_unknowns,
                   g.nuc_substitutions,
                   g.nuc_deletions,

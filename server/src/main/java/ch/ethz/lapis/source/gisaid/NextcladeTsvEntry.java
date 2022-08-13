@@ -15,6 +15,8 @@ public class NextcladeTsvEntry {
     private Integer totalMissing;
     private Integer totalNonACGTNs;
     private Integer totalPcrPrimerChanges;
+    private String insertions;
+    private String aaInsertions;
     private String pcrPrimerChanges;
     private Float alignmentScore;
     private Integer alignmentStart;
@@ -174,6 +176,24 @@ public class NextcladeTsvEntry {
 
     public NextcladeTsvEntry setTotalPcrPrimerChanges(Integer totalPcrPrimerChanges) {
         this.totalPcrPrimerChanges = totalPcrPrimerChanges;
+        return this;
+    }
+
+    public String getInsertions() {
+        return insertions;
+    }
+
+    public NextcladeTsvEntry setInsertions(String insertions) {
+        this.insertions = insertions;
+        return this;
+    }
+
+    public String getAaInsertions() {
+        return aaInsertions;
+    }
+
+    public NextcladeTsvEntry setAaInsertions(String aaInsertions) {
+        this.aaInsertions = aaInsertions;
         return this;
     }
 

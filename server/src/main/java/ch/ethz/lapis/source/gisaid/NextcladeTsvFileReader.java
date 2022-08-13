@@ -1,13 +1,14 @@
 package ch.ethz.lapis.source.gisaid;
 
 import ch.ethz.lapis.util.Utils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 public class NextcladeTsvFileReader
     implements Iterator<NextcladeTsvEntry>, Iterable<NextcladeTsvEntry>, AutoCloseable {
@@ -52,6 +53,8 @@ public class NextcladeTsvFileReader
             .setTotalMissing(Utils.nullableForcedIntegerValue(csv.get("totalMissing")))
             .setTotalNonACGTNs(Utils.nullableForcedIntegerValue(csv.get("totalNonACGTNs")))
             .setTotalPcrPrimerChanges(Utils.nullableForcedIntegerValue(csv.get("totalPcrPrimerChanges")))
+            .setInsertions(cleanString(csv.get("insertions")))
+            .setAaInsertions(cleanString(csv.get("aaInsertions")))
             .setPcrPrimerChanges(cleanString(csv.get("pcrPrimerChanges")))
             .setAlignmentScore(Utils.nullableFloatValue(csv.get("alignmentScore")))
             .setAlignmentStart(Utils.nullableForcedIntegerValue(csv.get("alignmentStart")))
