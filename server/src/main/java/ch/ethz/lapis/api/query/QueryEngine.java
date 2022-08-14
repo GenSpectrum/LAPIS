@@ -108,6 +108,10 @@ public class QueryEngine {
         var useNucMutations = nucMutations != null && !nucMutations.isEmpty();
         var aaMutations = sf.getAaMutations();
         var useAaMutations = aaMutations != null && !aaMutations.isEmpty();
+        var nucInsertions = sf.getNucInsertions();
+        var useNucInsertions = nucInsertions != null && !nucInsertions.isEmpty();
+        var aaInsertions = sf.getAaInsertions();
+        var useAaInsertions = aaInsertions != null && !aaInsertions.isEmpty();
         var pangoLineage = sf.getPangoLineage();
         var usePangoLineage = pangoLineage != null;
         var nextcladePangoLineage = sf.getNextcladePangoLineage();
@@ -119,8 +123,8 @@ public class QueryEngine {
         var variantQuery = sf.getVariantQuery();
         var useVariantQuery = variantQuery != null;
 
-        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || usePangoLineage || useNextcladePangoLineage
-            || useGisaidClade || useNextstrainClade;
+        boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || useNucInsertions || useAaInsertions
+            || usePangoLineage || useNextcladePangoLineage || useGisaidClade || useNextstrainClade;
         if (useVariantQuery && useOtherVariantSpecifying) {
             throw new RuntimeException("It is not allowed to use variantQuery and another variant-specifying " +
                 "field at the same time.");
@@ -162,6 +166,12 @@ public class QueryEngine {
             }
             if (useNucMutations) {
                 components.addAll(nucMutations);
+            }
+            if (useNucInsertions) {
+                components.addAll(nucInsertions);
+            }
+            if (useAaInsertions) {
+                components.addAll(aaInsertions);
             }
             variantQueryExpr = components.get(0);
             for (int i = 1; i < components.size(); i++) {

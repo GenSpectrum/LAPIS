@@ -1,6 +1,8 @@
 package ch.ethz.lapis.api.entity.req;
 
+import ch.ethz.lapis.api.entity.AAInsertion;
 import ch.ethz.lapis.api.entity.AAMutation;
+import ch.ethz.lapis.api.entity.NucInsertion;
 import ch.ethz.lapis.api.entity.NucMutation;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -67,7 +69,9 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Float nextcladeQcStopCodonsScoreTo;
 
     private List<NucMutation> nucMutations = new ArrayList<>();
+    private List<NucInsertion> nucInsertions = new ArrayList<>();
     private List<AAMutation> aaMutations = new ArrayList<>();
+    private List<AAInsertion> aaInsertions = new ArrayList<>();
 
     private String variantQuery;
 
@@ -341,6 +345,15 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return (T) this;
     }
 
+    public List<NucInsertion> getNucInsertions() {
+        return nucInsertions;
+    }
+
+    public SampleFilter<T> setNucInsertions(List<NucInsertion> nucInsertions) {
+        this.nucInsertions = nucInsertions;
+        return this;
+    }
+
     public List<AAMutation> getAaMutations() {
         return aaMutations;
     }
@@ -348,6 +361,15 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     public T setAaMutations(List<AAMutation> aaMutations) {
         this.aaMutations = aaMutations;
         return (T) this;
+    }
+
+    public List<AAInsertion> getAaInsertions() {
+        return aaInsertions;
+    }
+
+    public SampleFilter<T> setAaInsertions(List<AAInsertion> aaInsertions) {
+        this.aaInsertions = aaInsertions;
+        return this;
     }
 
     public String getVariantQuery() {

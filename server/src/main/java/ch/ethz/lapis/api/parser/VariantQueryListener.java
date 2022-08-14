@@ -110,6 +110,26 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 */
 	void exitAa_mut(VariantQueryParser.Aa_mutContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#nuc_ins}.
+	 * @param ctx the parse tree
+	 */
+	void enterNuc_ins(VariantQueryParser.Nuc_insContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#nuc_ins}.
+	 * @param ctx the parse tree
+	 */
+	void exitNuc_ins(VariantQueryParser.Nuc_insContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#aa_ins}.
+	 * @param ctx the parse tree
+	 */
+	void enterAa_ins(VariantQueryParser.Aa_insContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#aa_ins}.
+	 * @param ctx the parse tree
+	 */
+	void exitAa_ins(VariantQueryParser.Aa_insContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#position}.
 	 * @param ctx the parse tree
 	 */

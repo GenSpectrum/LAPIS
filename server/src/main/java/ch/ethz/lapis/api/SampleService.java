@@ -15,6 +15,7 @@ import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.Database.Columns;
+import ch.ethz.lapis.api.query.InsertionStore;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
 import ch.ethz.lapis.util.ReferenceGenomeData;
@@ -321,6 +322,40 @@ public class SampleService {
             });
         }
         return response;
+    }
+
+
+    public List<InsertionStore.InsertionCount> getInsertions(
+        SampleDetailRequest request,
+        SequenceType sequenceType
+    ) {
+        Database database = Database.getOrLoadInstance(dbPool);
+        List<Integer> ids = new QueryEngine().filterIds(database, request);
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        if (sequenceType == SequenceType.NUCLEOTIDE) {
+            return database.getNucInsertionStore().countInsertions(ids).stream()
+                // Append "ins_" to the insertion string
+                .map(ins -> new InsertionStore.InsertionCount(
+                    "ins_" + ins.getInsertion(),
+                    ins.getCount()
+                ))
+                .collect(Collectors.toList());
+        } else {
+            List<InsertionStore.InsertionCount> result = new ArrayList<>();
+            database.getAaInsertionStores().forEach((gene, store) -> {
+                var insertionsOfGene = store.countInsertions(ids).stream()
+                    // Append "ins_" and the gene to the insertion string
+                    .map(ins -> new InsertionStore.InsertionCount(
+                        "ins_" + gene + ":" + ins.getInsertion(),
+                        ins.getCount()
+                    ))
+                    .collect(Collectors.toList());
+                result.addAll(insertionsOfGene);
+            });
+            return result;
+        }
     }
 
 

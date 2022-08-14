@@ -4,38 +4,20 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
-import ch.ethz.lapis.api.entity.AccessKey;
-import ch.ethz.lapis.api.entity.AggregationField;
-import ch.ethz.lapis.api.entity.ApiCacheKey;
-import ch.ethz.lapis.api.entity.OpennessLevel;
-import ch.ethz.lapis.api.entity.SequenceType;
-import ch.ethz.lapis.api.entity.Versioned;
-import ch.ethz.lapis.api.entity.req.DataFormat;
-import ch.ethz.lapis.api.entity.req.GeneralConfig;
-import ch.ethz.lapis.api.entity.req.MutationRequest;
-import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
-import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
-import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
-import ch.ethz.lapis.api.entity.req.SampleFilter;
-import ch.ethz.lapis.api.entity.res.Contributor;
-import ch.ethz.lapis.api.entity.res.ContributorResponse;
-import ch.ethz.lapis.api.entity.res.CsvSerializer;
-import ch.ethz.lapis.api.entity.res.Information;
-import ch.ethz.lapis.api.entity.res.SampleAggregated;
-import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
-import ch.ethz.lapis.api.entity.res.SampleDetail;
-import ch.ethz.lapis.api.entity.res.SampleDetailResponse;
-import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.api.entity.res.V1Response;
-import ch.ethz.lapis.api.exception.ForbiddenException;
-import ch.ethz.lapis.api.exception.GisaidLimitationException;
-import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
-import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
-import ch.ethz.lapis.api.exception.UnsupportedDataFormatException;
+import ch.ethz.lapis.api.entity.*;
+import ch.ethz.lapis.api.entity.req.*;
+import ch.ethz.lapis.api.entity.res.*;
+import ch.ethz.lapis.api.exception.*;
+import ch.ethz.lapis.api.query.InsertionStore;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -45,14 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 
 @RestController
@@ -525,6 +499,113 @@ public class SampleController {
         String accessKey
     ) {
         return getNucMutations(request, generalConfig, accessKey);
+    }
+
+
+    public ResponseEntity<String> getInsertions(
+        SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        String accessKey,
+        String endpointName,
+        SequenceType sequenceType,
+        String fileName
+    ) {
+        checkAuthorization(accessKey, true);
+        checkDataVersion(generalConfig.getDataVersion());
+        checkVariantFilter(request);
+        checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
+        if (openness == OpennessLevel.GISAID && (
+            request.getGisaidEpiIsl() != null
+                || request.getGenbankAccession() != null
+                || request.getSraAccession() != null
+        )) {
+            throw new GisaidLimitationException();
+        }
+        ApiCacheKey cacheKey = new ApiCacheKey(endpointName, request);
+        String body = useCacheOrCompute(cacheKey, () -> {
+            try {
+                List<InsertionStore.InsertionCount> insertions = sampleService.getInsertions(request, sequenceType);
+                V1Response<List<InsertionStore.InsertionCount>> response = new V1Response<>(insertions,
+                    dataVersionService.getVersion(), openness);
+                return objectMapper.writeValueAsString(response);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        // If a CSV is requested, deserialize the JSON and serialize as CSV
+        DataFormat dataFormat = generalConfig.getDataFormat();
+        if (dataFormat.equals(DataFormat.CSV) || dataFormat.equals(DataFormat.TSV)) {
+            try {
+                V1Response<List<InsertionStore.InsertionCount>> res = objectMapper.readValue(body, new TypeReference<>() {});
+                body = new CsvSerializer(CsvSerializer.getDelimiterFromDataFormat(dataFormat))
+                    .serialize(res.getData(), InsertionStore.InsertionCount.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return new SampleResponseBuilder<String>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setETag(generateETag(cacheKey))
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDataFormat(generalConfig.getDataFormat())
+            .setDownloadFileName(fileName)
+            .setBody(body)
+            .build();
+    }
+
+
+    @GetMapping("/aa-insertions")
+    public ResponseEntity<String> getAAInsertions(
+        SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getInsertions(
+            request,
+            generalConfig,
+            accessKey,
+            CacheService.SupportedEndpoints.SAMPLE_AA_INSERTIONS,
+            SequenceType.AMINO_ACID,
+            "aa-insertions"
+        );
+    }
+
+
+    @PostMapping("/aa-insertions")
+    public ResponseEntity<String> getAAInsertionsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getAAInsertions(request, generalConfig, accessKey);
+    }
+
+
+    @GetMapping("/nuc-insertions")
+    public ResponseEntity<String> getNucInsertions(
+        SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+       return getInsertions(
+           request,
+           generalConfig,
+           accessKey,
+           CacheService.SupportedEndpoints.SAMPLE_NUC_INSERTIONS,
+           SequenceType.NUCLEOTIDE,
+           "nuc-insertions"
+       );
+    }
+
+
+    @PostMapping("/nuc-insertions")
+    public ResponseEntity<String> getNucInsertionsPost(
+        @RequestBody SampleDetailRequest request,
+        GeneralConfig generalConfig,
+        String accessKey
+    ) {
+        return getNucInsertions(request, generalConfig, accessKey);
     }
 
 
