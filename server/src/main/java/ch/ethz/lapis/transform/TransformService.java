@@ -128,14 +128,15 @@ public class TransformService {
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
-                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_unknowns, nuc_substitutions,
-                  nuc_deletions, nuc_insertions, nuc_unknowns
+                  id, seq_original_compressed, seq_aligned_compressed, aa_mutations, aa_insertions, aa_unknowns,
+                  nuc_substitutions, nuc_deletions, nuc_insertions, nuc_unknowns
                 )
                 select
                   mm.id,
                   ng.seq_original_compressed,
                   ng.seq_aligned_compressed,
                   ng.aa_mutations,
+                  ng.aa_insertions,
                   ng.aa_unknowns,
                   ng.nuc_substitutions,
                   ng.nuc_deletions,

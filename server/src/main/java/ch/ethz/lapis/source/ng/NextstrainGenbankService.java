@@ -434,11 +434,14 @@ public class NextstrainGenbankService {
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
 
         String sql = """
-                insert into y_nextstrain_genbank (strain, aa_mutations, nuc_substitutions, nuc_deletions, nuc_insertions)
+                insert into y_nextstrain_genbank (
+                  strain, aa_mutations, aa_insertions, nuc_substitutions, nuc_deletions, nuc_insertions
+                )
                 values (?, ?, ?, ?, ?)
                 on conflict (strain) do update
                 set
                   aa_mutations = ?,
+                  aa_insertions = ?,
                   nuc_substitutions = ?,
                   nuc_deletions = ?,
                   nuc_insertions = ?;
@@ -455,14 +458,16 @@ public class NextstrainGenbankService {
                         }
                         statement.setString(1, entry.getStrain());
                         statement.setString(2, entry.getAaMutations());
-                        statement.setString(3, entry.getNucSubstitutions());
-                        statement.setString(4, entry.getNucDeletions());
-                        statement.setString(5, entry.getNucInsertions());
+                        statement.setString(3, entry.getAaInsertions());
+                        statement.setString(4, entry.getNucSubstitutions());
+                        statement.setString(5, entry.getNucDeletions());
+                        statement.setString(6, entry.getNucInsertions());
 
-                        statement.setString(6, entry.getAaMutations());
-                        statement.setString(7, entry.getNucSubstitutions());
-                        statement.setString(8, entry.getNucDeletions());
-                        statement.setString(9, entry.getNucInsertions());
+                        statement.setString(7, entry.getAaMutations());
+                        statement.setString(8, entry.getAaInsertions());
+                        statement.setString(9, entry.getNucSubstitutions());
+                        statement.setString(10, entry.getNucDeletions());
+                        statement.setString(11, entry.getNucInsertions());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

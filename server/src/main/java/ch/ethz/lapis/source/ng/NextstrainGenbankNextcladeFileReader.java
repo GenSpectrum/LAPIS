@@ -73,6 +73,7 @@ public class NextstrainGenbankNextcladeFileReader
         return new NextstrainGenbankNextcladeEntry()
             .setStrain(csv.get("seqName"))
             .setAaMutations(aaMutations)
+            .setAaInsertions(csv.get("aaInsertions"))
             .setNucSubstitutions(csv.get("substitutions"))
             .setNucDeletions(nucDels)
             .setNucInsertions(csv.get("insertions"));

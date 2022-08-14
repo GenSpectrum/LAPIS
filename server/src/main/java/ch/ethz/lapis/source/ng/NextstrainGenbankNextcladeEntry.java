@@ -4,6 +4,7 @@ public class NextstrainGenbankNextcladeEntry {
 
     private String strain;
     private String aaMutations;
+    private String aaInsertions;
     private String nucSubstitutions;
     private String nucDeletions;
     private String nucInsertions;
@@ -23,6 +24,15 @@ public class NextstrainGenbankNextcladeEntry {
 
     public NextstrainGenbankNextcladeEntry setAaMutations(String aaMutations) {
         this.aaMutations = aaMutations;
+        return this;
+    }
+
+    public String getAaInsertions() {
+        return aaInsertions;
+    }
+
+    public NextstrainGenbankNextcladeEntry setAaInsertions(String aaInsertions) {
+        this.aaInsertions = aaInsertions;
         return this;
     }
 
