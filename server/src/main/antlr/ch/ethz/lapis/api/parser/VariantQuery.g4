@@ -25,10 +25,23 @@ expr:
   | expr '|' expr    # Or
   | '(' expr ')'     # Par
   ;
-single: aa_mut | nuc_mut | pango_query | nextclade_pango_query | gisaid_clade_query | nextstrain_clade_query | n_of;
+single:
+  aa_mut
+  | nuc_mut
+  | nuc_ins
+  | aa_ins
+  | pango_query
+  | nextclade_pango_query
+  | gisaid_clade_query
+  | nextstrain_clade_query
+  | n_of
+  ;
 
 nuc_mut : nuc? position nuc_mutated?;
 aa_mut : gene ':' aa? position aa_mutated?;
+// nuc_mutated contains - which doesn't make sense but everything else is alright
+nuc_ins: 'INS_' position ':' (nuc_mutated | '?')+;
+aa_ins: 'INS_' gene ':' position ':' (aa_mutated | '?')+;
 
 position: NUMBER+;
 aa: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;

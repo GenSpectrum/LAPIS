@@ -1,6 +1,8 @@
 package ch.ethz.lapis.api;
 
+import ch.ethz.lapis.api.entity.AAInsertion;
 import ch.ethz.lapis.api.entity.AAMutation;
+import ch.ethz.lapis.api.entity.NucInsertion;
 import ch.ethz.lapis.api.entity.NucMutation;
 import ch.ethz.lapis.api.parser.VariantQueryBaseListener;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
@@ -106,6 +108,18 @@ public class VariantQueryListener extends VariantQueryBaseListener {
             ctx.nuc_mutated() != null ? ctx.nuc_mutated().getText().charAt(0) : null
         );
         exprStack.peek().putValue(nucMutation);
+    }
+
+    @Override
+    public void enterNuc_ins(VariantQueryParser.Nuc_insContext ctx) {
+        NucInsertion nucInsertion = NucInsertion.parse(ctx.getText());
+        exprStack.peek().putValue(nucInsertion);
+    }
+
+    @Override
+    public void enterAa_ins(VariantQueryParser.Aa_insContext ctx) {
+        AAInsertion aaInsertion = AAInsertion.parse(ctx.getText());
+        exprStack.peek().putValue(aaInsertion);
     }
 
     @Override

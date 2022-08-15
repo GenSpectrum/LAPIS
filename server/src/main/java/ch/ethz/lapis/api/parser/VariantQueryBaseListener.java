@@ -126,6 +126,30 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterNuc_ins(VariantQueryParser.Nuc_insContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNuc_ins(VariantQueryParser.Nuc_insContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAa_ins(VariantQueryParser.Aa_insContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAa_ins(VariantQueryParser.Aa_insContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPosition(VariantQueryParser.PositionContext ctx) { }
 	/**
 	 * {@inheritDoc}

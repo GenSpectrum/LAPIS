@@ -4,8 +4,8 @@ import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -93,6 +93,8 @@ public class Database {
     private final Map<String, Boolean[]> booleanColumns = new HashMap<>();
     private final MutationStore nucMutationStore;
     private final Map<String, MutationStore> aaMutationStores; // One store per gene
+    private final InsertionStore nucInsertionStore;
+    private final Map<String, InsertionStore> aaInsertionStores; // One store per gene
 
     private Database(
         long dataVersion,
@@ -105,9 +107,12 @@ public class Database {
         this.databasePool = databasePool;
         this.pangoLineageQueryConverter = pangoLineageQueryConverter;
         this.nucMutationStore = new MutationStore(size);
+        this.nucInsertionStore = new InsertionStore();
         this.aaMutationStores = new HashMap<>();
+        this.aaInsertionStores = new HashMap<>();
         for (String name : ReferenceGenomeData.getInstance().getGeneNames()) {
             this.aaMutationStores.put(name, new MutationStore(size));
+            this.aaInsertionStores.put(name, new InsertionStore());
         }
     }
 
@@ -170,6 +175,16 @@ public class Database {
 
     public Map<String, MutationStore> getAaMutationStores() {
         return aaMutationStores;
+    }
+
+
+    public InsertionStore getNucInsertionStore() {
+        return nucInsertionStore;
+    }
+
+
+    public Map<String, InsertionStore> getAaInsertionStores() {
+        return aaInsertionStores;
     }
 
 
@@ -287,11 +302,14 @@ public class Database {
                 select
                   id,
                   coalesce(aa_mutations, '') as aa_mutations,
+                  coalesce(aa_insertions, '') as aa_insertions,
                   coalesce(aa_unknowns, '') as aa_unknowns,
                   coalesce(nuc_substitutions, '') as nuc_substitutions,
                   coalesce(nuc_deletions, '') as nuc_deletions,
+                  coalesce(nuc_insertions, '') as nuc_insertions,
                   coalesce(nuc_unknowns, '') as nuc_unknowns
-                from y_main_sequence;
+                from y_main_sequence
+                order by id;
                 """;
             Database database;
             try (Statement statement = conn.createStatement()) {
@@ -367,14 +385,14 @@ public class Database {
                         ++i;
                     }
                 }
-                // Fetch mutations
+                // Fetch mutations and insertions
                 statement.setFetchSize(20000);
                 try (ResultSet rs = statement.executeQuery(sequenceSql)) {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 100000 == 0) {
                             System.out.println(LocalDateTime.now() +
-                                " Loading mutations to in-memory database: " + i + "/" + numberRows);
+                                " Loading mutations (and insertions) to in-memory database: " + i + "/" + numberRows);
                         }
                         int id = rs.getInt("id");
                         // Nuc mutations
@@ -421,10 +439,27 @@ public class Database {
                         database.aaMutationStores.forEach((gene, mutationStore) -> {
                             mutationStore.putEntry(id, aaMutationsPerGene.get(gene), aaUnknownsPerGene.get(gene));
                         });
+                        // Nuc insertions
+                        String nucInsertionsString = rs.getString("nuc_insertions");
+                        if (!nucInsertionsString.isBlank()) {
+                            Arrays.stream(nucInsertionsString.split(","))
+                                .forEach(ins -> database.nucInsertionStore.putInsertions(id, ins));
+                        }
+                        // AA insertions
+                        String aaInsertionsString = rs.getString("aa_insertions");
+                        if (!aaInsertionsString.isBlank()) {
+                            Arrays.stream(aaInsertionsString.split(","))
+                                .forEach(geneIns -> {
+                                    String[] split = geneIns.split(":", 2);
+                                    String gene = split[0];
+                                    String ins = split[1];
+                                    database.aaInsertionStores.get(gene).putInsertions(id, ins);
+                                });
+                        }
+                        // Done
                         ++i;
                     }
                 }
-
             }
             conn.setAutoCommit(true);
             return database;

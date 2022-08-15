@@ -171,6 +171,8 @@ public class CacheService {
         public static final String SAMPLE_AGGREGATED = "/v0/sample/aggregated";
         public static final String SAMPLE_AA_MUTATIONS = "/v0/sample/aa-mutations";
         public static final String SAMPLE_NUC_MUTATIONS = "/v0/sample/nuc-mutations";
+        public static final String SAMPLE_NUC_INSERTIONS = "/v0/sample/nuc-insertions";
+        public static final String SAMPLE_AA_INSERTIONS = "/v0/sample/aa-insertions";
     }
 
 }
