@@ -349,9 +349,9 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return nucInsertions;
     }
 
-    public SampleFilter<T> setNucInsertions(List<NucInsertion> nucInsertions) {
+    public T setNucInsertions(List<NucInsertion> nucInsertions) {
         this.nucInsertions = nucInsertions;
-        return this;
+        return (T) this;
     }
 
     public List<AAMutation> getAaMutations() {
@@ -367,9 +367,9 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
         return aaInsertions;
     }
 
-    public SampleFilter<T> setAaInsertions(List<AAInsertion> aaInsertions) {
+    public T setAaInsertions(List<AAInsertion> aaInsertions) {
         this.aaInsertions = aaInsertions;
-        return this;
+        return (T) this;
     }
 
     public String getVariantQuery() {

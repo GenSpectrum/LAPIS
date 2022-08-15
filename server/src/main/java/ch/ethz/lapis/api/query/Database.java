@@ -94,7 +94,7 @@ public class Database {
     private final MutationStore nucMutationStore;
     private final Map<String, MutationStore> aaMutationStores; // One store per gene
     private final InsertionStore nucInsertionStore;
-    private final Map<String, InsertionStore> aaInsertionStores; // One store per gene;
+    private final Map<String, InsertionStore> aaInsertionStores; // One store per gene
 
     private Database(
         long dataVersion,

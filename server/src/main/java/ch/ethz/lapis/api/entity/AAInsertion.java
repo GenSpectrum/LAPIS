@@ -2,6 +2,7 @@ package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
+import ch.ethz.lapis.util.ReferenceGenomeData;
 
 import java.util.List;
 
@@ -57,7 +58,9 @@ public class AAInsertion implements VariantQueryExpr {
     @Override
     public boolean[] evaluate(Database database) {
         boolean[] matched = new boolean[database.size()];
-        List<Integer> ids = database.getAaInsertionStores().get(gene).find(position + ":" + query);
+        String capitalizedGeneName = ReferenceGenomeData.getInstance().getCorrectlyCapitalizedGeneName(gene);
+        List<Integer> ids = database.getAaInsertionStores().get(capitalizedGeneName)
+            .find(position + ":" + query);
         for (Integer id : ids) {
             matched[id] = true;
         }
