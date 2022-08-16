@@ -45,19 +45,25 @@ public class InsertionStore {
         String[] split = insertionQuery.split(":");
         short position = Short.parseShort(split[0]);
         String basesQuery = split[1];
-        Pattern queryRegex = Pattern.compile(basesQuery.replace("?", ".*"));
 
         Map<String, List<Integer>> insertionsAtPosition = positionMap.get(position);
         if (insertionsAtPosition == null) {
             return List.of();
         }
-        List<Integer> allSequences = new ArrayList<>();
-        insertionsAtPosition.forEach((insertion, sequences) -> {
-            if (queryRegex.matcher(insertion).matches()) {
-                allSequences.addAll(sequences);
-            }
-        });
-        return allSequences;
+        if (!basesQuery.contains("?")) {
+            // No wildcard
+            return insertionsAtPosition.getOrDefault(basesQuery, List.of());
+        } else {
+            // With wildcard
+            Pattern queryRegex = Pattern.compile(basesQuery.replace("?", ".*"));
+            List<Integer> allSequences = new ArrayList<>();
+            insertionsAtPosition.forEach((insertion, sequences) -> {
+                if (queryRegex.matcher(insertion).matches()) {
+                    allSequences.addAll(sequences);
+                }
+            });
+            return allSequences;
+        }
     }
 
     public List<InsertionCount> countInsertions(Collection<Integer> ids) {
