@@ -11,6 +11,10 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://bioinfweb.info/MavenRepository/"
+        allowInsecureProtocol true
+    }
 }
 
 dependencies {
@@ -30,6 +34,7 @@ dependencies {
     implementation 'org.jooq:jooq:3.14.8'
     implementation 'redis.clients:jedis:3.7.0'
     implementation 'com.github.luben:zstd-jni:1.5.0-4'
+    implementation 'info.bioinfweb.jphyloio:jphyloio-core:1.0.0'
 
     antlr "org.antlr:antlr4:4.9.3"
     implementation "org.antlr:antlr4-runtime:4.9.3"

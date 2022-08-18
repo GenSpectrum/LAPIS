@@ -8,11 +8,13 @@ import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
 import ch.ethz.lapis.source.s3c.S3CVineyardService;
 import ch.ethz.lapis.transform.TransformService;
+import ch.ethz.lapis.tree.TreeProcessingService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -100,6 +102,12 @@ public class LapisMain extends SubProgram<LapisConfig> {
                         .switchInStagingTables();
                 }
             }
+            return;
+        }
+        if ("--process-tree".equals(args[0])) {
+            Path pathToNwkFile = Path.of(args[1]);
+            Path pathToIdentifierMapping = Path.of(args[2]);
+            new TreeProcessingService(pathToNwkFile, pathToIdentifierMapping).doWork();
         }
     }
 
