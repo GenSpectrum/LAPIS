@@ -60,6 +60,7 @@ All **sample** endpoints can be filtered by the following attributes:
 - host
 - variantQuery (see :ref:`variantQuery`)
 - clade
+- lineage
 - nucMutations
 
 The endpoints ``details``, ``contributors``, ``nuc-mutations``, ``fasta``, and ``fasta-aligned`` can additionally be filtered by these attributes:
@@ -92,6 +93,7 @@ Above, we used the ``/sample/aggregated`` endpoint to get the total counts of se
 - division
 - host
 - clade
+- lineage
 
 
 .. toctree::
