@@ -59,7 +59,7 @@ public class SimpleTreeNode {
         queue.add(this);
         while (!queue.isEmpty()) {
             var node = queue.pollFirst();
-            consumer.accept(this);
+            consumer.accept(node);
             for (SimpleTreeNode child : node.children) {
                 queue.addLast(child);
             }

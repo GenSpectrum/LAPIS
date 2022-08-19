@@ -28,6 +28,19 @@ public class SimpleTree {
     }
 
     /**
+     * Returns a list of the names of the leaves
+     */
+    public List<String> getLeaves() {
+        List<String> leaves = new ArrayList<>();
+        traverseBFS(n -> {
+            if (n.getChildren().isEmpty()) {
+                leaves.add(n.getName());
+            }
+        });
+        return leaves;
+    }
+
+    /**
      * Returns a new tree and does not manipulate the current tree.
      *
      * @param names Names of leaves that should be kept
@@ -57,9 +70,16 @@ public class SimpleTree {
      * <a href="https://github.com/niemasd/TreeSwift/blob/master/treeswift/Tree.py">TreeSwift</a>
      */
     private SimpleTree extractTree(Collection<String> names, boolean with, boolean suppressUnifurcations) {
-        // The leaves and all parents should be kept (for now)
-        Set<String> nodesToKeep = new HashSet<>(names);
-        for (String name : names) {
+        // The leaves and all parents should be kept (supressUnifurcation will be applied later)
+        Set<String> leavesToKeep;
+        if (with) {
+            leavesToKeep = new HashSet<>(names);
+        } else {
+            leavesToKeep = new HashSet<>(getLeaves());
+            leavesToKeep.removeAll(new HashSet<>(names));
+        }
+        Set<String> nodesToKeep = new HashSet<>(leavesToKeep);
+        for (String name : leavesToKeep) {
             var node = idIndex.get(name);
             if (node == null) {
                 throw new RuntimeException("Node does not exist: " + name);
@@ -73,14 +93,15 @@ public class SimpleTree {
         Deque<SimpleTreeNode> nodeQueue = new LinkedList<>();
         nodeQueue.add(newRoot);
         while (!nodeQueue.isEmpty()) {
-            SimpleTreeNode parent = nodeQueue.pop();
-            for (SimpleTreeNode child : parent.getChildren()) {
-                String childName = child.getName();
+            SimpleTreeNode newParent = nodeQueue.pop();
+            SimpleTreeNode oldParent = idIndex.get(newParent.getName());
+            for (SimpleTreeNode oldChild : oldParent.getChildren()) {
+                String childName = oldChild.getName();
                 if (nodesToKeep.contains(childName)) {
-                    SimpleTreeNode newChildNode = new SimpleTreeNode(childName);
-                    parent.addChild(newChildNode);
-                    newChildNode.setParent(parent);
-                    nodeQueue.add(newChildNode);
+                    SimpleTreeNode newChild = new SimpleTreeNode(childName);
+                    newParent.addChild(newChild);
+                    newChild.setParent(newParent);
+                    nodeQueue.add(newChild);
                 }
             }
         }
@@ -107,10 +128,12 @@ public class SimpleTree {
                     onlyChild.setParent(null);
                 } else {
                     parent.getChildren().remove(node);
+                    parent.addChild(onlyChild);
                     onlyChild.setParent(parent);
                 }
             }
         });
+        constructNewIdIndex();
     }
 
     public SimpleTreeNode getRoot() {
