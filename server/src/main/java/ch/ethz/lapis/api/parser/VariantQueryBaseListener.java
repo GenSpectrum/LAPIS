@@ -366,6 +366,18 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTree_node(VariantQueryParser.Tree_nodeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTree_node(VariantQueryParser.Tree_nodeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCharacter(VariantQueryParser.CharacterContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -1,9 +1,6 @@
 package ch.ethz.lapis.api;
 
-import ch.ethz.lapis.api.entity.AAInsertion;
-import ch.ethz.lapis.api.entity.AAMutation;
-import ch.ethz.lapis.api.entity.NucInsertion;
-import ch.ethz.lapis.api.entity.NucMutation;
+import ch.ethz.lapis.api.entity.*;
 import ch.ethz.lapis.api.parser.VariantQueryBaseListener;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.api.query.*;
@@ -134,6 +131,13 @@ public class VariantQueryListener extends VariantQueryBaseListener {
     @Override
     public void exitN_of(VariantQueryParser.N_ofContext ctx) {
         exprStack.pop();
+    }
+
+    @Override
+    public void enterTree_node(VariantQueryParser.Tree_nodeContext ctx) {
+        String label = ctx.getText().replace("TEMPORARY_NODE_", "node_");
+        TreeNode treeNode = new TreeNode(label);
+        exprStack.peek().putValue(treeNode);
     }
 
     public VariantQueryExpr getExpr() {

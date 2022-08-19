@@ -310,6 +310,16 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 */
 	void exitNextstrain_clade_query(VariantQueryParser.Nextstrain_clade_queryContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link VariantQueryParser#tree_node}.
+	 * @param ctx the parse tree
+	 */
+	void enterTree_node(VariantQueryParser.Tree_nodeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link VariantQueryParser#tree_node}.
+	 * @param ctx the parse tree
+	 */
+	void exitTree_node(VariantQueryParser.Tree_nodeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link VariantQueryParser#character}.
 	 * @param ctx the parse tree
 	 */

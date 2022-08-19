@@ -35,6 +35,7 @@ single:
   | gisaid_clade_query
   | nextstrain_clade_query
   | n_of
+  | tree_node
   ;
 
 nuc_mut : nuc? position nuc_mutated?;
@@ -64,6 +65,8 @@ gisaid_clade_query: gisaid_clade_prefix gisaid_clade;
 nextstrain_clade: NUMBER NUMBER character;
 nextstrain_clade_prefix: N E X T S T R A I N C L A D E ':';
 nextstrain_clade_query: nextstrain_clade_prefix nextstrain_clade;
+
+tree_node: 'TEMPORARY_NODE_' NUMBER+;
 
 character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 

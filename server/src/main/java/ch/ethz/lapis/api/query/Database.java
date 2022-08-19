@@ -1,6 +1,8 @@
 package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
+import ch.ethz.lapis.tree.SimpleTree;
+import ch.ethz.lapis.tree.TreeProcessingService;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -95,6 +97,9 @@ public class Database {
     private final Map<String, MutationStore> aaMutationStores; // One store per gene
     private final InsertionStore nucInsertionStore;
     private final Map<String, InsertionStore> aaInsertionStores; // One store per gene
+    private long treeTimestamp = -1;
+    private SimpleTree tree;
+    private final Map<String, Integer> gisaidEpiIslToIdMap = new HashMap<>(); // This is only for TreeNode.
 
     private Database(
         long dataVersion,
@@ -266,6 +271,22 @@ public class Database {
         }
     }
 
+
+    public long getTreeTimestamp() {
+        return treeTimestamp;
+    }
+
+
+    public SimpleTree getTree() {
+        return tree;
+    }
+
+
+    public Map<String, Integer> getGisaidEpiIslToIdMap() {
+        return gisaidEpiIslToIdMap;
+    }
+
+
     public static void updateInstance(ComboPooledDataSource databasePool) {
         try {
             instance = loadDatabase(databasePool);
@@ -382,6 +403,10 @@ public class Database {
                         for (String booleanColumn : BOOLEAN_COLUMNS) {
                             database.booleanColumns.get(booleanColumn)[i] = rs.getObject(booleanColumn, Boolean.class);
                         }
+                        String gisaidEpiIsl = rs.getString(Columns.GISAID_EPI_ISL);
+                        if (gisaidEpiIsl != null) {
+                            database.gisaidEpiIslToIdMap.put(gisaidEpiIsl, i);
+                        }
                         ++i;
                     }
                 }
@@ -462,6 +487,10 @@ public class Database {
                 }
             }
             conn.setAutoCommit(true);
+            // Fetch tree
+            var treeData = TreeProcessingService.getMostRecentTreeFromDatabase(databasePool);
+            database.treeTimestamp = treeData.getValue0();
+            database.tree = treeData.getValue1();
             return database;
         }
     }
