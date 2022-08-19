@@ -1,5 +1,7 @@
 package ch.ethz.lapis.tree;
 
+import ch.ethz.lapis.util.ZstdSeqCompressor;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import info.bioinfweb.jphyloio.JPhyloIOEventReader;
 import info.bioinfweb.jphyloio.ReadWriteParameterMap;
 import info.bioinfweb.jphyloio.events.EdgeEvent;
@@ -12,9 +14,11 @@ import info.bioinfweb.jphyloio.formats.JPhyloIOFormatIDs;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.javatuples.Pair;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +27,12 @@ import java.util.Map;
 // Inspired by http://bioinfweb.info/Code/sventon/repos/JPhyloIO/show/trunk/demo/info.bioinfweb.jphyloio.demo.tree/src/info/bioinfweb/jphyloio/demo/tree/TreeReader.java
 public class TreeProcessingService {
 
+    private final ComboPooledDataSource dbPool;
     private final Path pathToNwkFile;
     private final Path pathToIdentifierMapping;
 
-    public TreeProcessingService(Path pathToNwkFile, Path pathToIdentifierMapping) {
+    public TreeProcessingService(ComboPooledDataSource dbPool, Path pathToNwkFile, Path pathToIdentifierMapping) {
+        this.dbPool = dbPool;
         this.pathToNwkFile = pathToNwkFile;
         this.pathToIdentifierMapping = pathToIdentifierMapping;
     }
@@ -77,7 +83,6 @@ public class TreeProcessingService {
         //   1. replace " " with "_"
         //   2. For sequences, use the gisaid_epi_isl as label
         //   3. Collect labels that cannot be parsed
-        List<String> unparsable = new ArrayList<>();
         root.traverseDFS(n -> {
             String name = n.getName().replace(' ', '_');
             if (!name.startsWith("node_")) {
@@ -97,7 +102,6 @@ public class TreeProcessingService {
                         return;
                     }
                 }
-                unparsable.add(name);
             }
         });
         // Create tree object
@@ -110,9 +114,48 @@ public class TreeProcessingService {
             }
         });
         tree = tree.extractTreeWith(gisaidEpiIsls, true);
-        // Save the tree (in the database?)
-        // TODO
+        // Save the compressed tree in the database
+        byte[] serialized = tree.serializeToBytes();
+        byte[] compressed = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE).compressBytes(serialized);
+        String sql = """
+            insert into y_tree (timestamp, bytes)
+            values (extract(epoch from now())::bigint, ?);
+            """;
+        try (Connection conn = dbPool.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setBytes(1, compressed);
+                statement.execute();
+            }
+        }
         System.out.println("Finished");
+    }
+
+
+    /**
+     * Reads the most recent version of the compressed tree from the database
+     */
+    public static Pair<Long, SimpleTree> getMostRecentTreeFromDatabase(ComboPooledDataSource dbPool) {
+        String sql = """
+            select timestamp, bytes
+            from y_tree
+            order by timestamp desc
+            limit 1;
+            """;
+        try (Connection conn = dbPool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(sql)) {
+                    if (!rs.next()) {
+                        return null;
+                    }
+                    return new Pair<>(
+                        rs.getLong("timestamp"),
+                        SimpleTree.readFromBytes(new ZstdSeqCompressor(ZstdSeqCompressor.DICT.NONE).decompressBytes(rs.getBytes("bytes")))
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void readNode(NodeEvent nodeEvent, TreeBuildingContext context) {

@@ -107,7 +107,7 @@ public class LapisMain extends SubProgram<LapisConfig> {
         if ("--process-tree".equals(args[0])) {
             Path pathToNwkFile = Path.of(args[1]);
             Path pathToIdentifierMapping = Path.of(args[2]);
-            new TreeProcessingService(pathToNwkFile, pathToIdentifierMapping).doWork();
+            new TreeProcessingService(dbPool, pathToNwkFile, pathToIdentifierMapping).doWork();
         }
     }
 

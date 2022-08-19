@@ -32,19 +32,7 @@ public class ZstdSeqCompressor implements SeqCompressor {
 
     @Override
     public byte[] compress(String seq) {
-        byte[] input = seq.getBytes(StandardCharsets.UTF_8);
-        int compressBound = (int) Zstd.compressBound(input.length);
-        byte[] outputBuffer = new byte[compressBound];
-        long compressionReturnCode;
-        if (dict == null) {
-            compressionReturnCode = Zstd.compress(outputBuffer, input, 3);
-        } else {
-            compressionReturnCode = Zstd.compress(outputBuffer, input, dict, 3);
-        }
-        if (Zstd.isError(compressionReturnCode)) {
-            throw new RuntimeException("Zstd compression failed: error code " + compressionReturnCode);
-        }
-        return Arrays.copyOfRange(outputBuffer, 0, (int) compressionReturnCode);
+        return compressBytes(seq.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -61,6 +49,36 @@ public class ZstdSeqCompressor implements SeqCompressor {
             throw new RuntimeException("Zstd decompression failed: error code " + decompressionReturnCode);
         }
         return new String(decompressedBuffer, 0, (int) decompressionReturnCode, StandardCharsets.UTF_8);
+    }
+
+    public byte[] compressBytes(byte[] input) {
+        int compressBound = (int) Zstd.compressBound(input.length);
+        byte[] outputBuffer = new byte[compressBound];
+        long compressionReturnCode;
+        if (dict == null) {
+            compressionReturnCode = Zstd.compress(outputBuffer, input, 3);
+        } else {
+            compressionReturnCode = Zstd.compress(outputBuffer, input, dict, 3);
+        }
+        if (Zstd.isError(compressionReturnCode)) {
+            throw new RuntimeException("Zstd compression failed: error code " + compressionReturnCode);
+        }
+        return Arrays.copyOfRange(outputBuffer, 0, (int) compressionReturnCode);
+    }
+
+    public byte[] decompressBytes(byte[] compressed) {
+        int decompressedSize = (int) Zstd.decompressedSize(compressed);
+        byte[] decompressedBuffer = new byte[decompressedSize];
+        long decompressionReturnCode;
+        if (dict == null) {
+            decompressionReturnCode = Zstd.decompress(decompressedBuffer, compressed);
+        } else {
+            decompressionReturnCode = Zstd.decompress(decompressedBuffer, compressed, dict);
+        }
+        if (Zstd.isError(decompressionReturnCode)) {
+            throw new RuntimeException("Zstd decompression failed: error code " + decompressionReturnCode);
+        }
+        return Arrays.copyOfRange(decompressedBuffer, 0, (int) decompressionReturnCode);
     }
 
     public enum DICT {

@@ -295,6 +295,12 @@ create table y_main_aa_sequence_columnar
   primary key (gene, position)
 );
 
+create table y_tree
+(
+  timestamp bigint primary key,
+  bytes bytea not null
+);
+
 
 -- Privileges
 
@@ -311,5 +317,6 @@ on
   y_main_sequence_columnar,
   y_main_aa_sequence,
   y_main_aa_sequence_columnar,
+  y_tree,
   access_key
 to y_user;

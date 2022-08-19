@@ -1,5 +1,6 @@
 package ch.ethz.lapis.tree;
 
+import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -58,6 +59,28 @@ public class SimpleTree {
      */
     public SimpleTree extractTreeWithout(Collection<String> names, boolean suppressUnifurcations) {
         return extractTree(names, false, suppressUnifurcations);
+    }
+
+    public byte[] serializeToBytes() {
+        try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+             ObjectOutputStream objectOut = new ObjectOutputStream(byteOut)) {
+            // We serialize the root object instead of this object because SimpleTreeNode is a simpler class
+            // that is less likely to change.
+            objectOut.writeObject(root);
+            return byteOut.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static SimpleTree readFromBytes(byte[] bytes) {
+        try (ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
+             ObjectInputStream objectIn = new ObjectInputStream(byteIn)) {
+            SimpleTreeNode root = (SimpleTreeNode) objectIn.readObject();
+            return new SimpleTree(root);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void constructNewIdIndex() {

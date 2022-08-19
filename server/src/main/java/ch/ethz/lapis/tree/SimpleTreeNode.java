@@ -1,12 +1,13 @@
 package ch.ethz.lapis.tree;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SimpleTreeNode {
+public class SimpleTreeNode implements Serializable {
 
     private String name;
     private SimpleTreeNode parent;
