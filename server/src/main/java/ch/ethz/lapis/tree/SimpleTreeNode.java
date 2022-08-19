@@ -1,6 +1,8 @@
 package ch.ethz.lapis.tree;
 
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -47,6 +49,21 @@ public class SimpleTreeNode {
     public void traverseDFS(Consumer<SimpleTreeNode> consumer) {
         consumer.accept(this);
         children.forEach(c -> c.traverseDFS(consumer));
+    }
+
+    /**
+     * Traverses through the tree in a breadth-first fashion and calls the consumer function on every node
+     */
+    public void traverseBFS(Consumer<SimpleTreeNode> consumer) {
+        Deque<SimpleTreeNode> queue = new LinkedList<>();
+        queue.add(this);
+        while (!queue.isEmpty()) {
+            var node = queue.pollFirst();
+            consumer.accept(this);
+            for (SimpleTreeNode child : node.children) {
+                queue.addLast(child);
+            }
+        }
     }
 
 }

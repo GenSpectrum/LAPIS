@@ -103,6 +103,14 @@ public class TreeProcessingService {
         // Create tree object
         SimpleTree tree = new SimpleTree(root);
         // Remove the leaves that we don't associate with a GISAID sequence
+        List<String> gisaidEpiIsls = new ArrayList<>();
+        tree.traverseBFS(n -> {
+            if (n.getName().startsWith("EPI_ISL_")) {
+                gisaidEpiIsls.add(n.getName());
+            }
+        });
+        tree = tree.extractTreeWith(gisaidEpiIsls, true);
+        // Save the tree (in the database?)
         // TODO
         System.out.println("Finished");
     }
