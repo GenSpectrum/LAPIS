@@ -437,7 +437,7 @@ public class NextstrainGenbankService {
                 insert into y_nextstrain_genbank (
                   strain, aa_mutations, aa_insertions, nuc_substitutions, nuc_deletions, nuc_insertions
                 )
-                values (?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?)
                 on conflict (strain) do update
                 set
                   aa_mutations = ?,
