@@ -38,6 +38,8 @@ public class NextstrainGenbankMetadataFileReader
     public NextstrainGenbankMetadataEntry next() {
         CSVRecord csv = iterator.next();
         ParsedDate pd = ParsedDate.parse(csv.get("date"));
+        String cladeLong = cleanString(csv.get("Nextstrain_clade")); // E.g., "21J (Delta)"
+        String clade = cladeLong != null ? cladeLong.split(" ")[0] : null; // E.g., "21J"
         return new NextstrainGenbankMetadataEntry()
             .setStrain(cleanString(csv.get("strain")))
             .setVirus(cleanString(csv.get("gisaid_epi_isl")))
@@ -59,7 +61,7 @@ public class NextstrainGenbankMetadataFileReader
             .setHost(cleanString(csv.get("host")))
             .setAge(Utils.nullableIntegerValue(csv.get("age")))
             .setSex(cleanString(csv.get("sex")))
-            .setNextstrainClade(cleanString(csv.get("Nextstrain_clade")))
+            .setNextstrainClade(clade)
             .setPangoLineage(cleanString(csv.get("pango_lineage")))
             .setNextcladePangoLineage(cleanString(csv.get("Nextclade_pango")))
             .setGisaidClade(cleanString(csv.get("GISAID_clade")))
