@@ -518,6 +518,7 @@ public class BatchProcessingWorker {
                       nextclade_qc_stop_codons_total_stop_codons = ?,
                       nextclade_qc_stop_codons_score = ?,
                       nextclade_qc_stop_codons_status = ?,
+                      nextclade_coverage = ?,
                       nextclade_errors = ?,
                       aa_insertions = ?
                     where gisaid_epi_isl = ?;
@@ -584,9 +585,10 @@ public class BatchProcessingWorker {
                     statement.setObject(54, nc != null ? nc.getQcStopCodonsTotalStopCodons() : null);
                     statement.setObject(55, nc != null ? nc.getQcStopCodonsScore() : null);
                     statement.setString(56, nc != null ? nc.getQcStopCodonsStatus() : null);
-                    statement.setString(57, nc != null ? nc.getErrors() : null);
-                    statement.setString(58, nc != null ? nc.getAaInsertions() : null);
-                    statement.setString(59, entry.getGisaidEpiIsl());
+                    statement.setObject(57, nc != null ? nc.getCoverage() : null);
+                    statement.setString(58, nc != null ? nc.getErrors() : null);
+                    statement.setString(59, nc != null ? nc.getAaInsertions() : null);
+                    statement.setString(60, entry.getGisaidEpiIsl());
                     statement.addBatch();
                     statement.clearParameters();
                 }
@@ -620,7 +622,7 @@ public class BatchProcessingWorker {
                       nextclade_qc_frame_shifts_frame_shifts_ignored, nextclade_qc_frame_shifts_total_frame_shifts_ignored,
                       nextclade_qc_frame_shifts_score, nextclade_qc_frame_shifts_status, nextclade_qc_stop_codons_stop_codons,
                       nextclade_qc_stop_codons_total_stop_codons, nextclade_qc_stop_codons_score, nextclade_qc_stop_codons_status,
-                      nextclade_errors, aa_insertions
+                      nextclade_coverage, nextclade_errors, aa_insertions
                     )
                     values (
                       now(),
@@ -635,7 +637,7 @@ public class BatchProcessingWorker {
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
                       ?, ?, ?, ?, ?, ?, ?,
-                      ?, ?, ?, ?, ?
+                      ?, ?, ?, ?, ?, ?
                     );
                 """;
             try (PreparedStatement insertStatement = conn.prepareStatement(insertSequenceSql)) {
@@ -728,8 +730,9 @@ public class BatchProcessingWorker {
                     insertStatement.setObject(79, nc != null ? nc.getQcStopCodonsTotalStopCodons() : null);
                     insertStatement.setObject(80, nc != null ? nc.getQcStopCodonsScore() : null);
                     insertStatement.setString(81, nc != null ? nc.getQcStopCodonsStatus() : null);
-                    insertStatement.setString(82, nc != null ? nc.getErrors() : null);
-                    insertStatement.setString(83, nc != null ? nc.getAaInsertions() : null);
+                    insertStatement.setObject(82, nc != null ? nc.getCoverage() : null);
+                    insertStatement.setString(83, nc != null ? nc.getErrors() : null);
+                    insertStatement.setString(84, nc != null ? nc.getAaInsertions() : null);
                     insertStatement.addBatch();
                     insertStatement.clearParameters();
                 }

@@ -162,6 +162,7 @@ create table y_gisaid
   nextclade_qc_stop_codons_total_stop_codons int,
   nextclade_qc_stop_codons_score float,
   nextclade_qc_stop_codons_status text,
+  nextclade_coverage float,
   nextclade_errors text
 );
 
@@ -230,7 +231,22 @@ create table y_main_metadata
   nextclade_qc_private_mutations_score float,
   nextclade_qc_snp_clusters_score float,
   nextclade_qc_frame_shifts_score float,
-  nextclade_qc_stop_codons_score float
+  nextclade_qc_stop_codons_score float,
+  nextclade_total_substitutions int,
+  nextclade_total_deletions int,
+  nextclade_total_insertions int,
+  nextclade_total_frame_shifts int,
+  nextclade_total_aminoacid_substitutions int,
+  nextclade_total_aminoacid_deletions int,
+  nextclade_total_aminoacid_insertions int,
+  nextclade_total_missing int,
+  nextclade_total_non_acgtns int,
+  nextclade_total_pcr_primer_changes int,
+  nextclade_pcr_primer_changes text,
+  nextclade_alignment_score float,
+  nextclade_alignment_start int,
+  nextclade_alignment_end int,
+  nextclade_coverage float
 );
 
 create index on y_main_metadata (genbank_accession);

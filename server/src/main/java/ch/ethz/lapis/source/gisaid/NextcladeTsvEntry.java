@@ -50,6 +50,7 @@ public class NextcladeTsvEntry {
     private Integer qcStopCodonsTotalStopCodons;
     private Float qcStopCodonsScore;
     private String qcStopCodonsStatus;
+    private Float coverage;
     private String errors;
 
     public String getSeqName() {
@@ -499,6 +500,15 @@ public class NextcladeTsvEntry {
 
     public NextcladeTsvEntry setQcStopCodonsStatus(String qcStopCodonsStatus) {
         this.qcStopCodonsStatus = qcStopCodonsStatus;
+        return this;
+    }
+
+    public Float getCoverage() {
+        return coverage;
+    }
+
+    public NextcladeTsvEntry setCoverage(Float coverage) {
+        this.coverage = coverage;
         return this;
     }
 

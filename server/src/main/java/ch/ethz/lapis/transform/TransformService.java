@@ -168,7 +168,12 @@ public class TransformService {
                   nextclade_pango_lineage, nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors,
                   nextclade_qc_overall_score, nextclade_qc_missing_data_score, nextclade_qc_mixed_sites_score,
                   nextclade_qc_private_mutations_score, nextclade_qc_snp_clusters_score,
-                  nextclade_qc_frame_shifts_score, nextclade_qc_stop_codons_score
+                  nextclade_qc_frame_shifts_score, nextclade_qc_stop_codons_score,
+                  nextclade_total_substitutions, nextclade_total_deletions, nextclade_total_insertions,
+                  nextclade_total_frame_shifts, nextclade_total_aminoacid_substitutions,
+                  nextclade_total_aminoacid_deletions, nextclade_total_aminoacid_insertions, nextclade_total_missing,
+                  nextclade_total_non_acgtns, nextclade_total_pcr_primer_changes, nextclade_pcr_primer_changes,
+                  nextclade_alignment_score, nextclade_alignment_start, nextclade_alignment_end, nextclade_coverage
                 )
                 select
                   row_number() over () - 1 as id,
@@ -207,7 +212,22 @@ public class TransformService {
                   nextclade_qc_private_mutations_score,
                   nextclade_qc_snp_clusters_score,
                   nextclade_qc_frame_shifts_score,
-                  nextclade_qc_stop_codons_score
+                  nextclade_qc_stop_codons_score,
+                  nextclade_total_substitutions,
+                  nextclade_total_deletions,
+                  nextclade_total_insertions,
+                  nextclade_total_frame_shifts,
+                  nextclade_total_aminoacid_substitutions,
+                  nextclade_total_aminoacid_deletions,
+                  nextclade_total_aminoacid_insertions,
+                  nextclade_total_missing,
+                  nextclade_total_non_acgtns,
+                  nextclade_total_pcr_primer_changes,
+                  nextclade_pcr_primer_changes,
+                  nextclade_alignment_score,
+                  nextclade_alignment_start,
+                  nextclade_alignment_end,
+                  nextclade_coverage
                 from y_gisaid
                 where
                   seq_aligned_compressed is not null;
