@@ -61,6 +61,7 @@ public class NextstrainGenbankMetadataFileReader
             .setSex(cleanString(csv.get("sex")))
             .setNextstrainClade(cleanString(csv.get("Nextstrain_clade")))
             .setPangoLineage(cleanString(csv.get("pango_lineage")))
+            .setNextcladePangoLineage(cleanString(csv.get("Nextclade_pango")))
             .setGisaidClade(cleanString(csv.get("GISAID_clade")))
             .setOriginatingLab(cleanString(csv.get("originating_lab")))
             .setSubmittingLab(cleanString(csv.get("submitting_lab")))
