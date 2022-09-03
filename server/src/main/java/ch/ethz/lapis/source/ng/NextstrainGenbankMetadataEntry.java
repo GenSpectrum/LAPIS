@@ -27,6 +27,7 @@ public class NextstrainGenbankMetadataEntry implements Serializable {
     private String sex;
     private String nextstrainClade;
     private String pangoLineage;
+    private String nextcladePangoLineage;
     private String gisaidClade;
     private String originatingLab;
     private String submittingLab;
@@ -229,6 +230,15 @@ public class NextstrainGenbankMetadataEntry implements Serializable {
 
     public NextstrainGenbankMetadataEntry setPangoLineage(String pangoLineage) {
         this.pangoLineage = pangoLineage;
+        return this;
+    }
+
+    public String getNextcladePangoLineage() {
+        return nextcladePangoLineage;
+    }
+
+    public NextstrainGenbankMetadataEntry setNextcladePangoLineage(String nextcladePangoLineage) {
+        this.nextcladePangoLineage = nextcladePangoLineage;
         return this;
     }
 

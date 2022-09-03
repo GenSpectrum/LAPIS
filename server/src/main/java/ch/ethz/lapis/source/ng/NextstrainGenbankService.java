@@ -301,14 +301,14 @@ public class NextstrainGenbankService {
                 insert into y_nextstrain_genbank (
                   genbank_accession, sra_accession, gisaid_epi_isl, strain, date, year, month, day, date_original,
                   date_submitted, region, country, division, location, region_exposure, country_exposure,
-                  division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextstrain_clade,
-                  gisaid_clade, originating_lab, submitting_lab, authors, metadata_hash
+                  division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextclade_pango_lineage,
+                  nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors, metadata_hash
                 )
                 values (
                   ?, ?, ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
-                  ?, ?, ?, ?, ?
+                  ?, ?, ?, ?, ?, ?
                 )
                 on conflict (strain) do update
                 set
@@ -333,6 +333,7 @@ public class NextstrainGenbankService {
                   sex = ?,
                   sampling_strategy = ?,
                   pango_lineage = ?,
+                  nextclade_pango_lineage = ?,
                   nextstrain_clade = ?,
                   gisaid_clade = ?,
                   originating_lab = ?,
@@ -381,40 +382,42 @@ public class NextstrainGenbankService {
                         statement.setString(20, entry.getSex());
                         statement.setString(21, entry.getSamplingStrategy());
                         statement.setString(22, entry.getPangoLineage());
-                        statement.setString(23, entry.getNextstrainClade());
-                        statement.setString(24, entry.getGisaidClade());
-                        statement.setString(25, entry.getOriginatingLab());
-                        statement.setString(26, entry.getSubmittingLab());
-                        statement.setString(27, entry.getAuthors());
-                        statement.setString(28, currentHash);
+                        statement.setString(23, entry.getNextcladePangoLineage());
+                        statement.setString(24, entry.getNextstrainClade());
+                        statement.setString(25, entry.getGisaidClade());
+                        statement.setString(26, entry.getOriginatingLab());
+                        statement.setString(27, entry.getSubmittingLab());
+                        statement.setString(28, entry.getAuthors());
+                        statement.setString(29, currentHash);
 
-                        statement.setString(29, entry.getGenbankAccession());
-                        statement.setString(30, entry.getSraAccession());
-                        statement.setString(31, entry.getGisaidEpiIsl());
-                        statement.setDate(32, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setObject(33, entry.getYear());
-                        statement.setObject(34, entry.getMonth());
-                        statement.setObject(35, entry.getDay());
-                        statement.setString(36, entry.getDateOriginal());
-                        statement.setDate(37, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(38, entry.getRegion());
-                        statement.setString(39, entry.getCountry());
-                        statement.setString(40, entry.getDivision());
-                        statement.setString(41, entry.getLocation());
-                        statement.setString(42, entry.getRegionExposure());
-                        statement.setString(43, entry.getCountryExposure());
-                        statement.setString(44, entry.getDivisionExposure());
-                        statement.setString(45, entry.getHost());
-                        statement.setObject(46, entry.getAge());
-                        statement.setString(47, entry.getSex());
-                        statement.setString(48, entry.getSamplingStrategy());
-                        statement.setString(49, entry.getPangoLineage());
-                        statement.setString(50, entry.getNextstrainClade());
-                        statement.setString(51, entry.getGisaidClade());
-                        statement.setString(52, entry.getOriginatingLab());
-                        statement.setString(53, entry.getSubmittingLab());
-                        statement.setString(54, entry.getAuthors());
-                        statement.setString(55, currentHash);
+                        statement.setString(30, entry.getGenbankAccession());
+                        statement.setString(31, entry.getSraAccession());
+                        statement.setString(32, entry.getGisaidEpiIsl());
+                        statement.setDate(33, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setObject(34, entry.getYear());
+                        statement.setObject(35, entry.getMonth());
+                        statement.setObject(36, entry.getDay());
+                        statement.setString(37, entry.getDateOriginal());
+                        statement.setDate(38, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(39, entry.getRegion());
+                        statement.setString(40, entry.getCountry());
+                        statement.setString(41, entry.getDivision());
+                        statement.setString(42, entry.getLocation());
+                        statement.setString(43, entry.getRegionExposure());
+                        statement.setString(44, entry.getCountryExposure());
+                        statement.setString(45, entry.getDivisionExposure());
+                        statement.setString(46, entry.getHost());
+                        statement.setObject(47, entry.getAge());
+                        statement.setString(48, entry.getSex());
+                        statement.setString(49, entry.getSamplingStrategy());
+                        statement.setString(50, entry.getPangoLineage());
+                        statement.setString(51, entry.getNextcladePangoLineage());
+                        statement.setString(52, entry.getNextstrainClade());
+                        statement.setString(53, entry.getGisaidClade());
+                        statement.setString(54, entry.getOriginatingLab());
+                        statement.setString(55, entry.getSubmittingLab());
+                        statement.setString(56, entry.getAuthors());
+                        statement.setString(57, currentHash);
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {
@@ -435,16 +438,88 @@ public class NextstrainGenbankService {
 
         String sql = """
                 insert into y_nextstrain_genbank (
-                  strain, aa_mutations, aa_insertions, nuc_substitutions, nuc_deletions, nuc_insertions
+                  strain, aa_mutations, aa_insertions, nuc_substitutions, nuc_deletions, nuc_insertions,
+                  nextclade_total_substitutions, nextclade_total_deletions, nextclade_total_insertions,
+                  nextclade_total_frame_shifts, nextclade_total_aminoacid_substitutions,
+                  nextclade_total_aminoacid_deletions, nextclade_total_aminoacid_insertions, nextclade_total_missing,
+                  nextclade_total_non_acgtns, nextclade_total_pcr_primer_changes, nextclade_pcr_primer_changes,
+                  nextclade_alignment_score, nextclade_alignment_start, nextclade_alignment_end,
+                  nextclade_qc_overall_score, nextclade_qc_overall_status,
+                  nextclade_qc_missing_data_missing_data_threshold, nextclade_qc_missing_data_score,
+                  nextclade_qc_missing_data_status, nextclade_qc_missing_data_total_missing,
+                  nextclade_qc_mixed_sites_mixed_sites_threshold, nextclade_qc_mixed_sites_score,
+                  nextclade_qc_mixed_sites_status, nextclade_qc_mixed_sites_total_mixed_sites,
+                  nextclade_qc_private_mutations_cutoff, nextclade_qc_private_mutations_excess,
+                  nextclade_qc_private_mutations_score, nextclade_qc_private_mutations_status,
+                  nextclade_qc_private_mutations_total, nextclade_qc_snp_clusters_clustered_snps,
+                  nextclade_qc_snp_clusters_score, nextclade_qc_snp_clusters_status,
+                  nextclade_qc_snp_clusters_total_snps, nextclade_qc_frame_shifts_frame_shifts,
+                  nextclade_qc_frame_shifts_total_frame_shifts, nextclade_qc_frame_shifts_frame_shifts_ignored,
+                  nextclade_qc_frame_shifts_total_frame_shifts_ignored, nextclade_qc_frame_shifts_score,
+                  nextclade_qc_frame_shifts_status, nextclade_qc_stop_codons_stop_codons,
+                  nextclade_qc_stop_codons_total_stop_codons, nextclade_qc_stop_codons_score,
+                  nextclade_qc_stop_codons_status, nextclade_coverage, nextclade_errors
                 )
-                values (?, ?, ?, ?, ?, ?)
+                values (
+                  ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                  ?, ?, ?, ?, ?
+                )
                 on conflict (strain) do update
                 set
                   aa_mutations = ?,
                   aa_insertions = ?,
                   nuc_substitutions = ?,
                   nuc_deletions = ?,
-                  nuc_insertions = ?;
+                  nuc_insertions = ?,
+                  nextclade_total_substitutions = ?,
+                  nextclade_total_deletions = ?,
+                  nextclade_total_insertions = ?,
+                  nextclade_total_frame_shifts = ?,
+                  nextclade_total_aminoacid_substitutions = ?,
+                  nextclade_total_aminoacid_deletions = ?,
+                  nextclade_total_aminoacid_insertions = ?,
+                  nextclade_total_missing = ?,
+                  nextclade_total_non_acgtns = ?,
+                  nextclade_total_pcr_primer_changes = ?,
+                  nextclade_pcr_primer_changes = ?,
+                  nextclade_alignment_score = ?,
+                  nextclade_alignment_start = ?,
+                  nextclade_alignment_end = ?,
+                  nextclade_qc_overall_score = ?,
+                  nextclade_qc_overall_status = ?,
+                  nextclade_qc_missing_data_missing_data_threshold = ?,
+                  nextclade_qc_missing_data_score = ?,
+                  nextclade_qc_missing_data_status = ?,
+                  nextclade_qc_missing_data_total_missing = ?,
+                  nextclade_qc_mixed_sites_mixed_sites_threshold = ?,
+                  nextclade_qc_mixed_sites_score = ?,
+                  nextclade_qc_mixed_sites_status = ?,
+                  nextclade_qc_mixed_sites_total_mixed_sites = ?,
+                  nextclade_qc_private_mutations_cutoff = ?,
+                  nextclade_qc_private_mutations_excess = ?,
+                  nextclade_qc_private_mutations_score = ?,
+                  nextclade_qc_private_mutations_status = ?,
+                  nextclade_qc_private_mutations_total = ?,
+                  nextclade_qc_snp_clusters_clustered_snps = ?,
+                  nextclade_qc_snp_clusters_score = ?,
+                  nextclade_qc_snp_clusters_status = ?,
+                  nextclade_qc_snp_clusters_total_snps = ?,
+                  nextclade_qc_frame_shifts_frame_shifts = ?,
+                  nextclade_qc_frame_shifts_total_frame_shifts = ?,
+                  nextclade_qc_frame_shifts_frame_shifts_ignored = ?,
+                  nextclade_qc_frame_shifts_total_frame_shifts_ignored = ?,
+                  nextclade_qc_frame_shifts_score = ?,
+                  nextclade_qc_frame_shifts_status = ?,
+                  nextclade_qc_stop_codons_stop_codons = ?,
+                  nextclade_qc_stop_codons_total_stop_codons = ?,
+                  nextclade_qc_stop_codons_score = ?,
+                  nextclade_qc_stop_codons_status = ?,
+                  nextclade_coverage = ?,
+                  nextclade_errors = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
             conn.setAutoCommit(false);
@@ -462,12 +537,102 @@ public class NextstrainGenbankService {
                         statement.setString(4, entry.getNucSubstitutions());
                         statement.setString(5, entry.getNucDeletions());
                         statement.setString(6, entry.getNucInsertions());
+                        statement.setObject(7, entry.getTotalSubstitutions());
+                        statement.setObject(8, entry.getTotalDeletions());
+                        statement.setObject(9, entry.getTotalInsertions());
+                        statement.setObject(10, entry.getTotalFrameShifts());
+                        statement.setObject(11, entry.getTotalAminoacidSubstitutions());
+                        statement.setObject(12, entry.getTotalAminoacidDeletions());
+                        statement.setObject(13, entry.getTotalAminoacidInsertions());
+                        statement.setObject(14, entry.getTotalMissing());
+                        statement.setObject(15, entry.getTotalNonACGTNs());
+                        statement.setObject(16, entry.getTotalPcrPrimerChanges());
+                        statement.setString(17, entry.getPcrPrimerChanges());
+                        statement.setObject(18, entry.getAlignmentScore());
+                        statement.setObject(19, entry.getAlignmentStart());
+                        statement.setObject(20, entry.getAlignmentEnd());
+                        statement.setObject(21, entry.getQcOverallScore());
+                        statement.setString(22, entry.getQcOverallStatus());
+                        statement.setObject(23, entry.getQcMissingDataMissingDataThreshold());
+                        statement.setObject(24, entry.getQcMissingDataScore());
+                        statement.setString(25, entry.getQcMissingDataStatus());
+                        statement.setObject(26, entry.getQcMissingDataTotalMissing());
+                        statement.setObject(27, entry.getQcMixedSitesMixedSitesThreshold());
+                        statement.setObject(28, entry.getQcMixedSitesScore());
+                        statement.setString(29, entry.getQcMixedSitesStatus());
+                        statement.setObject(30, entry.getQcMixedSitesTotalMixedSites());
+                        statement.setObject(31, entry.getQcPrivateMutationsCutoff());
+                        statement.setObject(32, entry.getQcPrivateMutationsExcess());
+                        statement.setObject(33, entry.getQcPrivateMutationsScore());
+                        statement.setString(34, entry.getQcPrivateMutationsStatus());
+                        statement.setObject(35, entry.getQcPrivateMutationsTotal());
+                        statement.setString(36, entry.getQcSnpClustersClusteredSNPs());
+                        statement.setObject(37, entry.getQcSnpClustersScore());
+                        statement.setString(38, entry.getQcSnpClustersStatus());
+                        statement.setObject(39, entry.getQcSnpClustersTotalSNPs());
+                        statement.setString(40, entry.getQcFrameShiftsFrameShifts());
+                        statement.setObject(41, entry.getQcFrameShiftsTotalFrameShifts());
+                        statement.setString(42, entry.getQcFrameShiftsFrameShiftsIgnored());
+                        statement.setObject(43, entry.getQcFrameShiftsTotalFrameShiftsIgnored());
+                        statement.setObject(44, entry.getQcFrameShiftsScore());
+                        statement.setString(45, entry.getQcFrameShiftsStatus());
+                        statement.setString(46, entry.getQcStopCodonsStopCodons());
+                        statement.setObject(47, entry.getQcStopCodonsTotalStopCodons());
+                        statement.setObject(48, entry.getQcStopCodonsScore());
+                        statement.setString(49, entry.getQcStopCodonsStatus());
+                        statement.setObject(50, entry.getCoverage());
+                        statement.setString(51, entry.getErrors());
 
-                        statement.setString(7, entry.getAaMutations());
-                        statement.setString(8, entry.getAaInsertions());
-                        statement.setString(9, entry.getNucSubstitutions());
-                        statement.setString(10, entry.getNucDeletions());
-                        statement.setString(11, entry.getNucInsertions());
+                        statement.setString(52, entry.getAaMutations());
+                        statement.setString(53, entry.getAaInsertions());
+                        statement.setString(54, entry.getNucSubstitutions());
+                        statement.setString(55, entry.getNucDeletions());
+                        statement.setString(56, entry.getNucInsertions());
+                        statement.setObject(57, entry.getTotalSubstitutions());
+                        statement.setObject(58, entry.getTotalDeletions());
+                        statement.setObject(59, entry.getTotalInsertions());
+                        statement.setObject(60, entry.getTotalFrameShifts());
+                        statement.setObject(61, entry.getTotalAminoacidSubstitutions());
+                        statement.setObject(62, entry.getTotalAminoacidDeletions());
+                        statement.setObject(63, entry.getTotalAminoacidInsertions());
+                        statement.setObject(64, entry.getTotalMissing());
+                        statement.setObject(65, entry.getTotalNonACGTNs());
+                        statement.setObject(66, entry.getTotalPcrPrimerChanges());
+                        statement.setString(67, entry.getPcrPrimerChanges());
+                        statement.setObject(68, entry.getAlignmentScore());
+                        statement.setObject(69, entry.getAlignmentStart());
+                        statement.setObject(70, entry.getAlignmentEnd());
+                        statement.setObject(71, entry.getQcOverallScore());
+                        statement.setString(72, entry.getQcOverallStatus());
+                        statement.setObject(73, entry.getQcMissingDataMissingDataThreshold());
+                        statement.setObject(74, entry.getQcMissingDataScore());
+                        statement.setString(75, entry.getQcMissingDataStatus());
+                        statement.setObject(76, entry.getQcMissingDataTotalMissing());
+                        statement.setObject(77, entry.getQcMixedSitesMixedSitesThreshold());
+                        statement.setObject(78, entry.getQcMixedSitesScore());
+                        statement.setString(79, entry.getQcMixedSitesStatus());
+                        statement.setObject(80, entry.getQcMixedSitesTotalMixedSites());
+                        statement.setObject(81, entry.getQcPrivateMutationsCutoff());
+                        statement.setObject(82, entry.getQcPrivateMutationsExcess());
+                        statement.setObject(83, entry.getQcPrivateMutationsScore());
+                        statement.setString(84, entry.getQcPrivateMutationsStatus());
+                        statement.setObject(85, entry.getQcPrivateMutationsTotal());
+                        statement.setString(86, entry.getQcSnpClustersClusteredSNPs());
+                        statement.setObject(87, entry.getQcSnpClustersScore());
+                        statement.setString(88, entry.getQcSnpClustersStatus());
+                        statement.setObject(89, entry.getQcSnpClustersTotalSNPs());
+                        statement.setString(90, entry.getQcFrameShiftsFrameShifts());
+                        statement.setObject(91, entry.getQcFrameShiftsTotalFrameShifts());
+                        statement.setString(92, entry.getQcFrameShiftsFrameShiftsIgnored());
+                        statement.setObject(93, entry.getQcFrameShiftsTotalFrameShiftsIgnored());
+                        statement.setObject(94, entry.getQcFrameShiftsScore());
+                        statement.setString(95, entry.getQcFrameShiftsStatus());
+                        statement.setString(96, entry.getQcStopCodonsStopCodons());
+                        statement.setObject(97, entry.getQcStopCodonsTotalStopCodons());
+                        statement.setObject(98, entry.getQcStopCodonsScore());
+                        statement.setString(99, entry.getQcStopCodonsStatus());
+                        statement.setObject(100, entry.getCoverage());
+                        statement.setString(101, entry.getErrors());
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {
