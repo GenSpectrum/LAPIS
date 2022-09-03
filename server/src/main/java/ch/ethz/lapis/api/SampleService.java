@@ -109,6 +109,8 @@ public class SampleService {
                 add(tbl.GISAID_EPI_ISL);
                 add(tbl.STRAIN);
                 add(tbl.DATE);
+                add(tbl.YEAR);
+                add(tbl.MONTH);
                 add(tbl.DATE_SUBMITTED);
                 add(tbl.REGION);
                 add(tbl.COUNTRY);
@@ -144,6 +146,8 @@ public class SampleService {
                     .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
                     .setStrain(r.get(tbl.STRAIN))
                     .setDate(r.get(tbl.DATE))
+                    .setYear(r.get(tbl.YEAR))
+                    .setMonth(r.get(tbl.MONTH))
                     .setDateSubmitted(r.get(tbl.DATE_SUBMITTED))
                     .setRegion(r.get(tbl.REGION))
                     .setCountry(r.get(tbl.COUNTRY))

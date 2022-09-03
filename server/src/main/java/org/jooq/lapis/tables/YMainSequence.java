@@ -11,7 +11,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row7;
+import org.jooq.Row10;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -67,6 +67,11 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
     public final TableField<YMainSequenceRecord, String> AA_MUTATIONS = createField(DSL.name("aa_mutations"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>y_main_sequence.aa_unknowns</code>.
+     */
+    public final TableField<YMainSequenceRecord, String> AA_UNKNOWNS = createField(DSL.name("aa_unknowns"), SQLDataType.CLOB, this, "");
+
+    /**
      * The column <code>y_main_sequence.nuc_substitutions</code>.
      */
     public final TableField<YMainSequenceRecord, String> NUC_SUBSTITUTIONS = createField(DSL.name("nuc_substitutions"), SQLDataType.CLOB, this, "");
@@ -80,6 +85,16 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
      * The column <code>y_main_sequence.nuc_insertions</code>.
      */
     public final TableField<YMainSequenceRecord, String> NUC_INSERTIONS = createField(DSL.name("nuc_insertions"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_sequence.nuc_unknowns</code>.
+     */
+    public final TableField<YMainSequenceRecord, String> NUC_UNKNOWNS = createField(DSL.name("nuc_unknowns"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_main_sequence.aa_insertions</code>.
+     */
+    public final TableField<YMainSequenceRecord, String> AA_INSERTIONS = createField(DSL.name("aa_insertions"), SQLDataType.CLOB, this, "");
 
     private YMainSequence(Name alias, Table<YMainSequenceRecord> aliased) {
         this(alias, aliased, null);
@@ -156,11 +171,11 @@ public class YMainSequence extends TableImpl<YMainSequenceRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row7 type methods
+    // Row10 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row7<Integer, byte[], byte[], String, String, String, String> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public Row10<Integer, byte[], byte[], String, String, String, String, String, String, String> fieldsRow() {
+        return (Row10) super.fieldsRow();
     }
 }

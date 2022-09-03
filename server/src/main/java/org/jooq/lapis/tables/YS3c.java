@@ -11,7 +11,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.Row7;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -55,6 +55,16 @@ public class YS3c extends TableImpl<YS3cRecord> {
      * The column <code>y_s3c.sra_accession</code>.
      */
     public final TableField<YS3cRecord, String> SRA_ACCESSION = createField(DSL.name("sra_accession"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>y_s3c.age</code>.
+     */
+    public final TableField<YS3cRecord, Integer> AGE = createField(DSL.name("age"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>y_s3c.sex</code>.
+     */
+    public final TableField<YS3cRecord, String> SEX = createField(DSL.name("sex"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>y_s3c.hospitalized</code>.
@@ -141,11 +151,11 @@ public class YS3c extends TableImpl<YS3cRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row5 type methods
+    // Row7 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<String, String, Boolean, Boolean, Boolean> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public Row7<String, String, Integer, String, Boolean, Boolean, Boolean> fieldsRow() {
+        return (Row7) super.fieldsRow();
     }
 }

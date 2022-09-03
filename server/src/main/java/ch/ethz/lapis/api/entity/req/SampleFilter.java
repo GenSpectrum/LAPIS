@@ -32,6 +32,11 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dateSubmittedTo;
 
+    private Integer yearFrom;
+    private Integer yearTo;
+    private String yearMonthFrom;
+    private String yearMonthTo;
+
     private String region;
     private String country;
     private String division;
@@ -67,6 +72,8 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
     private Float nextcladeQcFrameShiftsScoreTo;
     private Float nextcladeQcStopCodonsScoreFrom;
     private Float nextcladeQcStopCodonsScoreTo;
+    private Float nextcladeCoverageFrom;
+    private Float nextcladeCoverageTo;
 
     private List<NucMutation> nucMutations = new ArrayList<>();
     private List<NucInsertion> nucInsertions = new ArrayList<>();
@@ -144,6 +151,42 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setDateSubmittedTo(LocalDate dateSubmittedTo) {
         this.dateSubmittedTo = dateSubmittedTo;
+        return (T) this;
+    }
+
+    public Integer getYearFrom() {
+        return yearFrom;
+    }
+
+    public T setYearFrom(Integer yearFrom) {
+        this.yearFrom = yearFrom;
+        return (T) this;
+    }
+
+    public Integer getYearTo() {
+        return yearTo;
+    }
+
+    public T setYearTo(Integer yearTo) {
+        this.yearTo = yearTo;
+        return (T) this;
+    }
+
+    public String getYearMonthFrom() {
+        return yearMonthFrom;
+    }
+
+    public T setYearMonthFrom(String yearMonthFrom) {
+        this.yearMonthFrom = yearMonthFrom;
+        return (T) this;
+    }
+
+    public String getYearMonthTo() {
+        return yearMonthTo;
+    }
+
+    public T setYearMonthTo(String yearMonthTo) {
+        this.yearMonthTo = yearMonthTo;
         return (T) this;
     }
 
@@ -504,6 +547,24 @@ public abstract class SampleFilter<T extends SampleFilter<T>> {
 
     public T setNextcladeQcStopCodonsScoreTo(Float nextcladeQcStopCodonsScoreTo) {
         this.nextcladeQcStopCodonsScoreTo = nextcladeQcStopCodonsScoreTo;
+        return (T) this;
+    }
+
+    public Float getNextcladeCoverageFrom() {
+        return nextcladeCoverageFrom;
+    }
+
+    public T setNextcladeCoverageFrom(Float nextcladeCoverageFrom) {
+        this.nextcladeCoverageFrom = nextcladeCoverageFrom;
+        return (T) this;
+    }
+
+    public Float getNextcladeCoverageTo() {
+        return nextcladeCoverageTo;
+    }
+
+    public T setNextcladeCoverageTo(Float nextcladeCoverageTo) {
+        this.nextcladeCoverageTo = nextcladeCoverageTo;
         return (T) this;
     }
 }
