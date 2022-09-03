@@ -225,6 +225,8 @@ public class QueryEngine {
             sf.getNextcladeQcFrameShiftsScoreFrom(), sf.getNextcladeQcFrameShiftsScoreTo());
         between(matched, db.getFloatColumn(NEXTCLADE_QC_STOP_CODONS_SCORE),
             sf.getNextcladeQcStopCodonsScoreFrom(), sf.getNextcladeQcStopCodonsScoreTo());
+        between(matched, db.getFloatColumn(NEXTCLADE_COVERAGE),
+            sf.getNextcladeCoverageFrom(), sf.getNextcladeCoverageTo());
 
         // Filter IDs
         if (sf instanceof SampleDetailRequest) {

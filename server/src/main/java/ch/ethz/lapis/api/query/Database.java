@@ -47,6 +47,7 @@ public class Database {
         public static final String NEXTCLADE_QC_SNP_CLUSTERS_SCORE = "nextclade_qc_snp_clusters_score"; // Float
         public static final String NEXTCLADE_QC_FRAME_SHIFTS_SCORE = "nextclade_qc_frame_shifts_score"; // Float
         public static final String NEXTCLADE_QC_STOP_CODONS_SCORE = "nextclade_qc_stop_codons_score"; // Float
+        public static final String NEXTCLADE_COVERAGE = "nextclade_coverage"; // Float
     }
 
     public static final String[] ALL_COLUMNS = new String[] {
@@ -74,7 +75,7 @@ public class Database {
         Columns.NEXTCLADE_QC_OVERALL_SCORE, Columns.NEXTCLADE_QC_MISSING_DATA_SCORE,
         Columns.NEXTCLADE_QC_MIXED_SITES_SCORE, Columns.NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE,
         Columns.NEXTCLADE_QC_SNP_CLUSTERS_SCORE, Columns.NEXTCLADE_QC_FRAME_SHIFTS_SCORE,
-        Columns.NEXTCLADE_QC_STOP_CODONS_SCORE
+        Columns.NEXTCLADE_QC_STOP_CODONS_SCORE, Columns.NEXTCLADE_COVERAGE
     };
     public static final String[] BOOLEAN_COLUMNS = new String[] {
         Columns.HOSPITALIZED, Columns.DIED, Columns.FULLY_VACCINATED
