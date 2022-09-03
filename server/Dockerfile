@@ -5,7 +5,7 @@ WORKDIR /build/
 
 COPY . .
 RUN chmod +x ./gradlew
-RUN ./gradlew clean build -x test
+RUN ./gradlew clean bootJar -x test
 
 
 ## Run server ##
