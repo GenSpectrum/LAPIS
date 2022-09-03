@@ -18,7 +18,8 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
+    implementation 'com.sun.xml.bind:jaxb-impl:4.0.0'
 
     implementation 'org.yaml:snakeyaml:1.30'
     implementation 'org.postgresql:postgresql:42.5.0'
