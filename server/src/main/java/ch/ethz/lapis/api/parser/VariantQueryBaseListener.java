@@ -66,6 +66,18 @@ public class VariantQueryBaseListener implements VariantQueryListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterMaybe(VariantQueryParser.MaybeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMaybe(VariantQueryParser.MaybeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterOr(VariantQueryParser.OrContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -24,6 +24,7 @@ expr:
   | expr '&' expr    # And
   | expr '|' expr    # Or
   | '(' expr ')'     # Par
+  | 'MAYBE(' expr ')'    # Maybe
   ;
 single:
   aa_mut
