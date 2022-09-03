@@ -188,28 +188,6 @@ public class Database {
     }
 
 
-    private static List<PangoLineageAlias> getPangolinLineageAliases(Connection conn) throws SQLException {
-        String sql = """
-            select
-              alias,
-              full_name
-            from pangolin_lineage_alias;
-        """;
-        try (Statement statement = conn.createStatement()) {
-            try (ResultSet rs = statement.executeQuery(sql)) {
-                List<PangoLineageAlias> aliases = new ArrayList<>();
-                while (rs.next()) {
-                    aliases.add(new PangoLineageAlias(
-                        rs.getString("alias"),
-                        rs.getString("full_name")
-                    ));
-                }
-                return aliases;
-            }
-        }
-    }
-
-
     public char[] getNucArray(int position) {
         String sql = """
             select data_compressed
@@ -265,6 +243,29 @@ public class Database {
             throw new RuntimeException(e);
         }
     }
+
+
+    public static List<PangoLineageAlias> getPangoLineageAliases(Connection conn) throws SQLException {
+        String sql = """
+            select
+              alias,
+              full_name
+            from pangolin_lineage_alias;
+        """;
+        try (Statement statement = conn.createStatement()) {
+            try (ResultSet rs = statement.executeQuery(sql)) {
+                List<PangoLineageAlias> aliases = new ArrayList<>();
+                while (rs.next()) {
+                    aliases.add(new PangoLineageAlias(
+                        rs.getString("alias"),
+                        rs.getString("full_name")
+                    ));
+                }
+                return aliases;
+            }
+        }
+    }
+
 
     public static void updateInstance(ComboPooledDataSource databasePool) {
         try {
@@ -330,7 +331,7 @@ public class Database {
 
                 }
                 // Fetch pango lineage aliases
-                List<PangoLineageAlias> aliases = getPangolinLineageAliases(conn);
+                List<PangoLineageAlias> aliases = getPangoLineageAliases(conn);
                 PangoLineageQueryConverter pangoLineageQueryConverter = new PangoLineageQueryConverter(aliases);
                 // Create database object
                 database = new Database(

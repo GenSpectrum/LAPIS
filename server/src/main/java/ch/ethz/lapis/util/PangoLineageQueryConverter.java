@@ -5,7 +5,7 @@ import java.util.List;
 
 public class PangoLineageQueryConverter {
 
-    public class PangoLineageQueryMatch {
+    public static class PangoLineageQueryMatch {
         private final List<String> exact;
         private final List<String> prefix;
 
@@ -23,10 +23,15 @@ public class PangoLineageQueryConverter {
         }
     }
 
-    private final PangoLineageAliasResolver pangoLineageAliasResolver;
+    private PangoLineageAliasResolver pangoLineageAliasResolver;
 
 
     public PangoLineageQueryConverter(List<PangoLineageAlias> aliases) {
+        this.pangoLineageAliasResolver = new PangoLineageAliasResolver(aliases);
+    }
+
+
+    public void updateAliases(List<PangoLineageAlias> aliases) {
         this.pangoLineageAliasResolver = new PangoLineageAliasResolver(aliases);
     }
 

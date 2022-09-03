@@ -2,6 +2,7 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.util.PangoLineageAlias;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -69,4 +71,15 @@ public class DataVersionService {
         }
     }
 
+
+    @Scheduled(fixedDelay = 60000)
+    public void autoFetchPangoAliases() {
+        Database database = Database.getOrLoadInstance(dbPool);
+        try (Connection conn = dbPool.getConnection()) {
+            List<PangoLineageAlias> aliases = Database.getPangoLineageAliases(conn);
+            database.getPangoLineageQueryConverter().updateAliases(aliases);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
