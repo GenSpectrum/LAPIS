@@ -25,7 +25,9 @@ public class NextstrainGenbankNextcladeFileReader
         this.in = in;
         try {
             CSVFormat format = CSVFormat.TDF
-                .withFirstRecordAsHeader();
+                .builder()
+                .setHeader().setSkipHeaderRecord(true)
+                .build();
             CSVParser parser = CSVParser.parse(in, StandardCharsets.UTF_8, format);
             iterator = parser.iterator();
         } catch (IOException e) {
