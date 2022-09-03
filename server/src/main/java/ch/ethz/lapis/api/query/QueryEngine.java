@@ -118,7 +118,7 @@ public class QueryEngine {
         }
         if (sf.getYearMonthTo() != null) {
             if (!pattern.matcher(sf.getYearMonthTo()).matches()) {
-                throw new BadRequestException("getYearMonthTo is malformed, it has to be yyyy-mm");
+                throw new BadRequestException("yearMonthTo is malformed, it has to be yyyy-mm");
             }
         }
 
