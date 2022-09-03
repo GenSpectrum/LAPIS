@@ -9,6 +9,9 @@ plugins {
 group 'ch.ethz'
 version '1.0-SNAPSHOT'
 
+sourceCompatibility = '1.17'
+targetCompatibility = '1.17'
+
 repositories {
     mavenCentral()
 }
