@@ -1,16 +1,16 @@
 ## Build app ##
 
-FROM openjdk:16 AS builder
+FROM openjdk:17 AS builder
 WORKDIR /build/
 
 COPY . .
 RUN chmod +x ./gradlew
-RUN ./gradlew clean build -x test
+RUN ./gradlew clean bootJar -x test
 
 
 ## Run server ##
 
-FROM openjdk:16-bullseye AS server
+FROM openjdk:17-bullseye AS server
 WORKDIR /app
 
 # Download nextalign

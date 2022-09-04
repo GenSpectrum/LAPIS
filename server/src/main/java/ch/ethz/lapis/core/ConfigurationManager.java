@@ -2,13 +2,14 @@ package ch.ethz.lapis.core;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import org.yaml.snakeyaml.Yaml;
 
 
 public class ConfigurationManager {
@@ -40,9 +41,10 @@ public class ConfigurationManager {
         merged = Utils.nullableMapDeepMerge(merged, fileProgramConfig);
         merged = Utils.nullableMapDeepMerge(merged, envProgramConfig);
 
-        ObjectMapper objectMapper = new ObjectMapper()
+        JsonMapper objectMapper = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            .build();
         T mergedConfig = objectMapper.convertValue(merged, configClass);
         return mergedConfig;
     }
@@ -64,9 +66,10 @@ public class ConfigurationManager {
 
         Map merged = Utils.nullableMapDeepMerge(envDefaultConfig, envProgramConfig);
 
-        ObjectMapper objectMapper = new ObjectMapper()
+        JsonMapper objectMapper = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            .build();
         T mergedConfig = objectMapper.convertValue(merged, configClass);
         return mergedConfig;
     }

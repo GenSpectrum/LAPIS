@@ -87,7 +87,7 @@ public class CsvSerializer {
             .toArray(String[]::new);
         // Write CSV
         StringWriter out = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(out, csvFormat.withHeader(header))) {
+        try (CSVPrinter printer = new CSVPrinter(out, csvFormat.builder().setHeader(header).build())) {
             for (T obj : objects) {
                 Object[] record = selectedFields.stream()
                     .map(f -> {
