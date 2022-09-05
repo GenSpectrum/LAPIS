@@ -89,7 +89,7 @@ public class ReferenceGenomeData {
      * @param position Starts with the index 1
      */
     public char getGeneAABase(String gene, int position) {
-        return geneAASequencesArr.get(gene)[position - 1];
+        return geneAASequencesArr.get(getCorrectlyCapitalizedGeneName(gene))[position - 1];
     }
 
 
