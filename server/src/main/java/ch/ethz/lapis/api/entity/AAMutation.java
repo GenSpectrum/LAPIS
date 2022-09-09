@@ -15,6 +15,11 @@ public class AAMutation implements VariantQueryExpr {
 
     private Character mutation;
 
+    /**
+     * If true, unknowns will be mapped to true during the evaluation. If false, unknowns will be mapped to false.
+     */
+    private boolean applyMaybe = false;
+
     public AAMutation() {
     }
 
@@ -73,6 +78,15 @@ public class AAMutation implements VariantQueryExpr {
         return this;
     }
 
+    public boolean isApplyMaybe() {
+        return applyMaybe;
+    }
+
+    public AAMutation setApplyMaybe(boolean applyMaybe) {
+        this.applyMaybe = applyMaybe;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "AAMutation{" +
@@ -86,8 +100,14 @@ public class AAMutation implements VariantQueryExpr {
     public boolean[] evaluate(Database database) {
         char[] data = database.getAAArray(gene, position);
         boolean[] result = new boolean[data.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = isMatchingMutation(data[i], this);
+        if (!applyMaybe) {
+            for (int i = 0; i < result.length; i++) {
+                result[i] = isMatchingMutation(data[i], this);
+            }
+        } else {
+            for (int i = 0; i < result.length; i++) {
+                result[i] = isMaybeMatchingMutation(data[i], this);
+            }
         }
         return result;
     }
@@ -105,5 +125,18 @@ public class AAMutation implements VariantQueryExpr {
         } else {
             return foundBase == mutationBase;
         }
+    }
+
+    public static boolean isMaybeMatchingMutation(Character foundBase, AAMutation searchedMutation) {
+        if (!isAmbiguityCode(foundBase)) {
+            return isMatchingMutation(foundBase, searchedMutation);
+        }
+        // There is only a code for "unknown" for AAs. Thus, this function always returns true if the found base is
+        // ambiguous.
+        return true;
+    }
+
+    public static boolean isAmbiguityCode(Character base) {
+        return base == 'X';
     }
 }
