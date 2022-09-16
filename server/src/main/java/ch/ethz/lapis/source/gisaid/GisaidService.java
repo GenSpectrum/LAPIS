@@ -2,18 +2,19 @@ package ch.ethz.lapis.source.gisaid;
 
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
+import ch.ethz.lapis.core.NapiNotification;
+import ch.ethz.lapis.core.SendableReport.PriorityLevel;
 import ch.ethz.lapis.util.ParsedDate;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.javatuples.Pair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.tukaani.xz.XZInputStream;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -23,17 +24,33 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import org.javatuples.Pair;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.tukaani.xz.XZInputStream;
 
 
 public class GisaidService {
@@ -47,6 +64,7 @@ public class GisaidService {
     private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
     private final int batchSize = 400;
     private final Path geoLocationRulesFile;
+    private final String notificationAuthKey;
 
     public GisaidService(
         ComboPooledDataSource databasePool,
@@ -54,7 +72,8 @@ public class GisaidService {
         int maxNumberWorkers,
         String nextcladePath,
         GisaidApiConfig gisaidApiConfig,
-        String geoLocationRulesFile
+        String geoLocationRulesFile,
+        String notificationAuthKey
     ) {
         this.databasePool = databasePool;
         this.workdir = Path.of(workdir);
@@ -62,6 +81,7 @@ public class GisaidService {
         this.nextcladePath = Path.of(nextcladePath);
         this.gisaidApiConfig = gisaidApiConfig;
         this.geoLocationRulesFile = Path.of(geoLocationRulesFile);
+        this.notificationAuthKey = notificationAuthKey;
     }
 
     private static void downloadDataPackage(
@@ -254,7 +274,7 @@ public class GisaidService {
             deleted = toDelete.size();
         }
 
-        // Merge the BatchReports to a report and send it by email.
+        // Merge the BatchReports to a report and send it
         System.out.println(LocalDateTime.now() + " [main] Preparing final report");
         BatchReport mergedBatchReport = mergeBatchReports(new ArrayList<>(batchReports));
         boolean success = unhandledExceptions.isEmpty()
@@ -272,7 +292,7 @@ public class GisaidService {
             .setDeletedEntries(deleted)
             .setFailedEntries(mergedBatchReport.getFailedEntries())
             .setUnhandledExceptions(new ArrayList<>(unhandledExceptions));
-//        notificationSystem.sendReport(finalReport); TODO
+        sendReport(finalReport);
 
         System.err.println(LocalDateTime.now() + " There are " + unhandledExceptions.size() + " unhandled exceptions.");
         for (Exception unhandledException : unhandledExceptions) {
@@ -486,6 +506,15 @@ public class GisaidService {
             .setUpdatedSequenceEntries(updatedSequenceEntries)
             .setFailedEntries(failedEntries);
     }
+
+
+    private void sendReport(FinalReport report) {
+        String level = report.getPriority() == PriorityLevel.INFO ? "INFO" : "ERROR";
+        String subject = "[LAPIS GISAID import] Source data loading has finished";
+        String body = report.getEmailText();
+        NapiNotification.sendNotification(notificationAuthKey, level, subject, body);
+    }
+
 
     private void updateDataVersion(LocalDateTime startTime) throws SQLException {
         ZoneId zoneId = ZoneId.systemDefault();

@@ -22,6 +22,8 @@ public class LapisConfig implements Config {
     private OpennessLevel apiOpennessLevel;
     private DatabaseConfig s3cVineyard;
 
+    private String notificationKey;
+
     public DatabaseConfig getVineyard() {
         return vineyard;
     }
@@ -136,6 +138,15 @@ public class LapisConfig implements Config {
 
     public LapisConfig setS3cVineyard(DatabaseConfig s3cVineyard) {
         this.s3cVineyard = s3cVineyard;
+        return this;
+    }
+
+    public String getNotificationKey() {
+        return notificationKey;
+    }
+
+    public LapisConfig setNotificationKey(String notificationKey) {
+        this.notificationKey = notificationKey;
         return this;
     }
 

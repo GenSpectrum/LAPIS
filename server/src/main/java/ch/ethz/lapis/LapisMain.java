@@ -77,11 +77,11 @@ public class LapisMain extends SubProgram<LapisConfig> {
                     ).updateData();
                     case UpdateSteps.loadGisaid -> new GisaidService(
                         dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath(),
-                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
+                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath(), config.getNotificationKey()
                     ).updateData();
                     case UpdateSteps.loadGisaidMissingSubmitters -> new GisaidService(
                         dbPool, config.getWorkdir(), config.getMaxNumberWorkers(), config.getNextcladePath(),
-                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath()
+                        config.getGisaidApiConfig(), config.getGeoLocationRulesPath(), config.getNotificationKey()
                     ).fetchMissingSubmitterInformation();
                     case UpdateSteps.loadS3C -> new S3CVineyardService(dbPool, config.getS3cVineyard()).updateData();
                     case UpdateSteps.loadPangolinAssignment -> new CovLineagesService(dbPool, config.getWorkdir())
