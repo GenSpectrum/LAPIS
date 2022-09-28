@@ -27,6 +27,11 @@ public class VariantQueryListener extends VariantQueryBaseListener {
     }
 
     @Override
+    public void exitMaybe(VariantQueryParser.MaybeContext ctx) {
+        exprStack.pop();
+    }
+
+    @Override
     public void enterAnd(VariantQueryParser.AndContext ctx) {
         VariantQueryExpr expr = new BiOp(BiOp.OpType.AND);
         exprStack.peek().putValue(expr);
