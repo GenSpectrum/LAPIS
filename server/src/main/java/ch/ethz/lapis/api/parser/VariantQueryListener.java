@@ -56,6 +56,18 @@ public interface VariantQueryListener extends ParseTreeListener {
 	 */
 	void exitNeg(VariantQueryParser.NegContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code Maybe}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterMaybe(VariantQueryParser.MaybeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Maybe}
+	 * labeled alternative in {@link VariantQueryParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitMaybe(VariantQueryParser.MaybeContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code Or}
 	 * labeled alternative in {@link VariantQueryParser#expr}.
 	 * @param ctx the parse tree
