@@ -45,6 +45,8 @@ public class Maybe extends Single {
      *     </li>
      * </ul>
      * where definitely() is the "normal" mode where unknowns are treated like false.
+     * <p>
+     * If there is no maybe in the query, the function won't change anything.
      */
     public static void pushDownMaybe(VariantQueryExpr expr) {
         pushDownMaybeInternal(expr, false);
