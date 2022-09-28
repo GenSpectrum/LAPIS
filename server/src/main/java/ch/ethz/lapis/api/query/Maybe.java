@@ -76,7 +76,7 @@ public class Maybe extends Single {
                         + "operator (\"|\") to query for different possible values."
                 );
             }
-            x.setApplyMaybe(true);
+            x.setApplyMaybe(inMaybeMode);
         } else if (expr instanceof AAMutation x) {
             if (inMaybeMode && AAMutation.isAmbiguityCode(x.getMutation())) {
                 throw new MalformedVariantQueryException(
@@ -84,7 +84,7 @@ public class Maybe extends Single {
                         + "operator (\"|\") to query for different possible values."
                 );
             }
-            x.setApplyMaybe(true);
+            x.setApplyMaybe(inMaybeMode);
         } else if (expr instanceof NucInsertion || expr instanceof AAInsertion) {
             if (inMaybeMode) {
                 throw new MalformedVariantQueryException("insertions may not occur within a maybe().");
