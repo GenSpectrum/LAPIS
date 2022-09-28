@@ -59,6 +59,8 @@ public class Maybe extends Single {
             pushDownMaybeInternal(x.getValue(), true);
         } else if (expr instanceof Negation x) {
             pushDownMaybeInternal(x.getValue(), false);
+        } else if (expr instanceof Single x) {
+            pushDownMaybeInternal(x.getValue(), inMaybeMode);
         } else if (expr instanceof BiOp x) {
             pushDownMaybeInternal(x.getLeft(), inMaybeMode);
             pushDownMaybeInternal(x.getRight(), inMaybeMode);
