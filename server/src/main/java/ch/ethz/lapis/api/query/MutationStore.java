@@ -244,16 +244,7 @@ public class MutationStore {
     }
 
 
-    private static class InternalEntry {
-        private final int[] mutationIds;
-        private final short[] unknownPositions;
-        private final boolean[] unknownIsStartRange;
-
-        public InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
-            this.mutationIds = mutationIds;
-            this.unknownPositions = unknownPositions;
-            this.unknownIsStartRange = unknownIsStartRange;
-        }
+    private record InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
     }
 
 }

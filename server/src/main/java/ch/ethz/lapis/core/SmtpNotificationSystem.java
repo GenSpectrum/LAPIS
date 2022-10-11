@@ -72,7 +72,7 @@ public class SmtpNotificationSystem implements NotificationSystem, SendAttachmen
             builder.withHeader("X-Priority", 1);
         }
         for (ReportAttachment attachment : report.getAttachments()) {
-            builder.withAttachment(attachment.getAttachmentFilename(), attachment.getBytes(), attachment.getMimeType());
+            builder.withAttachment(attachment.attachmentFilename(), attachment.bytes(), attachment.mimeType());
         }
         Email email = builder.buildEmail();
         mailer.sendMail(email);

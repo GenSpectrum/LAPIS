@@ -65,31 +65,31 @@ public class BatchProcessingWorker {
 
     public BatchReport run(Batch batch) throws Exception {
         try {
-            int batchSize = batch.getEntries().size();
+            int batchSize = batch.entries().size();
             System.out.println(LocalDateTime.now() + " [" + id + "] Received a batch");
 
             // Remove entries from the batch where no sequence is provided -> very weird
-            batch = new Batch(batch.getEntries().stream()
+            batch = new Batch(batch.entries().stream()
                 .filter(s -> s.getSeqOriginal() != null && !s.getSeqOriginal().isBlank())
                 .collect(Collectors.toList()));
 
             determineChangeSet(batch);
 
             // Fetch the submitter information for all APPEND sequences
-            for (GisaidEntry entry : batch.getEntries()) {
+            for (GisaidEntry entry : batch.entries()) {
                 // Due to rate limitation, we only fetch submitter information for Swiss sequences for now
                 if (entry.getImportMode() == ImportMode.APPEND && "Switzerland".equals(entry.getCountry())) {
                     Thread.sleep(3000);
                     var result = submitterInformationFetcher.fetchSubmitterInformation(entry.getGisaidEpiIsl());
-                    if (result.getStatus() == SubmitterInformationFetcher.SubmitterInformationFetchingStatus.SUCCESSFUL) {
-                        entry.setSubmitterInformation(result.getValue());
+                    if (result.status() == SubmitterInformationFetcher.SubmitterInformationFetchingStatus.SUCCESSFUL) {
+                        entry.setSubmitterInformation(result.value());
                     }
                 }
             }
 
             // Determine the entries that are new and have a changed sequence. Those sequences need to be processed
             // Nextclade.
-            List<GisaidEntry> sequencePreprocessingNeeded = batch.getEntries().stream()
+            List<GisaidEntry> sequencePreprocessingNeeded = batch.entries().stream()
                 .filter(s -> s.getImportMode() == ImportMode.APPEND || s.isSequenceChanged())
                 .collect(Collectors.toList());
 
@@ -123,7 +123,7 @@ public class BatchProcessingWorker {
                 System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextclade..");
                 Map<String, NextcladeResultEntry> nextcladeResults = runNextclade(batch, originalSeqFastaPath);
                 ReferenceGenomeData refGenome = ReferenceGenomeData.getInstance();
-                for (GisaidEntry entry : batch.getEntries()) {
+                for (GisaidEntry entry : batch.entries()) {
                     NextcladeResultEntry nre = nextcladeResults.get(entry.getGisaidEpiIsl());
                     if (nre != null) {
                         // Add the Nextclade results to the entry
@@ -197,7 +197,7 @@ public class BatchProcessingWorker {
             int updatedTotalEntries = 0;
             int updatedMetadataEntries = 0;
             int updatedSequenceEntries = 0;
-            for (GisaidEntry entry : batch.getEntries()) {
+            for (GisaidEntry entry : batch.entries()) {
                 if (entry.getImportMode() == ImportMode.APPEND) {
                     addedEntries++;
                 } else if (entry.getImportMode() == ImportMode.UPDATE) {
@@ -239,7 +239,7 @@ public class BatchProcessingWorker {
      */
     private void determineChangeSet(Batch batch) {
         List<GisaidEntry> toRemove = new ArrayList<>();
-        for (GisaidEntry entry : batch.getEntries()) {
+        for (GisaidEntry entry : batch.entries()) {
             String sampleName = entry.getGisaidEpiIsl();
             List<Object> metadataListForHashing = new ArrayList<>();
             metadataListForHashing.add(entry.getStrain());
@@ -273,7 +273,7 @@ public class BatchProcessingWorker {
                 toRemove.add(entry);
             }
         }
-        batch.getEntries().removeAll(toRemove);
+        batch.entries().removeAll(toRemove);
     }
 
     private String formatSeqAsFasta(List<GisaidEntry> sequences) {
@@ -307,13 +307,13 @@ public class BatchProcessingWorker {
         Process process = Runtime.getRuntime().exec(command);
         boolean exited = process.waitFor(20, TimeUnit.MINUTES);
         if (!exited) {
-            String sequenceIdsCsv = batch.getEntries().stream()
+            String sequenceIdsCsv = batch.entries().stream()
                 .map(GisaidEntry::getGisaidEpiIsl).collect(Collectors.joining(","));
             process.destroyForcibly();
             throw new RuntimeException("Nextclade timed out (after 20 minutes); sequences: " + sequenceIdsCsv);
         }
         if (process.exitValue() != 0) {
-            String sequenceIdsCsv = batch.getEntries().stream()
+            String sequenceIdsCsv = batch.entries().stream()
                 .map(GisaidEntry::getGisaidEpiIsl).collect(Collectors.joining(","));
             throw new RuntimeException("Nextclade exited with code " + process.exitValue() + "; sequences:"
                 + sequenceIdsCsv);
@@ -336,7 +336,7 @@ public class BatchProcessingWorker {
 
         // Read the amino acid sequences
         Map<String, List<GeneAASeq>> geneAASeqs = new HashMap<>();
-        for (GisaidEntry entry : batch.getEntries()) {
+        for (GisaidEntry entry : batch.entries()) {
             geneAASeqs.put(entry.getGisaidEpiIsl(), new ArrayList<>());
         }
         for (String gene : genes) {
@@ -378,7 +378,7 @@ public class BatchProcessingWorker {
         List<GisaidEntry> toUpdateMetadata = new ArrayList<>();
         List<GisaidEntry> toUpdateSequence = new ArrayList<>();
         List<GisaidEntry> toInsert = new ArrayList<>();
-        for (GisaidEntry sequence : batch.getEntries()) {
+        for (GisaidEntry sequence : batch.entries()) {
             if (sequence.getImportMode() == ImportMode.APPEND) {
                 toInsert.add(sequence);
             } else if (sequence.getImportMode() == ImportMode.UPDATE) {
@@ -746,31 +746,13 @@ public class BatchProcessingWorker {
         }
     }
 
-    private static class GeneAASeq {
-
-        private final String gene;
-        private final String seq;
-
-        public GeneAASeq(String gene, String seq) {
-            this.gene = gene;
-            this.seq = seq;
-        }
+    private record GeneAASeq(String gene, String seq) {
     }
 
-    private static class NextcladeResultEntry {
-
-        private final String alignedNucSeq;
-        private final List<GeneAASeq> geneAASeqs;
-        private final NextcladeTsvEntry nextcladeTsvEntry;
-
-        public NextcladeResultEntry(
-            String alignedNucSeq,
-            List<GeneAASeq> geneAASeqs,
-            NextcladeTsvEntry nextcladeTsvEntry
-        ) {
-            this.alignedNucSeq = alignedNucSeq;
-            this.geneAASeqs = geneAASeqs;
-            this.nextcladeTsvEntry = nextcladeTsvEntry;
-        }
+    private record NextcladeResultEntry(
+        String alignedNucSeq,
+        List<GeneAASeq> geneAASeqs,
+        NextcladeTsvEntry nextcladeTsvEntry
+    ) {
     }
 }

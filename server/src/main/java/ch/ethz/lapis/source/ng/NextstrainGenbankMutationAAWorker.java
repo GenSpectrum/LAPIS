@@ -201,15 +201,7 @@ public class NextstrainGenbankMutationAAWorker {
         return fasta.toString();
     }
 
-    private static class GeneAASeq {
-
-        private final String gene;
-        private final String seq;
-
-        public GeneAASeq(String gene, String seq) {
-            this.gene = gene;
-            this.seq = seq;
-        }
+    private record GeneAASeq(String gene, String seq) {
     }
 
 }

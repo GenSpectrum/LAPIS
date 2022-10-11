@@ -12,28 +12,6 @@ public class SampleMutationsResponse extends ArrayList<SampleMutationsResponse.M
         super(c);
     }
 
-    public static class MutationEntry {
-
-        private final String mutation;
-        private final double proportion;
-        private final int count;
-
-        public MutationEntry(String mutation, double proportion, int count) {
-            this.mutation = mutation;
-            this.proportion = proportion;
-            this.count = count;
-        }
-
-        public String getMutation() {
-            return mutation;
-        }
-
-        public double getProportion() {
-            return proportion;
-        }
-
-        public int getCount() {
-            return count;
-        }
+    public record MutationEntry(String mutation, double proportion, int count) {
     }
 }

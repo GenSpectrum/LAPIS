@@ -1,31 +1,10 @@
 package ch.ethz.lapis.core;
 
 
-public class ProgramCrashReport implements SendableReport {
-
-    private final Throwable e;
-    private final String programName;
-
-
-    public ProgramCrashReport(Throwable e, String programName) {
-        this.e = e;
-        this.programName = programName;
-    }
-
-
-    public Throwable getE() {
-        return e;
-    }
-
-
+public record ProgramCrashReport(Throwable e, String programName) implements SendableReport {
     @Override
     public PriorityLevel getPriority() {
         return PriorityLevel.FATAL;
-    }
-
-    @Override
-    public String getProgramName() {
-        return programName;
     }
 
 

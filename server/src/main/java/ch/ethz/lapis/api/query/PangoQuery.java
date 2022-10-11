@@ -52,10 +52,10 @@ public class PangoQuery implements VariantQueryExpr {
             boolean r = false;
             String d = data[i];
             if (d != null) {
-                for (String s : match.getExact()) {
+                for (String s : match.exact()) {
                     r = r || d.equals(s);
                 }
-                for (String s : match.getPrefix()) {
+                for (String s : match.prefix()) {
                     r = r || d.startsWith(s);
                 }
             }

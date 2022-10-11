@@ -11,7 +11,7 @@ public class PangoLineageAliasResolver {
     public PangoLineageAliasResolver(List<PangoLineageAlias> aliases) {
         this.aliases = aliases;
         for (PangoLineageAlias alias : aliases) {
-            aliasToFullName.put(alias.getAlias(), alias.getFullName());
+            aliasToFullName.put(alias.alias(), alias.fullName());
         }
     }
 
@@ -48,12 +48,12 @@ public class PangoLineageAliasResolver {
         // Find the "short version" of the query
         String queryShort = finalQueryRoot;
         Optional<PangoLineageAlias> queryAliasOpt = aliases.stream()
-            .filter(a -> finalQueryRoot.startsWith(a.getFullName() + "."))
-            .sorted(Comparator.comparingInt(a -> -a.getFullName().length()))
+            .filter(a -> finalQueryRoot.startsWith(a.fullName() + "."))
+            .sorted(Comparator.comparingInt(a -> -a.fullName().length()))
             .findAny();
         if (queryAliasOpt.isPresent()) {
             PangoLineageAlias alias = queryAliasOpt.get();
-            queryShort = queryShort.replace(alias.getFullName(), alias.getAlias());
+            queryShort = queryShort.replace(alias.fullName(), alias.alias());
         }
         if (!queryRoot.equals(queryShort)) {
             resultRoots.add(queryShort);
@@ -66,8 +66,8 @@ public class PangoLineageAliasResolver {
 
         // If sub lineages need to be included, we have to add aliases for which the query is a prefix.
         List<String> subLineageAliases = aliases.stream()
-            .filter(a -> a.getFullName().equals(finalQueryRoot) || a.getFullName().startsWith(finalQueryRoot + "."))
-            .map(PangoLineageAlias::getAlias)
+            .filter(a -> a.fullName().equals(finalQueryRoot) || a.fullName().startsWith(finalQueryRoot + "."))
+            .map(PangoLineageAlias::alias)
             .collect(Collectors.toList());
         resultRoots.addAll(subLineageAliases);
         return resultRoots.stream().map(s -> s + "*").collect(Collectors.toList());

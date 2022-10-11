@@ -342,8 +342,8 @@ public class SampleService {
             return database.getNucInsertionStore().countInsertions(ids).stream()
                 // Append "ins_" to the insertion string
                 .map(ins -> new InsertionStore.InsertionCount(
-                    "ins_" + ins.getInsertion(),
-                    ins.getCount()
+                    "ins_" + ins.insertion(),
+                    ins.count()
                 ))
                 .collect(Collectors.toList());
         } else {
@@ -352,8 +352,8 @@ public class SampleService {
                 var insertionsOfGene = store.countInsertions(ids).stream()
                     // Append "ins_" and the gene to the insertion string
                     .map(ins -> new InsertionStore.InsertionCount(
-                        "ins_" + gene + ":" + ins.getInsertion(),
-                        ins.getCount()
+                        "ins_" + gene + ":" + ins.insertion(),
+                        ins.count()
                     ))
                     .collect(Collectors.toList());
                 result.addAll(insertionsOfGene);

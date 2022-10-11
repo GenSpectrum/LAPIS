@@ -8,22 +8,7 @@ import java.util.List;
 
 public class StopWatch {
 
-    public static class Round {
-        private final String label;
-        private final long durationInMs;
-
-        public Round(String label, long durationInMs) {
-            this.label = label;
-            this.durationInMs = durationInMs;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public long getDurationInMs() {
-            return durationInMs;
-        }
+    public record Round(String label, long durationInMs) {
     }
 
     private List<Round> finishedRounds;
@@ -79,8 +64,8 @@ public class StopWatch {
         long total = 0;
         List<String> stringParts = new ArrayList<>();
         for (Round round : results) {
-            total += round.getDurationInMs();
-            stringParts.add(round.getLabel() + "=" + round.getDurationInMs() + "ms");
+            total += round.durationInMs();
+            stringParts.add(round.label() + "=" + round.durationInMs() + "ms");
         }
         stringParts.add("total=" + total + "ms");
         return String.join(", ", stringParts);

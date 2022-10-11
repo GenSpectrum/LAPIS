@@ -347,8 +347,8 @@ public class GisaidService {
         int i = 0;
         for (String gisaidId : missingGisaidIds) {
             var result = fetcher.fetchSubmitterInformation(gisaidId);
-            switch (result.getStatus()) {
-                case SUCCESSFUL -> submitterInformationList.add(new Pair<>(gisaidId, result.getValue()));
+            switch (result.status()) {
+                case SUCCESSFUL -> submitterInformationList.add(new Pair<>(gisaidId, result.value()));
                 case NOT_FOUND -> {}
                 case TOO_MANY_REQUESTS -> {
                     System.out.println("Maybe rate-limited? Let's wait for 20 minutes");

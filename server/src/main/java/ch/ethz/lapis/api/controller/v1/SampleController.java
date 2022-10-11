@@ -100,8 +100,8 @@ public class SampleController {
                 stopWatch.round("Result formatting");
                 V1Response<SampleAggregatedResponse> response = new V1Response<>(new SampleAggregatedResponse(
                     request.getFields(),
-                    aggregatedSamples.getContent()
-                ), aggregatedSamples.getDataVersion(), openness);
+                    aggregatedSamples.content()
+                ), aggregatedSamples.dataVersion(), openness);
                 return objectMapper.writeValueAsString(response);
             } catch (SQLException | JsonProcessingException e) {
                 throw new RuntimeException(e);

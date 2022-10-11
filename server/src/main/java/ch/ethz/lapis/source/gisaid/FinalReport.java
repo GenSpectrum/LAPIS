@@ -35,7 +35,7 @@ public class FinalReport implements SendableReport {
     }
 
     @Override
-    public String getProgramName() {
+    public String programName() {
         return "LAPIS GisaidService";
     }
 

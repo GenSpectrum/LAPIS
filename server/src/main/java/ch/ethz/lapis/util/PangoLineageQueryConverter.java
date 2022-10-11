@@ -5,22 +5,7 @@ import java.util.List;
 
 public class PangoLineageQueryConverter {
 
-    public static class PangoLineageQueryMatch {
-        private final List<String> exact;
-        private final List<String> prefix;
-
-        public PangoLineageQueryMatch(List<String> exact, List<String> prefix) {
-            this.exact = exact;
-            this.prefix = prefix;
-        }
-
-        public List<String> getExact() {
-            return exact;
-        }
-
-        public List<String> getPrefix() {
-            return prefix;
-        }
+    public record PangoLineageQueryMatch(List<String> exact, List<String> prefix) {
     }
 
     private PangoLineageAliasResolver pangoLineageAliasResolver;

@@ -82,21 +82,6 @@ public class InsertionStore {
             .collect(Collectors.toList());
     }
 
-    public static class InsertionCount {
-        private final String insertion;
-        private final int count;
-
-        public InsertionCount(String insertion, int count) {
-            this.insertion = insertion;
-            this.count = count;
-        }
-
-        public String getInsertion() {
-            return insertion;
-        }
-
-        public int getCount() {
-            return count;
-        }
+    public record InsertionCount(String insertion, int count) {
     }
 }

@@ -15,25 +15,10 @@ public class SubmitterInformationFetcher {
         SUCCESSFUL, NOT_FOUND, TOO_MANY_REQUESTS, UNEXPECTED_ERROR
     }
 
-    public static class SubmitterInformationFetchingResult {
-        private final SubmitterInformationFetchingStatus status;
-        private final SubmitterInformation value;
-
-        public SubmitterInformationFetchingResult(
-            SubmitterInformationFetchingStatus status,
-            SubmitterInformation value
-        ) {
-            this.status = status;
-            this.value = value;
-        }
-
-        public SubmitterInformationFetchingStatus getStatus() {
-            return status;
-        }
-
-        public SubmitterInformation getValue() {
-            return value;
-        }
+    public record SubmitterInformationFetchingResult(
+        SubmitterInformationFetchingStatus status,
+        SubmitterInformation value
+    ) {
     }
 
     public SubmitterInformationFetchingResult fetchSubmitterInformation(String gisaidEpiIsl) {

@@ -23,7 +23,7 @@ public class SimpleReport implements SendableReport {
     }
 
     @Override
-    public String getProgramName() {
+    public String programName() {
         return programName;
     }
 

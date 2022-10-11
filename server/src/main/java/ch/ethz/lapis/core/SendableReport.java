@@ -5,10 +5,10 @@ public interface SendableReport {
 
     PriorityLevel getPriority();
 
-    String getProgramName();
+    String programName();
 
     default String getSubject() {
-        return "[Harvester] " + getProgramName() + " - " + getPriority();
+        return "[Harvester] " + programName() + " - " + getPriority();
     }
 
     String getEmailText();
