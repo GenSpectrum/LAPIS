@@ -1,6 +1,13 @@
 package ch.ethz.lapis.api.query;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.javatuples.Pair;
 
 
 public class MutationStore {
@@ -30,10 +37,12 @@ public class MutationStore {
         Collection<Mutation> mutations,
         Collection<String> unknownsCompressedPositions
     ) {
+        // The mutations and unknowns will be stored in ordered, ascending lists.
         // Encode the mutations using the MutationDict
         int[] mutationIds = new int[mutations.size()];
         int i = 0;
-        for (Mutation mutation : mutations) {
+        List<Mutation> mutationsSorted = mutations.stream().sorted().toList();
+        for (Mutation mutation : mutationsSorted) {
             mutationIds[i] = mutationDict.mutationToId(mutation);
             i++;
             if (mutation.position > maxPosition) {
@@ -41,14 +50,12 @@ public class MutationStore {
             }
         }
         // Parse the compressed unknown position strings
-        List<Short> unknownPositionsList = new ArrayList<>();
-        List<Boolean> unknownIsStartRangeList = new ArrayList<>();
+        List<Pair<Short, Short>> unknownsCompressedPositionsParsed = new ArrayList<>();
         for (String s : unknownsCompressedPositions) {
             if (!s.contains("-")) {
                 // It's a single value
                 short position = Short.parseShort(s);
-                unknownPositionsList.add(position);
-                unknownIsStartRangeList.add(false);
+                unknownsCompressedPositionsParsed.add(new Pair<>(position, null));
                 if (position > maxPosition) {
                     maxPosition = position;
                 }
@@ -57,15 +64,27 @@ public class MutationStore {
                 String[] parts = s.split("-");
                 short rangeStart = Short.parseShort(parts[0]);
                 short rangeEnd = Short.parseShort(parts[1]);
-                unknownPositionsList.add(rangeStart);
-                unknownPositionsList.add(rangeEnd);
-                unknownIsStartRangeList.add(true);
-                unknownIsStartRangeList.add(false);
+                unknownsCompressedPositionsParsed.add(new Pair<>(rangeStart, rangeEnd));
                 if (rangeEnd > maxPosition) {
                     maxPosition = rangeEnd;
                 }
             }
         }
+        unknownsCompressedPositionsParsed.sort(Comparator.comparingInt(Pair::getValue0));
+        List<Short> unknownPositionsList = new ArrayList<>();
+        List<Boolean> unknownIsStartRangeList = new ArrayList<>();
+        for (Pair<Short, Short> p : unknownsCompressedPositionsParsed) {
+            if (p.getValue1() == null) {
+                unknownPositionsList.add(p.getValue0());
+                unknownIsStartRangeList.add(false);
+            } else {
+                unknownPositionsList.add(p.getValue0());
+                unknownPositionsList.add(p.getValue1());
+                unknownIsStartRangeList.add(true);
+                unknownIsStartRangeList.add(false);
+            }
+        }
+
         short[] unknownPositions = new short[unknownPositionsList.size()];
         boolean[] unknownIsStartRange = new boolean[unknownPositionsList.size()];
         for (int j = 0; j < unknownPositionsList.size(); j++) {
@@ -128,7 +147,7 @@ public class MutationStore {
     }
 
 
-    public static class Mutation {
+    public static class Mutation implements Comparable<Mutation> {
         public final short position;
         public final char mutationTo;
 
@@ -160,6 +179,11 @@ public class MutationStore {
          */
         public static Mutation parse(String code) {
             return new Mutation(Short.parseShort(code.substring(1, code.length() - 1)), code.charAt(code.length() - 1));
+        }
+
+        @Override
+        public int compareTo(Mutation o) {
+            return Integer.compare(this.position, o.position);
         }
     }
 
@@ -244,6 +268,9 @@ public class MutationStore {
     }
 
 
+    /**
+     * The mutations and unknowns must be stored in an ordered, ascending fashion.
+     */
     private record InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
     }
 
