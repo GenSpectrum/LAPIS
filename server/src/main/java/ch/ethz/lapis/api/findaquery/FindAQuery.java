@@ -1,9 +1,10 @@
 package ch.ethz.lapis.api.findaquery;
 
-
 import ch.ethz.lapis.api.query.MutationStore;
+import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
 import ch.ethz.lapis.util.tuples.MutableTriplet;
 import org.javatuples.Pair;
+
 
 public class FindAQuery {
 
@@ -15,14 +16,18 @@ public class FindAQuery {
 
     public int calcSequenceDistance(int seqId1, int seqId2) {
         var internalMutationData = mutationStore.getInternalData();
+        var data1 = internalMutationData[seqId1];
+        var data2 = internalMutationData[seqId2];
+        return calcSequenceDistance(data1, data2);
+    }
+
+    private int calcSequenceDistance(InternalEntry data1, InternalEntry data2) {
         var internalMutationDict = mutationStore.getInternalMutationDict();
 
         int distance = 0;
-        var data1 = internalMutationData[seqId1];
         var mutations1 = data1.mutationIds();
         var unknowns1 = data1.unknownPositions();
         var unknownsIsRange1 = data1.unknownIsStartRange();
-        var data2 = internalMutationData[seqId2];
         var mutations2 = data2.mutationIds();
         var unknowns2 = data2.unknownPositions();
         var unknownsIsRange2 = data2.unknownIsStartRange();
