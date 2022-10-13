@@ -1,13 +1,8 @@
 package ch.ethz.lapis.api.query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import org.javatuples.Pair;
+
+import java.util.*;
 
 
 public class MutationStore {
@@ -147,6 +142,22 @@ public class MutationStore {
     }
 
 
+    /**
+     * We expose the internal data for the find-a-query method. Do not edit the returned data in any way!
+     */
+    public InternalEntry[] getInternalData() {
+        return data;
+    }
+
+
+    /**
+     * We expose the internal data for the find-a-query method. Do not edit the returned data in any way!
+     */
+    public MutationDict getInternalMutationDict() {
+        return mutationDict;
+    }
+
+
     public static class Mutation implements Comparable<Mutation> {
         public final short position;
         public final char mutationTo;
@@ -241,7 +252,7 @@ public class MutationStore {
     }
 
 
-    private static class MutationDict {
+    public static class MutationDict {
         private final Map<Mutation, Integer> mutationToIdMap = new HashMap<>();
         private final List<Mutation> mutations = new ArrayList<>();
         private int nextId = 0;
@@ -271,7 +282,7 @@ public class MutationStore {
     /**
      * The mutations and unknowns must be stored in an ordered, ascending fashion.
      */
-    private record InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
+    public record InternalEntry(int[] mutationIds, short[] unknownPositions, boolean[] unknownIsStartRange) {
     }
 
 }
