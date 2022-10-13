@@ -40,7 +40,6 @@ import static ch.ethz.lapis.api.query.Database.Columns.YEAR;
 import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
-import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.exception.BadRequestException;
@@ -293,13 +292,10 @@ public class QueryEngine {
             sf.getNextcladeCoverageFrom(), sf.getNextcladeCoverageTo());
 
         // Filter IDs
-        if (sf instanceof SampleDetailRequest) {
-            SampleDetailRequest sdr = (SampleDetailRequest) sf;
-            eq(matched, db.getStringColumn(GENBANK_ACCESSION), sdr.getGenbankAccession(), true);
-            eq(matched, db.getStringColumn(SRA_ACCESSION), sdr.getSraAccession(), true);
-            eq(matched, db.getStringColumn(GISAID_EPI_ISL), sdr.getGisaidEpiIsl(), true);
-            eq(matched, db.getStringColumn(STRAIN), sdr.getStrain(), true);
-        }
+        eq(matched, db.getStringColumn(GENBANK_ACCESSION), sf.getGenbankAccession(), true);
+        eq(matched, db.getStringColumn(SRA_ACCESSION), sf.getSraAccession(), true);
+        eq(matched, db.getStringColumn(GISAID_EPI_ISL), sf.getGisaidEpiIsl(), true);
+        eq(matched, db.getStringColumn(STRAIN), sf.getStrain(), true);
 
         return matched;
     }
