@@ -1,15 +1,14 @@
 package ch.ethz.lapis.api.findaquery;
 
 import ch.ethz.lapis.api.query.MutationStore;
+import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class FindAQueryTest {
 
-    @Test
-    public void testCalcSequenceDistance() {
-        // Test data
+    private MutationStore createMutationStore() {
         MutationStore mutationStore = new MutationStore(3);
         mutationStore.putEntry(0, List.of(
             new MutationStore.Mutation((short) 25, 'T'),
@@ -35,8 +34,12 @@ public class FindAQueryTest {
             "35-40",
             "45-50"
         ));
+        return mutationStore;
+    }
 
-        // Execute tests
+    @Test
+    public void testCalcSequenceDistance() {
+        MutationStore mutationStore = createMutationStore();
         FindAQuery findAQuery = new FindAQuery(mutationStore);
         // Different positions: 11-30, 42-44 -> 20 + 3 = 23
         Assertions.assertEquals(23, findAQuery.calcSequenceDistance(0, 1), "Distance seq0-seq1");
@@ -44,6 +47,23 @@ public class FindAQueryTest {
         Assertions.assertEquals(18, findAQuery.calcSequenceDistance(0, 2), "Distance seq0-seq2");
         // Different positions: 21-30, 35-39, 41-44 -> 10 + 5 + 4 = 19
         Assertions.assertEquals(19, findAQuery.calcSequenceDistance(1, 2), "Distance seq1-seq2");
+    }
+
+    @Test
+    public void testCalcCentroid() {
+        MutationStore mutationStore = createMutationStore();
+        InternalEntry[] internalData = mutationStore.getInternalData();
+        FindAQuery findAQuery = new FindAQuery(mutationStore);
+
+        InternalEntry centroid0 = findAQuery.calcCentroid(List.of(0));
+        InternalEntry centroid1 = findAQuery.calcCentroid(List.of(1));
+        InternalEntry centroid2 = findAQuery.calcCentroid(List.of(2));
+        InternalEntry centroid01 = findAQuery.calcCentroid(List.of(0, 1));
+        InternalEntry centroid02 = findAQuery.calcCentroid(List.of(0, 2));
+        InternalEntry centroid12 = findAQuery.calcCentroid(List.of(1, 2));
+        InternalEntry centroid123 = findAQuery.calcCentroid(List.of(0, 1, 2));
+
+        // TODO Check the results
     }
 
 }

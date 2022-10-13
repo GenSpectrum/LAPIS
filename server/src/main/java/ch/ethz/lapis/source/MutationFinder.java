@@ -3,6 +3,7 @@ package ch.ethz.lapis.source;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import java.util.ArrayList;
 import java.util.List;
+import org.javatuples.Pair;
 
 
 public class MutationFinder {
@@ -157,5 +158,77 @@ public class MutationFinder {
             }
         }
         return result;
+    }
+
+    /**
+     * This takes a list of position integers and introduces range representations if appropriate. Example:
+     * 1,5,6,7,8,20 will be transformed to ([1, 5, 8,  20], [false, true, false, false])
+     * The first entry in the tuple are the positions. The second entry in the tuple say whether the corresponding
+     * position defines the start of a range.
+     */
+    public static Pair<short[], boolean[]> compressPositionsAsArrays(List<Short> positions) {
+        List<Short> resultPositionsList = new ArrayList<>();
+        List<Boolean> resultIsStartRangeList = new ArrayList<>();
+        Short rangeStart = null;
+        Short rangeEnd = null;
+
+        for (short pos : positions) {
+            if (rangeStart == null) {
+                // Initial case
+                rangeStart = pos;
+                rangeEnd = pos;
+            } else if (pos == rangeEnd + 1) {
+                // If the range is being continued
+                rangeEnd = pos;
+            } else {
+                // If the range ended
+                if (rangeEnd - rangeStart > 1) {
+                    // If there is at least one number in between
+                    resultPositionsList.add(rangeStart);
+                    resultPositionsList.add(rangeEnd);
+                    resultIsStartRangeList.add(true);
+                    resultIsStartRangeList.add(false);
+                } else if (rangeEnd - rangeStart > 0) {
+                    // If there are two different numbers
+                    resultPositionsList.add(rangeStart);
+                    resultPositionsList.add(rangeEnd);
+                    resultIsStartRangeList.add(false);
+                    resultIsStartRangeList.add(false);
+                } else {
+                    // If there is a single number
+                    resultPositionsList.add(rangeStart);
+                    resultIsStartRangeList.add(false);
+                }
+                rangeStart = pos;
+                rangeEnd = pos;
+            }
+        }
+        if (rangeStart != null) {
+            // Finishing up - same code like above
+            if (rangeEnd - rangeStart > 1) {
+                // If there is at least one number in between
+                resultPositionsList.add(rangeStart);
+                resultPositionsList.add(rangeEnd);
+                resultIsStartRangeList.add(true);
+                resultIsStartRangeList.add(false);
+            } else if (rangeEnd - rangeStart > 0) {
+                // If there are two different numbers
+                resultPositionsList.add(rangeStart);
+                resultPositionsList.add(rangeEnd);
+                resultIsStartRangeList.add(false);
+                resultIsStartRangeList.add(false);
+            } else {
+                // If there is a single number
+                resultPositionsList.add(rangeStart);
+                resultIsStartRangeList.add(false);
+            }
+        }
+        short[] resultPositions = new short[resultPositionsList.size()];
+        boolean[] resultIsStartRange = new boolean[resultPositionsList.size()];
+        for (int j = 0; j < resultPositionsList.size(); j++) {
+            resultPositions[j] = resultPositionsList.get(j);
+            resultIsStartRange[j] = resultIsStartRangeList.get(j);
+        }
+        return new Pair<>(resultPositions, resultIsStartRange);
     }
 }

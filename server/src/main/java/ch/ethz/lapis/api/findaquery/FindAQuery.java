@@ -2,7 +2,14 @@ package ch.ethz.lapis.api.findaquery;
 
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
+import ch.ethz.lapis.api.query.MutationStore.Mutation;
+import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.util.tuples.MutableTriplet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.javatuples.Pair;
 
 
@@ -19,6 +26,81 @@ public class FindAQuery {
         var data1 = internalMutationData[seqId1];
         var data2 = internalMutationData[seqId2];
         return calcSequenceDistance(data1, data2);
+    }
+
+    public InternalEntry calcCentroid(Collection<Integer> seqIds) {
+        var internalMutationData = mutationStore.getInternalData();
+        return calcCentroid(seqIds.stream().map(id -> internalMutationData[id]).toList());
+    }
+
+    private InternalEntry calcCentroid(List<InternalEntry> dataList) {
+        var internalMutationDict = mutationStore.getInternalMutationDict();
+
+        // For every position, count the number of each mutation/unknown
+        Map<Integer, Map<Character, Integer>> positionCharacterCount = new HashMap<>();
+        for (InternalEntry data : dataList) {
+            for (int mutId : data.mutationIds()) {
+                Mutation mut = internalMutationDict.idToMutation(mutId);
+                incrementCharacterCount(positionCharacterCount, mut.position, mut.mutationTo);
+            }
+            int i = 0;
+            while (i < data.unknownPositions().length) {
+                if (!data.unknownIsStartRange()[i]) {
+                    incrementCharacterCount(positionCharacterCount, data.unknownPositions()[i], 'N');
+                    i++;
+                } else {
+                    short start = data.unknownPositions()[i];
+                    short end = data.unknownPositions()[i + 1];
+                    for (int j = start; j <= end; j++) {
+                        incrementCharacterCount(positionCharacterCount, j, 'N');
+                    }
+                    i += 2;
+                }
+            }
+        }
+
+        // For each position, find the character that occurs most
+        int totalSequences = dataList.size();
+        List<Integer> mutationIds = new ArrayList<>();
+        List<Short> unknownPositions = new ArrayList<>();
+        positionCharacterCount.forEach((position, characterCount) -> {
+            final char[] charWithMaxCount = {'?'};
+            final int[] maxCount = {0};
+            final int[] totalNonWildtypeCount = {0};
+            characterCount.forEach((c, count) -> {
+                totalNonWildtypeCount[0] += count;
+                if (count > maxCount[0]) { // If two characters have the same count, we take the first
+                    charWithMaxCount[0] = c;
+                    maxCount[0] = count;
+                }
+            });
+            if (maxCount[0] > totalSequences - totalNonWildtypeCount[0]) {
+                if (charWithMaxCount[0] != 'N') {
+                    mutationIds.add(internalMutationDict.mutationToId(
+                        new Mutation(position.shortValue(), charWithMaxCount[0])));
+                } else {
+                    unknownPositions.add(position.shortValue());
+                }
+            }
+        });
+        // Compress the unknown positions
+        unknownPositions.sort(Short::compareTo);
+        Pair<short[], boolean[]> unknownsCompressed = MutationFinder.compressPositionsAsArrays(unknownPositions);
+
+        int[] mutationIdsArr = new int[mutationIds.size()];
+        for (int i = 0; i < mutationIds.size(); i++) {
+            mutationIdsArr[i] = mutationIds.get(i);
+        }
+        return new InternalEntry(mutationIdsArr, unknownsCompressed.getValue0(), unknownsCompressed.getValue1());
+    }
+
+    private static void incrementCharacterCount(
+        Map<Integer, Map<Character, Integer>> positionCharacterCount,
+        int position,
+        char c
+    ) {
+        var characterCount = positionCharacterCount.computeIfAbsent(position, (x) -> new HashMap<>());
+        characterCount.put(c, characterCount.getOrDefault(c, 0) + 1);
     }
 
     private int calcSequenceDistance(InternalEntry data1, InternalEntry data2) {
