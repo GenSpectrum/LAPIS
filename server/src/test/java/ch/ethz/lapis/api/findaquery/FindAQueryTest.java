@@ -38,6 +38,18 @@ public class FindAQueryTest {
     }
 
     @Test
+    public void testKMeans() {
+        MutationStore mutationStore = createMutationStore();
+        FindAQuery findAQuery = new FindAQuery(mutationStore);
+
+        // Check that the proper cases do not crash. We are not testing the behavior.
+        findAQuery.kMeans(List.of(0, 1), 2);
+        findAQuery.kMeans(List.of(0, 2), 2);
+        findAQuery.kMeans(List.of(0, 1, 2), 2);
+        findAQuery.kMeans(List.of(0, 1, 2), 3);
+    }
+
+    @Test
     public void testCalcSequenceDistance() {
         MutationStore mutationStore = createMutationStore();
         FindAQuery findAQuery = new FindAQuery(mutationStore);

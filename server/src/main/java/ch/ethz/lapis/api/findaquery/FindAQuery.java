@@ -21,6 +21,53 @@ public class FindAQuery {
         this.mutationStore = mutationStore;
     }
 
+    public List<List<Integer>> kMeans(List<Integer> seqIds, int k) {
+        InternalEntry[] internalData = mutationStore.getInternalData();
+
+        // TODO Check border cases. E.g., can a cluster get zero sequences assigned? What if |seqIds| < k?
+        // Init: split the sequences into k clusters of roughly the same size
+        List<List<Integer>> clusters = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            clusters.add(new ArrayList<>());
+        }
+        for (int i = 0; i < seqIds.size(); i++) {
+            clusters.get(i % k).add(seqIds.get(i));
+        }
+
+        for (int iter = 0; iter < 10; iter++) { // TODO define proper abort conditions
+            // Calculate the centroid of every cluster
+            List<InternalEntry> clusterCentroids = new ArrayList<>();
+            for (List<Integer> cluster : clusters) {
+                clusterCentroids.add(calcCentroid(cluster));
+            }
+
+            // For every sequence, calculate the distance to every centroid and assign the sequences to their closest
+            // cluster.
+            List<List<Integer>> newClusters = new ArrayList<>();
+            for (int i = 0; i < k; i++) {
+                newClusters.add(new ArrayList<>());
+            }
+            for (Integer seqId : seqIds) {
+                List<Integer> distances = clusterCentroids.stream()
+                    .map(cc -> calcSequenceDistance(cc, internalData[seqId]))
+                    .toList();
+                int lowestDistance = Integer.MAX_VALUE;
+                int closestClusterIndex = -1;
+                for (int i = 0; i < distances.size(); i++) {
+                    int distance = distances.get(i);
+                    if (distance < lowestDistance) {
+                        lowestDistance = distance;
+                        closestClusterIndex = i;
+                    }
+                }
+                newClusters.get(closestClusterIndex).add(seqId);
+            }
+            clusters = newClusters;
+        }
+
+        return clusters;
+    }
+
     public int calcSequenceDistance(int seqId1, int seqId2) {
         var internalMutationData = mutationStore.getInternalData();
         var data1 = internalMutationData[seqId1];
