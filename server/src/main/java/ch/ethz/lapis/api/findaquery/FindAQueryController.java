@@ -19,8 +19,8 @@ public class FindAQueryController {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
 
-    @GetMapping("")
-    public List<List<String>> test(SampleDetailRequest request) {
+    @GetMapping("/kmeans")
+    public List<List<String>> kmeans(SampleDetailRequest request) {
         Database database = Database.getOrLoadInstance(dbPool);
         MutationStore mutationStore = database.getNucMutationStore();
         FindAQuery findAQuery = new FindAQuery(mutationStore);
@@ -34,6 +34,17 @@ public class FindAQueryController {
         }
 
         return clustersWithGisaidIds;
+    }
+
+    @GetMapping("/query1")
+    public String query1(SampleDetailRequest request) {
+        Database database = Database.getOrLoadInstance(dbPool);
+        MutationStore mutationStore = database.getNucMutationStore();
+        FindAQuery findAQuery = new FindAQuery(mutationStore);
+        QueryEngine queryEngine = new QueryEngine();
+        List<Integer> wantedSeqIds = queryEngine.filterIds(database, request);
+        List<Integer> unwantedSeqIds = queryEngine.filterIdsReversed(database, request);
+        return findAQuery.proposeClusterQuery(wantedSeqIds, unwantedSeqIds);
     }
 
 }

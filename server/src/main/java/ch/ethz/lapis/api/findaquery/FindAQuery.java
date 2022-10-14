@@ -1,15 +1,20 @@
 package ch.ethz.lapis.api.findaquery;
 
+import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
 import ch.ethz.lapis.api.query.MutationStore.Mutation;
+import ch.ethz.lapis.api.query.MutationStore.MutationCount;
+import ch.ethz.lapis.api.query.QueryEngine;
 import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.util.tuples.MutableTriplet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.javatuples.Pair;
 
 
@@ -19,6 +24,93 @@ public class FindAQuery {
 
     public FindAQuery(MutationStore mutationStore) {
         this.mutationStore = mutationStore;
+    }
+
+    public String proposeQuery(Database database, List<Integer> wantedSeqs) {
+        QueryEngine queryEngine = new QueryEngine();
+        return null;
+    }
+
+    public String proposeClusterQuery(
+        List<Integer> wantedSeqs,
+        List<Integer> unwantedSeqs
+    ) {
+        int numberWantedSeqs = wantedSeqs.size();
+        int numberUnwantedSeqs = unwantedSeqs.size();
+
+        // Fetch mutation distribution of both sets of sequences
+        List<MutationCount> wantedSeqsMuts = mutationStore.countMutations(wantedSeqs);
+        List<MutationCount> unwantedSeqsMuts = mutationStore.countMutations(unwantedSeqs);
+
+        Map<String, MutationCount> wantedSeqsMutsMap = new HashMap<>();
+        Set<String> wantedSeqsMutsSet = new HashSet<>();
+        wantedSeqsMuts.forEach(m -> {
+            String mutStr = m.getMutation().toString();
+            wantedSeqsMutsMap.put(mutStr, m);
+            wantedSeqsMutsSet.add(mutStr);
+        });
+        Map<String, MutationCount> unwantedSeqsMutsMap = new HashMap<>();
+        Set<String> unwantedSeqsMutsSet = new HashSet<>();
+        unwantedSeqsMuts.forEach(m -> {
+            String mutStr = m.getMutation().toString();
+            unwantedSeqsMutsMap.put(mutStr, m);
+            unwantedSeqsMutsSet.add(mutStr);
+        });
+        Set<String> allMutsSet = new HashSet<>(wantedSeqsMutsSet);
+        allMutsSet.addAll(unwantedSeqsMutsSet);
+
+        // Find the mutations that are (1) definitely in all wantedSeqs and not in all unwantedSeqs, (2) in none of the
+        // wantedSeqs and in some unwantedSeqs, or (3) maybe in all wantedSeqs and not maybe in all unwantedSeqs.
+        // We also calculate the proportion difference to evaluate the effect of including a query component.
+        List<Pair<String, Double>> queryComponentsAndProportionDifferences = new ArrayList<>();
+        for (String mutStr : allMutsSet) {
+            MutationCount wantedCount = wantedSeqsMutsMap.get(mutStr);
+            MutationCount unwantedCount = unwantedSeqsMutsMap.get(mutStr);
+            if (wantedCount == null) {
+                // Case (2)
+                queryComponentsAndProportionDifferences.add(new Pair<>(
+                    "!" + mutStr,
+                    (double) unwantedCount.getCount() / numberUnwantedSeqs
+                ));
+            } else if (wantedCount.getProportion() == 1) {
+                if (wantedCount.getCount() == numberWantedSeqs) {
+                    if (unwantedCount == null || unwantedCount.getCount() < numberUnwantedSeqs) {
+                        // Case (1)
+                        queryComponentsAndProportionDifferences.add(new Pair<>(
+                            mutStr,
+                            unwantedCount != null ?
+                                1 - (double) unwantedCount.getCount() / numberUnwantedSeqs :
+                                1
+                        ));
+                    }
+                } else if (unwantedCount == null || unwantedCount.getProportion() < 1) {
+                    // Case (3)
+                    queryComponentsAndProportionDifferences.add(new Pair<>(
+                        "maybe(" + mutStr + ")",
+                        unwantedCount != null ?
+                            1 - unwantedCount.getProportion() :
+                            1
+                    ));
+                }
+            }
+        }
+
+        // Select top 3 query components if there is no perfect (difference=1) component
+        List<String> finalQueryComponents = new ArrayList<>();
+        queryComponentsAndProportionDifferences.sort((a, b) -> b.getValue1().compareTo(a.getValue1()));
+        for (int i = 0; i < queryComponentsAndProportionDifferences.size(); i++) {
+            if (i == 3) {
+                break;
+            }
+            var queryComponentAndProportionDifference = queryComponentsAndProportionDifferences.get(i);
+            finalQueryComponents.add(queryComponentAndProportionDifference.getValue0());
+            if (queryComponentAndProportionDifference.getValue1() == 1) {
+                break;
+            }
+        }
+
+        // Construct final query
+        return String.join(" & ", finalQueryComponents);
     }
 
     public List<List<Integer>> kMeans(List<Integer> seqIds, int k) {

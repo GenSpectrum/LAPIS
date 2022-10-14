@@ -144,6 +144,17 @@ public class QueryEngine {
         return ids;
     }
 
+    public List<Integer> filterIdsReversed(Database database, SampleFilter<?> sampleFilter) {
+        boolean[] matched = matchSampleFilter(database, sampleFilter);
+        List<Integer> ids = new ArrayList<>();
+        for (int i = 0; i < matched.length; i++) {
+            if (!matched[i]) {
+                ids.add(i);
+            }
+        }
+        return ids;
+    }
+
     public boolean[] matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
         Database db = database;
         SampleFilter<?> sf = sampleFilter;
