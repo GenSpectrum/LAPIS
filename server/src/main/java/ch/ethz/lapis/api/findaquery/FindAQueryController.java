@@ -7,7 +7,9 @@ import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,9 +44,9 @@ public class FindAQueryController {
         MutationStore mutationStore = database.getNucMutationStore();
         FindAQuery findAQuery = new FindAQuery(mutationStore);
         QueryEngine queryEngine = new QueryEngine();
-        List<Integer> wantedSeqIds = queryEngine.filterIds(database, request);
-        List<Integer> unwantedSeqIds = queryEngine.filterIdsReversed(database, request);
-        return findAQuery.proposeClusterQuery(wantedSeqIds, unwantedSeqIds);
+        Set<Integer> wantedSeqIds = new HashSet<>(queryEngine.filterIds(database, request));
+        Set<Integer> unwantedSeqIds = new HashSet<>(queryEngine.filterIdsReversed(database, request));
+        return findAQuery.proposeAndNotMaybeQuery(database, wantedSeqIds, unwantedSeqIds);
     }
 
 }

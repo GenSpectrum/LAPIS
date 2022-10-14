@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api.findaquery;
 
+import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
@@ -21,6 +22,7 @@ import org.javatuples.Pair;
 public class FindAQuery {
 
     private final MutationStore mutationStore;
+    private final QueryEngine queryEngine = new QueryEngine();
 
     public FindAQuery(MutationStore mutationStore) {
         this.mutationStore = mutationStore;
@@ -31,9 +33,46 @@ public class FindAQuery {
         return null;
     }
 
-    public String proposeClusterQuery(
-        List<Integer> wantedSeqs,
-        List<Integer> unwantedSeqs
+    public String proposeAndNotMaybeQuery(
+        Database database,
+        Set<Integer> wantedSeqs,
+        Set<Integer> unwantedSeqs
+    ) {
+        List<String> queryComponents = new ArrayList<>();
+        for (int i = 0; i < 10; i++) { // TODO The max. number of iterations should not be fixed?
+            String component = proposeOneComponent(wantedSeqs, unwantedSeqs);
+            if (component == null) {
+                break;
+            }
+            queryComponents.add(component);
+            String newQuery = String.join(" & ", queryComponents);
+            // TODO Don't do this in the last iteration
+            Set<Integer> queriedSeqs = new HashSet<>(queryEngine.filterIds(database, new SampleDetailRequest()
+                .setVariantQuery(newQuery)));
+            // TODO We are still loosing sequences which, I believe, is due to rounding inaccuracies of "proportion"
+//            for (int wantedSeq : wantedSeqs) {
+//                if (!queriedSeqs.contains(wantedSeq)) {
+//                    throw new RuntimeException("The query " + newQuery + " lost the sequence " + wantedSeq);
+//                }
+//            }
+            unwantedSeqs = new HashSet<>(queriedSeqs);
+            unwantedSeqs.removeAll(wantedSeqs);
+
+            int numberWantedSeqs = wantedSeqs.size();
+            int numberUnwantedSeqs = unwantedSeqs.size();
+            double precision = (double) numberWantedSeqs / (numberWantedSeqs + numberUnwantedSeqs);
+            System.out.println(newQuery + " - precision=" + (double) Math.round(precision * 10000) / 10000);
+            if (precision == 1) {
+                break;
+            }
+        }
+
+        return String.join(" & ", queryComponents);
+    }
+
+    public String proposeOneComponent(
+        Set<Integer> wantedSeqs,
+        Set<Integer> unwantedSeqs
     ) {
         int numberWantedSeqs = wantedSeqs.size();
         int numberUnwantedSeqs = unwantedSeqs.size();
@@ -73,6 +112,7 @@ public class FindAQuery {
                     (double) unwantedCount.getCount() / numberUnwantedSeqs
                 ));
             } else if (wantedCount.getProportion() == 1) {
+                // TODO Due to rounding inaccuracies, I think that this can still loose sequences
                 if (wantedCount.getCount() == numberWantedSeqs) {
                     if (unwantedCount == null || unwantedCount.getCount() < numberUnwantedSeqs) {
                         // Case (1)
@@ -95,22 +135,12 @@ public class FindAQuery {
             }
         }
 
-        // Select top 3 query components if there is no perfect (difference=1) component
-        List<String> finalQueryComponents = new ArrayList<>();
+        // Return the best component if there's one available
         queryComponentsAndProportionDifferences.sort((a, b) -> b.getValue1().compareTo(a.getValue1()));
-        for (int i = 0; i < queryComponentsAndProportionDifferences.size(); i++) {
-            if (i == 3) {
-                break;
-            }
-            var queryComponentAndProportionDifference = queryComponentsAndProportionDifferences.get(i);
-            finalQueryComponents.add(queryComponentAndProportionDifference.getValue0());
-            if (queryComponentAndProportionDifference.getValue1() == 1) {
-                break;
-            }
+        if (queryComponentsAndProportionDifferences.isEmpty()) {
+            return null;
         }
-
-        // Construct final query
-        return String.join(" & ", finalQueryComponents);
+        return queryComponentsAndProportionDifferences.get(0).getValue0();
     }
 
     public List<List<Integer>> kMeans(List<Integer> seqIds, int k) {
