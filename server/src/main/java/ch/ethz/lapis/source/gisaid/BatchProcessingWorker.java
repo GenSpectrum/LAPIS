@@ -18,10 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -126,6 +123,32 @@ public class BatchProcessingWorker {
                 for (GisaidEntry entry : batch.entries()) {
                     NextcladeResultEntry nre = nextcladeResults.get(entry.getGisaidEpiIsl());
                     if (nre != null) {
+                        // Transform non-aligned bases in the aligned sequences from a deletion to N
+                        nre.alignedNucSeq = Utils.maskUnalignedBasesAsUnknown(
+                            nre.alignedNucSeq,
+                            nre.nextcladeTsvEntry.getAlignmentStart(),
+                            nre.nextcladeTsvEntry.getAlignmentEnd()
+                        );
+
+                        // Do the same for AA sequences
+                        // HACK: Just transform leading deletions in ORF1a from a deletion to N
+                        // TODO This is not accurate. It would be better to use alignmentStart and alignmentEnd.
+                        nre.geneAASeqs = nre.geneAASeqs.stream()
+                            .map(aaSeq -> {
+                                if (aaSeq.gene.equals("ORF1a")) {
+                                    char[] arr = aaSeq.seq.toCharArray();
+                                    for (int i = 0; i < arr.length; i++) {
+                                        if (arr[i] != '-') {
+                                            break;
+                                        }
+                                        arr[i] = 'X';
+                                    }
+                                    return new GeneAASeq(aaSeq.gene, new String(arr));
+                                }
+                                return aaSeq;
+                            })
+                            .toList();
+
                         // Add the Nextclade results to the entry
                         entry
                             .setSeqAligned(nre.alignedNucSeq)
@@ -749,10 +772,43 @@ public class BatchProcessingWorker {
     private record GeneAASeq(String gene, String seq) {
     }
 
-    private record NextcladeResultEntry(
-        String alignedNucSeq,
-        List<GeneAASeq> geneAASeqs,
-        NextcladeTsvEntry nextcladeTsvEntry
-    ) {
-    }
+    private static final class NextcladeResultEntry {
+        private String alignedNucSeq;
+        private List<GeneAASeq> geneAASeqs;
+        private NextcladeTsvEntry nextcladeTsvEntry;
+
+        private NextcladeResultEntry(
+            String alignedNucSeq,
+            List<GeneAASeq> geneAASeqs,
+            NextcladeTsvEntry nextcladeTsvEntry
+        ) {
+            this.alignedNucSeq = alignedNucSeq;
+            this.geneAASeqs = geneAASeqs;
+            this.nextcladeTsvEntry = nextcladeTsvEntry;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (NextcladeResultEntry) obj;
+            return Objects.equals(this.alignedNucSeq, that.alignedNucSeq) &&
+                Objects.equals(this.geneAASeqs, that.geneAASeqs) &&
+                Objects.equals(this.nextcladeTsvEntry, that.nextcladeTsvEntry);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(alignedNucSeq, geneAASeqs, nextcladeTsvEntry);
+        }
+
+        @Override
+        public String toString() {
+            return "NextcladeResultEntry[" +
+                "alignedNucSeq=" + alignedNucSeq + ", " +
+                "geneAASeqs=" + geneAASeqs + ", " +
+                "nextcladeTsvEntry=" + nextcladeTsvEntry + ']';
+        }
+
+        }
 }

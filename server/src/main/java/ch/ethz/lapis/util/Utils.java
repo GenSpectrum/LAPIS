@@ -176,4 +176,22 @@ public class Utils {
         }
     }
 
+
+    /**
+     * @param alignmentStart Following bioinformatics conventions, the index starts with 1
+     * @param alignmentEnd Following bioinformatics conventions, the index starts with 1
+     */
+    public static String maskUnalignedBasesAsUnknown(String alignedSeq, int alignmentStart, int alignmentEnd) {
+        int indexStart = alignmentStart - 1;
+        int indexEnd = alignmentEnd - 1;
+        char[] arr = alignedSeq.toCharArray();
+        for (int i = 0; i < indexStart; i++) {
+            arr[i] = 'N';
+        }
+        for (int i = arr.length - 1; i > indexEnd; i--) {
+            arr[i] = 'N';
+        }
+        return new String(arr);
+    }
+
 }
