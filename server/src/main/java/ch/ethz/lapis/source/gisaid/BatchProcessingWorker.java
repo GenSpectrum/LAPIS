@@ -125,7 +125,7 @@ public class BatchProcessingWorker {
                     if (nre != null) {
                         // Transform non-aligned bases in the aligned sequences from a deletion to N
                         if (nre.nextcladeTsvEntry != null && nre.nextcladeTsvEntry.getAlignmentStart() != null
-                            && nre.nextcladeTsvEntry.getAlignmentEnd() != null) {
+                            && nre.nextcladeTsvEntry.getAlignmentEnd() != null && nre.alignedNucSeq != null) {
                             nre.alignedNucSeq = Utils.maskUnalignedBasesAsUnknown(
                                 nre.alignedNucSeq,
                                 nre.nextcladeTsvEntry.getAlignmentStart(),
