@@ -124,11 +124,14 @@ public class BatchProcessingWorker {
                     NextcladeResultEntry nre = nextcladeResults.get(entry.getGisaidEpiIsl());
                     if (nre != null) {
                         // Transform non-aligned bases in the aligned sequences from a deletion to N
-                        nre.alignedNucSeq = Utils.maskUnalignedBasesAsUnknown(
-                            nre.alignedNucSeq,
-                            nre.nextcladeTsvEntry.getAlignmentStart(),
-                            nre.nextcladeTsvEntry.getAlignmentEnd()
-                        );
+                        if (nre.nextcladeTsvEntry != null && nre.nextcladeTsvEntry.getAlignmentStart() != null
+                            && nre.nextcladeTsvEntry.getAlignmentEnd() != null) {
+                            nre.alignedNucSeq = Utils.maskUnalignedBasesAsUnknown(
+                                nre.alignedNucSeq,
+                                nre.nextcladeTsvEntry.getAlignmentStart(),
+                                nre.nextcladeTsvEntry.getAlignmentEnd()
+                            );
+                        }
 
                         // Do the same for AA sequences
                         // HACK: Just transform leading deletions in ORF1a from a deletion to N
