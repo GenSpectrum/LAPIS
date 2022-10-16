@@ -22,8 +22,8 @@ public class NucMutation implements VariantQueryExpr {
        put('H', Set.of('A', 'C', 'T'));
        put('D', Set.of('A', 'G', 'T'));
        put('B', Set.of('C', 'G', 'T'));
-       put('N', Set.of('G', 'A', 'T', 'C'));
-       put('X', Set.of('G', 'A', 'T', 'C'));
+       put('N', Set.of('G', 'A', 'T', 'C', '-'));
+       put('X', Set.of('G', 'A', 'T', 'C', '-'));
     }};
 
     private int position;
