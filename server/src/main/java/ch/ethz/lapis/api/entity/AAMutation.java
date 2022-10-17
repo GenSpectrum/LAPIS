@@ -151,4 +151,13 @@ public class AAMutation implements VariantQueryExpr {
     public static boolean isAmbiguityCode(Character base) {
         return base == 'X';
     }
+
+    @Override
+    public String toQueryString() {
+        String s = gene + ":" + position;
+        if (mutation != null) {
+            s += mutation;
+        }
+        return s;
+    }
 }

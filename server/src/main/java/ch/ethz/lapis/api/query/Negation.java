@@ -11,4 +11,9 @@ public class Negation extends Single {
         }
         return result;
     }
+
+    @Override
+    public String toQueryString() {
+        return "!(" + getValue().toQueryString() + ")";
+    }
 }

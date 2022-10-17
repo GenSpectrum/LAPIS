@@ -31,4 +31,9 @@ public class Single implements VariantQueryExpr {
         callback.accept(this);
         value.traverseDFS(callback);
     }
+
+    @Override
+    public String toQueryString() {
+        return getValue().toQueryString();
+    }
 }

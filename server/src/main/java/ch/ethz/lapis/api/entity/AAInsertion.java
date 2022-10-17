@@ -78,4 +78,9 @@ public class AAInsertion implements VariantQueryExpr {
     public void traverseDFS(Consumer<QueryExpr> callback) {
         callback.accept(this);
     }
+
+    @Override
+    public String toQueryString() {
+        return "ins_" + gene + ":" + position + ":" + query;
+    }
 }

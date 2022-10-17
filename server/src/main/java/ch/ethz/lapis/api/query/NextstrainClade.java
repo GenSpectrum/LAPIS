@@ -17,4 +17,9 @@ public record NextstrainClade(String clade) implements VariantQueryExpr {
     public void traverseDFS(Consumer<QueryExpr> callback) {
         callback.accept(this);
     }
+
+    @Override
+    public String toQueryString() {
+        return "nextstrainClade:" + clade;
+    }
 }

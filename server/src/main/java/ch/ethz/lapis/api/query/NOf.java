@@ -3,6 +3,7 @@ package ch.ethz.lapis.api.query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class NOf implements VariantQueryExpr {
 
@@ -80,5 +81,18 @@ public class NOf implements VariantQueryExpr {
     public void traverseDFS(Consumer<QueryExpr> callback) {
         callback.accept(this);
         subExprs.forEach(o -> o.traverseDFS(callback));
+    }
+
+    @Override
+    public String toQueryString() {
+        String s = "[";
+        if (exactMode) {
+            s += "exactly-";
+        }
+        s += n
+            + "-of: "
+            + subExprs.stream().map(VariantQueryExpr::toQueryString).collect(Collectors.joining(", "))
+            + "]";
+        return s;
     }
 }

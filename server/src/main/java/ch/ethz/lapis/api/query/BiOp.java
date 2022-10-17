@@ -80,4 +80,12 @@ public class BiOp implements VariantQueryExpr {
         left.traverseDFS(callback);
         right.traverseDFS(callback);
     }
+
+    @Override
+    public String toQueryString() {
+        String leftQuery = "(" + left.toQueryString() + ")";
+        String rightQuery = "(" + right.toQueryString() + ")";
+        String opStr = opType == OpType.AND ? " & " : " | ";
+        return leftQuery + opStr + rightQuery;
+    }
 }

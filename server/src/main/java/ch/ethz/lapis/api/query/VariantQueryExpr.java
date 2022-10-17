@@ -8,4 +8,6 @@ public interface VariantQueryExpr extends QueryExpr {
         throw new MalformedVariantQueryException();
     };
 
+    String toQueryString();
+
 }

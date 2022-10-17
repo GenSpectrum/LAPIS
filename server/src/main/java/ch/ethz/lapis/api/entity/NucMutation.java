@@ -165,4 +165,13 @@ public class NucMutation implements VariantQueryExpr {
     public static boolean isAmbiguityCode(Character base) {
         return ambiguityCodes.containsKey(base);
     }
+
+    @Override
+    public String toQueryString() {
+        String s = String.valueOf(position);
+        if (mutation != null) {
+            s += mutation;
+        }
+        return s;
+    }
 }

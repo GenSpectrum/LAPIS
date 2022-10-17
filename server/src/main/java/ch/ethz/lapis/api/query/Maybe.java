@@ -10,7 +10,7 @@ public class Maybe extends Single {
 
     /**
      * The maybe operator does not do anything by itself. The maybe logic must be pushed down to the tips of the query
-     * tree before calling the evalute() method.
+     * tree before calling the evaluate() method.
      */
     private boolean pushedDown = false;
 
@@ -95,5 +95,10 @@ public class Maybe extends Single {
             throw new RuntimeException("Unexpected error: unexpected instance of VariantQueryExpr: " +
                 expr.getClass().getName());
         }
+    }
+
+    @Override
+    public String toQueryString() {
+        return "maybe(" + getValue().toQueryString() + ")";
     }
 }

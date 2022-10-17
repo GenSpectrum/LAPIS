@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.api.query.Database.Columns;
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 import java.util.function.Consumer;
 
@@ -73,5 +74,16 @@ public class PangoQuery implements VariantQueryExpr {
     @Override
     public void traverseDFS(Consumer<QueryExpr> callback) {
         callback.accept(this);
+    }
+
+    @Override
+    public String toQueryString() {
+        if (columnName.equals(Columns.PANGO_LINEAGE)) {
+            return pangoLineage;
+        }
+        if (columnName.equals(Columns.NEXTCLADE_PANGO_LINEAGE)) {
+            return "nextcladePangoLineage:" + pangoLineage;
+        }
+        throw new RuntimeException("Unexpected Pango lineage column: " + columnName);
     }
 }
