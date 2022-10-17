@@ -52,4 +52,9 @@ public class NucInsertion implements VariantQueryExpr {
         }
         return matched;
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

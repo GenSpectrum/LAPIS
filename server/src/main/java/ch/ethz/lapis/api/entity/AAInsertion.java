@@ -66,4 +66,9 @@ public class AAInsertion implements VariantQueryExpr {
         }
         return matched;
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

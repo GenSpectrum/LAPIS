@@ -63,4 +63,9 @@ public class PangoQuery implements VariantQueryExpr {
         }
         return result;
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

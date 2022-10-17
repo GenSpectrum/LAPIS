@@ -17,4 +17,10 @@ public class Single implements VariantQueryExpr {
         return value;
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Single o = (Single) super.clone();
+        o.value = (VariantQueryExpr) value.clone();
+        return o;
+    }
 }

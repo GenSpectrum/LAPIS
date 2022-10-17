@@ -27,4 +27,9 @@ public class StringValue implements QueryExpr {
         }
         return result;
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

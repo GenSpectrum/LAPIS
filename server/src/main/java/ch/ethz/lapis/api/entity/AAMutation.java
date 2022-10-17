@@ -112,6 +112,11 @@ public class AAMutation implements VariantQueryExpr {
         return result;
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     public static boolean isMatchingMutation(Character foundBase, AAMutation searchedMutation) {
         Character mutationBase = searchedMutation.getMutation();
         if (mutationBase == null) {

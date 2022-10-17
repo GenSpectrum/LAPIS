@@ -5,4 +5,9 @@ public record NextstrainClade(String clade) implements VariantQueryExpr {
     public boolean[] evaluate(Database database) {
         return new StringValue(clade, Database.Columns.NEXTSTRAIN_CLADE, false).evaluate(database);
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

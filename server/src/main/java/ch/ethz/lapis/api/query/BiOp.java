@@ -63,4 +63,12 @@ public class BiOp implements VariantQueryExpr {
             ", right=" + right +
             '}';
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        BiOp o = (BiOp) super.clone();
+        o.left = (VariantQueryExpr) o.left.clone();
+        o.right = (VariantQueryExpr) o.right.clone();
+        return o;
+    }
 }
