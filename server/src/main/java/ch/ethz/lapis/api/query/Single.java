@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.function.Consumer;
+
 public class Single implements VariantQueryExpr {
     private VariantQueryExpr value;
 
@@ -22,5 +24,11 @@ public class Single implements VariantQueryExpr {
         Single o = (Single) super.clone();
         o.value = (VariantQueryExpr) value.clone();
         return o;
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
+        value.traverseDFS(callback);
     }
 }

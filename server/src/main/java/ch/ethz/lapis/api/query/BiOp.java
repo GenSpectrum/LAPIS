@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.function.Consumer;
+
 public class BiOp implements VariantQueryExpr {
 
     public enum OpType {
@@ -70,5 +72,12 @@ public class BiOp implements VariantQueryExpr {
         o.left = (VariantQueryExpr) o.left.clone();
         o.right = (VariantQueryExpr) o.right.clone();
         return o;
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
+        left.traverseDFS(callback);
+        right.traverseDFS(callback);
     }
 }

@@ -2,6 +2,7 @@ package ch.ethz.lapis.api.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NOf implements VariantQueryExpr {
 
@@ -73,5 +74,11 @@ public class NOf implements VariantQueryExpr {
         NOf o = new NOf(exactMode, n);
         subExprs.forEach(o::putValue);
         return o;
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
+        subExprs.forEach(o -> o.traverseDFS(callback));
     }
 }

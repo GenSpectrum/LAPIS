@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
+import java.util.function.Consumer;
 
 public class PangoQuery implements VariantQueryExpr {
 
@@ -67,5 +68,10 @@ public class PangoQuery implements VariantQueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
     }
 }

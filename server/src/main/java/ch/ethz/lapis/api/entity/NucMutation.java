@@ -1,12 +1,14 @@
 package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.QueryExpr;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class NucMutation implements VariantQueryExpr {
 
@@ -117,6 +119,11 @@ public class NucMutation implements VariantQueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
     }
 
     public static boolean isMatchingMutation(Character foundBase, NucMutation searchedMutation) {

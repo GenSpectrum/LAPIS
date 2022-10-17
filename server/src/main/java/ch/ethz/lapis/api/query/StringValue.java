@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.function.Consumer;
+
 public class StringValue implements QueryExpr {
 
     private final String value;
@@ -31,5 +33,10 @@ public class StringValue implements QueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
     }
 }

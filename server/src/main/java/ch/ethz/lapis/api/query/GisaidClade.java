@@ -1,5 +1,7 @@
 package ch.ethz.lapis.api.query;
 
+import java.util.function.Consumer;
+
 public record GisaidClade(String clade) implements VariantQueryExpr {
     @Override
     public boolean[] evaluate(Database database) {
@@ -9,5 +11,10 @@ public record GisaidClade(String clade) implements VariantQueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
     }
 }

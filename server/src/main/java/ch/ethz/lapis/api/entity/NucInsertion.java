@@ -1,9 +1,11 @@
 package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.QueryExpr;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NucInsertion implements VariantQueryExpr {
     private int position;
@@ -56,5 +58,10 @@ public class NucInsertion implements VariantQueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public void traverseDFS(Consumer<QueryExpr> callback) {
+        callback.accept(this);
     }
 }
