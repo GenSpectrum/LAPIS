@@ -45,8 +45,7 @@ public class FindAQueryController {
         FindAQuery findAQuery = new FindAQuery(mutationStore);
         QueryEngine queryEngine = new QueryEngine();
         Set<Integer> wantedSeqIds = new HashSet<>(queryEngine.filterIds(database, request));
-        Set<Integer> unwantedSeqIds = new HashSet<>(queryEngine.filterIdsReversed(database, request));
-        return findAQuery.proposeAndNotMaybeQuery(database, wantedSeqIds, unwantedSeqIds);
+        return findAQuery.proposeQuery(database, wantedSeqIds);
     }
 
 }

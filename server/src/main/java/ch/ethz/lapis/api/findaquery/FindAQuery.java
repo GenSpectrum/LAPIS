@@ -28,25 +28,47 @@ public class FindAQuery {
         this.mutationStore = mutationStore;
     }
 
-    public String proposeQuery(Database database, List<Integer> wantedSeqs) {
-        QueryEngine queryEngine = new QueryEngine();
-        return null;
+    public String proposeQuery(Database database, Set<Integer> wantedSeqs) {
+        Set<Integer> unwantedSeqs = new HashSet<>(queryEngine.filterIds(database, new SampleDetailRequest()));
+        unwantedSeqs.removeAll(wantedSeqs);
+
+        // Iteration 1
+        var p1 = proposeAndNotMaybeQuery(database, wantedSeqs, unwantedSeqs,
+            new HashSet<>(), new ArrayList<>());
+        if (p1.unwantedSequences.isEmpty()) {
+            return String.join(" & ", p1.newComponents);
+        }
+
+        // Iteration 2 - with two clusters
+        var baseComponents = p1.newComponents;
+        var clusters = kMeans(new ArrayList<>(p1.wantedSequences), 2);
+
+        var p20 = proposeAndNotMaybeQuery(database,
+            new HashSet<>(clusters.get(0)), p1.unwantedSequences, wantedSeqs, baseComponents);
+        var p21 = proposeAndNotMaybeQuery(database,
+            new HashSet<>(clusters.get(1)), p1.unwantedSequences, wantedSeqs, baseComponents);
+
+        return String.join(" & ", p1.newComponents) +
+            " & ((" + String.join(" & ", p20.newComponents) + ") | (" + String.join(" & ", p21.newComponents) + "))";
     }
 
-    public String proposeAndNotMaybeQuery(
+    public ProposedQueryAndQueriedSequences proposeAndNotMaybeQuery(
         Database database,
         Set<Integer> wantedSeqs,
-        Set<Integer> unwantedSeqs
+        Set<Integer> unwantedSeqs,
+        Set<Integer> acceptedSeqs,
+        List<String> baseQueryComponents
     ) {
-        List<String> queryComponents = new ArrayList<>();
-        for (int i = 0; i < 10; i++) { // TODO The max. number of iterations should not be fixed?
+        List<String> queryComponents = new ArrayList<>(baseQueryComponents);
+        List<String> newQueryComponents = new ArrayList<>();
+        for (int i = 0; i < 8; i++) { // TODO The max. number of iterations should not be fixed?
             String component = proposeOneComponent(wantedSeqs, unwantedSeqs);
             if (component == null) {
                 break;
             }
             queryComponents.add(component);
+            newQueryComponents.add(component);
             String newQuery = String.join(" & ", queryComponents);
-            // TODO Don't do this in the last iteration
             Set<Integer> queriedSeqs = new HashSet<>(queryEngine.filterIds(database, new SampleDetailRequest()
                 .setVariantQuery(newQuery)));
             // TODO We are still loosing sequences which, I believe, is due to rounding inaccuracies of "proportion"
@@ -57,6 +79,7 @@ public class FindAQuery {
 //            }
             unwantedSeqs = new HashSet<>(queriedSeqs);
             unwantedSeqs.removeAll(wantedSeqs);
+            unwantedSeqs.removeAll(acceptedSeqs);
 
             int numberWantedSeqs = wantedSeqs.size();
             int numberUnwantedSeqs = unwantedSeqs.size();
@@ -67,7 +90,11 @@ public class FindAQuery {
             }
         }
 
-        return String.join(" & ", queryComponents);
+        return new ProposedQueryAndQueriedSequences(
+            newQueryComponents,
+            wantedSeqs, // This is inaccurate as we do not remove the sequences that we lost by accident.
+            unwantedSeqs
+        );
     }
 
     public String proposeOneComponent(
@@ -137,7 +164,8 @@ public class FindAQuery {
 
         // Return the best component if there's one available
         queryComponentsAndProportionDifferences.sort((a, b) -> b.getValue1().compareTo(a.getValue1()));
-        if (queryComponentsAndProportionDifferences.isEmpty()) {
+        if (queryComponentsAndProportionDifferences.isEmpty() ||
+            queryComponentsAndProportionDifferences.get(0).getValue1() < 0.02) { // TODO Don't fix the min. difference?
             return null;
         }
         return queryComponentsAndProportionDifferences.get(0).getValue0();
@@ -488,6 +516,12 @@ public class FindAQuery {
             return new Pair<>(distance, ConsumedStatus.VALUE1_CONSUMED);
         }
         return value;
+    }
+
+    private record ProposedQueryAndQueriedSequences(
+        List<String> newComponents,
+        Set<Integer> wantedSequences,
+        Set<Integer> unwantedSequences) {
     }
 
 }
