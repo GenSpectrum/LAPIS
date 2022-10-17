@@ -410,7 +410,7 @@ public class TransformService {
         }
         System.out.println(LocalDateTime.now() + " Data loaded");
 
-        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1500);
+        SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1000);
         transformer.transform(
             compressedSequences,
             alignedSeqCompressor::decompress,

@@ -22,7 +22,7 @@ public class SequenceRowToColumnTransformer {
 
     /**
      * This value defines how many positions should be processed at the same time, i.e., how many strings of length k
-     * has to be hold in memory. This is the core value to balance the needed RAM, CPU and wall-clock time.
+     * has to be held in memory. This is the core value to balance the needed RAM, CPU and wall-clock time.
      */
     private final int positionRangeSize;
 
