@@ -26,6 +26,7 @@ public record VariantQueryExprWithPointer(VariantQueryExpr root, VariantQueryExp
             }
             if (e == current) { // Yes, we are looking for reference equality here!
                 found.set(true);
+                return;
             }
             steps.getAndIncrement();
         });
@@ -39,6 +40,7 @@ public record VariantQueryExprWithPointer(VariantQueryExpr root, VariantQueryExp
             if (steps2.get() == steps.get()) {
                 newCurrent.set((VariantQueryExpr) e);
             }
+            steps2.getAndIncrement();
         });
         if (newCurrent.get() == null) {
             throw new RuntimeException("Unexpected error: newCurrent wasn't found.");

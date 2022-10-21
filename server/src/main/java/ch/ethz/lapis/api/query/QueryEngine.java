@@ -435,25 +435,6 @@ public class QueryEngine {
         }
     }
 
-    private VariantQueryExpr parseVariantQueryExpr(String variantQuery) {
-        try {
-            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            VariantQueryParser parser = new VariantQueryParser(tokens);
-            parser.removeErrorListeners();
-            parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-            ParseTree tree = parser.start();
-            ParseTreeWalker walker = new ParseTreeWalker();
-            VariantQueryListener listener = new VariantQueryListener();
-            walker.walk(listener, tree);
-            return listener.getExpr();
-        } catch (ParseCancellationException e) {
-            System.err.println("Malformed variant query: " +
-                variantQuery.substring(0, Math.min(200, variantQuery.length())));
-            throw new MalformedVariantQueryException();
-        }
-    }
-
     private String aggregationFieldToColumnName(AggregationField field) {
         return switch (field) {
             case DATE -> DATE;
@@ -482,6 +463,25 @@ public class QueryEngine {
             case ORIGINATINGLAB -> ORIGINATING_LAB;
             default -> throw new IllegalStateException("Unexpected value: " + field);
         };
+    }
+
+    public static VariantQueryExpr parseVariantQueryExpr(String variantQuery) {
+        try {
+            VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            VariantQueryParser parser = new VariantQueryParser(tokens);
+            parser.removeErrorListeners();
+            parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+            ParseTree tree = parser.start();
+            ParseTreeWalker walker = new ParseTreeWalker();
+            VariantQueryListener listener = new VariantQueryListener();
+            walker.walk(listener, tree);
+            return listener.getExpr();
+        } catch (ParseCancellationException e) {
+            System.err.println("Malformed variant query: " +
+                variantQuery.substring(0, Math.min(200, variantQuery.length())));
+            throw new MalformedVariantQueryException();
+        }
     }
 
 }

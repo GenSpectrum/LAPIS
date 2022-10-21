@@ -73,7 +73,9 @@ public class NOf implements VariantQueryExpr {
     @Override
     public Object clone() throws CloneNotSupportedException {
         NOf o = new NOf(exactMode, n);
-        subExprs.forEach(o::putValue);
+        for (VariantQueryExpr subExpr : subExprs) {
+            o.putValue((VariantQueryExpr) subExpr.clone());
+        }
         return o;
     }
 
