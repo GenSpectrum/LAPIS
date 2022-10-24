@@ -1,6 +1,7 @@
 package ch.ethz.lapis.api.findaquery;
 
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
+import ch.ethz.lapis.api.findaquery.eval.Challenge;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.MutationStore.InternalEntry;
@@ -37,6 +38,10 @@ public class FindAQuery {
         String finalQuery = proposeQuery(database, wantedSeqs, unwantedSeqs, wantedSeqs, new ArrayList<>(), 5);
         eval(database, finalQuery, wantedSeqs);
         return finalQuery;
+    }
+
+    public String proposeQuery(Database database, Challenge<?> challenge) {
+        throw new RuntimeException("TODO");
     }
 
     private void eval(Database database, String query, Set<Integer> wantedSeqs) {
