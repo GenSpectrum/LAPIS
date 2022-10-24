@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.javatuples.Pair;
 
 
@@ -32,24 +34,54 @@ public class FindAQuery {
         Set<Integer> unwantedSeqs = new HashSet<>(queryEngine.filterIds(database, new SampleDetailRequest()));
         unwantedSeqs.removeAll(wantedSeqs);
 
-        // Iteration 1
+        String finalQuery = proposeQuery(database, wantedSeqs, unwantedSeqs, wantedSeqs, new ArrayList<>(), 5);
+        eval(database, finalQuery, wantedSeqs);
+        return finalQuery;
+    }
+
+    private void eval(Database database, String query, Set<Integer> wantedSeqs) {
+        Set<Integer> queriedSeqs = new HashSet<>(queryEngine.filterIds(database, new SampleDetailRequest()
+            .setVariantQuery(query)));
+        Set<Integer> intersection = new HashSet<>(queriedSeqs);
+        intersection.retainAll(wantedSeqs);
+        double precision = intersection.size() * 1.0 / queriedSeqs.size();
+        double recall = intersection.size() * 1.0 / wantedSeqs.size();
+        System.out.println("precision=" + precision + " | recall=" + recall);
+    }
+
+    public String proposeQuery(
+        Database database,
+        Set<Integer> wantedSeqs,
+        Set<Integer> unwantedSeqs,
+        Set<Integer> acceptedSeqs,
+        List<String> baseQueryComponents,
+        int maxDepth
+    ) {
         var p1 = proposeAndNotMaybeQuery(database, wantedSeqs, unwantedSeqs,
-            new HashSet<>(), new ArrayList<>());
-        if (p1.unwantedSequences.isEmpty()) {
-            return String.join(" & ", p1.newComponents);
+            acceptedSeqs, baseQueryComponents);
+
+        String baseQuery = String.join(" & ", p1.newComponents);
+        if (maxDepth == 0 || baseQuery.isBlank() || p1.unwantedSequences.isEmpty()) {
+            return baseQuery;
         }
 
-        // Iteration 2 - with two clusters
-        var baseComponents = p1.newComponents;
-        var clusters = kMeans(new ArrayList<>(p1.wantedSequences), 2);
+        int k = 2;
+        var clusters = kMeans(new ArrayList<>(p1.wantedSequences), k);
+        List<String> clusterQueries = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            String clusterQuery = proposeQuery(database,
+                new HashSet<>(clusters.get(i)), p1.unwantedSequences, wantedSeqs, p1.newComponents, maxDepth - 1);
+            if (clusterQuery.isBlank()) {
+                // There is a cluster that cannot be further narrowed down
+                return baseQuery;
+            }
+            clusterQueries.add("(" + clusterQuery + ")");
+        }
 
-        var p20 = proposeAndNotMaybeQuery(database,
-            new HashSet<>(clusters.get(0)), p1.unwantedSequences, wantedSeqs, baseComponents);
-        var p21 = proposeAndNotMaybeQuery(database,
-            new HashSet<>(clusters.get(1)), p1.unwantedSequences, wantedSeqs, baseComponents);
-
-        return String.join(" & ", p1.newComponents) +
-            " & ((" + String.join(" & ", p20.newComponents) + ") | (" + String.join(" & ", p21.newComponents) + "))";
+        String clusterQueryEnsemble = "(" + String.join(" | ", clusterQueries) + ")";
+        return Stream.of(baseQuery, clusterQueryEnsemble)
+            .filter(c -> !c.isBlank())
+            .collect(Collectors.joining(" & "));
     }
 
     public ProposedQueryAndQueriedSequences proposeAndNotMaybeQuery(
@@ -62,7 +94,7 @@ public class FindAQuery {
         List<String> queryComponents = new ArrayList<>(baseQueryComponents);
         List<String> newQueryComponents = new ArrayList<>();
         for (int i = 0; i < 8; i++) { // TODO The max. number of iterations should not be fixed?
-            String component = proposeOneComponent(wantedSeqs, unwantedSeqs);
+            String component = proposeOneComponent(wantedSeqs, unwantedSeqs, new HashSet<>(queryComponents));
             if (component == null) {
                 break;
             }
@@ -99,7 +131,8 @@ public class FindAQuery {
 
     public String proposeOneComponent(
         Set<Integer> wantedSeqs,
-        Set<Integer> unwantedSeqs
+        Set<Integer> unwantedSeqs,
+        Set<String> usedQueryComponents
     ) {
         int numberWantedSeqs = wantedSeqs.size();
         int numberUnwantedSeqs = unwantedSeqs.size();
@@ -152,18 +185,21 @@ public class FindAQuery {
                     }
                 } else if (unwantedCount == null || unwantedCount.getProportion() < 1) {
                     // Case (3)
-                    queryComponentsAndProportionDifferences.add(new Pair<>(
-                        "maybe(" + mutStr + ")",
-                        unwantedCount != null ?
-                            1 - unwantedCount.getProportion() :
-                            1
-                    ));
+//                    queryComponentsAndProportionDifferences.add(new Pair<>(
+//                        "maybe(" + mutStr + ")",
+//                        unwantedCount != null ?
+//                            1 - unwantedCount.getProportion() :
+//                            1
+//                    ));
                 }
             }
         }
 
         // Return the best component if there's one available
-        queryComponentsAndProportionDifferences.sort((a, b) -> b.getValue1().compareTo(a.getValue1()));
+        queryComponentsAndProportionDifferences = queryComponentsAndProportionDifferences.stream()
+            .filter(p -> !usedQueryComponents.contains(p.getValue0()))
+            .sorted((a, b) -> b.getValue1().compareTo(a.getValue1()))
+            .toList();
         if (queryComponentsAndProportionDifferences.isEmpty() ||
             queryComponentsAndProportionDifferences.get(0).getValue1() < 0.02) { // TODO Don't fix the min. difference?
             return null;
@@ -181,7 +217,7 @@ public class FindAQuery {
             clusters.add(new ArrayList<>());
         }
         for (int i = 0; i < seqIds.size(); i++) {
-            clusters.get(i % k).add(seqIds.get(i));
+            clusters.get(((int) Math.round(Math.random() * k)) % k).add(seqIds.get(i));
         }
 
         for (int iter = 0; iter < 10; iter++) { // TODO define proper abort conditions
