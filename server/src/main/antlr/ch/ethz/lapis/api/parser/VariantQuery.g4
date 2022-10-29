@@ -62,7 +62,7 @@ nextclade_pango_query: nextclade_pango_lineage_prefix pango_query;
 gisaid_clade: character character?;
 gisaid_clade_prefix: G I S A I D ':';
 gisaid_clade_query: gisaid_clade_prefix gisaid_clade;
-nextstrain_clade: NUMBER NUMBER character;
+nextstrain_clade: NUMBER NUMBER character | 'RECOMBINANT';
 nextstrain_clade_prefix: N E X T S T R A I N C L A D E ':';
 nextstrain_clade_query: nextstrain_clade_prefix nextstrain_clade;
 
