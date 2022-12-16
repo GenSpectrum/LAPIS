@@ -57,7 +57,18 @@ public class SequenceRowToColumnTransformer {
             if (compressedSequences.isEmpty()) {
                 return;
             }
-            int sequenceLength = decompressor.apply(compressedSequences.get(0)).length();
+            // Determine the sequence length by looking at the first non-null entry
+            int sequenceLength = -1;
+            for (S compressedSequence : compressedSequences) {
+                if (compressedSequence != null) {
+                    sequenceLength = decompressor.apply(compressedSequence).length();
+                    break;
+                }
+            }
+            if (sequenceLength == -1) {
+                throw new RuntimeException("The sequences cannot be transformed because the compressedSequences only contain nulls.");
+            }
+
             int numberIterations = (int) Math.ceil(sequenceLength * 1.0 / positionRangeSize);
             int numberTasksPerIteration = (int) Math.ceil(compressedSequences.size() * 1.0 / batchSize);
             ExecutorService executor = Executors.newFixedThreadPool(numberWorkers);
