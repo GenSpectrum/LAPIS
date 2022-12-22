@@ -313,9 +313,33 @@ public class Database {
             }
 
             // Fill the database
-            Database.loadSequences(databasePool, database);
-            Database.loadMetadata(databasePool, database, numberRows);
-            Database.loadMutationsAndInsertions(databasePool, database, numberRows);
+            Thread t1 = new Thread(() -> {
+                try {
+                    Database.loadSequences(databasePool, database);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            Thread t2 = new Thread(() -> {
+                try {
+                    Database.loadMetadata(databasePool, database, numberRows);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            Thread t3 = new Thread(() -> {
+                try {
+                    Database.loadMutationsAndInsertions(databasePool, database, numberRows);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            t1.start();
+            t2.start();
+            t3.start();
+            t1.join();
+            t2.join();
+            t3.join();
 
             // Fetch the data version again and check whether it has changed in the meantime
             try (Statement statement = conn.createStatement()) {
@@ -334,6 +358,8 @@ public class Database {
             }
 
             return database;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
