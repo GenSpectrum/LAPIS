@@ -62,6 +62,8 @@ public class Database {
         public static final String NEXTCLADE_COVERAGE = "nextclade_coverage"; // Float
     }
 
+    private static class DataVersionChangedDuringFetching extends RuntimeException {}
+
     public static final String[] ALL_COLUMNS = new String[] {
         Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
         Columns.DATE, Columns.YEAR, Columns.MONTH, Columns.DATE_SUBMITTED, Columns.REGION, Columns.COUNTRY,
@@ -252,7 +254,13 @@ public class Database {
 
     public static void updateInstance(ComboPooledDataSource databasePool) {
         try {
-            instance = loadDatabase(databasePool);
+            try {
+                instance = loadDatabase(databasePool);
+            } catch (DataVersionChangedDuringFetching ignored) {
+                // If the data version changed during fetching, we retry once.
+                // If the second time also fails, something is likely wrong.
+                instance = loadDatabase(databasePool);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -267,7 +275,6 @@ public class Database {
 
     private static Database loadDatabase(ComboPooledDataSource databasePool) throws SQLException {
         try (Connection conn = databasePool.getConnection()) {
-            conn.setAutoCommit(false);
             String dataVersionSql = """
                 select timestamp
                 from data_version
@@ -277,33 +284,8 @@ public class Database {
                 select count(*) as count
                 from y_main_metadata
                 """;
-            String metadataSql = """
-                select *
-                from y_main_metadata
-                order by id;
-                """;
-            String sequenceSql = """
-                select
-                  id,
-                  coalesce(aa_mutations, '') as aa_mutations,
-                  coalesce(aa_insertions, '') as aa_insertions,
-                  coalesce(aa_unknowns, '') as aa_unknowns,
-                  coalesce(nuc_substitutions, '') as nuc_substitutions,
-                  coalesce(nuc_deletions, '') as nuc_deletions,
-                  coalesce(nuc_insertions, '') as nuc_insertions,
-                  coalesce(nuc_unknowns, '') as nuc_unknowns
-                from y_main_sequence
-                order by id;
-                """;
-            String nucSequenceColumnarSql = """
-                select position, data_compressed
-                from y_main_sequence_columnar;
-                """;
-            String aaSequenceColumnarSql = """
-                select gene, position, data_compressed
-                from y_main_aa_sequence_columnar;
-                """;
             Database database;
+            int numberRows;
             try (Statement statement = conn.createStatement()) {
                 // Fetch data version
                 long dataVersion;
@@ -312,10 +294,8 @@ public class Database {
                         throw new RuntimeException("The data version cannot be found in the database.");
                     }
                     dataVersion = rs.getLong("timestamp");
-
                 }
                 // Fetch number of rows
-                int numberRows;
                 try (ResultSet rs = statement.executeQuery(lengthSql)) {
                     rs.next();
                     numberRows = rs.getInt("count");
@@ -330,7 +310,45 @@ public class Database {
                     numberRows,
                     pangoLineageQueryConverter
                 );
-                // Fetch sequences
+            }
+
+            // Fill the database
+            Database.loadSequences(databasePool, database);
+            Database.loadMetadata(databasePool, database, numberRows);
+            Database.loadMutationsAndInsertions(databasePool, database, numberRows);
+
+            // Fetch the data version again and check whether it has changed in the meantime
+            try (Statement statement = conn.createStatement()) {
+                long dataVersion;
+                try (ResultSet rs = statement.executeQuery(dataVersionSql)) {
+                    if (!rs.next()) {
+                        throw new RuntimeException("The data version cannot be found in the database.");
+                    }
+                    dataVersion = rs.getLong("timestamp");
+                }
+                if (dataVersion != database.getDataVersion()) {
+                    System.err.println("Data version has changed. Initial version: " + database.getDataVersion() +
+                        ", current version: " + dataVersion);
+                    throw new DataVersionChangedDuringFetching();
+                }
+            }
+
+            return database;
+        }
+    }
+
+    private static void loadSequences(ComboPooledDataSource databasePool, Database database)
+        throws SQLException {
+        String nucSequenceColumnarSql = """
+                select position, data_compressed
+                from y_main_sequence_columnar;
+                """;
+        String aaSequenceColumnarSql = """
+                select gene, position, data_compressed
+                from y_main_aa_sequence_columnar;
+                """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
                 statement.setFetchSize(2000);
                 try (ResultSet rs = statement.executeQuery(nucSequenceColumnarSql)) {
                     int i = 0;
@@ -360,8 +378,19 @@ public class Database {
                         i++;
                     }
                 }
+            }
+        }
+    }
 
-                // Fetch metadata
+    private static void loadMetadata(ComboPooledDataSource databasePool, Database database, int numberRows)
+        throws SQLException {
+        String metadataSql = """
+                select *
+                from y_main_metadata
+                order by id;
+                """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
                 for (String stringColumn : STRING_COLUMNS) {
                     database.stringColumns.put(stringColumn, new String[numberRows]);
                 }
@@ -407,7 +436,30 @@ public class Database {
                         ++i;
                     }
                 }
-                // Fetch mutations and insertions
+            }
+        }
+    }
+
+    private static void loadMutationsAndInsertions(
+        ComboPooledDataSource databasePool,
+        Database database,
+        int numberRows
+    ) throws SQLException {
+        String sequenceSql = """
+            select
+              id,
+              coalesce(aa_mutations, '') as aa_mutations,
+              coalesce(aa_insertions, '') as aa_insertions,
+              coalesce(aa_unknowns, '') as aa_unknowns,
+              coalesce(nuc_substitutions, '') as nuc_substitutions,
+              coalesce(nuc_deletions, '') as nuc_deletions,
+              coalesce(nuc_insertions, '') as nuc_insertions,
+              coalesce(nuc_unknowns, '') as nuc_unknowns
+            from y_main_sequence
+            order by id;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
                 statement.setFetchSize(20000);
                 try (ResultSet rs = statement.executeQuery(sequenceSql)) {
                     int i = 0;
@@ -483,8 +535,6 @@ public class Database {
                     }
                 }
             }
-            conn.setAutoCommit(true);
-            return database;
         }
     }
 
