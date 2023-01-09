@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ public class SampleController {
         checkDataFormat(generalConfig.getDataFormat(), List.of(DataFormat.JSON, DataFormat.CSV, DataFormat.TSV));
         stopWatch.round("Cache check");
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AGGREGATED, request);
-        String body = useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(generalConfig.isNoCache(), cacheKey, () -> {
             try {
                 stopWatch.round("Query data");
                 Versioned<List<SampleAggregated>> aggregatedSamples = sampleService.getAggregatedSamples(request);
@@ -396,7 +397,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_AA_MUTATIONS, request);
-        String body = useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(generalConfig.isNoCache(), cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.AMINO_ACID, request.getMinProportion());
@@ -458,7 +459,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_NUC_MUTATIONS, request);
-        String body = useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(generalConfig.isNoCache(), cacheKey, () -> {
             try {
                 SampleMutationsResponse mutationsResponse = sampleService.getMutations(request,
                     SequenceType.NUCLEOTIDE, request.getMinProportion());
@@ -522,7 +523,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         ApiCacheKey cacheKey = new ApiCacheKey(endpointName, request);
-        String body = useCacheOrCompute(cacheKey, () -> {
+        String body = useCacheOrCompute(generalConfig.isNoCache(), cacheKey, () -> {
             try {
                 List<InsertionStore.InsertionCount> insertions = sampleService.getInsertions(request, sequenceType);
                 V1Response<List<InsertionStore.InsertionCount>> response = new V1Response<>(insertions,
@@ -683,8 +684,11 @@ public class SampleController {
     }
 
 
-    private String useCacheOrCompute(ApiCacheKey cacheKey, Supplier<String> compute) {
-        if (cacheServiceOpt.isEmpty()) {
+    private String useCacheOrCompute(boolean noCache, ApiCacheKey cacheKey, Supplier<String> compute) {
+        if (noCache || cacheServiceOpt.isEmpty()) {
+            if (noCache) {
+                System.out.println(LocalDateTime.now() + " Ignoring the cache");
+            }
             return compute.get();
         }
         CacheService cacheService = cacheServiceOpt.get();

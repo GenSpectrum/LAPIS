@@ -6,6 +6,7 @@ public class GeneralConfig {
     private Long dataVersion;
     private boolean downloadAsFile = false;
     private DataFormat dataFormat = DataFormat.JSON;
+    private boolean noCache = false;
 
     public Long getDataVersion() {
         return dataVersion;
@@ -31,6 +32,15 @@ public class GeneralConfig {
 
     public GeneralConfig setDataFormat(DataFormat dataFormat) {
         this.dataFormat = dataFormat;
+        return this;
+    }
+
+    public boolean isNoCache() {
+        return noCache;
+    }
+
+    public GeneralConfig setNoCache(boolean noCache) {
+        this.noCache = noCache;
         return this;
     }
 }
