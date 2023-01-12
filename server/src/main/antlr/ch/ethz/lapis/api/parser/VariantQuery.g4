@@ -46,9 +46,9 @@ aa_ins: 'INS_' gene ':' position ':' (aa_mutated | '?')+;
 
 position: NUMBER+;
 aa: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
-aa_mutated: aa | X | MINUS;
+aa_mutated: aa | X | MINUS | DOT;
 nuc: A | C | G | T;
-nuc_mutated: nuc | M | R | W | S | Y | K | V | H | D | B | N | MINUS;
+nuc_mutated: nuc | M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
 gene: E | M | N | S | ORF;
 
 pango_query: pango_lineage pango_include_sub?;
