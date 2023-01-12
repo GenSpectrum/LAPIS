@@ -29,8 +29,13 @@ public class PangoLineageAliasResolverTest {
         Arguments.of("B.1.1.1*", List.of("C*")),
         Arguments.of("B.1*", List.of("C*", "AY*", "BA*", "BE*", "BF*")),
         Arguments.of("B.*", List.of("C*", "AY*", "BA*", "BE*", "BF*")),
-        Arguments.of("BA.5*", List.of("BA.5*", "BE*", "BF*")),
-        Arguments.of("B.1.1.529.5.3*", List.of("BA.5.3*", "BE*"))
+        Arguments.of("BA.5*", List.of("BE*", "BF*")),
+        Arguments.of("B.1.1.529.5.3*", List.of("BA.5.3*", "BE*")),
+        Arguments.of("BA", List.of("B.1.1.529")),
+        Arguments.of("BA*", List.of("B.1.1.529*", "BE*", "BF*")),
+        Arguments.of("B.1.1.529*", List.of("BA*", "BE*", "BF*")),
+        Arguments.of("BF", List.of("BA.5.2.1")),
+        Arguments.of("BF*", List.of("BA.5.2.1*"))
     );
 
     @ParameterizedTest
