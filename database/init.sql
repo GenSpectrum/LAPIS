@@ -26,6 +26,13 @@ create table access_key
   comment text
 );
 
+create table nextclade_dataset_version
+(
+  id serial primary key,
+  inserted_at timestamp not null,
+  tag text not null
+);
+
 
 -- Source: Nextstrain/GenBank
 

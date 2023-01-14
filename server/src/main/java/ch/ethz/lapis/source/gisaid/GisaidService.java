@@ -4,17 +4,19 @@ import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.core.NapiNotification;
 import ch.ethz.lapis.core.SendableReport.PriorityLevel;
+import ch.ethz.lapis.source.NextcladeDatasetTagReader;
 import ch.ethz.lapis.util.ParsedDate;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.javatuples.Pair;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.tukaani.xz.XZInputStream;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -24,33 +26,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import org.javatuples.Pair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.tukaani.xz.XZInputStream;
 
 
 public class GisaidService {
@@ -123,6 +109,32 @@ public class GisaidService {
             throw e;
         }
 
+        // Check whether there is a new/different Nextclade version
+        String loadOldNextcladeDatasetTagSql = """
+                select tag
+                from nextclade_dataset_version
+                order by inserted_at desc
+                limit 1;
+            """;
+        String oldTag = null;
+        try (Connection conn = databasePool.getConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(loadOldNextcladeDatasetTagSql)) {
+                    if (rs.next()) {
+                        oldTag = rs.getString("tag");
+                    }
+                }
+            }
+        }
+        Path tagFilePath = Path.of("/app/nextclade-data/tag.json"); // TODO Move it to the configs
+        String currentTag = NextcladeDatasetTagReader.getDatasetTag(tagFilePath);
+        boolean newNextcladeDataset = !currentTag.equals(oldTag);
+        if (newNextcladeDataset) {
+            String subject = "[LAPIS GISAID import] New Nextclade dataset: " + currentTag;
+            String body = "Old tag: " + oldTag + ", new tag: " + currentTag;
+            NapiNotification.sendNotification(notificationAuthKey, "INFO", subject, body);
+        }
+
         // Load the list of all GISAID EPI ISL and hashes from the database.
         String loadExistingSql = """
                 select gisaid_epi_isl, metadata_hash, seq_original_hash
@@ -137,7 +149,8 @@ public class GisaidService {
                             rs.getString("gisaid_epi_isl"),
                             new GisaidHashes(
                                 rs.getString("metadata_hash"),
-                                rs.getString("seq_original_hash")
+                                // We want to reprocess all sequences if the Nextclade dataset has changed
+                                !newNextcladeDataset ? rs.getString("seq_original_hash") : null
                             )
                         );
                     }
@@ -272,6 +285,20 @@ public class GisaidService {
             toDelete.removeAll(gisaidEpiIslInDataPackage);
             deleteSequences(toDelete);
             deleted = toDelete.size();
+        }
+
+        // Store the new Nextclade dataset tag if it has changed
+        if (newNextcladeDataset) {
+            String insertNewNextcladeDatasetTagSql = """
+                insert into nextclade_dataset_version (inserted_at, tag)
+                values (now(), ?);
+            """;
+            try (Connection conn = databasePool.getConnection()) {
+                try (PreparedStatement statement = conn.prepareStatement(insertNewNextcladeDatasetTagSql)) {
+                    statement.setString(1, currentTag);
+                    statement.execute();
+                }
+            }
         }
 
         // Merge the BatchReports to a report and send it
