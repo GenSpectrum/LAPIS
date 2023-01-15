@@ -424,6 +424,29 @@ public class SampleService {
     }
 
 
+    public String getNextcladeDatasetTag() {
+        String loadOldNextcladeDatasetTagSql = """
+                select tag
+                from nextclade_dataset_version
+                order by inserted_at desc
+                limit 1;
+            """;
+        String tag = null;
+        try (Connection conn = getDatabaseConnection()) {
+            try (Statement statement = conn.createStatement()) {
+                try (ResultSet rs = statement.executeQuery(loadOldNextcladeDatasetTagSql)) {
+                    if (rs.next()) {
+                        tag = rs.getString("tag");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return tag;
+    }
+
+
     private Table<Record1<Integer>> getIdsTable(Collection<Integer> ids, DSLContext ctx) {
         String idsStr = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
         return ctx
