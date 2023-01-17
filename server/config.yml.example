@@ -1,0 +1,12 @@
+default:
+  vineyard:
+    host: <db host>
+    port: <db port>
+    dbname: <db name>
+    username: <db user name>
+    password: <db user password>
+    schema: <db schema>
+  apiOpennessLevel: <"OPEN" or "GISAID">
+  cacheEnabled: false
+  redisHost:
+  redisPort:
