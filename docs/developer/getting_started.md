@@ -22,25 +22,5 @@ To run the unit tests, call:
 
 This section describes how to start the API on a developer's local machine.
 
-After building it as described above, the program has to be executed with the following arguments:
-
-```
---config <path-to-config-file> Lapis --api
-```
-
-where the config file is a YAML file with the following content:
-
-```
-default:
-  vineyard:
-    host: <db host>
-    port: <db port>
-    dbname: <db name>
-    username: <db user name>
-    password: <db user password>
-    schema: <db schema>
-  apiOpennessLevel: <"OPEN" or "GISAID">
-  cacheEnabled: false
-  redisHost:
-  redisPort:
-```
+After building it as described above, the program can be started with `server/startServer.sh`.
+The script assumes that the .jar file is present and that `server/config.yml.example` is copied to `server/config.yml`.
