@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BadRequestException extends BaseApiException {
 
-    private String message;
+    private final String message;
 
     public BadRequestException(String message) {
         this.message = message;

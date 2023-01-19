@@ -81,12 +81,12 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
-        if (request.getStrain() != null || request.getGenbankAccession() != null || request.getGisaidEpiIsl() != null
-            || request.getSraAccession() != null) {
-            checkAuthorization(accessKey, false);
-        } else {
-            checkAuthorization(accessKey, true);
-        }
+        boolean endpointServesAggregatedData = request.getStrain() == null
+            && request.getGenbankAccession() == null
+            && request.getGisaidEpiIsl() == null
+            && request.getSraAccession() == null;
+        checkAuthorization(accessKey, endpointServesAggregatedData);
+
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Controller checks");
         checkDataVersion(generalConfig.getDataVersion());
@@ -104,7 +104,7 @@ public class SampleController {
                     aggregatedSamples.content()
                 ), aggregatedSamples.dataVersion(), openness);
                 return objectMapper.writeValueAsString(response);
-            } catch (SQLException | JsonProcessingException e) {
+            } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -404,7 +404,7 @@ public class SampleController {
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion(), openness);
                 return objectMapper.writeValueAsString(response);
-            } catch (SQLException | JsonProcessingException e) {
+            } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -466,7 +466,7 @@ public class SampleController {
                 V1Response<SampleMutationsResponse> response = new V1Response<>(mutationsResponse,
                     dataVersionService.getVersion(), openness);
                 return objectMapper.writeValueAsString(response);
-            } catch (SQLException | JsonProcessingException e) {
+            } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
         });

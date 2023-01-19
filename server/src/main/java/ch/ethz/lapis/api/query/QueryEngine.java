@@ -145,41 +145,38 @@ public class QueryEngine {
     }
 
     public boolean[] matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
-        Database db = database;
-        SampleFilter<?> sf = sampleFilter;
-
         // TODO This shouldn't be done here?
         //  Validate yearMonthFrom and yearMonthTo
         Pattern pattern = Pattern.compile("(\\d{4})([-]\\d{2})?([-]\\d{2})?");
-        if (sf.getYearMonthFrom() != null) {
-            if (!pattern.matcher(sf.getYearMonthFrom()).matches()) {
+        if (sampleFilter.getYearMonthFrom() != null) {
+            if (!pattern.matcher(sampleFilter.getYearMonthFrom()).matches()) {
                 throw new BadRequestException("yearMonthFrom is malformed, it has to be yyyy-mm");
             }
         }
-        if (sf.getYearMonthTo() != null) {
-            if (!pattern.matcher(sf.getYearMonthTo()).matches()) {
+        if (sampleFilter.getYearMonthTo() != null) {
+            if (!pattern.matcher(sampleFilter.getYearMonthTo()).matches()) {
                 throw new BadRequestException("yearMonthTo is malformed, it has to be yyyy-mm");
             }
         }
 
         // Filter variant
-        var nucMutations = sf.getNucMutations();
+        var nucMutations = sampleFilter.getNucMutations();
         var useNucMutations = nucMutations != null && !nucMutations.isEmpty();
-        var aaMutations = sf.getAaMutations();
+        var aaMutations = sampleFilter.getAaMutations();
         var useAaMutations = aaMutations != null && !aaMutations.isEmpty();
-        var nucInsertions = sf.getNucInsertions();
+        var nucInsertions = sampleFilter.getNucInsertions();
         var useNucInsertions = nucInsertions != null && !nucInsertions.isEmpty();
-        var aaInsertions = sf.getAaInsertions();
+        var aaInsertions = sampleFilter.getAaInsertions();
         var useAaInsertions = aaInsertions != null && !aaInsertions.isEmpty();
-        var pangoLineage = sf.getPangoLineage();
+        var pangoLineage = sampleFilter.getPangoLineage();
         var usePangoLineage = pangoLineage != null;
-        var nextcladePangoLineage = sf.getNextcladePangoLineage();
+        var nextcladePangoLineage = sampleFilter.getNextcladePangoLineage();
         var useNextcladePangoLineage = nextcladePangoLineage != null;
-        var gisaidClade = sf.getGisaidClade();
+        var gisaidClade = sampleFilter.getGisaidClade();
         var useGisaidClade = gisaidClade != null;
-        var nextstrainClade = sf.getNextstrainClade();
+        var nextstrainClade = sampleFilter.getNextstrainClade();
         var useNextstrainClade = nextstrainClade != null;
-        var variantQuery = sf.getVariantQuery();
+        var variantQuery = sampleFilter.getVariantQuery();
         var useVariantQuery = variantQuery != null;
 
         boolean useOtherVariantSpecifying = useNucMutations || useAaMutations || useNucInsertions || useAaInsertions
@@ -241,61 +238,61 @@ public class QueryEngine {
             }
         }
 
-        int numberRows = db.size();
+        int numberRows = database.size();
         boolean[] matched;
         if (variantQueryExpr != null) {
             Maybe.pushDownMaybe(variantQueryExpr);
-            matched = variantQueryExpr.evaluate(db);
+            matched = variantQueryExpr.evaluate(database);
         } else {
             matched = new boolean[numberRows];
             Arrays.fill(matched, true);
         }
 
         // Filter metadata
-        between(matched, db.getIntColumn(DATE), sf.getDateFrom(), sf.getDateTo());
-        between(matched, db.getIntColumn(YEAR), sf.getYearFrom(), sf.getYearTo());
-        betweenYearMonth(matched, db.getIntColumn(YEAR), db.getIntColumn(MONTH),
-            sf.getYearMonthFrom(), sf.getYearMonthTo());
-        between(matched, db.getIntColumn(DATE_SUBMITTED),
-            sf.getDateSubmittedFrom(), sf.getDateSubmittedTo());
-        eq(matched, db.getStringColumn(REGION), sf.getRegion(), true);
-        eq(matched, db.getStringColumn(COUNTRY), sf.getCountry(), true);
-        eq(matched, db.getStringColumn(DIVISION), sf.getDivision(), true);
-        eq(matched, db.getStringColumn(LOCATION), sf.getLocation(), true);
-        eq(matched, db.getStringColumn(REGION_EXPOSURE), sf.getRegionExposure(), true);
-        eq(matched, db.getStringColumn(COUNTRY_EXPOSURE), sf.getCountryExposure(), true);
-        eq(matched, db.getStringColumn(DIVISION_EXPOSURE), sf.getDivisionExposure(), true);
-        between(matched, db.getIntColumn(AGE), sf.getAgeFrom(), sf.getAgeTo());
-        eq(matched, db.getStringColumn(SEX), sf.getSex(), true);
-        eq(matched, db.getBoolColumn(HOSPITALIZED), sf.getHospitalized());
-        eq(matched, db.getBoolColumn(DIED), sf.getDied());
-        eq(matched, db.getBoolColumn(FULLY_VACCINATED), sf.getFullyVaccinated());
-        eq(matched, db.getStringColumn(HOST), sf.getHost(), true);
-        eq(matched, db.getStringColumn(SAMPLING_STRATEGY), sf.getSamplingStrategy(), true);
-        eq(matched, db.getStringColumn(SUBMITTING_LAB), sf.getSubmittingLab(), true);
-        eq(matched, db.getStringColumn(ORIGINATING_LAB), sf.getOriginatingLab(), true);
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_OVERALL_SCORE),
-            sf.getNextcladeQcOverallScoreFrom(), sf.getNextcladeQcOverallScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_MISSING_DATA_SCORE),
-            sf.getNextcladeQcMissingDataScoreFrom(), sf.getNextcladeQcMissingDataScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_MIXED_SITES_SCORE),
-            sf.getNextcladeQcMixedSitesScoreFrom(), sf.getNextcladeQcMixedSitesScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE),
-            sf.getNextcladeQcPrivateMutationsScoreFrom(), sf.getNextcladeQcPrivateMutationsScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_SNP_CLUSTERS_SCORE),
-            sf.getNextcladeQcSnpClustersScoreFrom(), sf.getNextcladeQcSnpClustersScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_FRAME_SHIFTS_SCORE),
-            sf.getNextcladeQcFrameShiftsScoreFrom(), sf.getNextcladeQcFrameShiftsScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_QC_STOP_CODONS_SCORE),
-            sf.getNextcladeQcStopCodonsScoreFrom(), sf.getNextcladeQcStopCodonsScoreTo());
-        between(matched, db.getFloatColumn(NEXTCLADE_COVERAGE),
-            sf.getNextcladeCoverageFrom(), sf.getNextcladeCoverageTo());
+        between(matched, database.getIntColumn(DATE), sampleFilter.getDateFrom(), sampleFilter.getDateTo());
+        between(matched, database.getIntColumn(YEAR), sampleFilter.getYearFrom(), sampleFilter.getYearTo());
+        betweenYearMonth(matched, database.getIntColumn(YEAR), database.getIntColumn(MONTH),
+            sampleFilter.getYearMonthFrom(), sampleFilter.getYearMonthTo());
+        between(matched, database.getIntColumn(DATE_SUBMITTED),
+            sampleFilter.getDateSubmittedFrom(), sampleFilter.getDateSubmittedTo());
+        eq(matched, database.getStringColumn(REGION), sampleFilter.getRegion(), true);
+        eq(matched, database.getStringColumn(COUNTRY), sampleFilter.getCountry(), true);
+        eq(matched, database.getStringColumn(DIVISION), sampleFilter.getDivision(), true);
+        eq(matched, database.getStringColumn(LOCATION), sampleFilter.getLocation(), true);
+        eq(matched, database.getStringColumn(REGION_EXPOSURE), sampleFilter.getRegionExposure(), true);
+        eq(matched, database.getStringColumn(COUNTRY_EXPOSURE), sampleFilter.getCountryExposure(), true);
+        eq(matched, database.getStringColumn(DIVISION_EXPOSURE), sampleFilter.getDivisionExposure(), true);
+        between(matched, database.getIntColumn(AGE), sampleFilter.getAgeFrom(), sampleFilter.getAgeTo());
+        eq(matched, database.getStringColumn(SEX), sampleFilter.getSex(), true);
+        eq(matched, database.getBoolColumn(HOSPITALIZED), sampleFilter.getHospitalized());
+        eq(matched, database.getBoolColumn(DIED), sampleFilter.getDied());
+        eq(matched, database.getBoolColumn(FULLY_VACCINATED), sampleFilter.getFullyVaccinated());
+        eq(matched, database.getStringColumn(HOST), sampleFilter.getHost(), true);
+        eq(matched, database.getStringColumn(SAMPLING_STRATEGY), sampleFilter.getSamplingStrategy(), true);
+        eq(matched, database.getStringColumn(SUBMITTING_LAB), sampleFilter.getSubmittingLab(), true);
+        eq(matched, database.getStringColumn(ORIGINATING_LAB), sampleFilter.getOriginatingLab(), true);
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_OVERALL_SCORE),
+            sampleFilter.getNextcladeQcOverallScoreFrom(), sampleFilter.getNextcladeQcOverallScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_MISSING_DATA_SCORE),
+            sampleFilter.getNextcladeQcMissingDataScoreFrom(), sampleFilter.getNextcladeQcMissingDataScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_MIXED_SITES_SCORE),
+            sampleFilter.getNextcladeQcMixedSitesScoreFrom(), sampleFilter.getNextcladeQcMixedSitesScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE),
+            sampleFilter.getNextcladeQcPrivateMutationsScoreFrom(), sampleFilter.getNextcladeQcPrivateMutationsScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_SNP_CLUSTERS_SCORE),
+            sampleFilter.getNextcladeQcSnpClustersScoreFrom(), sampleFilter.getNextcladeQcSnpClustersScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_FRAME_SHIFTS_SCORE),
+            sampleFilter.getNextcladeQcFrameShiftsScoreFrom(), sampleFilter.getNextcladeQcFrameShiftsScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_QC_STOP_CODONS_SCORE),
+            sampleFilter.getNextcladeQcStopCodonsScoreFrom(), sampleFilter.getNextcladeQcStopCodonsScoreTo());
+        between(matched, database.getFloatColumn(NEXTCLADE_COVERAGE),
+            sampleFilter.getNextcladeCoverageFrom(), sampleFilter.getNextcladeCoverageTo());
 
         // Filter IDs
-        eq(matched, db.getStringColumn(GENBANK_ACCESSION), sf.getGenbankAccession(), true);
-        eq(matched, db.getStringColumn(SRA_ACCESSION), sf.getSraAccession(), true);
-        eq(matched, db.getStringColumn(GISAID_EPI_ISL), sf.getGisaidEpiIsl(), true);
-        eq(matched, db.getStringColumn(STRAIN), sf.getStrain(), true);
+        eq(matched, database.getStringColumn(GENBANK_ACCESSION), sampleFilter.getGenbankAccession(), true);
+        eq(matched, database.getStringColumn(SRA_ACCESSION), sampleFilter.getSraAccession(), true);
+        eq(matched, database.getStringColumn(GISAID_EPI_ISL), sampleFilter.getGisaidEpiIsl(), true);
+        eq(matched, database.getStringColumn(STRAIN), sampleFilter.getStrain(), true);
 
         return matched;
     }
@@ -347,40 +344,21 @@ public class QueryEngine {
         }
     }
 
-    private void between(boolean[] matched, Integer[] data, Integer from, Integer to) {
+    private <N extends Number & Comparable<N>> void between(boolean[] matched, N[] data, N from, N to) {
         if (from == null && to == null) {
             return;
         }
         if (from != null && to != null) {
             for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from && data[i] <= to;
+                matched[i] = matched[i] && data[i] != null && data[i].compareTo(from) >= 0 && data[i].compareTo(to) <= 0;
             }
         } else if (from != null) {
             for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from;
+                matched[i] = matched[i] && data[i] != null && data[i].compareTo(from) >= 0;
             }
         } else {
             for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] <= to;
-            }
-        }
-    }
-
-    private void between(boolean[] matched, Float[] data, Float from, Float to) {
-        if (from == null && to == null) {
-            return;
-        }
-        if (from != null && to != null) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from && data[i] <= to;
-            }
-        } else if (from != null) {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] >= from;
-            }
-        } else {
-            for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i] <= to;
+                matched[i] = matched[i] && data[i] != null && data[i].compareTo(to) <= 0;
             }
         }
     }
@@ -480,7 +458,6 @@ public class QueryEngine {
             case GISAIDCLADE -> GISAID_CLADE;
             case SUBMITTINGLAB -> SUBMITTING_LAB;
             case ORIGINATINGLAB -> ORIGINATING_LAB;
-            default -> throw new IllegalStateException("Unexpected value: " + field);
         };
     }
 

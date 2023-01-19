@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.javatuples.Quartet;
 
 /**
- * This uses geo location rules [1] maintained by Nextstrain to clean up the location data in GISAID. It is implemented
+ * This uses geolocation rules [1] maintained by Nextstrain to clean up the location data in GISAID. It is implemented
  * similarly to [2].
  * <p>
  * [1] https://github.com/nextstrain/ncov-ingest/blob/master/source-data/gisaid_geoLocationRules.tsv [2]
@@ -87,9 +87,8 @@ public class GeoLocationMapper {
         } else if (wildCastMap == null) {
             nextLevelMap = fullMatchMap;
         } else {
-            Map<String, Object> _nextLevelMap = new HashMap<>();
-            fullMatchMap.forEach((k, v) -> _nextLevelMap.put(k, v));
-            wildCastMap.forEach((k, v) -> _nextLevelMap.putIfAbsent(k, v));
+            Map<String, Object> _nextLevelMap = new HashMap<>(fullMatchMap);
+            wildCastMap.forEach(_nextLevelMap::putIfAbsent);
             nextLevelMap = _nextLevelMap;
         }
         return findApplicableRule(geoLocation, currentLevel + 1, nextLevelMap);

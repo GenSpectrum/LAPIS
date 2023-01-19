@@ -29,7 +29,6 @@ public class BatchProcessingWorker {
     private final int id;
     private final Path workDir;
     private final ComboPooledDataSource databasePool;
-    private final boolean updateSubmitterInformation;
     private final SubmitterInformationFetcher submitterInformationFetcher = new SubmitterInformationFetcher();
     private final Path nextcladePath;
     private final SeqCompressor nucSeqCompressor;
@@ -37,14 +36,13 @@ public class BatchProcessingWorker {
     private final Map<String, GisaidHashes> oldHashes;
 
     /**
-     * @param id             An unique identifier for the worker
+     * @param id             A unique identifier for the worker
      * @param workDir        An empty work directory for the worker
      */
     public BatchProcessingWorker(
         int id,
         Path workDir,
         ComboPooledDataSource databasePool,
-        boolean updateSubmitterInformation,
         Path nextcladePath,
         SeqCompressor nucSeqCompressor,
         SeqCompressor aaSeqCompressor,
@@ -53,7 +51,6 @@ public class BatchProcessingWorker {
         this.databasePool = databasePool;
         this.id = id;
         this.workDir = workDir;
-        this.updateSubmitterInformation = updateSubmitterInformation;
         this.nextcladePath = nextcladePath;
         this.nucSeqCompressor = nucSeqCompressor;
         this.aaSeqCompressor = aaSeqCompressor;
@@ -88,7 +85,7 @@ public class BatchProcessingWorker {
             // Nextclade.
             List<GisaidEntry> sequencePreprocessingNeeded = batch.entries().stream()
                 .filter(s -> s.getImportMode() == ImportMode.APPEND || s.isSequenceChanged())
-                .collect(Collectors.toList());
+                .toList();
 
             // Exclude sequences that contain invalid characters
             Pattern r = Pattern.compile("[\\sACGTUMRWSYKVHDBNX-]*", Pattern.CASE_INSENSITIVE);
@@ -186,7 +183,8 @@ public class BatchProcessingWorker {
 
                                 aaUnknownsComponents.addAll(thisAAUnknowns.stream()
                                     .map(u -> geneAASeq.gene + ":" + u)
-                                    .collect(Collectors.toList()));
+                                    .toList()
+                                );
                             }
                             String aaMutations = tmp.stream()
                                 .map(m -> m.getGene() + ":" + refGenome.getGeneAABase(m.getGene(), m.getPosition())
@@ -377,10 +375,10 @@ public class BatchProcessingWorker {
         }
 
         Map<String, NextcladeResultEntry> result = new HashMap<>();
-        nextcladeTsvEntries.forEach((sampleName, nextcladeTsvEntry) -> {
-            result.put(sampleName, new NextcladeResultEntry(nucSeqs.get(sampleName), geneAASeqs.get(sampleName),
-                nextcladeTsvEntry));
-        });
+        nextcladeTsvEntries.forEach((sampleName, nextcladeTsvEntry) -> result.put(
+            sampleName,
+            new NextcladeResultEntry(nucSeqs.get(sampleName), geneAASeqs.get(sampleName), nextcladeTsvEntry)
+        ));
         return result;
     }
 
@@ -778,7 +776,7 @@ public class BatchProcessingWorker {
     private static final class NextcladeResultEntry {
         private String alignedNucSeq;
         private List<GeneAASeq> geneAASeqs;
-        private NextcladeTsvEntry nextcladeTsvEntry;
+        private final NextcladeTsvEntry nextcladeTsvEntry;
 
         private NextcladeResultEntry(
             String alignedNucSeq,

@@ -130,7 +130,7 @@ import java.util.*;
 //    deflateAAReference: t=2923
 public class CompressionTrainingAndBenchmark {
 
-    public static ComboPooledDataSource dbPool = LapisMain.dbPool;
+    public static final ComboPooledDataSource dbPool = LapisMain.dbPool;
 
     // Note: The following code may need adoption, depending on how the data are currently compressed in the
     // database.

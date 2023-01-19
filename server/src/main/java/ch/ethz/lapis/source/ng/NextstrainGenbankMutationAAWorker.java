@@ -1,7 +1,12 @@
 package ch.ethz.lapis.source.ng;
 
 import ch.ethz.lapis.source.MutationFinder;
-import ch.ethz.lapis.util.*;
+import ch.ethz.lapis.util.FastaEntry;
+import ch.ethz.lapis.util.FastaFileReader;
+import ch.ethz.lapis.util.ReferenceGenomeData;
+import ch.ethz.lapis.util.SeqCompressor;
+import ch.ethz.lapis.util.Utils;
+import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.io.FileUtils;
 
@@ -78,7 +83,7 @@ public class NextstrainGenbankMutationAAWorker {
                     MutationFinder.findAAUnknowns(aaSeq.seq));
                 aaUnknownsComponents.addAll(thisAAUnknowns.stream()
                     .map(u -> aaSeq.gene + ":" + u)
-                    .collect(Collectors.toList()));
+                    .toList());
             }
             String aaUnknowns = String.join(",", aaUnknownsComponents);
             aaUnknownsMap.put(sampleName, aaUnknowns);
