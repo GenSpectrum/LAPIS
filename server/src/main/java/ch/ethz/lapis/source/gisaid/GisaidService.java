@@ -16,7 +16,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.tukaani.xz.XZInputStream;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -26,20 +31,31 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 
 public class GisaidService {
+    private static final int BATCH_SIZE = 400;
 
     private final ComboPooledDataSource databasePool;
     private final Path workdir;
@@ -48,7 +64,6 @@ public class GisaidService {
     private final GisaidApiConfig gisaidApiConfig;
     private final SeqCompressor nucSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
     private final SeqCompressor aaSeqCompressor = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
-    private final int batchSize = 400;
     private final Path geoLocationRulesFile;
     private final String notificationAuthKey;
 
@@ -178,7 +193,6 @@ public class GisaidService {
                     finalI,
                     workerWorkDir,
                     databasePool,
-                    false,
                     nextcladePath,
                     nucSeqCompressor,
                     aaSeqCompressor,
@@ -236,7 +250,7 @@ public class GisaidService {
                 System.err.println(LocalDateTime.now() + " JSON parsing failed!");
                 throw e;
             }
-            if (batchEntries.size() >= batchSize) {
+            if (batchEntries.size() >= BATCH_SIZE) {
                 Batch batch = new Batch(batchEntries);
                 while (!emergencyBrake.get()) {
                     System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
@@ -436,7 +450,7 @@ public class GisaidService {
         if (locationString != null) {
             List<String> locationParts = Arrays.stream(locationString.split("/"))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toList();
             GeoLocation gisaidDirtyLocation = new GeoLocation();
             if (locationParts.size() > 0) {
                 gisaidDirtyLocation.setRegion(locationParts.get(0));

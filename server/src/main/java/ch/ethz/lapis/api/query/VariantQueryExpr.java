@@ -6,6 +6,6 @@ public interface VariantQueryExpr extends QueryExpr {
 
     default void putValue(VariantQueryExpr value) {
         throw new MalformedVariantQueryException();
-    };
+    }
 
 }

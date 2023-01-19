@@ -22,8 +22,20 @@ import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.jooq.Cursor;
+import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.*;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.Select;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectLimitStep;
+import org.jooq.SelectOrderByStep;
+import org.jooq.SelectSeekStep1;
+import org.jooq.Table;
+import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.lapis.tables.YMainMetadata;
 import org.jooq.lapis.tables.YMainSequence;
@@ -79,9 +91,7 @@ public class SampleService {
     }
 
 
-    public Versioned<List<SampleAggregated>> getAggregatedSamples(
-        SampleAggregatedRequest request
-    ) throws SQLException {
+    public Versioned<List<SampleAggregated>> getAggregatedSamples(SampleAggregatedRequest request) {
         Database database = Database.getOrLoadInstance(dbPool);
         return new Versioned<>(database.getDataVersion(), new QueryEngine().aggregate(database, request));
     }
@@ -281,7 +291,7 @@ public class SampleService {
         SampleDetailRequest request,
         SequenceType sequenceType,
         float minProportion
-    ) throws SQLException {
+    ) {
         Database database = Database.getOrLoadInstance(dbPool);
         ReferenceGenomeData reference = ReferenceGenomeData.getInstance();
         // Filter
@@ -355,7 +365,7 @@ public class SampleService {
                         "ins_" + gene + ":" + ins.insertion(),
                         ins.count()
                     ))
-                    .collect(Collectors.toList());
+                    .toList();
                 result.addAll(insertionsOfGene);
             });
             return result;

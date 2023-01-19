@@ -3,8 +3,8 @@ package ch.ethz.lapis.api.entity.req;
 public class OrderAndLimitConfig {
 
     public static class SpecialOrdering {
-        public static String ARBITRARY = "arbitrary"; // No defined ordering
-        public static String RANDOM = "random";
+        public static final String ARBITRARY = "arbitrary"; // No defined ordering
+        public static final String RANDOM = "random";
     }
 
     /**

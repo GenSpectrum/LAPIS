@@ -63,13 +63,9 @@ public class Utils {
             return original;
         }
         for (Object key : newMap.keySet()) {
-            if (newMap.get(key) instanceof Map && original.get(key) instanceof Map) {
-                Map originalChild = (Map) original.get(key);
-                Map newChild = (Map) newMap.get(key);
+            if (newMap.get(key) instanceof Map newChild && original.get(key) instanceof Map originalChild) {
                 original.put(key, nullableMapDeepMerge(originalChild, newChild));
-            } else if (newMap.get(key) instanceof List && original.get(key) instanceof List) {
-                List originalChild = (List) original.get(key);
-                List newChild = (List) newMap.get(key);
+            } else if (newMap.get(key) instanceof List newChild && original.get(key) instanceof List originalChild) {
                 for (Object each : newChild) {
                     if (!originalChild.contains(each)) {
                         originalChild.add(each);

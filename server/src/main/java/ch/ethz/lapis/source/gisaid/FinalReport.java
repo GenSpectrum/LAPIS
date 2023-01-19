@@ -41,8 +41,8 @@ public class FinalReport implements SendableReport {
 
     @Override
     public String getEmailText() {
-        String text =
-            "Success: " + success + "\n\n" +
+        StringBuilder text =
+            new StringBuilder("Success: " + success + "\n\n" +
                 "Started at: " + startTime + "\n" +
                 "Ended at: " + endTime + "\n\n" +
                 "Failed entries: " + failedEntries + "\n\n" +
@@ -53,15 +53,15 @@ public class FinalReport implements SendableReport {
                 "Updated metadata: " + updatedMetadataEntries + "\n" +
                 "Updated sequences: " + updatedSequenceEntries + "\n" +
                 "Deleted entries: " + deletedEntries + "\n" +
-                "Number of unhandled exceptions: " + unhandledExceptions.size() + "\n\n";
+                "Number of unhandled exceptions: " + unhandledExceptions.size() + "\n\n");
         if (!unhandledExceptions.isEmpty()) {
-            text += "Unhandled exceptions:\n";
+            text.append("Unhandled exceptions:\n");
             for (Exception unhandledException : unhandledExceptions) {
-                text += Utils.getStackTraceString(unhandledException) + "\n";
+                text.append(Utils.getStackTraceString(unhandledException)).append("\n");
             }
-            text += "\n\n";
+            text.append("\n\n");
         }
-        return text;
+        return text.toString();
     }
 
 

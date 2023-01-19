@@ -45,8 +45,8 @@ public class ConfigurationManager {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .build();
-        T mergedConfig = objectMapper.convertValue(merged, configClass);
-        return mergedConfig;
+
+        return objectMapper.convertValue(merged, configClass);
     }
 
     /**
@@ -70,8 +70,8 @@ public class ConfigurationManager {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .build();
-        T mergedConfig = objectMapper.convertValue(merged, configClass);
-        return mergedConfig;
+
+        return objectMapper.convertValue(merged, configClass);
     }
 
     private Map<String, ?> readConfigMapsFromYaml(Path configPath)

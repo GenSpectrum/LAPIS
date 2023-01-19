@@ -9,7 +9,7 @@ public class NotificationSystemFactory {
             return new NoopNotificationSystem();
         }
         switch (config.getType()) {
-            case "smtp":
+            case "smtp" -> {
                 NotificationConfig.SenderConfig senderConfig = config.getSender();
                 return new SmtpNotificationSystem(
                     senderConfig.getSmtpHost(),
@@ -19,10 +19,13 @@ public class NotificationSystemFactory {
                     senderConfig.getAddress(),
                     config.getRecipients()
                 );
-            case "sendmail":
+            }
+            case "sendmail" -> {
                 return new SendmailNotificationSystem(config.getRecipients());
-            case "dropoff":
+            }
+            case "dropoff" -> {
                 return new DropOffNotificationSystem(config.getRecipients(), Path.of(config.getDropoffDirectory()));
+            }
         }
         throw new RuntimeException("Unknown notification type: " + config.getType());
     }

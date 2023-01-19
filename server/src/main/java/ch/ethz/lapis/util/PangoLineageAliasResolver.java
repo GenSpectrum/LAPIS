@@ -1,6 +1,11 @@
 package ch.ethz.lapis.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PangoLineageAliasResolver {
@@ -16,7 +21,7 @@ public class PangoLineageAliasResolver {
     }
 
     /**
-     * This function returns aliases of the provided query. It does not return the original query query.
+     * This function returns aliases of the provided query. It does not return the original query.
      * <p>
      * Examples:
      * <ul>
@@ -55,8 +60,7 @@ public class PangoLineageAliasResolver {
         String queryShort = finalQueryRootFull;
         Optional<PangoLineageAlias> queryAliasOpt = aliases.stream()
             .filter(a -> finalQueryRootFull.startsWith(a.fullName() + "."))
-            .sorted(Comparator.comparingInt(a -> -a.fullName().length()))
-            .findFirst();
+            .min(Comparator.comparingInt(a -> -a.fullName().length()));
         if (queryAliasOpt.isPresent()) {
             PangoLineageAlias alias = queryAliasOpt.get();
             queryShort = queryShort.replace(alias.fullName(), alias.alias());

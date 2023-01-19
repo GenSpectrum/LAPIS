@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 public class SubmitterInformationFetcher {
 
-    public static enum SubmitterInformationFetchingStatus {
+    public enum SubmitterInformationFetchingStatus {
         SUCCESSFUL, NOT_FOUND, TOO_MANY_REQUESTS, UNEXPECTED_ERROR
     }
 
@@ -33,7 +33,7 @@ public class SubmitterInformationFetcher {
             conn = (HttpURLConnection) url.openConnection();
             int responseCode = conn.getResponseCode();
             switch (responseCode) {
-                case 200:
+                case 200 -> {
                     String jsonString = IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
                     JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
                     String jsonO = (String) json.get("covv_orig_lab");
@@ -47,14 +47,18 @@ public class SubmitterInformationFetcher {
                         SubmitterInformationFetchingStatus.SUCCESSFUL,
                         result
                     );
-                case 404:
+                }
+                case 404 -> {
                     System.err.println("Not found: " + urlStr);
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.NOT_FOUND, null);
-                case 429:
+                }
+                case 429 -> {
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.TOO_MANY_REQUESTS, null);
-                default:
+                }
+                default -> {
                     System.err.println("Unexpected HTTP response code: " + responseCode);
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.UNEXPECTED_ERROR, null);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -536,9 +536,11 @@ public class Database {
                                 String unknowns = parts[1];
                                 aaUnknownsPerGene.get(gene).add(unknowns);
                             });
-                        database.aaMutationStores.forEach((gene, mutationStore) -> {
-                            mutationStore.putEntry(id, aaMutationsPerGene.get(gene), aaUnknownsPerGene.get(gene));
-                        });
+                        database.aaMutationStores.forEach((gene, mutationStore) -> mutationStore.putEntry(
+                            id,
+                            aaMutationsPerGene.get(gene),
+                            aaUnknownsPerGene.get(gene)
+                        ));
                         // Nuc insertions
                         String nucInsertionsString = rs.getString("nuc_insertions");
                         if (!nucInsertionsString.isBlank()) {

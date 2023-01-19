@@ -13,7 +13,7 @@ import java.util.Stack;
 
 public class VariantQueryListener extends VariantQueryBaseListener {
 
-    private Stack<VariantQueryExpr> exprStack = new Stack<>();
+    private final Stack<VariantQueryExpr> exprStack = new Stack<>();
 
     public VariantQueryListener() {
         exprStack.push(new Single());

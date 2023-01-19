@@ -60,9 +60,7 @@ public class DataVersionService {
                             Database.updateInstance(dbPool);
                         }
                         version = newVersion;
-                        if (cacheServiceOpt.isPresent()) {
-                            cacheServiceOpt.get().updateCacheIfOutdated(version);
-                        }
+                        cacheServiceOpt.ifPresent(cacheService -> cacheService.updateCacheIfOutdated(version));
                     }
                 }
             }

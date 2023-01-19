@@ -11,7 +11,7 @@ import java.util.function.Function;
 /**
  * Given a list of k strings of length n (aligned sequences), this class produces n strings of length k. The
  * first string contains the first character of the input strings, etc.
- *
+ * <p>
  * Example:
  *   Input: ["AAT", "ATT"]
  *   Output: ["AA", "AT", "TT"]
@@ -30,7 +30,7 @@ public class SequenceRowToColumnTransformer {
      * This is the number of sequences that a worker will process per batch. It usually does not have a large effect on
      * the performance.
      */
-    private final int batchSize = 20000;
+    private static final int BATCH_SIZE = 20000;
 
     public SequenceRowToColumnTransformer(int numberWorkers, int positionRangeSize) {
         this.numberWorkers = numberWorkers;
@@ -70,7 +70,7 @@ public class SequenceRowToColumnTransformer {
             }
 
             int numberIterations = (int) Math.ceil(sequenceLength * 1.0 / positionRangeSize);
-            int numberTasksPerIteration = (int) Math.ceil(compressedSequences.size() * 1.0 / batchSize);
+            int numberTasksPerIteration = (int) Math.ceil(compressedSequences.size() * 1.0 / BATCH_SIZE);
             ExecutorService executor = Executors.newFixedThreadPool(numberWorkers);
 
             for (int iteration = 0; iteration < numberIterations; iteration++) {
@@ -82,8 +82,8 @@ public class SequenceRowToColumnTransformer {
 
                 List<Callable<List<Void>>> tasks = new ArrayList<>();
                 for (int taskIndex = 0; taskIndex < numberTasksPerIteration; taskIndex++) {
-                    final int startSeq = batchSize * taskIndex;
-                    final int endSeq = Math.min(batchSize * (taskIndex + 1), compressedSequences.size());
+                    final int startSeq = BATCH_SIZE * taskIndex;
+                    final int endSeq = Math.min(BATCH_SIZE * (taskIndex + 1), compressedSequences.size());
 
                     tasks.add(() -> {
                         try {

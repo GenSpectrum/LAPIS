@@ -52,9 +52,8 @@ public class SampleResponseBuilder<E> {
         // Content-type
         MediaType mediaType = switch (dataFormat) {
             case CSV -> new MediaType("text", "csv");
-            case TSV -> MediaType.TEXT_PLAIN;
+            case TSV, TEXT -> MediaType.TEXT_PLAIN;
             case JSON -> MediaType.APPLICATION_JSON;
-            case TEXT -> MediaType.TEXT_PLAIN;
             case FASTA -> new MediaType("text", "x-fasta");
         };
         builder1 = builder1.contentType(mediaType);

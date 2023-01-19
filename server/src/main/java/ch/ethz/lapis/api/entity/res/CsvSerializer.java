@@ -13,12 +13,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 public class CsvSerializer {
 
-    public static enum Delimiter {
+    public enum Delimiter {
         CSV,
         TSV
     }
@@ -72,8 +71,8 @@ public class CsvSerializer {
         }
         // Check fields
         List<String> selectedFields = fields != null ?
-            fields.stream().map(String::toLowerCase).collect(Collectors.toList()) :
-            allFields.keySet().stream().sorted().collect(Collectors.toList());
+            fields.stream().map(String::toLowerCase).toList() :
+            allFields.keySet().stream().sorted().toList();
         if (fields != null) {
             for (String field : selectedFields) {
                 if (!allFields.containsKey(field)) {
