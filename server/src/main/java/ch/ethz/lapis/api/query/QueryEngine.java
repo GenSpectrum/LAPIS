@@ -135,7 +135,7 @@ public class QueryEngine {
         return result;
     }
 
-    public List<Integer> filterIds(Database database, SampleFilter<?> sampleFilter) {
+    public List<Integer> filterIds(Database database, SampleFilter sampleFilter) {
         boolean[] matched = matchSampleFilter(database, sampleFilter);
         List<Integer> ids = new ArrayList<>();
         for (int i = 0; i < matched.length; i++) {
@@ -146,7 +146,7 @@ public class QueryEngine {
         return ids;
     }
 
-    public boolean[] matchSampleFilter(Database database, SampleFilter<?> sampleFilter) {
+    public boolean[] matchSampleFilter(Database database, SampleFilter sampleFilter) {
         // TODO This shouldn't be done here?
         //  Validate yearMonthFrom and yearMonthTo
         Pattern pattern = Pattern.compile("(\\d{4})([-]\\d{2})?([-]\\d{2})?");

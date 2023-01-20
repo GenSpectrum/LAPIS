@@ -8,6 +8,7 @@ import ch.ethz.lapis.api.entity.*;
 import ch.ethz.lapis.api.entity.req.*;
 import ch.ethz.lapis.api.entity.res.*;
 import ch.ethz.lapis.api.exception.*;
+import ch.ethz.lapis.api.log.RequestContext;
 import ch.ethz.lapis.api.query.InsertionStore;
 import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,18 +43,21 @@ public class SampleController {
     private final ObjectMapper objectMapper;
     private final OpennessLevel openness = LapisMain.globalConfig.getApiOpennessLevel();
     private final Map<String, AccessKey.LEVEL> accessKeys;
+    private final RequestContext requestContext;
 
 
     public SampleController(
         Optional<CacheService> cacheServiceOpt,
         SampleService sampleService,
         DataVersionService dataVersionService,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        RequestContext requestContext
     ) {
         this.cacheServiceOpt = cacheServiceOpt;
         this.sampleService = sampleService;
         this.dataVersionService = dataVersionService;
         this.objectMapper = objectMapper;
+        this.requestContext = requestContext;
         if (openness == OpennessLevel.PROTECTED) {
             // TODO The keys are currently only loaded during program start. Later changes will not have an effect
             //  until the next restart.
@@ -83,6 +87,8 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         boolean endpointServesAggregatedData = request.getStrain() == null
             && request.getGenbankAccession() == null
             && request.getGisaidEpiIsl() == null
@@ -155,6 +161,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) throws SQLException, JsonProcessingException {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -202,6 +210,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) throws SQLException, IOException {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -256,6 +266,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     )  {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -300,6 +312,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -344,6 +358,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -387,6 +403,8 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -449,6 +467,8 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -513,6 +533,8 @@ public class SampleController {
         SequenceType sequenceType,
         String fileName
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -619,6 +641,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -656,6 +680,8 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
+        requestContext.setVariantFilter(request);
+
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
         checkVariantFilter(request);
@@ -697,6 +723,7 @@ public class SampleController {
         String cached = cacheService.getCompressedString(cacheKey);
         if (cached != null) {
             log.info("Returning cached result");
+            requestContext.setReturnedDataFromCache(true);
             return cached;
         }
         String response = compute.get();
@@ -716,7 +743,7 @@ public class SampleController {
     }
 
 
-    private void checkVariantFilter(SampleFilter<?> request) {
+    private void checkVariantFilter(SampleFilter request) {
         if (request.getVariantQuery() != null &&
             (request.getPangoLineage() != null || request.getNextstrainClade() != null
                 || request.getGisaidClade() != null

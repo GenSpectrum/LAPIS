@@ -1,5 +1,10 @@
 package ch.ethz.lapis.api.config;
 
+import ch.ethz.lapis.api.log.RequestContext;
+import ch.ethz.lapis.api.log.RequestContextLoggerFilter;
+import ch.ethz.lapis.api.log.StatisticsLogObjectMapper;
+import ch.ethz.lapis.util.TimeFactory;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
@@ -24,5 +29,19 @@ public class WebConfig implements WebMvcConfigurer {
         filter.setIncludeHeaders(false);
         filter.setAfterMessagePrefix("REQUEST DATA: ");
         return filter;
+    }
+
+    @Bean
+    public RequestContextLoggerFilter requestContextLoggerFilter(
+        RequestContext requestContext,
+        StatisticsLogObjectMapper objectMapper,
+        TimeFactory timeFactory
+    ) {
+        return new RequestContextLoggerFilter(
+            requestContext,
+            objectMapper,
+            LoggerFactory.getLogger("StatisticsLogger"),
+            timeFactory
+        );
     }
 }
