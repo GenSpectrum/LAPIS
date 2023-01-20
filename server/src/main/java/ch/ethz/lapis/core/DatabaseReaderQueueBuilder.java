@@ -1,5 +1,7 @@
 package ch.ethz.lapis.core;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +11,7 @@ import java.util.function.Function;
 /**
  * ...and it's back! It's at least the fourth project that I use this small piece of code :) (Chaoran)
  */
+@Slf4j
 public class DatabaseReaderQueueBuilder<T> {
 
     private final PreparedStatement statement;
@@ -23,8 +26,12 @@ public class DatabaseReaderQueueBuilder<T> {
      * @param capacity        The maximal capacity of the queue
      * @param fetchSize       Please see java.sql.Statement.setFetchSize()
      */
-    public DatabaseReaderQueueBuilder(PreparedStatement statement, Function<ResultSet, T> convertFunction,
-        int capacity, int fetchSize) {
+    public DatabaseReaderQueueBuilder(
+        PreparedStatement statement,
+        Function<ResultSet, T> convertFunction,
+        int capacity,
+        int fetchSize
+    ){
         this.statement = statement;
         this.convertFunction = convertFunction;
         this.capacity = capacity;
@@ -39,13 +46,13 @@ public class DatabaseReaderQueueBuilder<T> {
         statement.setFetchSize(this.fetchSize);
         Thread fetcherThread = new Thread(() -> {
             try (ResultSet rs = statement.executeQuery()) {
-                System.out.println("DatabaseReaderQueueBuilder: Start fetching");
+                log.info("DatabaseReaderQueueBuilder: Start fetching");
                 while (rs.next()) {
                     T job = this.convertFunction.apply(rs);
                     queue.put(job);
                 }
                 queue.setExhausted(true);
-                System.out.println("DatabaseReaderQueueBuilder: Finished");
+                log.info("DatabaseReaderQueueBuilder: Finished");
             } catch (SQLException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);

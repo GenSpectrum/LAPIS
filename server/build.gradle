@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id "org.ec4j.editorconfig" version "0.0.3"
     id 'antlr'
+    id "io.freefair.lombok" version "6.6.1"
 }
 
 group 'ch.ethz'

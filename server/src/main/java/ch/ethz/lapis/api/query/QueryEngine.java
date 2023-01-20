@@ -58,12 +58,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
+@Slf4j
 public class QueryEngine {
 
     public List<SampleAggregated> aggregate(Database database, SampleAggregatedRequest request) {
@@ -426,7 +428,7 @@ public class QueryEngine {
             walker.walk(listener, tree);
             return listener.getExpr();
         } catch (ParseCancellationException e) {
-            System.err.println("Malformed variant query: " +
+            log.error("Malformed variant query: " +
                 variantQuery.substring(0, Math.min(200, variantQuery.length())));
             throw new MalformedVariantQueryException();
         }

@@ -5,6 +5,7 @@ import ch.ethz.lapis.source.MutationFinder;
 import ch.ethz.lapis.source.MutationNuc;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedInputStream;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 public class BatchProcessingWorker {
 
     private final int id;
@@ -60,7 +61,7 @@ public class BatchProcessingWorker {
     public BatchReport run(Batch batch) throws Exception {
         try {
             int batchSize = batch.entries().size();
-            System.out.println(LocalDateTime.now() + " [" + id + "] Received a batch");
+            log.info(LocalDateTime.now() + " [" + id + "] Received a batch");
 
             // Remove entries from the batch where no sequence is provided -> very weird
             batch = new Batch(batch.entries().stream()
@@ -99,22 +100,22 @@ public class BatchProcessingWorker {
                 }
             }
             if (!invalidSequences.isEmpty()) {
-                System.out.println(
+                log.info(
                     LocalDateTime.now() + " [" + id + "] Found sequences that contain invalid characters: "
                         + invalidSequences.stream().map(GisaidEntry::getGisaidEpiIsl)
                         .collect(Collectors.joining(",")));
             }
 
-            System.out.println(LocalDateTime.now() + " [" + id + "] " + validSequences.size() + " out of " + batchSize +
+            log.info(LocalDateTime.now() + " [" + id + "] " + validSequences.size() + " out of " + batchSize +
                 " sequences are new or have changed sequence.");
             if (!validSequences.isEmpty()) {
                 // Write the batch to a fasta file
                 Path originalSeqFastaPath = workDir.resolve("original.fasta");
-                System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
+                log.info(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
                 Files.writeString(originalSeqFastaPath, formatSeqAsFasta(validSequences));
 
                 // Run Nextclade
-                System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextclade..");
+                log.info(LocalDateTime.now() + " [" + id + "] Run Nextclade..");
                 Map<String, NextcladeResultEntry> nextcladeResults = runNextclade(batch, originalSeqFastaPath);
                 ReferenceGenomeData refGenome = ReferenceGenomeData.getInstance();
                 for (GisaidEntry entry : batch.entries()) {
@@ -213,7 +214,7 @@ public class BatchProcessingWorker {
             }
 
             // Write the data into the database
-            System.out.println(LocalDateTime.now() + " [" + id + "] Write to database..");
+            log.info(LocalDateTime.now() + " [" + id + "] Write to database..");
             writeToDatabase(batch);
 
             // Create the batch report
@@ -234,7 +235,7 @@ public class BatchProcessingWorker {
                     }
                 }
             }
-            System.out.println(LocalDateTime.now() + " [" + id + "] Everything successful with no failed sequences");
+            log.info(LocalDateTime.now() + " [" + id + "] Everything successful with no failed sequences");
             return new BatchReport()
                 .setAddedEntries(addedEntries)
                 .setUpdatedTotalEntries(updatedTotalEntries)
@@ -242,7 +243,7 @@ public class BatchProcessingWorker {
                 .setUpdatedSequenceEntries(updatedSequenceEntries);
         } finally {
             // Clean up the work directory
-            System.out.println(LocalDateTime.now() + " [" + id + "] Clean up");
+            log.info(LocalDateTime.now() + " [" + id + "] Clean up");
             try (DirectoryStream<Path> directory = Files.newDirectoryStream(workDir)) {
                 for (Path path : directory) {
                     if (Files.isDirectory(path)) {
@@ -252,7 +253,7 @@ public class BatchProcessingWorker {
                     }
                 }
             }
-            System.out.println(LocalDateTime.now() + " [" + id + "] Done!");
+            log.info(LocalDateTime.now() + " [" + id + "] Done!");
         }
     }
 

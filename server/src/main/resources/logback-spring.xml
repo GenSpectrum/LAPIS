@@ -1,0 +1,30 @@
+<configuration>
+
+    <property name="LOG_FILE" value="LAPIS"/>
+    <property name="LOG_DIR" value="log"/>
+
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_FILE}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%date %level [%thread] %class: %message%n</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/archived/${LOG_FILE}-%d{yyyy-MM-dd}.%i.gz
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10GB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>0</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="RollingFile"/>
+    </root>
+
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="debug" additivity="false">
+        <appender-ref ref="RollingFile"/>
+    </logger>
+
+</configuration>

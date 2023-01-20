@@ -9,6 +9,7 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
@@ -21,7 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+@Slf4j
 public class TransformService {
 
     private final ComboPooledDataSource databasePool;
@@ -42,10 +43,10 @@ public class TransformService {
         //     y_main_sequence_staging
         //     y_main_aa_sequence_staging
         if (source == LapisConfig.Source.NG) {
-            System.out.println(LocalDateTime.now() + " pullFromNextstrainGenbankTable()");
+            log.info(LocalDateTime.now() + " pullFromNextstrainGenbankTable()");
             pullFromNextstrainGenbankTable();
             // Compress AA sequences
-            System.out.println(LocalDateTime.now() + " compressAASeqs()");
+            log.info(LocalDateTime.now() + " compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -58,10 +59,10 @@ public class TransformService {
                   ng.aa_seqs_compressed is not null;
             """);
         } else if (source == LapisConfig.Source.GISAID) {
-            System.out.println(LocalDateTime.now() + " pullFromGisaidTable()");
+            log.info(LocalDateTime.now() + " pullFromGisaidTable()");
             pullFromGisaidTable();
             // Compress AA sequences
-            System.out.println(LocalDateTime.now() + " compressAASeqs()");
+            log.info(LocalDateTime.now() + " compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -75,10 +76,10 @@ public class TransformService {
             """);
         }
         // Fill the table y_main_sequence_columnar_staging
-        System.out.println(LocalDateTime.now() + " transformSeqsToColumnar()");
+        log.info(LocalDateTime.now() + " transformSeqsToColumnar()");
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
-        System.out.println(LocalDateTime.now() + " transformAASeqsToColumnar()");
+        log.info(LocalDateTime.now() + " transformAASeqsToColumnar()");
         transformAASeqsToColumnar();
     }
 
@@ -408,7 +409,7 @@ public class TransformService {
                 }
             }
         }
-        System.out.println(LocalDateTime.now() + " Data loaded");
+        log.info(LocalDateTime.now() + " Data loaded");
 
         SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1000);
         transformer.transform(
@@ -452,7 +453,7 @@ public class TransformService {
             order by mm.id;
         """;
         for (String gene : ReferenceGenomeData.getInstance().getGeneNames()) {
-            System.out.println(LocalDateTime.now() + "Gene " + gene + " - Start processing");
+            log.info(LocalDateTime.now() + "Gene " + gene + " - Start processing");
             // Load all amino acid sequences and their IDs
             List<byte[]> aaSequences = new ArrayList<>();
             int idCounter = 0;
@@ -472,9 +473,9 @@ public class TransformService {
                     }
                 }
             }
-            System.out.println(LocalDateTime.now() + "Gene " + gene + " - Data loaded");
+            log.info(LocalDateTime.now() + "Gene " + gene + " - Data loaded");
             if (aaSequences.isEmpty()) {
-                System.out.println(LocalDateTime.now() + "Gene " + gene + " - No data found.");
+                log.info(LocalDateTime.now() + "Gene " + gene + " - No data found.");
             }
 
             SequenceRowToColumnTransformer transformer = new SequenceRowToColumnTransformer(maxNumberWorkers, 1500);

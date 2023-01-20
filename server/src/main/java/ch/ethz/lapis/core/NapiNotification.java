@@ -1,11 +1,13 @@
 package ch.ethz.lapis.core;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 public class NapiNotification {
     /**
      * Sends the report to the "cs-ingest-default" channel of our instance of
@@ -14,7 +16,7 @@ public class NapiNotification {
     public static void sendNotification(String authKey, String level, String subject, String body) {
         try {
             if (authKey == null || authKey.isBlank()) {
-                System.out.println("No notification will be sent due to missing authentication key");
+                log.info("No notification will be sent due to missing authentication key");
                 return;
             }
             String url = "https://dev.cov-spectrum.org/notification/send";
@@ -31,11 +33,10 @@ public class NapiNotification {
             jsonBody.put("body", body);
             HttpEntity<String> request = new HttpEntity<>(jsonBody.toString(), headers);
             restTemplate.postForObject(url, request, String.class);
-            System.out.println("Notification sent");
+            log.info("Notification sent");
         } catch (Exception e) {
             // We don't consider notifications as extremely essential, so we won't crash the program if it fails.
-            System.err.println("Notification could not be sent.");
-            e.printStackTrace();
+            log.error("Notification could not be sent." + e.getMessage(), e);
         }
     }
 }

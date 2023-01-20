@@ -8,6 +8,7 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 /**
  * This class will also compute and write aa_unknowns and nuc_unknowns.
  */
+@Slf4j
 public class NextstrainGenbankMutationAAWorker {
 
     private final int id;
@@ -58,13 +60,13 @@ public class NextstrainGenbankMutationAAWorker {
      * nuc_unknowns.
      */
     public void run(List<FastaEntry> batch) throws Exception {
-        System.out.println(LocalDateTime.now() + " [" + id + "] Received " + batch.size() + " sequences.");
+        log.info(LocalDateTime.now() + " [" + id + "] Received " + batch.size() + " sequences.");
 
         // Run Nextalign and read amino acid mutation sequences
         Path seqFastaPath = workDir.resolve("aligned.fasta");
-        System.out.println(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
+        log.info(LocalDateTime.now() + " [" + id + "] Write fasta to disk..");
         Files.writeString(seqFastaPath, formatSeqAsFasta(batch));
-        System.out.println(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
+        log.info(LocalDateTime.now() + " [" + id + "] Run Nextalign..");
         Map<String, List<GeneAASeq>> geneAASeqs = runNextalign(seqFastaPath, batch);
 
         // Find the nuc_unknowns and aa_unknowns
@@ -90,7 +92,7 @@ public class NextstrainGenbankMutationAAWorker {
         });
 
         // Write to database
-        System.out.println(LocalDateTime.now() + " [" + id + "] Write to database");
+        log.info(LocalDateTime.now() + " [" + id + "] Write to database");
         String sql = """
                 insert into y_nextstrain_genbank (strain, aa_seqs_compressed, nuc_unknowns, aa_unknowns)
                 values (?, ?, ?, ?)
@@ -124,7 +126,7 @@ public class NextstrainGenbankMutationAAWorker {
         }
 
         // Clean up workdir
-        System.out.println(LocalDateTime.now() + " [" + id + "] Clean up");
+        log.info(LocalDateTime.now() + " [" + id + "] Clean up");
         try (DirectoryStream<Path> directory = Files.newDirectoryStream(workDir)) {
             for (Path path : directory) {
                 if (Files.isDirectory(path)) {
@@ -134,7 +136,7 @@ public class NextstrainGenbankMutationAAWorker {
                 }
             }
         }
-        System.out.println(LocalDateTime.now() + " [" + id + "] Finished");
+        log.info(LocalDateTime.now() + " [" + id + "] Finished");
     }
 
     private Map<String, List<GeneAASeq>> runNextalign(

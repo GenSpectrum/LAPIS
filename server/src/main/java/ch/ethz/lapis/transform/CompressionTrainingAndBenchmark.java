@@ -5,6 +5,7 @@ import ch.ethz.lapis.util.DeflateSeqCompressor;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.javatuples.Pair;
 
 import java.io.IOException;
@@ -128,6 +129,7 @@ import java.util.*;
 //    zstdNone: t=8
 //    deflateNuc: t=2695
 //    deflateAAReference: t=2923
+@Slf4j
 public class CompressionTrainingAndBenchmark {
 
     public static final ComboPooledDataSource dbPool = LapisMain.dbPool;
@@ -247,12 +249,12 @@ public class CompressionTrainingAndBenchmark {
             }
         }
 
-        System.out.println("==== Test compression ====");
+        log.info("==== Test compression ====");
 
         Collections.shuffle(compressors);
         List<Pair<String, Map<String, List<byte[]>>>> datasets2 = new ArrayList<>();
         for (Pair<String, List<String>> dataset : datasets) {
-            System.out.println("---- " + dataset.getValue0() + " ----");
+            log.info("---- " + dataset.getValue0() + " ----");
             Map<String, List<byte[]>> compressedMap = new HashMap<>();
             for (Pair<String, SeqCompressor> compressor : compressors) {
                 Instant start = Instant.now();
@@ -266,16 +268,16 @@ public class CompressionTrainingAndBenchmark {
                 Instant finish = Instant.now();
                 long timeElapsed = Duration.between(start, finish).toMillis();
                 int averageSize = (int) sizes.stream().mapToDouble(a -> a).average().getAsDouble();
-                System.out.println(compressor.getValue0() + ": t=" + timeElapsed + ", average size=" + averageSize);
+                log.info(compressor.getValue0() + ": t=" + timeElapsed + ", average size=" + averageSize);
                 compressedMap.put(compressor.getValue0(), compressedList);
             }
             datasets2.add(new Pair<>(dataset.getValue0(), compressedMap));
         }
 
 
-        System.out.println("\n\n==== Test decompression ====");
+        log.info("\n\n==== Test decompression ====");
         for (Pair<String, Map<String, List<byte[]>>> dataset : datasets2) {
-            System.out.println("---- " + dataset.getValue0() + " ----");
+            log.info("---- " + dataset.getValue0() + " ----");
             for (Pair<String, SeqCompressor> compressor : compressors) {
                 List<byte[]> compressedList = dataset.getValue1().get(compressor.getValue0());
                 Instant start = Instant.now();
@@ -284,7 +286,7 @@ public class CompressionTrainingAndBenchmark {
                 }
                 Instant finish = Instant.now();
                 long timeElapsed = Duration.between(start, finish).toMillis();
-                System.out.println(compressor.getValue0() + ": t=" + timeElapsed);
+                log.info(compressor.getValue0() + ": t=" + timeElapsed);
             }
         }
     }

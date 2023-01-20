@@ -1,5 +1,7 @@
 package ch.ethz.lapis.transform;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.function.Function;
  *   Input: ["AAT", "ATT"]
  *   Output: ["AA", "AT", "TT"]
  */
+@Slf4j
 public class SequenceRowToColumnTransformer {
 
     private final int numberWorkers;
@@ -78,7 +81,7 @@ public class SequenceRowToColumnTransformer {
                 final int endPos = Math.min(positionRangeSize * (iteration + 1), sequenceLength);
                 int countPos = endPos - startPos;
                 char[][] transformedData = new char[countPos][compressedSequences.size()];
-                System.out.println(LocalDateTime.now() + " Position " + startPos + " - " + endPos);
+                log.info(LocalDateTime.now() + " Position " + startPos + " - " + endPos);
 
                 List<Callable<List<Void>>> tasks = new ArrayList<>();
                 for (int taskIndex = 0; taskIndex < numberTasksPerIteration; taskIndex++) {
@@ -87,7 +90,7 @@ public class SequenceRowToColumnTransformer {
 
                     tasks.add(() -> {
                         try {
-                            System.out.println(
+                            log.info(
                                 LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - Start");
                             for (int seqIndex = startSeq; seqIndex < endSeq; seqIndex++) {
                                 S compressed = compressedSequences.get(seqIndex);
@@ -103,7 +106,7 @@ public class SequenceRowToColumnTransformer {
                                     }
                                 }
                             }
-                            System.out.println(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
+                            log.info(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
                             return null;
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -132,7 +135,7 @@ public class SequenceRowToColumnTransformer {
                         endPos);
 
                     tasks2.add(() -> {
-                        System.out.println(LocalDateTime.now() + "     Start compressing and inserting " +
+                        log.info(LocalDateTime.now() + "     Start compressing and inserting " +
                             finalizationPosStart + " - " + finalizationPosEnd);
                         List<T> results = new ArrayList<>();
                         for (int posIndex = finalizationPosStart; posIndex < finalizationPosEnd; posIndex++) {

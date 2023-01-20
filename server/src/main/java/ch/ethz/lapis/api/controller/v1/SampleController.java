@@ -13,6 +13,7 @@ import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/sample")
+@Slf4j
 public class SampleController {
 
     private final Optional<CacheService> cacheServiceOpt;
@@ -687,13 +689,14 @@ public class SampleController {
     private String useCacheOrCompute(boolean noCache, ApiCacheKey cacheKey, Supplier<String> compute) {
         if (noCache || cacheServiceOpt.isEmpty()) {
             if (noCache) {
-                System.out.println(LocalDateTime.now() + " Ignoring the cache");
+                log.info(LocalDateTime.now() + " Ignoring the cache");
             }
             return compute.get();
         }
         CacheService cacheService = cacheServiceOpt.get();
         String cached = cacheService.getCompressedString(cacheKey);
         if (cached != null) {
+            log.info("Returning cached result");
             return cached;
         }
         String response = compute.get();

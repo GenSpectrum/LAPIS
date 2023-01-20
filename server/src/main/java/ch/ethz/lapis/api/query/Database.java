@@ -7,6 +7,8 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Database {
 
     public static class Columns {
@@ -351,7 +354,7 @@ public class Database {
                     dataVersion = rs.getLong("timestamp");
                 }
                 if (dataVersion != database.getDataVersion()) {
-                    System.err.println("Data version has changed. Initial version: " + database.getDataVersion() +
+                    log.error("Data version has changed. Initial version: " + database.getDataVersion() +
                         ", current version: " + dataVersion);
                     throw new DataVersionChangedDuringFetching();
                 }
@@ -380,7 +383,7 @@ public class Database {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 5000 == 0) {
-                            System.out.println(LocalDateTime.now() +
+                            log.info(LocalDateTime.now() +
                                 " Loading columnar nuc sequences to in-memory database: " + i + "/" + 29904);
                         }
                         int position = rs.getInt("position");
@@ -393,7 +396,7 @@ public class Database {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 5000 == 0) {
-                            System.out.println(LocalDateTime.now() +
+                            log.info(LocalDateTime.now() +
                                 " Loading columnar AA sequences to in-memory database: " + i + "/ ?");
                         }
                         String gene = rs.getString("gene").toLowerCase();
@@ -437,7 +440,7 @@ public class Database {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 100000 == 0) {
-                            System.out.println(LocalDateTime.now() +
+                            log.info(LocalDateTime.now() +
                                 " Loading metadata to in-memory database: " + i + "/" + numberRows);
                         }
                         for (String stringColumn : STRING_COLUMNS) {
@@ -491,7 +494,7 @@ public class Database {
                     int i = 0;
                     while (rs.next()) {
                         if (i % 100000 == 0) {
-                            System.out.println(LocalDateTime.now() +
+                            log.info(LocalDateTime.now() +
                                 " Loading mutations (and insertions) to in-memory database: " + i + "/" + numberRows);
                         }
                         int id = rs.getInt("id");

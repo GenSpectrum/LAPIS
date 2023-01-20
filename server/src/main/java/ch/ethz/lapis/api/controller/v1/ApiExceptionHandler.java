@@ -4,13 +4,15 @@ import ch.ethz.lapis.api.entity.res.ErrorEntry;
 import ch.ethz.lapis.api.entity.res.V1Response;
 import ch.ethz.lapis.api.exception.BaseApiException;
 import java.util.ArrayList;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-
+@Slf4j
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -23,8 +25,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     protected ResponseEntity<V1Response<Object>> handleUnexpectedExceptions(Throwable ex) {
-        System.err.println("Unexpected error:");
-        ex.printStackTrace();
+        log.error("Unexpected error:" + ex.getMessage(), ex);
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new V1Response<>().setErrors(new ArrayList<>() {{

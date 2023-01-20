@@ -4,6 +4,7 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.util.PangoLineageAlias;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class DataVersionService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
@@ -51,7 +53,7 @@ public class DataVersionService {
                     long newVersion = rs.getLong("timestamp");
                     if (newVersion != version) {
                         // Update the cache
-                        System.out.println("New data version: " + version + " -> " + newVersion);
+                        log.info("New data version: " + version + " -> " + newVersion);
                         if (version == -1) {
                             // Initial loading. Using getOrLoadInstance() prevents the data to be loaded in parallel,
                             // e.g., by SampleController.

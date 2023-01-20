@@ -4,6 +4,7 @@ import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.util.*;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 
-
+@Slf4j
 public class NextstrainGenbankService {
 
     private final ComboPooledDataSource databasePool;
@@ -248,10 +249,10 @@ public class NextstrainGenbankService {
                 batch.add(entry);
                 if (batch.size() >= batchSize) {
                     while (!emergencyBrake.get()) {
-                        System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
+                        log.info(LocalDateTime.now() + " [main] Try adding a batch");
                         boolean success = batchQueue.offer(batch, 5, TimeUnit.SECONDS);
                         if (success) {
-                            System.out.println(LocalDateTime.now() + " [main] Batch added");
+                            log.info(LocalDateTime.now() + " [main] Batch added");
                             break;
                         }
                     }
@@ -260,10 +261,10 @@ public class NextstrainGenbankService {
             }
             if (!emergencyBrake.get() && !batch.isEmpty()) {
                 while (!emergencyBrake.get()) {
-                    System.out.println(LocalDateTime.now() + " [main] Try adding the last batch");
+                    log.info(LocalDateTime.now() + " [main] Try adding the last batch");
                     boolean success = batchQueue.offer(batch, 5, TimeUnit.SECONDS);
                     if (success) {
-                        System.out.println(LocalDateTime.now() + " [main] Batch added");
+                        log.info(LocalDateTime.now() + " [main] Batch added");
                         break;
                     }
                 }
@@ -274,10 +275,9 @@ public class NextstrainGenbankService {
 
         // If someone pulled the emergency brake, collect some information and send a notification email.
         if (emergencyBrake.get()) {
-            System.err.println(LocalDateTime.now() + " Emergency exit!");
-            System.err.println(LocalDateTime.now() + " The sequence batch processing workers are reporting unhandled errors:");
+            log.error("Emergency exit! The sequence batch processing workers are reporting unhandled errors:");
             for (Exception unhandledException : unhandledExceptions) {
-                unhandledException.printStackTrace();
+                log.error(unhandledException.getMessage(), unhandledException);
             }
             executor.shutdown();
             boolean terminated = executor.awaitTermination(3, TimeUnit.MINUTES);
