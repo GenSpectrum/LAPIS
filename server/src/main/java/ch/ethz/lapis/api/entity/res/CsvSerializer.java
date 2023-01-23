@@ -45,26 +45,47 @@ public class CsvSerializer {
 
     public <T> String serialize(List<T> objects, Class<T> c, List<String> fields) {
         Map<String, Pair<String, Method>> allFields = new HashMap<>(); // The keys are lower-cased
-        // Find the getters via reflection and extract the field names
+        // Find out whether c is a Record.
+        boolean isRecord = false;
         Class<?> currentClass = c;
+        while (currentClass != null && !currentClass.equals(Object.class)) {
+            if (currentClass.equals(Record.class)) {
+                isRecord = true;
+                break;
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        // Find the field names by looking at the method names via reflection
+        currentClass = c;
         while (currentClass != null && !currentClass.equals(Object.class)) {
             for (Method method : currentClass.getDeclaredMethods()) {
                 // Skip method if it is not public
                 if (!Modifier.isPublic(method.getModifiers())) {
                     continue;
                 }
-                // Skip method if it's not a getter function
                 String name = method.getName();
-                if (!name.startsWith("get") && !name.startsWith("is")) {
-                    continue;
-                }
-                String nameWithoutPrefix;
-                if (name.startsWith("get")) {
-                    nameWithoutPrefix = name.substring(3);
+                String fieldName;
+                if (!isRecord) {
+                    // Skip method if it's not a getter function
+                    if (!name.startsWith("get") && !name.startsWith("is")) {
+                        continue;
+                    }
+                    String nameWithoutPrefix;
+                    if (name.startsWith("get")) {
+                        nameWithoutPrefix = name.substring(3);
+                    } else {
+                        nameWithoutPrefix = name.substring(2);
+                    }
+                    fieldName = Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
                 } else {
-                    nameWithoutPrefix = name.substring(2);
+                    // Records don't have typical getters (i.e., methods that start with "get" or "is"). The value
+                    // of the field x is returned by the method x() and not by getX(). Records declare exactly three
+                    // implicit methods: equals(), toString(), and hashCode(). We will exclude them.
+                    if (name.equals("equals") || name.equals("toString") || name.equals("hashCode")) {
+                        continue;
+                    }
+                    fieldName = name;
                 }
-                String fieldName = Character.toLowerCase(nameWithoutPrefix.charAt(0)) + nameWithoutPrefix.substring(1);
                 allFields.put(fieldName.toLowerCase(), new Pair<>(fieldName, method));
             }
             currentClass = currentClass.getSuperclass();
