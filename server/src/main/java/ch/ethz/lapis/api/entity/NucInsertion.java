@@ -2,9 +2,14 @@ package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
 
+@ToString
+@EqualsAndHashCode
 public class NucInsertion implements VariantQueryExpr {
     private int position;
     private String query;
@@ -23,6 +28,11 @@ public class NucInsertion implements VariantQueryExpr {
         String withoutPrefix = s.substring(4);
         String[] split = withoutPrefix.toUpperCase().split(":");
         return new NucInsertion(Integer.parseInt(split[0]), split[1]);
+    }
+
+    @JsonValue
+    public String getInsertionCode(){
+        return "ins_" + position + (query.isEmpty()?"": ":" + query);
     }
 
     public int getPosition() {

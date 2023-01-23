@@ -4,7 +4,10 @@ import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode
 public class AAMutation implements VariantQueryExpr {
 
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
@@ -49,6 +52,11 @@ public class AAMutation implements VariantQueryExpr {
         } else {
             return new AAMutation(gene, Integer.parseInt(split[1]));
         }
+    }
+
+    @JsonValue
+    public String getMutationCode(){
+        return gene + ":" + position + (mutation!=null?mutation:"");
     }
 
     public String getGene() {

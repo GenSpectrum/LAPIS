@@ -1,15 +1,17 @@
 package ch.ethz.lapis.api.log;
 
+import ch.ethz.lapis.api.entity.AAInsertion;
+import ch.ethz.lapis.api.entity.AAMutation;
+import ch.ethz.lapis.api.entity.NucInsertion;
+import ch.ethz.lapis.api.entity.NucMutation;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.util.TimeFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 
@@ -19,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.contains;
@@ -46,7 +50,8 @@ class RequestContextLoggerFilterTest {
 
         requestContext = new RequestContext();
 
-        underTest = new RequestContextLoggerFilter(requestContext, new StatisticsLogObjectMapper(), loggerMock, timeFactoryMock);
+        underTest = new RequestContextLoggerFilter(requestContext, new StatisticsLogObjectMapper(), loggerMock,
+            timeFactoryMock);
     }
 
     @Test
@@ -63,24 +68,7 @@ class RequestContextLoggerFilterTest {
         );
 
         verify(loggerMock).info("{\"timestamp\":\"2007-12-03T10:15:30.001\",\"responseTimeInSeconds\":0.099000000," +
-            "\"endpoint\":\"/v1/sample/shouldBeLogged\",\"returnedDataFromCache\":false,\"variantFilter\":null}");
-    }
-
-    @Test
-    void givenAVariantFilter_thenLogsFilter() throws ServletException, IOException {
-        when(timeFactoryMock.now()).thenReturn(LocalDateTime.now());
-
-        SampleFilter inputFilter = new SampleDetailRequest();
-        inputFilter.setCountry("Germany");
-        requestContext.setVariantFilter(inputFilter);
-
-        underTest.doFilterInternal(
-            getRequestTo("/v1/sample/shouldBeLogged"),
-            mock(HttpServletResponse.class),
-            mock(FilterChain.class)
-        );
-
-        verify(loggerMock).info(contains("\"country\":\"Germany\""));
+            "\"endpoint\":\"/v1/sample/shouldBeLogged\",\"returnedDataFromCache\":false}");
     }
 
     @ParameterizedTest
@@ -91,5 +79,54 @@ class RequestContextLoggerFilterTest {
         underTest.doFilterInternal(getRequestTo(uri), mock(HttpServletResponse.class), mock(FilterChain.class));
 
         verify(loggerMock, never()).info(anyString());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInputFilter")
+    void givenAnInputFilter_thenTheCorrespondingFieldsAreLogged(SampleFilter filter, String expectedLogMessagePart) throws ServletException, IOException {
+        when(timeFactoryMock.now()).thenReturn(LocalDateTime.now());
+
+        requestContext.setFilter(filter);
+
+        underTest.doFilterInternal(
+            getRequestTo("/v1/sample/shouldBeLogged"),
+            mock(HttpServletResponse.class),
+            mock(FilterChain.class)
+        );
+
+        verify(loggerMock).info(contains(expectedLogMessagePart));
+    }
+
+    public static Stream<Arguments> getInputFilter() {
+        SampleFilter aaMutationFilter = new SampleDetailRequest();
+        aaMutationFilter.setAaMutations(List.of(
+            new AAMutation("S", 501, 'Y')
+        ));
+
+        SampleFilter aaInsertionsFilter = new SampleDetailRequest();
+        aaInsertionsFilter.setAaInsertions(List.of(
+            new AAInsertion("S", 501, "EN")
+        ));
+
+        SampleFilter nucMutationFilter = new SampleDetailRequest();
+        nucMutationFilter.setNucMutations(List.of(
+            new NucMutation(1234, 'T')
+        ));
+
+        SampleFilter nucInsertionsFilter = new SampleDetailRequest();
+        nucInsertionsFilter.setNucInsertions(List.of(
+            new NucInsertion(1234, "ACT?GGT")
+        ));
+
+        SampleFilter countryFilter = new SampleDetailRequest();
+        countryFilter.setCountry("Germany");
+
+        return Stream.of(
+            Arguments.of(aaMutationFilter, "\"aaMutations\":[\"S:501Y\"]"),
+            Arguments.of(aaInsertionsFilter, "\"aaInsertions\":[\"ins_S:501:EN\"]"),
+            Arguments.of(nucMutationFilter, "\"nucMutations\":[\"1234T\"]"),
+            Arguments.of(nucInsertionsFilter, "\"nucInsertions\":[\"ins_1234:ACT?GGT\"]"),
+            Arguments.of(countryFilter, "\"country\":\"Germany\"")
+        );
     }
 }

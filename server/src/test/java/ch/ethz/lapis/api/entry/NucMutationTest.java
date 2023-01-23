@@ -3,6 +3,14 @@ package ch.ethz.lapis.api.entry;
 import ch.ethz.lapis.api.entity.NucMutation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public class NucMutationTest {
 
@@ -26,6 +34,20 @@ public class NucMutationTest {
         Assertions.assertTrue(NucMutation.isMaybeMatchingMutation('N', new NucMutation(913, null)));
         Assertions.assertTrue(NucMutation.isMaybeMatchingMutation('M', new NucMutation(913, '.')));
         Assertions.assertFalse(NucMutation.isMaybeMatchingMutation('K', new NucMutation(913, '.')));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideMutations")
+    public void serializeDeserialize (String mutationCode, NucMutation mutation) {
+        assertThat(NucMutation.parse(mutationCode), is(mutation));
+        assertThat(mutation.getMutationCode(), is(mutationCode));
+    }
+
+    public static Stream<Arguments> provideMutations() {
+        return Stream.of(
+            Arguments.of("1234T", new NucMutation(1234, 'T')),
+            Arguments.of("2345", new NucMutation(2345))
+        );
     }
 
 }

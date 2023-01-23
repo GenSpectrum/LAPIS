@@ -87,7 +87,7 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         boolean endpointServesAggregatedData = request.getStrain() == null
             && request.getGenbankAccession() == null
@@ -161,7 +161,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) throws SQLException, JsonProcessingException {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
@@ -210,7 +210,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) throws SQLException, IOException {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -266,7 +266,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     )  {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -312,7 +312,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -358,7 +358,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -403,7 +403,7 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -467,7 +467,7 @@ public class SampleController {
         GeneralConfig generalConfig,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -533,7 +533,7 @@ public class SampleController {
         SequenceType sequenceType,
         String fileName
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
         checkDataVersion(generalConfig.getDataVersion());
@@ -641,7 +641,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());
@@ -680,7 +680,7 @@ public class SampleController {
         OrderAndLimitConfig limitAndOrder,
         String accessKey
     ) {
-        requestContext.setVariantFilter(request);
+        requestContext.setFilter(request);
 
         checkAuthorization(accessKey, false);
         checkDataVersion(generalConfig.getDataVersion());

@@ -16,5 +16,5 @@ public class RequestContext {
     private Duration responseTimeInSeconds;
     private String endpoint;
     private boolean returnedDataFromCache = false;
-    private SampleFilter variantFilter;
+    private SampleFilter filter;
 }
