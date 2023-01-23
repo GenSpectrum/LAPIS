@@ -1,16 +1,11 @@
 package ch.ethz.lapis.source.gisaid;
 
-import ch.ethz.lapis.core.SendableReport;
 import ch.ethz.lapis.core.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * The report that will be sent to via email
- */
-public class FinalReport implements SendableReport {
+public class FinalReport {
 
     private boolean success;
     private LocalDateTime startTime;
@@ -25,7 +20,13 @@ public class FinalReport implements SendableReport {
     private int failedEntries;
     private List<Exception> unhandledExceptions = new ArrayList<>();
 
-    @Override
+    public enum PriorityLevel {
+        FATAL,      // Immediate action required: the program can not continue working and might cause corruptions.
+        ERROR,      // Immediate action required: the program can not continue working.
+        WARNING,    // Something seems off but the program is able to continue.
+        INFO       // Everything is okay.
+    }
+
     public PriorityLevel getPriority() {
         if (!success) {
             return PriorityLevel.FATAL;
@@ -34,12 +35,6 @@ public class FinalReport implements SendableReport {
         }
     }
 
-    @Override
-    public String programName() {
-        return "LAPIS GisaidService";
-    }
-
-    @Override
     public String getEmailText() {
         StringBuilder text =
             new StringBuilder("Success: " + success + "\n\n" +
@@ -64,18 +59,9 @@ public class FinalReport implements SendableReport {
         return text.toString();
     }
 
-
-    public boolean isSuccess() {
-        return success;
-    }
-
     public FinalReport setSuccess(boolean success) {
         this.success = success;
         return this;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
     }
 
     public FinalReport setStartTime(LocalDateTime startTime) {
@@ -83,17 +69,9 @@ public class FinalReport implements SendableReport {
         return this;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
     public FinalReport setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
         return this;
-    }
-
-    public int getEntriesInDataPackage() {
-        return entriesInDataPackage;
     }
 
     public FinalReport setEntriesInDataPackage(int entriesInDataPackage) {
@@ -101,17 +79,9 @@ public class FinalReport implements SendableReport {
         return this;
     }
 
-    public int getProcessedEntries() {
-        return processedEntries;
-    }
-
     public FinalReport setProcessedEntries(int processedEntries) {
         this.processedEntries = processedEntries;
         return this;
-    }
-
-    public int getAddedEntries() {
-        return addedEntries;
     }
 
     public FinalReport setAddedEntries(int addedEntries) {
@@ -119,17 +89,9 @@ public class FinalReport implements SendableReport {
         return this;
     }
 
-    public int getUpdatedTotalEntries() {
-        return updatedTotalEntries;
-    }
-
     public FinalReport setUpdatedTotalEntries(int updatedTotalEntries) {
         this.updatedTotalEntries = updatedTotalEntries;
         return this;
-    }
-
-    public int getUpdatedMetadataEntries() {
-        return updatedMetadataEntries;
     }
 
     public FinalReport setUpdatedMetadataEntries(int updatedMetadataEntries) {
@@ -137,17 +99,9 @@ public class FinalReport implements SendableReport {
         return this;
     }
 
-    public int getUpdatedSequenceEntries() {
-        return updatedSequenceEntries;
-    }
-
     public FinalReport setUpdatedSequenceEntries(int updatedSequenceEntries) {
         this.updatedSequenceEntries = updatedSequenceEntries;
         return this;
-    }
-
-    public int getDeletedEntries() {
-        return deletedEntries;
     }
 
     public FinalReport setDeletedEntries(int deletedEntries) {
@@ -155,17 +109,9 @@ public class FinalReport implements SendableReport {
         return this;
     }
 
-    public int getFailedEntries() {
-        return failedEntries;
-    }
-
     public FinalReport setFailedEntries(int failedEntries) {
         this.failedEntries = failedEntries;
         return this;
-    }
-
-    public List<Exception> getUnhandledExceptions() {
-        return unhandledExceptions;
     }
 
     public FinalReport setUnhandledExceptions(List<Exception> unhandledExceptions) {
