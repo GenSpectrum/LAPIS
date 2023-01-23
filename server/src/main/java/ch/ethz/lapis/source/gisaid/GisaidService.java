@@ -3,7 +3,6 @@ package ch.ethz.lapis.source.gisaid;
 import ch.ethz.lapis.core.ExhaustibleBlockingQueue;
 import ch.ethz.lapis.core.ExhaustibleLinkedBlockingQueue;
 import ch.ethz.lapis.core.NapiNotification;
-import ch.ethz.lapis.core.SendableReport.PriorityLevel;
 import ch.ethz.lapis.source.NextcladeDatasetTagReader;
 import ch.ethz.lapis.util.ParsedDate;
 import ch.ethz.lapis.util.SeqCompressor;
@@ -550,7 +549,7 @@ public class GisaidService {
 
 
     private void sendReport(FinalReport report) {
-        String level = report.getPriority() == PriorityLevel.INFO ? "INFO" : "ERROR";
+        String level = report.getPriority() == FinalReport.PriorityLevel.INFO ? "INFO" : "ERROR";
         String subject = "[LAPIS GISAID import] Source data loading has finished";
         String body = report.getEmailText();
         NapiNotification.sendNotification(notificationAuthKey, level, subject, body);
