@@ -25,7 +25,6 @@ public class HelloController {
 
     @GetMapping("/info/nextclade-dataset")
     public NextcladeDatasetInfoResponse getNextcladeDatasetInfo() {
-        String s = "This is LAPIS. Please see https://cov-spectrum.ethz.ch/public for more information";
         return new NextcladeDatasetInfoResponse(
             sampleService.getNextcladeDatasetTag(),
             "sars-cov-2"

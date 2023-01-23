@@ -36,9 +36,9 @@ public class RequestContextLoggerFilter extends OncePerRequestFilter {
             if (requestURI.contains("/v1/sample") && !requestURI.contains("info")) {
                 requestContext.setResponseTimeInSeconds(Duration.between(before, timeFactory.now()));
                 try {
-                    statisticsLogger.info(objectMapper.writerFor(RequestContext.class).writeValueAsString(requestContext));
+                    statisticsLogger.info(objectMapper.writeValueAsString(requestContext));
                 } catch (JsonProcessingException e) {
-                    log.error(e.getMessage(), e);
+                    log.error("Could not log statistics message: " + e.getMessage(), e);
                 }
             }
         }

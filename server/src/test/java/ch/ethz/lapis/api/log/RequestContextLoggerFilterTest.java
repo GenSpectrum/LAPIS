@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -50,8 +51,12 @@ class RequestContextLoggerFilterTest {
 
         requestContext = new RequestContext();
 
-        underTest = new RequestContextLoggerFilter(requestContext, new StatisticsLogObjectMapper(), loggerMock,
-            timeFactoryMock);
+        underTest = new RequestContextLoggerFilter(
+            requestContext,
+            new StatisticsLogObjectMapper(new Jackson2ObjectMapperBuilder()),
+            loggerMock,
+            timeFactoryMock
+        );
     }
 
     @Test
