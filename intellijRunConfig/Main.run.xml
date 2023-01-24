@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="ch.ethz.lapis.Main" />
+    <module name="lapis.main" />
+    <option name="PROGRAM_PARAMETERS" value="--config config.yml Lapis --api" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ch.ethz.lapis.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -3,9 +3,14 @@ package ch.ethz.lapis.api.entity;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.util.ReferenceGenomeData;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.List;
 
+@EqualsAndHashCode
+@ToString
 public class AAInsertion implements VariantQueryExpr {
     private String gene;
     private int position;
@@ -26,6 +31,11 @@ public class AAInsertion implements VariantQueryExpr {
         String withoutPrefix = s.substring(4);
         String[] split = withoutPrefix.toUpperCase().split(":");
         return new AAInsertion(split[0], Integer.parseInt(split[1]), split[2]);
+    }
+
+    @JsonValue
+    public String getInsertionCode(){
+        return "ins_" + gene + ":" + position + (query.isEmpty()?"": ":" + query);
     }
 
     public String getGene() {

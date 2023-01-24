@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Conditional(IsCacheEnabledCondition.class)
+@Slf4j
 public class CacheService {
 
     private static final Map<String, Class<?>> endpointToClass = new HashMap<>() {{
@@ -158,7 +160,7 @@ public class CacheService {
                 String[] split = subKey.split("###", 2);
                 String endpoint = split[0];
                 String requestJson = split[1];
-                System.out.println("Pre-computing " + "(" + i + "/" + keys.size() + ")");
+                log.info("Pre-computing " + "(" + i + "/" + keys.size() + ")");
                 Object request = objectMapper.readValue(requestJson, endpointToClass.get(endpoint));
                 endpointToPreComputation.get(endpoint).accept(sampleController, request);
             } catch (JsonProcessingException e) {

@@ -4,7 +4,7 @@ import ch.ethz.lapis.api.entity.AggregationField;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SampleAggregatedRequest extends SampleFilter<SampleAggregatedRequest> {
+public class SampleAggregatedRequest extends SampleFilter {
 
     private List<AggregationField> fields = new ArrayList<>();
 

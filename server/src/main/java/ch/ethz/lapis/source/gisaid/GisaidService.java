@@ -9,6 +9,7 @@ import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.Utils;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import lombok.extern.slf4j.Slf4j;
 import org.javatuples.Pair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -52,7 +53,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+@Slf4j
 public class GisaidService {
     private static final int BATCH_SIZE = 400;
 
@@ -119,7 +120,7 @@ public class GisaidService {
                 gisaidDataFile
             );
         } catch (IOException e) {
-            System.err.println(LocalDateTime.now() + " provision.json.xz could not be downloaded from GISAID");
+            log.error(LocalDateTime.now() + " provision.json.xz could not be downloaded from GISAID");
             throw e;
         }
 
@@ -236,7 +237,7 @@ public class GisaidService {
             }
             entriesInDataPackage++;
             if (entriesInDataPackage % 10000 == 0) {
-                System.out.println(LocalDateTime.now() + " [main] Read " + entriesInDataPackage + " in the data package");
+                log.info(LocalDateTime.now() + " [main] Read " + entriesInDataPackage + " in the data package");
             }
             try {
                 JSONObject json = (JSONObject) new JSONParser().parse(line);
@@ -246,16 +247,16 @@ public class GisaidService {
                 batchEntries.add(entry);
                 processedEntries++;
             } catch (ParseException e) {
-                System.err.println(LocalDateTime.now() + " JSON parsing failed!");
+                log.error(LocalDateTime.now() + " JSON parsing failed!");
                 throw e;
             }
             if (batchEntries.size() >= BATCH_SIZE) {
                 Batch batch = new Batch(batchEntries);
                 while (!emergencyBrake.get()) {
-                    System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
+                    log.info(LocalDateTime.now() + " [main] Try adding a batch");
                     boolean success = gisaidBatchQueue.offer(batch, 5, TimeUnit.SECONDS);
                     if (success) {
-                        System.out.println(LocalDateTime.now() + " [main] Batch added");
+                        log.info(LocalDateTime.now() + " [main] Batch added");
                         break;
                     }
                 }
@@ -265,10 +266,10 @@ public class GisaidService {
         if (!emergencyBrake.get() && !batchEntries.isEmpty()) {
             Batch lastBatch = new Batch(batchEntries);
             while (!emergencyBrake.get()) {
-                System.out.println(LocalDateTime.now() + " [main] Try adding a batch");
+                log.info(LocalDateTime.now() + " [main] Try adding a batch");
                 boolean success = gisaidBatchQueue.offer(lastBatch, 5, TimeUnit.SECONDS);
                 if (success) {
-                    System.out.println(LocalDateTime.now() + " [main] Batch added");
+                    log.info(LocalDateTime.now() + " [main] Batch added");
                     break;
                 }
             }
@@ -278,7 +279,7 @@ public class GisaidService {
 
         // If someone pulled the emergency brake, collect some information and send a notification email.
         if (emergencyBrake.get()) {
-            System.err.println(LocalDateTime.now() + " Emergency exit!");
+            log.error(LocalDateTime.now() + " Emergency exit!");
             executor.shutdown();
             boolean terminated = executor.awaitTermination(3, TimeUnit.MINUTES);
             if (!terminated) {
@@ -293,7 +294,7 @@ public class GisaidService {
         // Perform deletions
         int deleted = 0;
         if (!emergencyBrake.get()) {
-            System.out.println(LocalDateTime.now() + " [main] Deleting removed sequences");
+            log.info(LocalDateTime.now() + " [main] Deleting removed sequences");
             Set<String> toDelete = new HashSet<>(oldHashes.keySet());
             toDelete.removeAll(gisaidEpiIslInDataPackage);
             deleteSequences(toDelete);
@@ -315,7 +316,7 @@ public class GisaidService {
         }
 
         // Merge the BatchReports to a report and send it
-        System.out.println(LocalDateTime.now() + " [main] Preparing final report");
+        log.info(LocalDateTime.now() + " [main] Preparing final report");
         BatchReport mergedBatchReport = mergeBatchReports(new ArrayList<>(batchReports));
         boolean success = unhandledExceptions.isEmpty()
             && mergedBatchReport.getFailedEntries() < 0.05 * processedEntries;
@@ -334,9 +335,9 @@ public class GisaidService {
             .setUnhandledExceptions(new ArrayList<>(unhandledExceptions));
         sendReport(finalReport);
 
-        System.err.println(LocalDateTime.now() + " There are " + unhandledExceptions.size() + " unhandled exceptions.");
+        log.error(LocalDateTime.now() + " There are " + unhandledExceptions.size() + " unhandled exceptions.");
         for (Exception unhandledException : unhandledExceptions) {
-            unhandledException.printStackTrace();
+            log.error(unhandledException.getMessage(), unhandledException);
         }
 
         if (emergencyBrake.get() || !unhandledExceptions.isEmpty()) {
@@ -376,12 +377,12 @@ public class GisaidService {
             }
         }
         if (missingGisaidIds.isEmpty()) {
-            System.out.println("No submitter information is missing");
+            log.info("No submitter information is missing");
             return;
         }
 
         // Fetch submitter information
-        System.out.println("Found " + missingGisaidIds.size() + " GISAID entries with missing submitter information.");
+        log.info("Found " + missingGisaidIds.size() + " GISAID entries with missing submitter information.");
         SubmitterInformationFetcher fetcher = new SubmitterInformationFetcher();
         List<Pair<String, SubmitterInformation>> submitterInformationList = new ArrayList<>();
         int i = 0;
@@ -391,18 +392,18 @@ public class GisaidService {
                 case SUCCESSFUL -> submitterInformationList.add(new Pair<>(gisaidId, result.value()));
                 case NOT_FOUND -> {}
                 case TOO_MANY_REQUESTS -> {
-                    System.out.println("Maybe rate-limited? Let's wait for 20 minutes");
+                    log.info("Maybe rate-limited? Let's wait for 20 minutes");
                     Thread.sleep(1000 * 60 * 20);
                 }
                 case UNEXPECTED_ERROR -> {
-                    System.out.println("Unsure what happened.. Let's wait for 20 minutes");
+                    log.info("Unsure what happened.. Let's wait for 20 minutes");
                     Thread.sleep(1000 * 60 * 20);
                 }
             }
             i++;
             Thread.sleep(2000);
             if (i % 20 == 0) {
-                System.out.println("Progress: " + i + "/" + missingGisaidIds.size());
+                log.info("Progress: " + i + "/" + missingGisaidIds.size());
             }
             if (i % 100 == 0 || i == missingGisaidIds.size()) {
                 // Write submitter information to database
@@ -429,7 +430,7 @@ public class GisaidService {
                         Utils.executeClearCommitBatch(conn, statement);
                     }
                 }
-                System.out.println("Wrote " + submitterInformationList.size() + " entries to database.");
+                log.info("Wrote " + submitterInformationList.size() + " entries to database.");
                 submitterInformationList = new ArrayList<>();
             }
         }

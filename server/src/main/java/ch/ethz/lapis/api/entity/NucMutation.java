@@ -4,10 +4,14 @@ import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.VariantQueryExpr;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@EqualsAndHashCode
 public class NucMutation implements VariantQueryExpr {
 
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
@@ -61,6 +65,11 @@ public class NucMutation implements VariantQueryExpr {
         } else {
             return new NucMutation(Integer.parseInt(mutationCode));
         }
+    }
+
+    @JsonValue
+    public String getMutationCode(){
+        return "" + position + (mutation!=null?mutation:"");
     }
 
     public int getPosition() {

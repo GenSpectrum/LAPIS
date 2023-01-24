@@ -1,5 +1,6 @@
 package ch.ethz.lapis.source.gisaid;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,7 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-
+@Slf4j
 public class SubmitterInformationFetcher {
 
     public enum SubmitterInformationFetchingStatus {
@@ -49,14 +50,14 @@ public class SubmitterInformationFetcher {
                     );
                 }
                 case 404 -> {
-                    System.err.println("Not found: " + urlStr);
+                    log.error("Not found: " + urlStr);
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.NOT_FOUND, null);
                 }
                 case 429 -> {
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.TOO_MANY_REQUESTS, null);
                 }
                 default -> {
-                    System.err.println("Unexpected HTTP response code: " + responseCode);
+                    log.error("Unexpected HTTP response code: " + responseCode);
                     return new SubmitterInformationFetchingResult(SubmitterInformationFetchingStatus.UNEXPECTED_ERROR, null);
                 }
             }
