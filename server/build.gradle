@@ -33,7 +33,7 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'org.simplejavamail:simple-java-mail:7.5.0'
     implementation 'jakarta.activation:jakarta.activation-api:2.1.0'
-    implementation 'org.jooq:jooq:3.17.3'
+    implementation 'org.jooq:jooq:3.17.7'
     implementation 'redis.clients:jedis:4.2.3'
     implementation 'com.github.luben:zstd-jni:1.5.2-3'
 
