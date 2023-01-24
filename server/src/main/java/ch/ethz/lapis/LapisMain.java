@@ -1,8 +1,8 @@
 package ch.ethz.lapis;
 
+import ch.ethz.lapis.core.ConfigurationManager;
 import ch.ethz.lapis.core.DatabaseService;
 import ch.ethz.lapis.core.GlobalProxyManager;
-import ch.ethz.lapis.core.SubProgram;
 import ch.ethz.lapis.source.covlineages.CovLineagesService;
 import ch.ethz.lapis.source.gisaid.GisaidService;
 import ch.ethz.lapis.source.ng.NextstrainGenbankService;
@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,16 +22,23 @@ import java.util.Set;
 
 @SpringBootApplication
 @EnableScheduling
-public class LapisMain extends SubProgram<LapisConfig> {
+public class LapisMain {
 
     public static LapisConfig globalConfig;
     public static ComboPooledDataSource dbPool;
 
-    public LapisMain() {
-        super("Lapis", LapisConfig.class);
+    public static void main(String[] args) throws Exception {
+        ConfigurationManager configurationManager = new ConfigurationManager();
+        if (args.length < 2 || !args[0].equals("--config")) {
+            System.out.println("Please run with '--config <path/to/config>'");
+            System.exit(1);
+        }
+        Path configFilePath = Path.of(args[1]);
+        LapisConfig lapisConfig = configurationManager.loadConfiguration(configFilePath, "lapis");
+
+        (new LapisMain()).run(Arrays.copyOfRange(args, 2, args.length), lapisConfig);
     }
 
-    @Override
     public void run(String[] args, LapisConfig config) throws Exception {
         if (args.length == 0) {
             throw new RuntimeException("TODO: write help page");

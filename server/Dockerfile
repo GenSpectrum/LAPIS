@@ -28,4 +28,4 @@ RUN curl https://raw.githubusercontent.com/nextstrain/ncov-ingest/master/source-
 COPY --from=builder /build/build/libs/lapis-1.0-SNAPSHOT.jar /app/lapis.jar
 
 EXPOSE 2345
-ENTRYPOINT ["java", "-Xmx10g", "-jar", "/app/lapis.jar", "--config", "/app/lapis-config.yml", "Lapis", "--api"]
+ENTRYPOINT ["java", "-Xmx10g", "-jar", "/app/lapis.jar", "--config", "/app/lapis-config.yml", "--api"]

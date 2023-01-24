@@ -1,5 +1,6 @@
 package ch.ethz.lapis.core;
 
+import ch.ethz.lapis.LapisConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -19,14 +20,11 @@ public class ConfigurationManager {
     /**
      * Loads the configuration from both the config file and from environment variables
      */
-    public <T extends Config> T loadConfiguration(Path configPath, Class<T> configClass, String programName)
+    public LapisConfig loadConfiguration(Path configPath, String programName)
         throws IOException {
         Map<String, ?> fileConfigMaps1 = readConfigMapsFromYaml(configPath);
         Map<String, ?> envConfigMaps1 = readConfigMapFromEnvironmentVariables();
 
-        // Turn the program name keys to lower case. The ObjectMapper will take care of the "case-insensitivity-ness"
-        // of everything else.
-        programName = programName.toLowerCase();
         Map<String, Object> fileConfigMaps = new HashMap<>();
         Map<String, Object> envConfigMaps = new HashMap<>();
         fileConfigMaps1.forEach((key, value) -> fileConfigMaps.put(key.toLowerCase(), value));
@@ -46,36 +44,10 @@ public class ConfigurationManager {
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .build();
 
-        return objectMapper.convertValue(merged, configClass);
+        return objectMapper.convertValue(merged, LapisConfig.class);
     }
 
-    /**
-     * Loads the configuration only from environment variables
-     */
-    public <T extends Config> T loadConfiguration(Class<T> configClass, String programName) {
-        Map<String, ?> envConfigMaps1 = readConfigMapFromEnvironmentVariables();
-
-        // Turn the program name keys to lower case. The ObjectMapper will take care of the "case-insensitivity-ness"
-        // of everything else.
-        programName = programName.toLowerCase();
-        Map<String, Object> envConfigMaps = new HashMap<>();
-        envConfigMaps1.forEach((key, value) -> envConfigMaps.put(key.toLowerCase(), value));
-
-        Map<String, ?> envDefaultConfig = (Map<String, ?>) envConfigMaps.get("default");
-        Map<String, ?> envProgramConfig = (Map<String, ?>) envConfigMaps.get(programName);
-
-        Map merged = Utils.nullableMapDeepMerge(envDefaultConfig, envProgramConfig);
-
-        JsonMapper objectMapper = JsonMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-            .build();
-
-        return objectMapper.convertValue(merged, configClass);
-    }
-
-    private Map<String, ?> readConfigMapsFromYaml(Path configPath)
-        throws IOException {
+    private Map<String, ?> readConfigMapsFromYaml(Path configPath) throws IOException {
         Yaml yaml = new Yaml();
         return yaml.load(Files.readString(configPath));
     }
