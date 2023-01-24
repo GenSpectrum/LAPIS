@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="MAIN_CLASS_NAME" value="ch.ethz.lapis.Main" />
+  <configuration default="false" name="LapisMain" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <module name="lapis.main" />
-    <option name="PROGRAM_PARAMETERS" value="--config config.yml Lapis --api" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+    <option name="PROGRAM_PARAMETERS" value="--config config.yml --api" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ch.ethz.lapis.LapisMain" />
+    <option name="WORKING_DIRECTORY" value="file://server" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="ch.ethz.lapis.*" />
