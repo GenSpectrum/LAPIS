@@ -5,15 +5,12 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-
 @Component
 @RequestScope
 @Data
 public class RequestContext {
-    private LocalDateTime timestamp;
-    private Duration responseTimeInSeconds;
+    private long unixTimestamp;
+    private long responseTimeInMilliSeconds;
     private String endpoint;
     private boolean returnedDataFromCache = false;
     private SampleFilter filter;

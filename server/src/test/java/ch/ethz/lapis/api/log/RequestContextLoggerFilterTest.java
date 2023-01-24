@@ -61,10 +61,7 @@ class RequestContextLoggerFilterTest {
 
     @Test
     void givenTwoTimestamps_thenLogsTimes() throws ServletException, IOException {
-        LocalDateTime timeBefore = LocalDateTime.parse("2007-12-03T10:15:30.001");
-        LocalDateTime timeAfter = LocalDateTime.parse("2007-12-03T10:15:30.100");
-
-        when(timeFactoryMock.now()).thenReturn(timeBefore, timeAfter);
+        when(timeFactoryMock.now()).thenReturn(100L, 199L);
 
         underTest.doFilterInternal(
             getRequestTo("/v1/sample/shouldBeLogged"),
@@ -72,14 +69,14 @@ class RequestContextLoggerFilterTest {
             mock(FilterChain.class)
         );
 
-        verify(loggerMock).info("{\"timestamp\":\"2007-12-03T10:15:30.001\",\"responseTimeInSeconds\":0.099000000," +
+        verify(loggerMock).info("{\"unixTimestamp\":100,\"responseTimeInMilliSeconds\":99," +
             "\"endpoint\":\"/v1/sample/shouldBeLogged\",\"returnedDataFromCache\":false}");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"/UriThatShouldNotBeLogged", "/v1/sample/info"})
     void givenAHttpRequestNotToASampleRoute_thenItDoesNotLog(String uri) throws ServletException, IOException {
-        when(timeFactoryMock.now()).thenReturn(LocalDateTime.now());
+        when(timeFactoryMock.now()).thenReturn(100L);
 
         underTest.doFilterInternal(getRequestTo(uri), mock(HttpServletResponse.class), mock(FilterChain.class));
 
@@ -89,7 +86,7 @@ class RequestContextLoggerFilterTest {
     @ParameterizedTest
     @MethodSource("getInputFilter")
     void givenAnInputFilter_thenTheCorrespondingFieldsAreLogged(SampleFilter filter, String expectedLogMessagePart) throws ServletException, IOException {
-        when(timeFactoryMock.now()).thenReturn(LocalDateTime.now());
+        when(timeFactoryMock.now()).thenReturn(100L);
 
         requestContext.setFilter(filter);
 

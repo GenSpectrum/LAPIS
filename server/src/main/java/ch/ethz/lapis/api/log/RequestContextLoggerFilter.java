@@ -12,8 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Slf4j
@@ -25,8 +23,8 @@ public class RequestContextLoggerFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        LocalDateTime before = timeFactory.now();
-        requestContext.setTimestamp(before);
+        long before = timeFactory.now();
+        requestContext.setUnixTimestamp(before);
         String requestURI = request.getRequestURI();
         requestContext.setEndpoint(requestURI);
 
@@ -34,7 +32,7 @@ public class RequestContextLoggerFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             if (requestURI.contains("/v1/sample") && !requestURI.contains("info")) {
-                requestContext.setResponseTimeInSeconds(Duration.between(before, timeFactory.now()));
+                requestContext.setResponseTimeInMilliSeconds(timeFactory.now() - before);
                 try {
                     statisticsLogger.info(objectMapper.writeValueAsString(requestContext));
                 } catch (JsonProcessingException e) {
