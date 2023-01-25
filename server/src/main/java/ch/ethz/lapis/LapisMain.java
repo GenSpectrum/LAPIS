@@ -33,8 +33,8 @@ public class LapisMain {
             System.out.println("Please run with '--config <path/to/config>'");
             System.exit(1);
         }
-        Path configFilePath = Path.of(args[1]);
-        LapisConfig lapisConfig = configurationManager.loadConfiguration(configFilePath, "lapis");
+
+        LapisConfig lapisConfig = configurationManager.loadConfiguration(Path.of(args[1]));
 
         (new LapisMain()).run(Arrays.copyOfRange(args, 2, args.length), lapisConfig);
     }
