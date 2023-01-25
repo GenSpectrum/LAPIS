@@ -66,16 +66,15 @@ First, create a file ``lapis-proc-config.yml`` with the following content (pleas
 
 .. code-block:: bash
 
-    default:
-      vineyard:
-        host: lapis_db
-        port: 5432
-        dbname: postgres
-        username: lapis_proc
-        password: <missing>
-        schema: public
-      workdir: /data
-      maxNumberWorkers: 20
+    vineyard:
+      host: lapis_db
+      port: 5432
+      dbname: postgres
+      username: lapis_proc
+      password: <missing>
+      schema: public
+    workdir: /data
+    maxNumberWorkers: 20
 
 
 Then, execute the following command:
@@ -102,18 +101,17 @@ To start the API server, create a file ``lapis-api-config.yml`` with the followi
 
 .. code-block:: bash
 
-    default:
-      vineyard:
-        host: lapis_db
-        port: 5432
-        dbname: postgres
-        username: lapis_api
-        password: <missing>
-        schema: public
-      cacheEnabled: false
-      redisHost:
-      redisPort:
-      apiOpennessLevel: OPEN
+    vineyard:
+      host: lapis_db
+      port: 5432
+      dbname: postgres
+      username: lapis_api
+      password: <missing>
+      schema: public
+    cacheEnabled: false
+    redisHost:
+    redisPort:
+    apiOpennessLevel: OPEN
 
 Then, execute the following command:
 

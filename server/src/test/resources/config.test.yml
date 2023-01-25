@@ -1,11 +1,11 @@
 vineyard:
   host: <db host>
-  port: <db port>
+  port: 123
   dbname: <db name>
   username: <db user name>
   password: <db user password>
   schema: <db schema>
-apiOpennessLevel: <"OPEN" or "GISAID">
+apiOpennessLevel: "GISAID"
 cacheEnabled: false
-redisHost:
-redisPort:
+redisHost: <redis host>
+redisPort: 456
