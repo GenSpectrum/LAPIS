@@ -1,48 +1,47 @@
 package ch.ethz.lapis.api.entity.res;
 
-public class SampleDetail extends SampleMetadata<SampleDetail> {
+import com.fasterxml.jackson.annotation.JsonFilter;
+import lombok.Data;
+import lombok.experimental.Accessors;
+import lombok.experimental.FieldNameConstants;
+
+import java.time.LocalDate;
+
+@JsonFilter(SampleDetail.FILTER_NAME)
+@FieldNameConstants(asEnum = true)
+@Data
+@Accessors(chain = true)
+public class SampleDetail {
+
+    public final static String FILTER_NAME = "SampleDetailFilter";
 
     private String genbankAccession;
-
     private String sraAccession;
-
     private String gisaidEpiIsl;
-
     private String strain;
+    private LocalDate date;
+    private Integer year;
+    private Integer month;
+    private LocalDate dateSubmitted;
+    private String region;
+    private String country;
+    private String division;
+    private String location;
+    private String regionExposure;
+    private String countryExposure;
+    private String divisionExposure;
+    private Integer age;
+    private String sex;
+    private Boolean hospitalized;
+    private Boolean died;
+    private Boolean fullyVaccinated;
+    private String host;
+    private String samplingStrategy;
+    private String pangoLineage;
+    private String nextcladePangoLineage;
+    private String nextstrainClade;
+    private String gisaidCloade;
+    private String submittingLab;
+    private String originatingLab;
 
-    public String getGenbankAccession() {
-        return genbankAccession;
-    }
-
-    public SampleDetail setGenbankAccession(String genbankAccession) {
-        this.genbankAccession = genbankAccession;
-        return this;
-    }
-
-    public String getSraAccession() {
-        return sraAccession;
-    }
-
-    public SampleDetail setSraAccession(String sraAccession) {
-        this.sraAccession = sraAccession;
-        return this;
-    }
-
-    public String getGisaidEpiIsl() {
-        return gisaidEpiIsl;
-    }
-
-    public SampleDetail setGisaidEpiIsl(String gisaidEpiIsl) {
-        this.gisaidEpiIsl = gisaidEpiIsl;
-        return this;
-    }
-
-    public String getStrain() {
-        return strain;
-    }
-
-    public SampleDetail setStrain(String strain) {
-        this.strain = strain;
-        return this;
-    }
 }

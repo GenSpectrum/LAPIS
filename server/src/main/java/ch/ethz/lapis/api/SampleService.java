@@ -2,9 +2,11 @@ package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.entity.AccessKey;
+import ch.ethz.lapis.api.entity.DetailsField;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
@@ -57,6 +59,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 public class SampleService {
 
@@ -107,77 +111,27 @@ public class SampleService {
             return new ArrayList<>();
         }
 
-        // Fetch data
         List<SampleDetail> samples = new ArrayList<>();
         try (Connection conn = getDatabaseConnection()) {
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
             YMainMetadata tbl = YMainMetadata.Y_MAIN_METADATA;
 
-            List<Field<?>> selectFields = new ArrayList<>() {{
-                add(tbl.GENBANK_ACCESSION);
-                add(tbl.SRA_ACCESSION);
-                add(tbl.GISAID_EPI_ISL);
-                add(tbl.STRAIN);
-                add(tbl.DATE);
-                add(tbl.YEAR);
-                add(tbl.MONTH);
-                add(tbl.DATE_SUBMITTED);
-                add(tbl.REGION);
-                add(tbl.COUNTRY);
-                add(tbl.DIVISION);
-                add(tbl.LOCATION);
-                add(tbl.REGION_EXPOSURE);
-                add(tbl.COUNTRY_EXPOSURE);
-                add(tbl.DIVISION_EXPOSURE);
-                add(tbl.AGE);
-                add(tbl.SEX);
-                add(tbl.HOSPITALIZED);
-                add(tbl.DIED);
-                add(tbl.FULLY_VACCINATED);
-                add(tbl.HOST);
-                add(tbl.SAMPLING_STRATEGY);
-                add(tbl.PANGO_LINEAGE);
-                add(tbl.NEXTSTRAIN_CLADE);
-                add(tbl.GISAID_CLADE);
-                add(tbl.SUBMITTING_LAB);
-                add(tbl.ORIGINATING_LAB);
-            }};
+            Collection<DetailsField<?>> selectedDetailsFields = DetailsField.getDetails(request.getFields());
+
+            List<Field<?>> selectFields = selectedDetailsFields.stream()
+                .map(field -> field.databaseColumnName)
+                .collect(toList());
 
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             SelectJoinStep<Record> statement = ctx
                 .select(selectFields)
                 .from(idsTbl.join(tbl).on(idsTbl.field("id", Integer.class).eq(tbl.ID)));
-            Select<Record> statement2 = applyOrderAndLimit(statement, orderAndLimit);
-            Result<Record> records = statement2.fetch();
-            for (var r : records) {
-                SampleDetail sample = new SampleDetail()
-                    .setGenbankAccession(r.get(tbl.GENBANK_ACCESSION))
-                    .setSraAccession(r.get(tbl.SRA_ACCESSION))
-                    .setGisaidEpiIsl(r.get(tbl.GISAID_EPI_ISL))
-                    .setStrain(r.get(tbl.STRAIN))
-                    .setDate(r.get(tbl.DATE))
-                    .setYear(r.get(tbl.YEAR))
-                    .setMonth(r.get(tbl.MONTH))
-                    .setDateSubmitted(r.get(tbl.DATE_SUBMITTED))
-                    .setRegion(r.get(tbl.REGION))
-                    .setCountry(r.get(tbl.COUNTRY))
-                    .setDivision(r.get(tbl.DIVISION))
-                    .setLocation(r.get(tbl.LOCATION))
-                    .setRegionExposure(r.get(tbl.REGION_EXPOSURE))
-                    .setCountryExposure(r.get(tbl.COUNTRY_EXPOSURE))
-                    .setDivisionExposure(r.get(tbl.DIVISION_EXPOSURE))
-                    .setAge(r.get(tbl.AGE))
-                    .setSex(r.get(tbl.SEX))
-                    .setHospitalized(r.get(tbl.HOSPITALIZED))
-                    .setDied(r.get(tbl.DIED))
-                    .setFullyVaccinated(r.get(tbl.FULLY_VACCINATED))
-                    .setHost(r.get(tbl.HOST))
-                    .setSamplingStrategy(r.get(tbl.SAMPLING_STRATEGY))
-                    .setPangoLineage(r.get(tbl.PANGO_LINEAGE))
-                    .setNextstrainClade(r.get(tbl.NEXTSTRAIN_CLADE))
-                    .setGisaidCloade(r.get(tbl.GISAID_CLADE))
-                    .setSubmittingLab(r.get(tbl.SUBMITTING_LAB))
-                    .setOriginatingLab(r.get(tbl.ORIGINATING_LAB));
+            Select<Record> orderedAndLimitedStatement = applyOrderAndLimit(statement, orderAndLimit);
+            Result<Record> records = orderedAndLimitedStatement.fetch();
+            for (var record : records) {
+                var sample = new SampleDetail();
+                selectedDetailsFields.forEach(detailsField -> detailsField.setDataFromRecord(sample, record));
+
                 samples.add(sample);
             }
         }
@@ -186,7 +140,7 @@ public class SampleService {
 
 
     public List<Contributor> getContributors(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         OrderAndLimitConfig orderAndLimit
     ) throws SQLException {
         // Filter
@@ -234,7 +188,7 @@ public class SampleService {
 
 
     public List<String> getStrainNames(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         OrderAndLimitConfig orderAndLimit
     ) {
         Database database = Database.getOrLoadInstance(dbPool);
@@ -247,12 +201,12 @@ public class SampleService {
         ids = applyOrderAndLimit(ids, orderAndLimit);
         // Fetch data
         String[] strainColumn = database.getStringColumn(Database.Columns.STRAIN);
-        return ids.stream().map(id -> strainColumn[id]).collect(Collectors.toList());
+        return ids.stream().map(id -> strainColumn[id]).collect(toList());
     }
 
 
     public List<String> getGisaidEpiIsls(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         OrderAndLimitConfig orderAndLimit
     ) {
         Database database = Database.getOrLoadInstance(dbPool);
@@ -265,12 +219,12 @@ public class SampleService {
         ids = applyOrderAndLimit(ids, orderAndLimit);
         // Fetch data
         String[] gisaidEpiIslColumn = database.getStringColumn(Database.Columns.GISAID_EPI_ISL);
-        return ids.stream().map(id -> gisaidEpiIslColumn[id]).collect(Collectors.toList());
+        return ids.stream().map(id -> gisaidEpiIslColumn[id]).collect(toList());
     }
 
 
     public List<String> getGenbankAccessions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         OrderAndLimitConfig orderAndLimit
     ) {
         Database database = Database.getOrLoadInstance(dbPool);
@@ -283,12 +237,12 @@ public class SampleService {
         ids = applyOrderAndLimit(ids, orderAndLimit);
         // Fetch data
         String[] genbankAccessionColumn = database.getStringColumn(Columns.GENBANK_ACCESSION);
-        return ids.stream().map(id -> genbankAccessionColumn[id]).collect(Collectors.toList());
+        return ids.stream().map(id -> genbankAccessionColumn[id]).collect(toList());
     }
 
 
     public SampleMutationsResponse getMutations(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         SequenceType sequenceType,
         float minProportion
     ) {
@@ -340,7 +294,7 @@ public class SampleService {
 
 
     public List<InsertionStore.InsertionCount> getInsertions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         SequenceType sequenceType
     ) {
         Database database = Database.getOrLoadInstance(dbPool);
@@ -355,7 +309,7 @@ public class SampleService {
                     "ins_" + ins.insertion(),
                     ins.count()
                 ))
-                .collect(Collectors.toList());
+                .collect(toList());
         } else {
             List<InsertionStore.InsertionCount> result = new ArrayList<>();
             database.getAaInsertionStores().forEach((gene, store) -> {
@@ -374,7 +328,7 @@ public class SampleService {
 
 
     public void getFasta(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         boolean aligned,
         OrderAndLimitConfig orderAndLimit,
         OutputStream outputStream
@@ -400,7 +354,7 @@ public class SampleService {
             Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
             TableField<YMainMetadataRecord, String> sequenceIdentifierColumn =
                 LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN ?
-                metaTbl.GENBANK_ACCESSION : metaTbl.GISAID_EPI_ISL;
+                    metaTbl.GENBANK_ACCESSION : metaTbl.GISAID_EPI_ISL;
             SelectJoinStep<Record2<String, byte[]>> statement = ctx
                 .select(sequenceIdentifierColumn, seqColumn)
                 .from(
@@ -428,7 +382,8 @@ public class SampleService {
                 try {
                     conn.setAutoCommit(true);
                     conn.close();
-                } catch (SQLException ignored) {}
+                } catch (SQLException ignored) {
+                }
             }
         }
     }

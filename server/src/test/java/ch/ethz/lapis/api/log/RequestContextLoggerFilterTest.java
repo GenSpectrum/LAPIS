@@ -4,7 +4,7 @@ import ch.ethz.lapis.api.entity.AAInsertion;
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.NucInsertion;
 import ch.ethz.lapis.api.entity.NucMutation;
-import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
+import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.util.TimeFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -100,27 +99,27 @@ class RequestContextLoggerFilterTest {
     }
 
     public static Stream<Arguments> getInputFilter() {
-        SampleFilter aaMutationFilter = new SampleDetailRequest();
+        SampleFilter aaMutationFilter = new BaseSampleRequest();
         aaMutationFilter.setAaMutations(List.of(
             new AAMutation("S", 501, 'Y')
         ));
 
-        SampleFilter aaInsertionsFilter = new SampleDetailRequest();
+        SampleFilter aaInsertionsFilter = new BaseSampleRequest();
         aaInsertionsFilter.setAaInsertions(List.of(
             new AAInsertion("S", 501, "EN")
         ));
 
-        SampleFilter nucMutationFilter = new SampleDetailRequest();
+        SampleFilter nucMutationFilter = new BaseSampleRequest();
         nucMutationFilter.setNucMutations(List.of(
             new NucMutation(1234, 'T')
         ));
 
-        SampleFilter nucInsertionsFilter = new SampleDetailRequest();
+        SampleFilter nucInsertionsFilter = new BaseSampleRequest();
         nucInsertionsFilter.setNucInsertions(List.of(
             new NucInsertion(1234, "ACT?GGT")
         ));
 
-        SampleFilter countryFilter = new SampleDetailRequest();
+        SampleFilter countryFilter = new BaseSampleRequest();
         countryFilter.setCountry("Germany");
 
         return Stream.of(

@@ -14,6 +14,9 @@ import ch.ethz.lapis.util.StopWatch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
@@ -25,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +45,7 @@ public class SampleController {
     private final SampleService sampleService;
     private final DataVersionService dataVersionService;
     private final ObjectMapper objectMapper;
-    private final OpennessLevel openness = LapisMain.globalConfig.getApiOpennessLevel();
+    private final OpennessLevel openness;
     private final Map<String, AccessKey.LEVEL> accessKeys;
     private final RequestContext requestContext;
 
@@ -53,6 +57,7 @@ public class SampleController {
         ObjectMapper objectMapper,
         RequestContext requestContext
     ) {
+        this.openness = LapisMain.globalConfig.getApiOpennessLevel();
         this.cacheServiceOpt = cacheServiceOpt;
         this.sampleService = sampleService;
         this.dataVersionService = dataVersionService;
@@ -176,10 +181,12 @@ public class SampleController {
             case JSON -> {
                 var response = new V1Response<>(new SampleDetailResponse(samples), dataVersionService.getVersion(),
                     openness);
-                yield objectMapper.writeValueAsString(response);
+                yield writeToJsonWithFilteredFields(request, response);
             }
-            case CSV -> new CsvSerializer(CsvSerializer.Delimiter.CSV).serialize(samples, SampleDetail.class);
-            case TSV -> new CsvSerializer(CsvSerializer.Delimiter.TSV).serialize(samples, SampleDetail.class);
+            case CSV -> new CsvSerializer(CsvSerializer.Delimiter.CSV)
+                .serialize(samples, SampleDetail.class, getFieldsFilter(request));
+            case TSV -> new CsvSerializer(CsvSerializer.Delimiter.TSV)
+                .serialize(samples, SampleDetail.class, getFieldsFilter(request));
             default -> throw new IllegalStateException("Unexpected value: " + generalConfig.getDataFormat());
         };
         return new SampleResponseBuilder<String>()
@@ -192,6 +199,23 @@ public class SampleController {
             .build();
     }
 
+    private static List<String> getFieldsFilter(SampleDetailRequest request) {
+        List<String> fieldsAsStrings = request.getFieldsAsStrings();
+        return fieldsAsStrings.isEmpty() ? null : fieldsAsStrings;
+    }
+
+    private String writeToJsonWithFilteredFields(
+        SampleDetailRequest request,
+        V1Response<SampleDetailResponse> response
+    ) throws JsonProcessingException {
+        SimpleBeanPropertyFilter fieldFilter = request.getFields().isEmpty()
+            ? SimpleBeanPropertyFilter.serializeAll()
+            : SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<>(request.getFieldsAsStrings()));
+
+        FilterProvider filters = new SimpleFilterProvider().addFilter(SampleDetail.FILTER_NAME, fieldFilter);
+
+        return objectMapper.writer(filters).writeValueAsString(response);
+    }
 
     @PostMapping("/details")
     public ResponseEntity<String> getDetailsPost(
@@ -205,7 +229,7 @@ public class SampleController {
 
     @GetMapping("/contributors")
     public ResponseEntity<String> getContributors(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -250,7 +274,7 @@ public class SampleController {
 
     @PostMapping("/contributors")
     public ResponseEntity<String> getContributorsPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -261,11 +285,11 @@ public class SampleController {
 
     @GetMapping("/strain-names")
     public ResponseEntity<String> getStrainNames(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
-    )  {
+    ) {
         requestContext.setFilter(request);
 
         checkAuthorization(accessKey, true);
@@ -273,11 +297,11 @@ public class SampleController {
         checkVariantFilter(request);
         if (openness == OpennessLevel.GISAID && (
             request.getAgeFrom() != null
-            || request.getAgeTo() != null
-            || request.getSex() != null
-            || request.getHospitalized() != null
-            || request.getDied() != null
-            || request.getFullyVaccinated() != null
+                || request.getAgeTo() != null
+                || request.getSex() != null
+                || request.getHospitalized() != null
+                || request.getDied() != null
+                || request.getFullyVaccinated() != null
         )) {
             throw new ForbiddenException();
         }
@@ -296,7 +320,7 @@ public class SampleController {
 
     @PostMapping("/strain-names")
     public ResponseEntity<String> getStrainNamesPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -307,7 +331,7 @@ public class SampleController {
 
     @GetMapping("/gisaid-epi-isl")
     public ResponseEntity<String> getGisaidEpiIsls(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -342,7 +366,7 @@ public class SampleController {
 
     @PostMapping("/gisaid-epi-isl")
     public ResponseEntity<String> getGisaidEpiIslsPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -353,7 +377,7 @@ public class SampleController {
 
     @GetMapping("/genbank-accession")
     public ResponseEntity<String> getGenbankAccessions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -388,7 +412,7 @@ public class SampleController {
 
     @PostMapping("/genbank-accession")
     public ResponseEntity<String> getGenbankAccessionsPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -526,7 +550,7 @@ public class SampleController {
 
 
     public ResponseEntity<String> getInsertions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         String accessKey,
         String endpointName,
@@ -561,7 +585,8 @@ public class SampleController {
         DataFormat dataFormat = generalConfig.getDataFormat();
         if (dataFormat.equals(DataFormat.CSV) || dataFormat.equals(DataFormat.TSV)) {
             try {
-                V1Response<List<InsertionStore.InsertionCount>> res = objectMapper.readValue(body, new TypeReference<>() {});
+                V1Response<List<InsertionStore.InsertionCount>> res = objectMapper.readValue(body,
+                    new TypeReference<>() {});
                 body = new CsvSerializer(CsvSerializer.getDelimiterFromDataFormat(dataFormat))
                     .serialize(res.getData(), InsertionStore.InsertionCount.class);
             } catch (JsonProcessingException e) {
@@ -582,7 +607,7 @@ public class SampleController {
 
     @GetMapping("/aa-insertions")
     public ResponseEntity<String> getAAInsertions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         String accessKey
     ) {
@@ -599,7 +624,7 @@ public class SampleController {
 
     @PostMapping("/aa-insertions")
     public ResponseEntity<String> getAAInsertionsPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         String accessKey
     ) {
@@ -609,24 +634,24 @@ public class SampleController {
 
     @GetMapping("/nuc-insertions")
     public ResponseEntity<String> getNucInsertions(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         String accessKey
     ) {
-       return getInsertions(
-           request,
-           generalConfig,
-           accessKey,
-           CacheService.SupportedEndpoints.SAMPLE_NUC_INSERTIONS,
-           SequenceType.NUCLEOTIDE,
-           "nuc-insertions"
-       );
+        return getInsertions(
+            request,
+            generalConfig,
+            accessKey,
+            CacheService.SupportedEndpoints.SAMPLE_NUC_INSERTIONS,
+            SequenceType.NUCLEOTIDE,
+            "nuc-insertions"
+        );
     }
 
 
     @PostMapping("/nuc-insertions")
     public ResponseEntity<String> getNucInsertionsPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         String accessKey
     ) {
@@ -636,7 +661,7 @@ public class SampleController {
 
     @GetMapping("/fasta")
     public ResponseEntity<StreamingResponseBody> getFasta(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -664,7 +689,7 @@ public class SampleController {
 
     @PostMapping("/fasta")
     public ResponseEntity<StreamingResponseBody> getFastaPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -675,7 +700,7 @@ public class SampleController {
 
     @GetMapping("/fasta-aligned")
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
-        SampleDetailRequest request,
+        BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
@@ -703,7 +728,7 @@ public class SampleController {
 
     @PostMapping("/fasta-aligned")
     public ResponseEntity<StreamingResponseBody> getAlignedFastaPost(
-        @RequestBody SampleDetailRequest request,
+        @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
         OrderAndLimitConfig limitAndOrder,
         String accessKey
