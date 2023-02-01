@@ -4,14 +4,17 @@
   "description": "API tests for LAPIS",
   "main": "index.js",
   "scripts": {
-    "test": "API_URL=http://localhost:2345/v0 OPENNESS=open mocha --timeout 600000",
-    "test-prod-public": "API_URL=https://cov-spectrum.ethz.ch/public/api/v0 OPENNESS=open mocha --timeout 180000",
-    "test-prod-gisaid": "API_URL=https://cov-spectrum.ethz.ch/gisaid/api/v0 OPENNESS=gisaid mocha --timeout 180000"
+    "test": "cross-env API_URL=http://localhost:2345/v1 OPENNESS=open mocha --timeout 600000",
+    "test-prod-public": "cross-env API_URL=https://lapis.cov-spectrum.org/open/v1 OPENNESS=open mocha --timeout 180000",
+    "test-prod-gisaid": "cross-env API_URL=https://lapis.cov-spectrum.org/gisaid/v1 OPENNESS=gisaid mocha --timeout 180000"
   },
   "devDependencies": {
     "ajv": "^8.6.3",
     "chai": "^4.3.4",
     "mocha": "^9.1.2",
     "supertest": "^6.1.6"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
   }
 }
