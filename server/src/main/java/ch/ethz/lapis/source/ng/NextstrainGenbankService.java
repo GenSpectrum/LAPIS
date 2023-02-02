@@ -147,8 +147,8 @@ public class NextstrainGenbankService {
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), true)) {
                     for (FastaEntry entry : fastaReader) {
-                        String seq = aligned ? entry.getSeq().toUpperCase() : entry.getSeq();
-                        String sampleName = entry.getSampleName();
+                        String seq = aligned ? entry.sequence().toUpperCase() : entry.sequence();
+                        String sampleName = entry.sampleName();
                         String currentHash = Utils.hashMd5(seq);
                         if (oldHashes.containsKey(sampleName)) {
                             String oldHash = aligned ? oldHashes.get(sampleName).getSeqAlignedHash() :
@@ -243,7 +243,7 @@ public class NextstrainGenbankService {
         List<FastaEntry> batch = new ArrayList<>();
         try (FastaFileReader fastaReader = new FastaFileReader(workdir.resolve(filename), true)) {
             for (FastaEntry entry : fastaReader) {
-                if (unchangedOriginalSeqStrains.contains(entry.getSampleName())) {
+                if (unchangedOriginalSeqStrains.contains(entry.sampleName())) {
                     continue;
                 }
                 batch.add(entry);

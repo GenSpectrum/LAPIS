@@ -1,31 +1,19 @@
 package ch.ethz.lapis.util;
 
-public class FastaEntry {
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
-    private String sampleName;
-
-    private String seq;
-
-    public FastaEntry(String sampleName, String seq) {
-        this.sampleName = sampleName;
-        this.seq = seq;
-    }
-
-    public String getSampleName() {
-        return sampleName;
-    }
-
-    public FastaEntry setSampleName(String sampleName) {
-        this.sampleName = sampleName;
-        return this;
-    }
-
-    public String getSeq() {
-        return seq;
-    }
-
-    public FastaEntry setSeq(String seq) {
-        this.seq = seq;
-        return this;
+public record FastaEntry(String sampleName, String sequence) {
+    public void writeToStream(OutputStream outputStream) {
+        try {
+            outputStream.write(">".getBytes(StandardCharsets.UTF_8));
+            outputStream.write(sampleName.getBytes(StandardCharsets.UTF_8));
+            outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+            outputStream.write(sequence.getBytes(StandardCharsets.UTF_8));
+            outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

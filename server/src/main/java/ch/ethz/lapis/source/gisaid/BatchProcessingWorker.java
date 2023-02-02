@@ -356,7 +356,7 @@ public class BatchProcessingWorker {
         Map<String, String> nucSeqs = new HashMap<>();
         FastaFileReader nucFastaReader = new FastaFileReader(outputPath.resolve("nextclade.aligned.fasta"), false);
         for (FastaEntry fastaEntry : nucFastaReader) {
-            nucSeqs.put(fastaEntry.getSampleName(), fastaEntry.getSeq());
+            nucSeqs.put(fastaEntry.sampleName(), fastaEntry.sequence());
         }
 
         // Read the amino acid sequences
@@ -369,8 +369,8 @@ public class BatchProcessingWorker {
                 outputPath.resolve("nextclade_gene_" + gene + ".translation.fasta"),
                 false);
             for (FastaEntry fastaEntry : geneFastaReader) {
-                geneAASeqs.get(fastaEntry.getSampleName()).add(
-                    new GeneAASeq(gene, fastaEntry.getSeq())
+                geneAASeqs.get(fastaEntry.sampleName()).add(
+                    new GeneAASeq(gene, fastaEntry.sequence())
                 );
             }
         }

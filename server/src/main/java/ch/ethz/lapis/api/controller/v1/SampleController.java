@@ -4,10 +4,35 @@ import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.CacheService;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
-import ch.ethz.lapis.api.entity.*;
-import ch.ethz.lapis.api.entity.req.*;
-import ch.ethz.lapis.api.entity.res.*;
-import ch.ethz.lapis.api.exception.*;
+import ch.ethz.lapis.api.entity.AccessKey;
+import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.ApiCacheKey;
+import ch.ethz.lapis.api.entity.OpennessLevel;
+import ch.ethz.lapis.api.entity.SequenceType;
+import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
+import ch.ethz.lapis.api.entity.req.DataFormat;
+import ch.ethz.lapis.api.entity.req.GeneralConfig;
+import ch.ethz.lapis.api.entity.req.MutationRequest;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
+import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
+import ch.ethz.lapis.api.entity.req.SampleDetailRequest;
+import ch.ethz.lapis.api.entity.req.SampleFilter;
+import ch.ethz.lapis.api.entity.res.Contributor;
+import ch.ethz.lapis.api.entity.res.ContributorResponse;
+import ch.ethz.lapis.api.entity.res.CsvSerializer;
+import ch.ethz.lapis.api.entity.res.Information;
+import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
+import ch.ethz.lapis.api.entity.res.SampleDetail;
+import ch.ethz.lapis.api.entity.res.SampleDetailResponse;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
+import ch.ethz.lapis.api.entity.res.V1Response;
+import ch.ethz.lapis.api.exception.ForbiddenException;
+import ch.ethz.lapis.api.exception.GisaidLimitationException;
+import ch.ethz.lapis.api.exception.OutdatedDataVersionException;
+import ch.ethz.lapis.api.exception.RedundantVariantDefinition;
+import ch.ethz.lapis.api.exception.UnsupportedDataFormatException;
 import ch.ethz.lapis.api.log.RequestContext;
 import ch.ethz.lapis.api.query.InsertionStore;
 import ch.ethz.lapis.util.StopWatch;
@@ -20,7 +45,12 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
@@ -686,7 +716,6 @@ public class SampleController {
             .build();
     }
 
-
     @PostMapping(value = {"/fasta", "/nuc-sequence"})
     public ResponseEntity<StreamingResponseBody> getFastaPost(
         @RequestBody BaseSampleRequest request,
@@ -696,7 +725,6 @@ public class SampleController {
     ) {
         return getFasta(request, generalConfig, limitAndOrder, accessKey);
     }
-
 
     @GetMapping(value = {"/fasta-aligned", "/nuc-sequence-aligned"})
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
@@ -734,6 +762,51 @@ public class SampleController {
         String accessKey
     ) {
         return getAlignedFasta(request, generalConfig, limitAndOrder, accessKey);
+    }
+
+    @GetMapping("/aa-sequence-aligned/{gene}")
+    public ResponseEntity<StreamingResponseBody> getAaSequenceAligned(
+        BaseSampleRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey,
+        @PathVariable String gene
+    ) {
+        requestContext.setFilter(request);
+
+        checkAuthorization(accessKey, false);
+        checkDataVersion(generalConfig.getDataVersion());
+        checkVariantFilter(request);
+        if (openness == OpennessLevel.GISAID) {
+            throw new GisaidLimitationException();
+        }
+
+        StreamingResponseBody responseBody = sampleService.getAaSequencesInFastaFormatStream(
+            request,
+            limitAndOrder,
+            gene
+        );
+
+        return new SampleResponseBuilder<StreamingResponseBody>()
+            .setAllowCaching(generalConfig.getDataVersion() != null)
+            .setDataVersion(dataVersionService.getVersion())
+            .setForDownload(generalConfig.isDownloadAsFile())
+            .setDataFormat(DataFormat.FASTA)
+            .setDownloadFileName("aligned_aa_sequences_" + gene)
+            .setBody(responseBody)
+            .build();
+    }
+
+
+    @PostMapping("/aa-sequence-aligned/{gene}")
+    public ResponseEntity<StreamingResponseBody> getAaSequenceAlignedPost(
+        @RequestBody BaseSampleRequest request,
+        GeneralConfig generalConfig,
+        OrderAndLimitConfig limitAndOrder,
+        String accessKey,
+        @PathVariable String gene
+    ) {
+        return getAaSequenceAligned(request, generalConfig, limitAndOrder, accessKey, gene);
     }
 
 
