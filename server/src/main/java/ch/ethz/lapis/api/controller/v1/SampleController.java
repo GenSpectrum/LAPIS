@@ -659,7 +659,7 @@ public class SampleController {
     }
 
 
-    @GetMapping("/fasta")
+    @GetMapping(value = {"/fasta", "/nuc-sequence"})
     public ResponseEntity<StreamingResponseBody> getFasta(
         BaseSampleRequest request,
         GeneralConfig generalConfig,
@@ -675,7 +675,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         StreamingResponseBody responseBody = response ->
-            sampleService.getFasta(request, false, limitAndOrder, response);
+            sampleService.getNucSequencesInFastaFormat(request, false, limitAndOrder, response);
         return new SampleResponseBuilder<StreamingResponseBody>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
@@ -687,7 +687,7 @@ public class SampleController {
     }
 
 
-    @PostMapping("/fasta")
+    @PostMapping(value = {"/fasta", "/nuc-sequence"})
     public ResponseEntity<StreamingResponseBody> getFastaPost(
         @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,
@@ -698,7 +698,7 @@ public class SampleController {
     }
 
 
-    @GetMapping("/fasta-aligned")
+    @GetMapping(value = {"/fasta-aligned", "/nuc-sequence-aligned"})
     public ResponseEntity<StreamingResponseBody> getAlignedFasta(
         BaseSampleRequest request,
         GeneralConfig generalConfig,
@@ -714,7 +714,7 @@ public class SampleController {
             throw new GisaidLimitationException();
         }
         StreamingResponseBody responseBody = response ->
-            sampleService.getFasta(request, true, limitAndOrder, response);
+            sampleService.getNucSequencesInFastaFormat(request, true, limitAndOrder, response);
         return new SampleResponseBuilder<StreamingResponseBody>()
             .setAllowCaching(generalConfig.getDataVersion() != null)
             .setDataVersion(dataVersionService.getVersion())
@@ -726,7 +726,7 @@ public class SampleController {
     }
 
 
-    @PostMapping("/fasta-aligned")
+    @PostMapping(value = {"/fasta-aligned", "/nuc-sequence-aligned"})
     public ResponseEntity<StreamingResponseBody> getAlignedFastaPost(
         @RequestBody BaseSampleRequest request,
         GeneralConfig generalConfig,

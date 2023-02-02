@@ -327,7 +327,7 @@ public class SampleService {
     }
 
 
-    public void getFasta(
+    public void getNucSequencesInFastaFormat(
         BaseSampleRequest request,
         boolean aligned,
         OrderAndLimitConfig orderAndLimit,
@@ -366,14 +366,15 @@ public class SampleService {
                 orderAndLimit.setLimit(100000);
             }
             Select<Record2<String, byte[]>> statement2 = applyOrderAndLimit(statement, orderAndLimit);
-            Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy();
-            for (Record2<String, byte[]> r : cursor) {
-                outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(sequenceIdentifierColumn).getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
-                    .getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+            try (Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy()) {
+                for (Record2<String, byte[]> r : cursor) {
+                    outputStream.write(">".getBytes(StandardCharsets.UTF_8));
+                    outputStream.write(r.get(sequenceIdentifierColumn).getBytes(StandardCharsets.UTF_8));
+                    outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+                    outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
+                        .getBytes(StandardCharsets.UTF_8));
+                    outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
+                }
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
