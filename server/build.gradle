@@ -34,7 +34,7 @@ dependencies {
     implementation 'org.jooq:jooq:3.17.7'
     implementation 'redis.clients:jedis:4.3.1'
     implementation 'com.github.luben:zstd-jni:1.5.2-3'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 
     antlr 'org.antlr:antlr4:4.10.1'
     implementation 'org.antlr:antlr4-runtime:4.10.1'
