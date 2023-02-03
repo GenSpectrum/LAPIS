@@ -36,8 +36,8 @@ dependencies {
     implementation 'com.github.luben:zstd-jni:1.5.2-3'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 
-    antlr 'org.antlr:antlr4:4.10.1'
-    implementation 'org.antlr:antlr4-runtime:4.10.1'
+    antlr 'org.antlr:antlr4:4.11.1'
+    implementation 'org.antlr:antlr4-runtime:4.11.1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'
