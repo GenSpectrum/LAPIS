@@ -1,4 +1,4 @@
-// Generated from ch\ethz\lapis\api\parser\VariantQuery.g4 by ANTLR 4.10.1
+// Generated from java-escape by ANTLR 4.11.1
 
     package ch.ethz.lapis.api.parser;
 
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class VariantQueryParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.10.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -99,7 +99,7 @@ public class VariantQueryParser extends Parser {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "VariantQuery.g4"; }
+	public String getGrammarFileName() { return "java-escape"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -115,6 +115,7 @@ public class VariantQueryParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class StartContext extends ParserRuleContext {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -157,6 +158,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class ExprContext extends ParserRuleContext {
 		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -168,6 +170,7 @@ public class VariantQueryParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class ParContext extends ExprContext {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -182,6 +185,7 @@ public class VariantQueryParser extends Parser {
 			if ( listener instanceof VariantQueryListener ) ((VariantQueryListener)listener).exitPar(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class UniContext extends ExprContext {
 		public SingleContext single() {
 			return getRuleContext(SingleContext.class,0);
@@ -196,6 +200,7 @@ public class VariantQueryParser extends Parser {
 			if ( listener instanceof VariantQueryListener ) ((VariantQueryListener)listener).exitUni(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class NegContext extends ExprContext {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -210,6 +215,7 @@ public class VariantQueryParser extends Parser {
 			if ( listener instanceof VariantQueryListener ) ((VariantQueryListener)listener).exitNeg(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class MaybeContext extends ExprContext {
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
@@ -224,6 +230,7 @@ public class VariantQueryParser extends Parser {
 			if ( listener instanceof VariantQueryListener ) ((VariantQueryListener)listener).exitMaybe(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class OrContext extends ExprContext {
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
@@ -241,6 +248,7 @@ public class VariantQueryParser extends Parser {
 			if ( listener instanceof VariantQueryListener ) ((VariantQueryListener)listener).exitOr(this);
 		}
 	}
+	@SuppressWarnings("CheckReturnValue")
 	public static class AndContext extends ExprContext {
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
@@ -412,6 +420,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class SingleContext extends ParserRuleContext {
 		public Aa_mutContext aa_mut() {
 			return getRuleContext(Aa_mutContext.class,0);
@@ -537,6 +546,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nuc_mutContext extends ParserRuleContext {
 		public PositionContext position() {
 			return getRuleContext(PositionContext.class,0);
@@ -571,7 +581,7 @@ public class VariantQueryParser extends Parser {
 			setState(100);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << A) | (1L << C) | (1L << G) | (1L << T))) != 0)) {
+			if (((_la) & ~0x3f) == 0 && ((1L << _la) & 34364260352L) != 0) {
 				{
 				setState(99);
 				nuc();
@@ -603,6 +613,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Aa_mutContext extends ParserRuleContext {
 		public GeneContext gene() {
 			return getRuleContext(GeneContext.class,0);
@@ -644,7 +655,7 @@ public class VariantQueryParser extends Parser {
 			setState(109);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << A) | (1L << C) | (1L << D) | (1L << E) | (1L << F) | (1L << G) | (1L << H) | (1L << I) | (1L << K) | (1L << L) | (1L << M) | (1L << N) | (1L << P) | (1L << Q) | (1L << R) | (1L << S) | (1L << T) | (1L << V) | (1L << W) | (1L << Y) | (1L << ASTERISK))) != 0)) {
+			if (((_la) & ~0x3f) == 0 && ((1L << _la) & 19171626516480L) != 0) {
 				{
 				setState(108);
 				aa();
@@ -676,6 +687,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nuc_insContext extends ParserRuleContext {
 		public PositionContext position() {
 			return getRuleContext(PositionContext.class,0);
@@ -776,6 +788,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Aa_insContext extends ParserRuleContext {
 		public GeneContext gene() {
 			return getRuleContext(GeneContext.class,0);
@@ -890,6 +903,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class PositionContext extends ParserRuleContext {
 		public List<TerminalNode> NUMBER() { return getTokens(VariantQueryParser.NUMBER); }
 		public TerminalNode NUMBER(int i) {
@@ -949,6 +963,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class AaContext extends ParserRuleContext {
 		public TerminalNode A() { return getToken(VariantQueryParser.A, 0); }
 		public TerminalNode R() { return getToken(VariantQueryParser.R, 0); }
@@ -994,7 +1009,7 @@ public class VariantQueryParser extends Parser {
 			{
 			setState(140);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << A) | (1L << C) | (1L << D) | (1L << E) | (1L << F) | (1L << G) | (1L << H) | (1L << I) | (1L << K) | (1L << L) | (1L << M) | (1L << N) | (1L << P) | (1L << Q) | (1L << R) | (1L << S) | (1L << T) | (1L << V) | (1L << W) | (1L << Y) | (1L << ASTERISK))) != 0)) ) {
+			if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 19171626516480L) != 0) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1015,6 +1030,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Aa_mutatedContext extends ParserRuleContext {
 		public AaContext aa() {
 			return getRuleContext(AaContext.class,0);
@@ -1106,6 +1122,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class NucContext extends ParserRuleContext {
 		public TerminalNode A() { return getToken(VariantQueryParser.A, 0); }
 		public TerminalNode C() { return getToken(VariantQueryParser.C, 0); }
@@ -1134,7 +1151,7 @@ public class VariantQueryParser extends Parser {
 			{
 			setState(148);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << A) | (1L << C) | (1L << G) | (1L << T))) != 0)) ) {
+			if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 34364260352L) != 0) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1155,6 +1172,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nuc_mutatedContext extends ParserRuleContext {
 		public NucContext nuc() {
 			return getRuleContext(NucContext.class,0);
@@ -1309,6 +1327,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class GeneContext extends ParserRuleContext {
 		public TerminalNode E() { return getToken(VariantQueryParser.E, 0); }
 		public TerminalNode M() { return getToken(VariantQueryParser.M, 0); }
@@ -1338,7 +1357,7 @@ public class VariantQueryParser extends Parser {
 			{
 			setState(166);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << E) | (1L << M) | (1L << N) | (1L << S) | (1L << ORF))) != 0)) ) {
+			if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 35202358312960L) != 0) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -1359,6 +1378,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Pango_queryContext extends ParserRuleContext {
 		public Pango_lineageContext pango_lineage() {
 			return getRuleContext(Pango_lineageContext.class,0);
@@ -1411,6 +1431,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Pango_include_subContext extends ParserRuleContext {
 		public TerminalNode ASTERISK() { return getToken(VariantQueryParser.ASTERISK, 0); }
 		public TerminalNode DOT() { return getToken(VariantQueryParser.DOT, 0); }
@@ -1460,6 +1481,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Pango_lineageContext extends ParserRuleContext {
 		public List<CharacterContext> character() {
 			return getRuleContexts(CharacterContext.class);
@@ -1545,6 +1567,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Pango_number_componentContext extends ParserRuleContext {
 		public TerminalNode DOT() { return getToken(VariantQueryParser.DOT, 0); }
 		public List<TerminalNode> NUMBER() { return getTokens(VariantQueryParser.NUMBER); }
@@ -1608,6 +1631,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nextclade_pango_lineage_prefixContext extends ParserRuleContext {
 		public List<TerminalNode> N() { return getTokens(VariantQueryParser.N); }
 		public TerminalNode N(int i) {
@@ -1713,6 +1737,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nextclade_pango_queryContext extends ParserRuleContext {
 		public Nextclade_pango_lineage_prefixContext nextclade_pango_lineage_prefix() {
 			return getRuleContext(Nextclade_pango_lineage_prefixContext.class,0);
@@ -1757,6 +1782,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Gisaid_cladeContext extends ParserRuleContext {
 		public List<CharacterContext> character() {
 			return getRuleContexts(CharacterContext.class);
@@ -1809,6 +1835,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Gisaid_clade_prefixContext extends ParserRuleContext {
 		public TerminalNode G() { return getToken(VariantQueryParser.G, 0); }
 		public List<TerminalNode> I() { return getTokens(VariantQueryParser.I); }
@@ -1865,6 +1892,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Gisaid_clade_queryContext extends ParserRuleContext {
 		public Gisaid_clade_prefixContext gisaid_clade_prefix() {
 			return getRuleContext(Gisaid_clade_prefixContext.class,0);
@@ -1909,6 +1937,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nextstrain_cladeContext extends ParserRuleContext {
 		public List<TerminalNode> NUMBER() { return getTokens(VariantQueryParser.NUMBER); }
 		public TerminalNode NUMBER(int i) {
@@ -1971,6 +2000,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nextstrain_clade_prefixContext extends ParserRuleContext {
 		public List<TerminalNode> N() { return getTokens(VariantQueryParser.N); }
 		public TerminalNode N(int i) {
@@ -2060,6 +2090,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class Nextstrain_clade_queryContext extends ParserRuleContext {
 		public Nextstrain_clade_prefixContext nextstrain_clade_prefix() {
 			return getRuleContext(Nextstrain_clade_prefixContext.class,0);
@@ -2104,6 +2135,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class CharacterContext extends ParserRuleContext {
 		public TerminalNode A() { return getToken(VariantQueryParser.A, 0); }
 		public TerminalNode B() { return getToken(VariantQueryParser.B, 0); }
@@ -2154,7 +2186,7 @@ public class VariantQueryParser extends Parser {
 			{
 			setState(265);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << A) | (1L << B) | (1L << C) | (1L << D) | (1L << E) | (1L << F) | (1L << G) | (1L << H) | (1L << I) | (1L << J) | (1L << K) | (1L << L) | (1L << M) | (1L << N) | (1L << O) | (1L << P) | (1L << Q) | (1L << R) | (1L << S) | (1L << T) | (1L << U) | (1L << V) | (1L << W) | (1L << X) | (1L << Y) | (1L << Z))) != 0)) ) {
+			if ( !(((_la) & ~0x3f) == 0 && ((1L << _la) & 4398046445568L) != 0) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -2175,6 +2207,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class N_ofContext extends ParserRuleContext {
 		public N_of_nContext n_of_n() {
 			return getRuleContext(N_of_nContext.class,0);
@@ -2239,6 +2272,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class N_of_exactlyContext extends ParserRuleContext {
 		public N_of_exactlyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2275,6 +2309,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class N_of_nContext extends ParserRuleContext {
 		public List<TerminalNode> NUMBER() { return getTokens(VariantQueryParser.NUMBER); }
 		public TerminalNode NUMBER(int i) {
@@ -2328,6 +2363,7 @@ public class VariantQueryParser extends Parser {
 		return _localctx;
 	}
 
+	@SuppressWarnings("CheckReturnValue")
 	public static class N_of_exprsContext extends ParserRuleContext {
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);

@@ -1,4 +1,4 @@
-// Generated from ch\ethz\lapis\api\parser\VariantQuery.g4 by ANTLR 4.10.1
+// Generated from java-escape by ANTLR 4.11.1
 
     package ch.ethz.lapis.api.parser;
 
