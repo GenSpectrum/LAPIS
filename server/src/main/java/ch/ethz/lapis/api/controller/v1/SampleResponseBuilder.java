@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 
@@ -51,8 +52,8 @@ public class SampleResponseBuilder<E> {
         }
         // Content-type
         MediaType mediaType = switch (dataFormat) {
-            case CSV -> new MediaType("text", "csv");
-            case TSV, TEXT -> MediaType.TEXT_PLAIN;
+            case CSV -> new MediaType("text", "csv", StandardCharsets.UTF_8);
+            case TSV, TEXT -> new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
             case JSON -> MediaType.APPLICATION_JSON;
             case FASTA -> new MediaType("text", "x-fasta");
         };
