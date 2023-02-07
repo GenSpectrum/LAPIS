@@ -92,8 +92,7 @@ public class QueryEngine {
                     List<Object> key = fields.stream()
                         .map(f -> database.getColumn(aggregationFieldToColumnName(f))[finalI])
                         .collect(Collectors.toList());
-                    counts.compute(key, (k, v) -> v == null ?
-                        new int[] { 0 } : v)[0]++;
+                    counts.compute(key, (k, v) -> v == null ? new int[]{0} : v)[0]++;
                 }
             }
             for (Map.Entry<List<Object>, int[]> entry : counts.entrySet()) {
@@ -352,7 +351,8 @@ public class QueryEngine {
         }
         if (from != null && to != null) {
             for (int i = 0; i < matched.length; i++) {
-                matched[i] = matched[i] && data[i] != null && data[i].compareTo(from) >= 0 && data[i].compareTo(to) <= 0;
+                matched[i] =
+                    matched[i] && data[i] != null && data[i].compareTo(from) >= 0 && data[i].compareTo(to) <= 0;
             }
         } else if (from != null) {
             for (int i = 0; i < matched.length; i++) {

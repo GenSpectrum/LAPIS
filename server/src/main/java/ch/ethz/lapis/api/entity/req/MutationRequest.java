@@ -1,7 +1,7 @@
 package ch.ethz.lapis.api.entity.req;
 
 
-public class MutationRequest extends SampleDetailRequest {
+public class MutationRequest extends BaseSampleRequest {
 
     private float minProportion = 0.05f;
 

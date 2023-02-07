@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(SampleController.class)
 @Import({TestConfig.class, JacksonAutoConfiguration.class})
+@DirtiesContext
 class GisaidSampleControllerTest {
 
     @Autowired
@@ -83,5 +85,12 @@ class GisaidSampleControllerTest {
             .andExpect(jsonPath("$.data[0].count", is(count)))
             .andExpect(jsonPath("$.data[0].country", is(country)));
     }
+
+    @Test
+    void detailsEndpointIsNotAllowedInGisaidInstance() throws Exception {
+        mockMvc.perform(get("/v1/sample/details")).andExpect(status().isForbidden());
+    }
+
+
 
 }
