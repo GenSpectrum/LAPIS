@@ -1,5 +1,15 @@
 package ch.ethz.lapis.api.controller.v1;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import ch.ethz.lapis.LapisConfig;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.DataVersionService;
@@ -18,16 +28,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(SampleController.class)
@@ -91,6 +91,8 @@ class GisaidSampleControllerTest {
         mockMvc.perform(get("/v1/sample/details")).andExpect(status().isForbidden());
     }
 
-
-
+    @Test
+    void aaSequencesAlignedEndpointIsNotAllowedInGisaidInstance() throws Exception {
+        mockMvc.perform(get("/v1/sample/aa-sequence-aligned/gene123")).andExpect(status().isForbidden());
+    }
 }

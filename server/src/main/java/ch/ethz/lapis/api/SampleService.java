@@ -20,11 +20,11 @@ import ch.ethz.lapis.api.query.Database.Columns;
 import ch.ethz.lapis.api.query.InsertionStore;
 import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
+import ch.ethz.lapis.util.FastaEntry;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -35,20 +35,17 @@ import org.jooq.Select;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectLimitStep;
 import org.jooq.SelectOrderByStep;
-import org.jooq.SelectSeekStep1;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.lapis.tables.YMainAaSequence;
 import org.jooq.lapis.tables.YMainMetadata;
 import org.jooq.lapis.tables.YMainSequence;
 import org.jooq.lapis.tables.records.YMainMetadataRecord;
-import org.jooq.lapis.tables.records.YMainSequenceRecord;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -65,8 +63,10 @@ import static java.util.stream.Collectors.toList;
 public class SampleService {
 
     private static final ComboPooledDataSource dbPool = LapisMain.dbPool;
-    private static final SeqCompressor referenceSeqCompressor
+    private static final SeqCompressor nucReferenceSeqCompressor
         = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.REFERENCE);
+    private static final SeqCompressor AaReferenceSeqCompressor
+        = new ZstdSeqCompressor(ZstdSeqCompressor.DICT.AA_REFERENCE);
 
 
     private Connection getDatabaseConnection() throws SQLException {
@@ -326,56 +326,92 @@ public class SampleService {
         }
     }
 
-
-    public void getFasta(
+    public void getNucSequencesInFastaFormat(
         BaseSampleRequest request,
         boolean aligned,
         OrderAndLimitConfig orderAndLimit,
         OutputStream outputStream
     ) {
-        // Filter
-        List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
-        if (ids.isEmpty()) {
+        var filteredIds = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (filteredIds.isEmpty()) {
             return;
         }
 
-        // Filter further by the other metadata and prepare the response
+        runInDatabaseContextWithoutAutoCommit(ctx -> {
+            var metaDataTable = YMainMetadata.Y_MAIN_METADATA;
+            var sequenceTable = YMainSequence.Y_MAIN_SEQUENCE;
+
+            var sequenceColumn = aligned ? sequenceTable.SEQ_ALIGNED_COMPRESSED : sequenceTable.SEQ_ORIGINAL_COMPRESSED;
+
+            var idsTable = getIdsTable(filteredIds, ctx);
+            var sequenceIdentifierColumn = LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN
+                ? metaDataTable.GENBANK_ACCESSION
+                : metaDataTable.GISAID_EPI_ISL;
+
+            var statement = ctx
+                .select(sequenceIdentifierColumn, sequenceColumn)
+                .from(
+                    idsTable
+                        .join(metaDataTable).on(idsTable.field("id", Integer.class).eq(metaDataTable.ID))
+                        .join(sequenceTable).on(metaDataTable.ID.eq(sequenceTable.ID))
+                );
+
+            streamFastaSequences(
+                orderAndLimit,
+                outputStream,
+                sequenceColumn,
+                sequenceIdentifierColumn,
+                statement,
+                nucReferenceSeqCompressor
+            );
+        });
+    }
+
+    public StreamingResponseBody getAaSequencesInFastaFormatStream(
+        BaseSampleRequest request,
+        OrderAndLimitConfig orderAndLimit,
+        String gene
+    ) {
+        var filteredIds = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
+        if (filteredIds.isEmpty()) {
+            return outputStream -> {
+            };
+        }
+        return outputStream -> runInDatabaseContextWithoutAutoCommit(ctx -> {
+            var metaDataTable = YMainMetadata.Y_MAIN_METADATA;
+            var aaSequenceTable = YMainAaSequence.Y_MAIN_AA_SEQUENCE;
+
+            var sequenceIdentifierColumn = LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN
+                ? metaDataTable.GENBANK_ACCESSION
+                : metaDataTable.GISAID_EPI_ISL;
+            var aaSequenceColumn = aaSequenceTable.AA_SEQ_COMPRESSED;
+
+            var joinCondition = aaSequenceTable.GENE.eq(gene)
+                .and(aaSequenceTable.ID.in(filteredIds))
+                .and(metaDataTable.ID.eq(aaSequenceTable.ID));
+
+            var statement = ctx.select(sequenceIdentifierColumn, aaSequenceColumn)
+                .from(aaSequenceTable.join(metaDataTable).on(joinCondition));
+
+            streamFastaSequences(
+                orderAndLimit,
+                outputStream,
+                aaSequenceColumn,
+                sequenceIdentifierColumn,
+                statement,
+                AaReferenceSeqCompressor
+            );
+        });
+    }
+
+    private void runInDatabaseContextWithoutAutoCommit(Consumer<DSLContext> databaseQuery) {
         Connection conn = null;
         try {
             conn = getDatabaseConnection();
             conn.setAutoCommit(false);
             DSLContext ctx = JooqHelper.getDSLCtx(conn);
-            YMainMetadata metaTbl = YMainMetadata.Y_MAIN_METADATA;
-            YMainSequence seqTbl = YMainSequence.Y_MAIN_SEQUENCE;
-
-            TableField<YMainSequenceRecord, byte[]> seqColumn = aligned ?
-                seqTbl.SEQ_ALIGNED_COMPRESSED : seqTbl.SEQ_ORIGINAL_COMPRESSED;
-
-            Table<Record1<Integer>> idsTbl = getIdsTable(ids, ctx);
-            TableField<YMainMetadataRecord, String> sequenceIdentifierColumn =
-                LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN ?
-                    metaTbl.GENBANK_ACCESSION : metaTbl.GISAID_EPI_ISL;
-            SelectJoinStep<Record2<String, byte[]>> statement = ctx
-                .select(sequenceIdentifierColumn, seqColumn)
-                .from(
-                    idsTbl
-                        .join(metaTbl).on(idsTbl.field("id", Integer.class).eq(metaTbl.ID))
-                        .join(seqTbl).on(metaTbl.ID.eq(seqTbl.ID))
-                );
-            if (orderAndLimit.getLimit() == null) {
-                orderAndLimit.setLimit(100000);
-            }
-            Select<Record2<String, byte[]>> statement2 = applyOrderAndLimit(statement, orderAndLimit);
-            Cursor<Record2<String, byte[]>> cursor = statement2.fetchSize(1000).fetchLazy();
-            for (Record2<String, byte[]> r : cursor) {
-                outputStream.write(">".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(r.get(sequenceIdentifierColumn).getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
-                outputStream.write(referenceSeqCompressor.decompress(r.get(seqColumn))
-                    .getBytes(StandardCharsets.UTF_8));
-                outputStream.write("\n\n".getBytes(StandardCharsets.UTF_8));
-            }
-        } catch (IOException | SQLException e) {
+            databaseQuery.accept(ctx);
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             if (conn != null) {
@@ -388,6 +424,29 @@ public class SampleService {
         }
     }
 
+    private <SequenceRecord extends Record> void streamFastaSequences(
+        OrderAndLimitConfig orderAndLimit,
+        OutputStream outputStream,
+        TableField<SequenceRecord, byte[]> sequenceColumn,
+        TableField<YMainMetadataRecord, String> sequenceIdentifierColumn,
+        SelectJoinStep<Record2<String, byte[]>> statement,
+        SeqCompressor compressor
+    ) {
+        if (orderAndLimit.getLimit() == null) {
+            orderAndLimit.setLimit(100000);
+        }
+        var orderedAndLimitedstatement = applyOrderAndLimit(statement, orderAndLimit);
+
+        try (var cursor = orderedAndLimitedstatement.fetchSize(1000).fetchLazy()) {
+            for (var row : cursor) {
+                var fastaEntry = new FastaEntry(
+                    row.get(sequenceIdentifierColumn),
+                    compressor.decompress(row.get(sequenceColumn))
+                );
+                fastaEntry.writeToStream(outputStream);
+            }
+        }
+    }
 
     public String getNextcladeDatasetTag() {
         String loadOldNextcladeDatasetTagSql = """
@@ -411,7 +470,6 @@ public class SampleService {
         return tag;
     }
 
-
     private Table<Record1<Integer>> getIdsTable(Collection<Integer> ids, DSLContext ctx) {
         String idsStr = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
         return ctx
@@ -433,7 +491,6 @@ public class SampleService {
         String orderBy = orderAndLimitConfig.getOrderBy();
         if (orderBy != null && !orderBy.isBlank() && !orderBy.equals(OrderAndLimitConfig.SpecialOrdering.ARBITRARY)) {
             if (orderBy.equals(OrderAndLimitConfig.SpecialOrdering.RANDOM)) {
-                SelectSeekStep1<T, BigDecimal> x;
                 statement2 = statement.orderBy(DSL.rand());
             } else {
                 throw new UnsupportedOrdering(orderBy);

@@ -1,11 +1,34 @@
 package ch.ethz.lapis.api.controller.v1;
 
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import ch.ethz.lapis.LapisConfig;
 import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.api.DataVersionService;
 import ch.ethz.lapis.api.SampleService;
 import ch.ethz.lapis.api.entity.OpennessLevel;
 import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import org.hamcrest.Matcher;
@@ -18,27 +41,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.stream.Collectors.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(SampleController.class)
@@ -239,4 +246,45 @@ class OpenSampleControllerTest {
         assertThat(rows[1], is("\t".repeat(SampleDetail.Fields.values().length - 1)));
     }
 
+    @Test
+    void aaSequencesAlignedEndpointReturnsDataFromStream() throws Exception {
+        String responseBody = "Test message";
+        when(sampleService.getAaSequencesInFastaFormatStream(any(), any(), any()))
+            .thenReturn(outputStream -> outputStream.write(responseBody.getBytes()));
+
+        mockMvc.perform(get("/v1/sample/aa-sequence-aligned/gene123"))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition", "inline"))
+            .andExpect(content().contentType("text/x-fasta"))
+            .andExpect(content().string(responseBody));
+
+        verify(sampleService).getAaSequencesInFastaFormatStream(
+            any(BaseSampleRequest.class),
+            any(OrderAndLimitConfig.class),
+            eq("gene123")
+        );
+    }
+
+    @Test
+    void aaSequencesAlignedEndpointReturnsDataFromStreamasFileDownload() throws Exception {
+        String responseBody = "Test message";
+        when(sampleService.getAaSequencesInFastaFormatStream(any(), any(), any()))
+            .thenReturn(outputStream -> outputStream.write(responseBody.getBytes()));
+
+        mockMvc.perform(get("/v1/sample/aa-sequence-aligned/gene123?downloadAsFile=true"))
+            .andExpect(request().asyncStarted())
+            .andDo(MvcResult::getAsyncResult)
+            .andExpect(status().isOk())
+            .andExpect(header().string("Content-Disposition", "attachment; filename=\"aligned_aa_sequences_gene123.fasta\""))
+            .andExpect(content().contentType("text/x-fasta"))
+            .andExpect(content().string(responseBody));
+
+        verify(sampleService).getAaSequencesInFastaFormatStream(
+            any(BaseSampleRequest.class),
+            any(OrderAndLimitConfig.class),
+            eq("gene123")
+        );
+    }
 }

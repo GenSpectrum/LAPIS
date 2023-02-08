@@ -73,10 +73,10 @@ public class NextstrainGenbankMutationAAWorker {
         Map<String, String> nucUnknownsMap = new HashMap<>();
         Map<String, String> aaUnknownsMap = new HashMap<>();
         for (FastaEntry fastaEntry : batch) {
-            String seq = fastaEntry.getSeq();
+            String seq = fastaEntry.sequence();
             String nucUnknowns = String.join(",", MutationFinder.compressPositionsAsStrings(
                 MutationFinder.findNucUnknowns(seq)));
-            nucUnknownsMap.put(fastaEntry.getSampleName(), nucUnknowns);
+            nucUnknownsMap.put(fastaEntry.sampleName(), nucUnknowns);
         }
         geneAASeqs.forEach((sampleName, aaSeqs) -> {
             List<String> aaUnknownsComponents = new ArrayList<>();
@@ -169,14 +169,14 @@ public class NextstrainGenbankMutationAAWorker {
         // Read the output
         Map<String, List<GeneAASeq>> geneAASeqs = new HashMap<>();
         for (FastaEntry fastaEntry : batch) {
-            geneAASeqs.put(fastaEntry.getSampleName(), new ArrayList<>());
+            geneAASeqs.put(fastaEntry.sampleName(), new ArrayList<>());
         }
         for (String gene : genes) {
             FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign_gene_" + gene + ".translation.fasta"),
                 false);
             for (FastaEntry fastaEntry : fastaReader) {
-                geneAASeqs.get(fastaEntry.getSampleName()).add(
-                    new GeneAASeq(gene, fastaEntry.getSeq())
+                geneAASeqs.get(fastaEntry.sampleName()).add(
+                    new GeneAASeq(gene, fastaEntry.sequence())
                 );
             }
         }
@@ -200,9 +200,9 @@ public class NextstrainGenbankMutationAAWorker {
         for (FastaEntry sequence : sequences) {
             fasta
                 .append(">")
-                .append(sequence.getSampleName())
+                .append(sequence.sampleName())
                 .append("\n")
-                .append(sequence.getSeq())
+                .append(sequence.sequence())
                 .append("\n\n");
         }
         return fasta.toString();

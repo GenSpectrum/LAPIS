@@ -20,10 +20,10 @@ public class SampleResponseBuilder<E> {
     private E body;
 
     public ResponseEntity<E> build() {
-        ResponseEntity.BodyBuilder builder1 = ResponseEntity.ok();
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
         // ETag
         if (eTag != null) {
-            builder1 = builder1.eTag(eTag);
+            builder = builder.eTag(eTag);
         }
         // Headers
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -42,12 +42,12 @@ public class SampleResponseBuilder<E> {
         } else {
             httpHeaders.set("Content-Disposition", "inline");
         }
-        builder1 = builder1.headers(httpHeaders);
+        builder = builder.headers(httpHeaders);
         // Cache control
         if (allowCaching) {
-            builder1 = builder1.cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS));
+            builder = builder.cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS));
         } else {
-            builder1 = builder1.cacheControl(CacheControl.noStore());
+            builder = builder.cacheControl(CacheControl.noStore());
         }
         // Content-type
         MediaType mediaType = switch (dataFormat) {
@@ -56,9 +56,9 @@ public class SampleResponseBuilder<E> {
             case JSON -> MediaType.APPLICATION_JSON;
             case FASTA -> new MediaType("text", "x-fasta");
         };
-        builder1 = builder1.contentType(mediaType);
+        builder = builder.contentType(mediaType);
         // Body
-        return builder1.body(this.body);
+        return builder.body(this.body);
     }
 
     public String getETag() {
