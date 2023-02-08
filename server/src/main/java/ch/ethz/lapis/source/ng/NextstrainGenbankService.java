@@ -54,11 +54,9 @@ public class NextstrainGenbankService {
     public void updateData() throws IOException, SQLException, InterruptedException {
         LocalDateTime startTime = LocalDateTime.now();
 
-        // Download files from Nextstrain
-        downloadFiles();
+        downloadFilesFromNextstrain();
 
-        // Load the hashes of the existing data
-        this.oldHashes = getHashes();
+        this.oldHashes = getHashesOfExistingData();
 
         // The files and different types of data will be inserted/updated independently and one after the other in the
         // following order:
@@ -78,7 +76,7 @@ public class NextstrainGenbankService {
     }
 
 
-    private void downloadFiles() throws IOException {
+    private void downloadFilesFromNextstrain() throws IOException {
         // Downloading the following files from data.nextstrain.org/files/ncov/open/
         //     metadata.tsv.gz
         //     sequences.fasta.xz
@@ -102,7 +100,7 @@ public class NextstrainGenbankService {
     }
 
 
-    private Map<String, NextstrainGenbankHashes> getHashes() throws SQLException {
+    private Map<String, NextstrainGenbankHashes> getHashesOfExistingData() throws SQLException {
         String sql = """
                 select strain, metadata_hash, seq_original_hash, seq_aligned_hash
                 from y_nextstrain_genbank;
@@ -129,6 +127,8 @@ public class NextstrainGenbankService {
 
 
     private void updateSeqOriginalOrAligned(boolean aligned) throws IOException, SQLException {
+        log.info("starting updateSeqOriginalOrAligned for aligned: " + aligned);
+
         String filename = !aligned ? "sequences.fasta.xz" : "aligned.fasta.xz";
         String sql = """
                 insert into y_nextstrain_genbank (strain, seq_original_compressed, seq_original_hash)
@@ -169,7 +169,11 @@ public class NextstrainGenbankService {
                         statement.addBatch();
                         i++;
                         if (i % 10000 == 0) {
+                            log.info("executing batch in updateSeqOriginalOrAligned for fasta entry i=" + i);
                             Utils.executeClearCommitBatch(conn, statement);
+                        }
+                        if (i > 500000) {
+                            break;
                         }
                     }
                     Utils.executeClearCommitBatch(conn, statement);
@@ -177,7 +181,7 @@ public class NextstrainGenbankService {
             }
             conn.setAutoCommit(true);
         }
-
+        log.info("finished updateSeqOriginalOrAligned");
     }
 
 
@@ -185,6 +189,7 @@ public class NextstrainGenbankService {
      * This function will also compute and write aa_unknowns and nuc_unknowns.
      */
     private void updateAAMutations() throws IOException, InterruptedException {
+        log.info("starting updateAAMutations");
         // TODO Check if Nextalign is installed
 
         // Write the reference sequence and genemap.gff to the workdir
@@ -290,10 +295,13 @@ public class NextstrainGenbankService {
             executor.shutdown();
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         }
+        log.info("finished updateAAMutations");
     }
 
 
     private void updateMetadata() throws IOException, SQLException {
+        log.info("starting updateMetadata");
+
         InputStream fileInputStream = new FileInputStream(workdir.resolve("metadata.tsv.gz").toFile());
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
 
@@ -429,10 +437,13 @@ public class NextstrainGenbankService {
             }
             conn.setAutoCommit(true);
         }
+        log.info("finished updateMetadata");
     }
 
 
     private void updateNextcladeData() throws IOException, SQLException {
+        log.info("started updateNextcladeData");
+
         InputStream fileInputStream = new FileInputStream(workdir.resolve("nextclade.tsv.gz").toFile());
         GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
 
@@ -644,10 +655,12 @@ public class NextstrainGenbankService {
             }
             conn.setAutoCommit(true);
         }
+        log.info("finished updateNextcladeData");
     }
 
 
     private void updateDataVersion(LocalDateTime startTime) throws SQLException {
+        log.info("updating data version");
         ZoneId zoneId = ZoneId.systemDefault();
         long epoch = startTime.atZone(zoneId).toEpochSecond();
         String sql = """
@@ -664,6 +677,7 @@ public class NextstrainGenbankService {
                 statement.execute();
             }
         }
+        log.info("set data version to " + epoch);
     }
 
 }

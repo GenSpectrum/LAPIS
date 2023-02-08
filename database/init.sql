@@ -1,7 +1,7 @@
 create schema open;
 create schema gisaid;
 
-grant usage on schema open, gisaid to y_user;
+grant usage on schema open, gisaid to lapis_proc;
 
 -- Basic information
 
@@ -73,6 +73,7 @@ create table y_nextstrain_genbank
   seq_aligned_compressed bytea,
   aa_seqs_compressed bytea,
   aa_mutations text,
+  aa_insertions text,
   aa_unknowns text,
   nuc_substitutions text,
   nuc_deletions text,
@@ -363,22 +364,3 @@ create table y_main_aa_sequence_columnar
   data_compressed bytea not null,
   primary key (gene, position)
 );
-
-
--- Privileges
-
-grant select, insert, update, delete, references, truncate
-on
-  pangolin_lineage_alias,
-  data_version,
-  y_nextstrain_genbank,
---   y_gisaid,
-  y_s3c,
-  y_pangolin_assignment,
-  y_main_metadata,
-  y_main_sequence,
-  y_main_sequence_columnar,
-  y_main_aa_sequence,
-  y_main_aa_sequence_columnar,
-  access_key
-to y_user;
