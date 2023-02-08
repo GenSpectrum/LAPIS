@@ -1,5 +1,33 @@
 package ch.ethz.lapis.api.controller.v1;
 
+import ch.ethz.lapis.LapisConfig;
+import ch.ethz.lapis.LapisMain;
+import ch.ethz.lapis.api.DataVersionService;
+import ch.ethz.lapis.api.SampleService;
+import ch.ethz.lapis.api.entity.OpennessLevel;
+import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
+import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
+import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleDetail;
+import org.hamcrest.Matcher;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -20,33 +48,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import ch.ethz.lapis.LapisConfig;
-import ch.ethz.lapis.LapisMain;
-import ch.ethz.lapis.api.DataVersionService;
-import ch.ethz.lapis.api.SampleService;
-import ch.ethz.lapis.api.entity.OpennessLevel;
-import ch.ethz.lapis.api.entity.Versioned;
-import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
-import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
-import ch.ethz.lapis.api.entity.res.SampleAggregated;
-import ch.ethz.lapis.api.entity.res.SampleDetail;
-import org.hamcrest.Matcher;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 
 @WebMvcTest(SampleController.class)
 @Import({TestConfig.class, JacksonAutoConfiguration.class})
@@ -175,7 +176,8 @@ class OpenSampleControllerTest {
 
         mockMvc.perform(get("/v1/sample/details?fields=age,countryExposure&dataFormat=csv"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType("text/csv"))
+            .andExpect(content().contentTypeCompatibleWith(new MediaType("text", "csv")))
+            .andExpect(content().encoding(StandardCharsets.UTF_8))
             .andExpect(content().string("age,countryExposure\r\n123,Germany\r\n"));
     }
 
@@ -188,7 +190,8 @@ class OpenSampleControllerTest {
 
         String result = mockMvc.perform(get("/v1/sample/details?dataFormat=csv"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType("text/csv"))
+            .andExpect(content().contentTypeCompatibleWith(new MediaType("text", "csv")))
+            .andExpect(content().encoding(StandardCharsets.UTF_8))
             .andReturn().getResponse().getContentAsString();
 
         var rows = result.split("\r\n");
@@ -218,7 +221,8 @@ class OpenSampleControllerTest {
 
         mockMvc.perform(get("/v1/sample/details?fields=age,countryExposure&dataFormat=tsv"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType("text/plain"))
+            .andExpect(content().encoding(StandardCharsets.UTF_8))
+            .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
             .andExpect(content().string("age\tcountryExposure\r\n123\tGermany\r\n"));
     }
 
@@ -231,7 +235,8 @@ class OpenSampleControllerTest {
 
         String result = mockMvc.perform(get("/v1/sample/details?dataFormat=tsv"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType("text/plain"))
+            .andExpect(content().encoding(StandardCharsets.UTF_8))
+            .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
             .andReturn().getResponse().getContentAsString();
 
         var rows = result.split("\r\n");
