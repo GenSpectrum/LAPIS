@@ -61,6 +61,7 @@ public class NextstrainFileToDatabaseService {
     }
 
     public void insertFilesIntoDatabase(LocalDateTime startTime) throws IOException, SQLException, InterruptedException {
+        log.info("inserting data into y_nextstrain_genbank...");
         this.oldHashes = getHashesOfExistingData();
 
         // The files and different types of data will be inserted/updated independently and one after the other in the
@@ -102,6 +103,8 @@ public class NextstrainFileToDatabaseService {
                 }
             }
         }
+
+        log.debug("found " + hashes.size() + " hashes in DB");
         return hashes;
     }
 
@@ -150,9 +153,6 @@ public class NextstrainFileToDatabaseService {
                         if (i % 10000 == 0) {
                             log.info("executing batch in updateSeqOriginalOrAligned for fasta entry i=" + i);
                             Utils.executeClearCommitBatch(conn, statement);
-                        }
-                        if (i > 500000) {
-                            break;
                         }
                     }
                     Utils.executeClearCommitBatch(conn, statement);
@@ -287,13 +287,13 @@ public class NextstrainFileToDatabaseService {
                   genbank_accession, sra_accession, gisaid_epi_isl, strain, date, year, month, day, date_original,
                   date_submitted, region, country, division, location, region_exposure, country_exposure,
                   division_exposure, host, age, sex, sampling_strategy, pango_lineage, nextclade_pango_lineage,
-                  nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors, metadata_hash
+                  nextstrain_clade, gisaid_clade, originating_lab, submitting_lab, authors, database, metadata_hash
                 )
                 values (
                   ?, ?, ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
                   ?, ?, ?, ?, ?, ?, ?,
-                  ?, ?, ?, ?, ?, ?
+                  ?, ?, ?, ?, ?, ?, ?
                 )
                 on conflict (strain) do update
                 set
@@ -324,6 +324,7 @@ public class NextstrainFileToDatabaseService {
                   originating_lab = ?,
                   submitting_lab = ?,
                   authors = ?,
+                  database = ?,
                   metadata_hash = ?;
             """;
         try (Connection conn = databasePool.getConnection()) {
@@ -373,36 +374,39 @@ public class NextstrainFileToDatabaseService {
                         statement.setString(26, entry.getOriginatingLab());
                         statement.setString(27, entry.getSubmittingLab());
                         statement.setString(28, entry.getAuthors());
-                        statement.setString(29, currentHash);
+                        statement.setString(29, entry.getDatabase());
+                        statement.setString(30, currentHash);
 
-                        statement.setString(30, entry.getGenbankAccession());
-                        statement.setString(31, entry.getSraAccession());
-                        statement.setString(32, entry.getGisaidEpiIsl());
-                        statement.setDate(33, Utils.nullableSqlDateValue(entry.getDate()));
-                        statement.setObject(34, entry.getYear());
-                        statement.setObject(35, entry.getMonth());
-                        statement.setObject(36, entry.getDay());
-                        statement.setString(37, entry.getDateOriginal());
-                        statement.setDate(38, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
-                        statement.setString(39, entry.getRegion());
-                        statement.setString(40, entry.getCountry());
-                        statement.setString(41, entry.getDivision());
-                        statement.setString(42, entry.getLocation());
-                        statement.setString(43, entry.getRegionExposure());
-                        statement.setString(44, entry.getCountryExposure());
-                        statement.setString(45, entry.getDivisionExposure());
-                        statement.setString(46, entry.getHost());
-                        statement.setObject(47, entry.getAge());
-                        statement.setString(48, entry.getSex());
-                        statement.setString(49, entry.getSamplingStrategy());
-                        statement.setString(50, entry.getPangoLineage());
-                        statement.setString(51, entry.getNextcladePangoLineage());
-                        statement.setString(52, entry.getNextstrainClade());
-                        statement.setString(53, entry.getGisaidClade());
-                        statement.setString(54, entry.getOriginatingLab());
-                        statement.setString(55, entry.getSubmittingLab());
-                        statement.setString(56, entry.getAuthors());
-                        statement.setString(57, currentHash);
+                        statement.setString(31, entry.getGenbankAccession());
+                        statement.setString(32, entry.getSraAccession());
+                        statement.setString(33, entry.getGisaidEpiIsl());
+                        statement.setDate(34, Utils.nullableSqlDateValue(entry.getDate()));
+                        statement.setObject(35, entry.getYear());
+                        statement.setObject(36, entry.getMonth());
+                        statement.setObject(37, entry.getDay());
+                        statement.setString(38, entry.getDateOriginal());
+                        statement.setDate(39, Utils.nullableSqlDateValue(entry.getDateSubmitted()));
+                        statement.setString(40, entry.getRegion());
+                        statement.setString(41, entry.getCountry());
+                        statement.setString(42, entry.getDivision());
+                        statement.setString(43, entry.getLocation());
+                        statement.setString(44, entry.getRegionExposure());
+                        statement.setString(45, entry.getCountryExposure());
+                        statement.setString(46, entry.getDivisionExposure());
+                        statement.setString(47, entry.getHost());
+                        statement.setObject(48, entry.getAge());
+                        statement.setString(49, entry.getSex());
+                        statement.setString(50, entry.getSamplingStrategy());
+                        statement.setString(51, entry.getPangoLineage());
+                        statement.setString(52, entry.getNextcladePangoLineage());
+                        statement.setString(53, entry.getNextstrainClade());
+                        statement.setString(54, entry.getGisaidClade());
+                        statement.setString(55, entry.getOriginatingLab());
+                        statement.setString(56, entry.getSubmittingLab());
+                        statement.setString(57, entry.getAuthors());
+                        statement.setString(58, entry.getDatabase());
+                        statement.setString(59, currentHash);
+
 
                         statement.addBatch();
                         if (i++ % 10000 == 0) {

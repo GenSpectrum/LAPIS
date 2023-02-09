@@ -345,7 +345,7 @@ public class SampleService {
 
             var idsTable = getIdsTable(filteredIds, ctx);
             var sequenceIdentifierColumn = LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN
-                ? metaDataTable.GENBANK_ACCESSION
+                ? metaDataTable.STRAIN
                 : metaDataTable.GISAID_EPI_ISL;
 
             var statement = ctx
@@ -382,7 +382,7 @@ public class SampleService {
             var aaSequenceTable = YMainAaSequence.Y_MAIN_AA_SEQUENCE;
 
             var sequenceIdentifierColumn = LapisMain.globalConfig.getApiOpennessLevel() == OpennessLevel.OPEN
-                ? metaDataTable.GENBANK_ACCESSION
+                ? metaDataTable.STRAIN
                 : metaDataTable.GISAID_EPI_ISL;
             var aaSequenceColumn = aaSequenceTable.AA_SEQ_COMPRESSED;
 

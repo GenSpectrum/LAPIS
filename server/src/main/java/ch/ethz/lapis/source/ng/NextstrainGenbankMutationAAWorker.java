@@ -163,7 +163,9 @@ public class NextstrainGenbankMutationAAWorker {
             throw new RuntimeException("Nextalign timed out (after 20 minutes)");
         }
         if (process.exitValue() != 0) {
-            throw new RuntimeException("Nextalign exited with code " + process.exitValue());
+            throw new RuntimeException("Nextalign exited with code " + process.exitValue()
+                + "\nstderr: " + new String(process.getErrorStream().readAllBytes() )
+                + "\nstdout: " + new String(process.getInputStream().readAllBytes()));
         }
 
         // Read the output
@@ -175,9 +177,9 @@ public class NextstrainGenbankMutationAAWorker {
             FastaFileReader fastaReader = new FastaFileReader(outputPath.resolve("nextalign_gene_" + gene + ".translation.fasta"),
                 false);
             for (FastaEntry fastaEntry : fastaReader) {
-                geneAASeqs.get(fastaEntry.sampleName()).add(
-                    new GeneAASeq(gene, fastaEntry.sequence())
-                );
+                geneAASeqs
+                    .get(fastaEntry.sampleName())
+                    .add(new GeneAASeq(gene, fastaEntry.sequence()));
             }
         }
 

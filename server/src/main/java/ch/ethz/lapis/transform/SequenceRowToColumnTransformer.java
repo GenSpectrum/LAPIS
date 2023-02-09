@@ -2,10 +2,14 @@ package ch.ethz.lapis.transform;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -41,7 +45,6 @@ public class SequenceRowToColumnTransformer {
     }
 
     /**
-     *
      * @param compressedSequences The compressed sequences
      * @param decompressor A function to decompress a sequence
      * @param consumer A function that takes the position of the first entry (index starts with 1) in the result set as
@@ -81,7 +84,7 @@ public class SequenceRowToColumnTransformer {
                 final int endPos = Math.min(positionRangeSize * (iteration + 1), sequenceLength);
                 int countPos = endPos - startPos;
                 char[][] transformedData = new char[countPos][compressedSequences.size()];
-                log.info(LocalDateTime.now() + " Position " + startPos + " - " + endPos);
+                log.info("Position " + startPos + " - " + endPos);
 
                 List<Callable<List<Void>>> tasks = new ArrayList<>();
                 for (int taskIndex = 0; taskIndex < numberTasksPerIteration; taskIndex++) {
@@ -90,8 +93,7 @@ public class SequenceRowToColumnTransformer {
 
                     tasks.add(() -> {
                         try {
-                            log.info(
-                                LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - Start");
+                            log.info("Sequences " + startSeq + " - " + endSeq + " - Start");
                             for (int seqIndex = startSeq; seqIndex < endSeq; seqIndex++) {
                                 S compressed = compressedSequences.get(seqIndex);
                                 if (compressed == null) {
@@ -106,7 +108,7 @@ public class SequenceRowToColumnTransformer {
                                     }
                                 }
                             }
-                            log.info(LocalDateTime.now() + "     Sequences " + startSeq + " - " + endSeq + " - End");
+                            log.info("Sequences " + startSeq + " - " + endSeq + " - End");
                             return null;
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -135,8 +137,7 @@ public class SequenceRowToColumnTransformer {
                         endPos);
 
                     tasks2.add(() -> {
-                        log.info(LocalDateTime.now() + "     Start compressing and inserting " +
-                            finalizationPosStart + " - " + finalizationPosEnd);
+                        log.info("Start compressing and inserting " + finalizationPosStart + " - " + finalizationPosEnd);
                         List<T> results = new ArrayList<>();
                         for (int posIndex = finalizationPosStart; posIndex < finalizationPosEnd; posIndex++) {
                             String transformed = String.valueOf(transformedData[posIndex - startPos]);

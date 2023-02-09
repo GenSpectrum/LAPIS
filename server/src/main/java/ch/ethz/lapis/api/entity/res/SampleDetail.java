@@ -43,5 +43,5 @@ public class SampleDetail {
     private String gisaidCloade;
     private String submittingLab;
     private String originatingLab;
-
+    private String database;
 }

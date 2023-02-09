@@ -71,7 +71,8 @@ public class NextstrainGenbankMetadataFileReader
             .setSubmittingLab(cleanString(csv.get("submitting_lab")))
             .setAuthors(cleanString(csv.get("authors")))
             .setDateSubmitted(Utils.nullableLocalDateValue(csv.get("date_submitted")))
-            .setSamplingStrategy(cleanString(csv.get("sampling_strategy")));
+            .setSamplingStrategy(cleanString(csv.get("sampling_strategy")))
+            .setDatabase(cleanString(csv.get("database")));
     }
 
     @Override

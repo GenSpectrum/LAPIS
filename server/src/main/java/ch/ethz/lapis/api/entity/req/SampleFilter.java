@@ -76,6 +76,7 @@ public abstract class SampleFilter {
     private Float nextcladeQcStopCodonsScoreTo;
     private Float nextcladeCoverageFrom;
     private Float nextcladeCoverageTo;
+    private String database;
 
     private List<NucMutation> nucMutations = new ArrayList<>();
     private List<NucInsertion> nucInsertions = new ArrayList<>();

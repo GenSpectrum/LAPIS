@@ -1,5 +1,7 @@
 package ch.ethz.lapis.source.ng;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -9,10 +11,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class NextstrainDownloadService {
 
     public void downloadFilesFromNextstrain(Path targetDir) throws IOException {
+
         String urlPrefix = "https://data.nextstrain.org/files/ncov/open/";
+        log.info("loading data from " + urlPrefix + " ...");
         List<String> files = new ArrayList<>() {{
             add("metadata.tsv.gz");
             add("sequences.fasta.xz");
