@@ -59,11 +59,15 @@ public class GeoLocationMapper {
 
     private Optional<String[]> findApplicableRule(GeoLocation geoLocation) {
         return findApplicableRule(
-            new Quartet<>(geoLocation.getRegion(),
+            new Quartet<>(
+                geoLocation.getRegion(),
                 geoLocation.getCountry(),
                 geoLocation.getDivision(),
-                geoLocation.getLocation()),
-            0, rules);
+                geoLocation.getLocation()
+            ),
+            0,
+            rules
+        );
     }
 
     private Optional<String[]> findApplicableRule(
