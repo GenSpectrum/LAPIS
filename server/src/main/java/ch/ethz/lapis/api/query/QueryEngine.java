@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
@@ -136,13 +137,10 @@ public class QueryEngine {
 
     public List<Integer> filterIds(Database database, SampleFilter sampleFilter) {
         boolean[] matched = matchSampleFilter(database, sampleFilter);
-        List<Integer> ids = new ArrayList<>();
-        for (int i = 0; i < matched.length; i++) {
-            if (matched[i]) {
-                ids.add(i);
-            }
-        }
-        return ids;
+        return IntStream.range(0, matched.length)
+            .filter(i -> matched[i])
+            .boxed()
+            .collect(Collectors.toList());
     }
 
     public boolean[] matchSampleFilter(Database database, SampleFilter sampleFilter) {
