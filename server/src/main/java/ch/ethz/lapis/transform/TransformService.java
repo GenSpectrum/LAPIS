@@ -594,7 +594,16 @@ public class TransformService {
                         'Base Surveillance',
                         'Basellne surveillance',
                         'Baseline Sureillance',
-                        'Systematic genomic surveillance'
+                        'Systematic genomic surveillance',
+                        'SURVEILLANCE'
+                        'surveillance testing',
+                        'Basline Surveillance',
+                        'baselinasurveillance',
+                        'Baseline surveillence',
+                        'Baselina surveillance',
+                        'baseline_surveillance',
+                        'Basic surveillance',
+                        'Base surveillance'
                       );
                 """;
                 statement.execute(sql2);
