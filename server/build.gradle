@@ -25,7 +25,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.5.4'
     implementation 'com.mchange:c3p0:0.9.5.5'
     implementation 'org.javatuples:javatuples:1.2'
-    implementation 'org.apache.commons:commons-csv:1.9.0'
+    implementation 'org.apache.commons:commons-csv:1.10.0'
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'org.tukaani:xz:1.9'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
