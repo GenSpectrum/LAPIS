@@ -22,7 +22,7 @@ dependencies {
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
     implementation 'com.sun.xml.bind:jaxb-impl:4.0.2'
 
-    implementation 'org.postgresql:postgresql:42.5.3'
+    implementation 'org.postgresql:postgresql:42.5.4'
     implementation 'com.mchange:c3p0:0.9.5.5'
     implementation 'org.javatuples:javatuples:1.2'
     implementation 'org.apache.commons:commons-csv:1.9.0'
