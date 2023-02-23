@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PutOpenDataFromYNextstrainGenbankIntoDatabase" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="17" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="MAIN_CLASS_NAME" value="ch.ethz.lapis.LapisMain" />
+    <module name="lapis.main" />
+    <option name="PROGRAM_PARAMETERS" value="--config config.local.yml --update-data transform-nextstrain-genbank,final-transforms,switch-in-staging" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -556,76 +556,96 @@ public class TransformService {
         try (Connection conn = databasePool.getConnection()) {
 
             try (Statement statement = conn.createStatement()) {
-                // Change pangoLineage "None" and "" to null
-                String sql1 = """
-                    update y_main_metadata_staging m
-                    set pango_lineage = null
-                    where
-                      m.pango_lineage = 'None'
-                      or m.pango_lineage = ''
-                      or m.pango_lineage = 'unclassifiable';
-                """;
-                statement.execute(sql1);
-                // Clean up the sampling strategy field a bit
-                String sql2 = """
-                    update y_main_metadata_staging
-                    set sampling_strategy = 'Baseline surveillance'
-                    where
-                      sampling_strategy in (
-                        'Random sampling',
-                        'Baseline surveillance (random sampling)',
-                        'Baseline Surveillance',
-                        'Surveillance testing',
-                        'baseline surveillance (random sampling)',
-                        'Active surveillance',
-                        'baseline surveillance',
-                        'Random',
-                        'random surveillance',
-                        'Surveillance',
-                        'surveillance',
-                        'Baseline Surveilliance',
-                        'Active Surveillance',
-                        'Routine Surveillance',
-                        'Geographic Representativeness',
-                        'Baseline',
-                        'BaselineSurveillance',
-                        'Representative sampling',
-                        'baselinesurveillance',
-                        'Random surveillance',
-                        'Epidemiological surveilance (Random sampling)',
-                        'Base Surveillance',
-                        'Basellne surveillance',
-                        'Baseline Sureillance',
-                        'Systematic genomic surveillance',
-                        'SURVEILLANCE'
-                        'surveillance testing',
-                        'Basline Surveillance',
-                        'baselinasurveillance',
-                        'Baseline surveillence',
-                        'Baselina surveillance',
-                        'baseline_surveillance',
-                        'Basic surveillance',
-                        'Base surveillance'
-                      );
-                """;
-                statement.execute(sql2);
-                // Set sampling strategy for Swiss data
-                String sql3 = """
-                    update y_main_metadata_staging
-                    set sampling_strategy = 'Baseline surveillance'
-                    where
-                      country = 'Switzerland'
-                      and (
-                        (submitting_lab = 'Department of Biosystems Science and Engineering, ETH Zürich'
-                           and originating_lab in ('Viollier AG', 'labor team w AG'))
-                        or (submitting_lab = 'HUG, Laboratory of Virology and the Health2030 Genome Center')
-                      );
-                """;
-                statement.execute(sql3);
+                setUndefinedPangoLineageToNull(statement);
+                cleanupSamplingStrategy(statement);
+                setSamplingStrategyForSwissData(statement);
+                setHostForRkiData(statement);
             }
         }
 
         log.info("Finished final transforms");
+    }
+
+    private static void setHostForRkiData(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set host = 'Homo sapiens'
+            where
+              m.host is null and m.database = 'rki';
+        """;
+        statement.execute(sql);
+    }
+
+    private static void setSamplingStrategyForSwissData(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging
+            set sampling_strategy = 'Baseline surveillance'
+            where
+              country = 'Switzerland'
+              and (
+                (submitting_lab = 'Department of Biosystems Science and Engineering, ETH Zürich'
+                   and originating_lab in ('Viollier AG', 'labor team w AG'))
+                or (submitting_lab = 'HUG, Laboratory of Virology and the Health2030 Genome Center')
+              );
+        """;
+        statement.execute(sql);
+    }
+
+    private static void cleanupSamplingStrategy(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging
+            set sampling_strategy = 'Baseline surveillance'
+            where
+              sampling_strategy in (
+                'Random sampling',
+                'Baseline surveillance (random sampling)',
+                'Baseline Surveillance',
+                'Surveillance testing',
+                'baseline surveillance (random sampling)',
+                'Active surveillance',
+                'baseline surveillance',
+                'Random',
+                'random surveillance',
+                'Surveillance',
+                'surveillance',
+                'Baseline Surveilliance',
+                'Active Surveillance',
+                'Routine Surveillance',
+                'Geographic Representativeness',
+                'Baseline',
+                'BaselineSurveillance',
+                'Representative sampling',
+                'baselinesurveillance',
+                'Random surveillance',
+                'Epidemiological surveilance (Random sampling)',
+                'Base Surveillance',
+                'Basellne surveillance',
+                'Baseline Sureillance',
+                'Systematic genomic surveillance',
+                'SURVEILLANCE',
+                'surveillance testing',
+                'Basline Surveillance',
+                'baselinasurveillance',
+                'Baseline surveillence',
+                'Baselina surveillance',
+                'baseline_surveillance',
+                'Basic surveillance',
+                'Base surveillance'
+              );
+        """;
+        statement.execute(sql);
+    }
+
+    private static void setUndefinedPangoLineageToNull(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set pango_lineage = null
+            where
+              m.pango_lineage = 'None'
+              or m.pango_lineage = ''
+              or m.pango_lineage = 'unclassifiable';
+        """;
+        statement.execute(sql);
     }
 
 

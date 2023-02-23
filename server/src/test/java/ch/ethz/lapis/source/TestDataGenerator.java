@@ -3,6 +3,7 @@ package ch.ethz.lapis.source;
 import ch.ethz.lapis.LapisConfig;
 import ch.ethz.lapis.core.ConfigurationManager;
 import ch.ethz.lapis.core.DatabaseService;
+import ch.ethz.lapis.source.ng.NextstrainDownloadService;
 import ch.ethz.lapis.source.ng.NextstrainFileToDatabaseService;
 import org.tukaani.xz.LZMA2Options;
 import org.tukaani.xz.XZInputStream;
@@ -25,6 +26,11 @@ public class TestDataGenerator {
     public static final int LIMIT = 20000;
     public static final String ORIGIN_DIR = "../../dataWorkdir";
     public static final String TESTDATA_DIR = ORIGIN_DIR + "/testdata";
+
+//    @Test // run this manually
+    void downloadFullDataset() throws Exception {
+        new NextstrainDownloadService().downloadFilesFromNextstrain(Path.of(ORIGIN_DIR));
+    }
 
 //    @Test // run this manually - this depends on already downloaded open data in ORIGIN_DIR
     void extractRkiTestdataFromFullDataset() throws Exception {
