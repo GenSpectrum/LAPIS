@@ -48,7 +48,7 @@ public class LapisMain {
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
         if ("--api".equals(args[0])) {
             String[] argsForSpring = Arrays.copyOfRange(args, 1, args.length);
-            System.setProperty("spring.mvc.async.request-timeout", "600000"); // 10 minutes
+            System.setProperty("spring.mvc.async.request-timeout", "3600000"); // 60 minutes
             SpringApplication app = new SpringApplication(LapisMain.class);
             app.setDefaultProperties(Collections.singletonMap("server.port", "2345"));
             app.run(argsForSpring);
