@@ -123,7 +123,8 @@ create table y_nextstrain_genbank
   nextclade_qc_stop_codons_score float,
   nextclade_qc_stop_codons_status text,
   nextclade_coverage float,
-  nextclade_errors text
+  nextclade_errors text,
+  database text
 );
 
 
@@ -300,7 +301,8 @@ create table y_main_metadata
   nextclade_alignment_score float,
   nextclade_alignment_start int,
   nextclade_alignment_end int,
-  nextclade_coverage float
+  nextclade_coverage float,
+  database text
 );
 
 create index on y_main_metadata (genbank_accession);

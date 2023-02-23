@@ -789,6 +789,14 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
         return (Double) get(54);
     }
 
+    public void setDatabase(String value) {
+        set(55, value);
+    }
+
+    public String setDatabase() {
+        return (String) get(55);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -812,7 +820,7 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
     /**
      * Create a detached, initialised YMainMetadataRecord
      */
-    public YMainMetadataRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String samplingStrategy, String pangoLineage, String nextcladePangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore, Integer year, Integer month, Integer day, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges, String nextcladePcrPrimerChanges, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Double nextcladeCoverage) {
+    public YMainMetadataRecord(Integer id, String source, String sourcePrimaryKey, String genbankAccession, String sraAccession, String gisaidEpiIsl, String strain, LocalDate date, LocalDate dateSubmitted, String region, String country, String division, String location, String regionExposure, String countryExposure, String divisionExposure, String host, Integer age, String sex, Boolean hospitalized, Boolean died, Boolean fullyVaccinated, String samplingStrategy, String pangoLineage, String nextcladePangoLineage, String nextstrainClade, String gisaidClade, String originatingLab, String submittingLab, String authors, Double nextcladeQcOverallScore, Double nextcladeQcMissingDataScore, Double nextcladeQcMixedSitesScore, Double nextcladeQcPrivateMutationsScore, Double nextcladeQcSnpClustersScore, Double nextcladeQcFrameShiftsScore, Double nextcladeQcStopCodonsScore, Integer year, Integer month, Integer day, Integer nextcladeTotalSubstitutions, Integer nextcladeTotalDeletions, Integer nextcladeTotalInsertions, Integer nextcladeTotalFrameShifts, Integer nextcladeTotalAminoacidSubstitutions, Integer nextcladeTotalAminoacidDeletions, Integer nextcladeTotalAminoacidInsertions, Integer nextcladeTotalMissing, Integer nextcladeTotalNonAcgtns, Integer nextcladeTotalPcrPrimerChanges, String nextcladePcrPrimerChanges, Double nextcladeAlignmentScore, Integer nextcladeAlignmentStart, Integer nextcladeAlignmentEnd, Double nextcladeCoverage, String database) {
         super(YMainMetadata.Y_MAIN_METADATA);
 
         setId(id);
@@ -870,5 +878,6 @@ public class YMainMetadataRecord extends UpdatableRecordImpl<YMainMetadataRecord
         setNextcladeAlignmentStart(nextcladeAlignmentStart);
         setNextcladeAlignmentEnd(nextcladeAlignmentEnd);
         setNextcladeCoverage(nextcladeCoverage);
+        setDatabase(database);
     }
 }

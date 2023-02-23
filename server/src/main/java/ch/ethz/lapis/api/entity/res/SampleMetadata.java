@@ -28,6 +28,7 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
     private String gisaidCloade;
     private String submittingLab;
     private String originatingLab;
+    private String database;
 
     public LocalDate getDate() {
         return date;
@@ -242,6 +243,15 @@ public abstract class SampleMetadata<T extends SampleMetadata<T>> {
 
     public T setOriginatingLab(String originatingLab) {
         this.originatingLab = originatingLab;
+        return (T) this;
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public T setDatabase(String database) {
+        this.database = database;
         return (T) this;
     }
 }

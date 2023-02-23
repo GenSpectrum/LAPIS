@@ -55,6 +55,7 @@ public class Database {
         public static final String GISAID_CLADE = "gisaid_clade"; // String
         public static final String ORIGINATING_LAB = "originating_lab"; // String
         public static final String SUBMITTING_LAB = "submitting_lab"; // String
+        public static final String DATABASE = "database"; // String
         public static final String NEXTCLADE_QC_OVERALL_SCORE = "nextclade_qc_overall_score"; // Float
         public static final String NEXTCLADE_QC_MISSING_DATA_SCORE = "nextclade_qc_missing_data_score"; // Float
         public static final String NEXTCLADE_QC_MIXED_SITES_SCORE = "nextclade_qc_mixed_sites_score"; // Float
@@ -73,14 +74,14 @@ public class Database {
         Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE, Columns.COUNTRY_EXPOSURE,
         Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.AGE, Columns.SEX, Columns.HOSPITALIZED, Columns.DIED,
         Columns.FULLY_VACCINATED, Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
-        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
+        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB, Columns.DATABASE
     };
     public static final String[] STRING_COLUMNS = new String[] {
         Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
         Columns.REGION, Columns.COUNTRY, Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE,
         Columns.COUNTRY_EXPOSURE, Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.SEX,
         Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTCLADE_PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
-        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB
+        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB, Columns.DATABASE
     };
     public static final String[] DATE_COLUMNS = new String[] {
         Columns.DATE, Columns.DATE_SUBMITTED

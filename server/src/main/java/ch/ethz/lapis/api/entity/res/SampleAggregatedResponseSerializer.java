@@ -46,6 +46,7 @@ public class SampleAggregatedResponseSerializer extends JsonSerializer<SampleAgg
                     case GISAIDCLADE -> gen.writeStringField("gisaidClade", sample.getGisaidCloade());
                     case SUBMITTINGLAB -> gen.writeStringField("submittingLab", sample.getSubmittingLab());
                     case ORIGINATINGLAB -> gen.writeStringField("originatingLab", sample.getOriginatingLab());
+                    case DATABASE -> gen.writeStringField("database", sample.getDatabase());
                     default -> throw new RuntimeException("Unexpected field name: " + field);
                 }
             }

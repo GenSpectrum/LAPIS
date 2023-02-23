@@ -9,15 +9,6 @@ create table y_main_sequence_columnar_staging (like y_main_sequence_columnar inc
 create table y_main_aa_sequence_staging (like y_main_aa_sequence including all);
 create table y_main_aa_sequence_columnar_staging (like y_main_aa_sequence_columnar including all);
 
-grant select, insert, update, delete, references, truncate
-on
-  y_main_metadata_staging,
-  y_main_sequence_staging,
-  y_main_sequence_columnar_staging,
-  y_main_aa_sequence_staging,
-  y_main_aa_sequence_columnar_staging
-to y_user;
-
 -- Switch out the tables
 create or replace function y_switch_in_staging_tables() returns void security definer as $$
 begin

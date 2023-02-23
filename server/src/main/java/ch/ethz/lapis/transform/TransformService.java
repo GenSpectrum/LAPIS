@@ -43,10 +43,10 @@ public class TransformService {
         //     y_main_sequence_staging
         //     y_main_aa_sequence_staging
         if (source == LapisConfig.Source.NG) {
-            log.info(LocalDateTime.now() + " pullFromNextstrainGenbankTable()");
+            log.info("pullFromNextstrainGenbankTable()");
             pullFromNextstrainGenbankTable();
             // Compress AA sequences
-            log.info(LocalDateTime.now() + " compressAASeqs()");
+            log.info("compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -59,10 +59,10 @@ public class TransformService {
                   ng.aa_seqs_compressed is not null;
             """);
         } else if (source == LapisConfig.Source.GISAID) {
-            log.info(LocalDateTime.now() + " pullFromGisaidTable()");
+            log.info("pullFromGisaidTable()");
             pullFromGisaidTable();
             // Compress AA sequences
-            log.info(LocalDateTime.now() + " compressAASeqs()");
+            log.info("compressAASeqs()");
             compressAASeqs("""
                 select
                   mm.id,
@@ -76,15 +76,16 @@ public class TransformService {
             """);
         }
         // Fill the table y_main_sequence_columnar_staging
-        log.info(LocalDateTime.now() + " transformSeqsToColumnar()");
+        log.info("transformSeqsToColumnar()");
         transformSeqsToColumnar();
         // Fill the table y_main_aa_sequence_columnar_staging
-        log.info(LocalDateTime.now() + " transformAASeqsToColumnar()");
+        log.info("transformAASeqsToColumnar()");
         transformAASeqsToColumnar();
+        log.info("finished mergeAndTransform for " + source);
     }
 
 
-    public void pullFromNextstrainGenbankTable() throws SQLException {
+    private void pullFromNextstrainGenbankTable() throws SQLException {
         String sql1 = """
                     insert into y_main_metadata_staging (
                       id, source, source_primary_key, genbank_accession, sra_accession, gisaid_epi_isl,
@@ -98,7 +99,8 @@ public class TransformService {
                       nextclade_total_frame_shifts, nextclade_total_aminoacid_substitutions,
                       nextclade_total_aminoacid_deletions, nextclade_total_aminoacid_insertions, nextclade_total_missing,
                       nextclade_total_non_acgtns, nextclade_total_pcr_primer_changes, nextclade_pcr_primer_changes,
-                      nextclade_alignment_score, nextclade_alignment_start, nextclade_alignment_end, nextclade_coverage
+                      nextclade_alignment_score, nextclade_alignment_start, nextclade_alignment_end, nextclade_coverage,
+                      database
                     )
                     select
                       row_number() over () - 1 as id,
@@ -152,11 +154,10 @@ public class TransformService {
                       nextclade_alignment_score,
                       nextclade_alignment_start,
                       nextclade_alignment_end,
-                      nextclade_coverage
+                      nextclade_coverage,
+                      database
                     from y_nextstrain_genbank
-                    where
-                      genbank_accession is not null
-                      and seq_aligned_compressed is not null;
+                    where seq_aligned_compressed is not null;
             """;
         String sql2 = """
                 insert into y_main_sequence_staging (
@@ -191,7 +192,7 @@ public class TransformService {
     }
 
 
-    public void pullFromGisaidTable() throws SQLException {
+    private void pullFromGisaidTable() throws SQLException {
         String sql1 = """
                 insert into y_main_metadata_staging (
                   id, source, source_primary_key, genbank_accession, sra_accession, gisaid_epi_isl,
@@ -301,7 +302,7 @@ public class TransformService {
      *
      * @param fetchAASeqsSql A SQL query string that gives a result set with two columns: "id" and "aa_seqs_compressed"
      */
-    public void compressAASeqs(String fetchAASeqsSql) throws SQLException, InterruptedException {
+    private void compressAASeqs(String fetchAASeqsSql) throws SQLException, InterruptedException {
         // Fetch the uncompressed AA sequences
         // The AA sequences have the format "<gene1>:<seq1>,<gene2>:<seq2>,..."
         ExhaustibleBlockingQueue<List<Pair<Integer, byte[]>>> batches;
@@ -385,7 +386,7 @@ public class TransformService {
     }
 
 
-    public void transformSeqsToColumnar() throws SQLException {
+    private void transformSeqsToColumnar() throws SQLException {
         // Load all compressed and aligned sequences and their IDs
         String sql1 = """
                 select s.id, s.seq_aligned_compressed
@@ -439,7 +440,7 @@ public class TransformService {
     }
 
 
-    public void transformAASeqsToColumnar() throws SQLException {
+    private void transformAASeqsToColumnar() throws SQLException {
         // We process the data gene by gene
         String sql1 = """
             select mm.id, aas.aa_seq_compressed
@@ -550,78 +551,101 @@ public class TransformService {
 
 
     public void finalTransforms() throws SQLException {
+        log.info("Starting final transforms");
 
         try (Connection conn = databasePool.getConnection()) {
 
             try (Statement statement = conn.createStatement()) {
-                // Change pangoLineage "None" and "" to null
-                String sql1 = """
-                    update y_main_metadata_staging m
-                    set pango_lineage = null
-                    where
-                      m.pango_lineage = 'None'
-                      or m.pango_lineage = ''
-                      or m.pango_lineage = 'unclassifiable';
-                """;
-                statement.execute(sql1);
-                // Clean up the sampling strategy field a bit
-                String sql2 = """
-                    update y_main_metadata_staging
-                    set sampling_strategy = 'Baseline surveillance'
-                    where
-                      sampling_strategy in (
-                        'Random sampling',
-                        'Baseline surveillance (random sampling)',
-                        'Baseline Surveillance',
-                        'Surveillance testing',
-                        'baseline surveillance (random sampling)',
-                        'Active surveillance',
-                        'baseline surveillance',
-                        'Random',
-                        'random surveillance',
-                        'Surveillance',
-                        'surveillance',
-                        'Baseline Surveilliance',
-                        'Active Surveillance',
-                        'Routine Surveillance',
-                        'Geographic Representativeness',
-                        'Baseline',
-                        'BaselineSurveillance',
-                        'Representative sampling',
-                        'baselinesurveillance',
-                        'Random surveillance',
-                        'Epidemiological surveilance (Random sampling)',
-                        'Base Surveillance',
-                        'Basellne surveillance',
-                        'Baseline Sureillance',
-                        'Systematic genomic surveillance',
-                        'SURVEILLANCE'
-                        'surveillance testing',
-                        'Basline Surveillance',
-                        'baselinasurveillance',
-                        'Baseline surveillence',
-                        'Baselina surveillance',
-                        'baseline_surveillance',
-                        'Basic surveillance',
-                        'Base surveillance'
-                      );
-                """;
-                statement.execute(sql2);
-                // Set sampling strategy for Swiss data
-                String sql3 = """
-                    update y_main_metadata_staging
-                    set sampling_strategy = 'Baseline surveillance'
-                    where
-                      country = 'Switzerland'
-                      and (
-                        (submitting_lab = 'Department of Biosystems Science and Engineering, ETH Zürich'
-                           and originating_lab in ('Viollier AG', 'labor team w AG'))
-                        or (submitting_lab = 'HUG, Laboratory of Virology and the Health2030 Genome Center')
-                      );
-                """;
-                statement.execute(sql3);
+                setUndefinedPangoLineageToNull(statement);
+                cleanupSamplingStrategy(statement);
+                setSamplingStrategyForSwissData(statement);
+                setHostForRkiData(statement);
             }
         }
+
+        log.info("Finished final transforms");
+    }
+
+    private static void setHostForRkiData(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set host = 'Homo sapiens'
+            where
+              m.host is null and m.database = 'rki';
+        """;
+        statement.execute(sql);
+    }
+
+    private static void setSamplingStrategyForSwissData(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging
+            set sampling_strategy = 'Baseline surveillance'
+            where
+              country = 'Switzerland'
+              and (
+                (submitting_lab = 'Department of Biosystems Science and Engineering, ETH Zürich'
+                   and originating_lab in ('Viollier AG', 'labor team w AG'))
+                or (submitting_lab = 'HUG, Laboratory of Virology and the Health2030 Genome Center')
+              );
+        """;
+        statement.execute(sql);
+    }
+
+    private static void cleanupSamplingStrategy(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging
+            set sampling_strategy = 'Baseline surveillance'
+            where
+              sampling_strategy in (
+                'Random sampling',
+                'Baseline surveillance (random sampling)',
+                'Baseline Surveillance',
+                'Surveillance testing',
+                'baseline surveillance (random sampling)',
+                'Active surveillance',
+                'baseline surveillance',
+                'Random',
+                'random surveillance',
+                'Surveillance',
+                'surveillance',
+                'Baseline Surveilliance',
+                'Active Surveillance',
+                'Routine Surveillance',
+                'Geographic Representativeness',
+                'Baseline',
+                'BaselineSurveillance',
+                'Representative sampling',
+                'baselinesurveillance',
+                'Random surveillance',
+                'Epidemiological surveilance (Random sampling)',
+                'Base Surveillance',
+                'Basellne surveillance',
+                'Baseline Sureillance',
+                'Systematic genomic surveillance',
+                'SURVEILLANCE',
+                'surveillance testing',
+                'Basline Surveillance',
+                'baselinasurveillance',
+                'Baseline surveillence',
+                'Baselina surveillance',
+                'baseline_surveillance',
+                'Basic surveillance',
+                'Base surveillance'
+              );
+        """;
+        statement.execute(sql);
+    }
+
+    private static void setUndefinedPangoLineageToNull(Statement statement) throws SQLException {
+        String sql = """
+            update y_main_metadata_staging m
+            set pango_lineage = null
+            where
+              m.pango_lineage = 'None'
+              or m.pango_lineage = ''
+              or m.pango_lineage = 'unclassifiable';
+        """;
+        statement.execute(sql);
     }
 
 
@@ -629,6 +653,8 @@ public class TransformService {
      * Switch the _staging tables with the active tables and update value in data_version
      */
     public void switchInStagingTables() throws SQLException {
+        log.info("switching staging tables...");
+
         String sql1 = "select y_switch_in_staging_tables()";
         String sql2 = """
                 insert into data_version (dataset, timestamp)
@@ -648,5 +674,6 @@ public class TransformService {
             conn.commit();
             conn.setAutoCommit(true);
         }
+        log.info("finished switching staging tables");
     }
 }

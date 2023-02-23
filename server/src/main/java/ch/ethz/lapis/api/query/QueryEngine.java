@@ -3,6 +3,7 @@ package ch.ethz.lapis.api.query;
 import static ch.ethz.lapis.api.query.Database.Columns.AGE;
 import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY;
 import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATABASE;
 import static ch.ethz.lapis.api.query.Database.Columns.DATE;
 import static ch.ethz.lapis.api.query.Database.Columns.DATE_SUBMITTED;
 import static ch.ethz.lapis.api.query.Database.Columns.DIED;
@@ -126,6 +127,7 @@ public class QueryEngine {
                         case GISAIDCLADE -> sampleAggregated.setGisaidCloade((String) key.get(i));
                         case SUBMITTINGLAB -> sampleAggregated.setSubmittingLab((String) key.get(i));
                         case ORIGINATINGLAB -> sampleAggregated.setOriginatingLab((String) key.get(i));
+                        case DATABASE -> sampleAggregated.setDatabase((String) key.get(i));
                     }
                 }
                 result.add(sampleAggregated);
@@ -458,6 +460,7 @@ public class QueryEngine {
             case GISAIDCLADE -> GISAID_CLADE;
             case SUBMITTINGLAB -> SUBMITTING_LAB;
             case ORIGINATINGLAB -> ORIGINATING_LAB;
+            case DATABASE -> DATABASE;
         };
     }
 

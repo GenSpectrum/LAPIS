@@ -323,6 +323,8 @@ public class YMainMetadata extends TableImpl<YMainMetadataRecord> {
      */
     public final TableField<YMainMetadataRecord, Double> NEXTCLADE_COVERAGE = createField(DSL.name("nextclade_coverage"), SQLDataType.DOUBLE, this, "");
 
+    public final TableField<YMainMetadataRecord, String> DATABASE = createField(DSL.name("database"), SQLDataType.CLOB, this, "");
+
     private YMainMetadata(Name alias, Table<YMainMetadataRecord> aliased) {
         this(alias, aliased, null);
     }

@@ -132,6 +132,10 @@ public class DetailsField<FieldType> {
             SampleDetail.Fields.originatingLab,
             new DetailsField<>(Y_MAIN_METADATA.ORIGINATING_LAB, SampleDetail::setOriginatingLab)
         );
+        put(
+            SampleDetail.Fields.database,
+            new DetailsField<>(Y_MAIN_METADATA.DATABASE, SampleDetail::setDatabase)
+        );
     }};
 
     public final TableField<YMainMetadataRecord, FieldType> databaseColumnName;
