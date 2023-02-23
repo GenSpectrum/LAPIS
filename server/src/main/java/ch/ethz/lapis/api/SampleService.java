@@ -353,7 +353,7 @@ public class SampleService {
                 .from(
                     idsTable
                         .join(metaDataTable).on(idsTable.field("id", Integer.class).eq(metaDataTable.ID))
-                        .join(sequenceTable).on(metaDataTable.ID.eq(sequenceTable.ID))
+                        .join(sequenceTable).on(metaDataTable.ID.eq(sequenceTable.ID).and(sequenceColumn.isNotNull()))
                 );
 
             streamFastaSequences(
