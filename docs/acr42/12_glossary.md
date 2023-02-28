@@ -1,0 +1,6 @@
+# Glossary
+
+| Term    | Definition                                                                                                                                                                                                                                                       |
+|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| AA      | amino acid                                                                                                                                                                                                                                                       |
+| aligned | a nucleotide sequence is aligned, if it is arranged such that it has many similarities to a given reference genome. The aligned sequence has the same length as the reference genome. Gaps are marked in the aligned sequence. Insertions are stored separately. |
