@@ -4,5 +4,36 @@
 |----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | AA       | amino acid                                                                                                                                                                                                                                                       |
 | aligned  | a nucleotide sequence is aligned, if it is arranged such that it has many similarities to a given reference genome. The aligned sequence has the same length as the reference genome. Gaps are marked in the aligned sequence. Insertions are stored separately. |
+| mutation | a divergence from the reference genome (see below).                                                                                                                                                                                                              |
 | QC       | quality control; in our case, it usually refers to the quality checks and metrics of the sequences, targeting how well the nucleotide sequence was determined from the probe.                                                                                    |
 | Variant  | We follow a very open definition of variants. Every subset of sequences is considered a variant. A variant is specified by lineage/clade names and mutations. A variant does not need to be [monophyletic](https://en.wikipedia.org/wiki/Monophyly).             |
+
+## Mutations
+
+Mutations can occur either on the nucleotide level or on the AA level. For the nucleotides a single symbol can produce a
+mutation, whereas for the amino acids, some nucleotide mutations still produce the same amino
+acid ([see also](https://en.wikipedia.org/wiki/DNA_and_RNA_codon_tables)).
+
+**Amino acid**
+
+The gene has to be provided for the AA mutation
+
+Example ORF_1a:G1234S translates to
+
+- in Gene: ORF_1a
+- AA mutation from G to S at position 1234
+
+The origin AA symbol can be omitted, since it is clear from the reference genome
+
+Example:
+ORF_1a:1234S
+
+**Nucleotide**
+
+Example:
+C1234T
+
+The origin nucleotide symbol can be omitted, since it is clear from the reference genome
+
+Example:
+1234T

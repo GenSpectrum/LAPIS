@@ -1,0 +1,34 @@
+@startuml
+
+actor Enduser as "End-user"
+actor maintainer as "Maintainer"
+
+component LAPIS as "LAPIS" {
+    portout restInterface as "REST Interface"
+    portin inputData as "input data"
+}
+
+
+folder InputData as "Sequence data on disk" {
+}
+
+
+
+file "Configuration File" as config
+
+
+
+Enduser <-up-> restInterface
+
+
+InputData -d-> inputData
+
+
+maintainer -d-> config: provides
+maintainer -> LAPIS: triggers update of data
+
+config -r-> LAPIS
+
+
+
+@enduml
