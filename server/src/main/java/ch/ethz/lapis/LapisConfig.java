@@ -22,7 +22,8 @@ public class LapisConfig implements Config {
     private String redisHost;
     private Integer redisPort;
     private OpennessLevel apiOpennessLevel;
-    private DatabaseConfig s3cVineyard;
+    private DatabaseConfig extVineyard;
+    private String salt;
 
     private String notificationKey;
 

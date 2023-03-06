@@ -1,7 +1,8 @@
 create schema open;
 create schema gisaid;
 
-grant usage on schema open, gisaid to lapis_proc;
+create schema swiss_internal;
+grant usage on schema swiss_internal to lapis_api, lapis_proc;
 
 -- Basic information
 
@@ -31,100 +32,6 @@ create table nextclade_dataset_version
   id serial primary key,
   inserted_at timestamp not null,
   tag text not null
-);
-
-
--- Source: Nextstrain/GenBank
-
-create table y_nextstrain_genbank
-(
-  metadata_hash text,
-  seq_original_hash text,
-  seq_aligned_hash text,
-  genbank_accession text,
-  sra_accession text,
-  gisaid_epi_isl text,
-  strain text primary key,
-  date date,
-  year integer,
-  month integer,
-  day integer,
-  date_original text,
-  date_submitted date,
-  region text,
-  country text,
-  division text,
-  location text,
-  region_exposure	text,
-  country_exposure text,
-  division_exposure text,
-  host text,
-  age int,
-  sex text,
-  sampling_strategy text,
-  pango_lineage text,
-  nextclade_pango_lineage text,
-  nextstrain_clade text,
-  gisaid_clade text,
-  originating_lab text,
-  submitting_lab text,
-  authors text,
-  seq_original_compressed bytea,
-  seq_aligned_compressed bytea,
-  aa_seqs_compressed bytea,
-  aa_mutations text,
-  aa_insertions text,
-  aa_unknowns text,
-  nuc_substitutions text,
-  nuc_deletions text,
-  nuc_insertions text,
-  nuc_unknowns text,
-  nextclade_total_substitutions int,
-  nextclade_total_deletions int,
-  nextclade_total_insertions int,
-  nextclade_total_frame_shifts int,
-  nextclade_total_aminoacid_substitutions int,
-  nextclade_total_aminoacid_deletions int,
-  nextclade_total_aminoacid_insertions int,
-  nextclade_total_missing int,
-  nextclade_total_non_acgtns int,
-  nextclade_total_pcr_primer_changes int,
-  nextclade_pcr_primer_changes text,
-  nextclade_alignment_score float,
-  nextclade_alignment_start int,
-  nextclade_alignment_end int,
-  nextclade_qc_overall_score float,
-  nextclade_qc_overall_status text,
-  nextclade_qc_missing_data_missing_data_threshold float,
-  nextclade_qc_missing_data_score float,
-  nextclade_qc_missing_data_status text,
-  nextclade_qc_missing_data_total_missing int,
-  nextclade_qc_mixed_sites_mixed_sites_threshold float,
-  nextclade_qc_mixed_sites_score float,
-  nextclade_qc_mixed_sites_status text,
-  nextclade_qc_mixed_sites_total_mixed_sites int,
-  nextclade_qc_private_mutations_cutoff float,
-  nextclade_qc_private_mutations_excess float,
-  nextclade_qc_private_mutations_score float,
-  nextclade_qc_private_mutations_status text,
-  nextclade_qc_private_mutations_total int,
-  nextclade_qc_snp_clusters_clustered_snps text,
-  nextclade_qc_snp_clusters_score float,
-  nextclade_qc_snp_clusters_status text,
-  nextclade_qc_snp_clusters_total_snps int,
-  nextclade_qc_frame_shifts_frame_shifts text,
-  nextclade_qc_frame_shifts_total_frame_shifts int,
-  nextclade_qc_frame_shifts_frame_shifts_ignored text,
-  nextclade_qc_frame_shifts_total_frame_shifts_ignored int,
-  nextclade_qc_frame_shifts_score float,
-  nextclade_qc_frame_shifts_status text,
-  nextclade_qc_stop_codons_stop_codons text,
-  nextclade_qc_stop_codons_total_stop_codons int,
-  nextclade_qc_stop_codons_score float,
-  nextclade_qc_stop_codons_status text,
-  nextclade_coverage float,
-  nextclade_errors text,
-  database text
 );
 
 
@@ -222,26 +129,13 @@ create table y_gisaid
 );
 
 
--- Source: S3C (additional metadata)
+-- Source: BAG (additional metadata)
 
-create table y_s3c (
+create table bag (
   gisaid_epi_isl text unique,
-  sra_accession text unique,
-  age integer,
-  sex text,
-  hospitalized boolean,
-  died boolean,
-  fully_vaccinated boolean
+  additional_data text
 );
 
-
--- Source: cov-lineages GitHub pangolin-assignments
--- https://github.com/cov-lineages/pangolin-assignment
-
-create table y_pangolin_assignment (
-  gisaid_epi_isl text primary key,
-  pango_lineage text
-);
 
 -- Transformed and merged
 
@@ -302,7 +196,8 @@ create table y_main_metadata
   nextclade_alignment_start int,
   nextclade_alignment_end int,
   nextclade_coverage float,
-  database text
+  database text,
+  additional_data text
 );
 
 create index on y_main_metadata (genbank_accession);
@@ -366,3 +261,6 @@ create table y_main_aa_sequence_columnar
   data_compressed bytea not null,
   primary key (gene, position)
 );
+
+grant select on all tables in schema swiss_internal to lapis_api;
+grant select, insert, update, delete, truncate on all tables in schema swiss_internal to lapis_proc;

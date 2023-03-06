@@ -512,18 +512,12 @@ public class TransformService {
     }
 
 
-    public void mergeAdditionalMetadataFromS3c() throws SQLException {
+    public void mergeAdditionalMetadataFromBag() throws SQLException {
         String sql = """
                 update y_main_metadata_staging m
-                set
-                  age = a.age,
-                  sex = a.sex,
-                  hospitalized = a.hospitalized,
-                  died = a.died,
-                  fully_vaccinated = null -- TODO change this to "a.fully_vaccinated" once we decide to use it
-                from y_s3c a
-                where
-                  m.gisaid_epi_isl = a.gisaid_epi_isl or m.sra_accession = a.sra_accession;
+                set additional_data = a.additional_data
+                from bag a
+                where m.gisaid_epi_isl = a.gisaid_epi_isl;
             """;
         try (Connection conn = databasePool.getConnection()) {
             try (Statement statement = conn.createStatement()) {
