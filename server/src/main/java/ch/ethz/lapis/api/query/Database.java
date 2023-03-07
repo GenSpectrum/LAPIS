@@ -1,5 +1,6 @@
 package ch.ethz.lapis.api.query;
 
+import ch.ethz.lapis.LapisMain;
 import ch.ethz.lapis.util.PangoLineageAlias;
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 import ch.ethz.lapis.util.ReferenceGenomeData;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.json.JSONObject;
 
 @Slf4j
 public class Database {
@@ -462,6 +464,35 @@ public class Database {
                         }
                         for (String booleanColumn : BOOLEAN_COLUMNS) {
                             database.booleanColumns.get(booleanColumn)[i] = rs.getObject(booleanColumn, Boolean.class);
+                        }
+                        // Special case for encrypted data
+                        String additionalDataEncrypted = rs.getString("additional_data");
+                        if (additionalDataEncrypted != null) {
+                            String additionalData = LapisMain.encryptor.decrypt(additionalDataEncrypted);
+                            JSONObject json = new JSONObject(additionalData);
+                            // Age
+                            if (json.has("age_group_covid19")) {
+                                String ageGroup = json.getString("age_group_covid19");
+                                if (ageGroup != null && !ageGroup.equals("unknown")) {
+                                    database.integerColumns.get(Columns.AGE)[i] = switch (ageGroup) {
+                                        case "0 - 9" -> 5;
+                                        case "10 - 19" -> 15;
+                                        case "20 - 29" -> 25;
+                                        case "30 - 39" -> 35;
+                                        case "40 - 49" -> 45;
+                                        case "50 - 59" -> 55;
+                                        case "60 - 69" -> 65;
+                                        case "70 - 79" -> 75;
+                                        case "80+" -> 85;
+                                        default -> null;
+                                    };
+                                }
+                            }
+                            // Hospitalization and death
+                            database.booleanColumns.get(Columns.HOSPITALIZED)[i] = json.has("hosp_date")
+                                && json.get("hosp_date") != null;
+                            database.booleanColumns.get(Columns.DIED)[i] = json.has("death_yearweek")
+                                && json.get("death_yearweek") != null;
                         }
                         ++i;
                     }
