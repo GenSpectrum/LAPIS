@@ -1,16 +1,11 @@
 package ch.ethz.lapis.util;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 import java.util.Base64;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
@@ -31,29 +26,31 @@ public class Encryptor {
         secret = new SecretKeySpec(factory.generateSecret(spec)
             .getEncoded(), "AES");
         // iv
-        byte[] ivBytes = new byte[16];
-        new SecureRandom().nextBytes(ivBytes);
-        iv = new IvParameterSpec(ivBytes);
+        iv = new IvParameterSpec(Arrays.copyOf(salt.getBytes(), 16));
     }
 
-    public String encrypt(String input)
-        throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-        InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, secret, iv);
-        byte[] cipherText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder()
-            .encodeToString(cipherText);
+    public String encrypt(String input) {
+        try {
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.ENCRYPT_MODE, secret, iv);
+            byte[] cipherText = cipher.doFinal(input.getBytes());
+            return Base64.getEncoder()
+                .encodeToString(cipherText);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String decrypt(String cipherText)
-        throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-        InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, secret, iv);
-        byte[] plainText = cipher.doFinal(Base64.getDecoder()
-            .decode(cipherText));
-        return new String(plainText);
+    public String decrypt(String cipherText) {
+        try {
+            Cipher cipher = Cipher.getInstance(algorithm);
+            cipher.init(Cipher.DECRYPT_MODE, secret, iv);
+            byte[] plainText = cipher.doFinal(Base64.getDecoder()
+                .decode(cipherText));
+            return new String(plainText);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
