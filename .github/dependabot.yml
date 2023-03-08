@@ -8,3 +8,7 @@ updates:
     directory: server/
     schedule:
       interval: weekly
+  - package-ecosystem: gradle
+    directory: lapis2/
+    schedule:
+      interval: weekly
