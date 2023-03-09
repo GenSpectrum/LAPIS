@@ -21,11 +21,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: "org.mockito"
     }
-    testImplementation("com.ninja-squad:springmockk:4.0.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.5.2")
+    testImplementation 'com.ninja-squad:springmockk:4.0.0'
+    testImplementation 'org.mock-server:mockserver-netty:5.14.0'
 }
 
 compileKotlin {
@@ -41,7 +44,5 @@ tasks.named('test') {
         events TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.STANDARD_OUT
         exceptionFormat TestExceptionFormat.FULL
         showExceptions true
-        showCauses true
-        showStackTraces true
     }
 }

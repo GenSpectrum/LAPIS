@@ -1,0 +1,32 @@
+package org.genspectrum.lapis.silo
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse.BodyHandlers
+
+class SiloClient(private val siloUrl: String) {
+    private val objectMapper = jacksonObjectMapper()
+
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder(URI("$siloUrl/query"))
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(query)))
+            .build()
+
+        val response = client.send(request, BodyHandlers.ofString())
+
+        return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
+    }
+}
+
+data class SiloQueryResponse<ResponseType>(
+    val queryResult: ResponseType,
+    val actionTime: Int,
+    val filterTime: Int,
+    val parseTime: Int,
+)
