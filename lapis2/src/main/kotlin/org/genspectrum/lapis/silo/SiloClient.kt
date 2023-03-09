@@ -18,11 +18,26 @@ class SiloClient(private val siloUrl: String) {
             .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(query)))
             .build()
 
-        val response = client.send(request, BodyHandlers.ofString())
+        val response =
+            try {
+                client.send(request, BodyHandlers.ofString())
+            } catch (exception: Exception) {
+                throw SiloException(exception.message, exception)
+            }
 
-        return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
+        if (response.statusCode() != 200) {
+            throw SiloException(response.body(), null)
+        }
+
+        try {
+            return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
+        } catch (exception: Exception) {
+            throw SiloException(exception.message, exception)
+        }
     }
 }
+
+class SiloException(message: String?, cause: Throwable?) : Exception(message, cause)
 
 data class SiloQueryResponse<ResponseType>(
     val queryResult: ResponseType,
