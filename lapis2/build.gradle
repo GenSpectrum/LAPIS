@@ -1,0 +1,47 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
+plugins {
+    id 'org.springframework.boot' version '3.0.4'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.10'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.8.10'
+}
+
+group = 'org.genspectrum'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '19'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: "org.mockito"
+    }
+    testImplementation("com.ninja-squad:springmockk:4.0.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.5.2")
+}
+
+compileKotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexport-kdoc")
+        jvmTarget.set(JvmTarget.JVM_19)
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.STANDARD_OUT
+        exceptionFormat TestExceptionFormat.FULL
+        showExceptions true
+        showCauses true
+        showStackTraces true
+    }
+}
