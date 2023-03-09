@@ -25,7 +25,7 @@ dependencies {
         exclude group: "org.mockito"
     }
     testImplementation("com.ninja-squad:springmockk:4.0.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.5.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.2")
 }
 
 compileKotlin {
