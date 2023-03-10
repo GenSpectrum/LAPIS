@@ -43,5 +43,5 @@ data class SiloQueryResponse<ResponseType>(
     val queryResult: ResponseType,
     val actionTime: Int,
     val filterTime: Int,
-    val parseTime: Int,
+    val parseTime: Int
 )

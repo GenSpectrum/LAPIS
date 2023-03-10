@@ -37,14 +37,16 @@ class SiloClientTest {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
-                .withBody("""{
-                    "actionTime": 0,
-                    "filterTime": 0,
-                    "parseTime": 0,
-                    "queryResult": {
-                        "count": 1
-                    }
-                }""")
+                .withBody(
+                    """{
+                        "actionTime": 0,
+                        "filterTime": 0,
+                        "parseTime": 0,
+                        "queryResult": {
+                            "count": 1
+                        }
+                    }"""
+                )
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))

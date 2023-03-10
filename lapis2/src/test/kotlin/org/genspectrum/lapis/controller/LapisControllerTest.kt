@@ -23,7 +23,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         every { siloClientMock.sendQuery(any<SiloQuery<AggregatedResponse>>()) } returns AggregatedResponse(0)
 
         mockMvc.perform(get("/aggregated"))
-                .andExpect(status().isOk)
-                .andExpect(jsonPath("\$.count").value(0))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.count").value(0))
     }
 }
