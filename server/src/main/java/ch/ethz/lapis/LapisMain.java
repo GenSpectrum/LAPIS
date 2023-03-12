@@ -249,7 +249,6 @@ public class LapisMain {
         }
         globalConfig = config;
         dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
-        extDbPool = DatabaseService.createDatabaseConnectionPool(config.getExtVineyard());
         GlobalProxyManager.setProxyFromConfig(config.getHttpProxy());
 
         Scanner scanner = new Scanner(System.in);
@@ -268,6 +267,7 @@ public class LapisMain {
             if (args.length < 2) {
                 throw new RuntimeException("Please provide the update steps. - TODO: write help page");
             }
+            extDbPool = DatabaseService.createDatabaseConnectionPool(config.getExtVineyard());
             String[] updateSteps = args[1].split(",");
             ComboPooledDataSource dbPool = DatabaseService.createDatabaseConnectionPool(config.getVineyard());
             Set<String> availableSteps = new HashSet<>() {{
