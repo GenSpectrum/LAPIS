@@ -2,6 +2,13 @@
 
 This is a generalized Lightweight API for Sequences. It uses [SILO](https://github.com/GenSpectrum/LAPIS-SILO) as database for storing and querying the sequence data.
 
+## OpenAPI documentation
+
+The swagger ui is available at `url.to.lapis:<port>/swagger-ui.html`.
+
+The OpenAPI specification is available at `url.to.lapis:<port>/api-docs` (in JSON format) or at 
+`url.to.lapis:<port>/api-docs.yaml` (in YAML format).
+
 ## Setup
 
 Run tests:
