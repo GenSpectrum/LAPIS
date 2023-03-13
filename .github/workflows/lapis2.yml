@@ -3,7 +3,7 @@ name: LAPIS v2
 on: [push]
 
 jobs:
-  tests:
+  Tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,8 +12,13 @@ jobs:
         with:
           java-version: '19'
           distribution: 'adopt'
-      - name: Execute tests
+      - name: Execute Tests
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
+          build-root-directory: lapis2
+      - name: Check Format And Lint
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ktlintCheck
           build-root-directory: lapis2

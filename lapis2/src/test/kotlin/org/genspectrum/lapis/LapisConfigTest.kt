@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.file.Path
 
-class LapisConfigTest{
+class LapisConfigTest {
     @Test
     fun `given an invalid config file then throws exception`() {
         val url = javaClass.getResource("/config/invalidLapisConfig.yml")

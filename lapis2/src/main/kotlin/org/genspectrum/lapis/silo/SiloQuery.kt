@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import org.genspectrum.lapis.response.AggregatedResponse
 
-data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filter: SiloFilter) {
-}
+data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filter: SiloFilter)
 
 sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>) {
     companion object {
@@ -19,6 +18,6 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
     )
 }
 
-sealed class SiloFilter(val type: String) {}
+sealed class SiloFilter(val type: String)
 
 data class StringEquals(val column: String, val value: String) : SiloFilter("StringEquals")
