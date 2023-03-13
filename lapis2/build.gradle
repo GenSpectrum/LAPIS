@@ -30,7 +30,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: "org.mockito"
     }
-    testImplementation 'com.ninja-squad:springmockk:4.0.1'
+    testImplementation 'com.ninja-squad:springmockk:4.0.2'
     testImplementation 'org.mock-server:mockserver-netty:5.14.0'
 }
 
