@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  lapis:
+    image: ghcr.io/genspectrum/lapis-v2:${LAPIS_TAG}
+    ports:
+      - "8080:8080"
+    command: --silo.url=http://silo:8080
+  silo:
+    image: ghcr.io/genspectrum/silo:${SILO_TAG}
+    ports:
+      - ":8080"

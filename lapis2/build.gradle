@@ -47,3 +47,7 @@ tasks.named('test') {
         showExceptions true
     }
 }
+
+tasks.named('bootBuildImage') {
+    imageName = "ghcr.io/genspectrum/${project.name}"
+}
