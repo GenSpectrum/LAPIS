@@ -6,6 +6,6 @@ services:
       - "8080:8080"
     command: --silo.url=http://silo:8080
   silo:
-    image: ghcr.io/genspectrum/silo:${SILO_TAG}
+    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
       - ":8080"
