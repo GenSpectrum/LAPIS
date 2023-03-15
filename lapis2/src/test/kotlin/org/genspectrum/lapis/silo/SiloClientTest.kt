@@ -45,8 +45,8 @@ class SiloClientTest {
                         "queryResult": {
                             "count": 1
                         }
-                    }"""
-                )
+                    }""",
+                ),
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
@@ -61,7 +61,7 @@ class SiloClientTest {
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
                 .withStatusCode(500)
-                .withBody("""{"someError":  "some message"}""")
+                .withBody("""{"someError":  "some message"}"""),
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
@@ -76,7 +76,7 @@ class SiloClientTest {
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
                 .withStatusCode(200)
-                .withBody("""{"unexpectedField":  "some message"}""")
+                .withBody("""{"unexpectedField":  "some message"}"""),
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
@@ -91,7 +91,7 @@ class SiloClientTest {
                 request()
                     .withMethod("POST")
                     .withPath("/query")
-                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withContentType(MediaType.APPLICATION_JSON),
             )
             .respond(httpResponse)
     }

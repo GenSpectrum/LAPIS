@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.type.TypeReference
 import org.genspectrum.lapis.response.AggregatedResponse
 
-data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filter: SiloFilter)
+data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
 
 sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>) {
     companion object {
@@ -13,11 +13,17 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
         }
     }
 
-    private class AggregatedAction(val type: String) : SiloAction<AggregatedResponse>(
-        object : TypeReference<SiloQueryResponse<AggregatedResponse>>() {}
+    private data class AggregatedAction(val type: String) : SiloAction<AggregatedResponse>(
+        object : TypeReference<SiloQueryResponse<AggregatedResponse>>() {},
     )
 }
 
-sealed class SiloFilter(val type: String)
+sealed class SiloFilterExpression(val type: String)
 
-data class StringEquals(val column: String, val value: String) : SiloFilter("StringEquals")
+data class StringEquals(val column: String, val value: String) : SiloFilterExpression("StringEquals")
+
+data class PangoLineageEquals(val pangoLineage: String) : SiloFilterExpression("PangoLineage")
+
+object True : SiloFilterExpression("True")
+
+data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
