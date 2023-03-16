@@ -12,6 +12,8 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     defaults:
       run:
         working-directory: ./server
