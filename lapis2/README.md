@@ -30,3 +30,16 @@ Use Docker Compose to run SILO and LAPIS:
 ```
 LAPIS_TAG=latest SILO_TAG=latest docker compose up
 ```
+
+## End-to-end tests
+
+There are end-to-end tests in `siloLapisTests/` that test the integration of SILO and LAPIS.
+
+How to execute the tests
+(Given that you have a running LAPIS instance listening on localhost:8080, e.g. via `docker compose up`):
+
+* Generate the OpenAPI docs for LAPIS: `cd lapis2 && ./gradlew generateOpenApiDocs`
+* Switch to test directory: `cd ../siloLapisTests/`
+* Install NPM dependencies: `npm install`
+* Generate a Typescript client for LAPIS: `npm run generateLapisClient`
+* Execute the tests: `npm run test`

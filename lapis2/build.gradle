@@ -64,6 +64,9 @@ tasks.named("inspectClassesForKotlinIC") {
 }
 
 openApi {
+    outputDir.set(file("$rootDir"))
+    outputFileName.set("lapis-v2-openapi.json")
+    apiDocsUrl.set("http://localhost:8080/api-docs")
     customBootRun {
         args.set(["--silo.url=does.not.matter.here"])
     }

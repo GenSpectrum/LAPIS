@@ -12,3 +12,7 @@ updates:
     directory: lapis2/
     schedule:
       interval: weekly
+  - package-ecosystem: npm
+    directory: siloLapisTests/
+    schedule:
+      interval: weekly
