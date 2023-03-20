@@ -25,7 +25,8 @@ class SiloClient(@Value("\${silo.url}") private val siloUrl: String) {
             try {
                 client.send(request, BodyHandlers.ofString())
             } catch (exception: Exception) {
-                throw SiloException(exception.message, exception)
+                val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
+                throw SiloException(message, exception)
             }
 
         if (response.statusCode() != 200) {
@@ -35,7 +36,8 @@ class SiloClient(@Value("\${silo.url}") private val siloUrl: String) {
         try {
             return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
         } catch (exception: Exception) {
-            throw SiloException(exception.message, exception)
+            val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
+            throw SiloException(message, exception)
         }
     }
 }
