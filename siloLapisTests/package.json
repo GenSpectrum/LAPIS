@@ -7,7 +7,9 @@
     "generateLapisClient": "npm run runOpenApiGenerator && npm run copyGeneratedFiles && npm run cleanUpGeneratedFiles",
     "runOpenApiGenerator": "openapi-generator-cli generate -i ../lapis2/lapis-v2-openapi.json -g typescript-fetch -o generated-sources --additional-properties=supportsES6=false",
     "copyGeneratedFiles": "cp generated-sources/index.ts generated-sources/runtime.ts test/lapisClient && cp -r generated-sources/apis generated-sources/models test/lapisClient",
-    "cleanUpGeneratedFiles": "rm -rf generated-sources"
+    "cleanUpGeneratedFiles": "rm -rf generated-sources",
+    "check-format": "prettier --check .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.5.2",
@@ -16,6 +18,7 @@
     "@types/node": "^18.15.3",
     "chai": "^4.3.7",
     "mocha": "^10.2.0",
+    "prettier": "^2.8.6",
     "request": "^2.88.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"

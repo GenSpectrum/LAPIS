@@ -1,4 +1,4 @@
 {
-    "require": "ts-node/register",
-    "spec": "test/**/*.spec.ts"
+  "require": "ts-node/register",
+  "spec": "test/**/*.spec.ts"
 }

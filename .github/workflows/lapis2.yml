@@ -111,6 +111,9 @@ jobs:
           npm ci
           npm run generateLapisClient
       -
+        name: Check Format
+        run: cd siloLapisTests && npm run check-format
+      -
         name: Docker metadata
         id: dockerMetadata
         uses: docker/metadata-action@v4
