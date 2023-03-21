@@ -24,6 +24,8 @@ data class StringEquals(val column: String, val value: String) : SiloFilterExpre
 
 data class PangoLineageEquals(val pangoLineage: String) : SiloFilterExpression("PangoLineage")
 
+data class NucleotideSymbolEquals(val position: Int, val symbol: String) : SiloFilterExpression("NucleotideEquals")
+
 object True : SiloFilterExpression("True")
 
 data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
