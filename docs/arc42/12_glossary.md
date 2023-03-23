@@ -14,9 +14,11 @@ Mutations can occur either on the nucleotide level or on the AA level. For the n
 mutation, whereas for the amino acids, some nucleotide mutations still produce the same amino
 acid ([see also](https://en.wikipedia.org/wiki/DNA_and_RNA_codon_tables)).
 
+The following explains the notations for mutations.
+
 **Amino acid**
 
-The gene has to be provided for the AA mutation
+The gene has to be provided for the AA mutation, since AAs only make sense within a gene.
 
 Example ORF_1a:G1234S translates to
 

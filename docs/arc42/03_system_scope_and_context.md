@@ -1,5 +1,7 @@
 # System Scope and Context
 
+This chapter specifies the boundaries of SILO-LAPIS and describes the interfaces to other systems and users.
+
 ![systemScopeAndContextBusiness](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/GenSpectrum/LAPIS/master/docs/arc42/images/systemScopeAndContext.puml)
 
 **LAPIS**
@@ -25,8 +27,8 @@
 **Sequence data on disk**
 
 Preprocessing:
-- original data most likely provided by GISAID/Genbank
-- original data must be preprocessed (by for example Nextstrain), which includes the following steps 
+- original data most likely provided by Genbank
+- original data must be preprocessed (for example by Nextstrain), which includes the following steps 
     - align nucleotide data
     - assign amino acids
     - determine insertions

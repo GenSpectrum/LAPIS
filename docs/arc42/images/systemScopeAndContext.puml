@@ -3,19 +3,16 @@
 actor Enduser as "End-user"
 actor maintainer as "Maintainer"
 
-component LAPIS as "LAPIS" {
+component SILO-LAPIS as "SILO-LAPIS" {
     portout restInterface as "REST Interface"
     portin inputData as "input data"
+
+    file "Configuration File" as config
 }
 
 
 folder InputData as "Sequence data on disk" {
 }
-
-
-
-file "Configuration File" as config
-
 
 
 Enduser <-up-> restInterface
@@ -24,11 +21,8 @@ Enduser <-up-> restInterface
 InputData -d-> inputData
 
 
-maintainer -d-> config: provides
-maintainer -> LAPIS: triggers update of data
-
-config -r-> LAPIS
-
+maintainer -r-> config: provides
+maintainer -r-> "SILO-LAPIS": triggers update of data
 
 
 @enduml
