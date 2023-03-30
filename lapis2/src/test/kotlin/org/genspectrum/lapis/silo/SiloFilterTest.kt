@@ -60,11 +60,22 @@ class SiloFilterTest {
                 """,
             ),
             Arguments.of(
-                PangoLineageEquals("ABC"),
+                PangoLineageEquals("ABC", includeSublineages = false),
                 """
                 {
                     "type": "PangoLineage",
-                    "pangoLineage": "ABC"
+                    "value": "ABC",
+                    "includeSublineages": false
+                }
+                """,
+            ),
+            Arguments.of(
+                PangoLineageEquals("ABC", includeSublineages = true),
+                """
+                {
+                    "type": "PangoLineage",
+                    "value": "ABC",
+                    "includeSublineages": true
                 }
                 """,
             ),

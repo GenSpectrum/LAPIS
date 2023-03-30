@@ -1,0 +1,9 @@
+{
+  "testCaseName": "Pango lineage B.1.1.7.* yields the same result as B.1.1.7*",
+  "lapisRequest": {
+    "pangoLineage": "B.1.1.7.*"
+  },
+  "expected": {
+    "count": 49
+  }
+}
