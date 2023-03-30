@@ -111,12 +111,8 @@ class AggregatedModelTest {
                 ),
             ),
             Arguments.of(
-                mapOf(
-                    "pangoLineage" to "A.1.2.3",
-                ),
-                And(
-                    listOf(PangoLineageEquals("A.1.2.3")),
-                ),
+                mapOf("pangoLineage" to "A.1.2.3"),
+                And(listOf(PangoLineageEquals("A.1.2.3"))),
             ),
             Arguments.of(
                 mapOf(
@@ -138,11 +134,7 @@ class AggregatedModelTest {
                 ),
                 And(
                     listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "A"),
-                            ),
-                        ),
+                        And(listOf(NucleotideSymbolEquals(123, "A"))),
                     ),
                 ),
             ),
@@ -180,11 +172,7 @@ class AggregatedModelTest {
                 "G123A",
                 And(
                     listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "A"),
-                            ),
-                        ),
+                        And(listOf(NucleotideSymbolEquals(123, "A"))),
                     ),
                 ),
             ),
@@ -192,11 +180,7 @@ class AggregatedModelTest {
                 "123A",
                 And(
                     listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "A"),
-                            ),
-                        ),
+                        And(listOf(NucleotideSymbolEquals(123, "A"))),
                     ),
                 ),
             ),
@@ -204,11 +188,7 @@ class AggregatedModelTest {
                 "123.",
                 And(
                     listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "."),
-                            ),
-                        ),
+                        And(listOf(NucleotideSymbolEquals(123, "."))),
                     ),
                 ),
             ),
@@ -216,11 +196,7 @@ class AggregatedModelTest {
                 "123-",
                 And(
                     listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "-"),
-                            ),
-                        ),
+                        And(listOf(NucleotideSymbolEquals(123, "-"))),
                     ),
                 ),
             ),

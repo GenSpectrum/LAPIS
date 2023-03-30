@@ -1,0 +1,9 @@
+{
+  "testCaseName": "region equals Europe",
+  "lapisRequest": {
+    "region": "Europe"
+  },
+  "expected": {
+    "count": 100
+  }
+}
