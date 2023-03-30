@@ -1,15 +1,28 @@
 package org.genspectrum.lapis
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import java.nio.file.Path
+import io.swagger.v3.oas.models.Components
+import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.media.Schema
+import org.genspectrum.lapis.controller.REQUEST_SCHEMA
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
-data class LapisConfig(val siloUrl: String)
+@Configuration
+class LapisConfig {
+    @Bean
+    fun openAPI(@Value("\${lapis.aggregated-field-names}") allowedFieldNames: String): OpenAPI {
+        val properties = allowedFieldNames.split(",").associateWith { Schema<String>().type("string") }
 
-fun readLapisConfig(configFile: Path): LapisConfig {
-    val objectMapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
-
-    return objectMapper.readValue(configFile.toFile())
+        return OpenAPI()
+            .components(
+                Components().addSchemas(
+                    REQUEST_SCHEMA,
+                    Schema<String>()
+                        .type("object")
+                        .description("valid filters for sequence data")
+                        .properties(properties),
+                ),
+            )
+    }
 }

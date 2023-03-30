@@ -1,0 +1,9 @@
+{
+  "testCaseName": "two mutations: T1-,A23062T",
+  "lapisRequest": {
+    "nucleotideMutations": "T1-,A23062T"
+  },
+  "expected": {
+    "count": 42
+  }
+}

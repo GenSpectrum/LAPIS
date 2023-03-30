@@ -1,0 +1,9 @@
+{
+  "testCaseName": "country equals Switzerland",
+  "lapisRequest": {
+    "country": "Switzerland"
+  },
+  "expected": {
+    "count": 100
+  }
+}

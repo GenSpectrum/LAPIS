@@ -88,6 +88,16 @@ class SiloFilterTest {
                 }
                 """,
             ),
+            Arguments.of(
+                NucleotideSymbolEquals(1234, "A"),
+                """
+                {
+                    "type": "NucleotideEquals",
+                    "position": 1234,
+                    "symbol": "A"
+                }
+                """,
+            ),
         )
     }
 }
