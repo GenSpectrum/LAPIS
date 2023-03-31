@@ -64,6 +64,15 @@ class AggregatedModelTest {
         }
     }
 
+    @Test
+    fun `given invalid Pango lineage ending with a dot then handleRequest should throw an exception`() {
+        val filterParameter = mapOf("pangoLineage" to "A.1.2.")
+
+        assertThrows<IllegalArgumentException> {
+            underTest.handleRequest(filterParameter)
+        }
+    }
+
     @ParameterizedTest(name = "nucleotideMutations: {0}")
     @MethodSource("getNucleotideMutationWithWrongSyntax")
     fun `given nucleotideMutations with wrong syntax then handleRequest should throw an exception`(
@@ -112,7 +121,15 @@ class AggregatedModelTest {
             ),
             Arguments.of(
                 mapOf("pangoLineage" to "A.1.2.3"),
-                And(listOf(PangoLineageEquals("A.1.2.3"))),
+                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = false))),
+            ),
+            Arguments.of(
+                mapOf("pangoLineage" to "A.1.2.3*"),
+                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = true))),
+            ),
+            Arguments.of(
+                mapOf("pangoLineage" to "A.1.2.3.*"),
+                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = true))),
             ),
             Arguments.of(
                 mapOf(
@@ -122,7 +139,7 @@ class AggregatedModelTest {
                 ),
                 And(
                     listOf(
-                        PangoLineageEquals("A.1.2.3"),
+                        PangoLineageEquals("A.1.2.3", includeSublineages = false),
                         StringEquals("some_metadata", "ABC"),
                         StringEquals("other_metadata", "DEF"),
                     ),

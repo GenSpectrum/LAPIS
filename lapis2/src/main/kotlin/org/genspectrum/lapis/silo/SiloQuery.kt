@@ -22,7 +22,8 @@ sealed class SiloFilterExpression(val type: String)
 
 data class StringEquals(val column: String, val value: String) : SiloFilterExpression("StringEquals")
 
-data class PangoLineageEquals(val pangoLineage: String) : SiloFilterExpression("PangoLineage")
+data class PangoLineageEquals(val value: String, val includeSublineages: Boolean) :
+    SiloFilterExpression("PangoLineage")
 
 data class NucleotideSymbolEquals(val position: Int, val symbol: String) : SiloFilterExpression("NucleotideEquals")
 

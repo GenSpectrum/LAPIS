@@ -25,19 +25,28 @@ class AggregatedModel(private val siloClient: SiloClient) {
             SiloQuery(
                 SiloAction.aggregated(),
                 And(
-                    filterParameter.map { convertToSiloFilter(it.key, it.value) },
+                    filterParameter.map { mapToSiloFilter(it.key, it.value) },
                 ),
             ),
         )
     }
 
-    fun convertToSiloFilter(key: String, value: String) = when (key) {
-        "pangoLineage" -> PangoLineageEquals(value)
-        "nucleotideMutations" -> generateNucleotideFilter(value)
+    fun mapToSiloFilter(key: String, value: String) = when (key) {
+        "pangoLineage" -> mapToPangoLineageFilter(value)
+        "nucleotideMutations" -> mapToNucleotideFilter(value)
         else -> StringEquals(key, value)
     }
 
-    private fun generateNucleotideFilter(userInput: String): SiloFilterExpression {
+    private fun mapToPangoLineageFilter(value: String) = when {
+        value.endsWith(".*") -> PangoLineageEquals(value.substringBeforeLast(".*"), includeSublineages = true)
+        value.endsWith('*') -> PangoLineageEquals(value.substringBeforeLast('*'), includeSublineages = true)
+        value.endsWith('.') -> throw IllegalArgumentException(
+            "Invalid pango lineage: $value must not end with a dot. Did you mean '$value*'?",
+        )
+        else -> PangoLineageEquals(value, includeSublineages = false)
+    }
+
+    private fun mapToNucleotideFilter(userInput: String): SiloFilterExpression {
         val mutations = userInput.split(",")
 
         return And(
