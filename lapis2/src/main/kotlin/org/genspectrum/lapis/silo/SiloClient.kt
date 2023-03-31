@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -11,8 +11,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
 
 @Component
-class SiloClient(@Value("\${silo.url}") private val siloUrl: String) {
-    private val objectMapper = jacksonObjectMapper()
+class SiloClient(@Value("\${silo.url}") private val siloUrl: String, private val objectMapper: ObjectMapper) {
 
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
         val client = HttpClient.newHttpClient()

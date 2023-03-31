@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.silo
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -24,7 +25,7 @@ class SiloClientTest {
     @BeforeEach
     fun setupMockServer() {
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
-        underTest = SiloClient("http://localhost:$MOCK_SERVER_PORT")
+        underTest = SiloClient("http://localhost:$MOCK_SERVER_PORT", jacksonObjectMapper())
     }
 
     @AfterEach

@@ -1,0 +1,9 @@
+{
+  "testCaseName": "date from 2021-03-18 with open end",
+  "lapisRequest": {
+    "dateFrom": "2021-03-18"
+  },
+  "expected": {
+    "count": 48
+  }
+}
