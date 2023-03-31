@@ -27,6 +27,21 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
             )
     }
 
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<String> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                jacksonObjectMapper().writeValueAsString(
+                    LapisHttpErrorResponse(
+                        "Bad request",
+                        "${e.message}",
+                    ),
+                ),
+            )
+    }
+
     @ExceptionHandler(SiloException::class)
     fun handleSiloException(e: SiloException): ResponseEntity<String> {
         return ResponseEntity
