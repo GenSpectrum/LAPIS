@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.genspectrum.lapis.model.AggregatedModel
+import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.response.MutationProportion
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController
 
 const val REQUEST_SCHEMA = "SequenceFilters"
 
+private const val DEFAULT_MIN_PROPORTION = 0.05
+
 @RestController
-class LapisController(val aggregatedModel: AggregatedModel) {
+class LapisController(val siloQueryModel: SiloQueryModel) {
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
@@ -33,7 +35,7 @@ class LapisController(val aggregatedModel: AggregatedModel) {
         @RequestParam
         sequenceFilters: Map<String, String>,
     ): AggregatedResponse {
-        return aggregatedModel.handleRequest(sequenceFilters)
+        return siloQueryModel.aggregate(sequenceFilters)
     }
 
     @PostMapping("/aggregated")
@@ -43,7 +45,7 @@ class LapisController(val aggregatedModel: AggregatedModel) {
         @RequestBody
         sequenceFilters: Map<String, String>,
     ): AggregatedResponse {
-        return aggregatedModel.handleRequest(sequenceFilters)
+        return siloQueryModel.aggregate(sequenceFilters)
     }
 
     @GetMapping("/nucleotideMutations")
@@ -54,10 +56,14 @@ class LapisController(val aggregatedModel: AggregatedModel) {
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
-        @RequestParam
+        @RequestParam()
         sequenceFilters: Map<String, String>,
+        @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString()) minProportion: Double,
     ): List<MutationProportion> {
-        return listOf(MutationProportion("the mutation", 42, 0.5))
+        return siloQueryModel.computeMutationProportions(
+            minProportion,
+            sequenceFilters.filterKeys { it != "minProportion" },
+        )
     }
 
     @PostMapping("/nucleotideMutations")
@@ -65,9 +71,21 @@ class LapisController(val aggregatedModel: AggregatedModel) {
     fun postNucleotideMutations(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"))
         @RequestBody
-        sequenceFilters: Map<String, String>,
+        requestBody: Map<String, String>,
     ): List<MutationProportion> {
-        return listOf(MutationProportion("the mutation", 42, 0.5))
+        val (minProportions, sequenceFilters) = requestBody.entries.partition { it.key == "minProportion" }
+
+        val maybeMinProportion = minProportions.getOrNull(0)?.value
+        val minProportion = try {
+            maybeMinProportion?.toDouble() ?: DEFAULT_MIN_PROPORTION
+        } catch (exception: IllegalArgumentException) {
+            throw IllegalArgumentException("Invalid minProportion: Could not parse '$maybeMinProportion' to float.")
+        }
+
+        return siloQueryModel.computeMutationProportions(
+            minProportion,
+            sequenceFilters.associate { it.key to it.value },
+        )
     }
 }
 

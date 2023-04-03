@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
 
 @SpringBootTest
-class SiloFilterTest {
+class SiloQueryTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
@@ -37,6 +37,14 @@ class SiloFilterTest {
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
+    @ParameterizedTest(name = "Test SiloAction {1}")
+    @MethodSource("getTestSiloActions")
+    fun `SiloAction is correctly serialized to JSON`(underTest: SiloAction<*>, expected: String) {
+        val result = objectMapper.writeValueAsString(underTest)
+
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
     @ParameterizedTest(name = "Test SiloFilterExpression {1}")
     @MethodSource("getTestSiloFilterExpression")
     fun `SiloFilterExpressions is correctly serialized to JSON`(underTest: SiloFilterExpression, expected: String) {
@@ -46,6 +54,35 @@ class SiloFilterTest {
     }
 
     companion object {
+        @JvmStatic
+        fun getTestSiloActions() = listOf(
+            Arguments.of(
+                SiloAction.aggregated(),
+                """
+                {
+                    "type": "Aggregated"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.mutations(),
+                """
+                {
+                    "type": "Mutations"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.mutations(0.5),
+                """
+                {
+                  "type": "Mutations",
+                  "minProportion": 0.5
+                }
+                """,
+            ),
+        )
+
         @JvmStatic
         fun getTestSiloFilterExpression() = listOf(
             Arguments.of(
