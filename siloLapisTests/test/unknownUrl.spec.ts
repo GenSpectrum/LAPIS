@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { basePath } from './common';
 
-describe('SILO-LAPIS', () => {
+describe('Error handling: UnknownUrl', () => {
   it('should return a 404 JSON response by default', async () => {
     const result = await fetch(basePath + '/unknownUrl');
 

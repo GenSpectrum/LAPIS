@@ -79,4 +79,23 @@ class ExceptionHandlerTest {
                 ),
             )
     }
+
+    @Test
+    fun `throw BAD_REQUEST(400) with additional info for bad requests`() {
+        every { validControllerCall() } throws IllegalArgumentException("SomeMessage")
+
+        mockMvc.perform(get(validRoute))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                content().json(
+                    """
+                    {
+                      "title":"Bad request",
+                      "message":"SomeMessage"
+                    }
+                    """,
+                ),
+            )
+    }
 }
