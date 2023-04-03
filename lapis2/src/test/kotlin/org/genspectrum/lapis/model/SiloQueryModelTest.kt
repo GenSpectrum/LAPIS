@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import org.genspectrum.lapis.response.AggregatedResponse
-import org.genspectrum.lapis.response.MutationProportion
+import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
@@ -43,7 +43,7 @@ class SiloQueryModelTest {
 
     @Test
     fun `computeMutationProportions calls the SILO client with a mutations action`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<List<MutationProportion>>>()) } returns emptyList()
+        every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<Map<String, String>>()) } returns True
 
         underTest.computeMutationProportions(0.5, emptyMap())

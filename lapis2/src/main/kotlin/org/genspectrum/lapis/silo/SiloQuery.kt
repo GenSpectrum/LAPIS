@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import org.genspectrum.lapis.response.AggregatedResponse
-import org.genspectrum.lapis.response.MutationProportion
+import org.genspectrum.lapis.response.MutationData
 import java.time.LocalDate
 
 data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
@@ -13,7 +13,7 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
     companion object {
         fun aggregated(): SiloAction<AggregatedResponse> = AggregatedAction("Aggregated")
 
-        fun mutations(minProportion: Double? = null): SiloAction<List<MutationProportion>> =
+        fun mutations(minProportion: Double? = null): SiloAction<List<MutationData>> =
             MutationsAction("Mutations", minProportion)
     }
 
@@ -22,7 +22,7 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private data class MutationsAction(val type: String, val minProportion: Double?) :
-        SiloAction<List<MutationProportion>>(object : TypeReference<SiloQueryResponse<List<MutationProportion>>>() {})
+        SiloAction<List<MutationData>>(object : TypeReference<SiloQueryResponse<List<MutationData>>>() {})
 }
 
 sealed class SiloFilterExpression(val type: String)

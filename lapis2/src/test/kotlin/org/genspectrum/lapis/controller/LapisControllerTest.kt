@@ -4,7 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregatedResponse
-import org.genspectrum.lapis.response.MutationProportion
+import org.genspectrum.lapis.response.MutationData
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -49,7 +49,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 0.05,
                 mapOf("country" to "Switzerland"),
             )
-        } returns listOf(MutationProportion("the mutation", 42, 0.5))
+        } returns listOf(someMutationProportion())
 
         mockMvc.perform(get("/nucleotideMutations?country=Switzerland"))
             .andExpect(status().isOk)
@@ -65,7 +65,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 0.3,
                 mapOf("country" to "Switzerland"),
             )
-        } returns listOf(MutationProportion("the mutation", 42, 0.5))
+        } returns listOf(someMutationProportion())
 
         mockMvc.perform(get("/nucleotideMutations?country=Switzerland&minProportion=0.3"))
             .andExpect(status().isOk)
@@ -81,7 +81,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 0.05,
                 mapOf("country" to "Switzerland"),
             )
-        } returns listOf(MutationProportion("the mutation", 42, 0.5))
+        } returns listOf(someMutationProportion())
 
         val request = post("/nucleotideMutations")
             .content("""{"country": "Switzerland"}""")
@@ -101,7 +101,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 0.7,
                 mapOf("country" to "Switzerland"),
             )
-        } returns listOf(MutationProportion("the mutation", 42, 0.5))
+        } returns listOf(someMutationProportion())
 
         val request = post("/nucleotideMutations")
             .content("""{"country": "Switzerland", "minProportion": 0.7}""")
@@ -127,4 +127,6 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 jsonPath("\$.message").value("Invalid minProportion: Could not parse 'this is not a float' to float."),
             )
     }
+
+    private fun someMutationProportion() = MutationData("the mutation", 42, 0.5)
 }
