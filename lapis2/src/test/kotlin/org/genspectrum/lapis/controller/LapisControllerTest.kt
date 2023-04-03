@@ -20,7 +20,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     lateinit var aggregatedModelMock: AggregatedModel
 
     @Test
-    fun aggregated() {
+    fun `GET aggregated`() {
         every { aggregatedModelMock.handleRequest(mapOf("country" to "Switzerland")) } returns AggregatedResponse(0)
 
         mockMvc.perform(get("/aggregated?country=Switzerland"))
@@ -29,7 +29,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `post aggregated`() {
+    fun `POST aggregated`() {
         every { aggregatedModelMock.handleRequest(mapOf("country" to "Switzerland")) } returns AggregatedResponse(0)
 
         val request = post("/aggregated")
@@ -39,5 +39,27 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.count").value(0))
+    }
+
+    @Test
+    fun `GET nucleotideMutations`() {
+        mockMvc.perform(get("/nucleotideMutations?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].proportion").value(0.5))
+            .andExpect(jsonPath("\$[0].count").value(42))
+    }
+
+    @Test
+    fun `POST nucleotideMutations`() {
+        val request = post("/nucleotideMutations")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].proportion").value(0.5))
+            .andExpect(jsonPath("\$[0].count").value(422))
     }
 }

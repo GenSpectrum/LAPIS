@@ -3,12 +3,14 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.genspectrum.lapis.model.AggregatedModel
 import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.MutationProportion
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -43,6 +45,30 @@ class LapisController(val aggregatedModel: AggregatedModel) {
     ): AggregatedResponse {
         return aggregatedModel.handleRequest(sequenceFilters)
     }
+
+    @GetMapping("/nucleotideMutations")
+    @LapisNucleotideMutationsResponse
+    fun getNucleotideMutations(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>,
+    ): List<MutationProportion> {
+        return listOf(MutationProportion("the mutation", 42, 0.5))
+    }
+
+    @PostMapping("/nucleotideMutations")
+    @LapisNucleotideMutationsResponse
+    fun postNucleotideMutations(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"))
+        @RequestBody
+        sequenceFilters: Map<String, String>,
+    ): List<MutationProportion> {
+        return listOf(MutationProportion("the mutation", 42, 0.5))
+    }
 }
 
 @Target(AnnotationTarget.FUNCTION)
@@ -67,3 +93,26 @@ class LapisController(val aggregatedModel: AggregatedModel) {
     ],
 )
 private annotation class LapisAggregatedResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@ApiResponses(
+    value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "OK",
+            content = [Content(array = ArraySchema(schema = Schema(implementation = MutationProportion::class)))],
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+        ApiResponse(
+            responseCode = "500",
+            description = "Internal Server Error",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+    ],
+)
+private annotation class LapisNucleotideMutationsResponse
