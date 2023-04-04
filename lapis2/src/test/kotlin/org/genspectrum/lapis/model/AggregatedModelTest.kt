@@ -6,6 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloAction
@@ -14,12 +15,15 @@ import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.True
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.time.LocalDate
 
 class AggregatedModelTest {
     @MockK
@@ -62,6 +66,22 @@ class AggregatedModelTest {
                 ),
             )
         }
+    }
+
+    @Test
+    fun `given invalid dateTo then handleRequest should throw an exception`() {
+        val filterParameter = mapOf("dateTo" to "this is not a date")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.handleRequest(filterParameter) }
+        assertThat(exception.message, containsString("dateTo 'this is not a date' is not a valid date"))
+    }
+
+    @Test
+    fun `given invalid dateFrom then handleRequest should throw an exception`() {
+        val filterParameter = mapOf("dateFrom" to "this is not a date either")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.handleRequest(filterParameter) }
+        assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
     }
 
     @Test
@@ -167,6 +187,37 @@ class AggregatedModelTest {
                                 NucleotideSymbolEquals(567, "T"),
                             ),
                         ),
+                    ),
+                ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "dateTo" to "2021-06-03",
+                ),
+                And(listOf(DateBetween(from = null, to = LocalDate.of(2021, 6, 3)))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "dateFrom" to "2021-03-28",
+                ),
+                And(listOf(DateBetween(from = LocalDate.of(2021, 3, 28), to = null))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "dateFrom" to "2021-03-28",
+                    "dateTo" to "2021-06-03",
+                ),
+                And(listOf(DateBetween(from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3)))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "dateTo" to "2021-06-03",
+                    "some_metadata" to "ABC",
+                ),
+                And(
+                    listOf(
+                        StringEquals("some_metadata", "ABC"),
+                        DateBetween(from = null, to = LocalDate.of(2021, 6, 3)),
                     ),
                 ),
             ),

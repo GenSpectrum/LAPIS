@@ -1,19 +1,26 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import java.time.LocalDate
 
+@SpringBootTest
 class SiloFilterTest {
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     @Test
     fun `Query is correctly serialized to JSON`() {
         val underTest = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
 
-        val result = jacksonObjectMapper().writeValueAsString(underTest)
+        val result = objectMapper.writeValueAsString(underTest)
 
         val expected = """
             {
@@ -27,15 +34,15 @@ class SiloFilterTest {
                 }
             }
         """
-        assertThat(jacksonObjectMapper().readTree(result), equalTo(jacksonObjectMapper().readTree(expected)))
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
     @ParameterizedTest(name = "Test SiloFilterExpression {1}")
     @MethodSource("getTestSiloFilterExpression")
     fun `SiloFilterExpressions is correctly serialized to JSON`(underTest: SiloFilterExpression, expected: String) {
-        val result = jacksonObjectMapper().writeValueAsString(underTest)
+        val result = objectMapper.writeValueAsString(underTest)
 
-        assertThat(jacksonObjectMapper().readTree(result), equalTo(jacksonObjectMapper().readTree(expected)))
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
     companion object {
@@ -106,6 +113,36 @@ class SiloFilterTest {
                     "type": "NucleotideEquals",
                     "position": 1234,
                     "symbol": "A"
+                }
+                """,
+            ),
+            Arguments.of(
+                DateBetween(LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
+                """
+                {
+                    "type": "DateBetween",
+                    "from": "2021-03-31",
+                    "to": "2022-06-03"
+                }
+                """,
+            ),
+            Arguments.of(
+                DateBetween(null, LocalDate.of(2022, 6, 3)),
+                """
+                {
+                    "type": "DateBetween",
+                    "from": null,
+                    "to": "2022-06-03"
+                }
+                """,
+            ),
+            Arguments.of(
+                DateBetween(LocalDate.of(2021, 3, 31), null),
+                """
+                {
+                    "type": "DateBetween",
+                    "from": "2021-03-31",
+                    "to": null
                 }
                 """,
             ),
