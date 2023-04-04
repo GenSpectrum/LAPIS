@@ -6,7 +6,7 @@ plugins {
     id 'org.springframework.boot' version '3.0.5'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'org.jetbrains.kotlin.jvm' version '1.8.20'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.8.10'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.8.20'
     id 'org.jlleitschuh.gradle.ktlint' version "11.3.1"
     id 'org.springdoc.openapi-gradle-plugin' version "1.6.0"
 }
@@ -56,10 +56,6 @@ tasks.named('bootBuildImage') {
 
 // workaround related to https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/102
 tasks.named("jar") {
-    mustRunAfter("forkedSpringBootRun", "generateOpenApiDocs")
-}
-
-tasks.named("inspectClassesForKotlinIC") {
     mustRunAfter("forkedSpringBootRun", "generateOpenApiDocs")
 }
 
