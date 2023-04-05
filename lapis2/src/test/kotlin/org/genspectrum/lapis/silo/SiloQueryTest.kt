@@ -201,6 +201,26 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                Or(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                """
+                {
+                    "type": "Or",
+                    "children": [
+                        {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                        },
+                        {
+                        "type": "StringEquals",
+                        "column": "theOtherColumn",
+                        "value": "theOtherValue"
+                        }
+                    ]
+                }
+                """,
+            ),
         )
     }
 }

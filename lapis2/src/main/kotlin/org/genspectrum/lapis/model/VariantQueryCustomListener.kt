@@ -4,10 +4,12 @@ import VariantQueryBaseListener
 import VariantQueryParser.AndContext
 import VariantQueryParser.NotContext
 import VariantQueryParser.Nucleotide_mutationContext
+import VariantQueryParser.OrContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
+import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 
 class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener {
@@ -36,5 +38,10 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     override fun exitNot(ctx: NotContext?) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Not(child))
+    }
+
+    override fun exitOr(ctx: OrContext?) {
+        val children = listOf(expressionStack.removeLast(), expressionStack.removeLast()).reversed()
+        expressionStack.addLast(Or(children))
     }
 }

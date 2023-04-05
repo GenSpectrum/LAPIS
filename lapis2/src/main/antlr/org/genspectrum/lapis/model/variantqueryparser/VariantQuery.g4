@@ -7,6 +7,7 @@ expr:
   single             # Uni
   | '!' expr         # Not
   | expr '&' expr    # And
+  | expr '|' expr    # Or
   ;
 
 single:
