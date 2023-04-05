@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -15,10 +16,20 @@ private const val DATE_FROM = "dateFrom"
 private const val DATE_TO = "dateTo"
 
 @Component
-class SiloFilterExpressionMapper {
+class SiloFilterExpressionMapper(private val databaseConfig: DatabaseConfig) {
     fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
+        }
+
+        val allowedSequenceFilterKeys = databaseConfig.schema.metadata.map { it.name }
+        for (sequenceFilterKey in sequenceFilters.keys) {
+            if (!allowedSequenceFilterKeys.contains(sequenceFilterKey)) {
+                throw IllegalArgumentException(
+                    "'$sequenceFilterKey' is not a valid sequence filter key. Valid keys are: " +
+                        allowedSequenceFilterKeys.joinToString(),
+                )
+            }
         }
 
         val (dateRangeFilters, genericSequenceFilters) = sequenceFilters.entries.partition {

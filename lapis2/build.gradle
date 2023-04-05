@@ -59,6 +59,9 @@ openApi {
     outputFileName.set("lapis-v2-openapi.json")
     apiDocsUrl.set("http://localhost:8080/api-docs")
     customBootRun {
-        args.set(["--silo.url=does.not.matter.here"])
+        args.set([
+            "--silo.url=does.not.matter.here",
+            "--lapis.databaseConfig.path=../siloLapisTests/testDatabaseConfig.yaml"
+        ])
     }
 }

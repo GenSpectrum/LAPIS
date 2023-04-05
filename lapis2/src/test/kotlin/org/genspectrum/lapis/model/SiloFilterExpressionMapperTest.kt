@@ -1,5 +1,8 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.DatabaseMetadata
+import org.genspectrum.lapis.config.DatabaseSchema
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -19,11 +22,40 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
 class SiloFilterExpressionMapperTest {
+    private val allowedFilterKeys = listOf(
+        "dateTo",
+        "dateFrom",
+        "pangoLineage",
+        "nucleotideMutations",
+        "some_metadata",
+        "other_metadata",
+    )
+
     private lateinit var underTest: SiloFilterExpressionMapper
 
     @BeforeEach
     fun setup() {
-        underTest = SiloFilterExpressionMapper()
+        val databaseConfig = DatabaseConfig(
+            DatabaseSchema(
+                "testInstanceName",
+                allowedFilterKeys.map { DatabaseMetadata(it, "testType") },
+                "primaryKey",
+            ),
+        )
+
+        underTest = SiloFilterExpressionMapper(databaseConfig)
+    }
+
+    @Test
+    fun `given invalid filter key then throws exception`() {
+        val filterParameter = mapOf("invalid query key" to "some value")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+
+        assertThat(
+            exception.message,
+            containsString("'invalid query key' is not a valid sequence filter key. Valid keys are:"),
+        )
     }
 
     @Test

@@ -21,14 +21,17 @@ Build Docker image:
 ./gradlew bootBuildImage
 ```
 
-When running LAPIS, you need to pass the SILO url as argument: `--silo.url=http://<url>:<port>`, e.g. when running via gradle:
+When running LAPIS, you need to pass the following arguments:
+* the SILO url `--silo.url=http://<url>:<port>`, 
+* the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
+e.g. when running via gradle:
 ```
-./gradlew bootRun --args='--silo.url=http://<url>:<port>'
+./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config>'
 ```
 
 Use Docker Compose to run SILO and LAPIS:
 ```
-LAPIS_TAG=latest SILO_TAG=latest docker compose up
+LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up
 ```
 
 ## End-to-end tests
