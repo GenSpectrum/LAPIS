@@ -40,3 +40,5 @@ data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDa
 object True : SiloFilterExpression("True")
 
 data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
+
+data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")

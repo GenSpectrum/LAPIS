@@ -188,6 +188,19 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                Not(StringEquals("theColumn", "theValue")),
+                """
+                {
+                    "type": "Not",
+                    "child": {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                    }
+                }
+                """,
+            ),
         )
     }
 }
