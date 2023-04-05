@@ -8,6 +8,8 @@ expr:
   | '!' expr         # Not
   | expr '&' expr    # And
   | expr '|' expr    # Or
+  | '(' expr ')'     # Parentesis
+  | 'MAYBE(' expr ')' # Maybe
   ;
 
 single:

@@ -44,3 +44,5 @@ data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression(
 data class Or(val children: List<SiloFilterExpression>) : SiloFilterExpression("Or")
 
 data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")
+
+data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe")

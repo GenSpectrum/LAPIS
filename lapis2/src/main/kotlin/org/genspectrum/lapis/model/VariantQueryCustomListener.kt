@@ -2,11 +2,13 @@ package org.genspectrum.lapis.model
 
 import VariantQueryBaseListener
 import VariantQueryParser.AndContext
+import VariantQueryParser.MaybeContext
 import VariantQueryParser.NotContext
 import VariantQueryParser.Nucleotide_mutationContext
 import VariantQueryParser.OrContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -43,5 +45,10 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     override fun exitOr(ctx: OrContext?) {
         val children = listOf(expressionStack.removeLast(), expressionStack.removeLast()).reversed()
         expressionStack.addLast(Or(children))
+    }
+
+    override fun exitMaybe(ctx: MaybeContext?) {
+        val child = expressionStack.removeLast()
+        expressionStack.addLast(Maybe(child))
     }
 }

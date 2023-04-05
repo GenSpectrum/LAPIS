@@ -221,6 +221,19 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                Maybe(StringEquals("theColumn", "theValue")),
+                """
+                {
+                    "type": "Maybe",
+                    "child": {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                    }
+                }
+                """,
+            ),
         )
     }
 }
