@@ -234,6 +234,35 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                NOf(
+                    2,
+                    true,
+                    listOf(
+                        StringEquals("theColumn", "theValue"),
+                        StringEquals("theOtherColumn", "theOtherValue"),
+                    ),
+                ),
+                """
+                {
+                    "type": "NOf",
+                    "numberOfMatchers": 2,
+                    "matchExactly": true,
+                    "children": [
+                        {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                        },
+                        {
+                        "type": "StringEquals",
+                        "column": "theOtherColumn",
+                        "value": "theOtherValue"
+                        }
+                    ]
+                }
+                """,
+            ),
         )
     }
 }

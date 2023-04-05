@@ -15,6 +15,7 @@ expr:
 single:
   nucleotide_mutation
   | pangolineage_query
+  | n_of_query
   ;
 
 nucleotide_mutation : nucleotide_symbol? position ambigous_nucleotide_symbol?;
@@ -28,6 +29,10 @@ pangolineage_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | 
 pangolineage_number_component: '.' NUMBER NUMBER? NUMBER?;
 pangolineage_include_sublineages: DOT? ASTERISK;
 
+n_of_query: '[' n_of_match_exactly? n_of_number_of_matchers '-of:' n_of_exprs ']';
+n_of_match_exactly: 'EXACTLY-';
+n_of_number_of_matchers: NUMBER+;
+n_of_exprs: expr (',' expr)*;
 
 // lexer rules
 

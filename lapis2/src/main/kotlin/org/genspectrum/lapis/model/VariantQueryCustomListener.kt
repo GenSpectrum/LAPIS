@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import VariantQueryBaseListener
 import VariantQueryParser.AndContext
 import VariantQueryParser.MaybeContext
+import VariantQueryParser.N_of_queryContext
 import VariantQueryParser.NotContext
 import VariantQueryParser.Nucleotide_mutationContext
 import VariantQueryParser.OrContext
@@ -10,6 +11,7 @@ import VariantQueryParser.Pangolineage_queryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.Maybe
+import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -63,5 +65,21 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     override fun exitMaybe(ctx: MaybeContext?) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Maybe(child))
+    }
+
+    override fun exitN_of_query(ctx: N_of_queryContext?) {
+        if (ctx == null) {
+            return
+        }
+
+        val n = ctx.n_of_number_of_matchers().text.toInt()
+        val matchExactly = ctx.n_of_match_exactly() != null
+
+        val children = mutableListOf<SiloFilterExpression>()
+        for (i in 1..n) {
+            children += expressionStack.removeLast()
+        }
+
+        expressionStack.addLast(NOf(n, matchExactly, children.reversed()))
     }
 }
