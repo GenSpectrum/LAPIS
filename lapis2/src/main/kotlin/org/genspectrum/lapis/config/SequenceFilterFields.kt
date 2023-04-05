@@ -10,7 +10,12 @@ data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldTy
             fields = databaseConfig.schema.metadata
                 .map(::mapToSequenceFilterFields)
                 .flatten()
-                .toMap() + nucleotideMutationsField,
+                .toMap() +
+                databaseConfig.schema.features
+                    .map(::mapToSequenceFilterFieldsFromFeatures)
+                    .flatten()
+                    .toMap() +
+                nucleotideMutationsField,
         )
     }
 }
@@ -29,11 +34,19 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
     )
 }
 
+private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) = when (databaseFeature.name) {
+    "sarsCoV2VariantQuery" -> listOf(databaseFeature.name to SequenceFilterFieldType.VariantQuery)
+    else -> throw IllegalArgumentException(
+        "Unknown feature '${databaseFeature.name}'",
+    )
+}
+
 sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     object String : SequenceFilterFieldType("string")
     object PangoLineage : SequenceFilterFieldType("string")
     object Date : SequenceFilterFieldType("string")
     object MutationsList : SequenceFilterFieldType("string")
+    object VariantQuery : SequenceFilterFieldType("string")
     data class DateFrom(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
     data class DateTo(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
 }
