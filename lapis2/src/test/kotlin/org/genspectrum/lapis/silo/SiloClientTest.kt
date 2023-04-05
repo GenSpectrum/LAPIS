@@ -2,9 +2,12 @@ package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.MutationData
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +37,7 @@ class SiloClientTest {
     }
 
     @Test
-    fun `given server returns aggregated query then response can be deserialized`() {
+    fun `given server returns aggregated response then response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -54,6 +57,42 @@ class SiloClientTest {
         val result = underTest.sendQuery(query)
 
         assertThat(result, equalTo(AggregatedResponse(1)))
+    }
+
+    @Test
+    fun `given server returns mutations response then response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """{
+                        "actionTime": 0,
+                        "filterTime": 0,
+                        "parseTime": 0,
+                        "queryResult": [
+                            {
+                                "count": 45,
+                                "mutation": "first mutation",
+                                "proportion": 0.9
+                            },
+                            {
+                                "count": 44,
+                                "mutation": "second mutation",
+                                "proportion": 0.7
+                            }
+                        ]
+                    }""",
+                ),
+        )
+
+        val query = SiloQuery(SiloAction.mutations(), StringEquals("theColumn", "theValue"))
+        val result = underTest.sendQuery(query)
+
+        assertThat(result, hasSize(2))
+        assertThat(
+            result,
+            containsInAnyOrder(MutationData("first mutation", 45, 0.9), MutationData("second mutation", 44, 0.7)),
+        )
     }
 
     @Test

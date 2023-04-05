@@ -1,14 +1,10 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
@@ -19,19 +15,8 @@ private const val DATE_FROM = "dateFrom"
 private const val DATE_TO = "dateTo"
 
 @Component
-class AggregatedModel(private val siloClient: SiloClient) {
-    fun handleRequest(filterParameter: Map<String, String>): AggregatedResponse {
-        val filterExpression = createFilterExpression(filterParameter)
-
-        return siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.aggregated(),
-                filterExpression,
-            ),
-        )
-    }
-
-    private fun createFilterExpression(sequenceFilters: Map<String, String>): SiloFilterExpression {
+class SiloFilterExpressionMapper {
+    fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
@@ -86,6 +71,7 @@ class AggregatedModel(private val siloClient: SiloClient) {
         value.endsWith('.') -> throw IllegalArgumentException(
             "Invalid pango lineage: $value must not end with a dot. Did you mean '$value*'?",
         )
+
         else -> PangoLineageEquals(value, includeSublineages = false)
     }
 

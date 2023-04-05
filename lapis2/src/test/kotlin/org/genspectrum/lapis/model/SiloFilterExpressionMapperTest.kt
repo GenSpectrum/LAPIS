@@ -1,22 +1,15 @@
 package org.genspectrum.lapis.model
 
-import io.mockk.MockKAnnotations
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
-import io.mockk.verify
-import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -25,103 +18,82 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
-class AggregatedModelTest {
-    @MockK
-    lateinit var siloClientMock: SiloClient
-    private lateinit var underTest: AggregatedModel
+class SiloFilterExpressionMapperTest {
+    private lateinit var underTest: SiloFilterExpressionMapper
 
     @BeforeEach
     fun setup() {
-        MockKAnnotations.init(this)
-        every { siloClientMock.sendQuery(any<SiloQuery<AggregatedResponse>>()) } returns AggregatedResponse(0)
-        underTest = AggregatedModel(siloClientMock)
+        underTest = SiloFilterExpressionMapper()
     }
 
     @Test
-    fun `given empty filter parameters then handleRequest should call the SiloClient with MatchAll SiloQuery`() {
+    fun `given empty filter parameters then returns a match-all filter`() {
         val filterParameter = emptyMap<String, String>()
 
-        underTest.handleRequest(filterParameter)
+        val result = underTest.map(filterParameter)
 
-        verify {
-            siloClientMock.sendQuery(
-                SiloQuery(SiloAction.aggregated(), True),
-            )
-        }
+        assertThat(result, equalTo(True))
     }
 
     @ParameterizedTest(name = "FilterParameter: {0}, SiloQuery: {1}")
     @MethodSource("getFilterParametersWithExpectedSiloQuery")
-    fun `given filter parameters then handleRequest should call the SiloClient with the corresponding SiloQuery`(
+    fun `given filter parameters then maps to expected FilterExpression`(
         filterParameter: Map<String, String>,
         expectedResult: SiloFilterExpression,
     ) {
-        underTest.handleRequest(filterParameter)
+        val result = underTest.map(filterParameter)
 
-        verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.aggregated(),
-                    expectedResult,
-                ),
-            )
-        }
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
-    fun `given invalid dateTo then handleRequest should throw an exception`() {
+    fun `given invalid dateTo then should throw an exception`() {
         val filterParameter = mapOf("dateTo" to "this is not a date")
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.handleRequest(filterParameter) }
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateTo 'this is not a date' is not a valid date"))
     }
 
     @Test
-    fun `given invalid dateFrom then handleRequest should throw an exception`() {
+    fun `given invalid dateFrom then should throw an exception`() {
         val filterParameter = mapOf("dateFrom" to "this is not a date either")
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.handleRequest(filterParameter) }
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
     }
 
     @Test
-    fun `given invalid Pango lineage ending with a dot then handleRequest should throw an exception`() {
+    fun `given invalid Pango lineage ending with a dot then should throw an exception`() {
         val filterParameter = mapOf("pangoLineage" to "A.1.2.")
 
         assertThrows<IllegalArgumentException> {
-            underTest.handleRequest(filterParameter)
+            underTest.map(filterParameter)
         }
     }
 
     @ParameterizedTest(name = "nucleotideMutations: {0}")
     @MethodSource("getNucleotideMutationWithWrongSyntax")
-    fun `given nucleotideMutations with wrong syntax then handleRequest should throw an exception`(
+    fun `given nucleotideMutations with wrong syntax then should throw an exception`(
         invalidMutation: String,
     ) {
         val filterParameter = mapOf("nucleotideMutations" to invalidMutation)
 
         assertThrows<IllegalArgumentException> {
-            underTest.handleRequest(filterParameter)
+            underTest.map(filterParameter)
         }
     }
 
     @ParameterizedTest(name = "nucleotideMutations: {0}")
     @MethodSource("getNucleotideMutationWithValidSyntax")
-    fun `given valid mutations then handleRequest should call the SiloClient with the corresponding SiloQuery`(
+    fun `given valid mutations then should return the corresponding SiloQuery`(
         validMutation: String,
         expectedResult: SiloFilterExpression,
     ) {
         val filterParameter = mapOf("nucleotideMutations" to validMutation)
-        underTest.handleRequest(filterParameter)
 
-        verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.aggregated(),
-                    expectedResult,
-                ),
-            )
-        }
+        val result = underTest.map(filterParameter)
+
+        assertThat(result, equalTo(expectedResult))
     }
 
     companion object {
