@@ -6,7 +6,9 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.springframework.stereotype.Component
 
+@Component
 class VariantQueryFacade {
 
     fun map(variantQuery: String): SiloFilterExpression {

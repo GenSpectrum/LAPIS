@@ -5,6 +5,7 @@ import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
@@ -115,6 +116,26 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = Maybe(NucleotideSymbolEquals(300, "G"))
+        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+    }
+
+    @Test
+    fun `given a variant variantQuery with a 'Pangolineage' expression the map should return the corresponding SiloQuery`() {
+        val variantQuery = "A.1.2.3"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = PangoLineageEquals("A.1.2.3", false)
+        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+    }
+
+    @Test
+    fun `given a variant variantQuery with a 'Pangolineage' expression including sublineages the map should return the corresponding SiloQuery`() {
+        val variantQuery = "A.1.2.3*"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = PangoLineageEquals("A.1.2.3", true)
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 }

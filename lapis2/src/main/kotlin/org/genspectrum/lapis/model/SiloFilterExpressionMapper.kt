@@ -18,7 +18,10 @@ data class SequenceFilterValue(val type: SequenceFilterFieldType, val value: Str
 typealias SequenceFilterFieldName = String
 
 @Component
-class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: SequenceFilterFields) {
+class SiloFilterExpressionMapper(
+    private val allowedSequenceFilterFields: SequenceFilterFields,
+    private val variantQueryFacade: VariantQueryFacade,
+) {
     fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
@@ -82,7 +85,7 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
             )
         }
 
-        return VariantQueryFacade().map(variantQuery)
+        return variantQueryFacade.map(variantQuery)
     }
 
     private fun mapToDateBetweenFilter(

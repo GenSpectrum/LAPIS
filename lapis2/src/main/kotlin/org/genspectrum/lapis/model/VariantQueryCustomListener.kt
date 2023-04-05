@@ -6,12 +6,14 @@ import VariantQueryParser.MaybeContext
 import VariantQueryParser.NotContext
 import VariantQueryParser.Nucleotide_mutationContext
 import VariantQueryParser.OrContext
+import VariantQueryParser.Pangolineage_queryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 
 class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener {
@@ -26,9 +28,20 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
             return
         }
         val position = ctx.position().text.toInt()
-        val secondSymbol = if (ctx.ambigous_nucleotide_symbol() != null) ctx.ambigous_nucleotide_symbol().text else "-"
+        val secondSymbol = ctx.ambigous_nucleotide_symbol()?.text ?: "-"
 
         val expr = NucleotideSymbolEquals(position, secondSymbol)
+        expressionStack.addLast(expr)
+    }
+
+    override fun enterPangolineage_query(ctx: Pangolineage_queryContext?) {
+        if (ctx == null) {
+            return
+        }
+        val pangolineage = ctx.pangolineage().text
+        val includeSublineages = ctx.pangolineage_include_sublineages() != null
+
+        val expr = PangoLineageEquals(pangolineage, includeSublineages)
         expressionStack.addLast(expr)
     }
 

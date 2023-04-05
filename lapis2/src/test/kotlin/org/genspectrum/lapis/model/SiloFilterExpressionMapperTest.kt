@@ -37,7 +37,7 @@ class SiloFilterExpressionMapperTest {
 
     @BeforeEach
     fun setup() {
-        underTest = SiloFilterExpressionMapper(sequenceFilterFields)
+        underTest = SiloFilterExpressionMapper(sequenceFilterFields, VariantQueryFacade())
     }
 
     @Test
