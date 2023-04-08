@@ -1,7 +1,15 @@
 package ch.ethz.lapis.api.sql;
 
-import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.entity.AAMutation;
+import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.NucMutation;
+import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
+import ch.ethz.lapis.api.query.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
@@ -18,10 +26,9 @@ import org.javatuples.Pair;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static ch.ethz.lapis.api.query.Database.Columns.*;
 
 public class SqlClient {
 
@@ -140,9 +147,9 @@ public class SqlClient {
                 if (limit.getOffset() != null) {
                     if (!(limitOffsetExpression instanceof LongValue offsetValue)) throw new UnsupportedSqlException();
                     int offsetInteger = (int) offsetValue.getValue();
-                    // TODO Why should someone provide offset twice and with different values? It's probably just wrong.
-                    //    But maybe it has a semantic that I am not aware of?
                     if (query.getOffset() != null && query.getOffset() != offsetInteger) {
+                        // TODO Why should someone provide offset twice and with different values? It's probably just
+                        //  wrong. But maybe it has a semantic that I am not aware of?
                         throw new UnsupportedSqlException();
                     }
                     query.setOffset(offsetInteger);
@@ -159,6 +166,7 @@ public class SqlClient {
      * <ol>
      *     <li>Check the fields (existence and compatibility)</li>
      *     <li>Rewrite: Use "nextcladePangoLineage"</li>
+     *     <li>Rewrite: resolve aliases in ORDER BY (but not in HAVING)</li>
      * </ol>
      */
     public void validateAndRewrite(Query query) {
@@ -178,8 +186,30 @@ public class SqlClient {
         // WHERE
         var where = query.getWhereExpression();
         if (where != null) {
-            validateAndRewriteWhereExpression(where);
+            query.setWhereQueryExpr(validateAndRewriteWhereExpression(where));
         }
+    }
+
+    public String executeToJson(Query query, Database database, ObjectMapper objectMapper) {
+        // WHERE -> filter the sequences
+        var where = query.getWhereQueryExpr();
+        boolean[] sequencesMatched;
+        if (where != null) {
+            sequencesMatched = where.evaluate(database);
+        } else {
+            sequencesMatched = new boolean[database.size()];
+            Arrays.fill(sequencesMatched, true);
+        }
+
+        String result = switch (query.getTable()) {
+            case "metadata" -> executeMetadataQuery(query, database, objectMapper, sequencesMatched);
+            case "nuc_mutations", "aa_mutations" -> {
+                throw new RuntimeException("Not implemented");
+            }
+            default -> throw new RuntimeException("Unexpected error");
+        };
+
+        return result;
     }
 
     private Pair<Map<String, String>, List<String>> extractSelectExpressionsAndAliases(List<SelectItem> selectItems) {
@@ -220,8 +250,16 @@ public class SqlClient {
         query.setSelectExpressions(newSelectExpressions);
 
         // GROUP BY: only allow metadata fields
+        List<String> oldGroupByColumns = query.getGroupByColumns();
+        // This is now a very "opinionated" rewrite: because we do not allow querying of individual samples,
+        // we can't evaluate something like "select date from metadata order by date limit 1". As a hack,
+        // such a query will be rewritten to "select date from metadata group by date order by date limit 1".
+        // More generally, we will add all metadata columns occurring in SELECT to GROUP BY.
+        // This might return something different from what the user wants but hopefully, it's in most cases not to far.
+        oldGroupByColumns.addAll(newSelectExpressions.stream().filter(e -> !e.equals("count(*)")).toList());
+        oldGroupByColumns = new ArrayList<>(new HashSet<>(oldGroupByColumns));
         List<String> newGroupByColumns = new ArrayList<>();
-        for (String groupByColumn : query.getGroupByColumns()) {
+        for (String groupByColumn : oldGroupByColumns) {
             String metadataField = validateAndRewriteMetadataField(groupByColumn);
             if (metadataField != null) {
                 newGroupByColumns.add(metadataField);
@@ -308,15 +346,26 @@ public class SqlClient {
         }
     }
 
-    private void validateAndRewriteWhereExpression(Expression expression) {
+    private QueryExpr validateAndRewriteWhereExpression(Expression expression) {
         if (expression instanceof AndExpression and) {
-            validateAndRewriteWhereExpression(and.getLeftExpression());
-            validateAndRewriteWhereExpression(and.getRightExpression());
+            var leftExpr = validateAndRewriteWhereExpression(and.getLeftExpression());
+            var rightExpr = validateAndRewriteWhereExpression(and.getRightExpression());
+            var result = new BiOp(BiOp.OpType.AND);
+            result.putValue(leftExpr);
+            result.putValue(rightExpr);
+            return result;
         } else if (expression instanceof OrExpression or) {
-            validateAndRewriteWhereExpression(or.getLeftExpression());
-            validateAndRewriteWhereExpression(or.getRightExpression());
+            var leftExpr = validateAndRewriteWhereExpression(or.getLeftExpression());
+            var rightExpr = validateAndRewriteWhereExpression(or.getRightExpression());
+            var result = new BiOp(BiOp.OpType.OR);
+            result.putValue(leftExpr);
+            result.putValue(rightExpr);
+            return result;
         } else if (expression instanceof NotExpression not) {
-            validateAndRewriteWhereExpression(not.getExpression());
+            var expr = validateAndRewriteWhereExpression(not.getExpression());
+            var result = new Negation();
+            result.putValue(expr);
+            return result;
         } else if (expression instanceof ComparisonOperator comparison) {
             var left = comparison.getLeftExpression();
             var right = comparison.getRightExpression();
@@ -334,29 +383,108 @@ public class SqlClient {
                 String columnType = Database.COLUMN_TO_TYPE.get(metadataColumn);
                 switch (columnType) {
                     case "string" -> {
-                        if (!(right instanceof StringValue)) throw new UnsupportedSqlException();
-                        if (!(comparison instanceof EqualsTo || comparison instanceof NotEqualsTo))
+                        if (!(right instanceof StringValue value)) throw new UnsupportedSqlException();
+                        QueryExpr expr;
+                        if (metadataColumn.equals(NEXTCLADE_PANGO_LINEAGE)) {
+                            expr = new PangoQuery(value.getValue(), true, NEXTCLADE_PANGO_LINEAGE);
+                        } else {
+                            expr = new ch.ethz.lapis.api.query.StringValue(value.getValue(), metadataColumn, false);
+                        }
+                        if (comparison instanceof EqualsTo) {
+                            return expr;
+                        } else if (comparison instanceof NotEqualsTo) {
+                            var negation = new Negation();
+                            negation.putValue(expr);
+                            return negation;
+                        } else {
                             throw new UnsupportedSqlException();
+                        }
                     }
                     case "date" -> {
                         if (!(right instanceof StringValue stringValue)) throw new UnsupportedSqlException();
+                        LocalDate date;
                         try {
-                            LocalDate.parse(stringValue.getValue());
+                            date = LocalDate.parse(stringValue.getValue());
                         } catch (DateTimeParseException e) {
                             throw new UnsupportedSqlException();
                         }
-                        if (!(comparison instanceof EqualsTo || comparison instanceof NotEqualsTo ||
-                            comparison instanceof GreaterThan || comparison instanceof GreaterThanEquals ||
-                            comparison instanceof MinorThan || comparison instanceof MinorThanEquals))
+                        if (comparison instanceof EqualsTo) {
+                            return new DateCompare(DateCompare.OpType.EQUAL, metadataColumn, date);
+                        } else if (comparison instanceof NotEqualsTo) {
+                            var negation = new Negation();
+                            negation.putValue(new DateCompare(DateCompare.OpType.EQUAL, metadataColumn, date));
+                            return negation;
+                        } else if (comparison instanceof GreaterThan) {
+                            return new DateCompare(DateCompare.OpType.GREATER_THAN, metadataColumn, date);
+                        } else if (comparison instanceof GreaterThanEquals) {
+                            return new DateCompare(DateCompare.OpType.GREATER_THAN_EQUAL, metadataColumn, date);
+                        } else if (comparison instanceof MinorThan) {
+                            return new DateCompare(DateCompare.OpType.LESS_THAN, metadataColumn, date);
+                        } else if (comparison instanceof MinorThanEquals) {
+                            return new DateCompare(DateCompare.OpType.LESS_THAN_EQUAL, metadataColumn, date);
+                        } else {
                             throw new UnsupportedSqlException();
+                        }
                     }
                     default -> throw new UnsupportedSqlException(); // Due to laziness
                 }
-            } else if (columnName.startsWith("nuc_") || columnName.startsWith("aa_")) {
-                // The right side must be a constant string value and only (not)equals is supported.
-                if (!(right instanceof StringValue)) throw new UnsupportedSqlException();
-                if (!(comparison instanceof EqualsTo || comparison instanceof NotEqualsTo))
+            } else if (columnName.startsWith("nuc_")) {
+                var parts = columnName.split("_");
+                if (parts.length != 2) throw new UnsupportedSqlException();
+                var positionStr = parts[1];
+                int position;
+                try {
+                    position = Integer.parseUnsignedInt(positionStr);
+                } catch (NumberFormatException e) {
                     throw new UnsupportedSqlException();
+                }
+
+                // The right side must be a constant string value
+                if (!(right instanceof StringValue value)) throw new UnsupportedSqlException();
+                String value2 = value.getValue();
+                if (value2.length() != 1) throw new UnsupportedSqlException();
+                char value3 = value2.charAt(0);
+
+                NucMutation nucMutation = new NucMutation(position, value3);
+                if (comparison instanceof EqualsTo) {
+                    return nucMutation;
+                } else if (comparison instanceof NotEqualsTo) {
+                    var negation = new Negation();
+                    negation.putValue(nucMutation);
+                    return negation;
+                } else {
+                    throw new UnsupportedSqlException();
+                }
+            } else if (columnName.startsWith("aa_")) {
+                var parts = columnName.split("_");
+                if (parts.length != 3) throw new UnsupportedSqlException();
+                String gene = parts[1];
+                String positionStr = parts[2];
+                int position;
+                try {
+                    position = Integer.parseUnsignedInt(positionStr);
+                } catch (NumberFormatException e) {
+                    throw new UnsupportedSqlException();
+                }
+
+                // The right side must be a constant string value
+                if (!(right instanceof StringValue value)) throw new UnsupportedSqlException();
+                String value2 = value.getValue();
+                if (value2.length() != 1) throw new UnsupportedSqlException();
+                char value3 = value2.charAt(0);
+
+                AAMutation aaMutation = new AAMutation(gene, position, value3);
+                if (comparison instanceof EqualsTo) {
+                    return aaMutation;
+                } else if (comparison instanceof NotEqualsTo) {
+                    var negation = new Negation();
+                    negation.putValue(aaMutation);
+                    return negation;
+                } else {
+                    throw new UnsupportedSqlException();
+                }
+            } else {
+                throw new UnsupportedSqlException();
             }
         } else if (expression instanceof Between between) {
             var left = between.getLeftExpression();
@@ -375,8 +503,9 @@ public class SqlClient {
             if (!(rightStart instanceof StringValue startString) || !(rightEnd instanceof StringValue endString))
                 throw new UnsupportedSqlException();
             try {
-                LocalDate.parse(startString.getValue());
-                LocalDate.parse(endString.getValue());
+                var startDate = LocalDate.parse(startString.getValue());
+                var endDate = LocalDate.parse(endString.getValue());
+                return new DateBetween(columnName, startDate, endDate);
             } catch (DateTimeParseException e) {
                 throw new UnsupportedSqlException();
             }
@@ -393,9 +522,121 @@ public class SqlClient {
             return field;
         }
         if (field.toLowerCase().contains("lineage")) {
-            return "nextclade_pango_lineage";
+            return NEXTCLADE_PANGO_LINEAGE;
         }
         return null;
+    }
+
+    private String executeMetadataQuery(Query query, Database database, ObjectMapper objectMapper, boolean[] sequencesMatched) {
+        // GROUP BY -> aggregate
+        QueryEngine queryEngine = new QueryEngine();
+        List<AggregationField> aggregationFields = query.getGroupByColumns().stream()
+            .map(QueryEngine::columnNameToaggregationField)
+            .toList();
+        List<SampleAggregated> result = queryEngine.aggregate(database, aggregationFields, sequencesMatched);
+
+        // HAVING -> another round of filtering
+        var having = (ComparisonOperator) query.getHavingExpression();
+        if (having != null) {
+            var leftName = having.getLeftExpression().toString();
+            var right = having.getRightExpression();
+            if (query.getAliasToExpression().containsKey(leftName)) {
+                leftName = query.getAliasToExpression().get(leftName);
+            }
+            if (!leftName.equals("count(*)")) {
+                throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+            }
+            double value;
+            if (right instanceof LongValue l) {
+                value = l.getValue();
+            } else if (right instanceof DoubleValue d) {
+                value = d.getValue();
+            } else {
+                throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+            }
+
+            // Now, actually start filtering
+            result = result.stream()
+                .filter(sampleAggregated -> {
+                    if (having instanceof EqualsTo) {
+                        return sampleAggregated.getCount() == value;
+                    } else if (having instanceof NotEqualsTo) {
+                        return sampleAggregated.getCount() != value;
+                    } else if (having instanceof GreaterThan) {
+                        return sampleAggregated.getCount() > value;
+                    } else if (having instanceof GreaterThanEquals) {
+                        return sampleAggregated.getCount() >= value;
+                    } else if (having instanceof MinorThan) {
+                        return sampleAggregated.getCount() < value;
+                    } else if (having instanceof MinorThanEquals) {
+                        return sampleAggregated.getCount() <= value;
+                    } else {
+                        throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+                    }
+                })
+                .toList();
+        }
+
+        // ORDER BY
+        var orderBy = query.getOrderByExpression();
+        if (orderBy != null) {
+            Comparator<SampleAggregated> comparator;
+            if (orderBy.equals("count(*)")) {
+                comparator = Comparator.comparing(SampleAggregated::getCount);
+            } else {
+                comparator = switch (orderBy) {
+                    case DATE -> Comparator.comparing(SampleAggregated::getDate, Comparator.nullsLast(LocalDate::compareTo));
+                    case YEAR -> Comparator.comparing(SampleAggregated::getYear, Comparator.nullsLast(Integer::compareTo));
+                    case MONTH -> Comparator.comparing(SampleAggregated::getMonth, Comparator.nullsLast(Integer::compareTo));
+                    case DATE_SUBMITTED -> Comparator.comparing(SampleAggregated::getDateSubmitted, Comparator.nullsLast(LocalDate::compareTo));
+                    case REGION -> Comparator.comparing(SampleAggregated::getRegion, Comparator.nullsLast(String::compareTo));
+                    case COUNTRY -> Comparator.comparing(SampleAggregated::getCountry, Comparator.nullsLast(String::compareTo));
+                    case DIVISION -> Comparator.comparing(SampleAggregated::getDivision, Comparator.nullsLast(String::compareTo));
+                    case LOCATION -> Comparator.comparing(SampleAggregated::getLocation, Comparator.nullsLast(String::compareTo));
+                    case REGION_EXPOSURE -> Comparator.comparing(SampleAggregated::getRegionExposure, Comparator.nullsLast(String::compareTo));
+                    case COUNTRY_EXPOSURE -> Comparator.comparing(SampleAggregated::getCountryExposure, Comparator.nullsLast(String::compareTo));
+                    case DIVISION_EXPOSURE -> Comparator.comparing(SampleAggregated::getDivisionExposure, Comparator.nullsLast(String::compareTo));
+                    case AGE -> Comparator.comparing(SampleAggregated::getAge, Comparator.nullsLast(Integer::compareTo));
+                    case SEX -> Comparator.comparing(SampleAggregated::getSex, Comparator.nullsLast(String::compareTo));
+                    case HOSPITALIZED -> Comparator.comparing(SampleAggregated::getHospitalized, Comparator.nullsLast(Boolean::compareTo));
+                    case DIED -> Comparator.comparing(SampleAggregated::getDied, Comparator.nullsLast(Boolean::compareTo));
+                    case FULLY_VACCINATED -> Comparator.comparing(SampleAggregated::getFullyVaccinated, Comparator.nullsLast(Boolean::compareTo));
+                    case HOST -> Comparator.comparing(SampleAggregated::getHost, Comparator.nullsLast(String::compareTo));
+                    case SAMPLING_STRATEGY -> Comparator.comparing(SampleAggregated::getSamplingStrategy, Comparator.nullsLast(String::compareTo));
+                    case PANGO_LINEAGE -> Comparator.comparing(SampleAggregated::getPangoLineage, Comparator.nullsLast(String::compareTo));
+                    case NEXTCLADE_PANGO_LINEAGE -> Comparator.comparing(SampleAggregated::getNextcladePangoLineage, Comparator.nullsLast(String::compareTo));
+                    case NEXTSTRAIN_CLADE -> Comparator.comparing(SampleAggregated::getNextstrainClade, Comparator.nullsLast(String::compareTo));
+                    case GISAID_CLADE -> Comparator.comparing(SampleAggregated::getGisaidCloade, Comparator.nullsLast(String::compareTo));
+                    case SUBMITTING_LAB -> Comparator.comparing(SampleAggregated::getSubmittingLab, Comparator.nullsLast(String::compareTo));
+                    case ORIGINATING_LAB -> Comparator.comparing(SampleAggregated::getOriginatingLab, Comparator.nullsLast(String::compareTo));
+                    case DATABASE -> Comparator.comparing(SampleAggregated::getDatabase, Comparator.nullsLast(String::compareTo));
+                    default -> throw new IllegalStateException("Unexpected order by value: " + orderBy);
+                };
+            }
+            if (!query.isOrderByAsc()) {
+                comparator = comparator.reversed();
+            }
+            result = result.stream().sorted(comparator).toList();
+        }
+
+        // OFFSET
+        var offset = query.getOffset();
+        if (offset != null) {
+            result = result.subList(Math.min(offset, result.size()), result.size());
+        }
+
+        // LIMIT
+        var limit = query.getLimit();
+        if (limit != null) {
+            result = result.subList(0, Math.min(limit, result.size()));
+        }
+
+        SampleAggregatedResponse response = new SampleAggregatedResponse(aggregationFields, result);
+        try {
+            return objectMapper.writeValueAsString(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

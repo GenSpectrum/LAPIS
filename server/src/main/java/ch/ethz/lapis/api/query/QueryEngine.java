@@ -28,13 +28,16 @@ import static ch.ethz.lapis.api.query.Database.Columns.*;
 public class QueryEngine {
 
     public List<SampleAggregated> aggregate(Database database, SampleAggregatedRequest request) {
-        // Filter
         boolean[] matched = matchSampleFilter(database, request);
+        List<AggregationField> fields = request.getFields();
+        return aggregate(database, fields, matched);
+    }
+
+    public List<SampleAggregated> aggregate(Database database, List<AggregationField> fields, boolean[] matched) {
         int numberRows = database.size();
 
         // Group by
         List<SampleAggregated> result = new ArrayList<>();
-        List<AggregationField> fields = request.getFields();
         if (fields.isEmpty()) {
             int count = 0;
             for (int i = 0; i < numberRows; i++) {
@@ -391,7 +394,7 @@ public class QueryEngine {
         }
     }
 
-    private String aggregationFieldToColumnName(AggregationField field) {
+    public static String aggregationFieldToColumnName(AggregationField field) {
         return switch (field) {
             case DATE -> DATE;
             case YEAR -> YEAR;
@@ -418,6 +421,37 @@ public class QueryEngine {
             case SUBMITTINGLAB -> SUBMITTING_LAB;
             case ORIGINATINGLAB -> ORIGINATING_LAB;
             case DATABASE -> DATABASE;
+        };
+    }
+
+    public static AggregationField columnNameToaggregationField(String column) {
+        return switch (column) {
+            case DATE -> AggregationField.DATE;
+            case YEAR -> AggregationField.YEAR;
+            case MONTH -> AggregationField.MONTH;
+            case DATE_SUBMITTED -> AggregationField.DATESUBMITTED;
+            case REGION -> AggregationField.REGION;
+            case COUNTRY -> AggregationField.COUNTRY;
+            case DIVISION -> AggregationField.DIVISION;
+            case LOCATION -> AggregationField.LOCATION;
+            case REGION_EXPOSURE -> AggregationField.REGIONEXPOSURE;
+            case COUNTRY_EXPOSURE -> AggregationField.COUNTRYEXPOSURE;
+            case DIVISION_EXPOSURE -> AggregationField.DIVISIONEXPOSURE;
+            case AGE -> AggregationField.AGE;
+            case SEX -> AggregationField.SEX;
+            case HOSPITALIZED -> AggregationField.HOSPITALIZED;
+            case DIED -> AggregationField.DIED;
+            case FULLY_VACCINATED -> AggregationField.FULLYVACCINATED;
+            case HOST -> AggregationField.HOST;
+            case SAMPLING_STRATEGY -> AggregationField.SAMPLINGSTRATEGY;
+            case PANGO_LINEAGE -> AggregationField.PANGOLINEAGE;
+            case NEXTCLADE_PANGO_LINEAGE -> AggregationField.NEXTCLADEPANGOLINEAGE;
+            case NEXTSTRAIN_CLADE -> AggregationField.NEXTSTRAINCLADE;
+            case GISAID_CLADE -> AggregationField.GISAIDCLADE;
+            case SUBMITTING_LAB -> AggregationField.SUBMITTINGLAB;
+            case ORIGINATING_LAB -> AggregationField.ORIGINATINGLAB;
+            case DATABASE -> AggregationField.DATABASE;
+            default -> throw new IllegalStateException("Unexpected value: " + column);
         };
     }
 
