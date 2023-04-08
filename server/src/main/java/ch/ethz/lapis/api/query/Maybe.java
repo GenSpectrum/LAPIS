@@ -48,11 +48,11 @@ public class Maybe extends Single {
      * <p>
      * If there is no maybe in the query, the function won't change anything.
      */
-    public static void pushDownMaybe(VariantQueryExpr expr) {
+    public static void pushDownMaybe(QueryExpr expr) {
         pushDownMaybeInternal(expr, false);
     }
 
-    private static void pushDownMaybeInternal(VariantQueryExpr expr, boolean inMaybeMode) {
+    private static void pushDownMaybeInternal(QueryExpr expr, boolean inMaybeMode) {
         if (expr instanceof Maybe x) {
             // maybe(A) => go into maybe mode; maybe(maybe(A)) won't have an effect.
             x.setPushedDown(true);

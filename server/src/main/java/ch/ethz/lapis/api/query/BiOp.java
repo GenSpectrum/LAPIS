@@ -1,6 +1,6 @@
 package ch.ethz.lapis.api.query;
 
-public class BiOp implements VariantQueryExpr {
+public class BiOp implements QueryExpr {
 
     public enum OpType {
         AND,
@@ -9,16 +9,16 @@ public class BiOp implements VariantQueryExpr {
 
     private final OpType opType;
 
-    private VariantQueryExpr left;
+    private QueryExpr left;
 
-    private VariantQueryExpr right;
+    private QueryExpr right;
 
     public BiOp(OpType opType) {
         this.opType = opType;
     }
 
     @Override
-    public void putValue(VariantQueryExpr value) {
+    public void putValue(QueryExpr value) {
         if (left == null) {
             left = value;
         } else {
@@ -47,11 +47,11 @@ public class BiOp implements VariantQueryExpr {
         return opType;
     }
 
-    public VariantQueryExpr getLeft() {
+    public QueryExpr getLeft() {
         return left;
     }
 
-    public VariantQueryExpr getRight() {
+    public QueryExpr getRight() {
         return right;
     }
 

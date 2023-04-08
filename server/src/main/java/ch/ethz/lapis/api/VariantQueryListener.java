@@ -13,7 +13,7 @@ import java.util.Stack;
 
 public class VariantQueryListener extends VariantQueryBaseListener {
 
-    private final Stack<VariantQueryExpr> exprStack = new Stack<>();
+    private final Stack<QueryExpr> exprStack = new Stack<>();
 
     public VariantQueryListener() {
         exprStack.push(new Single());
@@ -21,7 +21,7 @@ public class VariantQueryListener extends VariantQueryBaseListener {
 
     @Override
     public void enterMaybe(VariantQueryParser.MaybeContext ctx) {
-        VariantQueryExpr expr = new Maybe();
+        QueryExpr expr = new Maybe();
         exprStack.peek().putValue(expr);
         exprStack.push(expr);
     }
@@ -33,21 +33,21 @@ public class VariantQueryListener extends VariantQueryBaseListener {
 
     @Override
     public void enterAnd(VariantQueryParser.AndContext ctx) {
-        VariantQueryExpr expr = new BiOp(BiOp.OpType.AND);
+        QueryExpr expr = new BiOp(BiOp.OpType.AND);
         exprStack.peek().putValue(expr);
         exprStack.push(expr);
     }
 
     @Override
     public void enterOr(VariantQueryParser.OrContext ctx) {
-        VariantQueryExpr expr = new BiOp(BiOp.OpType.OR);
+        QueryExpr expr = new BiOp(BiOp.OpType.OR);
         exprStack.peek().putValue(expr);
         exprStack.push(expr);
     }
 
     @Override
     public void enterNeg(VariantQueryParser.NegContext ctx) {
-        VariantQueryExpr expr = new Negation();
+        QueryExpr expr = new Negation();
         exprStack.peek().putValue(expr);
         exprStack.push(expr);
     }
@@ -148,7 +148,7 @@ public class VariantQueryListener extends VariantQueryBaseListener {
         exprStack.pop();
     }
 
-    public VariantQueryExpr getExpr() {
+    public QueryExpr getExpr() {
         return exprStack.peek();
     }
 }

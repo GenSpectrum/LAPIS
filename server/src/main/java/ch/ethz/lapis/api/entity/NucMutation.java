@@ -1,7 +1,7 @@
 package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
-import ch.ethz.lapis.api.query.VariantQueryExpr;
+import ch.ethz.lapis.api.query.QueryExpr;
 import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.Utils;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 @EqualsAndHashCode
-public class NucMutation implements VariantQueryExpr {
+public class NucMutation implements QueryExpr {
 
     private static final ReferenceGenomeData referenceGenome = ReferenceGenomeData.getInstance();
     private static final Map<Character, Set<Character>> ambiguityCodes = new HashMap<>() {{
