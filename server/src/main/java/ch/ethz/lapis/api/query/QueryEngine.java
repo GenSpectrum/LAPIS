@@ -2,14 +2,17 @@ package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.core.Utils;
+import ch.ethz.lapis.util.ReferenceGenomeData;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -97,8 +100,63 @@ public class QueryEngine {
         return result;
     }
 
+    public SampleMutationsResponse getMutations(
+        Database database,
+        boolean[] matched,
+        SequenceType sequenceType,
+        float minProportion
+    ) {
+        ReferenceGenomeData reference = ReferenceGenomeData.getInstance();
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(matched);
+        if (ids.isEmpty()) {
+            return new SampleMutationsResponse();
+        }
+        // Count mutations
+        SampleMutationsResponse response = new SampleMutationsResponse();
+        if (sequenceType == SequenceType.NUCLEOTIDE) {
+            List<MutationStore.MutationCount> mutationCounts = database.getNucMutationStore().countMutations(ids);
+            for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                if (mutationCount.getProportion() < minProportion) {
+                    continue;
+                }
+                MutationStore.Mutation mutation = mutationCount.getMutation();
+                String mutString = "%s%s%s".formatted(
+                    reference.getNucleotideBase(mutation.position),
+                    mutation.position,
+                    mutation.mutationTo
+                );
+                response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                    mutationCount.getProportion(), mutationCount.getCount()));
+            }
+        } else {
+            database.getAaMutationStores().forEach((gene, mutationStore) -> {
+                List<MutationStore.MutationCount> mutationCounts = mutationStore.countMutations(ids);
+                for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                    if (mutationCount.getProportion() < minProportion) {
+                        continue;
+                    }
+                    MutationStore.Mutation mutation = mutationCount.getMutation();
+                    String mutString = "%s:%s%s%s".formatted(
+                        gene,
+                        reference.getGeneAABase(gene, mutation.position),
+                        mutation.position,
+                        mutation.mutationTo
+                    );
+                    response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                        mutationCount.getProportion(), mutationCount.getCount()));
+                }
+            });
+        }
+        return response;
+    }
+
     public List<Integer> filterIds(Database database, SampleFilter sampleFilter) {
         boolean[] matched = matchSampleFilter(database, sampleFilter);
+        return filterIds(matched);
+    }
+
+    public List<Integer> filterIds(boolean[] matched) {
         return IntStream.range(0, matched.length)
             .filter(i -> matched[i])
             .boxed()

@@ -3,8 +3,10 @@ package ch.ethz.lapis.api.sql;
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.NucMutation;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.query.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -203,9 +205,8 @@ public class SqlClient {
 
         String result = switch (query.getTable()) {
             case "metadata" -> executeMetadataQuery(query, database, objectMapper, sequencesMatched);
-            case "nuc_mutations", "aa_mutations" -> {
-                throw new RuntimeException("Not implemented");
-            }
+            case "nuc_mutations" -> executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.NUCLEOTIDE);
+            case "aa_mutations" -> executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.AMINO_ACID);
             default -> throw new RuntimeException("Unexpected error");
         };
 
@@ -310,11 +311,10 @@ public class SqlClient {
             }
         }
 
-        // GROUP BY: only allow "mutation"
-        for (String groupByColumn : query.getGroupByColumns()) {
-            if (!groupByColumn.equals("mutation")) {
-                throw new UnsupportedSqlException();
-            }
+        // GROUP BY: it must be grouped by "mutation" and only by "mutation.
+        var groupByColumns = query.getGroupByColumns();
+        if (groupByColumns.size() != 1 || !groupByColumns.get(0).equals("mutation")) {
+            throw new UnsupportedSqlException();
         }
 
         // HAVING
@@ -619,17 +619,8 @@ public class SqlClient {
             result = result.stream().sorted(comparator).toList();
         }
 
-        // OFFSET
-        var offset = query.getOffset();
-        if (offset != null) {
-            result = result.subList(Math.min(offset, result.size()), result.size());
-        }
-
-        // LIMIT
-        var limit = query.getLimit();
-        if (limit != null) {
-            result = result.subList(0, Math.min(limit, result.size()));
-        }
+        // OFFSET and LIMIT
+        result = limitAndOffset(result, query);
 
         SampleAggregatedResponse response = new SampleAggregatedResponse(aggregationFields, result);
         try {
@@ -637,6 +628,110 @@ public class SqlClient {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String executeMutationsQuery(
+        Query query,
+        Database database,
+        ObjectMapper objectMapper,
+        boolean[] sequencesMatched,
+        SequenceType sequenceType
+    ) {
+        // GROUP BY (the validate function already ensured that we have exactly "GROUP BY mutation")
+        //   -> Aggregate / count mutations
+        QueryEngine queryEngine = new QueryEngine();
+        List<SampleMutationsResponse.MutationEntry> result = queryEngine.getMutations(database, sequencesMatched, sequenceType, 0);
+
+        // HAVING -> another round of filtering
+        var having = (ComparisonOperator) query.getHavingExpression();
+        if (having != null) {
+            var leftName = having.getLeftExpression().toString();
+            var right = having.getRightExpression();
+            if (query.getAliasToExpression().containsKey(leftName)) {
+                leftName = query.getAliasToExpression().get(leftName);
+            }
+
+            java.util.function.Function<SampleMutationsResponse.MutationEntry, Number> getValueFunc;
+            if (leftName.equals("count(*)")) {
+                getValueFunc = SampleMutationsResponse.MutationEntry::count;
+            } else if (leftName.equals("proportion()")) {
+                getValueFunc = SampleMutationsResponse.MutationEntry::proportion;
+            } else {
+                throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+            }
+
+            double value;
+            if (right instanceof LongValue l) {
+                value = l.getValue();
+            } else if (right instanceof DoubleValue d) {
+                value = d.getValue();
+            } else {
+                throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+            }
+
+            // Now, actually start filtering
+            result = result.stream()
+                .filter(mutationEntry -> {
+                    if (having instanceof EqualsTo) {
+                        return ((double) getValueFunc.apply(mutationEntry)) == value;
+                    } else if (having instanceof NotEqualsTo) {
+                        return ((double) getValueFunc.apply(mutationEntry)) != value;
+                    } else if (having instanceof GreaterThan) {
+                        return ((double) getValueFunc.apply(mutationEntry)) > value;
+                    } else if (having instanceof GreaterThanEquals) {
+                        return ((double) getValueFunc.apply(mutationEntry)) >= value;
+                    } else if (having instanceof MinorThan) {
+                        return ((double) getValueFunc.apply(mutationEntry)) < value;
+                    } else if (having instanceof MinorThanEquals) {
+                        return ((double) getValueFunc.apply(mutationEntry)) <= value;
+                    } else {
+                        throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+                    }
+                })
+                .toList();
+        }
+
+        // ORDER BY
+        var orderBy = query.getOrderByExpression();
+        if (orderBy != null) {
+            Comparator<SampleMutationsResponse.MutationEntry> comparator;
+            if (orderBy.equals("count(*)")) {
+                comparator = Comparator.comparing(SampleMutationsResponse.MutationEntry::count);
+            } else if (orderBy.equals("proportion()")) {
+                comparator = Comparator.comparing(SampleMutationsResponse.MutationEntry::proportion);
+            } else {
+                throw new RuntimeException("Unexpected error: The validate function should have checked that already.");
+            }
+            if (!query.isOrderByAsc()) {
+                comparator = comparator.reversed();
+            }
+            result = result.stream().sorted(comparator).toList();
+        }
+
+        // OFFSET and LIMIT
+        result = limitAndOffset(result, query);
+
+        try {
+            return objectMapper.writeValueAsString(result);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> List<T> limitAndOffset(List<T> data, Query query) {
+        // OFFSET
+        var offset = query.getOffset();
+        if (offset != null) {
+            data = data.subList(Math.min(offset, data.size()), data.size());
+        }
+
+        // LIMIT
+        var limit = query.getLimit();
+        if (limit != null) {
+            data = data.subList(0, Math.min(limit, data.size()));
+        }
+
+        return data;
     }
 
 }
