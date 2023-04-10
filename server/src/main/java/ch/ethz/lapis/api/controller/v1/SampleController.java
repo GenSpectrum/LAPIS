@@ -786,28 +786,37 @@ public class SampleController {
     public ResponseEntity<String> sqlForChat(
         @RequestBody String sql,
         String accessKey
-    ) throws JsonProcessingException {
+    ) {
         checkAuthorization(accessKey, true);
 
-        String result;
-        try {
-            SqlClient sqlClient = new SqlClient();
-            Query query = sqlClient.parse(sql);
-            sqlClient.validateAndRewrite(query);
-            Database database = Database.getOrLoadInstance(LapisMain.dbPool);
-            String resultJson = sqlClient.executeToJson(query, database, objectMapper);
+        ApiCacheKey cacheKey = new ApiCacheKey(CacheService.SupportedEndpoints.SAMPLE_SQL_FOR_CHAT, sql);
+        String body = useCacheOrCompute(false, cacheKey, () -> {
+            String result;
+            try {
+                try {
+                    SqlClient sqlClient = new SqlClient();
+                    Query query = sqlClient.parse(sql);
+                    sqlClient.validateAndRewrite(query);
+                    Database database = Database.getOrLoadInstance(LapisMain.dbPool);
+                    String resultJson = sqlClient.executeToJson(query, database, objectMapper);
 
-            EndpointResponse response = new EndpointResponse();
-            String responseJson = objectMapper.writeValueAsString(response);
-            // A small hack to insert an already formatted JSON because I don't know how to do it properly.
-            result = responseJson.replace(EndpointResponse.PLACEHOLDER, resultJson);
-        } catch (UnsupportedSqlException e) {
-            EndpointResponse response = new EndpointResponse();
-            response.setError("The SQL query cannot be evaluated.");
-            String responseJson = objectMapper.writeValueAsString(response);
-            result = responseJson.replace(EndpointResponse.PLACEHOLDER, "null");
-        }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+                    EndpointResponse response = new EndpointResponse();
+                    String responseJson = objectMapper.writeValueAsString(response);
+                    // A small hack to insert an already formatted JSON because I don't know how to do it properly.
+                    result = responseJson.replace(EndpointResponse.PLACEHOLDER, resultJson);
+                } catch (UnsupportedSqlException e) {
+                    EndpointResponse response = new EndpointResponse();
+                    response.setError("The SQL query cannot be evaluated.");
+                    String responseJson = objectMapper.writeValueAsString(response);
+                    result = responseJson.replace(EndpointResponse.PLACEHOLDER, "null");
+                }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return result;
+        });
+
+        return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
 

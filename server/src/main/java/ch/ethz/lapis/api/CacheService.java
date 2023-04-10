@@ -22,11 +22,8 @@ import redis.clients.jedis.args.FlushMode;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -110,25 +107,10 @@ public class CacheService {
         if (currentDataVersion != null && currentDataVersion == newDataVersion) {
             return;
         }
-//        List<String> keys = getAllApiKeys();
         try (Jedis jedis = pool.getResource()) {
             jedis.flushAll(FlushMode.SYNC);
         }
         setCacheDataVersion(newDataVersion);
-
-        // Pre-compute
-//        new Thread(() -> {
-//            preCompute(keys);
-//        }).start();
-    }
-
-    private List<String> getAllApiKeys() {
-        try (Jedis jedis = pool.getResource()) {
-            Set<byte[]> keysBytes = jedis.keys("api###*".getBytes(StandardCharsets.UTF_8));
-            return keysBytes.stream()
-                .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
-                .collect(Collectors.toList());
-        }
     }
 
     private String apiCacheKeyToString(ApiCacheKey cacheKey) {
@@ -148,33 +130,13 @@ public class CacheService {
         setLong("general###data_version", dataVersion);
     }
 
-    private void preCompute(List<String> keys) {
-        int i = 0;
-        for (String key : keys) {
-            i++;
-            try {
-                if (!key.startsWith("api###")) {
-                    break;
-                }
-                String subKey = key.substring(6);
-                String[] split = subKey.split("###", 2);
-                String endpoint = split[0];
-                String requestJson = split[1];
-                log.info("Pre-computing " + "(" + i + "/" + keys.size() + ")");
-                Object request = objectMapper.readValue(requestJson, endpointToClass.get(endpoint));
-                endpointToPreComputation.get(endpoint).accept(sampleController, request);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public static final class SupportedEndpoints {
         public static final String SAMPLE_AGGREGATED = "/v0/sample/aggregated";
         public static final String SAMPLE_AA_MUTATIONS = "/v0/sample/aa-mutations";
         public static final String SAMPLE_NUC_MUTATIONS = "/v0/sample/nuc-mutations";
         public static final String SAMPLE_NUC_INSERTIONS = "/v0/sample/nuc-insertions";
         public static final String SAMPLE_AA_INSERTIONS = "/v0/sample/aa-insertions";
+        public static final String SAMPLE_SQL_FOR_CHAT = "/v0/sample/sqlForChat";
     }
 
 }
