@@ -1,7 +1,7 @@
 package ch.ethz.lapis.api.entity;
 
 import ch.ethz.lapis.api.query.Database;
-import ch.ethz.lapis.api.query.VariantQueryExpr;
+import ch.ethz.lapis.api.query.QueryExpr;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @ToString
 @EqualsAndHashCode
-public class NucInsertion implements VariantQueryExpr {
+public class NucInsertion implements QueryExpr {
     private int position;
     private String query;
 

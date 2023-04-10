@@ -68,14 +68,7 @@ public class Database {
 
     private static class DataVersionChangedDuringFetching extends RuntimeException {}
 
-    public static final String[] ALL_COLUMNS = new String[] {
-        Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
-        Columns.DATE, Columns.YEAR, Columns.MONTH, Columns.DATE_SUBMITTED, Columns.REGION, Columns.COUNTRY,
-        Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE, Columns.COUNTRY_EXPOSURE,
-        Columns.DIVISION_EXPOSURE, Columns.HOST, Columns.AGE, Columns.SEX, Columns.HOSPITALIZED, Columns.DIED,
-        Columns.FULLY_VACCINATED, Columns.SAMPLING_STRATEGY, Columns.PANGO_LINEAGE, Columns.NEXTSTRAIN_CLADE,
-        Columns.GISAID_CLADE, Columns.ORIGINATING_LAB, Columns.SUBMITTING_LAB, Columns.DATABASE
-    };
+    public static final String[] ALL_COLUMNS;
     public static final String[] STRING_COLUMNS = new String[] {
         Columns.GENBANK_ACCESSION, Columns.SRA_ACCESSION, Columns.GISAID_EPI_ISL, Columns.STRAIN,
         Columns.REGION, Columns.COUNTRY, Columns.DIVISION, Columns.LOCATION, Columns.REGION_EXPOSURE,
@@ -98,6 +91,33 @@ public class Database {
     public static final String[] BOOLEAN_COLUMNS = new String[] {
         Columns.HOSPITALIZED, Columns.DIED, Columns.FULLY_VACCINATED
     };
+    public static final Map<String, String> COLUMN_TO_TYPE;
+
+    static {
+        List<String> allColumnsList = new ArrayList<>();
+        COLUMN_TO_TYPE = new HashMap<>();
+        for (String column : STRING_COLUMNS) {
+            allColumnsList.add(column);
+            COLUMN_TO_TYPE.put(column, "string");
+        }
+        for (String column : DATE_COLUMNS) {
+            allColumnsList.add(column);
+            COLUMN_TO_TYPE.put(column, "date");
+        }
+        for (String column : INTEGER_COLUMNS) {
+            allColumnsList.add(column);
+            COLUMN_TO_TYPE.put(column, "integer");
+        }
+        for (String column : FLOAT_COLUMNS) {
+            allColumnsList.add(column);
+            COLUMN_TO_TYPE.put(column, "float");
+        }
+        for (String column : BOOLEAN_COLUMNS) {
+            allColumnsList.add(column);
+            COLUMN_TO_TYPE.put(column, "boolean");
+        }
+        ALL_COLUMNS = allColumnsList.toArray(new String[0]);
+    }
 
     private static Database instance;
 

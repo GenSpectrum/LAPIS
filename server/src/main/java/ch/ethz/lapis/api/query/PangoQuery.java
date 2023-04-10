@@ -2,7 +2,7 @@ package ch.ethz.lapis.api.query;
 
 import ch.ethz.lapis.util.PangoLineageQueryConverter;
 
-public class PangoQuery implements VariantQueryExpr {
+public class PangoQuery implements QueryExpr {
 
     private final String pangoLineage;
 

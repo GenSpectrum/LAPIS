@@ -1,10 +1,10 @@
 package ch.ethz.lapis.api.query;
 
-public class Single implements VariantQueryExpr {
-    private VariantQueryExpr value;
+public class Single implements QueryExpr {
+    private QueryExpr value;
 
     @Override
-    public void putValue(VariantQueryExpr value) {
+    public void putValue(QueryExpr value) {
         this.value = value;
     }
 
@@ -13,7 +13,7 @@ public class Single implements VariantQueryExpr {
         return value.evaluate(database);
     }
 
-    public VariantQueryExpr getValue() {
+    public QueryExpr getValue() {
         return value;
     }
 

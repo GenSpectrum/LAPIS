@@ -1,83 +1,46 @@
 package ch.ethz.lapis.api.query;
 
-import static ch.ethz.lapis.api.query.Database.Columns.AGE;
-import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY;
-import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.DATABASE;
-import static ch.ethz.lapis.api.query.Database.Columns.DATE;
-import static ch.ethz.lapis.api.query.Database.Columns.DATE_SUBMITTED;
-import static ch.ethz.lapis.api.query.Database.Columns.DIED;
-import static ch.ethz.lapis.api.query.Database.Columns.DIVISION;
-import static ch.ethz.lapis.api.query.Database.Columns.DIVISION_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.FULLY_VACCINATED;
-import static ch.ethz.lapis.api.query.Database.Columns.GENBANK_ACCESSION;
-import static ch.ethz.lapis.api.query.Database.Columns.GISAID_CLADE;
-import static ch.ethz.lapis.api.query.Database.Columns.GISAID_EPI_ISL;
-import static ch.ethz.lapis.api.query.Database.Columns.HOSPITALIZED;
-import static ch.ethz.lapis.api.query.Database.Columns.HOST;
-import static ch.ethz.lapis.api.query.Database.Columns.LOCATION;
-import static ch.ethz.lapis.api.query.Database.Columns.MONTH;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_COVERAGE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_PANGO_LINEAGE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_FRAME_SHIFTS_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_MISSING_DATA_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_MIXED_SITES_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_OVERALL_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_PRIVATE_MUTATIONS_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_SNP_CLUSTERS_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_QC_STOP_CODONS_SCORE;
-import static ch.ethz.lapis.api.query.Database.Columns.NEXTSTRAIN_CLADE;
-import static ch.ethz.lapis.api.query.Database.Columns.ORIGINATING_LAB;
-import static ch.ethz.lapis.api.query.Database.Columns.PANGO_LINEAGE;
-import static ch.ethz.lapis.api.query.Database.Columns.REGION;
-import static ch.ethz.lapis.api.query.Database.Columns.REGION_EXPOSURE;
-import static ch.ethz.lapis.api.query.Database.Columns.SAMPLING_STRATEGY;
-import static ch.ethz.lapis.api.query.Database.Columns.SEX;
-import static ch.ethz.lapis.api.query.Database.Columns.SRA_ACCESSION;
-import static ch.ethz.lapis.api.query.Database.Columns.STRAIN;
-import static ch.ethz.lapis.api.query.Database.Columns.SUBMITTING_LAB;
-import static ch.ethz.lapis.api.query.Database.Columns.YEAR;
-
 import ch.ethz.lapis.api.VariantQueryListener;
 import ch.ethz.lapis.api.entity.AggregationField;
+import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
 import ch.ethz.lapis.api.entity.req.SampleFilter;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
+import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
 import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.api.exception.MalformedVariantQueryException;
 import ch.ethz.lapis.api.parser.VariantQueryLexer;
 import ch.ethz.lapis.api.parser.VariantQueryParser;
 import ch.ethz.lapis.core.Utils;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import ch.ethz.lapis.util.ReferenceGenomeData;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static ch.ethz.lapis.api.query.Database.Columns.*;
 @Slf4j
 public class QueryEngine {
 
     public List<SampleAggregated> aggregate(Database database, SampleAggregatedRequest request) {
-        // Filter
         boolean[] matched = matchSampleFilter(database, request);
+        List<AggregationField> fields = request.getFields();
+        return aggregate(database, fields, matched);
+    }
+
+    public List<SampleAggregated> aggregate(Database database, List<AggregationField> fields, boolean[] matched) {
         int numberRows = database.size();
 
         // Group by
         List<SampleAggregated> result = new ArrayList<>();
-        List<AggregationField> fields = request.getFields();
         if (fields.isEmpty()) {
             int count = 0;
             for (int i = 0; i < numberRows; i++) {
@@ -137,8 +100,63 @@ public class QueryEngine {
         return result;
     }
 
+    public SampleMutationsResponse getMutations(
+        Database database,
+        boolean[] matched,
+        SequenceType sequenceType,
+        float minProportion
+    ) {
+        ReferenceGenomeData reference = ReferenceGenomeData.getInstance();
+        // Filter
+        List<Integer> ids = new QueryEngine().filterIds(matched);
+        if (ids.isEmpty()) {
+            return new SampleMutationsResponse();
+        }
+        // Count mutations
+        SampleMutationsResponse response = new SampleMutationsResponse();
+        if (sequenceType == SequenceType.NUCLEOTIDE) {
+            List<MutationStore.MutationCount> mutationCounts = database.getNucMutationStore().countMutations(ids);
+            for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                if (mutationCount.getProportion() < minProportion) {
+                    continue;
+                }
+                MutationStore.Mutation mutation = mutationCount.getMutation();
+                String mutString = "%s%s%s".formatted(
+                    reference.getNucleotideBase(mutation.position),
+                    mutation.position,
+                    mutation.mutationTo
+                );
+                response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                    mutationCount.getProportion(), mutationCount.getCount()));
+            }
+        } else {
+            database.getAaMutationStores().forEach((gene, mutationStore) -> {
+                List<MutationStore.MutationCount> mutationCounts = mutationStore.countMutations(ids);
+                for (MutationStore.MutationCount mutationCount : mutationCounts) {
+                    if (mutationCount.getProportion() < minProportion) {
+                        continue;
+                    }
+                    MutationStore.Mutation mutation = mutationCount.getMutation();
+                    String mutString = "%s:%s%s%s".formatted(
+                        gene,
+                        reference.getGeneAABase(gene, mutation.position),
+                        mutation.position,
+                        mutation.mutationTo
+                    );
+                    response.add(new SampleMutationsResponse.MutationEntry(mutString,
+                        mutationCount.getProportion(), mutationCount.getCount()));
+                }
+            });
+        }
+        return response;
+    }
+
     public List<Integer> filterIds(Database database, SampleFilter sampleFilter) {
         boolean[] matched = matchSampleFilter(database, sampleFilter);
+        return filterIds(matched);
+    }
+
+    public List<Integer> filterIds(boolean[] matched) {
         return IntStream.range(0, matched.length)
             .filter(i -> matched[i])
             .boxed()
@@ -187,11 +205,11 @@ public class QueryEngine {
                 "field at the same time.");
         }
 
-        VariantQueryExpr variantQueryExpr = null;
+        QueryExpr queryExpr = null;
         if (useVariantQuery) {
-            variantQueryExpr = parseVariantQueryExpr(variantQuery);
+            queryExpr = parseVariantQueryExpr(variantQuery);
         } else if (useOtherVariantSpecifying) {
-            List<VariantQueryExpr> components = new ArrayList<>();
+            List<QueryExpr> components = new ArrayList<>();
             if (usePangoLineage) {
                 PangoQuery pq;
                 if (pangoLineage.endsWith("*")) {
@@ -230,20 +248,20 @@ public class QueryEngine {
             if (useAaInsertions) {
                 components.addAll(aaInsertions);
             }
-            variantQueryExpr = components.get(0);
+            queryExpr = components.get(0);
             for (int i = 1; i < components.size(); i++) {
                 BiOp conjunction = new BiOp(BiOp.OpType.AND);
-                conjunction.putValue(variantQueryExpr);
+                conjunction.putValue(queryExpr);
                 conjunction.putValue(components.get(i));
-                variantQueryExpr = conjunction;
+                queryExpr = conjunction;
             }
         }
 
         int numberRows = database.size();
         boolean[] matched;
-        if (variantQueryExpr != null) {
-            Maybe.pushDownMaybe(variantQueryExpr);
-            matched = variantQueryExpr.evaluate(database);
+        if (queryExpr != null) {
+            Maybe.pushDownMaybe(queryExpr);
+            matched = queryExpr.evaluate(database);
         } else {
             matched = new boolean[numberRows];
             Arrays.fill(matched, true);
@@ -415,7 +433,7 @@ public class QueryEngine {
         }
     }
 
-    private VariantQueryExpr parseVariantQueryExpr(String variantQuery) {
+    private QueryExpr parseVariantQueryExpr(String variantQuery) {
         try {
             VariantQueryLexer lexer = new VariantQueryLexer(CharStreams.fromString(variantQuery.toUpperCase()));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -434,7 +452,7 @@ public class QueryEngine {
         }
     }
 
-    private String aggregationFieldToColumnName(AggregationField field) {
+    public static String aggregationFieldToColumnName(AggregationField field) {
         return switch (field) {
             case DATE -> DATE;
             case YEAR -> YEAR;
@@ -461,6 +479,37 @@ public class QueryEngine {
             case SUBMITTINGLAB -> SUBMITTING_LAB;
             case ORIGINATINGLAB -> ORIGINATING_LAB;
             case DATABASE -> DATABASE;
+        };
+    }
+
+    public static AggregationField columnNameToaggregationField(String column) {
+        return switch (column) {
+            case DATE -> AggregationField.DATE;
+            case YEAR -> AggregationField.YEAR;
+            case MONTH -> AggregationField.MONTH;
+            case DATE_SUBMITTED -> AggregationField.DATESUBMITTED;
+            case REGION -> AggregationField.REGION;
+            case COUNTRY -> AggregationField.COUNTRY;
+            case DIVISION -> AggregationField.DIVISION;
+            case LOCATION -> AggregationField.LOCATION;
+            case REGION_EXPOSURE -> AggregationField.REGIONEXPOSURE;
+            case COUNTRY_EXPOSURE -> AggregationField.COUNTRYEXPOSURE;
+            case DIVISION_EXPOSURE -> AggregationField.DIVISIONEXPOSURE;
+            case AGE -> AggregationField.AGE;
+            case SEX -> AggregationField.SEX;
+            case HOSPITALIZED -> AggregationField.HOSPITALIZED;
+            case DIED -> AggregationField.DIED;
+            case FULLY_VACCINATED -> AggregationField.FULLYVACCINATED;
+            case HOST -> AggregationField.HOST;
+            case SAMPLING_STRATEGY -> AggregationField.SAMPLINGSTRATEGY;
+            case PANGO_LINEAGE -> AggregationField.PANGOLINEAGE;
+            case NEXTCLADE_PANGO_LINEAGE -> AggregationField.NEXTCLADEPANGOLINEAGE;
+            case NEXTSTRAIN_CLADE -> AggregationField.NEXTSTRAINCLADE;
+            case GISAID_CLADE -> AggregationField.GISAIDCLADE;
+            case SUBMITTING_LAB -> AggregationField.SUBMITTINGLAB;
+            case ORIGINATING_LAB -> AggregationField.ORIGINATINGLAB;
+            case DATABASE -> AggregationField.DATABASE;
+            default -> throw new IllegalStateException("Unexpected value: " + column);
         };
     }
 

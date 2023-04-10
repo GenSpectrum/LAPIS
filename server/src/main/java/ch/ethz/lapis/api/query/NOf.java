@@ -3,11 +3,11 @@ package ch.ethz.lapis.api.query;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NOf implements VariantQueryExpr {
+public class NOf implements QueryExpr {
 
     private final boolean exactMode;
     private final int n;
-    private final List<VariantQueryExpr> subExprs = new ArrayList<>();
+    private final List<QueryExpr> subExprs = new ArrayList<>();
 
     public NOf(boolean exactMode, int n) {
         this.exactMode = exactMode;
@@ -16,7 +16,7 @@ public class NOf implements VariantQueryExpr {
 
 
     @Override
-    public void putValue(VariantQueryExpr value) {
+    public void putValue(QueryExpr value) {
         subExprs.add(value);
     }
 
@@ -26,7 +26,7 @@ public class NOf implements VariantQueryExpr {
             throw new RuntimeException("More than " + Short.MAX_VALUE + " in the n-of statement - seriously? Why??");
         }
         short[] trueCount = new short[database.size()];
-        for (VariantQueryExpr subExpr : subExprs) {
+        for (QueryExpr subExpr : subExprs) {
             boolean[] subResult = subExpr.evaluate(database);
             for (int i = 0; i < subResult.length; i++) {
                 if (subResult[i]) {
@@ -55,7 +55,7 @@ public class NOf implements VariantQueryExpr {
         return n;
     }
 
-    public List<VariantQueryExpr> getSubExprs() {
+    public List<QueryExpr> getSubExprs() {
         return subExprs;
     }
 

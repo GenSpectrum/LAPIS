@@ -1,11 +1,7 @@
 package ch.ethz.lapis.api;
 
 import ch.ethz.lapis.LapisMain;
-import ch.ethz.lapis.api.entity.AccessKey;
-import ch.ethz.lapis.api.entity.DetailsField;
-import ch.ethz.lapis.api.entity.OpennessLevel;
-import ch.ethz.lapis.api.entity.SequenceType;
-import ch.ethz.lapis.api.entity.Versioned;
+import ch.ethz.lapis.api.entity.*;
 import ch.ethz.lapis.api.entity.req.BaseSampleRequest;
 import ch.ethz.lapis.api.entity.req.OrderAndLimitConfig;
 import ch.ethz.lapis.api.entity.req.SampleAggregatedRequest;
@@ -18,25 +14,13 @@ import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.Database.Columns;
 import ch.ethz.lapis.api.query.InsertionStore;
-import ch.ethz.lapis.api.query.MutationStore;
 import ch.ethz.lapis.api.query.QueryEngine;
 import ch.ethz.lapis.util.FastaEntry;
-import ch.ethz.lapis.util.ReferenceGenomeData;
 import ch.ethz.lapis.util.SeqCompressor;
 import ch.ethz.lapis.util.ZstdSeqCompressor;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Result;
-import org.jooq.Select;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectLimitStep;
-import org.jooq.SelectOrderByStep;
-import org.jooq.Table;
-import org.jooq.TableField;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.lapis.tables.YMainAaSequence;
 import org.jooq.lapis.tables.YMainMetadata;
@@ -247,49 +231,9 @@ public class SampleService {
         float minProportion
     ) {
         Database database = Database.getOrLoadInstance(dbPool);
-        ReferenceGenomeData reference = ReferenceGenomeData.getInstance();
-        // Filter
-        List<Integer> ids = new QueryEngine().filterIds(database, request);
-        if (ids.isEmpty()) {
-            return new SampleMutationsResponse();
-        }
-        // Count mutations
-        SampleMutationsResponse response = new SampleMutationsResponse();
-        if (sequenceType == SequenceType.NUCLEOTIDE) {
-            List<MutationStore.MutationCount> mutationCounts = database.getNucMutationStore().countMutations(ids);
-            for (MutationStore.MutationCount mutationCount : mutationCounts) {
-                if (mutationCount.getProportion() < minProportion) {
-                    continue;
-                }
-                MutationStore.Mutation mutation = mutationCount.getMutation();
-                String mutString = "%s%s%s".formatted(
-                    reference.getNucleotideBase(mutation.position),
-                    mutation.position,
-                    mutation.mutationTo
-                );
-                response.add(new SampleMutationsResponse.MutationEntry(mutString,
-                    mutationCount.getProportion(), mutationCount.getCount()));
-            }
-        } else {
-            database.getAaMutationStores().forEach((gene, mutationStore) -> {
-                List<MutationStore.MutationCount> mutationCounts = mutationStore.countMutations(ids);
-                for (MutationStore.MutationCount mutationCount : mutationCounts) {
-                    if (mutationCount.getProportion() < minProportion) {
-                        continue;
-                    }
-                    MutationStore.Mutation mutation = mutationCount.getMutation();
-                    String mutString = "%s:%s%s%s".formatted(
-                        gene,
-                        reference.getGeneAABase(gene, mutation.position),
-                        mutation.position,
-                        mutation.mutationTo
-                    );
-                    response.add(new SampleMutationsResponse.MutationEntry(mutString,
-                        mutationCount.getProportion(), mutationCount.getCount()));
-                }
-            });
-        }
-        return response;
+        QueryEngine queryEngine = new QueryEngine();
+        boolean[] matched = queryEngine.matchSampleFilter(database, request);
+        return queryEngine.getMutations(database, matched, sequenceType, minProportion);
     }
 
 
