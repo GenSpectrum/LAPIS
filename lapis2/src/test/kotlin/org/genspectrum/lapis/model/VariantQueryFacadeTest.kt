@@ -217,7 +217,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variant variantQuery with a 'Insertion' expression the map should throw an error`() {
+    fun `given a variantQuery with a 'Insertion' expression the map should throw an error`() {
         val variantQuery = "ins_1234:GAG"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
@@ -229,7 +229,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variant variantQuery with a 'AA mutation' expression the map should throw an error`() {
+    fun `given a variant variantQuery with a 'AA mutation' expression the map should throw an error`() {
         val variantQuery = "S:N501Y"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
@@ -241,7 +241,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variant variantQuery with a 'AA insertion' expression the map should throw an error`() {
+    fun `given a valid variantQuery with a 'AA insertion' expression the map should throw an error`() {
         val variantQuery = "ins_S:N501EPE"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
@@ -253,7 +253,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variant variantQuery with a 'nextclade pango lineage' expression the map should throw an error`() {
+    fun `given a valid variantQuery with a 'nextclade pango lineage' expression the map should throw an error`() {
         val variantQuery = "nextcladePangoLineage:BA.5*"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
@@ -265,7 +265,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variant variantQuery with a 'Nextstrain clade lineage' expression the map should throw an error`() {
+    fun `given a valid variantQuery with a 'Nextstrain clade lineage' expression the map should throw an error`() {
         val variantQuery = "nextstrainClade:22B"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
@@ -277,7 +277,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variant variantQuery with a 'Gisaid clade lineage' expression the map should throw an error`() {
+    fun `given a valid variantQuery with a 'Gisaid clade lineage' expression the map should throw an error`() {
         val variantQuery = "gisaid:AB"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
