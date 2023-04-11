@@ -65,6 +65,21 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
                 ),
             )
     }
+
+    @ExceptionHandler(NotImplementedError::class)
+    fun handleNotImplementedError(e: NotImplementedError): ResponseEntity<String> {
+        return ResponseEntity
+            .status(HttpStatus.NOT_IMPLEMENTED)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                jacksonObjectMapper().writeValueAsString(
+                    LapisHttpErrorResponse(
+                        "Not implemented",
+                        "${e.message}",
+                    ),
+                ),
+            )
+    }
 }
 
 data class LapisHttpErrorResponse(val title: String, val message: String)

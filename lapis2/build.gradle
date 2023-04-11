@@ -36,6 +36,7 @@ dependencies {
     }
     testImplementation 'com.ninja-squad:springmockk:4.0.2'
     testImplementation 'org.mock-server:mockserver-netty:5.15.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 

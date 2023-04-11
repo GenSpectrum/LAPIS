@@ -217,6 +217,78 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a variant variantQuery with a 'Insertion' expression the map should throw an error`() {
+        val variantQuery = "ins_1234:GAG"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Nucleotide insertions are not supported yet."),
+        )
+    }
+
+    @Test
+    fun `given a valid variant variantQuery with a 'AA mutation' expression the map should throw an error`() {
+        val variantQuery = "S:N501Y"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Amino acid mutations are not supported yet."),
+        )
+    }
+
+    @Test
+    fun `given a valid variant variantQuery with a 'AA insertion' expression the map should throw an error`() {
+        val variantQuery = "ins_S:N501EPE"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Amino acid insertions are not supported yet."),
+        )
+    }
+
+    @Test
+    fun `given a valid variant variantQuery with a 'nextclade pango lineage' expression the map should throw an error`() {
+        val variantQuery = "nextcladePangoLineage:BA.5*"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Nextclade pango lineages are not supported yet."),
+        )
+    }
+
+    @Test
+    fun `given a valid variant variantQuery with a 'Nextstrain clade lineage' expression the map should throw an error`() {
+        val variantQuery = "nextstrainClade:22B"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Nextstrain clade lineages are not supported yet."),
+        )
+    }
+
+    @Test
+    fun `given a valid variant variantQuery with a 'Gisaid clade lineage' expression the map should throw an error`() {
+        val variantQuery = "gisaid:AB"
+
+        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+
+        MatcherAssert.assertThat(
+            exception.message,
+            Matchers.equalTo("Gisaid clade lineages are not supported yet."),
+        )
+    }
+
+    @Test
     fun `given a variantQuery with a exact 'Nof' expression then map should return the corresponding SiloQuery`() {
         val variantQuery = "[exactly-3-of: 123A, 234T, 345G]"
 

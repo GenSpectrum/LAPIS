@@ -1,10 +1,16 @@
 package org.genspectrum.lapis.model
 
 import VariantQueryBaseListener
+import VariantQueryParser.Aa_insertionContext
+import VariantQueryParser.Aa_mutationContext
 import VariantQueryParser.AndContext
+import VariantQueryParser.Gisaid_clade_lineage_queryContext
 import VariantQueryParser.MaybeContext
 import VariantQueryParser.N_of_queryContext
+import VariantQueryParser.Nextclade_pangolineage_queryContext
+import VariantQueryParser.Nextstrain_clade_queryContext
 import VariantQueryParser.NotContext
+import VariantQueryParser.Nucleotide_insertionContext
 import VariantQueryParser.Nucleotide_mutationContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.Pangolineage_queryContext
@@ -81,5 +87,29 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         }
 
         expressionStack.addLast(NOf(n, matchExactly, children.reversed()))
+    }
+
+    override fun enterNucleotide_insertion(ctx: Nucleotide_insertionContext?) {
+        throw NotImplementedError("Nucleotide insertions are not supported yet.")
+    }
+
+    override fun enterAa_mutation(ctx: Aa_mutationContext?) {
+        throw NotImplementedError("Amino acid mutations are not supported yet.")
+    }
+
+    override fun enterAa_insertion(ctx: Aa_insertionContext?) {
+        throw NotImplementedError("Amino acid insertions are not supported yet.")
+    }
+
+    override fun enterNextclade_pangolineage_query(ctx: Nextclade_pangolineage_queryContext?) {
+        throw NotImplementedError("Nextclade pango lineages are not supported yet.")
+    }
+
+    override fun enterNextstrain_clade_query(ctx: Nextstrain_clade_queryContext?) {
+        throw NotImplementedError("Nextstrain clade lineages are not supported yet.")
+    }
+
+    override fun enterGisaid_clade_lineage_query(ctx: Gisaid_clade_lineage_queryContext?) {
+        throw NotImplementedError("Gisaid clade lineages are not supported yet.")
     }
 }
