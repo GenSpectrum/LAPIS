@@ -157,6 +157,36 @@ class SiloFilterExpressionMapperTest {
         assertThat(result, equalTo(expectedResult))
     }
 
+    @Test
+    fun `given a query with an empty variantQuery then it should throw an error`() {
+        val filterParameter = mapOf("variantQuery" to "")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery cannot be empty"))
+    }
+
+    @Test
+    fun `given a query with a variantQuery alongside nucleotideMutation filter then it should throw an error`() {
+        val filterParameter = mapOf(
+            "nucleotideMutations" to "A123T",
+            "variantQuery" to "A123T",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery cannot be used with other variant filters"))
+    }
+
+    @Test
+    fun `given a query with a variantQuery alongside pangoLineage filter then it should throw an error`() {
+        val filterParameter = mapOf(
+            "pangoLineage" to "A.1.2.3",
+            "variantQuery" to "A123T",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery cannot be used with other variant filters"))
+    }
+
     companion object {
         @JvmStatic
         fun getFilterParametersWithExpectedSiloQuery() = listOf(
@@ -257,6 +287,33 @@ class SiloFilterExpressionMapperTest {
                     listOf(
                         DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
                         StringEquals("some_metadata", "ABC"),
+                    ),
+                ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "variantQuery" to "300G & 400A",
+                ),
+                And(
+                    listOf(
+                        And(
+                            listOf(
+                                NucleotideSymbolEquals(300, "G"),
+                                NucleotideSymbolEquals(400, "A"),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "variantQuery" to "300G",
+                    "some_metadata" to "ABC",
+                ),
+                And(
+                    listOf(
+                        StringEquals("some_metadata", "ABC"),
+                        NucleotideSymbolEquals(300, "G"),
                     ),
                 ),
             ),
