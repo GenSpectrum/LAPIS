@@ -141,4 +141,4 @@ jobs:
         env:
           SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
-          DATABASE_CONFIG: siloLapisTests/testDatabaseConfig.yaml
+          DATABASE_CONFIG: ../siloLapisTests/testDatabaseConfig.yaml
