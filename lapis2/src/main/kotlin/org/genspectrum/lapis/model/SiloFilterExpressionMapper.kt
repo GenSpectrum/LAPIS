@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.SequenceFilterField
+import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-data class SequenceFilterValue(val type: SequenceFilterField.Type, val value: String, val originalKey: String)
+data class SequenceFilterValue(val type: SequenceFilterFieldType, val value: String, val originalKey: String)
 
 @Component
 class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: SequenceFilterFields) {
@@ -24,7 +24,7 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
 
         val filterExpressions = sequenceFilters
             .map { (key, value) ->
-                val nullableType = allowedSequenceFilterFields.fields[key]?.type
+                val nullableType = allowedSequenceFilterFields.fields[key]
                 val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableType, key)
                 filterExpressionId to SequenceFilterValue(type, value, key)
             }
@@ -43,16 +43,16 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
     }
 
     private fun mapToFilterExpressionIdentifier(
-        type: SequenceFilterField.Type?,
+        type: SequenceFilterFieldType?,
         key: String,
-    ): Pair<Pair<String, SiloFilterPrimitive>, SequenceFilterField.Type> {
+    ): Pair<Pair<String, SiloFilterPrimitive>, SequenceFilterFieldType> {
         val filterExpressionId = when (type) {
-            is SequenceFilterField.Type.DateFrom -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
-            is SequenceFilterField.Type.DateTo -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
-            SequenceFilterField.Type.Date -> Pair(key, SiloFilterPrimitive.DateBetween)
-            SequenceFilterField.Type.PangoLineage -> Pair(key, SiloFilterPrimitive.PangoLineage)
-            SequenceFilterField.Type.String -> Pair(key, SiloFilterPrimitive.StringEquals)
-            SequenceFilterField.Type.MutationsList -> Pair(key, SiloFilterPrimitive.NucleotideSymbolEquals)
+            is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
+            is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
+            SequenceFilterFieldType.Date -> Pair(key, SiloFilterPrimitive.DateBetween)
+            SequenceFilterFieldType.PangoLineage -> Pair(key, SiloFilterPrimitive.PangoLineage)
+            SequenceFilterFieldType.String -> Pair(key, SiloFilterPrimitive.StringEquals)
+            SequenceFilterFieldType.MutationsList -> Pair(key, SiloFilterPrimitive.NucleotideSymbolEquals)
 
             null -> throw IllegalArgumentException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -67,7 +67,7 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
         values: List<SequenceFilterValue>,
     ): DateBetween {
         val (exactDateFilters, dateRangeFilters) = values.partition { (fieldType, _) ->
-            fieldType == SequenceFilterField.Type.Date
+            fieldType == SequenceFilterFieldType.Date
         }
 
         if (exactDateFilters.isNotEmpty() && dateRangeFilters.isNotEmpty()) {
@@ -88,12 +88,12 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
 
         return DateBetween(
             siloColumnName,
-            from = findDateOfFilterType<SequenceFilterField.Type.DateFrom>(dateRangeFilters),
-            to = findDateOfFilterType<SequenceFilterField.Type.DateTo>(dateRangeFilters),
+            from = findDateOfFilterType<SequenceFilterFieldType.DateFrom>(dateRangeFilters),
+            to = findDateOfFilterType<SequenceFilterFieldType.DateTo>(dateRangeFilters),
         )
     }
 
-    private inline fun <reified T : SequenceFilterField.Type> findDateOfFilterType(
+    private inline fun <reified T : SequenceFilterFieldType> findDateOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): LocalDate? {
         val fromFilter = dateRangeFilters.find { (type, _, _) -> type is T }

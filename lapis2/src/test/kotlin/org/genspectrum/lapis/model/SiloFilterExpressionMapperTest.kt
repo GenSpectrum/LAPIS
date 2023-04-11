@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.SequenceFilterField
+import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
@@ -23,13 +23,13 @@ import java.time.LocalDate
 class SiloFilterExpressionMapperTest {
     private val sequenceFilterFields = SequenceFilterFields(
         mapOf(
-            "date" to SequenceFilterField("date", SequenceFilterField.Type.Date),
-            "dateTo" to SequenceFilterField("dateTo", SequenceFilterField.Type.DateTo("date")),
-            "dateFrom" to SequenceFilterField("dateFrom", SequenceFilterField.Type.DateFrom("date")),
-            "pangoLineage" to SequenceFilterField("pangoLineage", SequenceFilterField.Type.PangoLineage),
-            "nucleotideMutations" to SequenceFilterField("nucleotideMutations", SequenceFilterField.Type.MutationsList),
-            "some_metadata" to SequenceFilterField("some_metadata", SequenceFilterField.Type.String),
-            "other_metadata" to SequenceFilterField("other_metadata", SequenceFilterField.Type.String),
+            "date" to SequenceFilterFieldType.Date,
+            "dateTo" to SequenceFilterFieldType.DateTo("date"),
+            "dateFrom" to SequenceFilterFieldType.DateFrom("date"),
+            "pangoLineage" to SequenceFilterFieldType.PangoLineage,
+            "nucleotideMutations" to SequenceFilterFieldType.MutationsList,
+            "some_metadata" to SequenceFilterFieldType.String,
+            "other_metadata" to SequenceFilterFieldType.String,
         ),
     )
 

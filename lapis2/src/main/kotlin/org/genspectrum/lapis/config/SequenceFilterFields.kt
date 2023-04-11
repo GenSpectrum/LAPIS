@@ -1,28 +1,27 @@
 package org.genspectrum.lapis.config
 
-data class SequenceFilterFields(val fields: Map<String, SequenceFilterField>) {
+typealias FieldName = String
+
+data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldType>) {
     companion object {
-        private val nucleotideMutationsField = Pair(
-            "nucleotideMutations",
-            SequenceFilterField("nucleotideMutations", SequenceFilterField.Type.MutationsList),
-        )
+        private val nucleotideMutationsField = Pair("nucleotideMutations", SequenceFilterFieldType.MutationsList)
 
         fun fromDatabaseConfig(databaseConfig: DatabaseConfig) = SequenceFilterFields(
             fields = databaseConfig.schema.metadata
                 .map(::mapToSequenceFilterFields)
                 .flatten()
-                .associateBy { it.name } + nucleotideMutationsField,
+                .toMap() + nucleotideMutationsField,
         )
     }
 }
 
 private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when (databaseMetadata.type) {
-    "string" -> listOf(SequenceFilterField(databaseMetadata.name, SequenceFilterField.Type.String))
-    "pango_lineage" -> listOf(SequenceFilterField(databaseMetadata.name, SequenceFilterField.Type.PangoLineage))
+    "string" -> listOf(databaseMetadata.name to SequenceFilterFieldType.String)
+    "pango_lineage" -> listOf(databaseMetadata.name to SequenceFilterFieldType.PangoLineage)
     "date" -> listOf(
-        SequenceFilterField(databaseMetadata.name, SequenceFilterField.Type.Date),
-        SequenceFilterField("${databaseMetadata.name}From", SequenceFilterField.Type.DateFrom(databaseMetadata.name)),
-        SequenceFilterField("${databaseMetadata.name}To", SequenceFilterField.Type.DateTo(databaseMetadata.name)),
+        databaseMetadata.name to SequenceFilterFieldType.Date,
+        "${databaseMetadata.name}From" to SequenceFilterFieldType.DateFrom(databaseMetadata.name),
+        "${databaseMetadata.name}To" to SequenceFilterFieldType.DateTo(databaseMetadata.name),
     )
 
     else -> throw IllegalArgumentException(
@@ -30,13 +29,11 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
     )
 }
 
-data class SequenceFilterField(val name: String, val type: Type) {
-    sealed class Type(val openApiType: kotlin.String) {
-        object String : Type("string")
-        object PangoLineage : Type("string")
-        object Date : Type("string")
-        object MutationsList : Type("string")
-        data class DateFrom(val associatedField: kotlin.String) : Type("string")
-        data class DateTo(val associatedField: kotlin.String) : Type("string")
-    }
+sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
+    object String : SequenceFilterFieldType("string")
+    object PangoLineage : SequenceFilterFieldType("string")
+    object Date : SequenceFilterFieldType("string")
+    object MutationsList : SequenceFilterFieldType("string")
+    data class DateFrom(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
+    data class DateTo(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
 }
