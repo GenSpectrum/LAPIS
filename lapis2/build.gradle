@@ -44,7 +44,7 @@ compileKotlin {
 tasks.named('test') {
     useJUnitPlatform()
     testLogging {
-        events TestLogEvent.FAILED, TestLogEvent.SKIPPED, TestLogEvent.STANDARD_OUT
+        events TestLogEvent.FAILED
         exceptionFormat TestExceptionFormat.FULL
         showExceptions true
     }

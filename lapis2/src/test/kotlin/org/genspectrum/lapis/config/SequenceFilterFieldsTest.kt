@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.config
 
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsInAnyOrder
-import org.hamcrest.Matchers.empty
+import org.hamcrest.Matchers.aMapWithSize
+import org.hamcrest.Matchers.hasEntry
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,7 +14,8 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, `is`(empty()))
+        assertThat(underTest.fields, aMapWithSize(1))
+        assertThat(underTest.fields, hasEntry("nucleotideMutations", SequenceFilterFieldType.MutationsList))
     }
 
     @Test
@@ -23,10 +24,8 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(
-            underTest.fields,
-            containsInAnyOrder(SequenceFilterField("fieldName", SequenceFilterField.Type.String)),
-        )
+        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, hasEntry("fieldName", SequenceFilterFieldType.String))
     }
 
     @Test
@@ -35,10 +34,8 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(
-            underTest.fields,
-            containsInAnyOrder(SequenceFilterField("pango lineage", SequenceFilterField.Type.PangoLineage)),
-        )
+        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, hasEntry("pango lineage", SequenceFilterFieldType.PangoLineage))
     }
 
     @Test
@@ -47,14 +44,10 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(
-            underTest.fields,
-            containsInAnyOrder(
-                SequenceFilterField("dateField", SequenceFilterField.Type.Date),
-                SequenceFilterField("dateFieldFrom", SequenceFilterField.Type.DateFrom("dateField")),
-                SequenceFilterField("dateFieldTo", SequenceFilterField.Type.DateTo("dateField")),
-            ),
-        )
+        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, hasEntry("dateField", SequenceFilterFieldType.Date))
+        assertThat(underTest.fields, hasEntry("dateFieldFrom", SequenceFilterFieldType.DateFrom("dateField")))
+        assertThat(underTest.fields, hasEntry("dateFieldTo", SequenceFilterFieldType.DateTo("dateField")))
     }
 
     @Test

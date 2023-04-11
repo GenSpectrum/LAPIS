@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.SequenceFilterField
+import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -12,78 +13,111 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-private const val DATE_FROM = "dateFrom"
-private const val DATE_TO = "dateTo"
+data class SequenceFilterValue(val type: SequenceFilterField.Type, val value: String, val originalKey: String)
 
 @Component
-class SiloFilterExpressionMapper(private val databaseConfig: DatabaseConfig) {
+class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: SequenceFilterFields) {
     fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
 
-        val allowedSequenceFilterKeys = databaseConfig.schema.metadata.map { it.name }
-        for (sequenceFilterKey in sequenceFilters.keys) {
-            if (!allowedSequenceFilterKeys.contains(sequenceFilterKey)) {
-                throw IllegalArgumentException(
-                    "'$sequenceFilterKey' is not a valid sequence filter key. Valid keys are: " +
-                        allowedSequenceFilterKeys.joinToString(),
-                )
+        val filterExpressions = sequenceFilters
+            .map { (key, value) ->
+                val nullableType = allowedSequenceFilterFields.fields[key]?.type
+                val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableType, key)
+                filterExpressionId to SequenceFilterValue(type, value, key)
             }
-        }
-
-        val (dateRangeFilters, genericSequenceFilters) = sequenceFilters.entries.partition {
-            it.key in DATE_RANGE_FILTER_KEYS
-        }
-
-        val filterExpressions = genericSequenceFilters.map { mapToSiloFilter(it.key, it.value) }
-
-        return when (val dateBetweenFilter = mapToDateBetweenFilter(dateRangeFilters)) {
-            null -> And(filterExpressions)
-            else -> {
-                val filterExpressionsWithDateBetween = filterExpressions.toMutableList()
-                filterExpressionsWithDateBetween.add(dateBetweenFilter)
-                return And(filterExpressionsWithDateBetween)
+            .groupBy({ it.first }, { it.second })
+            .map { (key, values) ->
+                val (siloColumnName, siloFilterPrimitive) = key
+                when (siloFilterPrimitive) {
+                    SiloFilterPrimitive.StringEquals -> StringEquals(siloColumnName, values[0].value)
+                    SiloFilterPrimitive.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values[0].value)
+                    SiloFilterPrimitive.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
+                    SiloFilterPrimitive.NucleotideSymbolEquals -> mapToNucleotideFilter(values[0].value)
+                }
             }
-        }
+
+        return And(filterExpressions)
     }
 
-    private fun mapToDateBetweenFilter(dateRangeFilters: List<Map.Entry<String, String>>): DateBetween? {
-        if (dateRangeFilters.isEmpty()) {
-            return null
-        }
+    private fun mapToFilterExpressionIdentifier(
+        type: SequenceFilterField.Type?,
+        key: String,
+    ): Pair<Pair<String, SiloFilterPrimitive>, SequenceFilterField.Type> {
+        val filterExpressionId = when (type) {
+            is SequenceFilterField.Type.DateFrom -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
+            is SequenceFilterField.Type.DateTo -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
+            SequenceFilterField.Type.Date -> Pair(key, SiloFilterPrimitive.DateBetween)
+            SequenceFilterField.Type.PangoLineage -> Pair(key, SiloFilterPrimitive.PangoLineage)
+            SequenceFilterField.Type.String -> Pair(key, SiloFilterPrimitive.StringEquals)
+            SequenceFilterField.Type.MutationsList -> Pair(key, SiloFilterPrimitive.NucleotideSymbolEquals)
 
-        val dateRangeFiltersMap = dateRangeFilters.associate { it.key to it.value }
-        try {
-            return DateBetween(
-                from = getAsDate(dateRangeFiltersMap, DATE_FROM),
-                to = getAsDate(dateRangeFiltersMap, DATE_TO),
+            null -> throw IllegalArgumentException(
+                "'$key' is not a valid sequence filter key. Valid keys are: " +
+                    allowedSequenceFilterFields.fields.keys.joinToString(),
             )
+        }
+        return Pair(filterExpressionId, type)
+    }
+
+    private fun mapToDateBetweenFilter(
+        siloColumnName: String,
+        values: List<SequenceFilterValue>,
+    ): DateBetween {
+        val (exactDateFilters, dateRangeFilters) = values.partition { (fieldType, _) ->
+            fieldType == SequenceFilterField.Type.Date
+        }
+
+        if (exactDateFilters.isNotEmpty() && dateRangeFilters.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "Cannot filter by exact date field '${exactDateFilters[0].originalKey}' " +
+                    "and by date range field '${dateRangeFilters[0].originalKey}'.",
+            )
+        }
+
+        if (exactDateFilters.isNotEmpty()) {
+            val date = getAsDate(exactDateFilters[0])
+            return DateBetween(
+                siloColumnName,
+                from = date,
+                to = date,
+            )
+        }
+
+        return DateBetween(
+            siloColumnName,
+            from = findDateOfFilterType<SequenceFilterField.Type.DateFrom>(dateRangeFilters),
+            to = findDateOfFilterType<SequenceFilterField.Type.DateTo>(dateRangeFilters),
+        )
+    }
+
+    private inline fun <reified T : SequenceFilterField.Type> findDateOfFilterType(
+        dateRangeFilters: List<SequenceFilterValue>,
+    ): LocalDate? {
+        val fromFilter = dateRangeFilters.find { (type, _, _) -> type is T }
+        return getAsDate(fromFilter)
+    }
+
+    private fun getAsDate(sequenceFilterValue: SequenceFilterValue?): LocalDate? {
+        val (_, value, originalKey) = sequenceFilterValue ?: return null
+
+        try {
+            return LocalDate.parse(value)
         } catch (exception: DateTimeParseException) {
-            throw IllegalArgumentException(exception.message, exception)
+            throw IllegalArgumentException("$originalKey '$value' is not a valid date: ${exception.message}", exception)
         }
     }
 
-    private fun getAsDate(asMap: Map<String, String>, key: String) = try {
-        asMap[key]?.let(LocalDate::parse)
-    } catch (exception: DateTimeParseException) {
-        throw IllegalArgumentException("$key '${asMap[key]}' is not a valid date: ${exception.message}", exception)
-    }
-
-    private fun mapToSiloFilter(key: String, value: String) = when (key) {
-        "pangoLineage" -> mapToPangoLineageFilter(value)
-        "nucleotideMutations" -> mapToNucleotideFilter(value)
-        else -> StringEquals(key, value)
-    }
-
-    private fun mapToPangoLineageFilter(value: String) = when {
-        value.endsWith(".*") -> PangoLineageEquals(value.substringBeforeLast(".*"), includeSublineages = true)
-        value.endsWith('*') -> PangoLineageEquals(value.substringBeforeLast('*'), includeSublineages = true)
+    private fun mapToPangoLineageFilter(column: String, value: String) = when {
+        value.endsWith(".*") -> PangoLineageEquals(column, value.substringBeforeLast(".*"), includeSublineages = true)
+        value.endsWith('*') -> PangoLineageEquals(column, value.substringBeforeLast('*'), includeSublineages = true)
         value.endsWith('.') -> throw IllegalArgumentException(
             "Invalid pango lineage: $value must not end with a dot. Did you mean '$value*'?",
         )
 
-        else -> PangoLineageEquals(value, includeSublineages = false)
+        else -> PangoLineageEquals(column, value, includeSublineages = false)
     }
 
     private fun mapToNucleotideFilter(userInput: String): SiloFilterExpression {
@@ -102,11 +136,6 @@ class SiloFilterExpressionMapper(private val databaseConfig: DatabaseConfig) {
     }
 
     companion object {
-        private val DATE_RANGE_FILTER_KEYS = arrayOf(
-            DATE_FROM,
-            DATE_TO,
-        )
-
         private var NUCLEOTIDE_MUTATION_REGEX: Regex
 
         init {
@@ -124,5 +153,12 @@ class SiloFilterExpressionMapper(private val databaseConfig: DatabaseConfig) {
                     "(?<symbolFrom>^[$validSymbolsFrom]?)(?<position>\\d+)(?<symbolTo>[$validSymbolsTo]\$)",
                 )
         }
+    }
+
+    private enum class SiloFilterPrimitive {
+        StringEquals,
+        PangoLineage,
+        DateBetween,
+        NucleotideSymbolEquals,
     }
 }

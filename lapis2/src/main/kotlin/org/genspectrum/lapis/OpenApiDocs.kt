@@ -9,8 +9,9 @@ import org.genspectrum.lapis.controller.REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 
 fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields): OpenAPI {
-    val properties =
-        sequenceFilterFields.fields.associateBy({ it.name }, { Schema<String>().type(it.type.openApiType) })
+    val properties = sequenceFilterFields.fields
+        .map { (fieldName, field) -> fieldName to Schema<String>().type(field.type.openApiType) }
+        .toMap()
 
     return OpenAPI()
         .components(

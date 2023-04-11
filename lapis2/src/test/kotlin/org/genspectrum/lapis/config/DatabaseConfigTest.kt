@@ -24,8 +24,7 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "date", type = "date"),
                 DatabaseMetadata(name = "region", type = "string"),
                 DatabaseMetadata(name = "country", type = "string"),
-                DatabaseMetadata(name = "division", type = "string"),
-                DatabaseMetadata(name = "pango_lineage", type = "pango_lineage"),
+                DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
             ),
         )
     }

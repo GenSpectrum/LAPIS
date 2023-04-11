@@ -29,12 +29,13 @@ sealed class SiloFilterExpression(val type: String)
 
 data class StringEquals(val column: String, val value: String) : SiloFilterExpression("StringEquals")
 
-data class PangoLineageEquals(val value: String, val includeSublineages: Boolean) :
+data class PangoLineageEquals(val column: String, val value: String, val includeSublineages: Boolean) :
     SiloFilterExpression("PangoLineage")
 
 data class NucleotideSymbolEquals(val position: Int, val symbol: String) : SiloFilterExpression("NucleotideEquals")
 
-data class DateBetween(val from: LocalDate?, val to: LocalDate?) : SiloFilterExpression("DateBetween")
+data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDate?) :
+    SiloFilterExpression("DateBetween")
 
 object True : SiloFilterExpression("True")
 
