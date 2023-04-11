@@ -51,30 +51,32 @@ public class SqlClient {
             }
             var selectBody = selectStatement.getSelectBody();
             if (!(selectBody instanceof PlainSelect plainSelect)) throw new UnsupportedSqlException();
-            if (plainSelect.getDistinct() != null ||
+            if (// The distinct keyword shall be ignored for now. It shouldn't be a problem in most cases as we
+                // copy over the values in SELECT into GROUP BY
+                //plainSelect.getDistinct() != null ||
                 plainSelect.getIntoTables() != null ||
-                plainSelect.getJoins() != null ||
-                plainSelect.getFetch() != null ||
-                plainSelect.getOptimizeFor() != null ||
-                plainSelect.getSkip() != null ||
-                plainSelect.getMySqlHintStraightJoin() ||
-                plainSelect.getTop() != null ||
-                plainSelect.getOracleHierarchical() != null ||
-                plainSelect.getOracleHint() != null ||
-                plainSelect.isOracleSiblings() ||
-                plainSelect.isForUpdate() ||
-                plainSelect.getForUpdateTable() != null ||
-                plainSelect.isSkipLocked() ||
-                plainSelect.isUseBrackets() ||
-                plainSelect.getWait() != null ||
-                plainSelect.getMySqlSqlCalcFoundRows() ||
-                plainSelect.getMySqlSqlCacheFlag() != null ||
-                plainSelect.getForXmlPath() != null ||
-                plainSelect.getKsqlWindow() != null ||
-                plainSelect.isNoWait() ||
-                plainSelect.isEmitChanges() ||
-                plainSelect.getWithIsolation() != null ||
-                plainSelect.getWindowDefinitions() != null
+                    plainSelect.getJoins() != null ||
+                    plainSelect.getFetch() != null ||
+                    plainSelect.getOptimizeFor() != null ||
+                    plainSelect.getSkip() != null ||
+                    plainSelect.getMySqlHintStraightJoin() ||
+                    plainSelect.getTop() != null ||
+                    plainSelect.getOracleHierarchical() != null ||
+                    plainSelect.getOracleHint() != null ||
+                    plainSelect.isOracleSiblings() ||
+                    plainSelect.isForUpdate() ||
+                    plainSelect.getForUpdateTable() != null ||
+                    plainSelect.isSkipLocked() ||
+                    plainSelect.isUseBrackets() ||
+                    plainSelect.getWait() != null ||
+                    plainSelect.getMySqlSqlCalcFoundRows() ||
+                    plainSelect.getMySqlSqlCacheFlag() != null ||
+                    plainSelect.getForXmlPath() != null ||
+                    plainSelect.getKsqlWindow() != null ||
+                    plainSelect.isNoWait() ||
+                    plainSelect.isEmitChanges() ||
+                    plainSelect.getWithIsolation() != null ||
+                    plainSelect.getWindowDefinitions() != null
             ) {
                 throw new UnsupportedSqlException();
             }
@@ -205,8 +207,10 @@ public class SqlClient {
 
         String result = switch (query.getTable()) {
             case "metadata" -> executeMetadataQuery(query, database, objectMapper, sequencesMatched);
-            case "nuc_mutations" -> executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.NUCLEOTIDE);
-            case "aa_mutations" -> executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.AMINO_ACID);
+            case "nuc_mutations" ->
+                executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.NUCLEOTIDE);
+            case "aa_mutations" ->
+                executeMutationsQuery(query, database, objectMapper, sequencesMatched, SequenceType.AMINO_ACID);
             default -> throw new RuntimeException("Unexpected error");
         };
 
@@ -585,31 +589,55 @@ public class SqlClient {
                 comparator = Comparator.comparing(SampleAggregated::getCount);
             } else {
                 comparator = switch (orderBy) {
-                    case DATE -> Comparator.comparing(SampleAggregated::getDate, Comparator.nullsLast(LocalDate::compareTo));
-                    case YEAR -> Comparator.comparing(SampleAggregated::getYear, Comparator.nullsLast(Integer::compareTo));
-                    case MONTH -> Comparator.comparing(SampleAggregated::getMonth, Comparator.nullsLast(Integer::compareTo));
-                    case DATE_SUBMITTED -> Comparator.comparing(SampleAggregated::getDateSubmitted, Comparator.nullsLast(LocalDate::compareTo));
-                    case REGION -> Comparator.comparing(SampleAggregated::getRegion, Comparator.nullsLast(String::compareTo));
-                    case COUNTRY -> Comparator.comparing(SampleAggregated::getCountry, Comparator.nullsLast(String::compareTo));
-                    case DIVISION -> Comparator.comparing(SampleAggregated::getDivision, Comparator.nullsLast(String::compareTo));
-                    case LOCATION -> Comparator.comparing(SampleAggregated::getLocation, Comparator.nullsLast(String::compareTo));
-                    case REGION_EXPOSURE -> Comparator.comparing(SampleAggregated::getRegionExposure, Comparator.nullsLast(String::compareTo));
-                    case COUNTRY_EXPOSURE -> Comparator.comparing(SampleAggregated::getCountryExposure, Comparator.nullsLast(String::compareTo));
-                    case DIVISION_EXPOSURE -> Comparator.comparing(SampleAggregated::getDivisionExposure, Comparator.nullsLast(String::compareTo));
-                    case AGE -> Comparator.comparing(SampleAggregated::getAge, Comparator.nullsLast(Integer::compareTo));
+                    case DATE ->
+                        Comparator.comparing(SampleAggregated::getDate, Comparator.nullsLast(LocalDate::compareTo));
+                    case YEAR ->
+                        Comparator.comparing(SampleAggregated::getYear, Comparator.nullsLast(Integer::compareTo));
+                    case MONTH ->
+                        Comparator.comparing(SampleAggregated::getMonth, Comparator.nullsLast(Integer::compareTo));
+                    case DATE_SUBMITTED ->
+                        Comparator.comparing(SampleAggregated::getDateSubmitted, Comparator.nullsLast(LocalDate::compareTo));
+                    case REGION ->
+                        Comparator.comparing(SampleAggregated::getRegion, Comparator.nullsLast(String::compareTo));
+                    case COUNTRY ->
+                        Comparator.comparing(SampleAggregated::getCountry, Comparator.nullsLast(String::compareTo));
+                    case DIVISION ->
+                        Comparator.comparing(SampleAggregated::getDivision, Comparator.nullsLast(String::compareTo));
+                    case LOCATION ->
+                        Comparator.comparing(SampleAggregated::getLocation, Comparator.nullsLast(String::compareTo));
+                    case REGION_EXPOSURE ->
+                        Comparator.comparing(SampleAggregated::getRegionExposure, Comparator.nullsLast(String::compareTo));
+                    case COUNTRY_EXPOSURE ->
+                        Comparator.comparing(SampleAggregated::getCountryExposure, Comparator.nullsLast(String::compareTo));
+                    case DIVISION_EXPOSURE ->
+                        Comparator.comparing(SampleAggregated::getDivisionExposure, Comparator.nullsLast(String::compareTo));
+                    case AGE ->
+                        Comparator.comparing(SampleAggregated::getAge, Comparator.nullsLast(Integer::compareTo));
                     case SEX -> Comparator.comparing(SampleAggregated::getSex, Comparator.nullsLast(String::compareTo));
-                    case HOSPITALIZED -> Comparator.comparing(SampleAggregated::getHospitalized, Comparator.nullsLast(Boolean::compareTo));
-                    case DIED -> Comparator.comparing(SampleAggregated::getDied, Comparator.nullsLast(Boolean::compareTo));
-                    case FULLY_VACCINATED -> Comparator.comparing(SampleAggregated::getFullyVaccinated, Comparator.nullsLast(Boolean::compareTo));
-                    case HOST -> Comparator.comparing(SampleAggregated::getHost, Comparator.nullsLast(String::compareTo));
-                    case SAMPLING_STRATEGY -> Comparator.comparing(SampleAggregated::getSamplingStrategy, Comparator.nullsLast(String::compareTo));
-                    case PANGO_LINEAGE -> Comparator.comparing(SampleAggregated::getPangoLineage, Comparator.nullsLast(String::compareTo));
-                    case NEXTCLADE_PANGO_LINEAGE -> Comparator.comparing(SampleAggregated::getNextcladePangoLineage, Comparator.nullsLast(String::compareTo));
-                    case NEXTSTRAIN_CLADE -> Comparator.comparing(SampleAggregated::getNextstrainClade, Comparator.nullsLast(String::compareTo));
-                    case GISAID_CLADE -> Comparator.comparing(SampleAggregated::getGisaidCloade, Comparator.nullsLast(String::compareTo));
-                    case SUBMITTING_LAB -> Comparator.comparing(SampleAggregated::getSubmittingLab, Comparator.nullsLast(String::compareTo));
-                    case ORIGINATING_LAB -> Comparator.comparing(SampleAggregated::getOriginatingLab, Comparator.nullsLast(String::compareTo));
-                    case DATABASE -> Comparator.comparing(SampleAggregated::getDatabase, Comparator.nullsLast(String::compareTo));
+                    case HOSPITALIZED ->
+                        Comparator.comparing(SampleAggregated::getHospitalized, Comparator.nullsLast(Boolean::compareTo));
+                    case DIED ->
+                        Comparator.comparing(SampleAggregated::getDied, Comparator.nullsLast(Boolean::compareTo));
+                    case FULLY_VACCINATED ->
+                        Comparator.comparing(SampleAggregated::getFullyVaccinated, Comparator.nullsLast(Boolean::compareTo));
+                    case HOST ->
+                        Comparator.comparing(SampleAggregated::getHost, Comparator.nullsLast(String::compareTo));
+                    case SAMPLING_STRATEGY ->
+                        Comparator.comparing(SampleAggregated::getSamplingStrategy, Comparator.nullsLast(String::compareTo));
+                    case PANGO_LINEAGE ->
+                        Comparator.comparing(SampleAggregated::getPangoLineage, Comparator.nullsLast(String::compareTo));
+                    case NEXTCLADE_PANGO_LINEAGE ->
+                        Comparator.comparing(SampleAggregated::getNextcladePangoLineage, Comparator.nullsLast(String::compareTo));
+                    case NEXTSTRAIN_CLADE ->
+                        Comparator.comparing(SampleAggregated::getNextstrainClade, Comparator.nullsLast(String::compareTo));
+                    case GISAID_CLADE ->
+                        Comparator.comparing(SampleAggregated::getGisaidCloade, Comparator.nullsLast(String::compareTo));
+                    case SUBMITTING_LAB ->
+                        Comparator.comparing(SampleAggregated::getSubmittingLab, Comparator.nullsLast(String::compareTo));
+                    case ORIGINATING_LAB ->
+                        Comparator.comparing(SampleAggregated::getOriginatingLab, Comparator.nullsLast(String::compareTo));
+                    case DATABASE ->
+                        Comparator.comparing(SampleAggregated::getDatabase, Comparator.nullsLast(String::compareTo));
                     default -> throw new IllegalStateException("Unexpected order by value: " + orderBy);
                 };
             }
