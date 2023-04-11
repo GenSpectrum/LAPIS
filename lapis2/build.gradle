@@ -54,11 +54,6 @@ tasks.named('bootBuildImage') {
     imageName = "ghcr.io/genspectrum/${project.name}"
 }
 
-// workaround related to https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/102
-tasks.named("jar") {
-    mustRunAfter("forkedSpringBootRun", "generateOpenApiDocs")
-}
-
 openApi {
     outputDir.set(file("$rootDir"))
     outputFileName.set("lapis-v2-openapi.json")
