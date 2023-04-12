@@ -12,5 +12,5 @@ schema:
     - name: pangoLineage
       type: pango_lineage
   features:
-    - feature: sarsCoV2VariantQuery
+    - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl

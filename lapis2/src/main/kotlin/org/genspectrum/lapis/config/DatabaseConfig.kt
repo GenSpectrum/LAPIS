@@ -6,7 +6,7 @@ data class DatabaseSchema(
     val instanceName: String,
     val metadata: List<DatabaseMetadata>,
     val primaryKey: String,
-    val features: List<DatabaseFeature>,
+    val features: List<DatabaseFeature>?,
 )
 
 data class DatabaseMetadata(val name: String, val type: String)

@@ -6,17 +6,24 @@ data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldTy
     companion object {
         private val nucleotideMutationsField = Pair("nucleotideMutations", SequenceFilterFieldType.MutationsList)
 
-        fun fromDatabaseConfig(databaseConfig: DatabaseConfig) = SequenceFilterFields(
-            fields = databaseConfig.schema.metadata
+        fun fromDatabaseConfig(databaseConfig: DatabaseConfig): SequenceFilterFields {
+            val metadataFields = databaseConfig.schema.metadata
                 .map(::mapToSequenceFilterFields)
                 .flatten()
-                .toMap() +
+                .toMap()
+            val staticFields = listOf(nucleotideMutationsField)
+
+            val featuresFields = if (databaseConfig.schema.features.isNullOrEmpty()) {
+                emptyMap<FieldName, SequenceFilterFieldType>()
+            } else {
                 databaseConfig.schema.features
                     .map(::mapToSequenceFilterFieldsFromFeatures)
                     .flatten()
-                    .toMap() +
-                nucleotideMutationsField,
-        )
+                    .toMap()
+            }
+
+            return SequenceFilterFields(fields = metadataFields + staticFields + featuresFields)
+        }
     }
 }
 
@@ -35,7 +42,7 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
 }
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) = when (databaseFeature.name) {
-    "sarsCoV2VariantQuery" -> listOf(databaseFeature.name to SequenceFilterFieldType.VariantQuery)
+    "sarsCoV2VariantQuery" -> listOf("variantQuery" to SequenceFilterFieldType.VariantQuery)
     else -> throw IllegalArgumentException(
         "Unknown feature '${databaseFeature.name}'",
     )
