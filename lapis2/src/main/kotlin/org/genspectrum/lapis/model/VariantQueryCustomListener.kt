@@ -49,7 +49,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         val pangolineage = ctx.pangolineage().text
         val includeSublineages = ctx.pangolineage_include_sublineages() != null
 
-        val expr = PangoLineageEquals(pangolineage, includeSublineages)
+        val expr = PangoLineageEquals("pangoLineage", pangolineage, includeSublineages)
         expressionStack.addLast(expr)
     }
 

@@ -27,5 +27,11 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
             ),
         )
+        assertThat(
+            underTest.schema.features,
+            containsInAnyOrder(
+                DatabaseFeature(name = "sarsCoV2VariantQuery"),
+            ),
+        )
     }
 }

@@ -30,6 +30,7 @@ class SiloFilterExpressionMapperTest {
             "nucleotideMutations" to SequenceFilterFieldType.MutationsList,
             "some_metadata" to SequenceFilterFieldType.String,
             "other_metadata" to SequenceFilterFieldType.String,
+            "variantQuery" to SequenceFilterFieldType.VariantQuery,
         ),
     )
 
@@ -312,8 +313,8 @@ class SiloFilterExpressionMapperTest {
                 ),
                 And(
                     listOf(
-                        StringEquals("some_metadata", "ABC"),
                         NucleotideSymbolEquals(300, "G"),
+                        StringEquals("some_metadata", "ABC"),
                     ),
                 ),
             ),
