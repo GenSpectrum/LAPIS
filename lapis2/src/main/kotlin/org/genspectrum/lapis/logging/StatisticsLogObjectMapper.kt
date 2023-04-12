@@ -22,6 +22,6 @@ class StatisticsLogObjectMapper(objectMapperBuilder: Jackson2ObjectMapperBuilder
     }
 
     fun writeValueAsString(requestContext: RequestContext): String {
-        return mapper.writeValueAsString(requestContext)
+        return mapper.writerFor(RequestContext::class.java).writeValueAsString(requestContext)
     }
 }

@@ -15,25 +15,32 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.slf4j.Logger
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest
 internal class RequestContextLoggerTest {
     @MockK(relaxed = true)
     private lateinit var loggerMock: Logger
 
     @MockK
     private lateinit var timeFactoryMock: TimeFactory
+
+    @Autowired
+    private lateinit var statisticsLogObjectMapper: StatisticsLogObjectMapper
+
+    @Autowired
     private lateinit var requestContext: RequestContext
+
     private lateinit var underTest: RequestContextLogger
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
 
-        requestContext = RequestContext()
         underTest = RequestContextLogger(
             requestContext,
-            StatisticsLogObjectMapper(Jackson2ObjectMapperBuilder()),
+            statisticsLogObjectMapper,
             loggerMock,
             timeFactoryMock,
         )

@@ -20,7 +20,7 @@ class RequestContext {
     var filter: Map<String, String>? = null
 }
 
-val log = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 @Component
 class RequestContextLoggerFilterAdapter(private val requestContextLogger: RequestContextLogger) :
