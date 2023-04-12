@@ -1,6 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id 'org.springframework.boot' version '3.0.5'
@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: "org.mockito"
