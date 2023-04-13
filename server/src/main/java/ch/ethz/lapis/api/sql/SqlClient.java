@@ -351,7 +351,9 @@ public class SqlClient {
     }
 
     private QueryExpr validateAndRewriteWhereExpression(Expression expression) {
-        if (expression instanceof AndExpression and) {
+        if (expression instanceof Parenthesis p) {
+            return validateAndRewriteWhereExpression(p.getExpression());
+        } else if (expression instanceof AndExpression and) {
             var leftExpr = validateAndRewriteWhereExpression(and.getLeftExpression());
             var rightExpr = validateAndRewriteWhereExpression(and.getRightExpression());
             var result = new BiOp(BiOp.OpType.AND);
