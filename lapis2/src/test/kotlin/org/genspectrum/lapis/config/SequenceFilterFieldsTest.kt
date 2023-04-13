@@ -75,6 +75,7 @@ class SequenceFilterFieldsTest {
     ) = DatabaseConfig(
         DatabaseSchema(
             "test config",
+            OpennessLevel.OPEN,
             databaseMetadata,
             "test primary key",
             databaseFeatures,

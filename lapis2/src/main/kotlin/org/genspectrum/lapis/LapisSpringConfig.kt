@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import mu.KotlinLogging
+import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilter
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
@@ -52,4 +53,8 @@ class LapisSpringConfig {
         KotlinLogging.logger("StatisticsLogger"),
         timeFactory,
     )
+
+    @Bean
+    fun dataOpennessAuthorizationFilter(databaseConfig: DatabaseConfig, objectMapper: ObjectMapper) =
+        DataOpennessAuthorizationFilter.createFromConfig(databaseConfig, objectMapper)
 }

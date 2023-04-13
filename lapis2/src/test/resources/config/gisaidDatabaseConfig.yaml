@@ -1,0 +1,7 @@
+schema:
+  instanceName: gisaidTestConfig
+  opennessLevel: GISAID
+  metadata:
+    - name: pangoLineage
+      type: pango_lineage
+  primaryKey: pangoLineage

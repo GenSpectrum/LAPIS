@@ -17,6 +17,7 @@ class DatabaseConfigTest {
     fun `load test database config`() {
         assertThat(underTest.schema.instanceName, `is`("sars_cov-2_minimal_test_config"))
         assertThat(underTest.schema.primaryKey, `is`("gisaid_epi_isl"))
+        assertThat(underTest.schema.opennessLevel, `is`(OpennessLevel.OPEN))
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(

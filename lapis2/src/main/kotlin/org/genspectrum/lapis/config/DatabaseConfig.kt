@@ -4,6 +4,7 @@ data class DatabaseConfig(val schema: DatabaseSchema)
 
 data class DatabaseSchema(
     val instanceName: String,
+    val opennessLevel: OpennessLevel,
     val metadata: List<DatabaseMetadata>,
     val primaryKey: String,
     val features: List<DatabaseFeature> = emptyList(),
@@ -12,3 +13,8 @@ data class DatabaseSchema(
 data class DatabaseMetadata(val name: String, val type: String)
 
 data class DatabaseFeature(val name: String)
+
+enum class OpennessLevel {
+    OPEN,
+    GISAID,
+}
