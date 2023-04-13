@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -9,6 +10,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class SiloClient(@Value("\${silo.url}") private val siloUrl: String, private val objectMapper: ObjectMapper) {
@@ -20,6 +23,8 @@ class SiloClient(@Value("\${silo.url}") private val siloUrl: String, private val
             .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(query)))
             .build()
 
+        log.info { "Calling SILO: $query" }
+
         val response =
             try {
                 client.send(request, BodyHandlers.ofString())
@@ -27,6 +32,8 @@ class SiloClient(@Value("\${silo.url}") private val siloUrl: String, private val
                 val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
                 throw SiloException(message, exception)
             }
+
+        log.info { "Response from SILO: ${response.statusCode()} - ${response.body()}" }
 
         if (response.statusCode() != 200) {
             throw SiloException(response.body(), null)

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.response.MutationData
@@ -25,7 +26,7 @@ const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion
 private const val DEFAULT_MIN_PROPORTION = 0.05
 
 @RestController
-class LapisController(val siloQueryModel: SiloQueryModel) {
+class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
@@ -38,6 +39,8 @@ class LapisController(val siloQueryModel: SiloQueryModel) {
         @RequestParam
         sequenceFilters: Map<String, String>,
     ): AggregatedResponse {
+        requestContext.filter = sequenceFilters
+
         return siloQueryModel.aggregate(sequenceFilters)
     }
 
@@ -48,6 +51,8 @@ class LapisController(val siloQueryModel: SiloQueryModel) {
         @RequestBody
         sequenceFilters: Map<String, String>,
     ): AggregatedResponse {
+        requestContext.filter = sequenceFilters
+
         return siloQueryModel.aggregate(sequenceFilters)
     }
 
@@ -63,6 +68,8 @@ class LapisController(val siloQueryModel: SiloQueryModel) {
         sequenceFilters: Map<String, String>,
         @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString()) minProportion: Double,
     ): List<MutationData> {
+        requestContext.filter = sequenceFilters
+
         return siloQueryModel.computeMutationProportions(
             minProportion,
             sequenceFilters.filterKeys { it != MIN_PROPORTION_PROPERTY },
@@ -76,6 +83,8 @@ class LapisController(val siloQueryModel: SiloQueryModel) {
         @RequestBody
         requestBody: Map<String, String>,
     ): List<MutationData> {
+        requestContext.filter = requestBody
+
         val (minProportions, sequenceFilters) = requestBody.entries.partition { it.key == MIN_PROPORTION_PROPERTY }
 
         val maybeMinProportion = minProportions.getOrNull(0)?.value
