@@ -18,7 +18,6 @@ data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldTy
             } else {
                 databaseConfig.schema.features
                     .map(::mapToSequenceFilterFieldsFromFeatures)
-                    .flatten()
                     .toMap()
             }
 
@@ -42,7 +41,7 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
 }
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) = when (databaseFeature.name) {
-    "sarsCoV2VariantQuery" -> listOf("variantQuery" to SequenceFilterFieldType.VariantQuery)
+    "sarsCoV2VariantQuery" -> "variantQuery" to SequenceFilterFieldType.VariantQuery
     else -> throw IllegalArgumentException(
         "Unknown feature '${databaseFeature.name}'",
     )

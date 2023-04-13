@@ -22,7 +22,7 @@ class SiloFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
 ) {
-    fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
+    fun map(sequenceFilters: Map<SequenceFilterFieldName, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
@@ -81,7 +81,7 @@ class SiloFilterExpressionMapper(
     private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
         if (variantQuery.isBlank()) {
             throw IllegalArgumentException(
-                "variantQuery cannot be empty",
+                "variantQuery must not be empty",
             )
         }
 

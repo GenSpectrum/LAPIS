@@ -163,7 +163,7 @@ class SiloFilterExpressionMapperTest {
         val filterParameter = mapOf("variantQuery" to "")
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery cannot be empty"))
+        assertThat(exception.message, containsString("variantQuery must not be empty"))
     }
 
     @Test

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.assertThrows
 class SequenceFilterFieldsTest {
     @Test
     fun `given database config without fields then is empty`() {
-        val input = databaseConfigWithFields(emptyList(), emptyList())
+        val input = databaseConfigWithFields(emptyList())
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -20,10 +20,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a string field then contains a string field`() {
-        val input = databaseConfigWithFields(
-            listOf(DatabaseMetadata("fieldName", "string")),
-            emptyList(),
-        )
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", "string")))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -33,10 +30,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a pango_lineage field then contains a pango_lineage field`() {
-        val input = databaseConfigWithFields(
-            listOf(DatabaseMetadata("pango lineage", "pango_lineage")),
-            emptyList(),
-        )
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pango lineage", "pango_lineage")))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -46,7 +40,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a date field then contains date, dateFrom and dateTo fields`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("dateField", "date")), emptyList())
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("dateField", "date")))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -58,17 +52,14 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with an unknown field type then throws exception`() {
-        val input = databaseConfigWithFields(
-            listOf(DatabaseMetadata("fieldName", "unknown type")),
-            emptyList(),
-        )
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", "unknown type")))
 
         val exception = assertThrows<IllegalArgumentException> { SequenceFilterFields.fromDatabaseConfig(input) }
         assertThat(exception.message, `is`("Unknown field type 'unknown type' for field 'fieldName'"))
     }
 
     @Test
-    fun `given database config with a feature of 'sarsCoV2VariantQuery' then contains variationQuery`() {
+    fun `given database config with a feature of 'sarsCoV2VariantQuery' then contains variantQuery`() {
         val input = databaseConfigWithFields(emptyList(), listOf(DatabaseFeature("sarsCoV2VariantQuery")))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
@@ -80,7 +71,7 @@ class SequenceFilterFieldsTest {
 
     private fun databaseConfigWithFields(
         databaseMetadata: List<DatabaseMetadata>,
-        databaseFeatures: List<DatabaseFeature>,
+        databaseFeatures: List<DatabaseFeature> = emptyList(),
     ) = DatabaseConfig(
         DatabaseSchema(
             "test config",

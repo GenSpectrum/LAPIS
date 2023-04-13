@@ -8,7 +8,7 @@ expr:
   | '!' expr         # Not
   | expr '&' expr    # And
   | expr '|' expr    # Or
-  | '(' expr ')'     # Parentesis
+  | '(' expr ')'     # Parenthesis
   | 'MAYBE(' expr ')' # Maybe
   ;
 
