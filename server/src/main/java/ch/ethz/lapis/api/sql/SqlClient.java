@@ -248,6 +248,11 @@ public class SqlClient {
                 newSelectExpressions.add(metadataField);
             } else if (selectExpression.equals("count(*)")) {
                 newSelectExpressions.add(selectExpression);
+            } else if (selectExpression.equals("date_trunc('year', date)")) {
+                newSelectExpressions.add("year");
+            } else if (selectExpression.equals("date_trunc('month', date)")) {
+                newSelectExpressions.add("year");
+                newSelectExpressions.add("month");
             } else {
                 throw new UnsupportedSqlException();
             }
@@ -268,7 +273,12 @@ public class SqlClient {
             String metadataField = validateAndRewriteMetadataField(groupByColumn);
             if (metadataField != null) {
                 newGroupByColumns.add(metadataField);
-            } else {
+            } else if (query.getAliasToExpression().containsKey(groupByColumn)) {
+                String aliasResolved = query.getAliasToExpression().get(groupByColumn);
+                if (aliasResolved.startsWith("date_trunc(")) {
+                    // That's fine. date_trunc() was already resolved above.
+                    continue;
+                }
                 throw new UnsupportedSqlException();
             }
         }
