@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.model
 
 import VariantQueryBaseListener
-import VariantQueryParser.Aa_insertionContext
-import VariantQueryParser.Aa_mutationContext
+import VariantQueryParser.Aa_insertion_queryContext
+import VariantQueryParser.Aa_mutation_queryContext
 import VariantQueryParser.AndContext
 import VariantQueryParser.Gisaid_clade_lineage_queryContext
 import VariantQueryParser.MaybeContext
@@ -10,8 +10,8 @@ import VariantQueryParser.N_of_queryContext
 import VariantQueryParser.Nextclade_pangolineage_queryContext
 import VariantQueryParser.Nextstrain_clade_queryContext
 import VariantQueryParser.NotContext
-import VariantQueryParser.Nucleotide_insertionContext
-import VariantQueryParser.Nucleotide_mutationContext
+import VariantQueryParser.Nucleotide_insertion_queryContext
+import VariantQueryParser.Nucleotide_mutation_queryContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.Pangolineage_queryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
@@ -31,12 +31,12 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         return expressionStack.first()
     }
 
-    override fun enterNucleotide_mutation(ctx: Nucleotide_mutationContext?) {
+    override fun enterNucleotide_mutation_query(ctx: Nucleotide_mutation_queryContext?) {
         if (ctx == null) {
             return
         }
         val position = ctx.position().text.toInt()
-        val secondSymbol = ctx.ambigous_nucleotide_symbol()?.text ?: "-"
+        val secondSymbol = ctx.nucleotide_mutation_query_second_symbol()?.text ?: "-"
 
         val expr = NucleotideSymbolEquals(position, secondSymbol)
         expressionStack.addLast(expr)
@@ -89,15 +89,15 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         expressionStack.addLast(NOf(n, matchExactly, children.reversed()))
     }
 
-    override fun enterNucleotide_insertion(ctx: Nucleotide_insertionContext?) {
+    override fun enterNucleotide_insertion_query(ctx: Nucleotide_insertion_queryContext?) {
         throw NotImplementedError("Nucleotide insertions are not supported yet.")
     }
 
-    override fun enterAa_mutation(ctx: Aa_mutationContext?) {
+    override fun enterAa_mutation_query(ctx: Aa_mutation_queryContext?) {
         throw NotImplementedError("Amino acid mutations are not supported yet.")
     }
 
-    override fun enterAa_insertion(ctx: Aa_insertionContext?) {
+    override fun enterAa_insertion_query(ctx: Aa_insertion_queryContext?) {
         throw NotImplementedError("Amino acid insertions are not supported yet.")
     }
 

@@ -242,7 +242,7 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a valid variantQuery with a 'AA insertion' expression the map should throw an error`() {
-        val variantQuery = "ins_S:N501EPE"
+        val variantQuery = "ins_S:501:EPE"
 
         val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
 
