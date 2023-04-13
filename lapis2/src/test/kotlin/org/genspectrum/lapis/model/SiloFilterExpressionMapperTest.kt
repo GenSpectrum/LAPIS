@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.SequenceFilterFieldType
+import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -19,11 +21,35 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
 class SiloFilterExpressionMapperTest {
+    private val sequenceFilterFields = SequenceFilterFields(
+        mapOf(
+            "date" to SequenceFilterFieldType.Date,
+            "dateTo" to SequenceFilterFieldType.DateTo("date"),
+            "dateFrom" to SequenceFilterFieldType.DateFrom("date"),
+            "pangoLineage" to SequenceFilterFieldType.PangoLineage,
+            "nucleotideMutations" to SequenceFilterFieldType.MutationsList,
+            "some_metadata" to SequenceFilterFieldType.String,
+            "other_metadata" to SequenceFilterFieldType.String,
+        ),
+    )
+
     private lateinit var underTest: SiloFilterExpressionMapper
 
     @BeforeEach
     fun setup() {
-        underTest = SiloFilterExpressionMapper()
+        underTest = SiloFilterExpressionMapper(sequenceFilterFields)
+    }
+
+    @Test
+    fun `given invalid filter key then throws exception`() {
+        val filterParameter = mapOf("invalid query key" to "some value")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+
+        assertThat(
+            exception.message,
+            containsString("'invalid query key' is not a valid sequence filter key. Valid keys are:"),
+        )
     }
 
     @Test
@@ -47,6 +73,14 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
+    fun `given invalid date then should throw an exception`() {
+        val filterParameter = mapOf("date" to "this is not a date")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("date 'this is not a date' is not a valid date"))
+    }
+
+    @Test
     fun `given invalid dateTo then should throw an exception`() {
         val filterParameter = mapOf("dateTo" to "this is not a date")
 
@@ -60,6 +94,33 @@ class SiloFilterExpressionMapperTest {
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
+    }
+
+    @Test
+    fun `given date and dateFrom then should throw an exception`() {
+        val filterParameter = mapOf(
+            "date" to "2021-06-03",
+            "dateFrom" to "2021-06-03",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("Cannot filter by exact date field 'date' and by date range field 'dateFrom'."),
+        )
+    }
+
+    @Test
+    fun `given date and dateTo then should throw an exception`() {
+        val filterParameter = mapOf(
+            "date" to "2021-06-03",
+            "dateTo" to "2021-06-03",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("Cannot filter by exact date field 'date' and by date range field 'dateTo'."),
+        )
     }
 
     @Test
@@ -113,15 +174,15 @@ class SiloFilterExpressionMapperTest {
             ),
             Arguments.of(
                 mapOf("pangoLineage" to "A.1.2.3"),
-                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = false))),
+                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
             ),
             Arguments.of(
                 mapOf("pangoLineage" to "A.1.2.3*"),
-                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = true))),
+                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
             ),
             Arguments.of(
                 mapOf("pangoLineage" to "A.1.2.3.*"),
-                And(listOf(PangoLineageEquals("A.1.2.3", includeSublineages = true))),
+                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
             ),
             Arguments.of(
                 mapOf(
@@ -131,7 +192,7 @@ class SiloFilterExpressionMapperTest {
                 ),
                 And(
                     listOf(
-                        PangoLineageEquals("A.1.2.3", includeSublineages = false),
+                        PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
                         StringEquals("some_metadata", "ABC"),
                         StringEquals("other_metadata", "DEF"),
                     ),
@@ -164,22 +225,28 @@ class SiloFilterExpressionMapperTest {
             ),
             Arguments.of(
                 mapOf(
+                    "date" to "2021-06-03",
+                ),
+                And(listOf(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)))),
+            ),
+            Arguments.of(
+                mapOf(
                     "dateTo" to "2021-06-03",
                 ),
-                And(listOf(DateBetween(from = null, to = LocalDate.of(2021, 6, 3)))),
+                And(listOf(DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)))),
             ),
             Arguments.of(
                 mapOf(
                     "dateFrom" to "2021-03-28",
                 ),
-                And(listOf(DateBetween(from = LocalDate.of(2021, 3, 28), to = null))),
+                And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null))),
             ),
             Arguments.of(
                 mapOf(
                     "dateFrom" to "2021-03-28",
                     "dateTo" to "2021-06-03",
                 ),
-                And(listOf(DateBetween(from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3)))),
+                And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3)))),
             ),
             Arguments.of(
                 mapOf(
@@ -188,8 +255,8 @@ class SiloFilterExpressionMapperTest {
                 ),
                 And(
                     listOf(
+                        DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
                         StringEquals("some_metadata", "ABC"),
-                        DateBetween(from = null, to = LocalDate.of(2021, 6, 3)),
                     ),
                 ),
             ),

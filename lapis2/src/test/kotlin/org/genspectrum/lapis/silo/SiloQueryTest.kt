@@ -104,20 +104,22 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                PangoLineageEquals("ABC", includeSublineages = false),
+                PangoLineageEquals("fieldName", "ABC", includeSublineages = false),
                 """
                 {
                     "type": "PangoLineage",
+                    "column": "fieldName",
                     "value": "ABC",
                     "includeSublineages": false
                 }
                 """,
             ),
             Arguments.of(
-                PangoLineageEquals("ABC", includeSublineages = true),
+                PangoLineageEquals("fieldName", "ABC", includeSublineages = true),
                 """
                 {
                     "type": "PangoLineage",
+                    "column": "fieldName",
                     "value": "ABC",
                     "includeSublineages": true
                 }
@@ -154,30 +156,33 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                DateBetween(LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
+                DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
                 """
                 {
                     "type": "DateBetween",
+                    "column": "fieldName",
                     "from": "2021-03-31",
                     "to": "2022-06-03"
                 }
                 """,
             ),
             Arguments.of(
-                DateBetween(null, LocalDate.of(2022, 6, 3)),
+                DateBetween("fieldName", null, LocalDate.of(2022, 6, 3)),
                 """
                 {
                     "type": "DateBetween",
+                    "column": "fieldName",
                     "from": null,
                     "to": "2022-06-03"
                 }
                 """,
             ),
             Arguments.of(
-                DateBetween(LocalDate.of(2021, 3, 31), null),
+                DateBetween("fieldName", LocalDate.of(2021, 3, 31), null),
                 """
                 {
                     "type": "DateBetween",
+                    "column": "fieldName",
                     "from": "2021-03-31",
                     "to": null
                 }
