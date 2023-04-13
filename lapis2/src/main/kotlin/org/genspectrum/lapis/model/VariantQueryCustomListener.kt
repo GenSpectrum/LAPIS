@@ -1,19 +1,19 @@
 package org.genspectrum.lapis.model
 
 import VariantQueryBaseListener
-import VariantQueryParser.Aa_insertion_queryContext
-import VariantQueryParser.Aa_mutation_queryContext
+import VariantQueryParser.AaInsertionQueryContext
+import VariantQueryParser.AaMutationQueryContext
 import VariantQueryParser.AndContext
-import VariantQueryParser.Gisaid_clade_lineage_queryContext
+import VariantQueryParser.GisaidCladeLineageQueryContext
 import VariantQueryParser.MaybeContext
-import VariantQueryParser.N_of_queryContext
-import VariantQueryParser.Nextclade_pangolineage_queryContext
-import VariantQueryParser.Nextstrain_clade_queryContext
+import VariantQueryParser.NOfQueryContext
+import VariantQueryParser.NextcladePangolineageQueryContext
+import VariantQueryParser.NextstrainCladeQueryContext
 import VariantQueryParser.NotContext
-import VariantQueryParser.Nucleotide_insertion_queryContext
-import VariantQueryParser.Nucleotide_mutation_queryContext
+import VariantQueryParser.NucleotideInsertionQueryContext
+import VariantQueryParser.NucleotideMutationQueryContext
 import VariantQueryParser.OrContext
-import VariantQueryParser.Pangolineage_queryContext
+import VariantQueryParser.PangolineageQueryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.Maybe
@@ -31,23 +31,23 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         return expressionStack.first()
     }
 
-    override fun enterNucleotide_mutation_query(ctx: Nucleotide_mutation_queryContext?) {
+    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
         if (ctx == null) {
             return
         }
         val position = ctx.position().text.toInt()
-        val secondSymbol = ctx.nucleotide_mutation_query_second_symbol()?.text ?: "-"
+        val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()?.text ?: "-"
 
         val expr = NucleotideSymbolEquals(position, secondSymbol)
         expressionStack.addLast(expr)
     }
 
-    override fun enterPangolineage_query(ctx: Pangolineage_queryContext?) {
+    override fun enterPangolineageQuery(ctx: PangolineageQueryContext?) {
         if (ctx == null) {
             return
         }
         val pangolineage = ctx.pangolineage().text
-        val includeSublineages = ctx.pangolineage_include_sublineages() != null
+        val includeSublineages = ctx.pangolineageIncludeSublineages() != null
 
         val expr = PangoLineageEquals("pangoLineage", pangolineage, includeSublineages)
         expressionStack.addLast(expr)
@@ -73,13 +73,13 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         expressionStack.addLast(Maybe(child))
     }
 
-    override fun exitN_of_query(ctx: N_of_queryContext?) {
+    override fun exitNOfQuery(ctx: NOfQueryContext?) {
         if (ctx == null) {
             return
         }
 
-        val n = ctx.n_of_number_of_matchers().text.toInt()
-        val matchExactly = ctx.n_of_match_exactly() != null
+        val n = ctx.nOfNumberOfMatchers().text.toInt()
+        val matchExactly = ctx.nOfMatchExactly() != null
 
         val children = mutableListOf<SiloFilterExpression>()
         for (i in 1..n) {
@@ -89,27 +89,27 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         expressionStack.addLast(NOf(n, matchExactly, children.reversed()))
     }
 
-    override fun enterNucleotide_insertion_query(ctx: Nucleotide_insertion_queryContext?) {
+    override fun enterNucleotideInsertionQuery(ctx: NucleotideInsertionQueryContext?) {
         throw NotImplementedError("Nucleotide insertions are not supported yet.")
     }
 
-    override fun enterAa_mutation_query(ctx: Aa_mutation_queryContext?) {
+    override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
         throw NotImplementedError("Amino acid mutations are not supported yet.")
     }
 
-    override fun enterAa_insertion_query(ctx: Aa_insertion_queryContext?) {
+    override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext?) {
         throw NotImplementedError("Amino acid insertions are not supported yet.")
     }
 
-    override fun enterNextclade_pangolineage_query(ctx: Nextclade_pangolineage_queryContext?) {
+    override fun enterNextcladePangolineageQuery(ctx: NextcladePangolineageQueryContext?) {
         throw NotImplementedError("Nextclade pango lineages are not supported yet.")
     }
 
-    override fun enterNextstrain_clade_query(ctx: Nextstrain_clade_queryContext?) {
+    override fun enterNextstrainCladeQuery(ctx: NextstrainCladeQueryContext?) {
         throw NotImplementedError("Nextstrain clade lineages are not supported yet.")
     }
 
-    override fun enterGisaid_clade_lineage_query(ctx: Gisaid_clade_lineage_queryContext?) {
+    override fun enterGisaidCladeLineageQuery(ctx: GisaidCladeLineageQueryContext?) {
         throw NotImplementedError("Gisaid clade lineages are not supported yet.")
     }
 }

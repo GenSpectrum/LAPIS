@@ -13,61 +13,61 @@ expr:
   ;
 
 single:
-  nucleotide_mutation_query
-  | pangolineage_query
-  | n_of_query
-  | nucleotide_insertion_query
-  | aa_mutation_query
-  | aa_insertion_query
-  | nextclade_pangolineage_query
-  | nextstrain_clade_lineage_query
-  | gisaid_clade_lineage_query
+  nucleotideMutationQuery
+  | pangolineageQuery
+  | nOfQuery
+  | nucleotideInsertionQuery
+  | aaMutationQuery
+  | aaInsertionQuery
+  | nextcladePangolineageQuery
+  | nextstrainCladeLineageQuery
+  | gisaidCladeLineageQuery
   ;
 
-nucleotide_mutation_query : nucleotide_mutation_query_first_symbol? position nucleotide_mutation_query_second_symbol?;
-nucleotide_mutation_query_first_symbol: nucleotide_symbol;
-nucleotide_mutation_query_second_symbol: possible_ambigous_nucleotide_symbol;
+nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
+nucleotideMutationQueryFirstSymbol: nucleotideSymbol;
+nucleotideMutationQuerySecondSymbol: possibleAmbiguousNucleotideSymbol;
 position: NUMBER+;
-nucleotide_symbol: A | C | G | T;
-ambigous_nucleotide_symbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
-possible_ambigous_nucleotide_symbol: nucleotide_symbol | ambigous_nucleotide_symbol;
+nucleotideSymbol: A | C | G | T;
+ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
+possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
 
 
-pangolineage_query: pangolineage pangolineage_include_sublineages?;
-pangolineage: pangolineage_character pangolineage_character? pangolineage_character? pangolineage_number_component*;
-pangolineage_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
-pangolineage_number_component: '.' NUMBER NUMBER? NUMBER?;
-pangolineage_include_sublineages: DOT? ASTERISK;
+pangolineageQuery: pangolineage pangolineageIncludeSublineages?;
+pangolineage: pangolineageCharacter pangolineageCharacter? pangolineageCharacter? pangolineageNumberComponent*;
+pangolineageCharacter: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
+pangolineageNumberComponent: '.' NUMBER NUMBER? NUMBER?;
+pangolineageIncludeSublineages: DOT? ASTERISK;
 
-n_of_query: '[' n_of_match_exactly? n_of_number_of_matchers no_of_of_keyword n_of_exprs ']';
-no_of_of_keyword: '-of:' | '-OF:';
-n_of_match_exactly: 'EXACTLY-' | 'exactly-';
-n_of_number_of_matchers: NUMBER+;
-n_of_exprs: expr (',' expr)*;
+nOfQuery: '[' nOfMatchExactly? nOfNumberOfMatchers nOfOfKeyword nOfExprs ']';
+nOfOfKeyword: '-of:' | '-OF:';
+nOfMatchExactly: 'EXACTLY-' | 'exactly-';
+nOfNumberOfMatchers: NUMBER+;
+nOfExprs: expr (',' expr)*;
 
-nucleotide_insertion_query: insertion_keyword position ':' (possible_ambigous_nucleotide_symbol | '?')+;
-insertion_keyword: 'ins_' | 'INS_';
+nucleotideInsertionQuery: insertionKeyword position ':' (possibleAmbiguousNucleotideSymbol | '?')+;
+insertionKeyword: 'ins_' | 'INS_';
 
-aa_mutation_query: gene ':' aa_symbol? position possible_ambigous_aa_symbol?;
-aa_symbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
-ambigous_aa_symbol: X | MINUS | DOT;
-possible_ambigous_aa_symbol: aa_symbol | ambigous_aa_symbol;
-gene: covid_gene;
-covid_gene : E | M | N | S | ORF;
+aaMutationQuery: gene ':' aaSymbol? position possibleAmbiguousAaSymbol?;
+aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
+ambiguousAaSymbol: X | MINUS | DOT;
+possibleAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
+gene: covidGene;
+covidGene : E | M | N | S | ORF;
 
-aa_insertion_query: insertion_keyword gene ':' position ':' (possible_ambigous_aa_symbol | '?')+;
+aaInsertionQuery: insertionKeyword gene ':' position ':' (possibleAmbiguousAaSymbol | '?')+;
 
-nextclade_pangolineage_query: nextclade_pango_lineage_prefix pangolineage_query;
-nextclade_pango_lineage_prefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:';
+nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageQuery;
+nextcladePangoLineagePrefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:';
 
-nextstrain_clade_lineage_query: nextstrain_clade_prefix nextstrain_clade_query;
-nextstrain_clade_prefix: 'nextstrainClade:'| 'NEXTSTRAINCLADE:';
-nextstrain_clade_query: NUMBER NUMBER nextstrain_clade_character | 'RECOMBINANT';
-nextstrain_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
+nextstrainCladeLineageQuery: nextstrainCladePrefix nextstrainCladeQuery;
+nextstrainCladePrefix: 'nextstrainClade:'| 'NEXTSTRAINCLADE:';
+nextstrainCladeQuery: NUMBER NUMBER nextstrainCladeCharacter | 'RECOMBINANT';
+nextstrainCladeCharacter: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
-gisaid_clade_lineage_query: gisaid_clade_prefix gisaid_clade_query;
-gisaid_clade_prefix: ('gisaid:'| 'GISAID:');
-gisaid_clade_query: gisaid_clade_character gisaid_clade_character?;
+gisaidCladeLineageQuery: gisaidCladePrefix gisaidCladeNomenclature;
+gisaidCladePrefix: ('gisaid:'| 'GISAID:');
+gisaidCladeNomenclature: gisaid_clade_character gisaid_clade_character?;
 gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
 
