@@ -1,5 +1,31 @@
 package ch.ethz.lapis.api.sql;
 
+import static ch.ethz.lapis.api.query.Database.Columns.AGE;
+import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY;
+import static ch.ethz.lapis.api.query.Database.Columns.COUNTRY_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATABASE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATE;
+import static ch.ethz.lapis.api.query.Database.Columns.DATE_SUBMITTED;
+import static ch.ethz.lapis.api.query.Database.Columns.DIED;
+import static ch.ethz.lapis.api.query.Database.Columns.DIVISION;
+import static ch.ethz.lapis.api.query.Database.Columns.DIVISION_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.FULLY_VACCINATED;
+import static ch.ethz.lapis.api.query.Database.Columns.GISAID_CLADE;
+import static ch.ethz.lapis.api.query.Database.Columns.HOSPITALIZED;
+import static ch.ethz.lapis.api.query.Database.Columns.HOST;
+import static ch.ethz.lapis.api.query.Database.Columns.LOCATION;
+import static ch.ethz.lapis.api.query.Database.Columns.MONTH;
+import static ch.ethz.lapis.api.query.Database.Columns.NEXTCLADE_PANGO_LINEAGE;
+import static ch.ethz.lapis.api.query.Database.Columns.NEXTSTRAIN_CLADE;
+import static ch.ethz.lapis.api.query.Database.Columns.ORIGINATING_LAB;
+import static ch.ethz.lapis.api.query.Database.Columns.PANGO_LINEAGE;
+import static ch.ethz.lapis.api.query.Database.Columns.REGION;
+import static ch.ethz.lapis.api.query.Database.Columns.REGION_EXPOSURE;
+import static ch.ethz.lapis.api.query.Database.Columns.SAMPLING_STRATEGY;
+import static ch.ethz.lapis.api.query.Database.Columns.SEX;
+import static ch.ethz.lapis.api.query.Database.Columns.SUBMITTING_LAB;
+import static ch.ethz.lapis.api.query.Database.Columns.YEAR;
+
 import ch.ethz.lapis.api.entity.AAMutation;
 import ch.ethz.lapis.api.entity.AggregationField;
 import ch.ethz.lapis.api.entity.NucMutation;
@@ -7,15 +33,44 @@ import ch.ethz.lapis.api.entity.SequenceType;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleAggregatedResponse;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
-import ch.ethz.lapis.api.query.*;
+import ch.ethz.lapis.api.query.BiOp;
+import ch.ethz.lapis.api.query.Database;
+import ch.ethz.lapis.api.query.DateBetween;
+import ch.ethz.lapis.api.query.DateCompare;
+import ch.ethz.lapis.api.query.Negation;
+import ch.ethz.lapis.api.query.PangoQuery;
+import ch.ethz.lapis.api.query.QueryEngine;
+import ch.ethz.lapis.api.query.QueryExpr;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.NotExpression;
+import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.expression.operators.relational.Between;
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GeometryDistance;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -25,12 +80,6 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.javatuples.Pair;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-
-import static ch.ethz.lapis.api.query.Database.Columns.*;
 
 public class SqlClient {
 
@@ -273,12 +322,10 @@ public class SqlClient {
             String metadataField = validateAndRewriteMetadataField(groupByColumn);
             if (metadataField != null) {
                 newGroupByColumns.add(metadataField);
-            } else if (query.getAliasToExpression().containsKey(groupByColumn)) {
-                String aliasResolved = query.getAliasToExpression().get(groupByColumn);
-                if (aliasResolved.startsWith("date_trunc(")) {
-                    // That's fine. date_trunc() was already resolved above.
-                    continue;
-                }
+            } else if (
+                query.getAliasToExpression().getOrDefault(groupByColumn, groupByColumn).startsWith("date_trunc(")) {
+                // That's fine. date_trunc() was already resolved above.
+            } else {
                 throw new UnsupportedSqlException();
             }
         }
