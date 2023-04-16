@@ -506,7 +506,7 @@ public class SqlClient {
                 if (!(right instanceof StringValue value)) throw new UnsupportedSqlException();
                 String value2 = value.getValue();
                 if (value2.length() != 1) throw new UnsupportedSqlException();
-                char value3 = value2.charAt(0);
+                char value3 = value2.toUpperCase().charAt(0);
 
                 NucMutation nucMutation = new NucMutation(position, value3);
                 if (comparison instanceof EqualsTo) {
@@ -534,7 +534,7 @@ public class SqlClient {
                 if (!(right instanceof StringValue value)) throw new UnsupportedSqlException();
                 String value2 = value.getValue();
                 if (value2.length() != 1) throw new UnsupportedSqlException();
-                char value3 = value2.charAt(0);
+                char value3 = value2.toUpperCase().charAt(0);
 
                 AAMutation aaMutation = new AAMutation(gene, position, value3);
                 if (comparison instanceof EqualsTo) {
