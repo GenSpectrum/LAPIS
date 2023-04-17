@@ -2,6 +2,9 @@ schema:
   instanceName: gisaidTestConfig
   opennessLevel: GISAID
   metadata:
-    - name: pangoLineage
-      type: pango_lineage
-  primaryKey: pangoLineage
+    - name: gisaid_epi_isl
+      type: string
+      unique: true
+    - name: country
+      type: string
+  primaryKey: gisaid_epi_isl

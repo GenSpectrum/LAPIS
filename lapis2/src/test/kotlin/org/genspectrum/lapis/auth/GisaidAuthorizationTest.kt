@@ -2,9 +2,9 @@ package org.genspectrum.lapis.auth
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
-import io.mockk.MockKMatcherScope
 import io.mockk.every
-import org.genspectrum.lapis.controller.LapisController
+import io.mockk.verify
+import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,20 +21,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @MockkBean
-    lateinit var lapisController: LapisController
+    lateinit var siloQueryModelMock: SiloQueryModel
 
-    private fun MockKMatcherScope.validControllerCall() = lapisController.aggregated(any())
     private val validRoute = "/aggregated"
 
     @BeforeEach
     fun setUp() {
-        every { validControllerCall() } returns AggregatedResponse(1)
+        every { siloQueryModelMock.aggregate(any()) } returns AggregatedResponse(1)
 
         MockKAnnotations.init(this)
     }
 
     @Test
-    fun `given no access key in request to GISAID instance, then access is denied`() {
+    fun `given no access key in GET request to GISAID instance, then access is denied`() {
         mockMvc.perform(MockMvcRequestBuilders.get(validRoute))
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -49,4 +48,157 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                 ),
             )
     }
+
+    @Test
+    fun `given no access key in POST request to GISAID instance, then access is denied`() {
+        mockMvc.perform(postRequestWithBody(""))
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                MockMvcResultMatchers.content().json(
+                    """
+                    {
+                      "title": "Forbidden",
+                      "message": "An access key is required to access this endpoint."
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `given wrong access key in GET request to GISAID instance, then access is denied`() {
+        mockMvc.perform(MockMvcRequestBuilders.get("$validRoute?accessKey=invalidKey"))
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                MockMvcResultMatchers.content().json(
+                    """
+                    {
+                      "title": "Forbidden",
+                      "message": "You are not authorized to access this endpoint."
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `given wrong access key in POST request to GISAID instance, then access is denied`() {
+        mockMvc.perform(postRequestWithBody("""{"accessKey": "invalidKey"}"""))
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                MockMvcResultMatchers.content().json(
+                    """
+                    {
+                      "title": "Forbidden",
+                      "message": "You are not authorized to access this endpoint."
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `given valid access key for aggregated data in GET request to GISAID instance, then access is granted`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+    }
+
+    @Test
+    fun `given valid access key for aggregated data in POST request to GISAID instance, then access is granted`() {
+        mockMvc.perform(
+            postRequestWithBody(
+                """ {
+                    "accessKey": "testAggregatedDataAccessKey",
+                    "field1": "value1"
+                }""",
+            ),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+    }
+
+    @Test
+    fun `given aggregated access key in GET request but filters are too fine-grained, then access is denied`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                MockMvcResultMatchers.content().json(
+                    """
+                    {
+                      "title": "Forbidden",
+                      "message": "You are not authorized to access this endpoint."
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `given aggregated access key in POST request but filters are too fine-grained, then access is denied`() {
+        mockMvc.perform(
+            postRequestWithBody(
+                """ {
+                    "accessKey": "testAggregatedDataAccessKey",
+                    "gisaid_epi_isl": "some value"
+                }""",
+            ),
+        )
+            .andExpect(MockMvcResultMatchers.status().isForbidden)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                MockMvcResultMatchers.content().json(
+                    """
+                    {
+                      "title": "Forbidden",
+                      "message": "You are not authorized to access this endpoint."
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `given valid access key for full access in GET request to GISAID instance, then access is granted`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("$validRoute?accessKey=testFullAccessKey&field1=value1"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+    }
+
+    @Test
+    fun `given valid access key for full access in POST request to GISAID instance, then access is granted`() {
+        mockMvc.perform(
+            postRequestWithBody(
+                """ {
+                    "accessKey": "testFullAccessKey",
+                    "field1": "value1"
+                }""",
+            ),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+    }
+
+    private fun postRequestWithBody(body: String) =
+        MockMvcRequestBuilders.post(validRoute)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body)
 }

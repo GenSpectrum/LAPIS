@@ -10,7 +10,7 @@ data class DatabaseSchema(
     val features: List<DatabaseFeature> = emptyList(),
 )
 
-data class DatabaseMetadata(val name: String, val type: String)
+data class DatabaseMetadata(val name: String, val type: String, val unique: Boolean = false)
 
 data class DatabaseFeature(val name: String)
 

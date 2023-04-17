@@ -1,17 +1,15 @@
 package org.genspectrum.lapis
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import mu.KotlinLogging
-import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilter
+import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.util.TimeFactory
+import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,8 +22,11 @@ class LapisSpringConfig {
     fun openAPI(sequenceFilterFields: SequenceFilterFields) = buildOpenApiSchema(sequenceFilterFields)
 
     @Bean
-    fun databaseConfig(@Value("\${lapis.databaseConfig.path}") configPath: String): DatabaseConfig {
-        return ObjectMapper(YAMLFactory()).registerKotlinModule().readValue(File(configPath))
+    fun databaseConfig(
+        @Value("\${lapis.databaseConfig.path}") configPath: String,
+        yamlObjectMapper: YamlObjectMapper,
+    ): DatabaseConfig {
+        return yamlObjectMapper.objectMapper.readValue(File(configPath))
     }
 
     @Bean
@@ -55,6 +56,7 @@ class LapisSpringConfig {
     )
 
     @Bean
-    fun dataOpennessAuthorizationFilter(databaseConfig: DatabaseConfig, objectMapper: ObjectMapper) =
-        DataOpennessAuthorizationFilter.createFromConfig(databaseConfig, objectMapper)
+    fun dataOpennessAuthorizationFilter(
+        dataOpennessAuthorizationFilterFactory: DataOpennessAuthorizationFilterFactory,
+    ) = dataOpennessAuthorizationFilterFactory.create()
 }

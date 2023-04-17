@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregatedResponse
@@ -27,6 +28,9 @@ private const val DEFAULT_MIN_PROPORTION = 0.05
 
 @RestController
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
+    companion object {
+        private val nonSequenceFilterFields = listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY)
+    }
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
@@ -41,7 +45,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     ): AggregatedResponse {
         requestContext.filter = sequenceFilters
 
-        return siloQueryModel.aggregate(sequenceFilters)
+        return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
     }
 
     @PostMapping("/aggregated")
@@ -53,7 +57,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     ): AggregatedResponse {
         requestContext.filter = sequenceFilters
 
-        return siloQueryModel.aggregate(sequenceFilters)
+        return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
     }
 
     @GetMapping("/nucleotideMutations")
@@ -72,7 +76,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
 
         return siloQueryModel.computeMutationProportions(
             minProportion,
-            sequenceFilters.filterKeys { it != MIN_PROPORTION_PROPERTY },
+            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
         )
     }
 
@@ -85,9 +89,11 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     ): List<MutationData> {
         requestContext.filter = requestBody
 
-        val (minProportions, sequenceFilters) = requestBody.entries.partition { it.key == MIN_PROPORTION_PROPERTY }
+        val (nonSequenceFilters, sequenceFilters) = requestBody.entries.partition {
+            nonSequenceFilterFields.contains(it.key)
+        }
 
-        val maybeMinProportion = minProportions.getOrNull(0)?.value
+        val maybeMinProportion = nonSequenceFilters.find { it.key == MIN_PROPORTION_PROPERTY }?.value
         val minProportion = try {
             maybeMinProportion?.toDouble() ?: DEFAULT_MIN_PROPORTION
         } catch (exception: IllegalArgumentException) {
