@@ -11,17 +11,18 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
 ) {
 
-    fun aggregate(sequenceFilters: Map<String, String>) = siloClient.sendQuery(
+    fun aggregate(sequenceFilters: Map<SequenceFilterFieldName, String>) = siloClient.sendQuery(
         SiloQuery(
             SiloAction.aggregated(),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )
 
-    fun computeMutationProportions(minProportion: Double?, sequenceFilters: Map<String, String>) = siloClient.sendQuery(
-        SiloQuery(
-            SiloAction.mutations(minProportion),
-            siloFilterExpressionMapper.map(sequenceFilters),
-        ),
-    )
+    fun computeMutationProportions(minProportion: Double?, sequenceFilters: Map<SequenceFilterFieldName, String>) =
+        siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.mutations(minProportion),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
 }

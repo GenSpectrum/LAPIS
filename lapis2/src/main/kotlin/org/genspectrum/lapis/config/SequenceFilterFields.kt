@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.config
 
-typealias FieldName = String
+typealias SequenceFilterFieldName = String
 
-data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldType>) {
+data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, SequenceFilterFieldType>) {
     companion object {
         private val nucleotideMutationsField = Pair("nucleotideMutations", SequenceFilterFieldType.MutationsList)
 
@@ -14,7 +14,7 @@ data class SequenceFilterFields(val fields: Map<FieldName, SequenceFilterFieldTy
             val staticFields = listOf(nucleotideMutationsField)
 
             val featuresFields = if (databaseConfig.schema.features.isNullOrEmpty()) {
-                emptyMap<FieldName, SequenceFilterFieldType>()
+                emptyMap<SequenceFilterFieldName, SequenceFilterFieldType>()
             } else {
                 databaseConfig.schema.features
                     .map(::mapToSequenceFilterFieldsFromFeatures)
@@ -53,6 +53,6 @@ sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     object Date : SequenceFilterFieldType("string")
     object MutationsList : SequenceFilterFieldType("string")
     object VariantQuery : SequenceFilterFieldType("string")
-    data class DateFrom(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
-    data class DateTo(val associatedField: kotlin.String) : SequenceFilterFieldType("string")
+    data class DateFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
+    data class DateTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
 }
