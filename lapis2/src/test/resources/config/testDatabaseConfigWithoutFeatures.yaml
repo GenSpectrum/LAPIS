@@ -1,0 +1,14 @@
+schema:
+  instanceName: sars_cov-2_minimal_test_config
+  metadata:
+    - name: gisaid_epi_isl
+      type: string
+    - name: date
+      type: date
+    - name: region
+      type: string
+    - name: country
+      type: string
+    - name: pangoLineage
+      type: pango_lineage
+  primaryKey: gisaid_epi_isl
