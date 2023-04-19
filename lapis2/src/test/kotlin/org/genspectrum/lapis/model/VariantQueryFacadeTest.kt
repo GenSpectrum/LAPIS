@@ -238,7 +238,7 @@ class VariantQueryFacadeTest {
     fun `given a variantQuery with a 'Insertion' expression then map should throw an error`() {
         val variantQuery = "ins_1234:GAG"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,
@@ -250,7 +250,7 @@ class VariantQueryFacadeTest {
     fun `given a variant variantQuery with a 'AA mutation' expression then map should throw an error`() {
         val variantQuery = "S:N501Y"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,
@@ -262,7 +262,7 @@ class VariantQueryFacadeTest {
     fun `given a valid variantQuery with a 'AA insertion' expression then map should throw an error`() {
         val variantQuery = "ins_S:501:EPE"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,
@@ -274,7 +274,7 @@ class VariantQueryFacadeTest {
     fun `given a valid variantQuery with a 'nextclade pango lineage' expression then map should throw an error`() {
         val variantQuery = "nextcladePangoLineage:BA.5*"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,
@@ -286,7 +286,7 @@ class VariantQueryFacadeTest {
     fun `given a valid variantQuery with a 'Nextstrain clade lineage' expression then map should throw an error`() {
         val variantQuery = "nextstrainClade:22B"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,
@@ -298,7 +298,7 @@ class VariantQueryFacadeTest {
     fun `given a valid variantQuery with a 'Gisaid clade lineage' expression then map should throw an error`() {
         val variantQuery = "gisaid:AB"
 
-        val exception = assertThrows<NotImplementedError> { underTest.map(variantQuery) }
+        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
         MatcherAssert.assertThat(
             exception.message,

@@ -90,26 +90,28 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     }
 
     override fun enterNucleotideInsertionQuery(ctx: NucleotideInsertionQueryContext?) {
-        throw NotImplementedError("Nucleotide insertions are not supported yet.")
+        throw SiloNotImplementedError("Nucleotide insertions are not supported yet.", NotImplementedError())
     }
 
     override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
-        throw NotImplementedError("Amino acid mutations are not supported yet.")
+        throw SiloNotImplementedError("Amino acid mutations are not supported yet.", NotImplementedError())
     }
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext?) {
-        throw NotImplementedError("Amino acid insertions are not supported yet.")
+        throw SiloNotImplementedError("Amino acid insertions are not supported yet.", NotImplementedError())
     }
 
     override fun enterNextcladePangolineageQuery(ctx: NextcladePangolineageQueryContext?) {
-        throw NotImplementedError("Nextclade pango lineages are not supported yet.")
+        throw SiloNotImplementedError("Nextclade pango lineages are not supported yet.", NotImplementedError())
     }
 
     override fun enterNextstrainCladeQuery(ctx: NextstrainCladeQueryContext?) {
-        throw NotImplementedError("Nextstrain clade lineages are not supported yet.")
+        throw SiloNotImplementedError("Nextstrain clade lineages are not supported yet.", NotImplementedError())
     }
 
     override fun enterGisaidCladeLineageQuery(ctx: GisaidCladeLineageQueryContext?) {
-        throw NotImplementedError("Gisaid clade lineages are not supported yet.")
+        throw SiloNotImplementedError("Gisaid clade lineages are not supported yet.", NotImplementedError())
     }
 }
+
+class SiloNotImplementedError(message: String?, cause: Throwable?) : Exception(message, cause)

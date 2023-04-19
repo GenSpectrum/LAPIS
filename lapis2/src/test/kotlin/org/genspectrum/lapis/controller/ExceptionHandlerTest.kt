@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
+import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.response.AggregatedResponse
 import org.genspectrum.lapis.silo.SiloException
 import org.junit.jupiter.api.BeforeEach
@@ -90,6 +91,25 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title":"Bad request",
+                      "message":"SomeMessage"
+                    }
+                    """,
+                ),
+            )
+    }
+
+    @Test
+    fun `throw NOT_IMPLEMENTED(501) with additional info for request of a not implemented resource in SILO`() {
+        every { validControllerCall() } throws SiloNotImplementedError("SomeMessage", Exception("SomeCause"))
+
+        mockMvc.perform(get(validRoute))
+            .andExpect(status().isNotImplemented)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(
+                content().json(
+                    """
+                    {
+                      "title":"Not implemented",
                       "message":"SomeMessage"
                     }
                     """,
