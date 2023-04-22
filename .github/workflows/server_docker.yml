@@ -7,7 +7,7 @@ on:
     - cron: '0 7 */2 * *'
 
 env:
-  IMAGE_NAME: ghcr.io/cevo-public/lapis-server
+  IMAGE_NAME: ghcr.io/genspectrum/lapis-server
 
 jobs:
   docker:

@@ -7,7 +7,7 @@ on:
     - cron: '0 7 */2 * *'
 
 env:
-  IMAGE_NAME: ghcr.io/cevo-public/lapis-mpox-proc
+  IMAGE_NAME: ghcr.io/genspectrum/lapis-mpox-proc
 
 jobs:
   docker:
