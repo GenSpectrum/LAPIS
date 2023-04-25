@@ -125,6 +125,11 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
             content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
         ),
         ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+        ApiResponse(
             responseCode = "500",
             description = "Internal Server Error",
             content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
@@ -147,6 +152,11 @@ private annotation class LapisAggregatedResponse
         ApiResponse(
             responseCode = "400",
             description = "Bad Request",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+        ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
             content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
         ),
         ApiResponse(

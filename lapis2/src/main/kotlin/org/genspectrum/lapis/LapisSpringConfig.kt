@@ -19,7 +19,8 @@ import java.io.File
 @Configuration
 class LapisSpringConfig {
     @Bean
-    fun openAPI(sequenceFilterFields: SequenceFilterFields) = buildOpenApiSchema(sequenceFilterFields)
+    fun openAPI(sequenceFilterFields: SequenceFilterFields, databaseConfig: DatabaseConfig) =
+        buildOpenApiSchema(sequenceFilterFields, databaseConfig)
 
     @Bean
     fun databaseConfig(

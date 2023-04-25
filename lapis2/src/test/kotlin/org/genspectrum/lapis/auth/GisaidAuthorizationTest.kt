@@ -42,7 +42,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "An access key is required to access this endpoint."
+                      "message": "An access key is required to access /aggregated."
                     }
                     """,
                 ),
@@ -59,7 +59,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "An access key is required to access this endpoint."
+                      "message": "An access key is required to access /aggregated."
                     }
                     """,
                 ),
@@ -76,7 +76,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "You are not authorized to access this endpoint."
+                      "message": "You are not authorized to access /aggregated."
                     }
                     """,
                 ),
@@ -93,7 +93,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "You are not authorized to access this endpoint."
+                      "message": "You are not authorized to access /aggregated."
                     }
                     """,
                 ),
@@ -139,7 +139,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "You are not authorized to access this endpoint."
+                      "message": "You are not authorized to access /aggregated."
                     }
                     """,
                 ),
@@ -163,7 +163,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                       "title": "Forbidden",
-                      "message": "You are not authorized to access this endpoint."
+                      "message": "You are not authorized to access /aggregated."
                     }
                     """,
                 ),
@@ -195,6 +195,24 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 
         verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+    }
+
+    @Test
+    fun `the swagger ui and api docs are always accessible`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/swagger-ui/index.html"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api-docs"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/api-docs.yaml"),
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
     }
 
     private fun postRequestWithBody(body: String) =

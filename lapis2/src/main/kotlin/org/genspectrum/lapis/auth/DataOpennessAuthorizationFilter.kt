@@ -91,14 +91,19 @@ private class ProtectedGisaidDataAuthorizationFilter(
     DataOpennessAuthorizationFilter(objectMapper) {
 
     companion object {
+        private val WHITELISTED_PATHS = listOf("/swagger-ui", "/api-docs")
         private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf("/aggregated", "/nucleotideMutations")
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {
+        if (WHITELISTED_PATHS.any { request.requestURI.startsWith(it) }) {
+            return AuthorizationResult.success()
+        }
+
         val requestFields = getRequestFields(request)
 
         val accessKey = requestFields[ACCESS_KEY_PROPERTY]
-            ?: return AuthorizationResult.failure("An access key is required to access this endpoint.")
+            ?: return AuthorizationResult.failure("An access key is required to access ${request.requestURI}.")
 
         if (accessKeys.fullAccessKey == accessKey) {
             return AuthorizationResult.success()
@@ -111,7 +116,7 @@ private class ProtectedGisaidDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        return AuthorizationResult.failure("You are not authorized to access this endpoint.")
+        return AuthorizationResult.failure("You are not authorized to access ${request.requestURI}.")
     }
 
     private fun getRequestFields(request: CachedBodyHttpServletRequest): Map<String, String> {
