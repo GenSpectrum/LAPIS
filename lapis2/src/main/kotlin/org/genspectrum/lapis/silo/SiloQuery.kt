@@ -48,4 +48,4 @@ data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")
 data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe")
 
 data class NOf(val numberOfMatchers: Int, val matchExactly: Boolean, val children: List<SiloFilterExpression>) :
-    SiloFilterExpression("NOf")
+    SiloFilterExpression("N-Of")

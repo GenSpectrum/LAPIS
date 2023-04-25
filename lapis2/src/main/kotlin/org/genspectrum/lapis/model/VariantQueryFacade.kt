@@ -20,6 +20,6 @@ class VariantQueryFacade {
         val walker = ParseTreeWalker()
         walker.walk(listener, parser.start())
 
-        return listener.getExpr()
+        return listener.getVariantQueryExpression()
     }
 }

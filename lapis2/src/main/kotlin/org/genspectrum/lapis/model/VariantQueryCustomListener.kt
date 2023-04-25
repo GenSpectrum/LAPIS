@@ -27,7 +27,7 @@ import org.genspectrum.lapis.silo.SiloFilterExpression
 class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
-    fun getExpr(): SiloFilterExpression {
+    fun getVariantQueryExpression(): SiloFilterExpression {
         return expressionStack.first()
     }
 

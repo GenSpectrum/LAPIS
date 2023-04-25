@@ -13,12 +13,10 @@ data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, Sequenc
                 .toMap()
             val staticFields = listOf(nucleotideMutationsField)
 
-            val featuresFields = if (databaseConfig.schema.features.isNullOrEmpty()) {
+            val featuresFields = if (databaseConfig.schema.features.isEmpty()) {
                 emptyMap<SequenceFilterFieldName, SequenceFilterFieldType>()
             } else {
-                databaseConfig.schema.features
-                    .map(::mapToSequenceFilterFieldsFromFeatures)
-                    .toMap()
+                databaseConfig.schema.features.associate(::mapToSequenceFilterFieldsFromFeatures)
             }
 
             return SequenceFilterFields(fields = metadataFields + staticFields + featuresFields)

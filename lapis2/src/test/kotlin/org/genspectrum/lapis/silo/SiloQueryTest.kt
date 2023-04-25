@@ -245,7 +245,7 @@ class SiloQueryTest {
                 ),
                 """
                 {
-                    "type": "NOf",
+                    "type": "N-Of",
                     "numberOfMatchers": 2,
                     "matchExactly": true,
                     "children": [

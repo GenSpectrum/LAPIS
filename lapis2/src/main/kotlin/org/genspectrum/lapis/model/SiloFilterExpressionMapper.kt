@@ -39,7 +39,8 @@ class SiloFilterExpressionMapper(
             allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes }
         ) {
             throw IllegalArgumentException(
-                "variantQuery cannot be used with other variant filters",
+                "variantQuery filter cannot be used with other variant filters such as: " +
+                    "${variantQueryTypes.joinToString(", ")}",
             )
         }
 

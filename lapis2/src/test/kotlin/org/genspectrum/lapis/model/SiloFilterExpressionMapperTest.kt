@@ -174,7 +174,10 @@ class SiloFilterExpressionMapperTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery cannot be used with other variant filters"))
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
     }
 
     @Test
@@ -185,7 +188,10 @@ class SiloFilterExpressionMapperTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery cannot be used with other variant filters"))
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
     }
 
     companion object {
