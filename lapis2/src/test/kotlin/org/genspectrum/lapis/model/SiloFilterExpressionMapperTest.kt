@@ -30,6 +30,7 @@ class SiloFilterExpressionMapperTest {
             "nucleotideMutations" to SequenceFilterFieldType.MutationsList,
             "some_metadata" to SequenceFilterFieldType.String,
             "other_metadata" to SequenceFilterFieldType.String,
+            "variantQuery" to SequenceFilterFieldType.VariantQuery,
         ),
     )
 
@@ -37,7 +38,7 @@ class SiloFilterExpressionMapperTest {
 
     @BeforeEach
     fun setup() {
-        underTest = SiloFilterExpressionMapper(sequenceFilterFields)
+        underTest = SiloFilterExpressionMapper(sequenceFilterFields, VariantQueryFacade())
     }
 
     @Test
@@ -157,6 +158,42 @@ class SiloFilterExpressionMapperTest {
         assertThat(result, equalTo(expectedResult))
     }
 
+    @Test
+    fun `given a query with an empty variantQuery then it should throw an error`() {
+        val filterParameter = mapOf("variantQuery" to "")
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery must not be empty"))
+    }
+
+    @Test
+    fun `given a query with a variantQuery alongside nucleotideMutation filter then it should throw an error`() {
+        val filterParameter = mapOf(
+            "nucleotideMutations" to "A123T",
+            "variantQuery" to "A123T",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
+    @Test
+    fun `given a query with a variantQuery alongside pangoLineage filter then it should throw an error`() {
+        val filterParameter = mapOf(
+            "pangoLineage" to "A.1.2.3",
+            "variantQuery" to "A123T",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
     companion object {
         @JvmStatic
         fun getFilterParametersWithExpectedSiloQuery() = listOf(
@@ -256,6 +293,33 @@ class SiloFilterExpressionMapperTest {
                 And(
                     listOf(
                         DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
+                        StringEquals("some_metadata", "ABC"),
+                    ),
+                ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "variantQuery" to "300G & 400A",
+                ),
+                And(
+                    listOf(
+                        And(
+                            listOf(
+                                NucleotideSymbolEquals(300, "G"),
+                                NucleotideSymbolEquals(400, "A"),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "variantQuery" to "300G",
+                    "some_metadata" to "ABC",
+                ),
+                And(
+                    listOf(
+                        NucleotideSymbolEquals(300, "G"),
                         StringEquals("some_metadata", "ABC"),
                     ),
                 ),

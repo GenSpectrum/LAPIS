@@ -27,5 +27,39 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
             ),
         )
+        assertThat(
+            underTest.schema.features,
+            containsInAnyOrder(
+                DatabaseFeature(name = "sarsCoV2VariantQuery"),
+            ),
+        )
+    }
+}
+
+@SpringBootTest(
+    properties =
+    [
+        "lapis.databaseConfig.path=src/test/resources/config/testDatabaseConfigWithoutFeatures.yaml",
+    ],
+)
+class DatabaseConfigWithoutFeaturesTest {
+    @Autowired
+    private lateinit var underTest: DatabaseConfig
+
+    @Test
+    fun `a config without features can be read`() {
+        assertThat(underTest.schema.instanceName, `is`("sars_cov-2_minimal_test_config"))
+        assertThat(underTest.schema.primaryKey, `is`("gisaid_epi_isl"))
+        assertThat(
+            underTest.schema.metadata,
+            containsInAnyOrder(
+                DatabaseMetadata(name = "gisaid_epi_isl", type = "string"),
+                DatabaseMetadata(name = "date", type = "date"),
+                DatabaseMetadata(name = "region", type = "string"),
+                DatabaseMetadata(name = "country", type = "string"),
+                DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
+            ),
+        )
+        assertThat(underTest.schema.features, `is`(emptyList()))
     }
 }

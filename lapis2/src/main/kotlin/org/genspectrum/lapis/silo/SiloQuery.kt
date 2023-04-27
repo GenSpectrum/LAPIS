@@ -40,3 +40,12 @@ data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDa
 object True : SiloFilterExpression("True")
 
 data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
+
+data class Or(val children: List<SiloFilterExpression>) : SiloFilterExpression("Or")
+
+data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")
+
+data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe")
+
+data class NOf(val numberOfMatchers: Int, val matchExactly: Boolean, val children: List<SiloFilterExpression>) :
+    SiloFilterExpression("N-Of")

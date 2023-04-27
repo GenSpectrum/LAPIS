@@ -188,6 +188,81 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                Not(StringEquals("theColumn", "theValue")),
+                """
+                {
+                    "type": "Not",
+                    "child": {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                    }
+                }
+                """,
+            ),
+            Arguments.of(
+                Or(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                """
+                {
+                    "type": "Or",
+                    "children": [
+                        {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                        },
+                        {
+                        "type": "StringEquals",
+                        "column": "theOtherColumn",
+                        "value": "theOtherValue"
+                        }
+                    ]
+                }
+                """,
+            ),
+            Arguments.of(
+                Maybe(StringEquals("theColumn", "theValue")),
+                """
+                {
+                    "type": "Maybe",
+                    "child": {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                    }
+                }
+                """,
+            ),
+            Arguments.of(
+                NOf(
+                    2,
+                    true,
+                    listOf(
+                        StringEquals("theColumn", "theValue"),
+                        StringEquals("theOtherColumn", "theOtherValue"),
+                    ),
+                ),
+                """
+                {
+                    "type": "N-Of",
+                    "numberOfMatchers": 2,
+                    "matchExactly": true,
+                    "children": [
+                        {
+                        "type": "StringEquals",
+                        "column": "theColumn",
+                        "value": "theValue"
+                        },
+                        {
+                        "type": "StringEquals",
+                        "column": "theOtherColumn",
+                        "value": "theOtherValue"
+                        }
+                    ]
+                }
+                """,
+            ),
         )
     }
 }

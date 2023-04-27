@@ -15,44 +15,61 @@ import java.time.format.DateTimeParseException
 
 data class SequenceFilterValue(val type: SequenceFilterFieldType, val value: String, val originalKey: String)
 
+typealias SequenceFilterFieldName = String
+
 @Component
-class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: SequenceFilterFields) {
-    fun map(sequenceFilters: Map<String, String>): SiloFilterExpression {
+class SiloFilterExpressionMapper(
+    private val allowedSequenceFilterFields: SequenceFilterFields,
+    private val variantQueryFacade: VariantQueryFacade,
+) {
+    fun map(sequenceFilters: Map<SequenceFilterFieldName, String>): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
 
-        val filterExpressions = sequenceFilters
+        val allowedSequenceFiltersWithType = sequenceFilters
             .map { (key, value) ->
                 val nullableType = allowedSequenceFilterFields.fields[key]
                 val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableType, key)
                 filterExpressionId to SequenceFilterValue(type, value, key)
             }
             .groupBy({ it.first }, { it.second })
-            .map { (key, values) ->
-                val (siloColumnName, siloFilterPrimitive) = key
-                when (siloFilterPrimitive) {
-                    SiloFilterPrimitive.StringEquals -> StringEquals(siloColumnName, values[0].value)
-                    SiloFilterPrimitive.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values[0].value)
-                    SiloFilterPrimitive.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
-                    SiloFilterPrimitive.NucleotideSymbolEquals -> mapToNucleotideFilter(values[0].value)
-                }
+
+        if (allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery } &&
+            allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes }
+        ) {
+            throw IllegalArgumentException(
+                "variantQuery filter cannot be used with other variant filters such as: " +
+                    "${variantQueryTypes.joinToString(", ")}",
+            )
+        }
+
+        val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
+            val (siloColumnName, filter) = key
+            when (filter) {
+                Filter.StringEquals -> StringEquals(siloColumnName, values[0].value)
+                Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values[0].value)
+                Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
+                Filter.NucleotideSymbolEquals -> mapToNucleotideFilter(values[0].value)
+                Filter.VariantQuery -> mapToVariantQueryFilter(values[0].value)
             }
+        }
 
         return And(filterExpressions)
     }
 
     private fun mapToFilterExpressionIdentifier(
         type: SequenceFilterFieldType?,
-        key: String,
-    ): Pair<Pair<String, SiloFilterPrimitive>, SequenceFilterFieldType> {
+        key: SequenceFilterFieldName,
+    ): Pair<Pair<SequenceFilterFieldName, Filter>, SequenceFilterFieldType> {
         val filterExpressionId = when (type) {
-            is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
-            is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, SiloFilterPrimitive.DateBetween)
-            SequenceFilterFieldType.Date -> Pair(key, SiloFilterPrimitive.DateBetween)
-            SequenceFilterFieldType.PangoLineage -> Pair(key, SiloFilterPrimitive.PangoLineage)
-            SequenceFilterFieldType.String -> Pair(key, SiloFilterPrimitive.StringEquals)
-            SequenceFilterFieldType.MutationsList -> Pair(key, SiloFilterPrimitive.NucleotideSymbolEquals)
+            is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, Filter.DateBetween)
+            is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, Filter.DateBetween)
+            SequenceFilterFieldType.Date -> Pair(key, Filter.DateBetween)
+            SequenceFilterFieldType.PangoLineage -> Pair(key, Filter.PangoLineage)
+            SequenceFilterFieldType.String -> Pair(key, Filter.StringEquals)
+            SequenceFilterFieldType.MutationsList -> Pair(key, Filter.NucleotideSymbolEquals)
+            SequenceFilterFieldType.VariantQuery -> Pair(key, Filter.VariantQuery)
 
             null -> throw IllegalArgumentException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -60,6 +77,16 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
             )
         }
         return Pair(filterExpressionId, type)
+    }
+
+    private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
+        if (variantQuery.isBlank()) {
+            throw IllegalArgumentException(
+                "variantQuery must not be empty",
+            )
+        }
+
+        return variantQueryFacade.map(variantQuery)
     }
 
     private fun mapToDateBetweenFilter(
@@ -155,10 +182,13 @@ class SiloFilterExpressionMapper(private val allowedSequenceFilterFields: Sequen
         }
     }
 
-    private enum class SiloFilterPrimitive {
+    private enum class Filter {
         StringEquals,
         PangoLineage,
         DateBetween,
         NucleotideSymbolEquals,
+        VariantQuery,
     }
+
+    private val variantQueryTypes = listOf(Filter.PangoLineage, Filter.NucleotideSymbolEquals)
 }
