@@ -16,9 +16,9 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
-@SpringBootTest(properties = ["lapis.databaseConfig.path=src/test/resources/config/gisaidDatabaseConfig.yaml"])
+@SpringBootTest(properties = ["lapis.databaseConfig.path=src/test/resources/config/protectedDataDatabaseConfig.yaml"])
 @AutoConfigureMockMvc
-class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
+class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
@@ -33,7 +33,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given no access key in GET request to GISAID instance, then access is denied`() {
+    fun `given no access key in GET request to protected instance, then access is denied`() {
         mockMvc.perform(MockMvcRequestBuilders.get(validRoute))
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -50,7 +50,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given no access key in POST request to GISAID instance, then access is denied`() {
+    fun `given no access key in POST request to protected instance, then access is denied`() {
         mockMvc.perform(postRequestWithBody(""))
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -67,7 +67,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given wrong access key in GET request to GISAID instance, then access is denied`() {
+    fun `given wrong access key in GET request to protected instance, then access is denied`() {
         mockMvc.perform(MockMvcRequestBuilders.get("$validRoute?accessKey=invalidKey"))
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -84,7 +84,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given wrong access key in POST request to GISAID instance, then access is denied`() {
+    fun `given wrong access key in POST request to protected instance, then access is denied`() {
         mockMvc.perform(postRequestWithBody("""{"accessKey": "invalidKey"}"""))
             .andExpect(MockMvcResultMatchers.status().isForbidden)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
@@ -101,7 +101,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given valid access key for aggregated data in GET request to GISAID instance, then access is granted`() {
+    fun `given valid access key for aggregated data in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
         )
@@ -112,7 +112,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given valid access key for aggregated data in POST request to GISAID instance, then access is granted`() {
+    fun `given valid access key for aggregated data in POST request to protected instance, then access is granted`() {
         mockMvc.perform(
             postRequestWithBody(
                 """ {
@@ -171,7 +171,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given valid access key for full access in GET request to GISAID instance, then access is granted`() {
+    fun `given valid access key for full access in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
             MockMvcRequestBuilders.get("$validRoute?accessKey=testFullAccessKey&field1=value1"),
         )
@@ -182,7 +182,7 @@ class GisaidAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `given valid access key for full access in POST request to GISAID instance, then access is granted`() {
+    fun `given valid access key for full access in POST request to protected instance, then access is granted`() {
         mockMvc.perform(
             postRequestWithBody(
                 """ {

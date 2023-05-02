@@ -15,7 +15,7 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
         .map { (fieldName, fieldType) -> fieldName to Schema<String>().type(fieldType.openApiType) }
         .toMap()
 
-    if (databaseConfig.schema.opennessLevel == OpennessLevel.GISAID) {
+    if (databaseConfig.schema.opennessLevel == OpennessLevel.PROTECTED) {
         properties = properties + ("accessKey" to accessKeySchema)
     }
 

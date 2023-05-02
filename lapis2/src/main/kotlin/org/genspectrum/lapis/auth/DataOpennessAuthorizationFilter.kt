@@ -29,10 +29,10 @@ class DataOpennessAuthorizationFilterFactory(
 ) {
     fun create() = when (databaseConfig.schema.opennessLevel) {
         OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(objectMapper)
-        OpennessLevel.GISAID -> ProtectedGisaidDataAuthorizationFilter(
+        OpennessLevel.PROTECTED -> ProtectedDataAuthorizationFilter(
             objectMapper,
             accessKeysReader.read(),
-            databaseConfig.schema.metadata.filter { it.unique }.map { it.name },
+            databaseConfig.schema.metadata.filter { it.valuesAreUnique }.map { it.name },
         )
     }
 }
@@ -43,7 +43,7 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val reReadableRequest = CachedBodyHttpServletRequest(request)
+        val reReadableRequest = makeRequestBodyReadableMoreThanOnce(request)
 
         when (val result = isAuthorizedForEndpoint(reReadableRequest)) {
             AuthorizationResult.Success -> filterChain.doFilter(reReadableRequest, response)
@@ -61,6 +61,9 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
             }
         }
     }
+
+    private fun makeRequestBodyReadableMoreThanOnce(request: HttpServletRequest) =
+        CachedBodyHttpServletRequest(request)
 
     abstract fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult
 }
@@ -83,7 +86,7 @@ private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper) :
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest) = AuthorizationResult.success()
 }
 
-private class ProtectedGisaidDataAuthorizationFilter(
+private class ProtectedDataAuthorizationFilter(
     objectMapper: ObjectMapper,
     private val accessKeys: AccessKeys,
     private val fieldsThatServeNonAggregatedData: List<String>,
