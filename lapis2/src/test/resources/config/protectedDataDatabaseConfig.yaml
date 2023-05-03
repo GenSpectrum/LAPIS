@@ -1,0 +1,10 @@
+schema:
+  instanceName: protectedDataTestConfig
+  opennessLevel: PROTECTED
+  metadata:
+    - name: gisaid_epi_isl
+      type: string
+      valuesAreUnique: true
+    - name: country
+      type: string
+  primaryKey: gisaid_epi_isl

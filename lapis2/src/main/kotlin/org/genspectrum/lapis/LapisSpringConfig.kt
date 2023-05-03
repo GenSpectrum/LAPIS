@@ -1,16 +1,15 @@
 package org.genspectrum.lapis
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import mu.KotlinLogging
+import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.util.TimeFactory
+import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,11 +19,15 @@ import java.io.File
 @Configuration
 class LapisSpringConfig {
     @Bean
-    fun openAPI(sequenceFilterFields: SequenceFilterFields) = buildOpenApiSchema(sequenceFilterFields)
+    fun openAPI(sequenceFilterFields: SequenceFilterFields, databaseConfig: DatabaseConfig) =
+        buildOpenApiSchema(sequenceFilterFields, databaseConfig)
 
     @Bean
-    fun databaseConfig(@Value("\${lapis.databaseConfig.path}") configPath: String): DatabaseConfig {
-        return ObjectMapper(YAMLFactory()).registerKotlinModule().readValue(File(configPath))
+    fun databaseConfig(
+        @Value("\${lapis.databaseConfig.path}") configPath: String,
+        yamlObjectMapper: YamlObjectMapper,
+    ): DatabaseConfig {
+        return yamlObjectMapper.objectMapper.readValue(File(configPath))
     }
 
     @Bean
@@ -52,4 +55,9 @@ class LapisSpringConfig {
         KotlinLogging.logger("StatisticsLogger"),
         timeFactory,
     )
+
+    @Bean
+    fun dataOpennessAuthorizationFilter(
+        dataOpennessAuthorizationFilterFactory: DataOpennessAuthorizationFilterFactory,
+    ) = dataOpennessAuthorizationFilterFactory.create()
 }
