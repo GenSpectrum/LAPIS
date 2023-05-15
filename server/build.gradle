@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.tukaani:xz:1.9'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'jakarta.activation:jakarta.activation-api:2.1.1'
-    implementation 'org.jooq:jooq:3.18.2'
+    implementation 'org.jooq:jooq:3.18.4'
     implementation 'redis.clients:jedis:4.3.1'
     implementation 'com.github.luben:zstd-jni:1.5.4-2'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
