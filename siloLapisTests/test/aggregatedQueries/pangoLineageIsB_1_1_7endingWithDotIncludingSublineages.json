@@ -4,6 +4,6 @@
     "pangoLineage": "B.1.1.7.*"
   },
   "expected": {
-    "count": 49
+    "count": 52
   }
 }
