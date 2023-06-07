@@ -57,7 +57,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.DOCKER_IMAGE_NAME }}
-          tags: type=ref,event=branch
+          tags: |
+            type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
       -
         name: Build Docker Image For Branch
         uses: gradle/gradle-build-action@v2
@@ -72,14 +74,14 @@ jobs:
         run: docker push ${{ steps.dockerMetadata.outputs.tags }}
       -
         name: Build "public" Docker Image
-        if: ${{ github.ref == format('refs/heads/{0}', 'public') }}
+        if: ${{ github.ref == 'refs/heads/public' }}
         uses: gradle/gradle-build-action@v2
         with:
           arguments: bootBuildImage --imageName=${{ env.DOCKER_IMAGE_NAME }}:public
           build-root-directory: lapis2
       -
         name: Push "public" Docker Image
-        if: ${{ github.ref == format('refs/heads/{0}', 'public') }}
+        if: ${{ github.ref == 'refs/heads/public' }}
         run: docker push ${{ env.DOCKER_IMAGE_NAME }}:public
 
   endToEndTests:
@@ -119,7 +121,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.DOCKER_IMAGE_NAME }}
-          tags: type=ref,event=branch
+          tags: |
+            type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
       -
         name: Get LAPIS Branch Tag
         id: lapisBranchTag
