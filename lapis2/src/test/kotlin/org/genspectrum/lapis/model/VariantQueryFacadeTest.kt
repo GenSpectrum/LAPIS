@@ -71,7 +71,7 @@ class VariantQueryFacadeTest {
                             ),
                         ),
                     ),
-                    PangoLineageEquals("pangoLineage", "A.1.2.3", true),
+                    PangoLineageEquals("pango_lineage", "A.1.2.3", true),
                 ),
             )
 
@@ -184,7 +184,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals("pangoLineage", "A.1.2.3", false)
+        val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", false)
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 
@@ -194,7 +194,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals("pangoLineage", "A.1.2.3", true)
+        val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", true)
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 

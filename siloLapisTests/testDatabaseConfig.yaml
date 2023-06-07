@@ -10,7 +10,7 @@ schema:
       type: string
     - name: country
       type: string
-    - name: pangoLineage
+    - name: pango_lineage
       type: pango_lineage
   features:
     - name: sarsCoV2VariantQuery
