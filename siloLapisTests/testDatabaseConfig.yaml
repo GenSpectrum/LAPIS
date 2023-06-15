@@ -8,10 +8,17 @@ schema:
       type: date
     - name: region
       type: string
+      generateIndex: true
     - name: country
       type: string
+      generateIndex: true
     - name: pango_lineage
       type: pango_lineage
+    - name: division
+      type: string
+      generateIndex: true
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl
+  dateToSortBy: date
+  partitionBy: pango_lineage

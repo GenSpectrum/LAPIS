@@ -1,7 +1,10 @@
 package org.genspectrum.lapis.config
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 data class DatabaseConfig(val schema: DatabaseSchema)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DatabaseSchema(
     val instanceName: String,
     val opennessLevel: OpennessLevel,
@@ -10,6 +13,7 @@ data class DatabaseSchema(
     val features: List<DatabaseFeature> = emptyList(),
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class DatabaseMetadata(val name: String, val type: String, val valuesAreUnique: Boolean = false)
 
 data class DatabaseFeature(val name: String)
