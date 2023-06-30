@@ -79,7 +79,7 @@ openApi {
     customBootRun {
         args.set([
             "--silo.url=does.not.matter.here",
-            "--lapis.databaseConfig.path=../siloLapisTests/testDatabaseConfig.yaml"
+            "--lapis.databaseConfig.path=../siloLapisTests/testData/testDatabaseConfig.yaml"
         ])
     }
 }

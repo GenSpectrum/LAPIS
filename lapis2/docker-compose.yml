@@ -7,10 +7,18 @@ services:
     command: --silo.url=http://silo:8081 --lapis.databaseConfig.path=databaseConfig.yaml
     volumes:
       - type: bind
-        source: ${DATABASE_CONFIG}
+        source: ../siloLapisTests/testData/testDatabaseConfig.yaml
         target: /workspace/databaseConfig.yaml
         read_only: true
   silo:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
       - ":8081"
+    command:
+      - "--api"
+      - "--preprocessingConfig=/data/preprocessingConfig.yaml"
+      - "--databaseConfig=/data/testDatabaseConfig.yaml"
+    volumes:
+      - type: bind
+        source: ../siloLapisTests/testData
+        target: /data
