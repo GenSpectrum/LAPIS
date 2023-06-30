@@ -3,7 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
-import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import java.time.LocalDate
 
@@ -11,14 +11,14 @@ data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val fil
 
 sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>) {
     companion object {
-        fun aggregated(): SiloAction<AggregatedResponse> = AggregatedAction("Aggregated")
+        fun aggregated(): SiloAction<List<AggregationData>> = AggregatedAction("Aggregated")
 
         fun mutations(minProportion: Double? = null): SiloAction<List<MutationData>> =
             MutationsAction("Mutations", minProportion)
     }
 
     private data class AggregatedAction(val type: String) :
-        SiloAction<AggregatedResponse>(object : TypeReference<SiloQueryResponse<AggregatedResponse>>() {})
+        SiloAction<List<AggregationData>>(object : TypeReference<SiloQueryResponse<List<AggregationData>>>() {})
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private data class MutationsAction(val type: String, val minProportion: Double?) :

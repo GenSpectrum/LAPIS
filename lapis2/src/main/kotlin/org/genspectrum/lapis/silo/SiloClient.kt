@@ -52,7 +52,4 @@ class SiloException(message: String?, cause: Throwable?) : Exception(message, ca
 
 data class SiloQueryResponse<ResponseType>(
     val queryResult: ResponseType,
-    val actionTime: Int,
-    val filterTime: Int,
-    val parseTime: Int,
 )

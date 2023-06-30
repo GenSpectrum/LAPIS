@@ -3,7 +3,9 @@
   "lapisRequest": {
     "country": "Switzerland"
   },
-  "expected": {
-    "count": 100
-  }
+  "expected": [
+    {
+      "count": 100
+    }
+  ]
 }

@@ -5,7 +5,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloNotImplementedError
-import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.SiloException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,7 +31,7 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
 
     private val validRoute = "/aggregated"
     private fun MockKMatcherScope.validControllerCall() = lapisController.aggregated(any())
-    private val validResponse = AggregatedResponse(1)
+    private val validResponse = emptyList<AggregationData>()
 
     @Test
     fun `throw NOT_FOUND(404) when route is not found`() {

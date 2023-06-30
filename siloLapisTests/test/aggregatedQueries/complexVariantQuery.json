@@ -3,7 +3,9 @@
   "lapisRequest": {
     "variantQuery": "300G & (400-|500B) & !600&MAYBE(700B|800-) & [3-of:123A,234T,345G] & A.1.2.3*"
   },
-  "expected": {
-    "count": 0
-  }
+  "expected": [
+    {
+      "count": 0
+    }
+  ]
 }

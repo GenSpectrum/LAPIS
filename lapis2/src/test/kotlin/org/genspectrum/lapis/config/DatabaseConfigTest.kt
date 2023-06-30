@@ -38,10 +38,7 @@ class DatabaseConfigTest {
 }
 
 @SpringBootTest(
-    properties =
-    [
-        "lapis.databaseConfig.path=src/test/resources/config/testDatabaseConfigWithoutFeatures.yaml",
-    ],
+    properties = ["lapis.databaseConfig.path=src/test/resources/config/testDatabaseConfigWithoutFeatures.yaml"],
 )
 class DatabaseConfigWithoutFeaturesTest {
     @Autowired

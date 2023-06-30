@@ -3,7 +3,9 @@
   "lapisRequest": {
     "nucleotideMutations": "23063T"
   },
-  "expected": {
-    "count": 49
-  }
+  "expected": [
+    {
+      "count": 49
+    }
+  ]
 }
