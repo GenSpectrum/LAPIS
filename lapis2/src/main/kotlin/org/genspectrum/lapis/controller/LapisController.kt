@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -42,7 +42,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         )
         @RequestParam
         sequenceFilters: Map<String, String>,
-    ): AggregatedResponse {
+    ): List<AggregationData> {
         requestContext.filter = sequenceFilters
 
         return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
@@ -54,7 +54,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"))
         @RequestBody
         sequenceFilters: Map<String, String>,
-    ): AggregatedResponse {
+    ): List<AggregationData> {
         requestContext.filter = sequenceFilters
 
         return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
@@ -117,7 +117,9 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         ApiResponse(
             responseCode = "200",
             description = "OK",
-            content = [Content(schema = Schema(implementation = AggregatedResponse::class))],
+            content = [
+                Content(array = ArraySchema(schema = Schema(implementation = AggregationData::class))),
+            ],
         ),
         ApiResponse(
             responseCode = "400",

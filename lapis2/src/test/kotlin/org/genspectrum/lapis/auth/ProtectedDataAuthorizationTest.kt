@@ -5,7 +5,6 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.response.AggregatedResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +26,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @BeforeEach
     fun setUp() {
-        every { siloQueryModelMock.aggregate(any()) } returns AggregatedResponse(1)
+        every { siloQueryModelMock.aggregate(any()) } returns emptyList()
 
         MockKAnnotations.init(this)
     }

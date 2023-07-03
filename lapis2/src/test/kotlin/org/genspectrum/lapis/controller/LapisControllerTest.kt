@@ -1,9 +1,11 @@
 package org.genspectrum.lapis.controller
 
+import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.response.AggregatedResponse
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,24 +26,35 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `GET aggregated`() {
-        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns AggregatedResponse(0)
+        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns listOf(
+            AggregationData(
+                0,
+                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+            ),
+        )
 
         mockMvc.perform(get("/aggregated?country=Switzerland"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.count").value(0))
+            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
     }
 
     @Test
     fun `POST aggregated`() {
-        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns AggregatedResponse(0)
-
+        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns listOf(
+            AggregationData(
+                0,
+                emptyMap(),
+            ),
+        )
         val request = post("/aggregated")
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.count").value(0))
+            .andExpect(jsonPath("\$[0].count").value(0))
     }
 
     @Test

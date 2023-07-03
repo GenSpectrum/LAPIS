@@ -3,7 +3,9 @@
   "lapisRequest": {
     "dateFrom": "2021-03-18"
   },
-  "expected": {
-    "count": 48
-  }
+  "expected": [
+    {
+      "count": 48
+    }
+  ]
 }

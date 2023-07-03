@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.genspectrum.lapis.response.AggregatedResponse
+import com.fasterxml.jackson.databind.node.TextNode
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -18,17 +18,21 @@ import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
 private const val MOCK_SERVER_PORT = 1080
 
+@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
 class SiloClientTest {
     private lateinit var mockServer: ClientAndServer
+
+    @Autowired
     private lateinit var underTest: SiloClient
 
     @BeforeEach
     fun setupMockServer() {
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
-        underTest = SiloClient("http://localhost:$MOCK_SERVER_PORT", jacksonObjectMapper())
     }
 
     @AfterEach
@@ -43,12 +47,16 @@ class SiloClientTest {
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
                 .withBody(
                     """{
-                        "actionTime": 0,
-                        "filterTime": 0,
-                        "parseTime": 0,
-                        "queryResult": {
-                            "count": 1
-                        }
+                        "queryResult": [
+                            {
+                              "count": 6,
+                              "division": "Aargau"
+                            },
+                            {
+                              "count": 8,
+                              "division": "Basel-Land"
+                            }
+                        ]
                     }""",
                 ),
         )
@@ -56,7 +64,15 @@ class SiloClientTest {
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
         val result = underTest.sendQuery(query)
 
-        assertThat(result, equalTo(AggregatedResponse(1)))
+        assertThat(
+            result,
+            equalTo(
+                listOf(
+                    AggregationData(6, mapOf("division" to TextNode("Aargau"))),
+                    AggregationData(8, mapOf("division" to TextNode("Basel-Land"))),
+                ),
+            ),
+        )
     }
 
     @Test
@@ -66,9 +82,6 @@ class SiloClientTest {
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
                 .withBody(
                     """{
-                        "actionTime": 0,
-                        "filterTime": 0,
-                        "parseTime": 0,
                         "queryResult": [
                             {
                                 "count": 45,
