@@ -1,0 +1,11 @@
+{
+  "testCaseName": "float equals",
+  "lapisRequest": {
+    "qcValue": 0.97
+  },
+  "expected": [
+    {
+      "count": 10
+    }
+  ]
+}

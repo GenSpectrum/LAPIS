@@ -4,6 +4,10 @@ import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.FloatBetween
+import org.genspectrum.lapis.silo.FloatEquals
+import org.genspectrum.lapis.silo.IntBetween
+import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
@@ -31,6 +35,12 @@ class SiloFilterExpressionMapperTest {
             "some_metadata" to SequenceFilterFieldType.String,
             "other_metadata" to SequenceFilterFieldType.String,
             "variantQuery" to SequenceFilterFieldType.VariantQuery,
+            "intField" to SequenceFilterFieldType.Int,
+            "intFieldTo" to SequenceFilterFieldType.IntTo("intField"),
+            "intFieldFrom" to SequenceFilterFieldType.IntFrom("intField"),
+            "floatField" to SequenceFilterFieldType.Float,
+            "floatFieldTo" to SequenceFilterFieldType.FloatTo("floatField"),
+            "floatFieldFrom" to SequenceFilterFieldType.FloatFrom("floatField"),
         ),
     )
 
@@ -121,6 +131,110 @@ class SiloFilterExpressionMapperTest {
         assertThat(
             exception.message,
             containsString("Cannot filter by exact date field 'date' and by date range field 'dateTo'."),
+        )
+    }
+
+    @Test
+    fun `given int field with non-int value then should throw an exception`() {
+        val filterParameter = mapOf(
+            "intField" to "not a number",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("intField 'not a number' is not a valid integer"),
+        )
+    }
+
+    @Test
+    fun `given intTo field with non-int value then should throw an exception`() {
+        val filterParameter = mapOf(
+            "intFieldTo" to "not a number",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("intFieldTo 'not a number' is not a valid integer"),
+        )
+    }
+
+    @Test
+    fun `given float field with non-float value then should throw an exception`() {
+        val filterParameter = mapOf(
+            "floatField" to "not a number",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("floatField 'not a number' is not a valid float"),
+        )
+    }
+
+    @Test
+    fun `given floatTo field with non-float value then should throw an exception`() {
+        val filterParameter = mapOf(
+            "floatFieldTo" to "not a number",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("floatFieldTo 'not a number' is not a valid float"),
+        )
+    }
+
+    @Test
+    fun `given int and intFrom then should throw an exception`() {
+        val filterParameter = mapOf(
+            "intField" to "42",
+            "intFieldFrom" to "43",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldFrom'."),
+        )
+    }
+
+    @Test
+    fun `given int and intTo then should throw an exception`() {
+        val filterParameter = mapOf(
+            "intFieldTo" to "43",
+            "intField" to "42",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldTo'."),
+        )
+    }
+
+    @Test
+    fun `given float and floatFrom then should throw an exception`() {
+        val filterParameter = mapOf(
+            "floatField" to "42.1",
+            "floatFieldFrom" to "42.3",
+        )
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString(
+                "Cannot filter by exact float field 'floatField' and by float range field 'floatFieldFrom'.",
+            ),
+        )
+    }
+
+    @Test
+    fun `given float and floatTo then should throw an exception`() {
+        val filterParameter = mapOf(
+            "floatFieldTo" to "42.3",
+            "floatField" to "42.1",
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("Cannot filter by exact float field 'floatField' and by float range field 'floatFieldTo'."),
         )
     }
 
@@ -323,6 +437,42 @@ class SiloFilterExpressionMapperTest {
                         StringEquals("some_metadata", "ABC"),
                     ),
                 ),
+            ),
+            Arguments.of(
+                mapOf(
+                    "intField" to "42",
+                ),
+                And(listOf(IntEquals("intField", 42))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "intFieldFrom" to "42",
+                ),
+                And(listOf(IntBetween("intField", 42, null))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "intFieldTo" to "42",
+                ),
+                And(listOf(IntBetween("intField", null, 42))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "floatField" to "42.45",
+                ),
+                And(listOf(FloatEquals("floatField", 42.45))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "floatFieldFrom" to "42.45",
+                ),
+                And(listOf(FloatBetween("floatField", 42.45, null))),
+            ),
+            Arguments.of(
+                mapOf(
+                    "floatFieldTo" to "42.45",
+                ),
+                And(listOf(FloatBetween("floatField", null, 42.45))),
             ),
         )
 

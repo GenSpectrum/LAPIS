@@ -1,0 +1,12 @@
+{
+  "testCaseName": "float between",
+  "lapisRequest": {
+    "qcValueFrom": 0.91,
+    "qcValueTo": 0.93
+  },
+  "expected": [
+    {
+      "count": 20
+    }
+  ]
+}

@@ -13,7 +13,7 @@ services:
   silo:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
-      - ":8081"
+      - "8081:8081"
     command:
       - "--api"
       - "--preprocessingConfig=/data/preprocessingConfig.yaml"

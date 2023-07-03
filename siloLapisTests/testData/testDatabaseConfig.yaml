@@ -17,6 +17,10 @@ schema:
     - name: division
       type: string
       generateIndex: true
+    - name: age
+      type: int
+    - name: qc_value
+      type: float
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl

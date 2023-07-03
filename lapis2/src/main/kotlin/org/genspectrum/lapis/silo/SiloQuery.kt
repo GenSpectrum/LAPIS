@@ -49,3 +49,11 @@ data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe"
 
 data class NOf(val numberOfMatchers: Int, val matchExactly: Boolean, val children: List<SiloFilterExpression>) :
     SiloFilterExpression("N-Of")
+
+data class IntEquals(val column: String, val value: Int) : SiloFilterExpression("IntEquals")
+
+data class IntBetween(val column: String, val from: Int?, val to: Int?) : SiloFilterExpression("IntBetween")
+
+data class FloatEquals(val column: String, val value: Double) : SiloFilterExpression("FloatEquals")
+
+data class FloatBetween(val column: String, val from: Double?, val to: Double?) : SiloFilterExpression("FloatBetween")
