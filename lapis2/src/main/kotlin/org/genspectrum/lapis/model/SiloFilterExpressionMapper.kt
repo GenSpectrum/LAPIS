@@ -4,6 +4,10 @@ import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.FloatBetween
+import org.genspectrum.lapis.silo.FloatEquals
+import org.genspectrum.lapis.silo.IntBetween
+import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
@@ -35,14 +39,7 @@ class SiloFilterExpressionMapper(
             }
             .groupBy({ it.first }, { it.second })
 
-        if (allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery } &&
-            allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes }
-        ) {
-            throw IllegalArgumentException(
-                "variantQuery filter cannot be used with other variant filters such as: " +
-                    "${variantQueryTypes.joinToString(", ")}",
-            )
-        }
+        crossValidateFilters(allowedSequenceFiltersWithType)
 
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
             val (siloColumnName, filter) = key
@@ -52,6 +49,10 @@ class SiloFilterExpressionMapper(
                 Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
                 Filter.NucleotideSymbolEquals -> mapToNucleotideFilter(values[0].value)
                 Filter.VariantQuery -> mapToVariantQueryFilter(values[0].value)
+                Filter.IntEquals -> mapToIntEqualsFilter(siloColumnName, values)
+                Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
+                Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
+                Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
             }
         }
 
@@ -70,6 +71,12 @@ class SiloFilterExpressionMapper(
             SequenceFilterFieldType.String -> Pair(key, Filter.StringEquals)
             SequenceFilterFieldType.MutationsList -> Pair(key, Filter.NucleotideSymbolEquals)
             SequenceFilterFieldType.VariantQuery -> Pair(key, Filter.VariantQuery)
+            SequenceFilterFieldType.Int -> Pair(key, Filter.IntEquals)
+            is SequenceFilterFieldType.IntFrom -> Pair(type.associatedField, Filter.IntBetween)
+            is SequenceFilterFieldType.IntTo -> Pair(type.associatedField, Filter.IntBetween)
+            SequenceFilterFieldType.Float -> Pair(key, Filter.FloatEquals)
+            is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
+            is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
 
             null -> throw IllegalArgumentException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -77,6 +84,47 @@ class SiloFilterExpressionMapper(
             )
         }
         return Pair(filterExpressionId, type)
+    }
+
+    private fun crossValidateFilters(
+        allowedSequenceFiltersWithType: Map<Pair<SequenceFilterFieldName, Filter>, List<SequenceFilterValue>>,
+    ) {
+        if (allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery } &&
+            allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes }
+        ) {
+            throw IllegalArgumentException(
+                "variantQuery filter cannot be used with other variant filters such as: " +
+                    variantQueryTypes.joinToString(", "),
+            )
+        }
+
+        val intEqualFilters = allowedSequenceFiltersWithType.keys.filter { it.second == Filter.IntEquals }
+        for ((intEqualsColumnName, _) in intEqualFilters) {
+            val intBetweenFilterForSameColumn = allowedSequenceFiltersWithType[
+                Pair(intEqualsColumnName, Filter.IntBetween),
+            ]
+
+            if (intBetweenFilterForSameColumn != null) {
+                throw IllegalArgumentException(
+                    "Cannot filter by exact int field '$intEqualsColumnName' " +
+                        "and by int range field '${intBetweenFilterForSameColumn[0].originalKey}'.",
+                )
+            }
+        }
+
+        val floatEqualFilters = allowedSequenceFiltersWithType.keys.filter { it.second == Filter.FloatEquals }
+        for ((floatEqualsColumnName, _) in floatEqualFilters) {
+            val floatBetweenFilterForSameColumn = allowedSequenceFiltersWithType[
+                Pair(floatEqualsColumnName, Filter.FloatBetween),
+            ]
+
+            if (floatBetweenFilterForSameColumn != null) {
+                throw IllegalArgumentException(
+                    "Cannot filter by exact float field '$floatEqualsColumnName' " +
+                        "and by float range field '${floatBetweenFilterForSameColumn[0].originalKey}'.",
+                )
+            }
+        }
     }
 
     private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
@@ -123,8 +171,8 @@ class SiloFilterExpressionMapper(
     private inline fun <reified T : SequenceFilterFieldType> findDateOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): LocalDate? {
-        val fromFilter = dateRangeFilters.find { (type, _, _) -> type is T }
-        return getAsDate(fromFilter)
+        val filter = dateRangeFilters.find { (type, _, _) -> type is T }
+        return getAsDate(filter)
     }
 
     private fun getAsDate(sequenceFilterValue: SequenceFilterValue?): LocalDate? {
@@ -162,6 +210,88 @@ class SiloFilterExpressionMapper(
         )
     }
 
+    private fun mapToIntEqualsFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        val value = values[0].value
+        try {
+            return IntEquals(siloColumnName, value.toInt())
+        } catch (exception: NumberFormatException) {
+            throw IllegalArgumentException(
+                "$siloColumnName '$value' is not a valid integer: ${exception.message}",
+                exception,
+            )
+        }
+    }
+
+    private fun mapToFloatEqualsFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        val value = values[0].value
+        try {
+            return FloatEquals(siloColumnName, value.toDouble())
+        } catch (exception: NumberFormatException) {
+            throw IllegalArgumentException(
+                "$siloColumnName '$value' is not a valid float: ${exception.message}",
+                exception,
+            )
+        }
+    }
+
+    private fun mapToIntBetweenFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        return IntBetween(
+            siloColumnName,
+            from = findIntOfFilterType<SequenceFilterFieldType.IntFrom>(values),
+            to = findIntOfFilterType<SequenceFilterFieldType.IntTo>(values),
+        )
+    }
+
+    private inline fun <reified T : SequenceFilterFieldType> findIntOfFilterType(
+        dateRangeFilters: List<SequenceFilterValue>,
+    ): Int? {
+        val (_, value, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+
+        try {
+            return value.toInt()
+        } catch (exception: NumberFormatException) {
+            throw IllegalArgumentException(
+                "$originalKey '$value' is not a valid integer: ${exception.message}",
+                exception,
+            )
+        }
+    }
+
+    private fun mapToFloatBetweenFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        return FloatBetween(
+            siloColumnName,
+            from = findFloatOfFilterType<SequenceFilterFieldType.FloatFrom>(values),
+            to = findFloatOfFilterType<SequenceFilterFieldType.FloatTo>(values),
+        )
+    }
+
+    private inline fun <reified T : SequenceFilterFieldType> findFloatOfFilterType(
+        dateRangeFilters: List<SequenceFilterValue>,
+    ): Double? {
+        val (_, value, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+
+        try {
+            return value.toDouble()
+        } catch (exception: NumberFormatException) {
+            throw IllegalArgumentException(
+                "$originalKey '$value' is not a valid float: ${exception.message}",
+                exception,
+            )
+        }
+    }
+
     companion object {
         private var NUCLEOTIDE_MUTATION_REGEX: Regex
 
@@ -188,6 +318,10 @@ class SiloFilterExpressionMapper(
         DateBetween,
         NucleotideSymbolEquals,
         VariantQuery,
+        IntEquals,
+        IntBetween,
+        FloatEquals,
+        FloatBetween,
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage, Filter.NucleotideSymbolEquals)
