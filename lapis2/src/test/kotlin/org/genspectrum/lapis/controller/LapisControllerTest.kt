@@ -188,5 +188,73 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             )
     }
 
+    @Test
+    fun `GET details`() {
+        every {
+            siloQueryModelMock.getDetails(
+                mapOf("country" to "Switzerland"),
+                emptyList(),
+            )
+        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+
+        mockMvc.perform(get("/details?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
+    @Test
+    fun `GET details with fields`() {
+        every {
+            siloQueryModelMock.getDetails(
+                mapOf("country" to "Switzerland"),
+                listOf("country", "age"),
+            )
+        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+
+        mockMvc.perform(get("/details?country=Switzerland&fields=country&fields=age"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
+    @Test
+    fun `POST details`() {
+        every {
+            siloQueryModelMock.getDetails(
+                mapOf("country" to "Switzerland"),
+                emptyList(),
+            )
+        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+
+        val request = post("/details")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
+    @Test
+    fun `POST details with fields`() {
+        every {
+            siloQueryModelMock.getDetails(
+                mapOf("country" to "Switzerland"),
+                listOf("country", "age"),
+            )
+        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+
+        val request = post("/details")
+            .content("""{"country": "Switzerland", "fields": ["country", "age"]}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
     private fun someMutationProportion() = MutationData("the mutation", 42, 0.5)
 }

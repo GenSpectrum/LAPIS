@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.silo
 
+import com.fasterxml.jackson.databind.node.DoubleNode
+import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
@@ -105,6 +107,58 @@ class SiloClientTest {
         assertThat(
             result,
             containsInAnyOrder(MutationData("first mutation", 45, 0.9), MutationData("second mutation", 44, 0.7)),
+        )
+    }
+
+    @Test
+    fun `given server returns details response then response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """{
+                        "queryResult": [
+                            {
+                                "age": 50,
+                                "country": "Switzerland",
+                                "date": "2021-02-23",
+                                "pango_lineage": "B.1.1.7",
+                                "qc_value": 0.95
+                            },
+                            {
+                                "age": 54,
+                                "country": "Switzerland",
+                                "date": "2021-03-19",
+                                "pango_lineage": "B.1.1.7",
+                                "qc_value": 0.94
+                            }
+                        ]
+                    }""",
+                ),
+        )
+
+        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val result = underTest.sendQuery(query)
+
+        assertThat(result, hasSize(2))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                mapOf(
+                    "age" to IntNode(50),
+                    "country" to TextNode("Switzerland"),
+                    "date" to TextNode("2021-02-23"),
+                    "pango_lineage" to TextNode("B.1.1.7"),
+                    "qc_value" to DoubleNode(0.95),
+                ),
+                mapOf(
+                    "age" to IntNode(54),
+                    "country" to TextNode("Switzerland"),
+                    "date" to TextNode("2021-03-19"),
+                    "pango_lineage" to TextNode("B.1.1.7"),
+                    "qc_value" to DoubleNode(0.94),
+                ),
+            ),
         )
     }
 

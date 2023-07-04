@@ -12,29 +12,32 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class AggregationRequestDeserializerTest {
+class SequenceFiltersRequestWithFieldsDeserializerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @ParameterizedTest(name = "Test AggregationRequestDeserializer {1}")
-    @MethodSource("getTestAggregationRequest")
-    fun `AggregationRequest is correctly deserialized from JSON`(underTest: String, expected: AggregationRequest) {
-        val result = objectMapper.readValue(underTest, AggregationRequest::class.java)
+    @ParameterizedTest(name = "Test SequenceFiltersRequestWithFieldsDeserializer {1}")
+    @MethodSource("getTestSequenceFiltersRequestWithFields")
+    fun `AggregationRequest is correctly deserialized from JSON`(
+        underTest: String,
+        expected: SequenceFiltersRequestWithFields,
+    ) {
+        val result = objectMapper.readValue(underTest, SequenceFiltersRequestWithFields::class.java)
 
         MatcherAssert.assertThat(result, Matchers.equalTo(expected))
     }
 
     companion object {
         @JvmStatic
-        fun getTestAggregationRequest() = listOf(
+        fun getTestSequenceFiltersRequestWithFields() = listOf(
             Arguments.of(
                 """
                 {
-                "country": "Switzerland",
-                 "fields": ["division", "country"]
+                    "country": "Switzerland",
+                    "fields": ["division", "country"]
                 }
                 """,
-                AggregationRequest(
+                SequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
                     listOf("division", "country"),
                 ),
@@ -42,10 +45,10 @@ class AggregationRequestDeserializerTest {
             Arguments.of(
                 """
                 {
-                "country": "Switzerland"
+                    "country": "Switzerland"
                 }
                 """,
-                AggregationRequest(
+                SequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
                     emptyList(),
                 ),
@@ -55,16 +58,16 @@ class AggregationRequestDeserializerTest {
     }
 
     @Test
-    fun `Given an AggregationRequest with fields not null or ArrayList it should return an error`() {
+    fun `Given a SequenceFiltersRequestWithFields with fields not null or ArrayList it should return an error`() {
         val underTest = """
-                {
+            {
                 "country": "Switzerland",
-                 "fields": "notAnArrayNode"
-                }
-                """
+                "fields": "notAnArrayNode"
+            }
+        """
 
         assertThrows(IllegalArgumentException::class.java) {
-            objectMapper.readValue(underTest, AggregationRequest::class.java)
+            objectMapper.readValue(underTest, SequenceFiltersRequestWithFields::class.java)
         }
     }
 }

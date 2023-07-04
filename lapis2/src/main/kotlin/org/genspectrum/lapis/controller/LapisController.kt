@@ -11,9 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.AggregationRequest
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.silo.DetailsData
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -21,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 const val MIN_PROPORTION_PROPERTY = "minProportion"
-const val GROUP_BY_FIELDS_PROPERTY = "fields"
+const val FIELDS_PROPERTY = "fields"
 const val REQUEST_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
-const val REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS = "SequenceFiltersWithGroupByFields"
+const val REQUEST_SCHEMA_WITH_FIELDS = "SequenceFiltersWithFields"
 const val RESPONSE_SCHEMA_AGGREGATED = "AggregatedResponse"
 
 private const val DEFAULT_MIN_PROPORTION = 0.05
@@ -33,14 +34,14 @@ private const val DEFAULT_MIN_PROPORTION = 0.05
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
     companion object {
         private val nonSequenceFilterFields =
-            listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY, GROUP_BY_FIELDS_PROPERTY)
+            listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY, FIELDS_PROPERTY)
     }
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
     fun aggregated(
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS"),
+            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"),
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
@@ -59,9 +60,9 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @PostMapping("/aggregated")
     @LapisAggregatedResponse
     fun postAggregated(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"))
         @RequestBody()
-        request: AggregationRequest,
+        request: SequenceFiltersRequestWithFields,
     ): List<AggregationData> {
         requestContext.filter = request.sequenceFilters
 
@@ -116,6 +117,41 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         return siloQueryModel.computeMutationProportions(
             minProportion,
             sequenceFilters.associate { it.key to it.value },
+        )
+    }
+
+    @GetMapping("/details")
+    @LapisDetailsResponse
+    fun details(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>,
+        @RequestParam(defaultValue = "") fields: List<String>,
+    ): List<DetailsData> {
+        requestContext.filter = sequenceFilters
+
+        return siloQueryModel.getDetails(
+            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
+            fields,
+        )
+    }
+
+    @PostMapping("/details")
+    @LapisDetailsResponse
+    fun postDetails(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"))
+        @RequestBody()
+        request: SequenceFiltersRequestWithFields,
+    ): List<DetailsData> {
+        requestContext.filter = request.sequenceFilters
+
+        return siloQueryModel.getDetails(
+            request.sequenceFilters,
+            request.fields,
         )
     }
 }
@@ -186,3 +222,40 @@ private annotation class LapisAggregatedResponse
     ],
 )
 private annotation class LapisNucleotideMutationsResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Operation(
+    description = "Returns the specified metadata fields of sequences matching the filter.",
+    responses = [
+        ApiResponse(
+            responseCode = "200",
+            description = "OK",
+            content = [
+                Content(
+                    array = ArraySchema(
+                        schema = Schema(
+                            ref = "#/components/schemas/$RESPONSE_SCHEMA_AGGREGATED",
+                        ),
+                    ),
+                ),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Bad Request",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+        ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+        ApiResponse(
+            responseCode = "500",
+            description = "Internal Server Error",
+            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+        ),
+    ],
+)
+private annotation class LapisDetailsResponse

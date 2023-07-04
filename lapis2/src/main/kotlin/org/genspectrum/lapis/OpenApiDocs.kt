@@ -8,7 +8,7 @@ import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA
-import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS
+import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_FIELDS
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.controller.RESPONSE_SCHEMA_AGGREGATED
 
@@ -41,7 +41,7 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                     .description("valid filters for sequence data")
                     .properties(requestProperties + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number"))),
             ).addSchemas(
-                REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS,
+                REQUEST_SCHEMA_WITH_FIELDS,
                 Schema<String>()
                     .type("object")
                     .description("valid filters for sequence data")

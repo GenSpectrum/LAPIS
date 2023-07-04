@@ -3,9 +3,12 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import java.time.LocalDate
+
+typealias DetailsData = Map<String, JsonNode>
 
 data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
 
@@ -16,6 +19,9 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
 
         fun mutations(minProportion: Double? = null): SiloAction<List<MutationData>> =
             MutationsAction("Mutations", minProportion)
+
+        fun details(fields: List<String> = emptyList()): SiloAction<List<DetailsData>> =
+            DetailsAction("Details", fields)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -25,6 +31,13 @@ sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReferen
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private data class MutationsAction(val type: String, val minProportion: Double?) :
         SiloAction<List<MutationData>>(object : TypeReference<SiloQueryResponse<List<MutationData>>>() {})
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class DetailsAction(val type: String, val fields: List<String> = emptyList()) :
+        SiloAction<List<DetailsData>>(
+            object :
+                TypeReference<SiloQueryResponse<List<DetailsData>>>() {},
+        )
 }
 
 sealed class SiloFilterExpression(val type: String)
