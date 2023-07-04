@@ -113,7 +113,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/nucleotideMutations?country=Switzerland"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
     }
@@ -129,7 +129,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/nucleotideMutations?country=Switzerland&minProportion=0.3"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
     }
@@ -149,7 +149,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
     }
@@ -169,7 +169,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].mutation").value("the mutation"))
+            .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
     }

@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 import { lapisClient } from './common';
 import fs from 'fs';
-import { AggregatedResponse, SequenceFiltersWithGroupByFields } from './lapisClient';
+import {AggregatedResponse, SequenceFiltersWithFields} from './lapisClient';
 
 const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);
 
 type TestCase = {
-  testCaseName: string;
-  lapisRequest: SequenceFiltersWithGroupByFields;
-  expected: AggregatedResponse[];
+    testCaseName: string;
+    lapisRequest: SequenceFiltersWithFields;
+    expected: AggregatedResponse[];
 };
 
 describe('The /aggregated endpoint', () => {
@@ -18,7 +18,7 @@ describe('The /aggregated endpoint', () => {
     .forEach((testCase: TestCase) =>
       it('should return data for the test case ' + testCase.testCaseName, async () => {
         const result = await lapisClient.postAggregated({
-          sequenceFiltersWithGroupByFields: testCase.lapisRequest,
+          sequenceFiltersWithFields: testCase.lapisRequest,
         });
 
         const resultWithoutUndefined = result.map((aggregatedResponse: AggregatedResponse) => {

@@ -87,12 +87,12 @@ class SiloClientTest {
                         "queryResult": [
                             {
                                 "count": 45,
-                                "mutation": "first mutation",
+                                "position": "first mutation",
                                 "proportion": 0.9
                             },
                             {
                                 "count": 44,
-                                "mutation": "second mutation",
+                                "position": "second mutation",
                                 "proportion": 0.7
                             }
                         ]

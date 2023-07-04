@@ -37,7 +37,7 @@ data class MutationData(
         example = "G29741T",
         description = "(nucleotide symbol in reference genome)(position in genome)" +
             "(mutation's target nucleotide symbol)",
-    ) val mutation: String,
+    ) val position: String,
     @Schema(
         example = "42",
         description = "Total number of sequences with this mutation matching the given sequence filter criteria",
