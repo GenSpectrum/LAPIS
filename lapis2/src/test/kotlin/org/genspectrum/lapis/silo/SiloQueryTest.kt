@@ -65,6 +65,15 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
+                SiloAction.aggregated(listOf("field1", "field2")),
+                """
+                {
+                    "type": "Aggregated",
+                    "groupByFields": ["field1", "field2"]
+                }
+                """,
+            ),
+            Arguments.of(
                 SiloAction.mutations(),
                 """
                 {

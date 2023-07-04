@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 import { lapisClient } from './common';
 import fs from 'fs';
-import { SequenceFilters } from './lapisClient';
+import { AggregatedResponse, SequenceFiltersWithGroupByFields } from './lapisClient';
 
 const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);
 
 type TestCase = {
   testCaseName: string;
-  lapisRequest: SequenceFilters;
-  expected: { count: number };
+  lapisRequest: SequenceFiltersWithGroupByFields;
+  expected: AggregatedResponse[];
 };
 
 describe('The /aggregated endpoint', () => {
@@ -17,9 +17,22 @@ describe('The /aggregated endpoint', () => {
     .map(file => JSON.parse(fs.readFileSync(`${queriesPath}/${file}`).toString()))
     .forEach((testCase: TestCase) =>
       it('should return data for the test case ' + testCase.testCaseName, async () => {
-        const result = await lapisClient.postAggregated({ sequenceFilters: testCase.lapisRequest });
+        const result = await lapisClient.postAggregated({
+          sequenceFiltersWithGroupByFields: testCase.lapisRequest,
+        });
 
-        expect(result).deep.equals(testCase.expected);
+        const resultWithoutUndefined = result.map((aggregatedResponse: AggregatedResponse) => {
+          const responseWithoutUndefined: Partial<AggregatedResponse> = {};
+          for (const [key, value] of Object.entries(aggregatedResponse)) {
+            if (value !== undefined) {
+              // @ts-ignore
+              responseWithoutUndefined[key] = value;
+            }
+          }
+          return responseWithoutUndefined;
+        });
+
+        expect(resultWithoutUndefined).to.have.deep.members(testCase.expected);
       })
     );
 });
