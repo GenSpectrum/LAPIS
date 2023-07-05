@@ -22,14 +22,15 @@ describe('The /aggregated endpoint', () => {
         });
 
         const resultWithoutUndefined = result.map((aggregatedResponse: AggregatedResponse) => {
-          const responseWithoutUndefined: Partial<AggregatedResponse> = {};
-          for (const [key, value] of Object.entries(aggregatedResponse)) {
-            if (value !== undefined) {
-              // @ts-ignore
-              responseWithoutUndefined[key] = value;
-            }
-          }
-          return responseWithoutUndefined;
+          return Object.entries(aggregatedResponse)
+            .filter(([, value]) => value !== undefined)
+            .reduce(
+              (accumulatedObject, [key, value]) => ({
+                [key]: value,
+                ...accumulatedObject,
+              }),
+              {} as AggregatedResponse
+            );
         });
 
         expect(resultWithoutUndefined).to.have.deep.members(testCase.expected);
