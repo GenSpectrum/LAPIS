@@ -10,11 +10,6 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.boot.jackson.JsonComponent
 
-@Schema(
-    description = "This type will have additional fields for every value in the \"fields\" parameter of the request " +
-        "with its respective value. The \"count\" field is always present.",
-    additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
-)
 data class AggregationData(val count: Int, @Schema(hidden = true) val fields: Map<String, JsonNode>)
 
 @JsonComponent

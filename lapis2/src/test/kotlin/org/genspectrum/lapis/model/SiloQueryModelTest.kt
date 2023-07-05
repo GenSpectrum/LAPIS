@@ -32,11 +32,11 @@ class SiloQueryModelTest {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<Map<String, String>>()) } returns True
 
-        underTest.aggregate(emptyMap())
+        underTest.aggregate(emptyMap(), emptyList())
 
         verify {
             siloClientMock.sendQuery(
-                SiloQuery(SiloAction.aggregated(), True),
+                SiloQuery(SiloAction.aggregated(emptyList()), True),
             )
         }
     }

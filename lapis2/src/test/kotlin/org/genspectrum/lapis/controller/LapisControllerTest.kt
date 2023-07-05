@@ -58,6 +58,51 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `GET aggregated with fields`() {
+        every {
+            siloQueryModelMock.aggregate(
+                mapOf("country" to "Switzerland"),
+                listOf("country", "age"),
+            )
+        } returns listOf(
+            AggregationData(
+                0,
+                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+            ),
+        )
+
+        mockMvc.perform(get("/aggregated?country=Switzerland&fields=country,age"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
+    @Test
+    fun `POST aggregated with fields`() {
+        every {
+            siloQueryModelMock.aggregate(
+                mapOf("country" to "Switzerland"),
+                listOf("country", "age"),
+            )
+        } returns listOf(
+            AggregationData(
+                0,
+                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+            ),
+        )
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland", "fields": ["country","age"]}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$[0].age").value(42))
+    }
+
+    @Test
     fun `GET nucleotideMutations without explicit minProportion defaults to 5 percent`() {
         every {
             siloQueryModelMock.computeMutationProportions(

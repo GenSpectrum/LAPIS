@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.AggregationRequest
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,44 +21,54 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 const val MIN_PROPORTION_PROPERTY = "minProportion"
-
+const val GROUP_BY_FIELDS_PROPERTY = "fields"
 const val REQUEST_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
+const val REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS = "SequenceFiltersWithGroupByFields"
+const val RESPONSE_SCHEMA_AGGREGATED = "AggregatedResponse"
 
 private const val DEFAULT_MIN_PROPORTION = 0.05
 
 @RestController
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
     companion object {
-        private val nonSequenceFilterFields = listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY)
+        private val nonSequenceFilterFields =
+            listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY, GROUP_BY_FIELDS_PROPERTY)
     }
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
     fun aggregated(
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"),
+            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS"),
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
         @RequestParam
         sequenceFilters: Map<String, String>,
+        @RequestParam(defaultValue = "") fields: List<String>,
     ): List<AggregationData> {
         requestContext.filter = sequenceFilters
 
-        return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
+        return siloQueryModel.aggregate(
+            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
+            fields,
+        )
     }
 
     @PostMapping("/aggregated")
     @LapisAggregatedResponse
     fun postAggregated(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"))
-        @RequestBody
-        sequenceFilters: Map<String, String>,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_GROUP_BY_FIELDS"))
+        @RequestBody()
+        request: AggregationRequest,
     ): List<AggregationData> {
-        requestContext.filter = sequenceFilters
+        requestContext.filter = request.sequenceFilters
 
-        return siloQueryModel.aggregate(sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) })
+        return siloQueryModel.aggregate(
+            request.sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
+            request.fields,
+        )
     }
 
     @GetMapping("/nucleotideMutations")
@@ -118,7 +129,13 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
             responseCode = "200",
             description = "OK",
             content = [
-                Content(array = ArraySchema(schema = Schema(implementation = AggregationData::class))),
+                Content(
+                    array = ArraySchema(
+                        schema = Schema(
+                            ref = "#/components/schemas/$RESPONSE_SCHEMA_AGGREGATED",
+                        ),
+                    ),
+                ),
             ],
         ),
         ApiResponse(

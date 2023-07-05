@@ -11,13 +11,15 @@ data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val fil
 
 sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>) {
     companion object {
-        fun aggregated(): SiloAction<List<AggregationData>> = AggregatedAction("Aggregated")
+        fun aggregated(groupByFields: List<String> = emptyList()): SiloAction<List<AggregationData>> =
+            AggregatedAction("Aggregated", groupByFields)
 
         fun mutations(minProportion: Double? = null): SiloAction<List<MutationData>> =
             MutationsAction("Mutations", minProportion)
     }
 
-    private data class AggregatedAction(val type: String) :
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class AggregatedAction(val type: String, val groupByFields: List<String>) :
         SiloAction<List<AggregationData>>(object : TypeReference<SiloQueryResponse<List<AggregationData>>>() {})
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

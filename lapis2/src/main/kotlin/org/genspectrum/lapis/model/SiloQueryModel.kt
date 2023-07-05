@@ -11,9 +11,12 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
 ) {
 
-    fun aggregate(sequenceFilters: Map<SequenceFilterFieldName, String>) = siloClient.sendQuery(
+    fun aggregate(
+        sequenceFilters: Map<SequenceFilterFieldName, String>,
+        groupByFields: List<SequenceFilterFieldName> = emptyList(),
+    ) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.aggregated(),
+            SiloAction.aggregated(groupByFields),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )
