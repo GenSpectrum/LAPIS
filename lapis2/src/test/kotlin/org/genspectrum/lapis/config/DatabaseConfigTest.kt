@@ -21,11 +21,11 @@ class DatabaseConfigTest {
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(
-                DatabaseMetadata(name = "gisaid_epi_isl", type = "string"),
-                DatabaseMetadata(name = "date", type = "date"),
-                DatabaseMetadata(name = "region", type = "string"),
-                DatabaseMetadata(name = "country", type = "string"),
-                DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
+                DatabaseMetadata(name = "gisaid_epi_isl", type = MetadataType.STRING),
+                DatabaseMetadata(name = "date", type = MetadataType.DATE),
+                DatabaseMetadata(name = "region", type = MetadataType.STRING),
+                DatabaseMetadata(name = "country", type = MetadataType.STRING),
+                DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
             ),
         )
         assertThat(
@@ -51,11 +51,11 @@ class DatabaseConfigWithoutFeaturesTest {
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(
-                DatabaseMetadata(name = "gisaid_epi_isl", type = "string"),
-                DatabaseMetadata(name = "date", type = "date"),
-                DatabaseMetadata(name = "region", type = "string"),
-                DatabaseMetadata(name = "country", type = "string"),
-                DatabaseMetadata(name = "pangoLineage", type = "pango_lineage"),
+                DatabaseMetadata(name = "gisaid_epi_isl", type = MetadataType.STRING),
+                DatabaseMetadata(name = "date", type = MetadataType.DATE),
+                DatabaseMetadata(name = "region", type = MetadataType.STRING),
+                DatabaseMetadata(name = "country", type = MetadataType.STRING),
+                DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
             ),
         )
         assertThat(underTest.schema.features, `is`(emptyList()))

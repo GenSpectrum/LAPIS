@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RestController
 
 const val MIN_PROPORTION_PROPERTY = "minProportion"
 const val FIELDS_PROPERTY = "fields"
-const val REQUEST_SCHEMA = "SequenceFilters"
+
+const val SEQUENCE_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
-const val REQUEST_SCHEMA_WITH_FIELDS = "SequenceFiltersWithFields"
-const val RESPONSE_SCHEMA_AGGREGATED = "AggregatedResponse"
+const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
+const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
+const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
+const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 
 private const val DEFAULT_MIN_PROPORTION = 0.05
+const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
+    "The fields to stratify by. If empty, only the overall count is returned"
+const val DETAILS_FIELDS_DESCRIPTION =
+    "The fields that the response items should contain. If empty, all fields are returned"
 
 @RestController
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
@@ -41,13 +48,15 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @LapisAggregatedResponse
     fun aggregated(
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"),
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
         @RequestParam
         sequenceFilters: Map<String, String>,
-        @RequestParam(defaultValue = "") fields: List<String>,
+        @Schema(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @RequestParam(defaultValue = "")
+        fields: List<String>,
     ): List<AggregationData> {
         requestContext.filter = sequenceFilters
 
@@ -60,7 +69,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @PostMapping("/aggregated")
     @LapisAggregatedResponse
     fun postAggregated(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody()
         request: SequenceFiltersRequestWithFields,
     ): List<AggregationData> {
@@ -76,7 +85,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @LapisNucleotideMutationsResponse
     fun getNucleotideMutations(
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA"),
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
@@ -124,13 +133,15 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @LapisDetailsResponse
     fun details(
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"),
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
         @RequestParam
         sequenceFilters: Map<String, String>,
-        @RequestParam(defaultValue = "") fields: List<String>,
+        @Schema(description = DETAILS_FIELDS_DESCRIPTION)
+        @RequestParam(defaultValue = "")
+        fields: List<String>,
     ): List<DetailsData> {
         requestContext.filter = sequenceFilters
 
@@ -143,7 +154,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     @PostMapping("/details")
     @LapisDetailsResponse
     fun postDetails(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_FIELDS"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody()
         request: SequenceFiltersRequestWithFields,
     ): List<DetailsData> {
@@ -167,9 +178,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
             content = [
                 Content(
                     array = ArraySchema(
-                        schema = Schema(
-                            ref = "#/components/schemas/$RESPONSE_SCHEMA_AGGREGATED",
-                        ),
+                        schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA"),
                     ),
                 ),
             ],
@@ -234,9 +243,7 @@ private annotation class LapisNucleotideMutationsResponse
             content = [
                 Content(
                     array = ArraySchema(
-                        schema = Schema(
-                            ref = "#/components/schemas/$RESPONSE_SCHEMA_AGGREGATED",
-                        ),
+                        schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA"),
                     ),
                 ),
             ],

@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.config
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class DatabaseConfig(val schema: DatabaseSchema)
 
@@ -14,7 +15,24 @@ data class DatabaseSchema(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DatabaseMetadata(val name: String, val type: String, val valuesAreUnique: Boolean = false)
+data class DatabaseMetadata(val name: String, val type: MetadataType, val valuesAreUnique: Boolean = false)
+
+enum class MetadataType {
+    @JsonProperty("string")
+    STRING,
+
+    @JsonProperty("pango_lineage")
+    PANGO_LINEAGE,
+
+    @JsonProperty("date")
+    DATE,
+
+    @JsonProperty("int")
+    INT,
+
+    @JsonProperty("float")
+    FLOAT,
+}
 
 data class DatabaseFeature(val name: String)
 
