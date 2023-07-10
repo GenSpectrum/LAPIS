@@ -28,4 +28,14 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+
+    fun getDetails(
+        sequenceFilters: Map<SequenceFilterFieldName, String>,
+        fields: List<SequenceFilterFieldName> = emptyList(),
+    ) = siloClient.sendQuery(
+        SiloQuery(
+            SiloAction.details(fields),
+            siloFilterExpressionMapper.map(sequenceFilters),
+        ),
+    )
 }

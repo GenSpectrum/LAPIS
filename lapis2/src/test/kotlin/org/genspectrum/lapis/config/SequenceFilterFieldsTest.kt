@@ -3,9 +3,7 @@ package org.genspectrum.lapis.config
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.hasEntry
-import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class SequenceFilterFieldsTest {
     @Test
@@ -20,7 +18,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a string field then contains a string field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", "string")))
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", MetadataType.STRING)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -30,7 +28,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a pango_lineage field then contains a pango_lineage field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pango lineage", "pango_lineage")))
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pango lineage", MetadataType.PANGO_LINEAGE)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -40,7 +38,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a date field then contains date, dateFrom and dateTo fields`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("dateField", "date")))
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("dateField", MetadataType.DATE)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -51,11 +49,27 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with an unknown field type then throws exception`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", "unknown type")))
+    fun `given database config with an int field then contains int, intFrom and intTo fields`() {
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("intField", MetadataType.INT)))
 
-        val exception = assertThrows<IllegalArgumentException> { SequenceFilterFields.fromDatabaseConfig(input) }
-        assertThat(exception.message, `is`("Unknown field type 'unknown type' for field 'fieldName'"))
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, hasEntry("intField", SequenceFilterFieldType.Int))
+        assertThat(underTest.fields, hasEntry("intFieldFrom", SequenceFilterFieldType.IntFrom("intField")))
+        assertThat(underTest.fields, hasEntry("intFieldTo", SequenceFilterFieldType.IntTo("intField")))
+    }
+
+    @Test
+    fun `given database config with a float field then contains float, floatFrom and floatTo fields`() {
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("floatField", MetadataType.FLOAT)))
+
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, hasEntry("floatField", SequenceFilterFieldType.Float))
+        assertThat(underTest.fields, hasEntry("floatFieldFrom", SequenceFilterFieldType.FloatFrom("floatField")))
+        assertThat(underTest.fields, hasEntry("floatFieldTo", SequenceFilterFieldType.FloatTo("floatField")))
     }
 
     @Test

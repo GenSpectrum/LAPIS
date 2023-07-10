@@ -25,26 +25,22 @@ data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, Sequenc
 }
 
 private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when (databaseMetadata.type) {
-    "string" -> listOf(databaseMetadata.name to SequenceFilterFieldType.String)
-    "pango_lineage" -> listOf(databaseMetadata.name to SequenceFilterFieldType.PangoLineage)
-    "date" -> listOf(
+    MetadataType.STRING -> listOf(databaseMetadata.name to SequenceFilterFieldType.String)
+    MetadataType.PANGO_LINEAGE -> listOf(databaseMetadata.name to SequenceFilterFieldType.PangoLineage)
+    MetadataType.DATE -> listOf(
         databaseMetadata.name to SequenceFilterFieldType.Date,
         "${databaseMetadata.name}From" to SequenceFilterFieldType.DateFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.DateTo(databaseMetadata.name),
     )
-    "int" -> listOf(
+    MetadataType.INT -> listOf(
         databaseMetadata.name to SequenceFilterFieldType.Int,
         "${databaseMetadata.name}From" to SequenceFilterFieldType.IntFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.IntTo(databaseMetadata.name),
     )
-    "float" -> listOf(
+    MetadataType.FLOAT -> listOf(
         databaseMetadata.name to SequenceFilterFieldType.Float,
         "${databaseMetadata.name}From" to SequenceFilterFieldType.FloatFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.FloatTo(databaseMetadata.name),
-    )
-
-    else -> throw IllegalArgumentException(
-        "Unknown field type '${databaseMetadata.type}' for field '${databaseMetadata.name}'",
     )
 }
 

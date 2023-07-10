@@ -90,6 +90,23 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                SiloAction.details(),
+                """
+                {
+                    "type": "Details"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.details(listOf("age", "pango_lineage")),
+                """
+                {
+                    "type": "Details",
+                    "fields": ["age", "pango_lineage"]
+                }
+                """,
+            ),
         )
 
         @JvmStatic
