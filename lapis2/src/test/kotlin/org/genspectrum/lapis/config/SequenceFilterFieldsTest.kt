@@ -12,8 +12,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(underTest.fields, hasEntry("nucleotideMutations", SequenceFilterFieldType.MutationsList))
+        assertThat(underTest.fields, aMapWithSize(0))
     }
 
     @Test
@@ -22,7 +21,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, aMapWithSize(1))
         assertThat(underTest.fields, hasEntry("fieldName", SequenceFilterFieldType.String))
     }
 
@@ -32,7 +31,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, aMapWithSize(1))
         assertThat(underTest.fields, hasEntry("pango lineage", SequenceFilterFieldType.PangoLineage))
     }
 
@@ -42,7 +41,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, aMapWithSize(3))
         assertThat(underTest.fields, hasEntry("dateField", SequenceFilterFieldType.Date))
         assertThat(underTest.fields, hasEntry("dateFieldFrom", SequenceFilterFieldType.DateFrom("dateField")))
         assertThat(underTest.fields, hasEntry("dateFieldTo", SequenceFilterFieldType.DateTo("dateField")))
@@ -54,7 +53,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, aMapWithSize(3))
         assertThat(underTest.fields, hasEntry("intField", SequenceFilterFieldType.Int))
         assertThat(underTest.fields, hasEntry("intFieldFrom", SequenceFilterFieldType.IntFrom("intField")))
         assertThat(underTest.fields, hasEntry("intFieldTo", SequenceFilterFieldType.IntTo("intField")))
@@ -66,7 +65,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(4))
+        assertThat(underTest.fields, aMapWithSize(3))
         assertThat(underTest.fields, hasEntry("floatField", SequenceFilterFieldType.Float))
         assertThat(underTest.fields, hasEntry("floatFieldFrom", SequenceFilterFieldType.FloatFrom("floatField")))
         assertThat(underTest.fields, hasEntry("floatFieldTo", SequenceFilterFieldType.FloatTo("floatField")))
@@ -78,8 +77,7 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(2))
-        assertThat(underTest.fields, hasEntry("nucleotideMutations", SequenceFilterFieldType.MutationsList))
+        assertThat(underTest.fields, aMapWithSize(1))
         assertThat(underTest.fields, hasEntry("variantQuery", SequenceFilterFieldType.VariantQuery))
     }
 

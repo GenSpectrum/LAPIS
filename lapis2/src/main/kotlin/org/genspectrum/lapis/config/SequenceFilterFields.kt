@@ -4,14 +4,11 @@ typealias SequenceFilterFieldName = String
 
 data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, SequenceFilterFieldType>) {
     companion object {
-        private val nucleotideMutationsField = Pair("nucleotideMutations", SequenceFilterFieldType.MutationsList)
-
         fun fromDatabaseConfig(databaseConfig: DatabaseConfig): SequenceFilterFields {
             val metadataFields = databaseConfig.schema.metadata
                 .map(::mapToSequenceFilterFields)
                 .flatten()
                 .toMap()
-            val staticFields = listOf(nucleotideMutationsField)
 
             val featuresFields = if (databaseConfig.schema.features.isEmpty()) {
                 emptyMap<SequenceFilterFieldName, SequenceFilterFieldType>()
@@ -19,7 +16,7 @@ data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, Sequenc
                 databaseConfig.schema.features.associate(::mapToSequenceFilterFieldsFromFeatures)
             }
 
-            return SequenceFilterFields(fields = metadataFields + staticFields + featuresFields)
+            return SequenceFilterFields(fields = metadataFields + featuresFields)
         }
     }
 }
@@ -55,7 +52,6 @@ sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     object String : SequenceFilterFieldType("string")
     object PangoLineage : SequenceFilterFieldType("string")
     object Date : SequenceFilterFieldType("string")
-    object MutationsList : SequenceFilterFieldType("string")
     object VariantQuery : SequenceFilterFieldType("string")
     data class DateFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
     data class DateTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")

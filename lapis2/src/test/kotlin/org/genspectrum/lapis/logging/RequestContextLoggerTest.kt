@@ -6,6 +6,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.util.TimeFactory
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
@@ -52,19 +55,23 @@ internal class RequestContextLoggerTest {
 
         underTest.handleAndLogRequest(
             mockRequest(),
-            mockk(),
+            mockResponse(),
             mockk(relaxed = true),
         )
 
         verify {
-            loggerMock.info("""{"unixTimestamp":100,"responseTimeInMilliSeconds":99,"endpoint":"/shouldBeLogged"}""")
+            loggerMock.info(
+                """
+                {"unixTimestamp":100,"responseTimeInMilliSeconds":99,"endpoint":"/shouldBeLogged","responseCode":200}
+                """.trimIndent(),
+            )
         }
     }
 
     @ParameterizedTest
     @MethodSource("provideInputFilters")
     fun `given an input filter then the corresponding fields are logged`(
-        filter: Map<String, String>,
+        filter: CommonSequenceFilters,
         expectedLogMessagePart: String?,
     ) {
         every { timeFactoryMock.now() } returns 100L
@@ -72,7 +79,7 @@ internal class RequestContextLoggerTest {
 
         underTest.handleAndLogRequest(
             mockRequest(),
-            mockk(),
+            mockResponse(),
             mockk(relaxed = true),
         )
 
@@ -81,21 +88,33 @@ internal class RequestContextLoggerTest {
         }
     }
 
+    private fun mockRequest(): HttpServletRequest {
+        val httpRequestMock = mockk<HttpServletRequest>()
+        every { httpRequestMock.requestURI } returns "/shouldBeLogged"
+        return httpRequestMock
+    }
+
+    private fun mockResponse(): HttpServletResponse {
+        val httpRequestMock = mockk<HttpServletResponse>()
+        every { httpRequestMock.status } returns 200
+        return httpRequestMock
+    }
+
     companion object {
-        private fun mockRequest(): HttpServletRequest {
-            val httpRequestMock = mockk<HttpServletRequest>()
-            every { httpRequestMock.requestURI } returns "/shouldBeLogged"
-            return httpRequestMock
-        }
 
         @JvmStatic
         fun provideInputFilters() = listOf(
             Arguments.of(
-                mapOf("country" to "Germany"),
+                SequenceFiltersRequestWithFields(mapOf("country" to "Germany"), emptyList(), emptyList(), emptyList()),
                 """"country":"Germany"""",
             ),
             Arguments.of(
-                mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
+                SequenceFiltersRequestWithFields(
+                    mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                ),
                 """"country":"Germany","nucleotideMutation":"A123T"""",
             ),
         )

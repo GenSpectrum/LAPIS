@@ -38,7 +38,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         val position = ctx.position().text.toInt()
         val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()?.text ?: "-"
 
-        val expr = NucleotideSymbolEquals(position, secondSymbol)
+        val expr = NucleotideSymbolEquals(null, position, secondSymbol)
         expressionStack.addLast(expr)
     }
 

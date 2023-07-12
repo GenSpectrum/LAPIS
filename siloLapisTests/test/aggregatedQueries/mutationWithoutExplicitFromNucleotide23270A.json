@@ -1,7 +1,7 @@
 {
   "testCaseName": "mutation without explicit from nucleotide 23063T",
   "lapisRequest": {
-    "nucleotideMutations": "23063T"
+    "nucleotideMutations": ["23063T"]
   },
   "expected": [
     {

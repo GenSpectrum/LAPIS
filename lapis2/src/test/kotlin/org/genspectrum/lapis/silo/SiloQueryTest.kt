@@ -172,12 +172,63 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                NucleotideSymbolEquals(1234, "A"),
+                NucleotideSymbolEquals(null, 1234, "A"),
                 """
                 {
                     "type": "NucleotideEquals",
                     "position": 1234,
                     "symbol": "A"
+                }
+                """,
+            ),
+            Arguments.of(
+                NucleotideSymbolEquals("sequence name", 1234, "A"),
+                """
+                {
+                    "type": "NucleotideEquals",
+                    "sequenceName": "sequence name",
+                    "position": 1234,
+                    "symbol": "A"
+                }
+                """,
+            ),
+            Arguments.of(
+                HasNucleotideMutation("sequence name", 1234),
+                """
+                {
+                    "type": "HasNucleotideMutation",
+                    "sequenceName": "sequence name",
+                    "position": 1234
+                }
+                """,
+            ),
+            Arguments.of(
+                HasNucleotideMutation(null, 1234),
+                """
+                {
+                    "type": "HasNucleotideMutation",
+                    "position": 1234
+                }
+                """,
+            ),
+            Arguments.of(
+                AminoAcidSymbolEquals("gene name", 1234, "A"),
+                """
+                {
+                    "type": "AminoAcidEquals",
+                    "sequenceName": "gene name",
+                    "position": 1234,
+                    "symbol": "A"
+                }
+                """,
+            ),
+            Arguments.of(
+                HasAminoAcidMutation("gene name", 1234),
+                """
+                {
+                    "type": "HasAminoAcidMutation",
+                    "sequenceName": "gene name",
+                    "position": 1234
                 }
                 """,
             ),

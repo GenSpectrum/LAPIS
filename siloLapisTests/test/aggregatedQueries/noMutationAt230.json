@@ -1,0 +1,11 @@
+{
+  "testCaseName": "no mutation at 230",
+  "lapisRequest": {
+    "nucleotideMutations": ["230."]
+  },
+  "expected": [
+    {
+      "count": 3
+    }
+  ]
+}

@@ -2,10 +2,16 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.FloatEquals
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
+import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -31,7 +37,6 @@ class SiloFilterExpressionMapperTest {
             "dateTo" to SequenceFilterFieldType.DateTo("date"),
             "dateFrom" to SequenceFilterFieldType.DateFrom("date"),
             "pangoLineage" to SequenceFilterFieldType.PangoLineage,
-            "nucleotideMutations" to SequenceFilterFieldType.MutationsList,
             "some_metadata" to SequenceFilterFieldType.String,
             "other_metadata" to SequenceFilterFieldType.String,
             "variantQuery" to SequenceFilterFieldType.VariantQuery,
@@ -53,7 +58,7 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given invalid filter key then throws exception`() {
-        val filterParameter = mapOf("invalid query key" to "some value")
+        val filterParameter = getSequenceFilters(mapOf("invalid query key" to "some value"))
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
 
@@ -65,7 +70,7 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given empty filter parameters then returns a match-all filter`() {
-        val filterParameter = emptyMap<String, String>()
+        val filterParameter = getSequenceFilters(emptyMap())
 
         val result = underTest.map(filterParameter)
 
@@ -78,14 +83,14 @@ class SiloFilterExpressionMapperTest {
         filterParameter: Map<String, String>,
         expectedResult: SiloFilterExpression,
     ) {
-        val result = underTest.map(filterParameter)
+        val result = underTest.map(getSequenceFilters(filterParameter))
 
         assertThat(result, equalTo(expectedResult))
     }
 
     @Test
     fun `given invalid date then should throw an exception`() {
-        val filterParameter = mapOf("date" to "this is not a date")
+        val filterParameter = getSequenceFilters(mapOf("date" to "this is not a date"))
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("date 'this is not a date' is not a valid date"))
@@ -93,7 +98,7 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given invalid dateTo then should throw an exception`() {
-        val filterParameter = mapOf("dateTo" to "this is not a date")
+        val filterParameter = getSequenceFilters(mapOf("dateTo" to "this is not a date"))
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateTo 'this is not a date' is not a valid date"))
@@ -101,7 +106,7 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given invalid dateFrom then should throw an exception`() {
-        val filterParameter = mapOf("dateFrom" to "this is not a date either")
+        val filterParameter = getSequenceFilters(mapOf("dateFrom" to "this is not a date either"))
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
@@ -109,9 +114,11 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given date and dateFrom then should throw an exception`() {
-        val filterParameter = mapOf(
-            "date" to "2021-06-03",
-            "dateFrom" to "2021-06-03",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "date" to "2021-06-03",
+                "dateFrom" to "2021-06-03",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -122,11 +129,12 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given date and dateTo then should throw an exception`() {
-        val filterParameter = mapOf(
-            "date" to "2021-06-03",
-            "dateTo" to "2021-06-03",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "date" to "2021-06-03",
+                "dateTo" to "2021-06-03",
+            ),
         )
-
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
@@ -136,8 +144,10 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given int field with non-int value then should throw an exception`() {
-        val filterParameter = mapOf(
-            "intField" to "not a number",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "intField" to "not a number",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -148,8 +158,10 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given intTo field with non-int value then should throw an exception`() {
-        val filterParameter = mapOf(
-            "intFieldTo" to "not a number",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "intFieldTo" to "not a number",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -160,8 +172,10 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given float field with non-float value then should throw an exception`() {
-        val filterParameter = mapOf(
-            "floatField" to "not a number",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "floatField" to "not a number",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -172,8 +186,10 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given floatTo field with non-float value then should throw an exception`() {
-        val filterParameter = mapOf(
-            "floatFieldTo" to "not a number",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "floatFieldTo" to "not a number",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -184,9 +200,11 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given int and intFrom then should throw an exception`() {
-        val filterParameter = mapOf(
-            "intField" to "42",
-            "intFieldFrom" to "43",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "intField" to "42",
+                "intFieldFrom" to "43",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -197,11 +215,12 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given int and intTo then should throw an exception`() {
-        val filterParameter = mapOf(
-            "intFieldTo" to "43",
-            "intField" to "42",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "intFieldTo" to "43",
+                "intField" to "42",
+            ),
         )
-
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
@@ -211,9 +230,11 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given float and floatFrom then should throw an exception`() {
-        val filterParameter = mapOf(
-            "floatField" to "42.1",
-            "floatFieldFrom" to "42.3",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "floatField" to "42.1",
+                "floatFieldFrom" to "42.3",
+            ),
         )
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
@@ -226,11 +247,12 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given float and floatTo then should throw an exception`() {
-        val filterParameter = mapOf(
-            "floatFieldTo" to "42.3",
-            "floatField" to "42.1",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "floatFieldTo" to "42.3",
+                "floatField" to "42.1",
+            ),
         )
-
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
@@ -239,52 +261,94 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
-    fun `given invalid Pango lineage ending with a dot then should throw an exception`() {
-        val filterParameter = mapOf("pangoLineage" to "A.1.2.")
-
-        assertThrows<IllegalArgumentException> {
-            underTest.map(filterParameter)
-        }
-    }
-
-    @ParameterizedTest(name = "nucleotideMutations: {0}")
-    @MethodSource("getNucleotideMutationWithWrongSyntax")
-    fun `given nucleotideMutations with wrong syntax then should throw an exception`(
-        invalidMutation: String,
-    ) {
-        val filterParameter = mapOf("nucleotideMutations" to invalidMutation)
-
-        assertThrows<IllegalArgumentException> {
-            underTest.map(filterParameter)
-        }
-    }
-
-    @ParameterizedTest(name = "nucleotideMutations: {0}")
-    @MethodSource("getNucleotideMutationWithValidSyntax")
-    fun `given valid mutations then should return the corresponding SiloQuery`(
-        validMutation: String,
-        expectedResult: SiloFilterExpression,
-    ) {
-        val filterParameter = mapOf("nucleotideMutations" to validMutation)
+    fun `given nucleotide mutation with symbol then is mapped to NucleotideSymbolEquals`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            listOf(NucleotideMutation(null, 123, "B"), NucleotideMutation("sequenceName", 999, "A")),
+            emptyList(),
+        )
 
         val result = underTest.map(filterParameter)
 
-        assertThat(result, equalTo(expectedResult))
+        val expected =
+            And(listOf(NucleotideSymbolEquals(null, 123, "B"), NucleotideSymbolEquals("sequenceName", 999, "A")))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `given nucleotide mutation without symbol then is mapped to HasNucleotideMutation`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            listOf(NucleotideMutation(null, 123, null), NucleotideMutation("sequenceName", 999, null)),
+            emptyList(),
+        )
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(HasNucleotideMutation(null, 123), HasNucleotideMutation("sequenceName", 999)))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `given amino acid mutation with symbol then is mapped to AASymbolEquals`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            emptyList(),
+            listOf(AminoAcidMutation("geneName1", 123, "B"), AminoAcidMutation("geneName2", 999, "A")),
+        )
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(AminoAcidSymbolEquals("geneName1", 123, "B"), AminoAcidSymbolEquals("geneName2", 999, "A")))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `given amino acid mutation without symbol then is mapped to HasAAMutation`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            emptyList(),
+            listOf(AminoAcidMutation("geneName1", 123, null), AminoAcidMutation("geneName2", 999, null)),
+        )
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(HasAminoAcidMutation("geneName1", 123), HasAminoAcidMutation("geneName2", 999)))
+        assertThat(result, equalTo(expected))
     }
 
     @Test
     fun `given a query with an empty variantQuery then it should throw an error`() {
-        val filterParameter = mapOf("variantQuery" to "")
+        val filterParameter = getSequenceFilters(mapOf("variantQuery" to ""))
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("variantQuery must not be empty"))
     }
 
     @Test
-    fun `given a query with a variantQuery alongside nucleotideMutation filter then it should throw an error`() {
-        val filterParameter = mapOf(
-            "nucleotideMutations" to "A123T",
-            "variantQuery" to "A123T",
+    fun `given a query with a variantQuery alongside nucleotide mutations then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("variantQuery" to "A123T"),
+            listOf(NucleotideMutation(null, 123, null)),
+            emptyList(),
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
+    @Test
+    fun `given a query with a variantQuery alongside amino acid mutations then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("variantQuery" to "A123T"),
+            emptyList(),
+            listOf(AminoAcidMutation("gene", 123, null)),
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
@@ -296,9 +360,11 @@ class SiloFilterExpressionMapperTest {
 
     @Test
     fun `given a query with a variantQuery alongside pangoLineage filter then it should throw an error`() {
-        val filterParameter = mapOf(
-            "pangoLineage" to "A.1.2.3",
-            "variantQuery" to "A123T",
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "pangoLineage" to "A.1.2.3",
+                "variantQuery" to "A123T",
+            ),
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
@@ -351,31 +417,6 @@ class SiloFilterExpressionMapperTest {
             ),
             Arguments.of(
                 mapOf(
-                    "nucleotideMutations" to "G123A",
-                ),
-                And(
-                    listOf(
-                        And(listOf(NucleotideSymbolEquals(123, "A"))),
-                    ),
-                ),
-            ),
-            Arguments.of(
-                mapOf(
-                    "nucleotideMutations" to "G123A,567T",
-                ),
-                And(
-                    listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(123, "A"),
-                                NucleotideSymbolEquals(567, "T"),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-            Arguments.of(
-                mapOf(
                     "date" to "2021-06-03",
                 ),
                 And(listOf(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)))),
@@ -419,8 +460,8 @@ class SiloFilterExpressionMapperTest {
                     listOf(
                         And(
                             listOf(
-                                NucleotideSymbolEquals(300, "G"),
-                                NucleotideSymbolEquals(400, "A"),
+                                NucleotideSymbolEquals(null, 300, "G"),
+                                NucleotideSymbolEquals(null, 400, "A"),
                             ),
                         ),
                     ),
@@ -433,7 +474,7 @@ class SiloFilterExpressionMapperTest {
                 ),
                 And(
                     listOf(
-                        NucleotideSymbolEquals(300, "G"),
+                        NucleotideSymbolEquals(null, 300, "G"),
                         StringEquals("some_metadata", "ABC"),
                     ),
                 ),
@@ -475,52 +516,14 @@ class SiloFilterExpressionMapperTest {
                 And(listOf(FloatBetween("floatField", null, 42.45))),
             ),
         )
-
-        @JvmStatic
-        fun getNucleotideMutationWithWrongSyntax() = listOf(
-            Arguments.of("AA123"),
-            Arguments.of("123AA"),
-            Arguments.of(""),
-            Arguments.of("123X"),
-            Arguments.of("AA123A"),
-            Arguments.of("A123"),
-            Arguments.of("123"),
-        )
-
-        @JvmStatic
-        fun getNucleotideMutationWithValidSyntax() = listOf(
-            Arguments.of(
-                "G123A",
-                And(
-                    listOf(
-                        And(listOf(NucleotideSymbolEquals(123, "A"))),
-                    ),
-                ),
-            ),
-            Arguments.of(
-                "123A",
-                And(
-                    listOf(
-                        And(listOf(NucleotideSymbolEquals(123, "A"))),
-                    ),
-                ),
-            ),
-            Arguments.of(
-                "123.",
-                And(
-                    listOf(
-                        And(listOf(NucleotideSymbolEquals(123, "."))),
-                    ),
-                ),
-            ),
-            Arguments.of(
-                "123-",
-                And(
-                    listOf(
-                        And(listOf(NucleotideSymbolEquals(123, "-"))),
-                    ),
-                ),
-            ),
-        )
     }
+
+    private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
+        DummySequenceFilters(sequenceFilters, emptyList(), emptyList())
+
+    data class DummySequenceFilters(
+        override val sequenceFilters: Map<String, String>,
+        override val nucleotideMutations: List<NucleotideMutation>,
+        override val aaMutations: List<AminoAcidMutation>,
+    ) : CommonSequenceFilters
 }

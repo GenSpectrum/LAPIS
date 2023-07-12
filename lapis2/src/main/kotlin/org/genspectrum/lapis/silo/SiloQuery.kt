@@ -47,7 +47,19 @@ data class StringEquals(val column: String, val value: String) : SiloFilterExpre
 data class PangoLineageEquals(val column: String, val value: String, val includeSublineages: Boolean) :
     SiloFilterExpression("PangoLineage")
 
-data class NucleotideSymbolEquals(val position: Int, val symbol: String) : SiloFilterExpression("NucleotideEquals")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class NucleotideSymbolEquals(val sequenceName: String?, val position: Int, val symbol: String) :
+    SiloFilterExpression("NucleotideEquals")
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class HasNucleotideMutation(val sequenceName: String?, val position: Int) :
+    SiloFilterExpression("HasNucleotideMutation")
+
+data class AminoAcidSymbolEquals(val sequenceName: String, val position: Int, val symbol: String) :
+    SiloFilterExpression("AminoAcidEquals")
+
+data class HasAminoAcidMutation(val sequenceName: String, val position: Int) :
+    SiloFilterExpression("HasAminoAcidMutation")
 
 data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDate?) :
     SiloFilterExpression("DateBetween")

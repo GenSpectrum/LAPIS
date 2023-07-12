@@ -7,10 +7,13 @@ describe('Error handling: BadRequest', () => {
     const result = await fetch(basePath + '/aggregated?' + badRequestForAggregated);
 
     expect(result.status).equals(400);
-    expect(result.headers.get('Content-Type')).equals('application/json');
+    expect(result.headers.get('Content-Type')).equals('application/problem+json');
     expect(await result.json()).to.deep.equal({
-      title: 'Bad request',
-      message: 'Invalid nucleotide mutation: someInvalidMutation',
+      detail: "Failed to convert 'nucleotideMutations' with value: 'someInvalidMutation'",
+      instance: '/aggregated',
+      status: 400,
+      title: 'Bad Request',
+      type: 'about:blank',
     });
   });
 });

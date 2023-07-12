@@ -38,23 +38,23 @@ class VariantQueryFacadeTest {
                                         listOf(
                                             And(
                                                 listOf(
-                                                    NucleotideSymbolEquals(300, "G"),
+                                                    NucleotideSymbolEquals(null, 300, "G"),
                                                     Or(
                                                         listOf(
-                                                            NucleotideSymbolEquals(400, "-"),
-                                                            NucleotideSymbolEquals(500, "B"),
+                                                            NucleotideSymbolEquals(null, 400, "-"),
+                                                            NucleotideSymbolEquals(null, 500, "B"),
                                                         ),
                                                     ),
                                                 ),
                                             ),
-                                            Not(NucleotideSymbolEquals(600, "-")),
+                                            Not(NucleotideSymbolEquals(null, 600, "-")),
                                         ),
                                     ),
                                     Maybe(
                                         Or(
                                             listOf(
-                                                NucleotideSymbolEquals(700, "B"),
-                                                NucleotideSymbolEquals(800, "-"),
+                                                NucleotideSymbolEquals(null, 700, "B"),
+                                                NucleotideSymbolEquals(null, 800, "-"),
                                             ),
                                         ),
                                     ),
@@ -64,9 +64,9 @@ class VariantQueryFacadeTest {
                                 3,
                                 matchExactly = false,
                                 listOf(
-                                    NucleotideSymbolEquals(123, "A"),
-                                    NucleotideSymbolEquals(234, "T"),
-                                    NucleotideSymbolEquals(345, "G"),
+                                    NucleotideSymbolEquals(null, 123, "A"),
+                                    NucleotideSymbolEquals(null, 234, "T"),
+                                    NucleotideSymbolEquals(null, 345, "G"),
                                 ),
                             ),
                         ),
@@ -84,7 +84,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = NucleotideSymbolEquals(300, "G")
+        val expectedResult = NucleotideSymbolEquals(null, 300, "G")
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 
@@ -96,8 +96,8 @@ class VariantQueryFacadeTest {
 
         val expectedResult = And(
             listOf(
-                NucleotideSymbolEquals(300, "G"),
-                NucleotideSymbolEquals(400, "-"),
+                NucleotideSymbolEquals(null, 300, "G"),
+                NucleotideSymbolEquals(null, 400, "-"),
             ),
         )
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
@@ -113,11 +113,11 @@ class VariantQueryFacadeTest {
             listOf(
                 And(
                     listOf(
-                        NucleotideSymbolEquals(300, "G"),
-                        NucleotideSymbolEquals(400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals(null, 400, "-"),
                     ),
                 ),
-                NucleotideSymbolEquals(500, "B"),
+                NucleotideSymbolEquals(null, 500, "B"),
             ),
         )
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
@@ -129,7 +129,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = Not(NucleotideSymbolEquals(300, "G"))
+        val expectedResult = Not(NucleotideSymbolEquals(null, 300, "G"))
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 
@@ -141,8 +141,8 @@ class VariantQueryFacadeTest {
 
         val expectedResult = Or(
             listOf(
-                NucleotideSymbolEquals(300, "G"),
-                NucleotideSymbolEquals(400, "-"),
+                NucleotideSymbolEquals(null, 300, "G"),
+                NucleotideSymbolEquals(null, 400, "-"),
             ),
         )
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
@@ -156,11 +156,11 @@ class VariantQueryFacadeTest {
 
         val expectedResult = And(
             listOf(
-                NucleotideSymbolEquals(300, "C"),
+                NucleotideSymbolEquals(null, 300, "C"),
                 Or(
                     listOf(
-                        NucleotideSymbolEquals(400, "A"),
-                        NucleotideSymbolEquals(500, "G"),
+                        NucleotideSymbolEquals(null, 400, "A"),
+                        NucleotideSymbolEquals(null, 500, "G"),
                     ),
                 ),
             ),
@@ -174,7 +174,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = Maybe(NucleotideSymbolEquals(300, "G"))
+        val expectedResult = Maybe(NucleotideSymbolEquals(null, 300, "G"))
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
     }
 
@@ -208,9 +208,9 @@ class VariantQueryFacadeTest {
             3,
             false,
             listOf(
-                NucleotideSymbolEquals(123, "A"),
-                NucleotideSymbolEquals(234, "T"),
-                NucleotideSymbolEquals(345, "G"),
+                NucleotideSymbolEquals(null, 123, "A"),
+                NucleotideSymbolEquals(null, 234, "T"),
+                NucleotideSymbolEquals(null, 345, "G"),
             ),
         )
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
@@ -226,9 +226,9 @@ class VariantQueryFacadeTest {
             3,
             true,
             listOf(
-                NucleotideSymbolEquals(123, "A"),
-                NucleotideSymbolEquals(234, "T"),
-                NucleotideSymbolEquals(345, "G"),
+                NucleotideSymbolEquals(null, 123, "A"),
+                NucleotideSymbolEquals(null, 234, "T"),
+                NucleotideSymbolEquals(null, 345, "G"),
             ),
         )
         MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))

@@ -2,10 +2,16 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.FloatEquals
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
+import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -26,12 +32,13 @@ class SiloFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
 ) {
-    fun map(sequenceFilters: Map<SequenceFilterFieldName, String>): SiloFilterExpression {
+    fun map(sequenceFilters: CommonSequenceFilters): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
 
         val allowedSequenceFiltersWithType = sequenceFilters
+            .sequenceFilters
             .map { (key, value) ->
                 val nullableType = allowedSequenceFilterFields.fields[key]
                 val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableType, key)
@@ -39,7 +46,11 @@ class SiloFilterExpressionMapper(
             }
             .groupBy({ it.first }, { it.second })
 
-        crossValidateFilters(allowedSequenceFiltersWithType)
+        crossValidateFilters(
+            allowedSequenceFiltersWithType,
+            sequenceFilters.nucleotideMutations,
+            sequenceFilters.aaMutations,
+        )
 
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
             val (siloColumnName, filter) = key
@@ -47,7 +58,6 @@ class SiloFilterExpressionMapper(
                 Filter.StringEquals -> StringEquals(siloColumnName, values[0].value)
                 Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values[0].value)
                 Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
-                Filter.NucleotideSymbolEquals -> mapToNucleotideFilter(values[0].value)
                 Filter.VariantQuery -> mapToVariantQueryFilter(values[0].value)
                 Filter.IntEquals -> mapToIntEqualsFilter(siloColumnName, values)
                 Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
@@ -56,7 +66,10 @@ class SiloFilterExpressionMapper(
             }
         }
 
-        return And(filterExpressions)
+        val nucleotideMutationExpressions = sequenceFilters.nucleotideMutations.map { toNucleotideMutationFilter(it) }
+        val aminoAcidMutationExpressions = sequenceFilters.aaMutations.map { toAminoAcidMutationFilter(it) }
+
+        return And(filterExpressions + nucleotideMutationExpressions + aminoAcidMutationExpressions)
     }
 
     private fun mapToFilterExpressionIdentifier(
@@ -69,7 +82,6 @@ class SiloFilterExpressionMapper(
             SequenceFilterFieldType.Date -> Pair(key, Filter.DateBetween)
             SequenceFilterFieldType.PangoLineage -> Pair(key, Filter.PangoLineage)
             SequenceFilterFieldType.String -> Pair(key, Filter.StringEquals)
-            SequenceFilterFieldType.MutationsList -> Pair(key, Filter.NucleotideSymbolEquals)
             SequenceFilterFieldType.VariantQuery -> Pair(key, Filter.VariantQuery)
             SequenceFilterFieldType.Int -> Pair(key, Filter.IntEquals)
             is SequenceFilterFieldType.IntFrom -> Pair(type.associatedField, Filter.IntBetween)
@@ -88,10 +100,15 @@ class SiloFilterExpressionMapper(
 
     private fun crossValidateFilters(
         allowedSequenceFiltersWithType: Map<Pair<SequenceFilterFieldName, Filter>, List<SequenceFilterValue>>,
+        nucleotideMutations: List<NucleotideMutation>,
+        aaMutations: List<AminoAcidMutation>,
     ) {
-        if (allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery } &&
-            allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes }
-        ) {
+        val containsAdvancedVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery }
+        val containsSimpleVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes } ||
+            nucleotideMutations.isNotEmpty() ||
+            aaMutations.isNotEmpty()
+
+        if (containsAdvancedVariantQuery && containsSimpleVariantQuery) {
             throw IllegalArgumentException(
                 "variantQuery filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
@@ -195,21 +212,6 @@ class SiloFilterExpressionMapper(
         else -> PangoLineageEquals(column, value, includeSublineages = false)
     }
 
-    private fun mapToNucleotideFilter(userInput: String): SiloFilterExpression {
-        val mutations = userInput.split(",")
-
-        return And(
-            mutations.map { mutationExpression ->
-                val match = NUCLEOTIDE_MUTATION_REGEX.find(mutationExpression)
-                    ?: throw IllegalArgumentException("Invalid nucleotide mutation: $mutationExpression")
-
-                val (_, position: String, symbolTo: String) = match.destructured
-
-                NucleotideSymbolEquals(position.toInt(), symbolTo)
-            },
-        )
-    }
-
     private fun mapToIntEqualsFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
@@ -292,31 +294,30 @@ class SiloFilterExpressionMapper(
         }
     }
 
-    companion object {
-        private var NUCLEOTIDE_MUTATION_REGEX: Regex
-
-        init {
-            val validNucleotideSymbols = listOf("A", "C", "G", "T")
-            val validMutationNucleotideSymbols =
-                listOf("N", "-", "M", "R", "W", "S", "Y", "K", "V", "H", "D", "B", ".") +
-                    validNucleotideSymbols
-            val validSymbolsFrom = validNucleotideSymbols.joinToString { it }
-            var validSymbolsTo = validMutationNucleotideSymbols.joinToString { it }
-            validSymbolsTo = validSymbolsTo.replace(".", "\\.")
-            validSymbolsTo = validSymbolsTo.replace("-", "\\-")
-
-            NUCLEOTIDE_MUTATION_REGEX =
-                Regex(
-                    "(?<symbolFrom>^[$validSymbolsFrom]?)(?<position>\\d+)(?<symbolTo>[$validSymbolsTo]\$)",
-                )
+    private fun toNucleotideMutationFilter(nucleotideMutation: NucleotideMutation) =
+        when (nucleotideMutation.symbol) {
+            null -> HasNucleotideMutation(nucleotideMutation.sequenceName, nucleotideMutation.position)
+            else -> NucleotideSymbolEquals(
+                nucleotideMutation.sequenceName,
+                nucleotideMutation.position,
+                nucleotideMutation.symbol,
+            )
         }
-    }
+
+    private fun toAminoAcidMutationFilter(aaMutation: AminoAcidMutation) =
+        when (aaMutation.symbol) {
+            null -> HasAminoAcidMutation(aaMutation.gene, aaMutation.position)
+            else -> AminoAcidSymbolEquals(
+                aaMutation.gene,
+                aaMutation.position,
+                aaMutation.symbol,
+            )
+        }
 
     private enum class Filter {
         StringEquals,
         PangoLineage,
         DateBetween,
-        NucleotideSymbolEquals,
         VariantQuery,
         IntEquals,
         IntBetween,
@@ -324,5 +325,5 @@ class SiloFilterExpressionMapper(
         FloatBetween,
     }
 
-    private val variantQueryTypes = listOf(Filter.PangoLineage, Filter.NucleotideSymbolEquals)
+    private val variantQueryTypes = listOf(Filter.PangoLineage)
 }
