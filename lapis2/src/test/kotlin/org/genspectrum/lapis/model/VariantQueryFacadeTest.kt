@@ -1,14 +1,17 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
+import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
-import org.hamcrest.MatcherAssert
-import org.hamcrest.Matchers
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -47,7 +50,7 @@ class VariantQueryFacadeTest {
                                                     ),
                                                 ),
                                             ),
-                                            Not(NucleotideSymbolEquals(null, 600, "-")),
+                                            Not(HasNucleotideMutation(null, 600)),
                                         ),
                                     ),
                                     Maybe(
@@ -75,7 +78,7 @@ class VariantQueryFacadeTest {
                 ),
             )
 
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -85,12 +88,21 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = NucleotideSymbolEquals(null, 300, "G")
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
+    fun `given a variantQuery with mutation with position only then should return HasNucleotideMutation filter`() {
+        val variantQuery = "400"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(HasNucleotideMutation(null, 400)))
     }
 
     @Test
     fun `given a variantQuery with an 'And' expression then map should return the corresponding SiloQuery`() {
-        val variantQuery = "300G & 400"
+        val variantQuery = "300G & 400-"
 
         val result = underTest.map(variantQuery)
 
@@ -100,7 +112,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 400, "-"),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -120,7 +132,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 500, "B"),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -130,12 +142,12 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = Not(NucleotideSymbolEquals(null, 300, "G"))
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
     fun `given a variant variantQuery with an 'Or' expression then map should return the corresponding SiloQuery`() {
-        val variantQuery = "300G | 400"
+        val variantQuery = "300G | 400-"
 
         val result = underTest.map(variantQuery)
 
@@ -145,7 +157,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 400, "-"),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -165,7 +177,7 @@ class VariantQueryFacadeTest {
                 ),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -175,7 +187,7 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = Maybe(NucleotideSymbolEquals(null, 300, "G"))
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -185,7 +197,7 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", false)
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -195,7 +207,7 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", true)
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -213,7 +225,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 345, "G"),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -231,7 +243,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 345, "G"),
             ),
         )
-        MatcherAssert.assertThat(result, Matchers.equalTo(expectedResult))
+        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -240,22 +252,46 @@ class VariantQueryFacadeTest {
 
         val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
-        MatcherAssert.assertThat(
+        assertThat(
             exception.message,
-            Matchers.equalTo("Nucleotide insertions are not supported yet."),
+            equalTo("Nucleotide insertions are not supported yet."),
         )
     }
 
     @Test
-    fun `given a variant variantQuery with a 'AA mutation' expression then map should throw an error`() {
+    fun `given amino acidAA mutation expression then should map to AminoAcidSymbolEquals`() {
         val variantQuery = "S:N501Y"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        MatcherAssert.assertThat(
-            exception.message,
-            Matchers.equalTo("Amino acid mutations are not supported yet."),
-        )
+        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
+    }
+
+    @Test
+    fun `given amino acid mutation expression without first symbol then should map to AminoAcidSymbolEquals`() {
+        val variantQuery = "S:501Y"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
+    }
+
+    @Test
+    fun `given amino acid mutation expression without second symbol then should return HasAminoAcidMutation`() {
+        val variantQuery = "S:N501"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
+    }
+
+    @Test
+    fun `given amino acid mutation expression without any symbol then should return HasAminoAcidMutation`() {
+        val variantQuery = "S:501"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
     }
 
     @Test
@@ -264,9 +300,9 @@ class VariantQueryFacadeTest {
 
         val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
-        MatcherAssert.assertThat(
+        assertThat(
             exception.message,
-            Matchers.equalTo("Amino acid insertions are not supported yet."),
+            equalTo("Amino acid insertions are not supported yet."),
         )
     }
 
@@ -276,9 +312,9 @@ class VariantQueryFacadeTest {
 
         val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
-        MatcherAssert.assertThat(
+        assertThat(
             exception.message,
-            Matchers.equalTo("Nextclade pango lineages are not supported yet."),
+            equalTo("Nextclade pango lineages are not supported yet."),
         )
     }
 
@@ -288,9 +324,9 @@ class VariantQueryFacadeTest {
 
         val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
-        MatcherAssert.assertThat(
+        assertThat(
             exception.message,
-            Matchers.equalTo("Nextstrain clade lineages are not supported yet."),
+            equalTo("Nextstrain clade lineages are not supported yet."),
         )
     }
 
@@ -300,9 +336,9 @@ class VariantQueryFacadeTest {
 
         val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
 
-        MatcherAssert.assertThat(
+        assertThat(
             exception.message,
-            Matchers.equalTo("Gisaid clade lineages are not supported yet."),
+            equalTo("Gisaid clade lineages are not supported yet."),
         )
     }
 }

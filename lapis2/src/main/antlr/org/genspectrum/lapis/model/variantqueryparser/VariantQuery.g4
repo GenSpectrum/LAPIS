@@ -48,14 +48,14 @@ nOfExprs: expr (',' expr)*;
 nucleotideInsertionQuery: insertionKeyword position ':' (possibleAmbiguousNucleotideSymbol | '?')+;
 insertionKeyword: 'ins_' | 'INS_';
 
-aaMutationQuery: gene ':' aaSymbol? position possibleAmbiguousAaSymbol?;
+aaMutationQuery: gene ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
-possibleAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
+possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 gene: covidGene;
 covidGene : E | M | N | S | ORF;
 
-aaInsertionQuery: insertionKeyword gene ':' position ':' (possibleAmbiguousAaSymbol | '?')+;
+aaInsertionQuery: insertionKeyword gene ':' position ':' (possiblyAmbiguousAaSymbol | '?')+;
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageQuery;
 nextcladePangoLineagePrefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:';

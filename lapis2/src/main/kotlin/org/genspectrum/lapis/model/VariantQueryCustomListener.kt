@@ -15,7 +15,10 @@ import VariantQueryParser.NucleotideMutationQueryContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
+import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
@@ -36,10 +39,13 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
             return
         }
         val position = ctx.position().text.toInt()
-        val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()?.text ?: "-"
 
-        val expr = NucleotideSymbolEquals(null, position, secondSymbol)
-        expressionStack.addLast(expr)
+        val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
+            null -> HasNucleotideMutation(null, position)
+            else -> NucleotideSymbolEquals(null, position, secondSymbol.text)
+        }
+
+        expressionStack.addLast(expression)
     }
 
     override fun enterPangolineageQuery(ctx: PangolineageQueryContext?) {
@@ -94,7 +100,17 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     }
 
     override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
-        throw SiloNotImplementedError("Amino acid mutations are not supported yet.", NotImplementedError())
+        if (ctx == null) {
+            return
+        }
+        val position = ctx.position().text.toInt()
+
+        val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
+            null -> HasAminoAcidMutation(ctx.gene().text, position)
+            else -> AminoAcidSymbolEquals(ctx.gene().text, position, aaSymbol.text)
+        }
+
+        expressionStack.addLast(expression)
     }
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext?) {
