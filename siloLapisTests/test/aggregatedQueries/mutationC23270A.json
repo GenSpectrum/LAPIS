@@ -1,7 +1,7 @@
 {
   "testCaseName": "mutation A23063T",
   "lapisRequest": {
-    "nucleotideMutations": "A23063T"
+    "nucleotideMutations": ["A23063T"]
   },
   "expected": [
     {

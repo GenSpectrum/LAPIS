@@ -5,8 +5,12 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -26,7 +30,9 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `GET aggregated`() {
-        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns listOf(
+        every {
+            siloQueryModelMock.aggregate(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOf(
             AggregationData(
                 0,
                 mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
@@ -42,7 +48,9 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `POST aggregated`() {
-        every { siloQueryModelMock.aggregate(mapOf("country" to "Switzerland")) } returns listOf(
+        every {
+            siloQueryModelMock.aggregate(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOf(
             AggregationData(
                 0,
                 emptyMap(),
@@ -61,8 +69,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `GET aggregated with fields`() {
         every {
             siloQueryModelMock.aggregate(
-                mapOf("country" to "Switzerland"),
-                listOf("country", "age"),
+                sequenceFiltersRequestWithFields(
+                    mapOf("country" to "Switzerland"),
+                    listOf("country", "age"),
+                ),
             )
         } returns listOf(
             AggregationData(
@@ -79,11 +89,45 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `GET aggregated with invalid nucleotide mutation`() {
+        mockMvc.perform(get("/aggregated?nucleotideMutations=invalidMutation"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to convert 'nucleotideMutations'")))
+    }
+
+    @Test
+    fun `GET aggregated with invalid amino acid mutation`() {
+        mockMvc.perform(get("/aggregated?aminoAcidMutations=invalidMutation"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to convert 'aminoAcidMutations'")))
+    }
+
+    @Test
+    fun `GET aggregated with valid mutation`() {
+        every {
+            siloQueryModelMock.aggregate(
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
+                    emptyList(),
+                    emptyList(),
+                ),
+            )
+        } returns listOf(AggregationData(5, emptyMap()))
+
+        mockMvc.perform(get("/aggregated?nucleotideMutations=123A,124B"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$[0].count").value(5))
+    }
+
+    @Test
     fun `POST aggregated with fields`() {
         every {
             siloQueryModelMock.aggregate(
-                mapOf("country" to "Switzerland"),
-                listOf("country", "age"),
+                sequenceFiltersRequestWithFields(
+                    mapOf("country" to "Switzerland"),
+                    listOf("country", "age"),
+                ),
             )
         } returns listOf(
             AggregationData(
@@ -91,6 +135,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                 mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
             ),
         )
+
         val request = post("/aggregated")
             .content("""{"country": "Switzerland", "fields": ["country","age"]}""")
             .contentType(MediaType.APPLICATION_JSON)
@@ -106,8 +151,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `GET nucleotideMutations without explicit minProportion defaults to 5 percent`() {
         every {
             siloQueryModelMock.computeMutationProportions(
-                0.05,
-                mapOf("country" to "Switzerland"),
+                mutationProportionsRequest(
+                    mapOf("country" to "Switzerland"),
+                    0.05,
+                ),
             )
         } returns listOf(someMutationProportion())
 
@@ -122,8 +169,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `GET nucleotideMutations with minProportion`() {
         every {
             siloQueryModelMock.computeMutationProportions(
-                0.3,
-                mapOf("country" to "Switzerland"),
+                mutationProportionsRequest(
+                    mapOf("country" to "Switzerland"),
+                    0.3,
+                ),
             )
         } returns listOf(someMutationProportion())
 
@@ -138,8 +187,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `POST nucleotideMutations without explicit minProportion defaults to 5 percent`() {
         every {
             siloQueryModelMock.computeMutationProportions(
-                0.05,
-                mapOf("country" to "Switzerland"),
+                mutationProportionsRequest(
+                    mapOf("country" to "Switzerland"),
+                    0.05,
+                ),
             )
         } returns listOf(someMutationProportion())
 
@@ -158,8 +209,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `POST nucleotideMutations with minProportion`() {
         every {
             siloQueryModelMock.computeMutationProportions(
-                0.7,
-                mapOf("country" to "Switzerland"),
+                mutationProportionsRequest(
+                    mapOf("country" to "Switzerland"),
+                    0.7,
+                ),
             )
         } returns listOf(someMutationProportion())
 
@@ -184,17 +237,14 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.title").value("Bad request"))
             .andExpect(
-                jsonPath("\$.message").value("Invalid minProportion: Could not parse 'this is not a float' to float."),
+                jsonPath("\$.message").value("minProportion must be a number"),
             )
     }
 
     @Test
     fun `GET details`() {
         every {
-            siloQueryModelMock.getDetails(
-                mapOf("country" to "Switzerland"),
-                emptyList(),
-            )
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
 
         mockMvc.perform(get("/details?country=Switzerland"))
@@ -207,8 +257,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `GET details with fields`() {
         every {
             siloQueryModelMock.getDetails(
-                mapOf("country" to "Switzerland"),
-                listOf("country", "age"),
+                sequenceFiltersRequestWithFields(
+                    mapOf("country" to "Switzerland"),
+                    listOf("country", "age"),
+                ),
             )
         } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
 
@@ -221,10 +273,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST details`() {
         every {
-            siloQueryModelMock.getDetails(
-                mapOf("country" to "Switzerland"),
-                emptyList(),
-            )
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
 
         val request = post("/details")
@@ -241,8 +290,10 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `POST details with fields`() {
         every {
             siloQueryModelMock.getDetails(
-                mapOf("country" to "Switzerland"),
-                listOf("country", "age"),
+                sequenceFiltersRequestWithFields(
+                    mapOf("country" to "Switzerland"),
+                    listOf("country", "age"),
+                ),
             )
         } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
 
@@ -255,6 +306,24 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$[0].age").value(42))
     }
+
+    private fun sequenceFiltersRequestWithFields(
+        sequenceFilters: Map<String, String>,
+        fields: List<String> = emptyList(),
+    ) = SequenceFiltersRequestWithFields(
+        sequenceFilters,
+        emptyList(),
+        emptyList(),
+        fields,
+    )
+
+    private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double) =
+        MutationProportionsRequest(
+            sequenceFilters,
+            emptyList(),
+            emptyList(),
+            minProportion,
+        )
 
     private fun someMutationProportion() = MutationData("the mutation", 42, 0.5)
 }

@@ -37,4 +37,13 @@ describe('The /aggregated endpoint', () => {
         expect(resultWithoutUndefined).to.have.deep.members(testCase.expected);
       })
     );
+
+  it('should correctly handle mutliple mutation requests in GET requests', async () => {
+    const result = await lapisClient.aggregated({
+      nucleotideMutations: ['T1-', 'A23062T'],
+      aminoAcidMutations: ['S:501Y', 'ORF1b:12'],
+    });
+
+    expect(result).to.have.length(1);
+  });
 });

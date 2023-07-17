@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.util.TimeFactory
 import org.slf4j.Logger
 import org.springframework.stereotype.Component
@@ -17,7 +18,8 @@ class RequestContext {
     var unixTimestamp: Long = 0
     var responseTimeInMilliSeconds: Long = 0
     var endpoint: String? = null
-    var filter: Map<String, String>? = null
+    var filter: CommonSequenceFilters? = null
+    var responseCode: Int? = null
 }
 
 private val log = KotlinLogging.logger {}
@@ -54,6 +56,7 @@ class RequestContextLogger(
         try {
             filterChain.doFilter(request, response)
         } finally {
+            requestContext.responseCode = response.status
             requestContext.responseTimeInMilliSeconds = timeFactory.now() - before
             try {
                 statisticsLogger.info(objectMapper.writeValueAsString(requestContext))

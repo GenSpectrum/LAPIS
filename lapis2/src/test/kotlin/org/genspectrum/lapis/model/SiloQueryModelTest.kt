@@ -4,6 +4,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
+import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.silo.SiloAction
@@ -30,9 +33,9 @@ class SiloQueryModelTest {
     @Test
     fun `aggregate calls the SILO client with an aggregated action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
-        every { siloFilterExpressionMapperMock.map(any<Map<String, String>>()) } returns True
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        underTest.aggregate(emptyMap(), emptyList())
+        underTest.aggregate(SequenceFiltersRequestWithFields(emptyMap(), emptyList(), emptyList(), emptyList()))
 
         verify {
             siloClientMock.sendQuery(
@@ -44,9 +47,9 @@ class SiloQueryModelTest {
     @Test
     fun `computeMutationProportions calls the SILO client with a mutations action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns emptyList()
-        every { siloFilterExpressionMapperMock.map(any<Map<String, String>>()) } returns True
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        underTest.computeMutationProportions(0.5, emptyMap())
+        underTest.computeMutationProportions(MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.5))
 
         verify {
             siloClientMock.sendQuery(

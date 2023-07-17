@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
@@ -11,30 +13,24 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
 ) {
 
-    fun aggregate(
-        sequenceFilters: Map<SequenceFilterFieldName, String>,
-        groupByFields: List<SequenceFilterFieldName> = emptyList(),
-    ) = siloClient.sendQuery(
+    fun aggregate(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.aggregated(groupByFields),
+            SiloAction.aggregated(sequenceFilters.fields),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )
 
-    fun computeMutationProportions(minProportion: Double?, sequenceFilters: Map<SequenceFilterFieldName, String>) =
+    fun computeMutationProportions(sequenceFilters: MutationProportionsRequest) =
         siloClient.sendQuery(
             SiloQuery(
-                SiloAction.mutations(minProportion),
+                SiloAction.mutations(sequenceFilters.minProportion),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
-    fun getDetails(
-        sequenceFilters: Map<SequenceFilterFieldName, String>,
-        fields: List<SequenceFilterFieldName> = emptyList(),
-    ) = siloClient.sendQuery(
+    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.details(fields),
+            SiloAction.details(sequenceFilters.fields),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )

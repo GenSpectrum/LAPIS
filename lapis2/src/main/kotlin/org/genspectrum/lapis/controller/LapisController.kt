@@ -11,6 +11,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
+import org.genspectrum.lapis.request.FIELDS_PROPERTY
+import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
+import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
@@ -21,9 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val MIN_PROPORTION_PROPERTY = "minProportion"
-const val FIELDS_PROPERTY = "fields"
-
 const val SEQUENCE_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
@@ -31,7 +36,9 @@ const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 
-private const val DEFAULT_MIN_PROPORTION = 0.05
+const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
+const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
+
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
 const val DETAILS_FIELDS_DESCRIPTION =
@@ -41,44 +48,56 @@ const val DETAILS_FIELDS_DESCRIPTION =
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
     companion object {
         private val nonSequenceFilterFields =
-            listOf(MIN_PROPORTION_PROPERTY, ACCESS_KEY_PROPERTY, FIELDS_PROPERTY)
+            listOf(
+                MIN_PROPORTION_PROPERTY,
+                ACCESS_KEY_PROPERTY,
+                FIELDS_PROPERTY,
+                NUCLEOTIDE_MUTATIONS_PROPERTY,
+                AMINO_ACID_MUTATIONS_PROPERTY,
+            )
     }
 
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
     fun aggregated(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
         @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
             explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
         )
         @RequestParam
-        sequenceFilters: Map<String, String>,
-        @Schema(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
-        @RequestParam(defaultValue = "")
-        fields: List<String>,
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
     ): List<AggregationData> {
-        requestContext.filter = sequenceFilters
-
-        return siloQueryModel.aggregate(
-            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
-            fields,
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
         )
+
+        requestContext.filter = request
+
+        return siloQueryModel.aggregate(request)
     }
 
     @PostMapping("/aggregated")
     @LapisAggregatedResponse
     fun postAggregated(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
-        @RequestBody()
+        @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): List<AggregationData> {
-        requestContext.filter = request.sequenceFilters
+        requestContext.filter = request
 
-        return siloQueryModel.aggregate(
-            request.sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
-            request.fields,
-        )
+        return siloQueryModel.aggregate(request)
     }
 
     @GetMapping("/nucleotideMutations")
@@ -89,16 +108,27 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
             explode = Explode.TRUE,
             style = ParameterStyle.FORM,
         )
-        @RequestParam()
-        sequenceFilters: Map<String, String>,
-        @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString()) minProportion: Double,
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString())
+        minProportion: Double,
     ): List<MutationData> {
-        requestContext.filter = sequenceFilters
-
-        return siloQueryModel.computeMutationProportions(
+        val request = MutationProportionsRequest(
+            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
             minProportion,
-            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
         )
+
+        requestContext.filter = request
+
+        return siloQueryModel.computeMutationProportions(request)
     }
 
     @PostMapping("/nucleotideMutations")
@@ -106,64 +136,51 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
     fun postNucleotideMutations(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
-        requestBody: Map<String, String>,
+        request: MutationProportionsRequest,
     ): List<MutationData> {
-        requestContext.filter = requestBody
+        requestContext.filter = request
 
-        val (nonSequenceFilters, sequenceFilters) = requestBody.entries.partition {
-            nonSequenceFilterFields.contains(it.key)
-        }
-
-        val maybeMinProportion = nonSequenceFilters.find { it.key == MIN_PROPORTION_PROPERTY }?.value
-        val minProportion = try {
-            maybeMinProportion?.toDouble() ?: DEFAULT_MIN_PROPORTION
-        } catch (exception: IllegalArgumentException) {
-            throw IllegalArgumentException(
-                "Invalid $MIN_PROPORTION_PROPERTY: Could not parse '$maybeMinProportion' to float.",
-            )
-        }
-
-        return siloQueryModel.computeMutationProportions(
-            minProportion,
-            sequenceFilters.associate { it.key to it.value },
-        )
+        return siloQueryModel.computeMutationProportions(request)
     }
 
     @GetMapping("/details")
     @LapisDetailsResponse
     fun details(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @SequenceFilters
         @RequestParam
-        sequenceFilters: Map<String, String>,
-        @Schema(description = DETAILS_FIELDS_DESCRIPTION)
-        @RequestParam(defaultValue = "")
-        fields: List<String>,
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
     ): List<DetailsData> {
-        requestContext.filter = sequenceFilters
-
-        return siloQueryModel.getDetails(
-            sequenceFilters.filterKeys { !nonSequenceFilterFields.contains(it) },
-            fields,
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
         )
+
+        requestContext.filter = request
+
+        return siloQueryModel.getDetails(request)
     }
 
     @PostMapping("/details")
     @LapisDetailsResponse
     fun postDetails(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
-        @RequestBody()
+        @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): List<DetailsData> {
-        requestContext.filter = request.sequenceFilters
+        requestContext.filter = request
 
-        return siloQueryModel.getDetails(
-            request.sequenceFilters,
-            request.fields,
-        )
+        return siloQueryModel.getDetails(request)
     }
 }
 
@@ -266,3 +283,13 @@ private annotation class LapisNucleotideMutationsResponse
     ],
 )
 private annotation class LapisDetailsResponse
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    description = "Valid filters for sequence data. Only provide the fields that should be filtered by.",
+    schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+    explode = Explode.TRUE,
+    style = ParameterStyle.FORM,
+)
+private annotation class SequenceFilters

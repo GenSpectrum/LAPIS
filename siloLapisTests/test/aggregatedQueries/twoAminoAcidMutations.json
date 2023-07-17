@@ -1,0 +1,11 @@
+{
+  "testCaseName": "two amino acid mutations: S:501Y,ORF1b:12",
+  "lapisRequest": {
+    "aminoAcidMutations": ["S:501Y", "S:796"]
+  },
+  "expected": [
+    {
+      "count": 32
+    }
+  ]
+}

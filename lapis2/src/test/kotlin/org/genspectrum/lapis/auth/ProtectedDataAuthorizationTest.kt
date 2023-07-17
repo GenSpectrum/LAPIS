@@ -5,6 +5,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -107,7 +108,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
 
     @Test
@@ -123,7 +124,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
 
     @Test
@@ -177,7 +178,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
 
     @Test
@@ -193,8 +194,11 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(mapOf("field1" to "value1")) }
+        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
+
+    private fun sequenceFilterRequest() =
+        SequenceFiltersRequestWithFields(mapOf("field1" to "value1"), emptyList(), emptyList(), emptyList())
 
     @Test
     fun `the swagger ui and api docs are always accessible`() {
