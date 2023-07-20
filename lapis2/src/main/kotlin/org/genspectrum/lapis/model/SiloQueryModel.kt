@@ -15,7 +15,12 @@ class SiloQueryModel(
 
     fun aggregate(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.aggregated(sequenceFilters.fields),
+            SiloAction.aggregated(
+                sequenceFilters.fields,
+                sequenceFilters.orderByFields,
+                sequenceFilters.limit,
+                sequenceFilters.offset,
+            ),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )
@@ -23,14 +28,24 @@ class SiloQueryModel(
     fun computeMutationProportions(sequenceFilters: MutationProportionsRequest) =
         siloClient.sendQuery(
             SiloQuery(
-                SiloAction.mutations(sequenceFilters.minProportion),
+                SiloAction.mutations(
+                    sequenceFilters.minProportion,
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
     fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.details(sequenceFilters.fields),
+            SiloAction.details(
+                sequenceFilters.fields,
+                sequenceFilters.orderByFields,
+                sequenceFilters.limit,
+                sequenceFilters.offset,
+            ),
             siloFilterExpressionMapper.map(sequenceFilters),
         ),
     )

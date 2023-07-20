@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import java.time.LocalDate
@@ -12,32 +13,69 @@ typealias DetailsData = Map<String, JsonNode>
 
 data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
 
-sealed class SiloAction<ResponseType>(@JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>) {
+class AggregationDataTypeReference : TypeReference<SiloQueryResponse<List<AggregationData>>>()
+class MutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
+class DetailsDataTypeReference : TypeReference<SiloQueryResponse<List<DetailsData>>>()
+
+interface CommonActionFields {
+    val orderByFields: List<OrderByField>
+    val limit: Int?
+    val offset: Int?
+}
+
+sealed class SiloAction<ResponseType>(
+    @JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>,
+) : CommonActionFields {
     companion object {
-        fun aggregated(groupByFields: List<String> = emptyList()): SiloAction<List<AggregationData>> =
-            AggregatedAction("Aggregated", groupByFields)
+        fun aggregated(
+            groupByFields: List<String> = emptyList(),
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<AggregationData>> =
+            AggregatedAction("Aggregated", groupByFields, orderByFields, limit, offset)
 
-        fun mutations(minProportion: Double? = null): SiloAction<List<MutationData>> =
-            MutationsAction("Mutations", minProportion)
+        fun mutations(
+            minProportion: Double? = null,
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<MutationData>> = MutationsAction("Mutations", minProportion, orderByFields, limit, offset)
 
-        fun details(fields: List<String> = emptyList()): SiloAction<List<DetailsData>> =
-            DetailsAction("Details", fields)
+        fun details(
+            fields: List<String> = emptyList(),
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<DetailsData>> = DetailsAction("Details", fields, orderByFields, limit, offset)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class AggregatedAction(val type: String, val groupByFields: List<String>) :
-        SiloAction<List<AggregationData>>(object : TypeReference<SiloQueryResponse<List<AggregationData>>>() {})
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private data class MutationsAction(val type: String, val minProportion: Double?) :
-        SiloAction<List<MutationData>>(object : TypeReference<SiloQueryResponse<List<MutationData>>>() {})
+    private data class AggregatedAction(
+        val type: String,
+        val groupByFields: List<String>,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+    ) : SiloAction<List<AggregationData>>(AggregationDataTypeReference())
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class DetailsAction(val type: String, val fields: List<String> = emptyList()) :
-        SiloAction<List<DetailsData>>(
-            object :
-                TypeReference<SiloQueryResponse<List<DetailsData>>>() {},
-        )
+    private data class MutationsAction(
+        val type: String,
+        val minProportion: Double?,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+    ) : SiloAction<List<MutationData>>(MutationDataTypeReference())
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class DetailsAction(
+        val type: String,
+        val fields: List<String> = emptyList(),
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+    ) : SiloAction<List<DetailsData>>(DetailsDataTypeReference())
 }
 
 sealed class SiloFilterExpression(val type: String)

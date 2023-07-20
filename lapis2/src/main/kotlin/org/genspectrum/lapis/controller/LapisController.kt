@@ -15,10 +15,14 @@ import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
+import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.OFFSET_PROPERTY
+import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
@@ -38,11 +42,17 @@ const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
+const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
+const val LIMIT_SCHEMA = "Limit"
+const val OFFSET_SCHEMA = "Offset"
 
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
 const val DETAILS_FIELDS_DESCRIPTION =
     "The fields that the response items should contain. If empty, all fields are returned"
+const val LIMIT_DESCRIPTION = "The maximum number of entries to return in the response"
+const val OFFSET_DESCRIPTION = "The offset of the first entry to return in the response. " +
+    "This is useful for pagination in combination with \"limit\"."
 
 @RestController
 class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
@@ -54,6 +64,9 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
                 FIELDS_PROPERTY,
                 NUCLEOTIDE_MUTATIONS_PROPERTY,
                 AMINO_ACID_MUTATIONS_PROPERTY,
+                ORDER_BY_PROPERTY,
+                LIMIT_PROPERTY,
+                OFFSET_PROPERTY,
             )
     }
 
@@ -67,6 +80,13 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         @RequestParam
         fields: List<String>?,
         @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields to order by." +
+                " Fields specified here must either be \"count\" or also be present in \"fields\".",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
             schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
             explode = Explode.TRUE,
         )
@@ -75,12 +95,27 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
     ): List<AggregationData> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
         )
 
         requestContext.filter = request
@@ -118,12 +153,33 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString())
         minProportion: Double,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
     ): List<MutationData> {
         val request = MutationProportionsRequest(
             sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
         )
 
         requestContext.filter = request
@@ -149,21 +205,43 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by." +
+                " Fields specified here must also be present in \"fields\".",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
         @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
     ): List<DetailsData> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
         )
 
         requestContext.filter = request

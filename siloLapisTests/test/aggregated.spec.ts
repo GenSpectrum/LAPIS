@@ -46,4 +46,49 @@ describe('The /aggregated endpoint', () => {
 
     expect(result).to.have.length(1);
   });
+
+  it('should order by specified fields', async () => {
+    const ascendingOrderedResult = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        orderBy: [{ field: 'division', type: 'ascending' }],
+        fields: ['division'],
+      },
+    });
+
+    expect(ascendingOrderedResult[0]).to.have.property('division', 'Aargau');
+
+    const descendingOrderedResult = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        orderBy: [{ field: 'division', type: 'descending' }],
+        fields: ['division'],
+      },
+    });
+
+    expect(descendingOrderedResult[0]).to.have.property('division', 'Zürich');
+  });
+
+  it('should apply limit and offset', async () => {
+    const resultWithLimit = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        orderBy: [{ field: 'division', type: 'ascending' }],
+        fields: ['division'],
+        limit: 2,
+      },
+    });
+
+    expect(resultWithLimit).to.have.length(2);
+    expect(resultWithLimit[1]).to.have.property('division', 'Basel-Land');
+
+    const resultWithLimitAndOffset = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        orderBy: [{ field: 'division', type: 'ascending' }],
+        fields: ['division'],
+        limit: 2,
+        offset: 1,
+      },
+    });
+
+    expect(resultWithLimitAndOffset).to.have.length(2);
+    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+  });
 });

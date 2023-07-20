@@ -111,6 +111,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                     listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
                 ),
             )
         } returns listOf(AggregationData(5, emptyMap()))
@@ -315,6 +316,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         emptyList(),
         emptyList(),
         fields,
+        emptyList(),
     )
 
     private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double) =
@@ -323,6 +325,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             emptyList(),
             emptyList(),
             minProportion,
+            emptyList(),
         )
 
     private fun someMutationProportion() = MutationData("the mutation", 42, 0.5)
