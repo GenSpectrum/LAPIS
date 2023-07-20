@@ -47,6 +47,7 @@ public class NextstrainFileToDatabaseService {
     // updateSeqOriginalOrAligned(false) will fill this set with the "strains" of the entries for which the original
     // sequence did not change. For those sequences, we will not overwrite the AA mutations and Nextclade data either.
     private final Set<String> unchangedOriginalSeqStrains = new HashSet<>();
+    private final Set<String> foundInMetadataStrings = new HashSet<>();
 
     public NextstrainFileToDatabaseService(
         ComboPooledDataSource databasePool,
@@ -77,6 +78,9 @@ public class NextstrainFileToDatabaseService {
         updateAAMutations();
         updateMetadata();
         updateNextcladeData();
+
+        // Delete all old entries that are not in the new metadata file
+        deleteOldSequences();
 
         updateDataVersion(startTime);
     }
@@ -337,6 +341,7 @@ public class NextstrainFileToDatabaseService {
                         if (entry.getStrain() == null) {
                             continue;
                         }
+                        foundInMetadataStrings.add(entry.getStrain());
                         String sampleName = entry.getStrain();
                         String currentHash = Utils.hashMd5(entry);
                         if (oldHashes.containsKey(sampleName)) {
@@ -636,6 +641,29 @@ public class NextstrainFileToDatabaseService {
             conn.setAutoCommit(true);
         }
         log.info("finished updateNextcladeData");
+    }
+
+    private void deleteOldSequences() throws SQLException {
+        log.info("started deleteOldSequences");
+        var deleted = new HashSet<>(oldHashes.keySet());
+        deleted.removeAll(foundInMetadataStrings);
+        log.info(deleted + " old sequences were deleted from the dataset");
+        String sql = """
+            delete from y_nextstrain_genbank
+            where strain = ?;
+            """;
+        try (Connection conn = databasePool.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                for (String strain : deleted) {
+                    statement.setString(1, strain);
+                    statement.addBatch();
+                }
+                Utils.executeClearCommitBatch(conn, statement);
+            }
+            conn.setAutoCommit(true);
+        }
+        log.info("finished deleteOldSequences");
     }
 
     private void updateDataVersion(LocalDateTime startTime) throws SQLException {
