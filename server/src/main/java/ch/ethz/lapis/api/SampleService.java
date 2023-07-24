@@ -10,6 +10,7 @@ import ch.ethz.lapis.api.entity.res.Contributor;
 import ch.ethz.lapis.api.entity.res.SampleAggregated;
 import ch.ethz.lapis.api.entity.res.SampleDetail;
 import ch.ethz.lapis.api.entity.res.SampleMutationsResponse;
+import ch.ethz.lapis.api.exception.BadRequestException;
 import ch.ethz.lapis.api.exception.UnsupportedOrdering;
 import ch.ethz.lapis.api.query.Database;
 import ch.ethz.lapis.api.query.Database.Columns;
@@ -93,6 +94,29 @@ public class SampleService {
         List<Integer> ids = new QueryEngine().filterIds(Database.getOrLoadInstance(dbPool), request);
         if (ids.isEmpty()) {
             return new ArrayList<>();
+        }
+
+        var limit = orderAndLimit.getLimit();
+        var orderBy = orderAndLimit.getOrderBy();
+        var offset = orderAndLimit.getOffset();
+        boolean arbitraryOrdering = orderBy == null || orderBy.equals(OrderAndLimitConfig.SpecialOrdering.ARBITRARY);
+
+        // Apply offset if ordering is arbitrary/unset; otherwise, throw an error
+        if (offset != null) {
+            if (!arbitraryOrdering) {
+                throw new BadRequestException("offset and orderBy cannot be combined at the moment.");
+            }
+            if (offset > ids.size()) {
+                return new ArrayList<>();
+            }
+            ids = ids.subList(offset, ids.size());
+        }
+
+        // Apply limit if the ordering is arbitrary/unset
+        if (limit != null) {
+            if (arbitraryOrdering) {
+                ids = ids.subList(0, Math.min(limit, ids.size()));
+            }
         }
 
         List<SampleDetail> samples = new ArrayList<>();
