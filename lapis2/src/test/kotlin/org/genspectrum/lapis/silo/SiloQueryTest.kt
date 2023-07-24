@@ -1,6 +1,8 @@
 package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.genspectrum.lapis.request.Order
+import org.genspectrum.lapis.request.OrderByField
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
@@ -65,11 +67,22 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                SiloAction.aggregated(listOf("field1", "field2")),
+                SiloAction.aggregated(
+                    listOf("field1", "field2"),
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
                 """
                 {
                     "type": "Aggregated",
-                    "groupByFields": ["field1", "field2"]
+                    "groupByFields": ["field1", "field2"],
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
                 }
                 """,
             ),
@@ -82,11 +95,22 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                SiloAction.mutations(0.5),
+                SiloAction.mutations(
+                    0.5,
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
                 """
                 {
-                  "type": "Mutations",
-                  "minProportion": 0.5
+                    "type": "Mutations",
+                    "minProportion": 0.5,
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
                 }
                 """,
             ),
@@ -99,11 +123,22 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
-                SiloAction.details(listOf("age", "pango_lineage")),
+                SiloAction.details(
+                    listOf("age", "pango_lineage"),
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
                 """
                 {
                     "type": "Details",
-                    "fields": ["age", "pango_lineage"]
+                    "fields": ["age", "pango_lineage"],
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
                 }
                 """,
             ),

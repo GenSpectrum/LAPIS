@@ -15,15 +15,24 @@ import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_RESPONSE_SCHEMA
+import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
+import org.genspectrum.lapis.controller.LIMIT_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_SCHEMA
+import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.OFFSET_SCHEMA
+import org.genspectrum.lapis.controller.ORDER_BY_FIELDS_SCHEMA
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.controller.SEQUENCE_FILTERS_SCHEMA
 import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
+import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.OFFSET_PROPERTY
+import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 
 fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfig: DatabaseConfig): OpenAPI {
@@ -36,7 +45,10 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
 
     val sequenceFilters = requestProperties +
         Pair(NUCLEOTIDE_MUTATIONS_PROPERTY, nucleotideMutations()) +
-        Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations())
+        Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
+        Pair(ORDER_BY_PROPERTY, orderByPostSchema()) +
+        Pair(LIMIT_PROPERTY, limitSchema()) +
+        Pair(OFFSET_PROPERTY, offsetSchema())
 
     return OpenAPI()
         .components(
@@ -85,7 +97,10 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                         .properties(metadataFieldSchemas(databaseConfig)),
                 )
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
-                .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations()),
+                .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
+                .addSchemas(ORDER_BY_FIELDS_SCHEMA, orderByGetSchema())
+                .addSchemas(LIMIT_SCHEMA, limitSchema())
+                .addSchemas(OFFSET_SCHEMA, offsetSchema()),
         )
 }
 
@@ -163,6 +178,48 @@ private fun aminoAcidMutations() =
                     """.trimMargin(),
                 ),
         )
+
+private fun orderByGetSchema() = Schema<List<String>>()
+    .type("array")
+    .items(orderByFieldStringSchema())
+    .description("The fields by which the result is ordered in ascending order.")
+
+private fun orderByPostSchema() = Schema<List<String>>()
+    .type("array")
+    .items(
+        Schema<String>().anyOf(
+            listOf(
+                orderByFieldStringSchema(),
+                Schema<OrderByField>()
+                    .type("object")
+                    .description("The fields by which the result is ordered with ascending or descending order.")
+                    .required(listOf("field"))
+                    .properties(
+                        mapOf(
+                            "field" to orderByFieldStringSchema(),
+                            "type" to Schema<String>()
+                                .type("string")
+                                ._enum(listOf("ascending", "descending"))
+                                ._default("ascending"),
+                        ),
+                    ),
+            ),
+        ),
+    )
+
+private fun orderByFieldStringSchema() = Schema<String>()
+    .type("string")
+    .example("country")
+    .description("The field by which the result is ordered.")
+
+private fun limitSchema() = Schema<Int>()
+    .type("integer")
+    .description(LIMIT_DESCRIPTION)
+    .example(100)
+
+private fun offsetSchema() = Schema<Int>()
+    .type("integer")
+    .description(OFFSET_DESCRIPTION)
 
 // This is a function so that the resulting schema can be reused in multiple places. The setters mutate the instance.
 private fun fieldsSchema() = Schema<String>()

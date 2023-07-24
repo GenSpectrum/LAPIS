@@ -14,6 +14,9 @@ data class SequenceFiltersRequestWithFields(
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
     val fields: List<String>,
+    override val orderByFields: List<OrderByField> = emptyList(),
+    override val limit: Int? = null,
+    override val offset: Int? = null,
 ) : CommonSequenceFilters
 
 @JsonComponent
@@ -30,8 +33,16 @@ class SequenceFiltersRequestWithFieldsDeserializer : JsonDeserializer<SequenceFi
             )
         }
 
-        val (nucleotideMutations, aminoAcidMutations, sequenceFilters) = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, codec)
 
-        return SequenceFiltersRequestWithFields(sequenceFilters, nucleotideMutations, aminoAcidMutations, fields)
+        return SequenceFiltersRequestWithFields(
+            parsedCommonFields.sequenceFilters,
+            parsedCommonFields.nucleotideMutations,
+            parsedCommonFields.aminoAcidMutations,
+            fields,
+            parsedCommonFields.orderByFields,
+            parsedCommonFields.limit,
+            parsedCommonFields.offset,
+        )
     }
 }

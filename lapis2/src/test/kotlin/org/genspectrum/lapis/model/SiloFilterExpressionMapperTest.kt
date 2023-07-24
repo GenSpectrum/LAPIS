@@ -5,6 +5,7 @@ import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
@@ -525,5 +526,8 @@ class SiloFilterExpressionMapperTest {
         override val sequenceFilters: Map<String, String>,
         override val nucleotideMutations: List<NucleotideMutation>,
         override val aaMutations: List<AminoAcidMutation>,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
     ) : CommonSequenceFilters
 }

@@ -15,6 +15,9 @@ data class MutationProportionsRequest(
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
     val minProportion: Double,
+    override val orderByFields: List<OrderByField> = emptyList(),
+    override val limit: Int? = null,
+    override val offset: Int? = null,
 ) : CommonSequenceFilters
 
 @JsonComponent
@@ -28,13 +31,17 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
             JsonNodeType.MISSING,
             JsonNodeType.NULL,
             JsonNodeType.NUMBER,
-            -> {}
+            -> {
+            }
+
             else -> throw IllegalArgumentException("minProportion must be a number")
         }
 
-        val (nucleotideMutations, aminoAcidMutations, primitiveFields) = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, codec)
 
-        val (minProportions, sequenceFilters) = primitiveFields.entries.partition { it.key == MIN_PROPORTION_PROPERTY }
+        val (minProportions, actualSequenceFilters) = parsedCommonFields.sequenceFilters.entries.partition {
+            it.key == MIN_PROPORTION_PROPERTY
+        }
 
         val minProportion = if (minProportions.isEmpty()) {
             DEFAULT_MIN_PROPORTION
@@ -43,10 +50,13 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
         }
 
         return MutationProportionsRequest(
-            sequenceFilters.associate { it.key to it.value },
-            nucleotideMutations,
-            aminoAcidMutations,
+            actualSequenceFilters.associate { it.key to it.value },
+            parsedCommonFields.nucleotideMutations,
+            parsedCommonFields.aminoAcidMutations,
             minProportion,
+            parsedCommonFields.orderByFields,
+            parsedCommonFields.limit,
+            parsedCommonFields.offset,
         )
     }
 }
