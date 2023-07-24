@@ -17,4 +17,6 @@ public class OrderAndLimitConfig {
     private String orderBy;
 
     private Integer limit;
+
+    private Integer offset;
 }
