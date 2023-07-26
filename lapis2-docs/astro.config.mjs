@@ -12,6 +12,7 @@ export default defineConfig({
             social: {
                 github: 'https://github.com/GenSpectrum/LAPIS',
             },
+            customCss: ['./src/styles/custom.css'],
             sidebar: [
                 {
                     label: 'Getting started',
@@ -52,6 +53,23 @@ export default defineConfig({
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                     ]),
+                },
+                {
+                    label: 'References',
+                    items: [
+                        {
+                            label: 'Endpoints',
+                            link: '/references/endpoints/',
+                        },
+                        {
+                            label: 'Fields',
+                            link: '/references/fields/',
+                        },
+                        {
+                            label: 'Filters',
+                            link: '/references/filters/',
+                        },
+                    ],
                 },
             ],
         }),

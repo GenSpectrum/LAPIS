@@ -1,0 +1,27 @@
+---
+import {getConfig} from "../config";
+
+const config = getConfig()
+---
+
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+  </thead>
+  <tbody>
+  {config.schema.metadata.map(m => (
+    <tr>
+      <td>{m.name}</td>
+      <td>
+        {m.type}
+        {m.name === config.schema.primaryKey && <> (primary key)</>}
+      </td>
+      <td><i>TODO</i></td>
+    </tr>
+  ))}
+  </tbody>
+</table>
