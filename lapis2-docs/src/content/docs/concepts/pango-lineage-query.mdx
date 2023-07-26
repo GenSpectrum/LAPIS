@@ -4,8 +4,9 @@ description: Pango lineage query
 ---
 
 import { OnlyIf } from '../../../components/OnlyIf.tsx';
+import { getConfig } from '../../../config.ts';
 
-<OnlyIf condition={false}>
+<OnlyIf condition={!!getConfig().schema.metadata.find(m => m.type === 'pango_lineage')}>
 
 Pango lineage names inherit the hierarchical nature of genetic lineages. For example, B.1.1 is a sub-lineage of B.1. More information about the pango nomenclature can be found on the website of the [Pango network](https://www.pango.network/).
 

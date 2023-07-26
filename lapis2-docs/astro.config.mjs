@@ -2,14 +2,15 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 import react from '@astrojs/react';
+import { hasFeature } from './src/config.ts';
 
 // https://astro.build/config
 export default defineConfig({
     integrations: [
         starlight({
-            title: 'My Docs',
+            title: 'LAPIS',
             social: {
-                github: 'https://github.com/withastro/starlight',
+                github: 'https://github.com/GenSpectrum/LAPIS',
             },
             sidebar: [
                 {
@@ -39,7 +40,7 @@ export default defineConfig({
                         {
                             label: 'Pango lineage query',
                             link: '/concepts/pango-lineage-query/',
-                            onlyIf: 'sars-cov-2',
+                            onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
                             label: 'Response format',
@@ -48,7 +49,7 @@ export default defineConfig({
                         {
                             label: 'Variant query',
                             link: '/concepts/variant-query/',
-                            onlyIf: 'sars-cov-2',
+                            onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                     ]),
                 },
@@ -64,6 +65,12 @@ export default defineConfig({
     },
 });
 
+/**
+ * TODO Not sure if this is actually a good solution. The filtering now happens at compile time but ideally, it happens
+ *   at runtime (so that the user/maintainer does not need to re-compile for their own config).
+ */
 function filterAvailableConcepts(pages) {
-    return pages.filter((p) => !p.onlyIf).map(({ label, link }) => ({ label, link }));
+    return pages
+        .filter((p) => !p.onlyIfFeature || hasFeature(p.onlyIfFeature))
+        .map(({ label, link }) => ({ label, link }));
 }
