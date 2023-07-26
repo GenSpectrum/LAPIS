@@ -27,7 +27,7 @@ export default defineConfig({
                 },
                 {
                     label: 'Concepts',
-                    items: [
+                    items: filterAvailableConcepts([
                         {
                             label: 'Data versions',
                             link: '/concepts/data-versions/',
@@ -39,6 +39,7 @@ export default defineConfig({
                         {
                             label: 'Pango lineage query',
                             link: '/concepts/pango-lineage-query/',
+                            onlyIf: 'sars-cov-2',
                         },
                         {
                             label: 'Response format',
@@ -47,8 +48,9 @@ export default defineConfig({
                         {
                             label: 'Variant query',
                             link: '/concepts/variant-query/',
+                            onlyIf: 'sars-cov-2',
                         },
-                    ],
+                    ]),
                 },
             ],
         }),
@@ -61,3 +63,7 @@ export default defineConfig({
         },
     },
 });
+
+function filterAvailableConcepts(pages) {
+    return pages.filter((p) => !p.onlyIf).map(({ label, link }) => ({ label, link }));
+}

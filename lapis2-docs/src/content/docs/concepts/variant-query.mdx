@@ -3,6 +3,10 @@ title: Variant query
 description: Variant query
 ---
 
+import { OnlyIf } from '../../../components/OnlyIf.tsx';
+
+<OnlyIf condition={false}>
+
 LAPIS offers a special query language to specify variants. A variant query can be used to filter sequences and be passed to the server through the query parameter `variantQuery`. It is not allowed to use the `variantQuery` parameter alongside other variant-defining parameters (e.g., `pangoLineage` or `aaMutations`). Don't forget to encode/escape the query correctly (in JavaScript, this can be done with the [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent>) function)!
 
 The formal specification of the query language is available [here](https://github.com/cevo-public/LAPIS/blob/main/server/src/main/antlr/ch/ethz/lapis/api/parser/VariantQuery.g4) as an ANTLR v4 grammar. In following, we provide an informal description and examples.
@@ -34,3 +38,5 @@ For SARS-CoV-2, it is also possible to use [Pango lineage queries](../pango-line
 ```
 BA.5* | nextcladePangoLineage:BA.5* | nextstrainClade:22B
 ```
+
+</OnlyIf>
