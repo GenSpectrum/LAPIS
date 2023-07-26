@@ -29,8 +29,24 @@ export default defineConfig({
                     label: 'Concepts',
                     items: [
                         {
+                            label: 'Data versions',
+                            link: '/concepts/data-versions/',
+                        },
+                        {
                             label: 'Mutation filters',
                             link: '/concepts/mutation-filters/',
+                        },
+                        {
+                            label: 'Pango lineage query',
+                            link: '/concepts/pango-lineage-query/',
+                        },
+                        {
+                            label: 'Response format',
+                            link: '/concepts/response-format/',
+                        },
+                        {
+                            label: 'Variant query',
+                            link: '/concepts/variant-query/',
                         },
                     ],
                 },

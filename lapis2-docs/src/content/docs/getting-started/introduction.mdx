@@ -3,6 +3,17 @@ title: Introduction
 description: Introduction to LAPIS
 ---
 
-import { ReactCounter } from '../../../components/ReactCounter.tsx';
+LAPIS (Lightweight API for Sequences) is a webservice for querying genomic sequences. It is designed for pathogen data to answer genomic epidemiological questions. Main features include:
 
-<ReactCounter client:load />
+-   **Data retrieval:** You can download sequences, metadata, alignments, translations, and annotation data.
+-   **Data aggregation:** You can flexibly group and aggregate sequences (e.g., to find out the number of sequences per country over time)
+-   **Powerful filters:** You can filter by metadata and combinations of mutations. It is possible to specify complex filter conditions using Boolean logic.
+-   **Easy to use:** It is a simple HTTP/REST API (application programming interface). For most cases, you can query it just by typing a URL into your browser. It can also be called from any programming language.
+-   **Many output formats:** You can download the metadata and aggregated data as JSON, CSV, or TSV. Sequences are provided as FASTA.
+-   **Very fast:** LAPIS was originally developed to query SARS-CoV-2 sequences and, therefore, capable to process millions of sequences efficiently. It uses [SILO](https://github.com/GenSpectrum/LAPIS-SILO) as its data query engine.
+
+To get started, you can look at one of the example use cases or use our interactive wizard to generate your query. We provide code examples for Python and R.
+
+You can find background information of LAPIS in the following publication. For up-to-date information, please rely on this documentation.
+
+> Chen, C., Taepper, A., Engelniederhammer, F., Kellerer, J., Roemer, C. & Stadler, T. "LAPIS is a fast web API for massive open virus sequencing data" BMC Bioinformatics (2023); doi: [10.1186/s12859-023-05364-3](https://doi.org/10.1186/s12859-023-05364-3)
