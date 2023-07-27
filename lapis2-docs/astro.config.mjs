@@ -1,8 +1,9 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-
 import react from '@astrojs/react';
 import { hasFeature } from './src/config.ts';
+
+import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
@@ -74,6 +75,7 @@ export default defineConfig({
             ],
         }),
         react(),
+        tailwind(),
     ],
     // Process images with sharp: https://docs.astro.build/en/guides/assets/#using-sharp
     image: {
@@ -90,5 +92,8 @@ export default defineConfig({
 function filterAvailableConcepts(pages) {
     return pages
         .filter((p) => !p.onlyIfFeature || hasFeature(p.onlyIfFeature))
-        .map(({ label, link }) => ({ label, link }));
+        .map(({ label, link }) => ({
+            label,
+            link,
+        }));
 }
