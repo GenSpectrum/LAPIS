@@ -1,11 +1,11 @@
 import { expect } from 'chai';
-import { lapisClient } from './common';
+import { basePath, lapisClient } from './common';
 import fs from 'fs';
 import { SequenceFilters } from './lapisClient';
 
 describe('The /details endpoint', () => {
   it('should return details with specified fields', async () => {
-    const result = await lapisClient.postDetails({
+    const result = await lapisClient.postDetails1({
       detailsPostRequest: {
         pangoLineage: 'B.1.617.2',
         fields: ['pango_lineage', 'division'],
@@ -26,7 +26,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should return details with all fields when no explicit fields were specified', async () => {
-    const result = await lapisClient.postDetails({
+    const result = await lapisClient.postDetails1({
       detailsPostRequest: {
         pangoLineage: 'B.1.617.2',
       },
@@ -46,7 +46,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postDetails({
+    const ascendingOrderedResult = await lapisClient.postDetails1({
       detailsPostRequest: {
         orderBy: [{ field: 'division', type: 'ascending' }],
         fields: ['division'],
@@ -55,7 +55,7 @@ describe('The /details endpoint', () => {
 
     expect(ascendingOrderedResult[0]).to.have.property('division', 'Aargau');
 
-    const descendingOrderedResult = await lapisClient.postDetails({
+    const descendingOrderedResult = await lapisClient.postDetails1({
       detailsPostRequest: {
         orderBy: [{ field: 'division', type: 'descending' }],
         fields: ['division'],
@@ -66,7 +66,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postDetails({
+    const resultWithLimit = await lapisClient.postDetails1({
       detailsPostRequest: {
         orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
         fields: ['gisaid_epi_isl'],
@@ -77,7 +77,7 @@ describe('The /details endpoint', () => {
     expect(resultWithLimit).to.have.length(2);
     expect(resultWithLimit[1]).to.have.property('gisaidEpiIsl', 'EPI_ISL_1001920');
 
-    const resultWithLimitAndOffset = await lapisClient.postDetails({
+    const resultWithLimitAndOffset = await lapisClient.postDetails1({
       detailsPostRequest: {
         orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
         fields: ['gisaid_epi_isl'],
@@ -88,5 +88,25 @@ describe('The /details endpoint', () => {
 
     expect(resultWithLimitAndOffset).to.have.length(2);
     expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+  });
+
+  it('should return the data as CSV', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'gisaid_epi_isl,pango_lineage,division',
+      orderBy: 'gisaid_epi_isl',
+      limit: '3',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/details?' + urlParams.toString());
+
+    expect(await result.text()).to.be.equal(
+      String.raw`
+division,gisaid_epi_isl,pango_lineage
+Vaud,EPI_ISL_1001493,B.1.177.44
+Bern,EPI_ISL_1001920,B.1.177
+Solothurn,EPI_ISL_1002052,B.1
+    `.trim()
+    );
   });
 });
