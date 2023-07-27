@@ -14,6 +14,9 @@ export default defineConfig({
                 github: 'https://github.com/GenSpectrum/LAPIS',
             },
             customCss: ['./src/styles/custom.css'],
+            editLink: {
+                baseUrl: 'https://github.com/GenSpectrum/LAPIS/tree/main/lapis2-docs/',
+            },
             sidebar: [
                 {
                     label: 'Getting started',
