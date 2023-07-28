@@ -50,6 +50,13 @@ function constructGetQueryUrl({ queryType, filters, outputFormat }: Props) {
                 params.append('fields', [...aggregatedFields].join(','));
             }
             break;
+        case 'mutations':
+            endpoint = queryType.mutations.type === 'nucleotide' ? 'nuc-mutations' : 'aa-mutations';
+            params.append('minProportion', queryType.mutations.minProportion);
+            break;
+        case 'insertions':
+            endpoint = queryType.insertions.type === 'nucleotide' ? 'nuc-insertions' : 'aa-insertions';
+            break;
         case 'details':
             endpoint = 'details';
             const detailsFields = queryType.details.fields;
@@ -57,11 +64,21 @@ function constructGetQueryUrl({ queryType, filters, outputFormat }: Props) {
                 params.append('fields', [...detailsFields].join(','));
             }
             break;
+        case 'nucleotideSequences':
+            endpoint = queryType.nucleotideSequences.type === 'unaligned' ? 'nuc-sequences' : 'nuc-sequences-aligned';
+            break;
+        case 'aminoAcidSequences':
+            endpoint = `aa-sequences-aligned/${queryType.aminoAcidSequences.gene}`;
+            break;
     }
     for (let [name, value] of filters) {
         params.set(name, value);
     }
-    if (endpoint !== 'fasta' && endpoint !== 'fasta-aligned' && outputFormat !== 'json') {
+    if (
+        queryType.selection !== 'nucleotideSequences' &&
+        queryType.selection !== 'aminoAcidSequences' &&
+        outputFormat !== 'json'
+    ) {
         params.set('dataFormat', outputFormat);
     }
     return `/${endpoint}?${params}`;

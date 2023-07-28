@@ -1,9 +1,20 @@
 import type { ReactNode } from 'react';
 import type { Config } from '../../config';
 
-type Selection = 'aggregatedAll' | 'aggregatedStratified' | 'details' | 'nucleotideSequences' | 'aminoAcidSequences';
+type Selection =
+    | 'aggregatedAll'
+    | 'aggregatedStratified'
+    | 'mutations'
+    | 'insertions'
+    | 'details'
+    | 'nucleotideSequences'
+    | 'aminoAcidSequences';
 
+const sequenceTypes = ['nucleotide', 'aminoAcid'] as const;
+type SequenceType = (typeof sequenceTypes)[number];
 type DetailsType = 'all' | 'selected';
+const alignmentTypes = ['unaligned', 'aligned'] as const;
+type AlignmentType = (typeof alignmentTypes)[number];
 
 export type QueryTypeSelectionState = {
     selection: Selection;
@@ -11,9 +22,22 @@ export type QueryTypeSelectionState = {
     aggregatedStratified: {
         fields: Set<string>;
     };
+    mutations: {
+        type: SequenceType;
+        minProportion: string;
+    };
+    insertions: {
+        type: SequenceType;
+    };
     details: {
         type: DetailsType;
         fields: Set<string>;
+    };
+    nucleotideSequences: {
+        type: AlignmentType;
+    };
+    aminoAcidSequences: {
+        gene: string;
     };
 };
 
@@ -37,6 +61,14 @@ export const QueryTypeSelection = (props: Props) => {
             content: <AggregatedStratified {...props} />,
         },
         { header: 'Metadata', selection: 'details', content: <Details {...props} /> },
+        { header: 'Substitutions and deletions', selection: 'mutations', content: <Mutations {...props} /> },
+        { header: 'Insertions', selection: 'insertions', content: <Insertions {...props} /> },
+        {
+            header: 'Nucleotide sequences',
+            selection: 'nucleotideSequences',
+            content: <NucleotideSequences {...props} />,
+        },
+        { header: 'Amino acid sequences', selection: 'aminoAcidSequences', content: <AminoAcidSequences {...props} /> },
     ] as const;
 
     return (
@@ -189,6 +221,124 @@ const Details = ({ config, state, onStateChange }: Props) => {
                     ))}
                 </div>
             </div>
+        </>
+    );
+};
+
+const Mutations = ({ state, onStateChange }: Props) => {
+    const changeType = (type: SequenceType) => {
+        onStateChange({
+            ...state,
+            mutations: { ...state.mutations, type },
+        });
+    };
+
+    const changeMinProportion = (minProportion: string) => {
+        onStateChange({
+            ...state,
+            mutations: { ...state.mutations, minProportion },
+        });
+    };
+
+    return (
+        <>
+            <div>Please choose:</div>
+            {sequenceTypes.map((t) => (
+                <div key={t}>
+                    <input
+                        type='checkbox'
+                        className='checkbox checkbox-sm border border-solid'
+                        disabled={state.selection !== 'mutations'}
+                        checked={state.mutations.type === t}
+                        onChange={() => changeType(t)}
+                    />
+                    {t}
+                </div>
+            ))}
+            You can filter for mutations that occur in at least a certain proportion of sequences:
+            <input
+                type='text'
+                className='input input-bordered w-full max-w-xs'
+                disabled={state.selection !== 'mutations'}
+                value={state.mutations.minProportion}
+                onChange={(e) => changeMinProportion(e.target.value)}
+            />
+        </>
+    );
+};
+
+const Insertions = ({ state, onStateChange }: Props) => {
+    const changeType = (type: SequenceType) => {
+        onStateChange({
+            ...state,
+            insertions: { ...state.insertions, type },
+        });
+    };
+
+    return (
+        <>
+            <div>Please choose:</div>
+            {sequenceTypes.map((t) => (
+                <div key={t}>
+                    <input
+                        type='checkbox'
+                        className='checkbox checkbox-sm border border-solid'
+                        disabled={state.selection !== 'insertions'}
+                        checked={state.insertions.type === t}
+                        onChange={() => changeType(t)}
+                    />
+                    {t}
+                </div>
+            ))}
+        </>
+    );
+};
+
+const NucleotideSequences = ({ state, onStateChange }: Props) => {
+    const changeType = (type: AlignmentType) => {
+        onStateChange({
+            ...state,
+            nucleotideSequences: { ...state.nucleotideSequences, type },
+        });
+    };
+
+    return (
+        <>
+            <div>Please choose:</div>
+            {alignmentTypes.map((t) => (
+                <div key={t}>
+                    <input
+                        type='checkbox'
+                        className='checkbox checkbox-sm border border-solid'
+                        disabled={state.selection !== 'nucleotideSequences'}
+                        checked={state.nucleotideSequences.type === t}
+                        onChange={() => changeType(t)}
+                    />
+                    {t}
+                </div>
+            ))}
+        </>
+    );
+};
+
+const AminoAcidSequences = ({ state, onStateChange }: Props) => {
+    const changeGene = (gene: string) => {
+        onStateChange({
+            ...state,
+            aminoAcidSequences: { ...state.aminoAcidSequences, gene },
+        });
+    };
+
+    return (
+        <>
+            <div>Which gene/reading frame are you interested in?</div>
+            <input
+                type='text'
+                className='input input-bordered w-full max-w-xs'
+                disabled={state.selection !== 'aminoAcidSequences'}
+                value={state.aminoAcidSequences.gene}
+                onChange={(e) => changeGene(e.target.value)}
+            />
         </>
     );
 };

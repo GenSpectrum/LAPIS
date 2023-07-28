@@ -17,9 +17,22 @@ export const QueryGenerator = ({ config }: Props) => {
         aggregatedStratified: {
             fields: new Set<string>(),
         },
+        mutations: {
+            type: 'nucleotide',
+            minProportion: '0.05',
+        },
+        insertions: {
+            type: 'nucleotide',
+        },
         details: {
             type: 'all',
             fields: new Set<string>(),
+        },
+        nucleotideSequences: {
+            type: 'unaligned',
+        },
+        aminoAcidSequences: {
+            gene: '',
         },
     });
     const [filters, setFilters] = useState<Filters>(new Map());
