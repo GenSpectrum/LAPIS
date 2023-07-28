@@ -2,6 +2,7 @@ import type { QueryTypeSelectionState } from './QueryTypeSelection';
 import type { Filters } from './FiltersSelection';
 import type { MetadataOutputFormat } from './OutputFormatSelection';
 import { useState } from 'react';
+import { CodeBlock } from '../CodeBlock';
 
 type Props = {
     queryType: QueryTypeSelectionState;
@@ -105,9 +106,9 @@ const QueryUrlTab = (props: Props) => {
 };
 
 const RTab = (props: Props) => {
-    return <div>TODO R code</div>;
+    return <CodeBlock>TODO R code</CodeBlock>;
 };
 
 const PythonTab = (props: Props) => {
-    return <div>TODO Python code</div>;
+    return <CodeBlock>TODO Python code</CodeBlock>;
 };

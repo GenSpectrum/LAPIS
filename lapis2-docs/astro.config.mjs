@@ -32,6 +32,23 @@ export default defineConfig({
                     ],
                 },
                 {
+                    label: 'References',
+                    items: [
+                        {
+                            label: 'Endpoints',
+                            link: '/references/endpoints/',
+                        },
+                        {
+                            label: 'Fields',
+                            link: '/references/fields/',
+                        },
+                        {
+                            label: 'Filters',
+                            link: '/references/filters/',
+                        },
+                    ],
+                },
+                {
                     label: 'Concepts',
                     items: filterAvailableConcepts([
                         {
@@ -57,23 +74,6 @@ export default defineConfig({
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                     ]),
-                },
-                {
-                    label: 'References',
-                    items: [
-                        {
-                            label: 'Endpoints',
-                            link: '/references/endpoints/',
-                        },
-                        {
-                            label: 'Fields',
-                            link: '/references/fields/',
-                        },
-                        {
-                            label: 'Filters',
-                            link: '/references/filters/',
-                        },
-                    ],
                 },
             ],
         }),
