@@ -3,7 +3,8 @@ title: Response format
 description: Response format
 ---
 
-Most endpoints can return data either as JSON or CSV. The default is JSON. To get a CSV, specify the query parameter `dataFormat=csv`.
+Most endpoints can return data either as JSON or CSV. The default is JSON. To get a CSV, specify the query parameter
+`dataFormat=csv`.
 
 Responses returned in JSON have three top level attributes:
 
@@ -27,8 +28,11 @@ Example:
 }
 ```
 
-Genomic sequences (`fasta` and `fasta-aligned` endpoints) are returned in the [FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
+Genomic sequences (`fasta` and `fasta-aligned` endpoints) are returned in the
+[FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
 
+<!-- prettier-ignore -->
 :::note
-Every response, independent of the data format, contains the data version as it is a very important information. See the [data versions page](../data-versions/) for details.
+Every response, independent of the data format, contains the data version as it is a very important information. See the
+[data versions page](../data-versions/) for details.
 :::
