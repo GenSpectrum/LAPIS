@@ -65,6 +65,10 @@ export default defineConfig({
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
+                            label: 'Request methods: GET and POST',
+                            link: '/concepts/request-methods/',
+                        },
+                        {
                             label: 'Response format',
                             link: '/concepts/response-format/',
                         },

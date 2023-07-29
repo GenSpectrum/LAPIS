@@ -1,8 +1,8 @@
 import type { QueryTypeSelectionState } from './QueryTypeSelection';
 import type { Filters } from './FiltersSelection';
 import type { MetadataOutputFormat } from './OutputFormatSelection';
-import { useState } from 'react';
 import { CodeBlock } from '../CodeBlock';
+import { Tab, TabsBox } from '../TabsBox/react/TabsBox';
 
 type Props = {
     queryType: QueryTypeSelectionState;
@@ -10,30 +10,19 @@ type Props = {
     outputFormat: MetadataOutputFormat;
 };
 
-const tabs = ['Query URL', 'R code', 'Python code'] as const;
-
 export const Result = (props: Props) => {
-    const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>(tabs[0]);
+    const tabs = [
+        { name: 'Query URL', content: <QueryUrlTab {...props} /> },
+        { name: 'R code', content: <RTab {...props} /> },
+        { name: 'Python code', content: <PythonTab {...props} /> },
+    ];
 
     return (
-        <div>
-            <div className='tabs'>
-                {tabs.map((tab) => (
-                    <a
-                        key={tab}
-                        className={`tab tab-lifted ${tab === activeTab ? 'tab-active' : ''}`}
-                        onClick={() => setActiveTab(tab)}
-                    >
-                        {tab}
-                    </a>
-                ))}
-            </div>
-            <div className='-mt-px border border-solid border-gray-200 p-8'>
-                {activeTab === tabs[0] && <QueryUrlTab {...props} />}
-                {activeTab === tabs[1] && <RTab {...props} />}
-                {activeTab === tabs[2] && <PythonTab {...props} />}
-            </div>
-        </div>
+        <TabsBox>
+            {tabs.map((tab) => (
+                <Tab label={tab.name}>{tab.content}</Tab>
+            ))}
+        </TabsBox>
     );
 };
 
