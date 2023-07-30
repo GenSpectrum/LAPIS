@@ -1,13 +1,18 @@
 import type { QueryTypeSelectionState } from './QueryTypeSelection';
 import type { Filters } from './FiltersSelection';
-import type { MetadataOutputFormat } from './OutputFormatSelection';
+import type { TabularOutputFormat } from './OutputFormatSelection';
 import { CodeBlock } from '../CodeBlock';
 import { Tab, TabsBox } from '../TabsBox/react/TabsBox';
+import { generateNonFastaQuery } from '../../utils/code-generators/python/generator';
+import type { Config, MetadataType } from '../../config';
+import { OutputFormatSelection } from './OutputFormatSelection';
+import { useState } from 'react';
+import type { ResultField, ResultFieldType } from '../../utils/code-generators/types';
 
 type Props = {
     queryType: QueryTypeSelectionState;
     filters: Filters;
-    outputFormat: MetadataOutputFormat;
+    config: Config;
 };
 
 export const Result = (props: Props) => {
@@ -26,60 +31,40 @@ export const Result = (props: Props) => {
     );
 };
 
-function constructGetQueryUrl({ queryType, filters, outputFormat }: Props) {
-    let endpoint;
+function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFormat) {
+    const { endpoint, body } = constructPostQuery(props);
     const params = new URLSearchParams();
-    switch (queryType.selection) {
-        case 'aggregatedAll':
-            endpoint = 'aggregated';
-            break;
-        case 'aggregatedStratified':
-            endpoint = 'aggregated';
-            const aggregatedFields = queryType.aggregatedStratified.fields;
-            if (aggregatedFields.size > 0) {
-                params.append('fields', [...aggregatedFields].join(','));
-            }
-            break;
-        case 'mutations':
-            endpoint = queryType.mutations.type === 'nucleotide' ? 'nuc-mutations' : 'aa-mutations';
-            params.append('minProportion', queryType.mutations.minProportion);
-            break;
-        case 'insertions':
-            endpoint = queryType.insertions.type === 'nucleotide' ? 'nuc-insertions' : 'aa-insertions';
-            break;
-        case 'details':
-            endpoint = 'details';
-            const detailsFields = queryType.details.fields;
-            if (detailsFields.size > 0) {
-                params.append('fields', [...detailsFields].join(','));
-            }
-            break;
-        case 'nucleotideSequences':
-            endpoint = queryType.nucleotideSequences.type === 'unaligned' ? 'nuc-sequences' : 'nuc-sequences-aligned';
-            break;
-        case 'aminoAcidSequences':
-            endpoint = `aa-sequences-aligned/${queryType.aminoAcidSequences.gene}`;
-            break;
+    for (let [name, value] of Object.entries(body)) {
+        if (Array.isArray(value)) {
+            params.set(name, value.join(','));
+        } else {
+            params.set(name, value);
+        }
     }
-    for (let [name, value] of filters) {
-        params.set(name, value);
-    }
+    const queryType = props.queryType;
     if (
         queryType.selection !== 'nucleotideSequences' &&
         queryType.selection !== 'aminoAcidSequences' &&
-        outputFormat !== 'json'
+        tabularOutputFormat !== 'json'
     ) {
-        params.set('dataFormat', outputFormat);
+        params.set('dataFormat', tabularOutputFormat);
     }
-    return `/${endpoint}?${params}`;
+    return `${endpoint}?${params}`;
 }
 
 const QueryUrlTab = (props: Props) => {
+    const [tabularOutputFormat, setTabularOutputFormat] = useState<TabularOutputFormat>('json');
+
     // TODO Prepend the URL to the instance
-    const queryUrl = constructGetQueryUrl(props);
+    const queryUrl = constructGetQueryUrl(props, tabularOutputFormat);
 
     return (
         <div>
+            <OutputFormatSelection
+                queryType={props.queryType}
+                format={tabularOutputFormat}
+                onFormatChange={setTabularOutputFormat}
+            />
             <input
                 type='text'
                 className='input input-bordered w-full'
@@ -99,5 +84,93 @@ const RTab = (props: Props) => {
 };
 
 const PythonTab = (props: Props) => {
-    return <CodeBlock>TODO Python code</CodeBlock>;
+    if (props.queryType.selection === 'nucleotideSequences' || props.queryType.selection === 'aminoAcidSequences') {
+        return <CodeBlock>TODO Code for fetching sequences</CodeBlock>;
+    }
+    const propsWithJson: Props = {
+        ...props,
+    };
+    const { endpoint, body, resultFields } = constructPostQuery(propsWithJson);
+    const code = generateNonFastaQuery('', endpoint, body, resultFields);
+    return <CodeBlock>{code}</CodeBlock>;
 };
+
+function constructPostQuery({ queryType, filters, config }: Props): {
+    endpoint: string;
+    body: object;
+    resultFields: ResultField[];
+} {
+    let endpoint = '/sample/';
+    const body: any = {};
+    const resultFields: ResultField[] = [];
+
+    switch (queryType.selection) {
+        case 'aggregatedAll':
+            endpoint += 'aggregated';
+            resultFields.push({ name: 'count', type: 'integer', nullable: false });
+            break;
+        case 'aggregatedStratified':
+            endpoint += 'aggregated';
+            resultFields.push({ name: 'count', type: 'integer', nullable: false });
+            const aggregatedFields = queryType.aggregatedStratified.fields;
+            if (aggregatedFields.size > 0) {
+                body.fields = [...aggregatedFields];
+                resultFields.push(...fieldNamesToResultFields(aggregatedFields, config));
+            }
+            break;
+        case 'mutations':
+            endpoint += queryType.mutations.type === 'nucleotide' ? 'nuc-mutations' : 'aa-mutations';
+            body.minProportion = queryType.mutations.minProportion;
+            resultFields.push(
+                { name: 'mutation', type: 'string', nullable: false },
+                { name: 'proportion', type: 'float', nullable: false },
+                { name: 'count', type: 'integer', nullable: false },
+            );
+            break;
+        case 'insertions':
+            endpoint += queryType.insertions.type === 'nucleotide' ? 'nuc-insertions' : 'aa-insertions';
+            resultFields.push(
+                { name: 'insertion', type: 'string', nullable: false },
+                { name: 'count', type: 'integer', nullable: false },
+            );
+            break;
+        case 'details':
+            endpoint += 'details';
+            const detailsFields = queryType.details.fields;
+            if (detailsFields.size > 0) {
+                body.fields = [...detailsFields];
+                resultFields.push(...fieldNamesToResultFields(detailsFields, config));
+            }
+            break;
+        case 'nucleotideSequences':
+            endpoint += queryType.nucleotideSequences.type === 'unaligned' ? 'nuc-sequences' : 'nuc-sequences-aligned';
+            break;
+        case 'aminoAcidSequences':
+            endpoint += `aa-sequences-aligned/${queryType.aminoAcidSequences.gene}`;
+            break;
+    }
+    for (let [name, value] of filters) {
+        if (value.length > 0) {
+            body[name] = value;
+        }
+    }
+    return { endpoint, body, resultFields };
+}
+
+function mapMetadataTypeToResultFieldType(type: MetadataType): ResultFieldType {
+    switch (type) {
+        case 'pango_lineage':
+        case 'date':
+        case 'string':
+            return 'string';
+    }
+}
+
+function fieldNamesToResultFields(fields: Set<string>, config: Config): ResultField[] {
+    const metadataMap = new Map(config.schema.metadata.map((m) => [m.name, m.type]));
+    return [...fields].map((field) => ({
+        name: field,
+        type: mapMetadataTypeToResultFieldType(metadataMap.get(field)!),
+        nullable: true,
+    }));
+}

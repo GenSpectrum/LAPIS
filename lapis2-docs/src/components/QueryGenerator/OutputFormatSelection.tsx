@@ -1,12 +1,12 @@
 import type { QueryTypeSelectionState } from './QueryTypeSelection';
 
-const availableFormats = ['tsv', 'csv', 'json'] as const;
-export type MetadataOutputFormat = (typeof availableFormats)[number];
+const availableFormats = ['json', 'tsv', 'csv'] as const;
+export type TabularOutputFormat = (typeof availableFormats)[number];
 
 type Props = {
     queryType: QueryTypeSelectionState;
-    format: MetadataOutputFormat;
-    onFormatChange: (format: MetadataOutputFormat) => void;
+    format: TabularOutputFormat;
+    onFormatChange: (format: TabularOutputFormat) => void;
 };
 
 export const OutputFormatSelection = ({ queryType, format, onFormatChange }: Props) => {
@@ -19,7 +19,7 @@ export const OutputFormatSelection = ({ queryType, format, onFormatChange }: Pro
             ) : (
                 <>
                     <div>Which format do you prefer?</div>
-                    <div className='flex flex-col gap-4'>
+                    <div className='flex gap-4'>
                         {availableFormats.map((f) => (
                             <div>
                                 <input

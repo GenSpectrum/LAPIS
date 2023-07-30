@@ -1,9 +1,11 @@
 import fs from 'fs';
 import { parse } from 'yaml';
 
+export type MetadataType = 'string' | 'date' | 'pango_lineage';
+
 export type Metadata = {
     name: string;
-    type: 'string' | 'date' | 'pango_lineage';
+    type: MetadataType;
 };
 
 export type Feature = {
