@@ -46,6 +46,10 @@ export default defineConfig({
                             label: 'Filters',
                             link: '/references/filters/',
                         },
+                        {
+                            label: 'Open API / Swagger',
+                            link: '/references/open-api-definition/',
+                        },
                     ],
                 },
                 {
