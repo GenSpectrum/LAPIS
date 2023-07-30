@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Config } from '../../config';
+import { CheckBoxesWrapper, ContainerWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
 
 type Selection =
     | 'aggregatedAll'
@@ -54,7 +55,7 @@ export const QueryTypeSelection = (props: Props) => {
     };
 
     const options = [
-        { header: 'Number of sequences', selection: 'aggregatedAll', content: <></> },
+        { header: 'Number of sequences', selection: 'aggregatedAll', content: undefined },
         {
             header: 'Number of sequences per ...',
             selection: 'aggregatedStratified',
@@ -73,7 +74,7 @@ export const QueryTypeSelection = (props: Props) => {
 
     return (
         <div>
-            <div>Which type of data would you like to get?</div>
+            <div className='mb-4'>Which type of data would you like to get?</div>
             <div className='flex flex-col gap-4'>
                 {options.map((option) => (
                     <Option
@@ -99,17 +100,21 @@ type OptionProps = {
 
 const Option = ({ header, children, selected, onSelection }: OptionProps) => {
     return (
-        <div className={`border border-solid p-4`}>
-            <div className='flex gap-4'>
+        <div className={`border border-solid rounded-xl ${selected ? 'border-blue-100 ' : 'border-blue-50 '}`}>
+            <label
+                className={`flex items-center gap-4 p-4 rounded-xl ${
+                    selected ? 'bg-blue-100 font-bold ' : 'bg-blue-50 font-medium'
+                }`}
+            >
                 <input
                     type='checkbox'
                     checked={selected}
                     onChange={() => onSelection()}
                     className='checkbox border border-solid'
                 />
-                <div className='font-bold inline-block'>{header}</div>
-            </div>
-            <div>{children}</div>
+                <div className='inline-block'>{header}</div>
+            </label>
+            {children && <div className={`pb-4 px-4 mt-4`}>{children}</div>}
         </div>
     );
 };
@@ -132,30 +137,24 @@ const AggregatedStratified = ({ config, state, onStateChange }: Props) => {
     };
 
     return (
-        <>
-            <div>Examples:</div>
-            <ul>
-                <li>Give me the number of sequences per lineage</li>
-                <li>Give me the number of sequences per country and date</li>
-            </ul>
+        <ContainerWrapper>
             <div>
-                <div>By which field(s) would you like to stratify?</div>
-                <div className='flex flex-wrap ml-8 gap-8'>
+                <LabelWrapper>By which field(s) would you like to stratify?</LabelWrapper>
+                <CheckBoxesWrapper>
                     {config.schema.metadata.map((m) => (
-                        <div key={m.name}>
-                            <input
-                                type='checkbox'
-                                className='checkbox checkbox-sm border border-solid'
-                                disabled={state.selection !== 'aggregatedStratified'}
-                                checked={state.aggregatedStratified.fields.has(m.name)}
-                                onChange={() => changeAggregatedStratifiedField(m.name)}
-                            />
-                            {m.name}
-                        </div>
+                        <LabeledCheckBox
+                            label={m.name}
+                            key={m.name}
+                            type='checkbox'
+                            className='w-40'
+                            disabled={state.selection !== 'aggregatedStratified'}
+                            checked={state.aggregatedStratified.fields.has(m.name)}
+                            onChange={() => changeAggregatedStratifiedField(m.name)}
+                        />
                     ))}
-                </div>
+                </CheckBoxesWrapper>
             </div>
-        </>
+        </ContainerWrapper>
     );
 };
 
@@ -184,44 +183,45 @@ const Details = ({ config, state, onStateChange }: Props) => {
     };
 
     return (
-        <>
+        <ContainerWrapper>
             <div>
-                <div>
-                    <input
+                <LabelWrapper>Which metadata would you like to get?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    <LabeledCheckBox
+                        label='Give me all available metadata'
                         type='checkbox'
                         disabled={state.selection !== 'details'}
                         checked={state.details.type === 'all'}
                         onChange={() => changeDetailsType('all')}
-                        className='checkbox checkbox-sm ml-8 mt-4 border border-solid'
-                    />{' '}
-                    Give me all available metadata
-                </div>
-                <div>
-                    <input
+                        className='w-80'
+                    />
+                    <LabeledCheckBox
+                        label='Let me specify the fields'
                         type='checkbox'
                         disabled={state.selection !== 'details'}
                         checked={state.details.type === 'selected'}
                         onChange={() => changeDetailsType('selected')}
-                        className='checkbox checkbox-sm ml-8 border border-solid'
-                    />{' '}
-                    Let me specify the fields
-                </div>
-                <div className='flex flex-wrap ml-8 gap-8'>
-                    {config.schema.metadata.map((m) => (
-                        <div key={m.name}>
-                            <input
-                                type='checkbox'
-                                className='checkbox checkbox-sm border border-solid'
-                                disabled={state.selection !== 'details' || state.details.type !== 'selected'}
-                                checked={state.details.fields.has(m.name)}
-                                onChange={() => changeDetailsField(m.name)}
-                            />
-                            {m.name}
-                        </div>
-                    ))}
-                </div>
+                        className='w-80'
+                    />
+                </CheckBoxesWrapper>
             </div>
-        </>
+            <div>
+                <LabelWrapper>Which fields?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    {config.schema.metadata.map((m) => (
+                        <LabeledCheckBox
+                            label={m.name}
+                            key={m.name}
+                            type='checkbox'
+                            className='w-40'
+                            disabled={state.selection !== 'details' || state.details.type !== 'selected'}
+                            checked={state.details.fields.has(m.name)}
+                            onChange={() => changeDetailsField(m.name)}
+                        />
+                    ))}
+                </CheckBoxesWrapper>
+            </div>
+        </ContainerWrapper>
     );
 };
 
@@ -241,29 +241,37 @@ const Mutations = ({ state, onStateChange }: Props) => {
     };
 
     return (
-        <>
-            <div>Please choose:</div>
-            {sequenceTypes.map((t) => (
-                <div key={t}>
-                    <input
-                        type='checkbox'
-                        className='checkbox checkbox-sm border border-solid'
-                        disabled={state.selection !== 'mutations'}
-                        checked={state.mutations.type === t}
-                        onChange={() => changeType(t)}
-                    />
-                    {t}
-                </div>
-            ))}
-            You can filter for mutations that occur in at least a certain proportion of sequences:
-            <input
-                type='text'
-                className='input input-bordered w-full max-w-xs'
-                disabled={state.selection !== 'mutations'}
-                value={state.mutations.minProportion}
-                onChange={(e) => changeMinProportion(e.target.value)}
-            />
-        </>
+        <ContainerWrapper>
+            <div>
+                <LabelWrapper>Would you like to get the nucleotide or AA mutations?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    {sequenceTypes.map((t) => (
+                        <LabeledCheckBox
+                            label={t}
+                            key={t}
+                            type='checkbox'
+                            className='w-80'
+                            disabled={state.selection !== 'mutations'}
+                            checked={state.mutations.type === t}
+                            onChange={() => changeType(t)}
+                        />
+                    ))}
+                </CheckBoxesWrapper>
+            </div>
+
+            <div>
+                <LabelWrapper>
+                    What is the minimal proportion of samples in which the mutations should occur?
+                </LabelWrapper>
+                <input
+                    type='text'
+                    className='input input-bordered w-full max-w-xs'
+                    disabled={state.selection !== 'mutations'}
+                    value={state.mutations.minProportion}
+                    onChange={(e) => changeMinProportion(e.target.value)}
+                />
+            </div>
+        </ContainerWrapper>
     );
 };
 
@@ -276,21 +284,24 @@ const Insertions = ({ state, onStateChange }: Props) => {
     };
 
     return (
-        <>
-            <div>Please choose:</div>
-            {sequenceTypes.map((t) => (
-                <div key={t}>
-                    <input
-                        type='checkbox'
-                        className='checkbox checkbox-sm border border-solid'
-                        disabled={state.selection !== 'insertions'}
-                        checked={state.insertions.type === t}
-                        onChange={() => changeType(t)}
-                    />
-                    {t}
-                </div>
-            ))}
-        </>
+        <ContainerWrapper>
+            <div>
+                <LabelWrapper>Would you like to get the nucleotide or AA insertions?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    {sequenceTypes.map((t) => (
+                        <LabeledCheckBox
+                            label={t}
+                            key={t}
+                            type='checkbox'
+                            className='w-80'
+                            disabled={state.selection !== 'insertions'}
+                            checked={state.insertions.type === t}
+                            onChange={() => changeType(t)}
+                        />
+                    ))}
+                </CheckBoxesWrapper>
+            </div>
+        </ContainerWrapper>
     );
 };
 
@@ -303,21 +314,24 @@ const NucleotideSequences = ({ state, onStateChange }: Props) => {
     };
 
     return (
-        <>
-            <div>Please choose:</div>
-            {alignmentTypes.map((t) => (
-                <div key={t}>
-                    <input
-                        type='checkbox'
-                        className='checkbox checkbox-sm border border-solid'
-                        disabled={state.selection !== 'nucleotideSequences'}
-                        checked={state.nucleotideSequences.type === t}
-                        onChange={() => changeType(t)}
-                    />
-                    {t}
-                </div>
-            ))}
-        </>
+        <ContainerWrapper>
+            <div>
+                <LabelWrapper>Would you like to get the unaligned (original) or aligned sequences?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    {alignmentTypes.map((t) => (
+                        <LabeledCheckBox
+                            label={t}
+                            key={t}
+                            type='checkbox'
+                            className='w-80'
+                            disabled={state.selection !== 'nucleotideSequences'}
+                            checked={state.nucleotideSequences.type === t}
+                            onChange={() => changeType(t)}
+                        />
+                    ))}
+                </CheckBoxesWrapper>
+            </div>
+        </ContainerWrapper>
     );
 };
 
@@ -330,15 +344,17 @@ const AminoAcidSequences = ({ state, onStateChange }: Props) => {
     };
 
     return (
-        <>
-            <div>Which gene/reading frame are you interested in?</div>
-            <input
-                type='text'
-                className='input input-bordered w-full max-w-xs'
-                disabled={state.selection !== 'aminoAcidSequences'}
-                value={state.aminoAcidSequences.gene}
-                onChange={(e) => changeGene(e.target.value)}
-            />
-        </>
+        <ContainerWrapper>
+            <div>
+                <LabelWrapper>Which gene/reading frame are you interested in?</LabelWrapper>
+                <input
+                    type='text'
+                    className='input input-bordered w-full max-w-xs'
+                    disabled={state.selection !== 'aminoAcidSequences'}
+                    value={state.aminoAcidSequences.gene}
+                    onChange={(e) => changeGene(e.target.value)}
+                />
+            </div>
+        </ContainerWrapper>
     );
 };

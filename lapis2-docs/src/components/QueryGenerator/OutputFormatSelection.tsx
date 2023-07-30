@@ -1,4 +1,5 @@
 import type { QueryTypeSelectionState } from './QueryTypeSelection';
+import { CheckBoxesWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
 
 const availableFormats = ['json', 'tsv', 'csv'] as const;
 export type TabularOutputFormat = (typeof availableFormats)[number];
@@ -18,20 +19,18 @@ export const OutputFormatSelection = ({ queryType, format, onFormatChange }: Pro
                 </>
             ) : (
                 <>
-                    <div>Which format do you prefer?</div>
-                    <div className='flex gap-4'>
+                    <LabelWrapper>Which format do you prefer?</LabelWrapper>
+                    <CheckBoxesWrapper>
                         {availableFormats.map((f) => (
-                            <div>
-                                <input
-                                    type='checkbox'
-                                    className='checkbox checkbox-sm border border-solid'
-                                    checked={f === format}
-                                    onChange={() => onFormatChange(f)}
-                                />{' '}
-                                {f}
-                            </div>
+                            <LabeledCheckBox
+                                label={f.toUpperCase()}
+                                type='checkbox'
+                                className='w-40'
+                                checked={f === format}
+                                onChange={() => onFormatChange(f)}
+                            />
                         ))}
-                    </div>
+                    </CheckBoxesWrapper>
                 </>
             )}
         </div>

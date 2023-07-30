@@ -8,6 +8,7 @@ import type { Config, MetadataType } from '../../config';
 import { OutputFormatSelection } from './OutputFormatSelection';
 import { useState } from 'react';
 import type { ResultField, ResultFieldType } from '../../utils/code-generators/types';
+import { ContainerWrapper, LabelWrapper } from './styled-components';
 
 type Props = {
     queryType: QueryTypeSelectionState;
@@ -59,23 +60,26 @@ const QueryUrlTab = (props: Props) => {
     const queryUrl = constructGetQueryUrl(props, tabularOutputFormat);
 
     return (
-        <div>
+        <ContainerWrapper>
             <OutputFormatSelection
                 queryType={props.queryType}
                 format={tabularOutputFormat}
                 onFormatChange={setTabularOutputFormat}
             />
-            <input
-                type='text'
-                className='input input-bordered w-full'
-                value={queryUrl}
-                readOnly
-                onFocus={(e) => e.target.select()}
-            />
-            <a href={queryUrl} target='_blank'>
-                <button className='btn btn-sm mt-4'>Open in browser</button>
-            </a>
-        </div>
+            <div>
+                <LabelWrapper>Query URL:</LabelWrapper>
+                <input
+                    type='text'
+                    className='input input-bordered w-full'
+                    value={queryUrl}
+                    readOnly
+                    onFocus={(e) => e.target.select()}
+                />
+                <a href={queryUrl} target='_blank'>
+                    <button className='btn btn-sm mt-4'>Open in browser</button>
+                </a>
+            </div>
+        </ContainerWrapper>
     );
 };
 
