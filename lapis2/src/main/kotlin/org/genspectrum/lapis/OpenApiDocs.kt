@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.AGGREGATED_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_REQUEST_SCHEMA
@@ -25,6 +26,7 @@ import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_SCHEMA
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_SCHEMA
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_PROPERTY
@@ -104,6 +106,28 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                             .properties(metadataFieldSchemas(databaseConfig)),
                     ),
                 )
+                .addSchemas(
+                    NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA,
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description(
+                                "The response contains the metadata of every sequence matching the sequence filters.",
+                            )
+                            .properties(nucleotideMutationProportionSchema()),
+                    ),
+                )
+                .addSchemas(
+                    AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA,
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description(
+                                "The response contains the metadata of every sequence matching the sequence filters.",
+                            )
+                            .properties(aminoAcidMutationProportionSchema()),
+                    ),
+                )
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
                 .addSchemas(ORDER_BY_FIELDS_SCHEMA, orderByGetSchema())
@@ -161,6 +185,21 @@ private fun accessKeySchema() = Schema<String>()
         "An access key that grants access to the protected data that this instance serves. " +
             "There are two types or access keys: One only grants access to aggregated data, " +
             "the other also grants access to detailed data.",
+    )
+
+private fun nucleotideMutationProportionSchema() =
+    mapOf(
+        "mutation" to Schema<String>().type("string").description("The mutation that was found."),
+        "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
+        "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
+    )
+private fun aminoAcidMutationProportionSchema() =
+    mapOf(
+        "mutation" to Schema<String>().type("string").description(
+            "A amino acid mutation that was found in the format \"\\<gene\\>:\\<position\\>",
+        ),
+        "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
+        "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
     )
 
 private fun nucleotideMutations() =

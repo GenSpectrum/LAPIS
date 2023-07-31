@@ -10,11 +10,15 @@ import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -164,91 +168,101 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$.data[0].age").value(42))
     }
 
-    @Test
-    fun `GET nucleotideMutations without explicit minProportion defaults to 5 percent`() {
-        every {
-            siloQueryModelMock.computeMutationProportions(
-                mutationProportionsRequest(
-                    mapOf("country" to "Switzerland"),
-                    0.05,
-                ),
-            )
-        } returns listOf(someMutationProportion())
+    @ParameterizedTest(name = "GET {0} without explicit minProportion")
+    @MethodSource("getMutationEndpointTypes")
+    fun `GET mutations without explicit minProportion`(
+        endpoint: String,
+    ) {
+        setupMutationMock(endpoint, null)
 
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland"))
+        mockMvc.perform(get("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].position").value("the mutation"))
+            .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
-    @Test
-    fun `GET nucleotideMutations with minProportion`() {
-        every {
-            siloQueryModelMock.computeMutationProportions(
-                mutationProportionsRequest(
-                    mapOf("country" to "Switzerland"),
-                    0.3,
-                ),
-            )
-        } returns listOf(someMutationProportion())
+    @ParameterizedTest(name = "GET {0} with minProportion")
+    @MethodSource("getMutationEndpointTypes")
+    fun `GET mutations with minProportion`(
+        endpoint: String,
+    ) {
+        setupMutationMock(endpoint, 0.3)
 
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland&minProportion=0.3"))
+        mockMvc.perform(get("$endpoint?country=Switzerland&minProportion=0.3"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].position").value("the mutation"))
+            .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
     }
 
-    @Test
-    fun `POST nucleotideMutations without explicit minProportion defaults to 5 percent`() {
-        every {
-            siloQueryModelMock.computeMutationProportions(
-                mutationProportionsRequest(
-                    mapOf("country" to "Switzerland"),
-                    0.05,
-                ),
-            )
-        } returns listOf(someMutationProportion())
+    @ParameterizedTest(name = "POST {0} without explicit minProportion")
+    @MethodSource("getMutationEndpointTypes")
+    fun `POST mutations without explicit minProportion`(
+        endpoint: String,
+    ) {
+        setupMutationMock(endpoint, null)
 
-        val request = post("/nucleotideMutations")
+        val request = post(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].position").value("the mutation"))
+            .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
     }
 
-    @Test
-    fun `POST nucleotideMutations with minProportion`() {
-        every {
-            siloQueryModelMock.computeMutationProportions(
-                mutationProportionsRequest(
-                    mapOf("country" to "Switzerland"),
-                    0.7,
-                ),
-            )
-        } returns listOf(someMutationProportion())
+    @ParameterizedTest(name = "POST {0} with minProportion")
+    @MethodSource("getMutationEndpointTypes")
+    fun `POST mutations with minProportion`(
+        endpoint: String,
+    ) {
+        setupMutationMock(endpoint, 0.7)
 
-        val request = post("/nucleotideMutations")
+        val request = post(endpoint)
             .content("""{"country": "Switzerland", "minProportion": 0.7}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].position").value("the mutation"))
+            .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
-    @Test
-    fun `POST nucleotideMutations with invalid minProportion returns bad request`() {
-        val request = post("/nucleotideMutations")
+    private fun setupMutationMock(endpoint: String, minProportion: Double?) {
+        if (endpoint == "/nucleotideMutations") {
+            every {
+                siloQueryModelMock.computeNucleotideMutationProportions(
+                    mutationProportionsRequest(
+                        mapOf("country" to "Switzerland"),
+                        minProportion,
+                    ),
+                )
+            } returns listOf(someNucleotideMutationProportion())
+        }
+        if (endpoint == "/aminoAcidMutations") {
+            every {
+                siloQueryModelMock.computeAminoAcidMutationProportions(
+                    mutationProportionsRequest(
+                        mapOf("country" to "Switzerland"),
+                        minProportion,
+                    ),
+                )
+            } returns listOf(someAminoAcidMutationProportion())
+        }
+    }
+
+    @ParameterizedTest(name = "POST {0} with invalid minProportion returns bad request")
+    @MethodSource("getMutationEndpointTypes")
+    fun `POST mutations with invalid minProportion returns bad request`(
+        endpoint: String,
+    ) {
+        val request = post(endpoint)
             .content("""{"country": "Switzerland", "minProportion": "this is not a float"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -258,6 +272,14 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(
                 jsonPath("\$.error.message").value("minProportion must be a number"),
             )
+    }
+
+    private companion object {
+        @JvmStatic
+        fun getMutationEndpointTypes() = listOf(
+            Arguments.of("/nucleotideMutations"),
+            Arguments.of("/aminoAcidMutations"),
+        )
     }
 
     @Test
@@ -339,7 +361,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         emptyList(),
     )
 
-    private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double) =
+    private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double?) =
         MutationProportionsRequest(
             sequenceFilters,
             emptyList(),
@@ -348,5 +370,6 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             emptyList(),
         )
 
-    private fun someMutationProportion() = MutationData("the mutation", 42, 0.5)
+    private fun someNucleotideMutationProportion() = NucleotideMutationResponse("the mutation", 42, 0.5)
+    private fun someAminoAcidMutationProportion() = AminoAcidMutationResponse("the mutation", 42, 0.5)
 }
