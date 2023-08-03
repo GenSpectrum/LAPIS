@@ -129,4 +129,11 @@ Solothurn	EPI_ISL_1002052	B.1
     `.trim()
     );
   });
+
+  it('should return the lapis data version in the response', async () => {
+    const result = await fetch(basePath + '/details');
+
+    expect(result.status).equals(200);
+    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
+  });
 });

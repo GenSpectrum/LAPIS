@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { lapisClient } from './common';
 import fs from 'fs';
 import { SequenceFilters } from './lapisClient';
+import { basePath } from './common';
 
 describe('The /nucleotideMutationProportions endpoint', () => {
   let mutationWithLessThan10PercentProportion = 'C19220T';
@@ -81,5 +82,12 @@ describe('The /nucleotideMutationProportions endpoint', () => {
 
     expect(resultWithLimitAndOffset).to.have.length(2);
     expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+  });
+
+  it('should return the lapis data version in the response', async () => {
+    const result = await fetch(basePath + '/nucleotideMutations');
+
+    expect(result.status).equals(200);
+    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
   });
 });
