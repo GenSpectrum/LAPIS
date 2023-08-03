@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.util.Collections
 import java.util.Enumeration
 
 private val log = KotlinLogging.logger {}
+
+const val TEXT_CSV_HEADER = "text/csv"
+const val TEXT_TSV_HEADER = "text/tab-separated-values"
 
 @Component
 class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter() {
@@ -36,8 +40,20 @@ class AcceptHeaderModifyingRequestWrapper(
         if (name.equals("Accept", ignoreCase = true)) {
             when (reReadableRequest.getRequestFields()[FORMAT_PROPERTY]?.textValue()?.uppercase()) {
                 "CSV" -> {
-                    log.debug { "Overwriting Accept header to text/csv due to format property" }
-                    return "text/csv"
+                    log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
+                    return TEXT_CSV_HEADER
+                }
+
+                "TSV" -> {
+                    log.debug { "Overwriting Accept header to $TEXT_TSV_HEADER due to format property" }
+                    return TEXT_TSV_HEADER
+                }
+
+                "JSON" -> {
+                    log.debug {
+                        "Overwriting Accept header to ${MediaType.APPLICATION_JSON_VALUE} due to format property"
+                    }
+                    return MediaType.APPLICATION_JSON_VALUE
                 }
 
                 else -> {}
@@ -51,8 +67,20 @@ class AcceptHeaderModifyingRequestWrapper(
         if (name.equals("Accept", ignoreCase = true)) {
             when (reReadableRequest.getRequestFields()[FORMAT_PROPERTY]?.textValue()?.uppercase()) {
                 "CSV" -> {
-                    log.debug { "Overwriting Accept header to text/csv due to format property" }
-                    return Collections.enumeration(listOf("text/csv"))
+                    log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
+                    return Collections.enumeration(listOf(TEXT_CSV_HEADER))
+                }
+
+                "TSV" -> {
+                    log.debug { "Overwriting Accept header to $TEXT_TSV_HEADER due to format property" }
+                    return Collections.enumeration(listOf(TEXT_TSV_HEADER))
+                }
+
+                "JSON" -> {
+                    log.debug {
+                        "Overwriting Accept header to ${MediaType.APPLICATION_JSON_VALUE} due to format property"
+                    }
+                    return Collections.enumeration(listOf(MediaType.APPLICATION_JSON_VALUE))
                 }
 
                 else -> {}

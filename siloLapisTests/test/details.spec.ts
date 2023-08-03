@@ -109,4 +109,24 @@ Solothurn,EPI_ISL_1002052,B.1
     `.trim()
     );
   });
+
+  it('should return the data as TSV', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'gisaid_epi_isl,pango_lineage,division',
+      orderBy: 'gisaid_epi_isl',
+      limit: '3',
+      dataFormat: 'tsv',
+    });
+
+    const result = await fetch(basePath + '/details?' + urlParams.toString());
+
+    expect(await result.text()).to.be.equal(
+      String.raw`
+division	gisaid_epi_isl	pango_lineage
+Vaud	EPI_ISL_1001493	B.1.177.44
+Bern	EPI_ISL_1001920	B.1.177
+Solothurn	EPI_ISL_1002052	B.1
+    `.trim()
+    );
+  });
 });

@@ -26,6 +26,23 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
+    val listOfMetadata = listOf(
+        mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+        mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43)),
+    )
+
+    val metadataCsv = """
+        country,age
+        Switzerland,42
+        Switzerland,43
+    """.trimIndent()
+
+    val metadataTsv = """
+        country	age
+        Switzerland	42
+        Switzerland	43
+    """.trimIndent()
+
     @Test
     fun `GET empty details return empty CSV`() {
         every {
@@ -62,26 +79,39 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
+    fun `GET details as TSV with accept header`() {
+        every {
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOfMetadata
+
+        mockMvc.perform(get("/details?country=Switzerland").header("Accept", "text/tab-separated-values"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(metadataTsv))
+    }
+
+    @Test
     fun `GET details as CSV with request parameter`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(
-            mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
-            mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43)),
-        )
+        } returns listOfMetadata
 
         mockMvc.perform(get("/details?country=Switzerland&dataFormat=csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(
-                content().string(
-                    """
-                        country,age
-                        Switzerland,42
-                        Switzerland,43
-                    """.trimIndent(),
-                ),
-            )
+            .andExpect(content().string(metadataCsv))
+    }
+
+    @Test
+    fun `GET details as TSV with request parameter`() {
+        every {
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOfMetadata
+
+        mockMvc.perform(get("/details?country=Switzerland&dataFormat=tsv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(metadataTsv))
     }
 
     @Test
@@ -105,7 +135,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     fun `POST details as CSV with accept header`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns emptyList()
+        } returns listOfMetadata
 
         val request = post("/details")
             .content("""{"country": "Switzerland"}""")
@@ -115,14 +145,31 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
+            .andExpect(content().string(metadataCsv))
+    }
+
+    @Test
+    fun `POST details as TSV with accept header`() {
+        every {
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOfMetadata
+
+        val request = post("/details")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/tab-separated-values")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(metadataTsv))
     }
 
     @Test
     fun `POST details as CSV with request parameter`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns emptyList()
+        } returns listOfMetadata
 
         val request = post("/details")
             .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
@@ -131,7 +178,23 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
+            .andExpect(content().string(metadataCsv))
+    }
+
+    @Test
+    fun `POST details as TSV with request parameter`() {
+        every {
+            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+        } returns listOfMetadata
+
+        val request = post("/details")
+            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(metadataTsv))
     }
 
     private fun sequenceFiltersRequestWithFields(

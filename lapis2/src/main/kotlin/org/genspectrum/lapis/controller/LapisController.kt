@@ -237,10 +237,11 @@ class LapisController(
         return siloQueryModel.getDetails(request)
     }
 
-    @GetMapping("/details", produces = ["text/csv"])
+    @GetMapping("/details", produces = [TEXT_CSV_HEADER])
     @Operation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "getDetailsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
     )
     fun getDetailsAsCsv(
         @SequenceFilters
@@ -285,7 +286,59 @@ class LapisController(
             offset,
         )
 
-        return getDetailsAsCsv(request)
+        return getDetailsAsCsv(request, Delimiter.COMMA)
+    }
+
+    @GetMapping("/details", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "getDetailsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getDetailsAsTsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by." +
+                " Fields specified here must also be present in \"fields\".",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        return getDetailsAsCsv(request, Delimiter.TAB)
     }
 
     @PostMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -304,20 +357,35 @@ class LapisController(
         return siloQueryModel.getDetails(request)
     }
 
-    @PostMapping("/details", produces = ["text/csv"])
+    @PostMapping("/details", produces = [TEXT_CSV_HEADER])
     @Operation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "postDetailsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
     )
     fun postDetailsAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getDetailsAsCsv(request)
+        return getDetailsAsCsv(request, Delimiter.COMMA)
     }
 
-    private fun getDetailsAsCsv(request: SequenceFiltersRequestWithFields): String {
+    @PostMapping("/details", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "postDetailsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postDetailsAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+    ): String {
+        return getDetailsAsCsv(request, Delimiter.TAB)
+    }
+
+    private fun getDetailsAsCsv(request: SequenceFiltersRequestWithFields, delimiter: Delimiter): String {
         requestContext.filter = request
 
         val data = siloQueryModel.getDetails(request)
@@ -327,7 +395,7 @@ class LapisController(
         }
 
         val headers = data[0].keys.toTypedArray<String>()
-        return csvWriter.write(headers, data.map { it.asCsvRecord() })
+        return csvWriter.write(headers, data.map { it.asCsvRecord() }, delimiter)
     }
 }
 
