@@ -15,9 +15,9 @@ results are generated from the exact same underlying dataset.
 Here is an example of a potential problem: Imagine you would like to obtain the proportion of sequences from Oceania in
 the whole dataset. To calculate it, you could make two API requests: the first to get the number of sequences from
 Oceania and the second for the total number of available sequences. However, an error arises if the dataset gets updated
-between the two requests and new sequences (including some from Oceania) are added. Then, when you divide the number
-from the first request by the number of the second request to obtain the proportion, the result would be too small and
-neither reflect the correct proportion in the previous dataset nor the proportion in the new dataset.
+between the two requests and new sequences from Oceania are added. Then, when you divide the number from the first
+request by the number of the second request to obtain the proportion, the result would be too small and neither reflect
+the correct proportion in the previous dataset nor the proportion in the new dataset.
 
 ## Solution
 
