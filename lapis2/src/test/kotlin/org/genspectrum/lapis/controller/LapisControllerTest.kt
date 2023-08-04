@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.DataVersion
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -27,6 +30,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
+
+    @MockkBean
+    lateinit var dataVersion: DataVersion
+
+    @BeforeEach
+    fun setup() {
+        every {
+            dataVersion.dataVersion
+        } returns "1234"
+    }
 
     @Test
     fun `GET aggregated`() {
@@ -44,6 +57,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$[0].count").value(0))
             .andExpect(jsonPath("\$[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$[0].age").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test
@@ -63,6 +77,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test
@@ -164,6 +179,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test
@@ -226,6 +242,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$[0].position").value("the mutation"))
             .andExpect(jsonPath("\$[0].proportion").value(0.5))
             .andExpect(jsonPath("\$[0].count").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test
@@ -252,6 +269,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$[0].age").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test
@@ -285,6 +303,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$[0].age").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
     @Test

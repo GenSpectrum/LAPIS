@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { lapisClient } from './common';
+import { lapisClient, basePath } from './common';
 import fs from 'fs';
 import { AggregatedPostRequest } from './lapisClient/models/AggregatedPostRequest';
 import { AggregatedResponse } from './lapisClient/models/AggregatedResponse';
@@ -90,5 +90,12 @@ describe('The /aggregated endpoint', () => {
 
     expect(resultWithLimitAndOffset).to.have.length(2);
     expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+  });
+
+  it('should return the lapis data version in the response', async () => {
+    const result = await fetch(basePath + '/aggregated');
+
+    expect(result.status).equals(200);
+    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
   });
 });
