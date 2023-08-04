@@ -29,9 +29,14 @@ e.g. when running via gradle:
 ./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config>'
 ```
 
-Use Docker Compose to run SILO and LAPIS:
+Use Docker Compose to preprocess data, e.g. via:
 ```
-LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up
+LAPIS_TAG=latest SILO_TAG=latest docker compose -f docker-compose-silo-preprocessing-for-e2e.yml up
+```
+
+Use Docker Compose to run SILO and LAPIS (after preprocessing):
+```
+LAPIS_TAG=latest SILO_TAG=latest docker compose up
 ```
 
 ## End-to-end tests
