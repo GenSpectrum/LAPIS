@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
-
-const val FIELDS_PROPERTY = "fields"
 
 data class SequenceFiltersRequestWithFields(
     override val sequenceFilters: Map<String, String>,

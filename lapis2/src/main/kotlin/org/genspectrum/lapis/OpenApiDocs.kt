@@ -11,27 +11,28 @@ import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.AGGREGATED_RESPONSE_SCHEMA
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_RESPONSE_SCHEMA
+import org.genspectrum.lapis.controller.FIELDS_PROPERTY
+import org.genspectrum.lapis.controller.FORMAT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
+import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_SCHEMA
+import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_SCHEMA
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.OFFSET_PROPERTY
 import org.genspectrum.lapis.controller.OFFSET_SCHEMA
 import org.genspectrum.lapis.controller.ORDER_BY_FIELDS_SCHEMA
+import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.controller.SEQUENCE_FILTERS_SCHEMA
-import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.FIELDS_PROPERTY
-import org.genspectrum.lapis.request.LIMIT_PROPERTY
-import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
-import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.NucleotideMutation
-import org.genspectrum.lapis.request.OFFSET_PROPERTY
-import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 
@@ -48,7 +49,8 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
         Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
         Pair(ORDER_BY_PROPERTY, orderByPostSchema()) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
-        Pair(OFFSET_PROPERTY, offsetSchema())
+        Pair(OFFSET_PROPERTY, offsetSchema()) +
+        Pair(FORMAT_PROPERTY, formatSchema())
 
     return OpenAPI()
         .components(
@@ -225,3 +227,12 @@ private fun offsetSchema() = Schema<Int>()
 private fun fieldsSchema() = Schema<String>()
     .type("array")
     .items(Schema<String>().type("string"))
+
+private fun formatSchema() = Schema<String>()
+    .type("string")
+    .description(
+        "The data format of the response. " +
+            "Alternatively, the data format can be specified by setting the \"Accept\"-header.",
+    )
+    ._enum(listOf("csv", "tsv", "json"))
+    ._default("json")

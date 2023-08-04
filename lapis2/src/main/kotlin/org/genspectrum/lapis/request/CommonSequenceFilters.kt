@@ -4,19 +4,12 @@ import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
-import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
-
-const val NUCLEOTIDE_MUTATIONS_PROPERTY = "nucleotideMutations"
-const val AMINO_ACID_MUTATIONS_PROPERTY = "aminoAcidMutations"
-const val ORDER_BY_PROPERTY = "orderBy"
-const val LIMIT_PROPERTY = "limit"
-const val OFFSET_PROPERTY = "offset"
-
-private val nonSequenceFilterPrimitiveFields = listOf(
-    LIMIT_PROPERTY,
-    OFFSET_PROPERTY,
-    ACCESS_KEY_PROPERTY,
-)
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.LIMIT_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.OFFSET_PROPERTY
+import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
+import org.genspectrum.lapis.controller.SPECIAL_REQUEST_PROPERTIES
 
 interface CommonSequenceFilters {
     val sequenceFilters: Map<String, String>
@@ -71,7 +64,7 @@ fun parseCommonFields(node: JsonNode, codec: ObjectCodec): ParsedCommonFields {
     val sequenceFilters = node.fields()
         .asSequence()
         .filter { isStringOrNumber(it.value) }
-        .filter { !nonSequenceFilterPrimitiveFields.contains(it.key) }
+        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
         .associate { it.key to it.value.asText() }
     return ParsedCommonFields(nucleotideMutations, aminoAcidMutations, sequenceFilters, orderByFields, limit, offset)
 }

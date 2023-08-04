@@ -1,15 +1,23 @@
 package org.genspectrum.lapis.util
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.ReadListener
 import jakarta.servlet.ServletInputStream
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
+import mu.KotlinLogging
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 
-class CachedBodyHttpServletRequest(request: HttpServletRequest) : HttpServletRequestWrapper(request) {
+private val log = KotlinLogging.logger {}
+
+class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper: ObjectMapper) :
+    HttpServletRequestWrapper(request) {
     private val cachedBody: ByteArray by lazy {
         val inputStream: InputStream = request.inputStream
         val byteArrayOutputStream = ByteArrayOutputStream()
@@ -41,6 +49,25 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest) : HttpServletReq
         @Throws(IOException::class)
         override fun read(): Int {
             return cachedInputStream.read()
+        }
+    }
+
+    fun getRequestFields(): Map<String, JsonNode> {
+        if (parameterNames.hasMoreElements()) {
+            return parameterMap.mapValues { (_, value) -> TextNode(value.joinToString()) }
+        }
+
+        if (contentLength == 0) {
+            log.warn { "Could not read from request body, because content length is 0." }
+            return emptyMap()
+        }
+
+        return try {
+            objectMapper.readValue(inputStream)
+        } catch (exception: Exception) {
+            log.error { "Failed to read from request body: ${exception.message}" }
+            log.debug { exception.stackTraceToString() }
+            emptyMap()
         }
     }
 }

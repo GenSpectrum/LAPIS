@@ -8,25 +8,18 @@ import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import org.genspectrum.lapis.auth.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.FIELDS_PROPERTY
-import org.genspectrum.lapis.request.LIMIT_PROPERTY
-import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.request.MutationProportionsRequest
-import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.NucleotideMutation
-import org.genspectrum.lapis.request.OFFSET_PROPERTY
-import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.silo.DetailsData
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -46,6 +39,7 @@ const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 
+const val DETAILS_ENDPOINT_DESCRIPTION = "Returns the specified metadata fields of sequences matching the filter."
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
 const val DETAILS_FIELDS_DESCRIPTION =
@@ -55,21 +49,11 @@ const val OFFSET_DESCRIPTION = "The offset of the first entry to return in the r
     "This is useful for pagination in combination with \"limit\"."
 
 @RestController
-class LapisController(private val siloQueryModel: SiloQueryModel, private val requestContext: RequestContext) {
-    companion object {
-        private val nonSequenceFilterFields =
-            listOf(
-                MIN_PROPORTION_PROPERTY,
-                ACCESS_KEY_PROPERTY,
-                FIELDS_PROPERTY,
-                NUCLEOTIDE_MUTATIONS_PROPERTY,
-                AMINO_ACID_MUTATIONS_PROPERTY,
-                ORDER_BY_PROPERTY,
-                LIMIT_PROPERTY,
-                OFFSET_PROPERTY,
-            )
-    }
-
+class LapisController(
+    private val siloQueryModel: SiloQueryModel,
+    private val requestContext: RequestContext,
+    private val csvWriter: CsvWriter,
+) {
     @GetMapping("/aggregated")
     @LapisAggregatedResponse
     fun aggregated(
@@ -109,7 +93,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         offset: Int? = null,
     ): List<AggregationData> {
         val request = SequenceFiltersRequestWithFields(
-            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             fields ?: emptyList(),
@@ -173,7 +157,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         offset: Int? = null,
     ): List<MutationData> {
         val request = MutationProportionsRequest(
-            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             minProportion,
@@ -199,9 +183,13 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         return siloQueryModel.computeMutationProportions(request)
     }
 
-    @GetMapping("/details")
+    @GetMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
-    fun details(
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "getDetails",
+    )
+    fun getDetailsAsJson(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
@@ -235,7 +223,7 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         offset: Int? = null,
     ): List<DetailsData> {
         val request = SequenceFiltersRequestWithFields(
-            sequenceFilters?.filter { !nonSequenceFilterFields.contains(it.key) } ?: emptyMap(),
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             fields ?: emptyList(),
@@ -249,9 +237,117 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
         return siloQueryModel.getDetails(request)
     }
 
-    @PostMapping("/details")
+    @GetMapping("/details", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "getDetailsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getDetailsAsCsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by." +
+                " Fields specified here must also be present in \"fields\".",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        return getDetailsAsCsv(request, Delimiter.COMMA)
+    }
+
+    @GetMapping("/details", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "getDetailsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getDetailsAsTsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by." +
+                " Fields specified here must also be present in \"fields\".",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        return getDetailsAsCsv(request, Delimiter.TAB)
+    }
+
+    @PostMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
-    fun postDetails(
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "postDetails",
+    )
+    fun postDetailsAsJson(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
@@ -260,38 +356,60 @@ class LapisController(private val siloQueryModel: SiloQueryModel, private val re
 
         return siloQueryModel.getDetails(request)
     }
+
+    @PostMapping("/details", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "postDetailsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postDetailsAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+    ): String {
+        return getDetailsAsCsv(request, Delimiter.COMMA)
+    }
+
+    @PostMapping("/details", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = DETAILS_ENDPOINT_DESCRIPTION,
+        operationId = "postDetailsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postDetailsAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+    ): String {
+        return getDetailsAsCsv(request, Delimiter.TAB)
+    }
+
+    private fun getDetailsAsCsv(request: SequenceFiltersRequestWithFields, delimiter: Delimiter): String {
+        requestContext.filter = request
+
+        val data = siloQueryModel.getDetails(request)
+
+        if (data.isEmpty()) {
+            return ""
+        }
+
+        val headers = data[0].keys.toTypedArray<String>()
+        return csvWriter.write(headers, data.map { it.asCsvRecord() }, delimiter)
+    }
 }
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = "Returns the number of sequences matching the specified sequence filters",
-    responses = [
-        ApiResponse(
-            responseCode = "200",
-            description = "OK",
-            content = [
-                Content(
-                    array = ArraySchema(
-                        schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA"),
-                    ),
-                ),
-            ],
-        ),
-        ApiResponse(
-            responseCode = "400",
-            description = "Bad Request",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "403",
-            description = "Forbidden",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "500",
-            description = "Internal Server Error",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+@Operation(description = "Returns the number of sequences matching the specified sequence filters")
+@ApiResponse(
+    responseCode = "200",
+    description = "OK",
+    content = [
+        Content(
+            array = ArraySchema(
+                schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA"),
+            ),
         ),
     ],
 )
@@ -302,61 +420,24 @@ private annotation class LapisAggregatedResponse
 @Operation(
     description = "Returns a list of mutations along with properties whose proportions are greater than or equal to " +
         "the specified minProportion. Only sequences matching the specified sequence filters are considered.",
-    responses = [
-        ApiResponse(
-            responseCode = "200",
-            description = "OK",
-            content = [Content(array = ArraySchema(schema = Schema(implementation = MutationData::class)))],
-        ),
-        ApiResponse(
-            responseCode = "400",
-            description = "Bad Request",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "403",
-            description = "Forbidden",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "500",
-            description = "Internal Server Error",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-    ],
+)
+@ApiResponse(
+    responseCode = "200",
+    description = "OK",
+    content = [Content(array = ArraySchema(schema = Schema(implementation = MutationData::class)))],
 )
 private annotation class LapisNucleotideMutationsResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = "Returns the specified metadata fields of sequences matching the filter.",
-    responses = [
-        ApiResponse(
-            responseCode = "200",
-            description = "OK",
-            content = [
-                Content(
-                    array = ArraySchema(
-                        schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA"),
-                    ),
-                ),
-            ],
-        ),
-        ApiResponse(
-            responseCode = "400",
-            description = "Bad Request",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "403",
-            description = "Forbidden",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
-        ),
-        ApiResponse(
-            responseCode = "500",
-            description = "Internal Server Error",
-            content = [Content(schema = Schema(implementation = LapisHttpErrorResponse::class))],
+@ApiResponse(
+    responseCode = "200",
+    description = "OK",
+    content = [
+        Content(
+            array = ArraySchema(
+                schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA"),
+            ),
         ),
     ],
 )

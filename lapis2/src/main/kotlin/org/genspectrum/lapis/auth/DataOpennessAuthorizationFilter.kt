@@ -1,25 +1,20 @@
 package org.genspectrum.lapis.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
 import org.genspectrum.lapis.config.AccessKeys
 import org.genspectrum.lapis.config.AccessKeysReader
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.OpennessLevel
+import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.LapisHttpErrorResponse
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-
-const val ACCESS_KEY_PROPERTY = "accessKey"
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class DataOpennessAuthorizationFilterFactory(
@@ -63,7 +58,7 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
     }
 
     private fun makeRequestBodyReadableMoreThanOnce(request: HttpServletRequest) =
-        CachedBodyHttpServletRequest(request)
+        CachedBodyHttpServletRequest(request, objectMapper)
 
     abstract fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult
 }
@@ -75,7 +70,7 @@ sealed interface AuthorizationResult {
         fun failure(message: String): AuthorizationResult = Failure(message)
     }
 
-    object Success : AuthorizationResult
+    data object Success : AuthorizationResult
 
     class Failure(val message: String) : AuthorizationResult
 }
@@ -103,9 +98,9 @@ private class ProtectedDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        val requestFields = getRequestFields(request)
+        val requestFields = request.getRequestFields()
 
-        val accessKey = requestFields[ACCESS_KEY_PROPERTY]
+        val accessKey = requestFields[ACCESS_KEY_PROPERTY]?.textValue()
             ?: return AuthorizationResult.failure("An access key is required to access ${request.requestURI}.")
 
         if (accessKeys.fullAccessKey == accessKey) {
@@ -120,24 +115,5 @@ private class ProtectedDataAuthorizationFilter(
         }
 
         return AuthorizationResult.failure("You are not authorized to access ${request.requestURI}.")
-    }
-
-    private fun getRequestFields(request: CachedBodyHttpServletRequest): Map<String, String> {
-        if (request.parameterNames.hasMoreElements()) {
-            return request.parameterMap.mapValues { (_, value) -> value.joinToString() }
-        }
-
-        if (request.contentLength == 0) {
-            log.warn { "Could not read access key from body, because content length is 0." }
-            return emptyMap()
-        }
-
-        return try {
-            objectMapper.readValue(request.inputStream)
-        } catch (exception: Exception) {
-            log.error { "Failed to read access key from request body: ${exception.message}" }
-            log.debug { exception.stackTraceToString() }
-            emptyMap()
-        }
     }
 }
