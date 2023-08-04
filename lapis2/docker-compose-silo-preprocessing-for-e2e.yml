@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  silo:
+    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    ports:
+      - "8081:8081"
+    command:
+      - "--preprocessing"
+      - "--preprocessingConfig=/data/preprocessingConfig.yaml"
+      - "--databaseConfig=/data/databaseConfig.yaml"
+    volumes:
+      - type: bind
+        source: ../siloLapisTests/testData
+        target: /data

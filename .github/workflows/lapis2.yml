@@ -138,6 +138,10 @@ jobs:
           check-name: Build Docker Image
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       -
+        name: Start SILO preprocessing
+        run: |
+          docker compose -f lapis2/docker-compose-silo-preprocessing-for-e2e.yml up
+      -
         name: Start SILO and LAPIS and Run Tests
         run: |
           docker compose -f lapis2/docker-compose.yml up -d --wait

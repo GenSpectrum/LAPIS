@@ -17,7 +17,6 @@ services:
     command:
       - "--api"
       - "--preprocessingConfig=/data/preprocessingConfig.yaml"
-      - "--databaseConfig=/data/testDatabaseConfig.yaml"
     volumes:
       - type: bind
         source: ../siloLapisTests/testData
