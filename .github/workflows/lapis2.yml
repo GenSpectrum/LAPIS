@@ -141,6 +141,8 @@ jobs:
         name: Start SILO preprocessing
         run: |
           docker compose -f lapis2/docker-compose-silo-preprocessing-for-e2e.yml up
+        env:
+          SILO_TAG: latest
       -
         name: Start SILO and LAPIS and Run Tests
         run: |
