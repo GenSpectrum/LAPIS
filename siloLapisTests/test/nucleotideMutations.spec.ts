@@ -1,8 +1,5 @@
 import { expect } from 'chai';
-import { lapisClient } from './common';
-import fs from 'fs';
-import { SequenceFilters } from './lapisClient';
-import { basePath } from './common';
+import { basePath, lapisClient } from './common';
 
 describe('The /nucleotideMutationProportions endpoint', () => {
   let mutationWithLessThan10PercentProportion = 'C19220T';
@@ -13,15 +10,15 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
-    expect(result).to.have.length(362);
+    expect(result.data).to.have.length(362);
 
-    const rareMutationProportion = result.find(
+    const rareMutationProportion = result.data.find(
       mutationData => mutationData.position === mutationWithLessThan10PercentProportion
     );
     expect(rareMutationProportion?.count).to.equal(8);
     expect(rareMutationProportion?.proportion).to.be.approximately(0.0816, 0.0001);
 
-    const commonMutationProportion = result.find(
+    const commonMutationProportion = result.data.find(
       mutationProportion => mutationProportion.position === mutationWithMoreThan50PercentProportion
     );
     expect(commonMutationProportion?.count).to.equal(51);
@@ -36,9 +33,9 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       },
     });
 
-    expect(result).to.have.length(108);
+    expect(result.data).to.have.length(108);
 
-    const mutationsAboveThreshold = result.map(mutationData => mutationData.position);
+    const mutationsAboveThreshold = result.data.map(mutationData => mutationData.position);
     expect(mutationsAboveThreshold).to.contain(mutationWithMoreThan50PercentProportion);
     expect(mutationsAboveThreshold).to.not.contain(mutationWithLessThan10PercentProportion);
   });
@@ -50,7 +47,7 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult[0]).to.have.property('position', 'A1-');
+    expect(ascendingOrderedResult.data[0]).to.have.property('position', 'A1-');
 
     const descendingOrderedResult = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
@@ -58,7 +55,7 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       },
     });
 
-    expect(descendingOrderedResult[0]).to.have.property('position', 'T9-');
+    expect(descendingOrderedResult.data[0]).to.have.property('position', 'T9-');
   });
 
   it('should apply limit and offset', async () => {
@@ -69,8 +66,8 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       },
     });
 
-    expect(resultWithLimit).to.have.length(2);
-    expect(resultWithLimit[1]).to.have.property('position', 'A11201G');
+    expect(resultWithLimit.data).to.have.length(2);
+    expect(resultWithLimit.data[1]).to.have.property('position', 'A11201G');
 
     const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
@@ -80,8 +77,8 @@ describe('The /nucleotideMutationProportions endpoint', () => {
       },
     });
 
-    expect(resultWithLimitAndOffset).to.have.length(2);
-    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+    expect(resultWithLimitAndOffset.data).to.have.length(2);
+    expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
   it('should return the lapis data version in the response', async () => {

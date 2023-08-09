@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
-import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -91,7 +90,7 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
-    ): List<AggregationData> {
+    ): LapisResponse<List<AggregationData>> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -104,7 +103,7 @@ class LapisController(
 
         requestContext.filter = request
 
-        return siloQueryModel.aggregate(request)
+        return LapisResponse(siloQueryModel.aggregate(request))
     }
 
     @PostMapping("/aggregated")
@@ -113,10 +112,10 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
-    ): List<AggregationData> {
+    ): LapisResponse<List<AggregationData>> {
         requestContext.filter = request
 
-        return siloQueryModel.aggregate(request)
+        return LapisResponse(siloQueryModel.aggregate(request))
     }
 
     @GetMapping("/nucleotideMutations")
@@ -155,7 +154,7 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
-    ): List<MutationData> {
+    ): LapisResponse<List<MutationData>> {
         val request = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -168,7 +167,7 @@ class LapisController(
 
         requestContext.filter = request
 
-        return siloQueryModel.computeMutationProportions(request)
+        return LapisResponse(siloQueryModel.computeMutationProportions(request))
     }
 
     @PostMapping("/nucleotideMutations")
@@ -177,10 +176,10 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
         request: MutationProportionsRequest,
-    ): List<MutationData> {
+    ): LapisResponse<List<MutationData>> {
         requestContext.filter = request
 
-        return siloQueryModel.computeMutationProportions(request)
+        return LapisResponse(siloQueryModel.computeMutationProportions(request))
     }
 
     @GetMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -221,7 +220,7 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
-    ): List<DetailsData> {
+    ): LapisResponse<List<DetailsData>> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -234,7 +233,7 @@ class LapisController(
 
         requestContext.filter = request
 
-        return siloQueryModel.getDetails(request)
+        return LapisResponse(siloQueryModel.getDetails(request))
     }
 
     @GetMapping("/details", produces = [TEXT_CSV_HEADER])
@@ -351,10 +350,10 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
-    ): List<DetailsData> {
+    ): LapisResponse<List<DetailsData>> {
         requestContext.filter = request
 
-        return siloQueryModel.getDetails(request)
+        return LapisResponse(siloQueryModel.getDetails(request))
     }
 
     @PostMapping("/details", produces = [TEXT_CSV_HEADER])
@@ -406,11 +405,7 @@ class LapisController(
     responseCode = "200",
     description = "OK",
     content = [
-        Content(
-            array = ArraySchema(
-                schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA"),
-            ),
-        ),
+        Content(schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA")),
     ],
 )
 private annotation class LapisAggregatedResponse
@@ -424,7 +419,7 @@ private annotation class LapisAggregatedResponse
 @ApiResponse(
     responseCode = "200",
     description = "OK",
-    content = [Content(array = ArraySchema(schema = Schema(implementation = MutationData::class)))],
+    useReturnTypeSchema = true,
 )
 private annotation class LapisNucleotideMutationsResponse
 
@@ -434,11 +429,7 @@ private annotation class LapisNucleotideMutationsResponse
     responseCode = "200",
     description = "OK",
     content = [
-        Content(
-            array = ArraySchema(
-                schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA"),
-            ),
-        ),
+        Content(schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA")),
     ],
 )
 private annotation class LapisDetailsResponse

@@ -12,8 +12,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(result).to.have.length(2);
-    expect(result[0]).to.be.deep.equal({
+    expect(result.data).to.have.length(2);
+    expect(result.data[0]).to.be.deep.equal({
       age: undefined,
       country: undefined,
       date: undefined,
@@ -32,8 +32,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(result).to.have.length(2);
-    expect(result[0]).to.be.deep.equal({
+    expect(result.data).to.have.length(2);
+    expect(result.data[0]).to.be.deep.equal({
       age: 50,
       country: 'Switzerland',
       date: '2021-07-19',
@@ -53,7 +53,7 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult[0]).to.have.property('division', 'Aargau');
+    expect(ascendingOrderedResult.data[0]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postDetails1({
       detailsPostRequest: {
@@ -62,7 +62,7 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(descendingOrderedResult[0]).to.have.property('division', 'Zürich');
+    expect(descendingOrderedResult.data[0]).to.have.property('division', 'Zürich');
   });
 
   it('should apply limit and offset', async () => {
@@ -74,8 +74,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(resultWithLimit).to.have.length(2);
-    expect(resultWithLimit[1]).to.have.property('gisaidEpiIsl', 'EPI_ISL_1001920');
+    expect(resultWithLimit.data).to.have.length(2);
+    expect(resultWithLimit.data[1]).to.have.property('gisaidEpiIsl', 'EPI_ISL_1001920');
 
     const resultWithLimitAndOffset = await lapisClient.postDetails1({
       detailsPostRequest: {
@@ -86,8 +86,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(resultWithLimitAndOffset).to.have.length(2);
-    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+    expect(resultWithLimitAndOffset.data).to.have.length(2);
+    expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
   it('should return the data as CSV', async () => {
