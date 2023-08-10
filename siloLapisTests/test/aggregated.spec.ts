@@ -22,7 +22,7 @@ describe('The /aggregated endpoint', () => {
           aggregatedPostRequest: testCase.lapisRequest,
         });
 
-        const resultWithoutUndefined = result.map((aggregatedResponse: AggregatedResponse) => {
+        const resultWithoutUndefined = result.data.map(aggregatedResponse => {
           return Object.entries(aggregatedResponse)
             .filter(([, value]) => value !== undefined)
             .reduce(
@@ -44,7 +44,7 @@ describe('The /aggregated endpoint', () => {
       aminoAcidMutations: ['S:501Y', 'ORF1b:12'],
     });
 
-    expect(result).to.have.length(1);
+    expect(result.data).to.have.length(1);
   });
 
   it('should order by specified fields', async () => {
@@ -55,7 +55,7 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult[0]).to.have.property('division', 'Aargau');
+    expect(ascendingOrderedResult.data[0]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postAggregated({
       aggregatedPostRequest: {
@@ -64,7 +64,7 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(descendingOrderedResult[0]).to.have.property('division', 'Zürich');
+    expect(descendingOrderedResult.data[0]).to.have.property('division', 'Zürich');
   });
 
   it('should apply limit and offset', async () => {
@@ -76,8 +76,8 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(resultWithLimit).to.have.length(2);
-    expect(resultWithLimit[1]).to.have.property('division', 'Basel-Land');
+    expect(resultWithLimit.data).to.have.length(2);
+    expect(resultWithLimit.data[1]).to.have.property('division', 'Basel-Land');
 
     const resultWithLimitAndOffset = await lapisClient.postAggregated({
       aggregatedPostRequest: {
@@ -88,8 +88,8 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(resultWithLimitAndOffset).to.have.length(2);
-    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
+    expect(resultWithLimitAndOffset.data).to.have.length(2);
+    expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
   it('should return the lapis data version in the response', async () => {

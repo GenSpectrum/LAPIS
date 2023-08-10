@@ -9,7 +9,8 @@ import org.genspectrum.lapis.config.AccessKeysReader
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
-import org.genspectrum.lapis.controller.LapisHttpErrorResponse
+import org.genspectrum.lapis.controller.LapisError
+import org.genspectrum.lapis.controller.LapisErrorResponse
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -47,9 +48,11 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
                 response.contentType = MediaType.APPLICATION_JSON_VALUE
                 response.writer.write(
                     objectMapper.writeValueAsString(
-                        LapisHttpErrorResponse(
-                            "Forbidden",
-                            result.message,
+                        LapisErrorResponse(
+                            LapisError(
+                                "Forbidden",
+                                result.message,
+                            ),
                         ),
                     ),
                 )

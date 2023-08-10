@@ -14,7 +14,18 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+
+private const val notAuthorizedToAccessEndpointError = """
+{
+    "error" : {
+        "title": "Forbidden",
+        "message": "You are not authorized to access /aggregated."
+    }
+}
+"""
 
 @SpringBootTest(properties = ["lapis.databaseConfig.path=src/test/resources/config/protectedDataDatabaseConfig.yaml"])
 @AutoConfigureMockMvc
@@ -34,15 +45,17 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `given no access key in GET request to protected instance, then access is denied`() {
-        mockMvc.perform(MockMvcRequestBuilders.get(validRoute))
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(validRoute))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
-                MockMvcResultMatchers.content().json(
+                content().json(
                     """
                     {
-                      "title": "Forbidden",
-                      "message": "An access key is required to access /aggregated."
+                        "error" : {
+                            "title": "Forbidden",
+                            "message": "An access key is required to access /aggregated."
+                        }
                     }
                     """,
                 ),
@@ -52,14 +65,16 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `given no access key in POST request to protected instance, then access is denied`() {
         mockMvc.perform(postRequestWithBody(""))
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
-                MockMvcResultMatchers.content().json(
+                content().json(
                     """
                     {
-                      "title": "Forbidden",
-                      "message": "An access key is required to access /aggregated."
+                        "error" : {
+                            "title": "Forbidden",
+                            "message": "An access key is required to access /aggregated."
+                        }
                     }
                     """,
                 ),
@@ -68,17 +83,12 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `given wrong access key in GET request to protected instance, then access is denied`() {
-        mockMvc.perform(MockMvcRequestBuilders.get("$validRoute?accessKey=invalidKey"))
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("$validRoute?accessKey=invalidKey"))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
-                MockMvcResultMatchers.content().json(
-                    """
-                    {
-                      "title": "Forbidden",
-                      "message": "You are not authorized to access /aggregated."
-                    }
-                    """,
+                content().json(
+                    notAuthorizedToAccessEndpointError,
                 ),
             )
     }
@@ -86,16 +96,11 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `given wrong access key in POST request to protected instance, then access is denied`() {
         mockMvc.perform(postRequestWithBody("""{"accessKey": "invalidKey"}"""))
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
-                MockMvcResultMatchers.content().json(
-                    """
-                    {
-                      "title": "Forbidden",
-                      "message": "You are not authorized to access /aggregated."
-                    }
-                    """,
+                content().json(
+                    notAuthorizedToAccessEndpointError,
                 ),
             )
     }
@@ -103,10 +108,10 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `given valid access key for aggregated data in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
+            get("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
         )
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
@@ -121,8 +126,8 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                 }""",
             ),
         )
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
@@ -130,20 +135,11 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `given aggregated access key in GET request but filters are too fine-grained, then access is denied`() {
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
+            get("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
         )
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                MockMvcResultMatchers.content().json(
-                    """
-                    {
-                      "title": "Forbidden",
-                      "message": "You are not authorized to access /aggregated."
-                    }
-                    """,
-                ),
-            )
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(notAuthorizedToAccessEndpointError))
     }
 
     @Test
@@ -156,27 +152,18 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                 }""",
             ),
         )
-            .andExpect(MockMvcResultMatchers.status().isForbidden)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                MockMvcResultMatchers.content().json(
-                    """
-                    {
-                      "title": "Forbidden",
-                      "message": "You are not authorized to access /aggregated."
-                    }
-                    """,
-                ),
-            )
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(notAuthorizedToAccessEndpointError))
     }
 
     @Test
     fun `given valid access key for full access in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
-            MockMvcRequestBuilders.get("$validRoute?accessKey=testFullAccessKey&field1=value1"),
+            get("$validRoute?accessKey=testFullAccessKey&field1=value1"),
         )
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
@@ -191,8 +178,8 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                 }""",
             ),
         )
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
         verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
     }
@@ -202,20 +189,14 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `the swagger ui and api docs are always accessible`() {
-        mockMvc.perform(
-            MockMvcRequestBuilders.get("/swagger-ui/index.html"),
-        )
-            .andExpect(MockMvcResultMatchers.status().isOk)
+        mockMvc.perform(get("/swagger-ui/index.html"))
+            .andExpect(status().isOk)
 
-        mockMvc.perform(
-            MockMvcRequestBuilders.get("/api-docs"),
-        )
-            .andExpect(MockMvcResultMatchers.status().isOk)
+        mockMvc.perform(get("/api-docs"))
+            .andExpect(status().isOk)
 
-        mockMvc.perform(
-            MockMvcRequestBuilders.get("/api-docs.yaml"),
-        )
-            .andExpect(MockMvcResultMatchers.status().isOk)
+        mockMvc.perform(get("/api-docs.yaml"))
+            .andExpect(status().isOk)
     }
 
     private fun postRequestWithBody(body: String) =

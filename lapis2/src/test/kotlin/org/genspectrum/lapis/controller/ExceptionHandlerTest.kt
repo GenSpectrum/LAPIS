@@ -31,7 +31,7 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
 
     private val validRoute = "/aggregated"
     private fun MockKMatcherScope.validControllerCall() = lapisController.aggregated(any(), any(), any(), any(), any())
-    private val validResponse = emptyList<AggregationData>()
+    private val validResponse = LapisResponse(emptyList<AggregationData>())
 
     @Test
     fun `throw NOT_FOUND(404) when route is not found`() {
@@ -52,8 +52,10 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                 content().json(
                     """
                     {
-                      "title":"Unexpected error",
-                      "message":"SomeMessage"
+                        "error": {
+                            "title": "Unexpected error",
+                            "message": "SomeMessage"
+                         }
                     }
                     """,
                 ),
@@ -71,8 +73,10 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                 content().json(
                     """
                     {
-                      "title":"Silo error",
-                      "message":"SomeMessage"
+                        "error": {
+                            "title": "Silo error",
+                            "message": "SomeMessage"
+                         }
                     }
                     """,
                 ),
@@ -90,8 +94,10 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                 content().json(
                     """
                     {
-                      "title":"Bad request",
-                      "message":"SomeMessage"
+                        "error": {
+                            "title": "Bad request",
+                            "message": "SomeMessage"
+                         }
                     }
                     """,
                 ),
@@ -109,8 +115,10 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                 content().json(
                     """
                     {
-                      "title":"Not implemented",
-                      "message":"SomeMessage"
+                        "error": {
+                            "title": "Not implemented",
+                            "message": "SomeMessage"
+                         }
                     }
                     """,
                 ),

@@ -41,8 +41,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/aggregated?orderBy=country"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
-            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
@@ -61,8 +61,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/aggregated?orderBy=country,date"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
-            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
@@ -85,7 +85,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
     }
 
     @Test
@@ -122,7 +122,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
     }
 
     @Test
@@ -133,7 +133,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.message").value("orderByField must have a string property \"field\""))
+            .andExpect(jsonPath("\$.error.message").value("orderByField must have a string property \"field\""))
     }
 
     @Test
@@ -153,8 +153,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/aggregated?limit=100"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
-            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
@@ -178,7 +178,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
     }
 
     @Test
@@ -189,7 +189,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.message").value("limit must be a number or null"))
+            .andExpect(jsonPath("\$.error.message").value("limit must be a number or null"))
     }
 
     @Test
@@ -210,8 +210,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(get("/aggregated?offset=5"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
-            .andExpect(jsonPath("\$[0].country").value("Switzerland"))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
@@ -236,7 +236,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].count").value(0))
     }
 
     @Test
@@ -247,6 +247,6 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.message").value("offset must be a number or null"))
+            .andExpect(jsonPath("\$.error.message").value("offset must be a number or null"))
     }
 }

@@ -79,24 +79,28 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                 )
                 .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
-                    Schema<String>()
-                        .type("object")
-                        .description(
-                            "Aggregated sequence data. " +
-                                "If fields are specified, then these fields are also keys in the result. " +
-                                "The key 'count' is always present.",
-                        )
-                        .required(listOf(COUNT_PROPERTY))
-                        .properties(getAggregatedResponseProperties(metadataFieldSchemas(databaseConfig))),
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description(
+                                "Aggregated sequence data. " +
+                                    "If fields are specified, then these fields are also keys in the result. " +
+                                    "The key 'count' is always present.",
+                            )
+                            .required(listOf(COUNT_PROPERTY))
+                            .properties(getAggregatedResponseProperties(metadataFieldSchemas(databaseConfig))),
+                    ),
                 )
                 .addSchemas(
                     DETAILS_RESPONSE_SCHEMA,
-                    Schema<String>()
-                        .type("object")
-                        .description(
-                            "The response contains the metadata of every sequence matching the sequence filters.",
-                        )
-                        .properties(metadataFieldSchemas(databaseConfig)),
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description(
+                                "The response contains the metadata of every sequence matching the sequence filters.",
+                            )
+                            .properties(metadataFieldSchemas(databaseConfig)),
+                    ),
                 )
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
@@ -105,6 +109,13 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                 .addSchemas(OFFSET_SCHEMA, offsetSchema()),
         )
 }
+
+private fun lapisResponseSchema(dataSchema: Schema<Any>) =
+    Schema<Any>().type("object").properties(
+        mapOf(
+            "data" to Schema<Any>().type("array").items(dataSchema),
+        ),
+    ).required(listOf("data"))
 
 private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
