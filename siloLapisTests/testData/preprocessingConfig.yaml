@@ -1,6 +1,3 @@
-inputDirectory: ./
-outputDirectory: ./output/
 metadataFilename: small_metadata_set.tsv
-sequenceFilename: small_sequence_set.fasta
 pangoLineageDefinitionFilename: pangolineage_alias.json
 referenceGenomeFilename: reference-genomes.json
