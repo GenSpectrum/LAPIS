@@ -28,7 +28,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with a single orderBy field`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -48,7 +48,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with orderBy fields`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -68,7 +68,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated with flat orderBy fields`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -91,7 +91,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated with ascending and descending orderBy fields`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -139,7 +139,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with limit`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -160,7 +160,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated with limit`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -195,7 +195,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with offset`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),
@@ -217,7 +217,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated with offset`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     emptyList(),

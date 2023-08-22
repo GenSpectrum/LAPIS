@@ -35,7 +35,7 @@ class SiloQueryModelTest {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        underTest.aggregate(SequenceFiltersRequestWithFields(emptyMap(), emptyList(), emptyList(), emptyList()))
+        underTest.getAggregated(SequenceFiltersRequestWithFields(emptyMap(), emptyList(), emptyList(), emptyList()))
 
         verify {
             siloClientMock.sendQuery(

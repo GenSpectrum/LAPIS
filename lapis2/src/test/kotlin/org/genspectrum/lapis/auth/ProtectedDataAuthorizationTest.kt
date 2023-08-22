@@ -38,7 +38,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
 
     @BeforeEach
     fun setUp() {
-        every { siloQueryModelMock.aggregate(any()) } returns emptyList()
+        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
 
         MockKAnnotations.init(this)
     }
@@ -113,7 +113,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
     }
 
     @Test
@@ -129,7 +129,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
     }
 
     @Test
@@ -165,7 +165,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
     }
 
     @Test
@@ -181,7 +181,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
-        verify { siloQueryModelMock.aggregate(sequenceFilterRequest()) }
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
     }
 
     private fun sequenceFilterRequest() =

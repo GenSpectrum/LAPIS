@@ -8,6 +8,8 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -27,8 +29,8 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     lateinit var siloQueryModelMock: SiloQueryModel
 
     val listOfMetadata = listOf(
-        mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
-        mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43)),
+        DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))),
+        DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43))),
     )
 
     val metadataCsv = """
@@ -41,6 +43,23 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         country	age
         Switzerland	42
         Switzerland	43
+    """.trimIndent()
+
+    val aggregationData = listOf(
+        AggregationData(
+            0,
+            mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+        ),
+    )
+
+    val aggregationDataCsv = """
+        country,age,count
+        Switzerland,42,0
+    """.trimIndent()
+
+    val aggregationDataTsv = """
+        country	age	count
+        Switzerland	42	0
     """.trimIndent()
 
     @Test
@@ -60,8 +79,20 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(
-            mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42), "floatValue" to DoubleNode(3.14)),
-            mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43), "floatValue" to NullNode.instance),
+            DetailsData(
+                mapOf(
+                    "country" to TextNode("Switzerland"),
+                    "age" to IntNode(42),
+                    "floatValue" to DoubleNode(3.14),
+                ),
+            ),
+            DetailsData(
+                mapOf(
+                    "country" to TextNode("Switzerland"),
+                    "age" to IntNode(43),
+                    "floatValue" to NullNode.instance,
+                ),
+            ),
         )
 
         mockMvc.perform(get("/details?country=Switzerland").header("Accept", "text/csv"))
@@ -207,4 +238,127 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         fields,
         emptyList(),
     )
+
+    @Test
+    fun `GET aggregated returns empty CSV`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
+
+        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(""))
+    }
+
+    @Test
+    fun `GET aggregated as CSV with accept header`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataCsv))
+    }
+
+    @Test
+    fun `GET aggregated as TSV with accept header`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/tab-separated-values"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataTsv))
+    }
+
+    @Test
+    fun `GET aggregated as CSV with request parameter`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        mockMvc.perform(get("/aggregated?country=Switzerland&dataFormat=csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataCsv))
+    }
+
+    @Test
+    fun `GET aggregated as TSV with request parameter`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        mockMvc.perform(get("/aggregated?country=Switzerland&dataFormat=tsv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataTsv))
+    }
+
+    @Test
+    fun `POST aggregated returns empty CSV`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
+
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/csv")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(""))
+    }
+
+    @Test
+    fun `POST aggregated as CSV with accept header`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/csv")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataCsv))
+    }
+
+    @Test
+    fun `POST aggregated as TSV with accept header`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/tab-separated-values")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataTsv))
+    }
+
+    @Test
+    fun `POST aggregated as CSV with request parameter`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataCsv))
+    }
+
+    @Test
+    fun `POST aggregated as TSV with request parameter`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
+
+        val request = post("/aggregated")
+            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(aggregationDataTsv))
+    }
 }

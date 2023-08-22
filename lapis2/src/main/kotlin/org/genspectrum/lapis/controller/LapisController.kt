@@ -16,8 +16,8 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
-import org.genspectrum.lapis.silo.DetailsData
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -39,10 +39,16 @@ const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 
 const val DETAILS_ENDPOINT_DESCRIPTION = "Returns the specified metadata fields of sequences matching the filter."
+const val AGGREGATED_ENDPONT_DESCRIPTION = "Returns the number of sequences matching the specified sequence filters"
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
+const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
+    "The fields of the response to order by." +
+        "Fields specified here must either be \"count\" or also be present in \"fields\"."
 const val DETAILS_FIELDS_DESCRIPTION =
     "The fields that the response items should contain. If empty, all fields are returned"
+const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
+    "The fields of the response to order by. Fields specified here must also be present in \"fields\"."
 const val LIMIT_DESCRIPTION = "The maximum number of entries to return in the response"
 const val OFFSET_DESCRIPTION = "The offset of the first entry to return in the response. " +
     "This is useful for pagination in combination with \"limit\"."
@@ -53,7 +59,7 @@ class LapisController(
     private val requestContext: RequestContext,
     private val csvWriter: CsvWriter,
 ) {
-    @GetMapping("/aggregated")
+    @GetMapping("/aggregated", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
     fun aggregated(
         @SequenceFilters
@@ -64,8 +70,7 @@ class LapisController(
         fields: List<String>?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields to order by." +
-                " Fields specified here must either be \"count\" or also be present in \"fields\".",
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
         )
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -103,11 +108,125 @@ class LapisController(
 
         requestContext.filter = request
 
-        return LapisResponse(siloQueryModel.aggregate(request))
+        return LapisResponse(siloQueryModel.getAggregated(request))
     }
 
-    @PostMapping("/aggregated")
+    @GetMapping("/aggregated", produces = [TEXT_CSV_HEADER])
     @LapisAggregatedResponse
+    @Operation(
+        description = AGGREGATED_ENDPONT_DESCRIPTION,
+        operationId = "getAggregatedAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getAggregatedAsCsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
+            explode = Explode.TRUE,
+        )
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getAggregated)
+    }
+
+    @GetMapping("/aggregated", produces = [TEXT_TSV_HEADER])
+    @LapisAggregatedResponse
+    @Operation(
+        description = AGGREGATED_ENDPONT_DESCRIPTION,
+        operationId = "getAggregatedAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getAggregatedAsTsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @RequestParam
+        fields: List<String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
+            explode = Explode.TRUE,
+        )
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequestWithFields(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            fields ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getAggregated)
+    }
+
+    @PostMapping("/aggregated", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @LapisAggregatedResponse
+    @Operation(
+        description = AGGREGATED_ENDPONT_DESCRIPTION,
+        operationId = "postAggregated",
+    )
     fun postAggregated(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
@@ -115,7 +234,35 @@ class LapisController(
     ): LapisResponse<List<AggregationData>> {
         requestContext.filter = request
 
-        return LapisResponse(siloQueryModel.aggregate(request))
+        return LapisResponse(siloQueryModel.getAggregated(request))
+    }
+
+    @PostMapping("/aggregated", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = AGGREGATED_ENDPONT_DESCRIPTION,
+        operationId = "postAggregatedAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postAggregatedAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+    ): String {
+        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getAggregated)
+    }
+
+    @PostMapping("/aggregated", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = AGGREGATED_ENDPONT_DESCRIPTION,
+        operationId = "postAggregatedAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postAggregatedAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+    ): String {
+        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getAggregated)
     }
 
     @GetMapping("/nucleotideMutations")
@@ -197,8 +344,7 @@ class LapisController(
         fields: List<String>?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by." +
-                " Fields specified here must also be present in \"fields\".",
+            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
         )
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -251,8 +397,7 @@ class LapisController(
         fields: List<String>?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by." +
-                " Fields specified here must also be present in \"fields\".",
+            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
         )
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -285,7 +430,7 @@ class LapisController(
             offset,
         )
 
-        return getDetailsAsCsv(request, Delimiter.COMMA)
+        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getDetails)
     }
 
     @GetMapping("/details", produces = [TEXT_TSV_HEADER])
@@ -303,8 +448,7 @@ class LapisController(
         fields: List<String>?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by." +
-                " Fields specified here must also be present in \"fields\".",
+            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
         )
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -337,7 +481,7 @@ class LapisController(
             offset,
         )
 
-        return getDetailsAsCsv(request, Delimiter.TAB)
+        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getDetails)
     }
 
     @PostMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -367,7 +511,7 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getDetailsAsCsv(request, Delimiter.COMMA)
+        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getDetails)
     }
 
     @PostMapping("/details", produces = [TEXT_TSV_HEADER])
@@ -381,20 +525,24 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getDetailsAsCsv(request, Delimiter.TAB)
+        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getDetails)
     }
 
-    private fun getDetailsAsCsv(request: SequenceFiltersRequestWithFields, delimiter: Delimiter): String {
+    private fun getResponseAsCsv(
+        request: SequenceFiltersRequestWithFields,
+        delimiter: Delimiter,
+        getResponse: (request: SequenceFiltersRequestWithFields) -> List<CsvRecord>,
+    ): String {
         requestContext.filter = request
 
-        val data = siloQueryModel.getDetails(request)
+        val data = getResponse(request)
 
         if (data.isEmpty()) {
             return ""
         }
 
-        val headers = data[0].keys.toTypedArray<String>()
-        return csvWriter.write(headers, data.map { it.asCsvRecord() }, delimiter)
+        val headers = data[0].asHeader()
+        return csvWriter.write(headers, data, delimiter)
     }
 }
 

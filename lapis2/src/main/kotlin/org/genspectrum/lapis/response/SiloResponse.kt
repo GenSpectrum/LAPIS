@@ -8,11 +8,38 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import io.swagger.v3.oas.annotations.media.Schema
+import org.genspectrum.lapis.controller.CsvRecord
 import org.springframework.boot.jackson.JsonComponent
 
 const val COUNT_PROPERTY = "count"
 
-data class AggregationData(val count: Int, @Schema(hidden = true) val fields: Map<String, JsonNode>)
+data class AggregationData(val count: Int, @Schema(hidden = true) val fields: Map<String, JsonNode>) : CsvRecord {
+    override fun asArray() = fields.values.map { it.asText() }.plus(count.toString()).toTypedArray()
+    override fun asHeader() = fields.keys.plus(COUNT_PROPERTY).toTypedArray()
+}
+
+data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
+    override fun asArray() = values.map { it.asText() }.toTypedArray()
+    override fun asHeader() = keys.toTypedArray()
+}
+
+@JsonComponent
+class DetailsDataSerializer : JsonSerializer<DetailsData>() {
+    override fun serialize(value: DetailsData, gen: JsonGenerator, serializers: SerializerProvider) {
+        gen.writeStartObject()
+        value.forEach { (key, value) -> gen.writeObjectField(key, value) }
+        gen.writeEndObject()
+    }
+}
+
+@JsonComponent
+class DetailsDataDeserializer : JsonDeserializer<DetailsData>() {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DetailsData {
+        val node = p.readValueAsTree<JsonNode>()
+        val fields = node.fields().asSequence().associate { it.key to it.value }
+        return DetailsData(fields)
+    }
+}
 
 @JsonComponent
 class AggregationDataSerializer : JsonSerializer<AggregationData>() {
