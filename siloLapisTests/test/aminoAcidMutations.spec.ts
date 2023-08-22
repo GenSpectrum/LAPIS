@@ -6,7 +6,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   let mutationWithMoreThan50PercentProportion = 'S:T478K';
 
   it('should return mutation proportions for Switzerland', async () => {
-    const result = await lapisClient.postAminoAcidMutations({
+    const result = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
@@ -26,7 +26,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
-    const result = await lapisClient.postAminoAcidMutations({
+    const result = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: {
         country: 'Switzerland',
         minProportion: 0.5,
@@ -41,7 +41,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postAminoAcidMutations({
+    const ascendingOrderedResult = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
       },
@@ -49,7 +49,7 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'ORF1a:A1306S');
 
-    const descendingOrderedResult = await lapisClient.postAminoAcidMutations({
+    const descendingOrderedResult = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'descending' }],
       },
@@ -59,7 +59,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postAminoAcidMutations({
+    const resultWithLimit = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -69,7 +69,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('mutation', 'ORF1a:A1708D');
 
-    const resultWithLimitAndOffset = await lapisClient.postAminoAcidMutations({
+    const resultWithLimitAndOffset = await lapisClient.postAminoAcidMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -79,6 +79,58 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     expect(resultWithLimitAndOffset.data).to.have.length(2);
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
+  });
+
+  it('should return the data as CSV', async () => {
+    const urlParams = new URLSearchParams({
+      country: 'Switzerland',
+      age: '50',
+      orderBy: 'mutation',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/aminoAcidMutations?' + urlParams.toString());
+    const resultText = await result.text();
+
+    expect(resultText).to.contain(
+      String.raw`
+mutation,count,proportion
+    `.trim()
+    );
+
+    expect(resultText).to.contain(
+      String.raw`
+N:A220V,1,0.058823529411764705
+S:A222V,3,0.1875
+ORF1a:A2529V,3,0.17647058823529413
+`.trim()
+    );
+  });
+
+  it('should return the data as TSV', async () => {
+    const urlParams = new URLSearchParams({
+      country: 'Switzerland',
+      age: '50',
+      orderBy: 'mutation',
+      dataFormat: 'tsv',
+    });
+
+    const result = await fetch(basePath + '/aminoAcidMutations?' + urlParams.toString());
+    const resultText = await result.text();
+
+    expect(resultText).to.contain(
+      String.raw`
+mutation	count	proportion
+    `.trim()
+    );
+
+    expect(resultText).to.contain(
+      String.raw`
+N:A220V	1	0.058823529411764705
+S:A222V	3	0.1875
+ORF1a:A2529V	3	0.17647058823529413
+    `.trim()
+    );
   });
 
   it('should return the lapis data version in the response', async () => {

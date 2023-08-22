@@ -6,7 +6,7 @@ describe('The /nucleotideMutations endpoint', () => {
   let mutationWithMoreThan50PercentProportion = 'G28280C';
 
   it('should return mutation proportions for Switzerland', async () => {
-    const result = await lapisClient.postNucleotideMutations({
+    const result = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
@@ -26,7 +26,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
-    const result = await lapisClient.postNucleotideMutations({
+    const result = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: {
         country: 'Switzerland',
         minProportion: 0.5,
@@ -41,7 +41,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postNucleotideMutations({
+    const ascendingOrderedResult = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
       },
@@ -49,7 +49,7 @@ describe('The /nucleotideMutations endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'A1-');
 
-    const descendingOrderedResult = await lapisClient.postNucleotideMutations({
+    const descendingOrderedResult = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'descending' }],
       },
@@ -59,7 +59,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postNucleotideMutations({
+    const resultWithLimit = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -69,7 +69,7 @@ describe('The /nucleotideMutations endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('mutation', 'A11201G');
 
-    const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations({
+    const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations1({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -79,6 +79,58 @@ describe('The /nucleotideMutations endpoint', () => {
 
     expect(resultWithLimitAndOffset.data).to.have.length(2);
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
+  });
+
+  it('should return the data as CSV', async () => {
+    const urlParams = new URLSearchParams({
+      country: 'Switzerland',
+      age: '50',
+      orderBy: 'mutation',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/nucleotideMutations?' + urlParams.toString());
+    const resultText = await result.text();
+
+    expect(resultText).to.contain(
+      String.raw`
+mutation,count,proportion
+    `.trim()
+    );
+
+    expect(resultText).to.contain(
+      String.raw`
+C7029T,1,0.0625
+C71-,1,0.058823529411764705
+C7124T,2,0.11764705882352941
+`.trim()
+    );
+  });
+
+  it('should return the data as TSV', async () => {
+    const urlParams = new URLSearchParams({
+      country: 'Switzerland',
+      age: '50',
+      orderBy: 'mutation',
+      dataFormat: 'tsv',
+    });
+
+    const result = await fetch(basePath + '/nucleotideMutations?' + urlParams.toString());
+    const resultText = await result.text();
+
+    expect(resultText).to.contain(
+      String.raw`
+mutation	count	proportion
+    `.trim()
+    );
+
+    expect(resultText).to.contain(
+      String.raw`
+C7029T	1	0.0625
+C71-	1	0.058823529411764705
+C7124T	2	0.11764705882352941
+    `.trim()
+    );
   });
 
   it('should return the lapis data version in the response', async () => {
