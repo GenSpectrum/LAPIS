@@ -29,6 +29,12 @@ e.g. when running via gradle:
 ./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config>'
 ```
 
+It's possible to specify an url prefix via `--lapis.base-url=/my/lapis`
+that's used as a prefix for all absolute links
+(such as to the Swagger UI from the error page). 
+This is necessary for those links to work when deploying LAPIS with a proxy that adds a prefix to the url.
+The configured prefix must match the prefix that the proxy adds (`/my/lapis` in the example above).
+
 Use Docker Compose to run SILO and LAPIS:
 ```
 LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up

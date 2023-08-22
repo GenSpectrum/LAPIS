@@ -12,10 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
 class SwaggerUiTest(@Autowired val mockMvc: MockMvc) {
 
@@ -47,5 +48,40 @@ class SwaggerUiTest(@Autowired val mockMvc: MockMvc) {
         val yaml = objectMapper.readTree(result.response.contentAsString)
         assertTrue(yaml.has("openapi"))
         assertTrue(yaml.get("paths").has("/aggregated"))
+    }
+}
+
+@SpringBootTest(properties = ["lapis.base-url=/base/url"])
+@AutoConfigureMockMvc
+class SwaggerUiWithBasePathTest(@Autowired val mockMvc: MockMvc) {
+
+    @Test
+    fun `JSON API docs are available with base url prefix`() {
+        mockMvc.perform(get("/base/url/api-docs"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("\$.openapi").exists())
+            .andExpect(jsonPath("\$.paths./aggregated").exists())
+    }
+
+    @Test
+    fun `swagger config is available with the base url prefix`() {
+        mockMvc.perform(get("/base/url/api-docs/swagger-config"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/json"))
+    }
+
+    @Test
+    fun `API docs are available without the base url prefix because a proxy strips it away`() {
+        mockMvc.perform(get("/api-docs"))
+            .andExpect(status().isOk)
+            .andExpect(forwardedUrl("/base/url/api-docs"))
+    }
+
+    @Test
+    fun `swagger config is available without the base url prefix because a proxy strips it away`() {
+        mockMvc.perform(get("/api-docs/swagger-config"))
+            .andExpect(status().isOk)
+            .andExpect(forwardedUrl("/base/url/api-docs/swagger-config"))
     }
 }

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.LapisApplicationProperties
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.filter.CommonsRequestLoggingFilter
@@ -24,10 +24,14 @@ class LapisSpringConfig {
 
     @Bean
     fun databaseConfig(
-        @Value("\${lapis.databaseConfig.path}") configPath: String,
+        lapisApplicationProperties: LapisApplicationProperties,
         yamlObjectMapper: YamlObjectMapper,
     ): DatabaseConfig {
-        return yamlObjectMapper.objectMapper.readValue(File(configPath))
+        val path = lapisApplicationProperties.databaseConfig.path
+            ?: throw IllegalStateException(
+                "Database config path is not set, set it with '--lapis.database-config.path'",
+            )
+        return yamlObjectMapper.objectMapper.readValue(File(path))
     }
 
     @Bean

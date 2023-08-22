@@ -31,13 +31,13 @@ dependencies {
     antlr 'org.antlr:antlr4:4.13.0'
     implementation 'org.antlr:antlr4-runtime:4.13.0'
     implementation 'org.apache.commons:commons-csv:1.10.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: "org.mockito"
     }
     testImplementation 'com.ninja-squad:springmockk:4.0.2'
     testImplementation 'org.mock-server:mockserver-netty:5.15.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 

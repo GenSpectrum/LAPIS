@@ -4,7 +4,7 @@ services:
     image: ghcr.io/genspectrum/lapis-v2:${LAPIS_TAG}
     ports:
       - "8080:8080"
-    command: --silo.url=http://silo:8081 --lapis.databaseConfig.path=databaseConfig.yaml
+    command: --silo.url=http://silo:8081 --lapis.database-config.path=databaseConfig.yaml
     volumes:
       - type: bind
         source: ../siloLapisTests/testData/testDatabaseConfig.yaml
