@@ -34,6 +34,13 @@ Use Docker Compose to run SILO and LAPIS:
 LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up
 ```
 
+### Operating LAPIS behind a proxy
+
+When running LAPIS behind a proxy, the proxy needs to set X-Forwarded headers:
+* X-Forwarded-For
+* X-Forwarded-Proto
+* X-Forwarded-Prefix
+
 ## End-to-end tests
 
 There are end-to-end tests in `siloLapisTests/` that test the integration of SILO and LAPIS.
