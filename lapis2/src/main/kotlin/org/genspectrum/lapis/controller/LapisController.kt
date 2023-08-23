@@ -37,6 +37,7 @@ const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
 const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
+const val FORMAT_SCHEMA = "DataFormat"
 
 const val DETAILS_ENDPOINT_DESCRIPTION = "Returns the specified metadata fields of sequences matching the filter."
 const val AGGREGATED_ENDPONT_DESCRIPTION = "Returns the number of sequences matching the specified sequence filters"
@@ -95,6 +96,12 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = "The format of the response.",
+        )
+        @RequestParam
+        dataFormat: String? = null,
     ): LapisResponse<List<AggregationData>> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
@@ -366,6 +373,12 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = "The format of the response.",
+        )
+        @RequestParam
+        dataFormat: String? = null,
     ): LapisResponse<List<DetailsData>> {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
