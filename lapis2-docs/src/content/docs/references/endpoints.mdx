@@ -1,0 +1,120 @@
+---
+title: Endpoints
+description: Endpoints
+---
+
+<table>
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Example</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>`/aggregated`</td>
+      <td>
+        Get the number of samples matching the [filters](../filters/) stratified by the [fields](../fields/) specified
+        in the parameter `fields`. If `fields` is not specified, the endpoint returns the total number of samples.
+      </td>
+      <td>
+        **Request:**
+
+        ```
+        /aggregated?fields=country,date
+        ```
+
+        **Response:**
+
+        ```json
+        [
+          {
+            "country": "Switzerland",
+            "count": 12
+          },
+          ...
+        ]
+        ```
+      </td>
+    </tr>
+    <tr>
+      <td>`/sample/details`</td>
+      <td>
+        Get per-sample metadata. You can specify `fields` to choose the [fields](../fields/) that should be returned.
+        If `fields` is not specified, the endpoint returns the full set of metadata.
+      </td>
+      <td>
+        **Request:**
+
+        ```
+        /details?fields=accession,country,date
+        ```
+
+        **Response:**
+
+        ```json
+        [
+          {
+            "accession": "AC1234567",
+            "country": "Switzerland",
+            "date": "2023-07-26"
+          },
+          ...
+        ]
+        ```
+      </td>
+    </tr>
+    <tr>
+      <td>`/aa-mutations`</td>
+      <td>
+        Get the amino acid mutations and their frequencies. You can specify `minProportion` to only return mutations
+        that occur in at least `minProportion` of the samples. The default value of `minProportion` is 0.05.
+      </td>
+      <td>
+        **Request:**
+
+        ```
+        /aa-mutations?minProportion=0.1
+        ```
+
+        **Response:**
+
+        ```json
+        [
+          {
+            "mutation": "S:N501Y",
+            "count": "100",
+            "proportion": 0.102457132
+          },
+          ...
+        ]
+        ```
+      </td>
+    </tr>
+    <tr>
+      <td>`/nuc-mutations`</td>
+      <td>
+        Same as `/aa-mutations`
+      </td>
+      <td>
+        _See above_
+      </td>
+    </tr>
+    <tr>
+      <td>`/fasta`</td>
+      <td>
+        Get the original (unaligned) sequences
+      </td>
+      <td>The response is a FASTA file.</td>
+    </tr>
+    <tr>
+      <td>`/fasta-aligned`</td>
+      <td>
+        Get the aligned sequences
+      </td>
+      <td>The response is a FASTA file.</td>
+    </tr>
+
+  </tbody>
+</table>

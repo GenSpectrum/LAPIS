@@ -1,0 +1,85 @@
+---
+// This code is largely based/copied from
+// https://github.com/withastro/starlight/tree/6c387705f1019466ad177355d78eb25f58d928ec/packages/starlight/user-components
+import { processPanels } from './rehype-tabs';
+
+const panelHtml = await Astro.slots.render('default');
+const { html, panels } = processPanels(panelHtml);
+---
+
+<tabs-box>
+    {
+        panels && (
+            <div class='tabs not-content mt-6' role='tablist'>
+                {panels.map(({ label, panelId, tabId }, index) => (
+                    <a
+                        role='tab'
+                        id={tabId}
+                        class={`tab tab-lifted ${index === 0 ? 'tab-active' : ''}`}
+                        aria-selected={index === 0 && 'true'}
+                        tabindex={index !== 0 ? -1 : 0}
+                    >
+                        {label}
+                    </a>
+                ))}
+            </div>
+        )
+    }
+    <div class='!-mt-px border border-solid border-gray-200 p-8 pt-2'>
+        <!-- Starlight adds a margin-top to sections that are not the first. To ensure that all tabs have the
+        margin-top, we add an empty div here. -->
+        <div></div>
+        <Fragment set:html={html} />
+    </div>
+</tabs-box>
+
+<script>
+    class StarlightTabs extends HTMLElement {
+        tabs: HTMLAnchorElement[];
+        panels: HTMLElement[];
+
+        constructor() {
+            super();
+            const tablist = this.querySelector<HTMLUListElement>('[role="tablist"]')!;
+            this.tabs = [...tablist.querySelectorAll<HTMLAnchorElement>('[role="tab"]')];
+            this.panels = [...this.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+
+            this.tabs.forEach((tab, i) => {
+                // Handle clicks for mouse users
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const currentTab = tablist.querySelector('[aria-selected]');
+                    if (e.currentTarget !== currentTab) {
+                        this.switchTab(e.currentTarget as HTMLAnchorElement, i);
+                    }
+                });
+            });
+        }
+
+        switchTab(newTab: HTMLAnchorElement | null | undefined, index: number) {
+            if (!newTab) return;
+
+            // Mark all tabs as unselected and hide all tab panels.
+            this.tabs.forEach((tab) => {
+                tab.removeAttribute('aria-selected');
+                tab.setAttribute('tabindex', '-1');
+                tab.setAttribute('class', tab.getAttribute('class').replace('tab-active', ''));
+            });
+            this.panels.forEach((oldPanel) => {
+                oldPanel.hidden = true;
+            });
+
+            // Show new panel and mark new tab as selected.
+            const newPanel = this.panels[index];
+            if (newPanel) newPanel.hidden = false;
+            // Restore active tab to the default tab order.
+            newTab.removeAttribute('tabindex');
+            newTab.setAttribute('aria-selected', 'true');
+
+            newTab.setAttribute('class', newTab.getAttribute('class') + ' tab-active');
+            newTab.focus();
+        }
+    }
+
+    customElements.define('tabs-box', StarlightTabs);
+</script>

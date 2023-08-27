@@ -1,0 +1,45 @@
+---
+import { getConfig, Metadata } from '../config';
+
+const config = getConfig();
+const filters: Metadata[] = [];
+for (let meta of config.schema.metadata) {
+    if (meta.type === 'date') {
+        filters.push({ name: `${meta.name}From`, type: meta.type }, { name: `${meta.name}To`, type: meta.type });
+    } else {
+        filters.push(meta);
+    }
+}
+---
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {
+            filters.map((f) => (
+                <tr>
+                    <td>{f.name}</td>
+                    <td>
+                        {f.type}
+                        {f.name === config.schema.primaryKey && <> (primary key)</>}
+                    </td>
+                    <td>
+                        {f.type === 'pango_lineage' ? (
+                            <>
+                                See <a href='/concepts/pango-lineage-query/'>Pango lineage query</a>
+                            </>
+                        ) : (
+                            <i>TODO</i>
+                        )}
+                    </td>
+                </tr>
+            ))
+        }
+    </tbody>
+</table>

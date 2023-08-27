@@ -1,0 +1,10 @@
+---
+title: Generate your request
+description: A step-by-step wizard to help you generate a request
+---
+
+import { getConfig } from '../../../config.ts';
+
+import { QueryGenerator } from '../../../components/QueryGenerator/QueryGenerator.tsx';
+
+<QueryGenerator client:load config={getConfig()} />

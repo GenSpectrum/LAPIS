@@ -1,0 +1,34 @@
+{
+    "name": "lapis2-docs",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "check-format": "prettier --ignore-path \".gitignore\" --check \"**/*.{ts,tsx,json,astro,md,mdx,mjs}\"",
+        "format": "prettier --ignore-path \".gitignore\" --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs}\""
+    },
+    "dependencies": {
+        "@astrojs/react": "^2.2.1",
+        "@astrojs/starlight": "^0.5.6",
+        "@astrojs/tailwind": "^4.0.0",
+        "@types/react": "^18.2.16",
+        "@types/react-dom": "^18.2.7",
+        "astro": "^2.8.5",
+        "daisyui": "^3.5.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "sharp": "^0.32.3",
+        "swagger-ui": "^5.2.0",
+        "tailwindcss": "^3.3.3",
+        "yaml": "^2.3.1"
+    },
+    "devDependencies": {
+        "@types/swagger-ui": "^3.52.0",
+        "prettier": "^3.0.0",
+        "prettier-plugin-astro": "^0.11.0"
+    }
+}

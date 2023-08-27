@@ -1,0 +1,19 @@
+{
+  "printWidth": 120,
+  "tabWidth": 4,
+  "trailingComma": "all",
+  "semi": true,
+  "jsxSingleQuote": true,
+  "singleQuote": true,
+  "quoteProps": "consistent",
+  "proseWrap": "always",
+  "plugins": ["prettier-plugin-astro"],
+  "overrides": [
+    {
+      "files": "*.astro",
+      "options": {
+        "parser": "astro"
+      }
+    }
+  ]
+}

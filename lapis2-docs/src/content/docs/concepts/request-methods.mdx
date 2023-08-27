@@ -1,0 +1,59 @@
+---
+title: 'Request methods: GET and POST'
+description: Request methods
+---
+
+import TabsBox from '../../../components/TabsBox/astro/TabsBox.astro';
+import Tab from '../../../components/TabsBox/astro/Tab.astro';
+
+LAPIS supports queries via GET and POST requests. GET requests encode the query in the URL, offering a simple, shareable
+format ideal for direct browser access. Most features are supported with GET requests. POST requests requires formatting
+the query as a JSON and send it in the reuqest body. They support a few advanced queries that are not possible with GET
+requests. They are ideal if you want to make requests programmatically.
+
+## Example
+
+As an example, let's query the number of sequences per country and date from Africa and receive the data as a CSV file.
+Hereby, we have to use the `/sample/aggregated` [endpoint](../../references/endpoints/) and set the `region` parameter
+to "Africa", the `fields` parameter to "country" and "date", and the `dataFormat` parameter to "csv". With GET, multiple
+values for one parameter are separated by comma. The query URL looks as follows and you can open it in your browser:
+
+```
+[URL to LAPIS instance]/sample/aggregated?fields=country,date&region=Africa&dataFormat=tsv
+```
+
+Using POST, we have to write the query as a JSON:
+
+```json
+{
+    "fields": ["country", "date"],
+    "region": "Africa",
+    "dataFormat": "csv"
+}
+```
+
+The JSON will be sent to `/sample/aggregated` and the `Content-Type`-header must be set to `application/json`. Here are
+example code for doing it with curl and from R and Python:
+
+<TabsBox>
+    <Tab label='curl'>
+    ```bash
+    curl -X POST [URL to LAPIS instance]/sample/aggregated \
+      -H 'Content-Type: application/json' \
+      -d '{"fields":["country", "date"],"region":"Africa","dataFormat":"csv"}'
+    ```
+    </Tab>
+    <Tab label='R'>
+      TODO R code
+    </Tab>
+  <Tab label='Python'>
+    TODO Python code
+  </Tab>
+</TabsBox>
+
+{/* prettier-ignore */}
+:::note
+This is a general example and will only work on instances that have the fields `region`,
+`country`, and `date`. Check out the [fields](../../references/fields/) and [filters](../../references/filters/) page to
+see information about this instance. {/* prettier-ignore */}
+:::
