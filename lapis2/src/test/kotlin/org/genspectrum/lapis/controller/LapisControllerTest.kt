@@ -10,6 +10,7 @@ import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +45,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated`() {
         every {
-            siloQueryModelMock.aggregate(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(
             AggregationData(
                 0,
@@ -63,7 +64,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated`() {
         every {
-            siloQueryModelMock.aggregate(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(
             AggregationData(
                 0,
@@ -83,7 +84,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with fields`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
                     listOf("country", "age"),
@@ -120,7 +121,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `GET aggregated with valid mutation`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
@@ -139,7 +140,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     @Test
     fun `POST aggregated with fields`() {
         every {
-            siloQueryModelMock.aggregate(
+            siloQueryModelMock.getAggregated(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
                     listOf("country", "age"),
@@ -263,7 +264,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `GET details`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(get("/details?country=Switzerland"))
             .andExpect(status().isOk)
@@ -281,7 +282,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                     listOf("country", "age"),
                 ),
             )
-        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(get("/details?country=Switzerland&fields=country&fields=age"))
             .andExpect(status().isOk)
@@ -293,7 +294,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     fun `POST details`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         val request = post("/details")
             .content("""{"country": "Switzerland"}""")
@@ -315,7 +316,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
                     listOf("country", "age"),
                 ),
             )
-        } returns listOf(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         val request = post("/details")
             .content("""{"country": "Switzerland", "fields": ["country", "age"]}""")

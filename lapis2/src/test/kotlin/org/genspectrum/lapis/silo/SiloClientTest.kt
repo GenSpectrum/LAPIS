@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -144,19 +145,23 @@ class SiloClientTest {
         assertThat(
             result,
             containsInAnyOrder(
-                mapOf(
-                    "age" to IntNode(50),
-                    "country" to TextNode("Switzerland"),
-                    "date" to TextNode("2021-02-23"),
-                    "pango_lineage" to TextNode("B.1.1.7"),
-                    "qc_value" to DoubleNode(0.95),
+                DetailsData(
+                    mapOf(
+                        "age" to IntNode(50),
+                        "country" to TextNode("Switzerland"),
+                        "date" to TextNode("2021-02-23"),
+                        "pango_lineage" to TextNode("B.1.1.7"),
+                        "qc_value" to DoubleNode(0.95),
+                    ),
                 ),
-                mapOf(
-                    "age" to IntNode(54),
-                    "country" to TextNode("Switzerland"),
-                    "date" to TextNode("2021-03-19"),
-                    "pango_lineage" to TextNode("B.1.1.7"),
-                    "qc_value" to DoubleNode(0.94),
+                DetailsData(
+                    mapOf(
+                        "age" to IntNode(54),
+                        "country" to TextNode("Switzerland"),
+                        "date" to TextNode("2021-03-19"),
+                        "pango_lineage" to TextNode("B.1.1.7"),
+                        "qc_value" to DoubleNode(0.94),
+                    ),
                 ),
             ),
         )

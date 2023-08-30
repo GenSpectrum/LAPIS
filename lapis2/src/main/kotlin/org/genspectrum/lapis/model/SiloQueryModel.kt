@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
@@ -13,7 +14,7 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
 ) {
 
-    fun aggregate(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
+    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
         SiloQuery(
             SiloAction.aggregated(
                 sequenceFilters.fields,
@@ -38,7 +39,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
+    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields): List<DetailsData> = siloClient.sendQuery(
         SiloQuery(
             SiloAction.details(
                 sequenceFilters.fields,
