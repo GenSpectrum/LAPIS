@@ -17,6 +17,7 @@ import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.DETAILS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
+import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_SCHEMA
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
@@ -244,8 +245,7 @@ private fun fieldsSchema() = Schema<String>()
 private fun formatSchema() = Schema<String>()
     .type("string")
     .description(
-        "The data format of the response. " +
-            "Alternatively, the data format can be specified by setting the \"Accept\"-header.",
+        FORMAT_DESCRIPTION,
     )
     ._enum(listOf("csv", "tsv", "json"))
     ._default("json")

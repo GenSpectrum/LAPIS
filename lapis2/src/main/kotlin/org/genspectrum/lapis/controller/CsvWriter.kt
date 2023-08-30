@@ -7,7 +7,7 @@ import java.io.StringWriter
 
 interface CsvRecord {
     fun asArray(): Array<String>
-    fun asHeader(): Array<String>
+    fun getHeader(): Array<String>
 }
 
 @Component

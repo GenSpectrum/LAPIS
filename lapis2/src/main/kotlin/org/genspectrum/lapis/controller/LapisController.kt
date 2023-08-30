@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -53,6 +54,9 @@ const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
 const val LIMIT_DESCRIPTION = "The maximum number of entries to return in the response"
 const val OFFSET_DESCRIPTION = "The offset of the first entry to return in the response. " +
     "This is useful for pagination in combination with \"limit\"."
+const val FORMAT_DESCRIPTION = "The data format of the response. " +
+    "Alternatively, the data format can be specified by setting the \"Accept\"-header. When both are specified, " +
+    "this parameter takes precedence."
 
 @RestController
 class LapisController(
@@ -98,7 +102,7 @@ class LapisController(
         offset: Int? = null,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = "The format of the response.",
+            description = FORMAT_DESCRIPTION,
         )
         @RequestParam
         dataFormat: String? = null,
@@ -375,7 +379,7 @@ class LapisController(
         offset: Int? = null,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = "The format of the response.",
+            description = FORMAT_DESCRIPTION,
         )
         @RequestParam
         dataFormat: String? = null,
@@ -541,10 +545,10 @@ class LapisController(
         return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getDetails)
     }
 
-    private fun getResponseAsCsv(
-        request: SequenceFiltersRequestWithFields,
+    private fun <Request : CommonSequenceFilters> getResponseAsCsv(
+        request: Request,
         delimiter: Delimiter,
-        getResponse: (request: SequenceFiltersRequestWithFields) -> List<CsvRecord>,
+        getResponse: (request: Request) -> List<CsvRecord>,
     ): String {
         requestContext.filter = request
 
@@ -554,7 +558,7 @@ class LapisController(
             return ""
         }
 
-        val headers = data[0].asHeader()
+        val headers = data[0].getHeader()
         return csvWriter.write(headers, data, delimiter)
     }
 }
