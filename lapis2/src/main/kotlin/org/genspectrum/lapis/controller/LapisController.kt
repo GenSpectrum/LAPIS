@@ -7,18 +7,19 @@ import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
-import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -32,6 +33,8 @@ const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
+const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
+const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -42,6 +45,12 @@ const val FORMAT_SCHEMA = "DataFormat"
 
 const val DETAILS_ENDPOINT_DESCRIPTION = "Returns the specified metadata fields of sequences matching the filter."
 const val AGGREGATED_ENDPONT_DESCRIPTION = "Returns the number of sequences matching the specified sequence filters"
+const val NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION =
+    "Returns the number of sequences matching the specified sequence filters, " +
+        "grouped by nucleotide mutations."
+const val AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION =
+    "Returns the number of sequences matching the specified sequence filters, " +
+        "grouped by amino acid mutations."
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
@@ -278,6 +287,11 @@ class LapisController(
 
     @GetMapping("/nucleotideMutations")
     @LapisNucleotideMutationsResponse
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "getNucleotideMutations",
+        responses = [ApiResponse(responseCode = "200")],
+    )
     fun getNucleotideMutations(
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
@@ -292,8 +306,7 @@ class LapisController(
         @RequestParam(required = false)
         @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam(defaultValue = DEFAULT_MIN_PROPORTION.toString())
-        minProportion: Double,
+        @RequestParam minProportion: Double?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
             description = "The fields of the response to order by.",
@@ -312,8 +325,9 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
-    ): LapisResponse<List<MutationData>> {
-        val request = MutationProportionsRequest(
+        request: HttpServletRequest,
+    ): LapisResponse<List<NucleotideMutationResponse>> {
+        val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
@@ -323,21 +337,106 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
+        requestContext.filter = mutationProportionsRequest
 
-        return LapisResponse(siloQueryModel.computeMutationProportions(request))
+        val result = siloQueryModel.computeNucleotideMutationProportions(mutationProportionsRequest)
+        return LapisResponse(result)
     }
 
     @PostMapping("/nucleotideMutations")
     @LapisNucleotideMutationsResponse
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideMutations",
+        responses = [ApiResponse(responseCode = "200")],
+    )
     fun postNucleotideMutations(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
-        request: MutationProportionsRequest,
-    ): LapisResponse<List<MutationData>> {
-        requestContext.filter = request
+        mutationProportionsRequest: MutationProportionsRequest,
+        request: HttpServletRequest,
+    ): LapisResponse<List<NucleotideMutationResponse>> {
+        requestContext.filter = mutationProportionsRequest
 
-        return LapisResponse(siloQueryModel.computeMutationProportions(request))
+        val result = siloQueryModel.computeNucleotideMutationProportions(mutationProportionsRequest)
+        return LapisResponse(result)
+    }
+
+    @GetMapping("/aminoAcidMutations")
+    @LapisAminoAcidMutationsResponse
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "getAminoAcidMutations",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getAminoAcidMutations(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam minProportion: Double?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+        request: HttpServletRequest,
+    ): LapisResponse<List<AminoAcidMutationResponse>> {
+        val mutationProportionsRequest = MutationProportionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = mutationProportionsRequest
+
+        val result = siloQueryModel.computeAminoAcidMutationProportions(mutationProportionsRequest)
+        return LapisResponse(result)
+    }
+
+    @PostMapping("/aminoAcidMutations")
+    @LapisAminoAcidMutationsResponse
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postAminoAcidMutations",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postAminoAcidMutations(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
+        @RequestBody
+        mutationProportionsRequest: MutationProportionsRequest,
+        request: HttpServletRequest,
+    ): LapisResponse<List<AminoAcidMutationResponse>> {
+        requestContext.filter = mutationProportionsRequest
+
+        val result = siloQueryModel.computeAminoAcidMutationProportions(mutationProportionsRequest)
+        return LapisResponse(result)
     }
 
     @GetMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -584,9 +683,27 @@ private annotation class LapisAggregatedResponse
 @ApiResponse(
     responseCode = "200",
     description = "OK",
-    useReturnTypeSchema = true,
+    content = [
+        Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA")),
+    ],
 )
 private annotation class LapisNucleotideMutationsResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Operation(
+    description = "Returns a list of mutations along with the counts and proportions whose proportions are greater " +
+        "than or equal to the specified minProportion. Only sequences matching the specified " +
+        "sequence filters are considered.",
+)
+@ApiResponse(
+    responseCode = "200",
+    description = "OK",
+    content = [
+        Content(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA")),
+    ],
+)
+private annotation class LapisAminoAcidMutationsResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

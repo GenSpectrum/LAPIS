@@ -49,7 +49,7 @@ class MutationProportionsRequestTest {
                     "country": "Switzerland"
                 }
                 """,
-                MutationProportionsRequest(mapOf("country" to "Switzerland"), emptyList(), emptyList(), 0.05),
+                MutationProportionsRequest(mapOf("country" to "Switzerland"), emptyList(), emptyList()),
             ),
             Arguments.of(
                 """
@@ -61,7 +61,6 @@ class MutationProportionsRequestTest {
                     emptyMap(),
                     listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
                     emptyList(),
-                    0.05,
                 ),
             ),
             Arguments.of(
@@ -74,7 +73,6 @@ class MutationProportionsRequestTest {
                     emptyMap(),
                     emptyList(),
                     listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
-                    0.05,
                 ),
             ),
             Arguments.of(
@@ -91,14 +89,14 @@ class MutationProportionsRequestTest {
                     "accessKey": "some access key"                
                 }
                 """,
-                MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.05),
+                MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
             ),
             Arguments.of(
                 """
                 {
                 }
                 """,
-                MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.05),
+                MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
             ),
         )
 

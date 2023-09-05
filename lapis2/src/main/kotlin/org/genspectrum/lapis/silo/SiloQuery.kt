@@ -13,6 +13,7 @@ data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val fil
 
 class AggregationDataTypeReference : TypeReference<SiloQueryResponse<List<AggregationData>>>()
 class MutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
+class AminoAcidMutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
 class DetailsDataTypeReference : TypeReference<SiloQueryResponse<List<DetailsData>>>()
 
 interface CommonActionFields {
@@ -31,48 +32,75 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<List<AggregationData>> =
-            AggregatedAction("Aggregated", groupByFields, orderByFields, limit, offset)
+            AggregatedAction(groupByFields, orderByFields, limit, offset)
 
         fun mutations(
             minProportion: Double? = null,
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<MutationData>> = MutationsAction("Mutations", minProportion, orderByFields, limit, offset)
+        ): SiloAction<List<MutationData>> = MutationsAction(
+            minProportion,
+            orderByFields,
+            limit,
+            offset,
+        )
+
+        fun aminoAcidMutations(
+            minProportion: Double? = null,
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<MutationData>> = AminoAcidMutationsAction(
+            minProportion,
+            orderByFields,
+            limit,
+            offset,
+        )
 
         fun details(
             fields: List<String> = emptyList(),
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<DetailsData>> = DetailsAction("Details", fields, orderByFields, limit, offset)
+        ): SiloAction<List<DetailsData>> = DetailsAction(fields, orderByFields, limit, offset)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class AggregatedAction(
-        val type: String,
         val groupByFields: List<String>,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
+        val type: String = "Aggregated",
     ) : SiloAction<List<AggregationData>>(AggregationDataTypeReference())
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class MutationsAction(
-        val type: String,
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
+        val type: String = "Mutations",
     ) : SiloAction<List<MutationData>>(MutationDataTypeReference())
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class AminoAcidMutationsAction(
+        val minProportion: Double?,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        val type: String = "AminoAcidMutations",
+    ) : SiloAction<List<MutationData>>(AminoAcidMutationDataTypeReference())
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class DetailsAction(
-        val type: String,
+
         val fields: List<String> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
+        val type: String = "Details",
     ) : SiloAction<List<DetailsData>>(DetailsDataTypeReference())
 }
 

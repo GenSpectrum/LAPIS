@@ -8,11 +8,15 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.True
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -45,16 +49,60 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `computeMutationProportions calls the SILO client with a mutations action`() {
+    fun `computeNucleotideMutationProportions calls the SILO client with a mutations action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        underTest.computeMutationProportions(MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.5))
+        underTest.computeNucleotideMutationProportions(
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.5),
+        )
 
         verify {
             siloClientMock.sendQuery(
                 SiloQuery(SiloAction.mutations(0.5), True),
             )
         }
+    }
+
+    @Test
+    fun `computeNucleotideMutationProportions ignores the field sequenceName if it is called main`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns listOf(
+            MutationData("A1234B", 1234, 0.1234, "main"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.computeNucleotideMutationProportions(
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+        )
+
+        assertThat(result, equalTo(listOf(NucleotideMutationResponse("A1234B", 1234, 0.1234))))
+    }
+
+    @Test
+    fun `computeNucleotideMutationProportions include the field sequenceName if it is not called main`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns listOf(
+            MutationData("A1234B", 1234, 0.1234, "NotMain"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.computeNucleotideMutationProportions(
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+        )
+
+        assertThat(result, equalTo(listOf(NucleotideMutationResponse("NotMain:A1234B", 1234, 0.1234))))
+    }
+
+    @Test
+    fun `computeAminoAcidMutationsProportions returns the sequenceName with the position`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns listOf(
+            MutationData("A1234B", 1234, 0.1234, "someName"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.computeAminoAcidMutationProportions(
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+        )
+
+        assertThat(result, equalTo(listOf(AminoAcidMutationResponse("someName:A1234B", 1234, 0.1234))))
     }
 }

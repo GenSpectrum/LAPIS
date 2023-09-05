@@ -79,7 +79,7 @@ class SiloClientTest {
     }
 
     @Test
-    fun `given server returns mutations response then response can be deserialized`() {
+    fun `given server returns amino acid mutations response then response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -88,13 +88,53 @@ class SiloClientTest {
                         "queryResult": [
                             {
                                 "count": 45,
-                                "position": "first mutation",
-                                "proportion": 0.9
+                                "mutation": "first mutation",
+                                "proportion": 0.9,
+                                "sequenceName": "S"
                             },
                             {
                                 "count": 44,
-                                "position": "second mutation",
-                                "proportion": 0.7
+                                "mutation": "second mutation",
+                                "proportion": 0.7,
+                                "sequenceName": "ORF"
+                            }
+                        ]
+                    }""",
+                ),
+        )
+
+        val query = SiloQuery(SiloAction.aminoAcidMutations(), StringEquals("theColumn", "theValue"))
+        val result = underTest.sendQuery(query)
+
+        assertThat(result, hasSize(2))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                MutationData("first mutation", 45, 0.9, "S"),
+                MutationData("second mutation", 44, 0.7, "ORF"),
+            ),
+        )
+    }
+
+    @Test
+    fun `given server returns nucleotide response then response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """{
+                        "queryResult": [
+                            {
+                                "count": 45,
+                                "mutation": "first mutation",
+                                "proportion": 0.9,
+                                "sequenceName": "main"
+                            },
+                            {
+                                "count": 44,
+                                "mutation": "second mutation",
+                                "proportion": 0.7,
+                                "sequenceName": "otherSequence"
                             }
                         ]
                     }""",
@@ -107,7 +147,10 @@ class SiloClientTest {
         assertThat(result, hasSize(2))
         assertThat(
             result,
-            containsInAnyOrder(MutationData("first mutation", 45, 0.9), MutationData("second mutation", 44, 0.7)),
+            containsInAnyOrder(
+                MutationData("first mutation", 45, 0.9, "main"),
+                MutationData("second mutation", 44, 0.7, "otherSequence"),
+            ),
         )
     }
 

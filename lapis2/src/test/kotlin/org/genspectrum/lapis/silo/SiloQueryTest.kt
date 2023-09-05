@@ -115,6 +115,34 @@ class SiloQueryTest {
                 """,
             ),
             Arguments.of(
+                SiloAction.aminoAcidMutations(),
+                """
+                {
+                    "type": "AminoAcidMutations"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.aminoAcidMutations(
+                    0.5,
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
+                """
+                {
+                    "type": "AminoAcidMutations",
+                    "minProportion": 0.5,
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
+                }
+                """,
+            ),
+            Arguments.of(
                 SiloAction.details(),
                 """
                 {

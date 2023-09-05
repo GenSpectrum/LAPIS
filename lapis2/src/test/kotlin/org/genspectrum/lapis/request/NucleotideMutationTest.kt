@@ -17,7 +17,7 @@ class NucleotideMutationTest {
     private lateinit var objectMapper: ObjectMapper
 
     @ParameterizedTest
-    @MethodSource("getNucleotideMutationWithValidSyntax")
+    @MethodSource("getMutationWithValidSyntax")
     fun `NucleotideMutation is correctly deserialized from JSON`(
         underTest: String,
         expected: NucleotideMutation,
@@ -37,7 +37,7 @@ class NucleotideMutationTest {
 
     companion object {
         @JvmStatic
-        fun getNucleotideMutationWithValidSyntax() = listOf(
+        fun getMutationWithValidSyntax() = listOf(
             Arguments.of(
                 "\"G123A\"",
                 NucleotideMutation(null, 123, "A"),
