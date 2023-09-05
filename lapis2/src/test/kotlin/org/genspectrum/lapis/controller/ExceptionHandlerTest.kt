@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
-    lateinit var lapisController: LapisController
+    lateinit var someLapisController: AggregatedController
 
     @BeforeEach
     fun setUp() {
@@ -30,7 +30,14 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     private val validRoute = "/aggregated"
-    private fun MockKMatcherScope.validControllerCall() = lapisController.aggregated(any(), any(), any(), any(), any())
+    private fun MockKMatcherScope.validControllerCall() = someLapisController.aggregated(
+        any(),
+        any(),
+        any(),
+        any(),
+        any(),
+    )
+
     private val validResponse = LapisResponse(emptyList<AggregationData>())
 
     @Test
