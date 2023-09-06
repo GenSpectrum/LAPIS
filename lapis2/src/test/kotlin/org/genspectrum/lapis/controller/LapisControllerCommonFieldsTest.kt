@@ -34,6 +34,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                     listOf(OrderByField("country", Order.ASCENDING)),
                 ),
             )
@@ -51,6 +53,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -74,6 +78,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                     listOf(OrderByField("country", Order.ASCENDING), OrderByField("date", Order.ASCENDING)),
                 ),
             )
@@ -94,6 +100,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -146,6 +154,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                     100,
                 ),
             )
@@ -163,6 +173,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -202,6 +214,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                     null,
                     5,
                 ),
@@ -220,6 +234,8 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),

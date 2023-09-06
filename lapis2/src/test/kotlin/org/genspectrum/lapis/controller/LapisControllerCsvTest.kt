@@ -263,6 +263,8 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         sequenceFilters,
         emptyList(),
         emptyList(),
+        emptyList(),
+        emptyList(),
         fields,
         emptyList(),
     )

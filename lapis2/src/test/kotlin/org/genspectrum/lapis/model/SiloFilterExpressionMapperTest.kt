@@ -2,10 +2,13 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
@@ -15,6 +18,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
@@ -267,6 +271,8 @@ class SiloFilterExpressionMapperTest {
             emptyMap(),
             listOf(NucleotideMutation(null, 123, "B"), NucleotideMutation("sequenceName", 999, "A")),
             emptyList(),
+            emptyList(),
+            emptyList(),
         )
 
         val result = underTest.map(filterParameter)
@@ -281,6 +287,8 @@ class SiloFilterExpressionMapperTest {
         val filterParameter = DummySequenceFilters(
             emptyMap(),
             listOf(NucleotideMutation(null, 123, null), NucleotideMutation("sequenceName", 999, null)),
+            emptyList(),
+            emptyList(),
             emptyList(),
         )
 
@@ -297,6 +305,8 @@ class SiloFilterExpressionMapperTest {
             emptyMap(),
             emptyList(),
             listOf(AminoAcidMutation("geneName1", 123, "B"), AminoAcidMutation("geneName2", 999, "A")),
+            emptyList(),
+            emptyList(),
         )
 
         val result = underTest.map(filterParameter)
@@ -312,12 +322,48 @@ class SiloFilterExpressionMapperTest {
             emptyMap(),
             emptyList(),
             listOf(AminoAcidMutation("geneName1", 123, null), AminoAcidMutation("geneName2", 999, null)),
+            emptyList(),
+            emptyList(),
         )
 
         val result = underTest.map(filterParameter)
 
         val expected =
             And(listOf(HasAminoAcidMutation("geneName1", 123), HasAminoAcidMutation("geneName2", 999)))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `given nucleotide insertion it is mapped to NucleotideInsertionContains without using the segment`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            emptyList(),
+            emptyList(),
+            listOf(NucleotideInsertion(123, "ABCD", "segment"), NucleotideInsertion(999, "DEF", null)),
+            emptyList(),
+        )
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(NucleotideInsertionContains(123, "ABCD"), NucleotideInsertionContains(999, "DEF")))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `given amino acid insertion then it is mapped to AminoAcidInsertionContains`() {
+        val filterParameter = DummySequenceFilters(
+            emptyMap(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            listOf(AminoAcidInsertion(123, "gene", "ABCD"), AminoAcidInsertion(999, "ORF1", "DEF")),
+        )
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(AminoAcidInsertionContains(123, "ABCD", "gene"), AminoAcidInsertionContains(999, "DEF", "ORF1")))
         assertThat(result, equalTo(expected))
     }
 
@@ -335,6 +381,8 @@ class SiloFilterExpressionMapperTest {
             mapOf("variantQuery" to "A123T"),
             listOf(NucleotideMutation(null, 123, null)),
             emptyList(),
+            emptyList(),
+            emptyList(),
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
@@ -350,6 +398,8 @@ class SiloFilterExpressionMapperTest {
             mapOf("variantQuery" to "A123T"),
             emptyList(),
             listOf(AminoAcidMutation("gene", 123, null)),
+            emptyList(),
+            emptyList(),
         )
 
         val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
@@ -520,12 +570,14 @@ class SiloFilterExpressionMapperTest {
     }
 
     private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
-        DummySequenceFilters(sequenceFilters, emptyList(), emptyList())
+        DummySequenceFilters(sequenceFilters, emptyList(), emptyList(), emptyList(), emptyList())
 
     data class DummySequenceFilters(
         override val sequenceFilters: Map<String, String>,
         override val nucleotideMutations: List<NucleotideMutation>,
         override val aaMutations: List<AminoAcidMutation>,
+        override val nucleotideInsertions: List<NucleotideInsertion>,
+        override val aminoAcidInsertions: List<AminoAcidInsertion>,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,

@@ -128,6 +128,13 @@ data class HasAminoAcidMutation(val sequenceName: String, val position: Int) :
 data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDate?) :
     SiloFilterExpression("DateBetween")
 
+data class NucleotideInsertionContains(val position: Int, val value: String) : SiloFilterExpression("InsertionContains")
+
+data class AminoAcidInsertionContains(val position: Int, val value: String, val sequenceName: String) :
+    SiloFilterExpression(
+        "AminoAcidInsertionContains",
+    )
+
 object True : SiloFilterExpression("True")
 
 data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")

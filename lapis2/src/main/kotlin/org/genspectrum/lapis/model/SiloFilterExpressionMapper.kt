@@ -2,9 +2,12 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
@@ -14,6 +17,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
@@ -68,8 +72,17 @@ class SiloFilterExpressionMapper(
 
         val nucleotideMutationExpressions = sequenceFilters.nucleotideMutations.map { toNucleotideMutationFilter(it) }
         val aminoAcidMutationExpressions = sequenceFilters.aaMutations.map { toAminoAcidMutationFilter(it) }
+        val nucleotideInsertionExpressions =
+            sequenceFilters.nucleotideInsertions.map { toNucleotideInsertionFilter(it) }
+        val aminoAcidInsertionExpressions = sequenceFilters.aminoAcidInsertions.map { toAminoAcidInsertionFilter(it) }
 
-        return And(filterExpressions + nucleotideMutationExpressions + aminoAcidMutationExpressions)
+        return And(
+            filterExpressions +
+                nucleotideMutationExpressions +
+                aminoAcidMutationExpressions +
+                nucleotideInsertionExpressions +
+                aminoAcidInsertionExpressions,
+        )
     }
 
     private fun mapToFilterExpressionIdentifier(
@@ -313,6 +326,18 @@ class SiloFilterExpressionMapper(
                 aaMutation.symbol,
             )
         }
+
+    private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains {
+        return NucleotideInsertionContains(nucleotideInsertion.position, nucleotideInsertion.insertions)
+    }
+
+    private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains {
+        return AminoAcidInsertionContains(
+            aminoAcidInsertion.position,
+            aminoAcidInsertion.insertions,
+            aminoAcidInsertion.gene,
+        )
+    }
 
     private enum class Filter {
         StringEquals,
