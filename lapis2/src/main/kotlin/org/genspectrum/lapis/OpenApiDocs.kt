@@ -11,6 +11,8 @@ import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.AGGREGATED_RESPONSE_SCHEMA
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_SCHEMA
@@ -25,6 +27,8 @@ import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_SCHEMA
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_SCHEMA
@@ -35,7 +39,9 @@ import org.genspectrum.lapis.controller.ORDER_BY_FIELDS_SCHEMA
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.controller.SEQUENCE_FILTERS_SCHEMA
+import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.COUNT_PROPERTY
@@ -51,6 +57,8 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
     val sequenceFilters = requestProperties +
         Pair(NUCLEOTIDE_MUTATIONS_PROPERTY, nucleotideMutations()) +
         Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
+        Pair(NUCLEOTIDE_INSERTIONS_PROPERTY, nucleotideInsertions()) +
+        Pair(AMINO_ACID_INSERTIONS_PROPERTY, aminoAcidInsertions()) +
         Pair(ORDER_BY_PROPERTY, orderByPostSchema()) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
         Pair(OFFSET_PROPERTY, offsetSchema()) +
@@ -130,6 +138,8 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                     ),
                 )
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
+                .addSchemas(NUCLEOTIDE_INSERTIONS_SCHEMA, nucleotideInsertions())
+                .addSchemas(AMINO_ACID_INSERTIONS_SCHEMA, aminoAcidInsertions())
                 .addSchemas(ORDER_BY_FIELDS_SCHEMA, orderByGetSchema())
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
@@ -160,6 +170,8 @@ private fun mapToOpenApiType(type: MetadataType): String = when (type) {
     MetadataType.DATE -> "string"
     MetadataType.INT -> "integer"
     MetadataType.FLOAT -> "number"
+    MetadataType.NUCLEOTIDE_INSERTION -> "string"
+    MetadataType.AMINO_ACID_INSERTION -> "string"
 }
 
 private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFilterFields) =
@@ -238,6 +250,35 @@ private fun aminoAcidMutations() =
                     """
                     |A amino acid mutation in the format "\<gene\>:\<position\>\<toSymbol\>?".  
                     |If the toSymbol is not provided, the statement means "has any mutation at the given position". 
+                    """.trimMargin(),
+                ),
+        )
+
+private fun nucleotideInsertions() =
+    Schema<List<NucleotideInsertion>>()
+        .type("array")
+        .items(
+            Schema<String>()
+                .type("string")
+                .example("ins_123:ATT")
+                .description(
+                    """
+                    |A nucleotide insertion in the format "ins_(\<sequenceName\>:)?\<position\>:\<insertion\>".  
+                    |If the sequenceName is not provided, LAPIS will use the default sequence name.  
+                    """.trimMargin(),
+                ),
+        )
+
+private fun aminoAcidInsertions() =
+    Schema<List<AminoAcidInsertion>>()
+        .type("array")
+        .items(
+            Schema<String>()
+                .type("string")
+                .example("ins_ORF1:123:ATT")
+                .description(
+                    """
+                    |A amino acid insertion in the format "ins_\<gene\>:\<position\>:\<insertion\>".  
                     """.trimMargin(),
                 ),
         )

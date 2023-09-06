@@ -58,6 +58,26 @@ class AminoAcidInsertionTest {
                 "\"ins_gene:123:?\"",
                 AminoAcidInsertion(123, "gene", ".*"),
             ),
+            Arguments.of(
+                "\"ins_gene:123:.*CD\"",
+                AminoAcidInsertion(123, "gene", ".*CD"),
+            ),
+            Arguments.of(
+                "\"ins_gene:123:AB.*.*\"",
+                AminoAcidInsertion(123, "gene", "AB.*.*"),
+            ),
+            Arguments.of(
+                "\"ins_gene:123:?CD\"",
+                AminoAcidInsertion(123, "gene", ".*CD"),
+            ),
+            Arguments.of(
+                "\"ins_gene:123:AB??\"",
+                AminoAcidInsertion(123, "gene", "AB.*.*"),
+            ),
+            Arguments.of(
+                "\"ins_gene:123:AB.*?CD\"",
+                AminoAcidInsertion(123, "gene", "AB.*.*CD"),
+            ),
 
         )
 
@@ -65,6 +85,7 @@ class AminoAcidInsertionTest {
         fun getAminoAcidInsertionWithWrongSyntax() = listOf(
             Arguments.of("\"ins_::123:G\""),
             Arguments.of("\"ins_:123:\""),
+            Arguments.of("\"ins_gene:123:\""),
             Arguments.of("\"ins_gene:gene:123:ABC\""),
             Arguments.of("\"ins_123:ABCD\""),
             Arguments.of("\"ins_gene\$name&with/invalid)chars:123:A\""),

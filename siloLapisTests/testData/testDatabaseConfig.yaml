@@ -21,6 +21,10 @@ schema:
       type: int
     - name: qc_value
       type: float
+    - name: insertions
+      type: insertion
+    - name: aaInsertions
+      type: aaInsertion
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl

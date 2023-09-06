@@ -14,6 +14,8 @@ describe('The /details endpoint', () => {
 
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
+      aaInsertions: undefined,
+      insertions: undefined,
       age: undefined,
       country: undefined,
       date: undefined,
@@ -34,6 +36,8 @@ describe('The /details endpoint', () => {
 
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
+      aaInsertions: undefined,
+      insertions: undefined,
       age: 50,
       country: 'Switzerland',
       date: '2021-07-19',
@@ -53,7 +57,9 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0]).to.have.property('division', 'Aargau');
+    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[1].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[2]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postDetails1({
       detailsPostRequest: {
@@ -128,6 +134,54 @@ Bern	EPI_ISL_1001920	B.1.177
 Solothurn	EPI_ISL_1002052	B.1
     `.trim()
     );
+  });
+
+  it('should correctly handle nucleotide insertion requests in POST requests', async () => {
+    const expectedResultWithNucleotideInsertion = {
+      aaInsertions: undefined,
+      age: 57,
+      country: 'Switzerland',
+      date: '2021-05-12',
+      division: 'Zürich',
+      gisaidEpiIsl: 'EPI_ISL_3578231',
+      insertions: '25701:CCC,5959:TAT',
+      pangoLineage: 'B.1.1.28.1',
+      qcValue: 0.93,
+      region: 'Europe',
+    };
+
+    const result = await lapisClient.postDetails1({
+      detailsPostRequest: {
+        nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.deep.equal(expectedResultWithNucleotideInsertion);
+  });
+
+  it('should correctly handle amino acid insertion requests in POST requests', async () => {
+    const expectedResultWithAminoAcidInsertion = {
+      aaInsertions: 'S:143:T,ORF1a:3602:FEP',
+      insertions: undefined,
+      age: 52,
+      country: 'Switzerland',
+      date: '2021-07-04',
+      division: 'Vaud',
+      gisaidEpiIsl: 'EPI_ISL_3259931',
+      pangoLineage: 'B.1.617.2.43',
+      qcValue: 0.98,
+      region: 'Europe',
+    };
+
+    const result = await lapisClient.postDetails1({
+      detailsPostRequest: {
+        aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.deep.equal(expectedResultWithAminoAcidInsertion);
   });
 
   it('should return the lapis data version in the response', async () => {

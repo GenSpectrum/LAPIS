@@ -42,6 +42,9 @@ const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
+const val NUCLEOTIDE_INSERTIONS_SCHEMA = "NucleotideInsertions"
+const val AMINO_ACID_INSERTIONS_SCHEMA = "AminoAcidInsertions"
+
 const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
@@ -102,8 +105,10 @@ class LapisController(
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         @Parameter(
             schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
@@ -188,8 +193,10 @@ class LapisController(
         @RequestParam
         dataFormat: String? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -254,8 +261,10 @@ class LapisController(
         @RequestParam
         dataFormat: String? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -296,7 +305,7 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun postAggregatedAsCsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
@@ -310,7 +319,7 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun postAggregatedAsTsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
@@ -365,8 +374,10 @@ class LapisController(
         @RequestParam
         dataFormat: String? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<NucleotideMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -427,8 +438,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = MutationProportionsRequest(
@@ -487,8 +500,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = MutationProportionsRequest(
@@ -594,8 +609,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<AminoAcidMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -656,8 +673,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -716,8 +735,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -842,8 +863,10 @@ class LapisController(
         @RequestParam
         dataFormat: String? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<DetailsData>> {
         val request = SequenceFiltersRequestWithFields(
@@ -901,8 +924,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -958,8 +983,10 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
         @RequestParam
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(

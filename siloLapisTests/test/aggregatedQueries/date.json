@@ -1,5 +1,5 @@
 {
-  "testCaseName": "date to 2021-06-05",
+  "testCaseName": "date 2021-06-05",
   "lapisRequest": {
     "date": "2021-06-05"
   },

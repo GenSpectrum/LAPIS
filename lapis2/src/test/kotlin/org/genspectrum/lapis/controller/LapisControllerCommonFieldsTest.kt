@@ -4,11 +4,17 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.AminoAcidInsertion
+import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -264,5 +270,101 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.error.message").value("offset must be a number or null"))
+    }
+
+    @Test
+    fun `GET aggregated with valid nucleotideInsertion`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "segment")),
+                    emptyList(),
+                    emptyList(),
+                ),
+            )
+        } returns listOf(AggregationData(5, emptyMap()))
+
+        mockMvc.perform(get("/aggregated?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(5))
+    }
+
+    @Test
+    fun `GET aggregated with valid aminoAcidInsertions`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(AminoAcidInsertion(123, "S", "ABC"), AminoAcidInsertion(124, "ORF1", "DEF")),
+                    emptyList(),
+                ),
+            )
+        } returns listOf(AggregationData(5, emptyMap()))
+
+        mockMvc.perform(get("/aggregated?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(5))
+    }
+
+    @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
+    @MethodSource("getEndpointsWithNucleotideMutationFilter")
+    fun `GET endpoint with invalid nucleotide mutation filter`(
+        endpoint: String,
+    ) {
+        mockMvc.perform(get("$endpoint?nucleotideMutations=invalidMutation"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideMutations'")))
+    }
+
+    @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
+    @MethodSource("getEndpointsWithAminoAcidMutationFilter")
+    fun `GET endpoind with invalid amino acid mutation`(endpoint: String) {
+        mockMvc.perform(get("$endpoint?aminoAcidMutations=invalidMutation"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidMutations'")))
+    }
+
+    @ParameterizedTest(name = "GET {0} with invalid nucleotideInsertion")
+    @MethodSource("getEndpointsWithInsertionFilter")
+    fun `GET with invalid nucleotide insertion filter`(
+        endpoint: String,
+    ) {
+        mockMvc.perform(get(endpoint + "?nucleotideInsertions=invalidInsertion"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideInsertions'")))
+    }
+
+    @ParameterizedTest(name = "GET {0} with invalid aminoAcidInsertion")
+    @MethodSource("getEndpointsWithInsertionFilter")
+    fun `GET with invalid amino acid insertionFilter`(
+        endpoint: String,
+    ) {
+        mockMvc.perform(get(endpoint + "?aminoAcidInsertions=invalidInsertion"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidInsertions'")))
+    }
+
+    private companion object {
+        fun allEndpoints() = listOf(
+            Arguments.of("/nucleotideMutations"),
+            Arguments.of("/aminoAcidMutations"),
+            Arguments.of("/aggregated"),
+            Arguments.of("/details"),
+        )
+
+        @JvmStatic
+        fun getEndpointsWithInsertionFilter() = allEndpoints()
+
+        @JvmStatic
+        fun getEndpointsWithNucleotideMutationFilter() = allEndpoints()
+
+        @JvmStatic
+        fun getEndpointsWithAminoAcidMutationFilter() = allEndpoints()
     }
 }

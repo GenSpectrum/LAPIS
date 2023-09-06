@@ -25,7 +25,7 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
 
-            val insertions = matchGroups["insertion"]?.value?.replace("?", ".*")
+            val insertions = matchGroups["insertions"]?.value?.replace("?", ".*")
                 ?: throw IllegalArgumentException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find insertions",
                 )
@@ -41,7 +41,7 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
 
 private val AMINO_ACID_INSERTION_REGEX =
     Regex(
-        """^ins_(?<gene>[a-zA-Z0-9_-]+):(?<position>\d+):(?<insertion>[a-zA-Z0-9?_-]+)?$""",
+        """^ins_(?<gene>[a-zA-Z0-9_-]+):(?<position>\d+):(?<insertions>(([a-zA-Z?]|(\.\*))+))$""",
     )
 
 @JsonComponent

@@ -62,6 +62,30 @@ class NucleotideInsertionTest {
                 "\"ins_segment:123:?\"",
                 NucleotideInsertion(123, ".*", "segment"),
             ),
+            Arguments.of(
+                "\"ins_segment:123:AB.*CD\"",
+                NucleotideInsertion(123, "AB.*CD", "segment"),
+            ),
+            Arguments.of(
+                "\"ins_segment:123:.*CD\"",
+                NucleotideInsertion(123, ".*CD", "segment"),
+            ),
+            Arguments.of(
+                "\"ins_segment:123:AB.*.*\"",
+                NucleotideInsertion(123, "AB.*.*", "segment"),
+            ),
+            Arguments.of(
+                "\"ins_segment:123:?CD\"",
+                NucleotideInsertion(123, ".*CD", "segment"),
+            ),
+            Arguments.of(
+                "\"ins_segment:123:AB??\"",
+                NucleotideInsertion(123, "AB.*.*", "segment"),
+            ),
+            Arguments.of(
+                "\"ins_segment:123:AB.*?CD\"",
+                NucleotideInsertion(123, "AB.*.*CD", "segment"),
+            ),
 
         )
 
@@ -69,7 +93,9 @@ class NucleotideInsertionTest {
         fun getNucleotideInsertionWithWrongSyntax() = listOf(
             Arguments.of("\"ins_::123:G\""),
             Arguments.of("\"ins_:123:\""),
+            Arguments.of("\"ins_segment:123:\""),
             Arguments.of("\"ins_segment:segment:123:ABC\""),
+            Arguments.of("\"ins_segmentWithDotWithoutStar:123:AB.C\""),
             Arguments.of("\"ins_segment\$name&with/invalid)chars:123:A\""),
         )
     }

@@ -26,6 +26,8 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
                 DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
+                DatabaseMetadata(name = "nucInsertion", type = MetadataType.NUCLEOTIDE_INSERTION),
+                DatabaseMetadata(name = "aaInsertion", type = MetadataType.AMINO_ACID_INSERTION),
             ),
         )
         assertThat(
@@ -56,6 +58,8 @@ class DatabaseConfigWithoutFeaturesTest {
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
                 DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
+                DatabaseMetadata(name = "nucInsertion", type = MetadataType.NUCLEOTIDE_INSERTION),
+                DatabaseMetadata(name = "aaInsertion", type = MetadataType.AMINO_ACID_INSERTION),
             ),
         )
         assertThat(underTest.schema.features, `is`(emptyList()))

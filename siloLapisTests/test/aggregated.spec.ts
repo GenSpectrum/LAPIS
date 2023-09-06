@@ -49,6 +49,28 @@ describe('The /aggregated endpoint', () => {
     expect(result.data).to.have.length(1);
   });
 
+  it('should correctly handle nucleotide insertion requests in GET requests', async () => {
+    const result = await lapisClient.postAggregated1({
+      aggregatedPostRequest: {
+        nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0].count).to.equal(1);
+  });
+
+  it('should correctly handle amino acid insertion requests in GET requests', async () => {
+    const result = await lapisClient.postAggregated1({
+      aggregatedPostRequest: {
+        aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0].count).to.equal(1);
+  });
+
   it('should order by specified fields', async () => {
     const ascendingOrderedResult = await lapisClient.postAggregated1({
       aggregatedPostRequest: {
@@ -57,7 +79,8 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0]).to.have.property('division', 'Aargau');
+    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[1]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postAggregated1({
       aggregatedPostRequest: {
@@ -79,7 +102,7 @@ describe('The /aggregated endpoint', () => {
     });
 
     expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('division', 'Basel-Land');
+    expect(resultWithLimit.data[1]).to.have.property('division', 'Aargau');
 
     const resultWithLimitAndOffset = await lapisClient.postAggregated1({
       aggregatedPostRequest: {
@@ -106,15 +129,16 @@ describe('The /aggregated endpoint', () => {
     expect(await result.text()).to.be.equal(
       String.raw`
 age,country,count
+null,Switzerland,2
 4,Switzerland,2
 5,Switzerland,1
 6,Switzerland,1
 50,Switzerland,17
-51,Switzerland,8
+51,Switzerland,7
 52,Switzerland,8
 53,Switzerland,8
 54,Switzerland,9
-55,Switzerland,9
+55,Switzerland,8
 56,Switzerland,9
 57,Switzerland,10
 58,Switzerland,9
@@ -135,15 +159,16 @@ age,country,count
     expect(await result.text()).to.be.equal(
       String.raw`
 age	country	count
+null	Switzerland	2
 4	Switzerland	2
 5	Switzerland	1
 6	Switzerland	1
 50	Switzerland	17
-51	Switzerland	8
+51	Switzerland	7
 52	Switzerland	8
 53	Switzerland	8
 54	Switzerland	9
-55	Switzerland	9
+55	Switzerland	8
 56	Switzerland	9
 57	Switzerland	10
 58	Switzerland	9
