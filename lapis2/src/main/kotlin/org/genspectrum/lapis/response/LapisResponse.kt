@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.response
 
 import io.swagger.v3.oas.annotations.media.Schema
+import org.genspectrum.lapis.controller.CsvRecord
 
 data class NucleotideMutationResponse(
     @Schema(
@@ -20,7 +21,10 @@ data class NucleotideMutationResponse(
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
             "given filter criteria",
     ) val proportion: Double,
-)
+) : CsvRecord {
+    override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+    override fun getHeader() = arrayOf("mutation", "count", "proportion")
+}
 
 data class AminoAcidMutationResponse(
     @Schema(
@@ -37,4 +41,7 @@ data class AminoAcidMutationResponse(
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
             "given filter criteria",
     ) val proportion: Double,
-)
+) : CsvRecord {
+    override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+    override fun getHeader() = arrayOf("mutation", "count", "proportion")
+}

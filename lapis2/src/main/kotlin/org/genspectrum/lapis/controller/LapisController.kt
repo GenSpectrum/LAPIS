@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
+import org.genspectrum.lapis.controller.Delimiter.COMMA
+import org.genspectrum.lapis.controller.Delimiter.TAB
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -132,7 +134,6 @@ class LapisController(
     }
 
     @GetMapping("/aggregated", produces = [TEXT_CSV_HEADER])
-    @LapisAggregatedResponse
     @Operation(
         description = AGGREGATED_ENDPONT_DESCRIPTION,
         operationId = "getAggregatedAsCsv",
@@ -183,11 +184,10 @@ class LapisController(
             offset,
         )
 
-        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getAggregated)
+        return getResponseAsCsv(request, COMMA, siloQueryModel::getAggregated)
     }
 
     @GetMapping("/aggregated", produces = [TEXT_TSV_HEADER])
-    @LapisAggregatedResponse
     @Operation(
         description = AGGREGATED_ENDPONT_DESCRIPTION,
         operationId = "getAggregatedAsTsv",
@@ -238,7 +238,7 @@ class LapisController(
             offset,
         )
 
-        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getAggregated)
+        return getResponseAsCsv(request, TAB, siloQueryModel::getAggregated)
     }
 
     @PostMapping("/aggregated", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -268,7 +268,7 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getAggregated)
+        return getResponseAsCsv(request, COMMA, siloQueryModel::getAggregated)
     }
 
     @PostMapping("/aggregated", produces = [TEXT_TSV_HEADER])
@@ -282,10 +282,10 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getAggregated)
+        return getResponseAsCsv(request, TAB, siloQueryModel::getAggregated)
     }
 
-    @GetMapping("/nucleotideMutations")
+    @GetMapping("/nucleotideMutations", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideMutationsResponse
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
@@ -326,6 +326,12 @@ class LapisController(
         @RequestParam
         offset: Int? = null,
         request: HttpServletRequest,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = "The format of the response.",
+        )
+        @RequestParam
+        dataFormat: String? = null,
     ): LapisResponse<List<NucleotideMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
@@ -343,7 +349,115 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping("/nucleotideMutations")
+    @GetMapping("/nucleotideMutations", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "getNucleotideMutationsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getNucleotideMutationsAsCsv(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam minProportion: Double?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = MutationProportionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+        requestContext.filter = request
+
+        return getResponseAsCsv(request, COMMA, siloQueryModel::computeNucleotideMutationProportions)
+    }
+
+    @GetMapping("/nucleotideMutations", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "getNucleotideMutationsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getNucleotideMutationsAsTsv(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam minProportion: Double?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = MutationProportionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+        requestContext.filter = request
+
+        return getResponseAsCsv(request, TAB, siloQueryModel::computeNucleotideMutationProportions)
+    }
+
+    @PostMapping("/nucleotideMutations", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideMutationsResponse
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
@@ -354,7 +468,6 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
         mutationProportionsRequest: MutationProportionsRequest,
-        request: HttpServletRequest,
     ): LapisResponse<List<NucleotideMutationResponse>> {
         requestContext.filter = mutationProportionsRequest
 
@@ -362,7 +475,35 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @GetMapping("/aminoAcidMutations")
+    @PostMapping("/nucleotideMutations", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideMutationsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postNucleotideMutationsAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
+        @RequestBody
+        mutationProportionsRequest: MutationProportionsRequest,
+    ): String {
+        return getResponseAsCsv(mutationProportionsRequest, COMMA, siloQueryModel::computeNucleotideMutationProportions)
+    }
+
+    @PostMapping("/nucleotideMutations", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideMutationsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postNucleotideMutationsAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
+        @RequestBody
+        mutationProportionsRequest: MutationProportionsRequest,
+    ): String {
+        return getResponseAsCsv(mutationProportionsRequest, TAB, siloQueryModel::computeNucleotideMutationProportions)
+    }
+
+    @GetMapping("/aminoAcidMutations", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidMutationsResponse
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
@@ -402,7 +543,6 @@ class LapisController(
         )
         @RequestParam
         offset: Int? = null,
-        request: HttpServletRequest,
     ): LapisResponse<List<AminoAcidMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
@@ -420,7 +560,119 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping("/aminoAcidMutations")
+    @GetMapping("/aminoAcidMutations", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "getAminoAcidMutationsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getAminoAcidMutationsAsCsv(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam minProportion: Double?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val mutationProportionsRequest = MutationProportionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+        requestContext.filter = mutationProportionsRequest
+
+        return getResponseAsCsv(mutationProportionsRequest, COMMA, siloQueryModel::computeAminoAcidMutationProportions)
+    }
+
+    @GetMapping("/aminoAcidMutations", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "getAminoAcidMutationsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getAminoAcidMutationsAsTsv(
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+            explode = Explode.TRUE,
+            style = ParameterStyle.FORM,
+        )
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        nucleotideMutations: List<NucleotideMutation>?,
+        @RequestParam(required = false)
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam minProportion: Double?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = "The fields of the response to order by.",
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val mutationProportionsRequest = MutationProportionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            minProportion,
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+        requestContext.filter = mutationProportionsRequest
+
+        return getResponseAsCsv(
+            mutationProportionsRequest,
+            TAB,
+            siloQueryModel::computeAminoAcidMutationProportions,
+        )
+    }
+
+    @PostMapping("/aminoAcidMutations", produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidMutationsResponse
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
@@ -431,12 +683,51 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
         mutationProportionsRequest: MutationProportionsRequest,
-        request: HttpServletRequest,
     ): LapisResponse<List<AminoAcidMutationResponse>> {
         requestContext.filter = mutationProportionsRequest
 
         val result = siloQueryModel.computeAminoAcidMutationProportions(mutationProportionsRequest)
         return LapisResponse(result)
+    }
+
+    @PostMapping("/aminoAcidMutations", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postAminoAcidMutationsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postAminoAcidMutationsAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
+        @RequestBody
+        mutationProportionsRequest: MutationProportionsRequest,
+    ): String {
+        requestContext.filter = mutationProportionsRequest
+
+        return getResponseAsCsv(
+            mutationProportionsRequest,
+            COMMA,
+            siloQueryModel::computeAminoAcidMutationProportions,
+        )
+    }
+
+    @PostMapping("/aminoAcidMutations", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postAminoAcidMutationsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postAminoAcidMutationsAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
+        @RequestBody
+        mutationProportionsRequest: MutationProportionsRequest,
+    ): String {
+        requestContext.filter = mutationProportionsRequest
+
+        return getResponseAsCsv(
+            mutationProportionsRequest,
+            TAB,
+            siloQueryModel::computeAminoAcidMutationProportions,
+        )
     }
 
     @GetMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -492,7 +783,6 @@ class LapisController(
             limit,
             offset,
         )
-
         requestContext.filter = request
 
         return LapisResponse(siloQueryModel.getDetails(request))
@@ -545,8 +835,8 @@ class LapisController(
             limit,
             offset,
         )
-
-        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getDetails)
+        requestContext.filter = request
+        return getResponseAsCsv(request, COMMA, siloQueryModel::getDetails)
     }
 
     @GetMapping("/details", produces = [TEXT_TSV_HEADER])
@@ -597,7 +887,7 @@ class LapisController(
             offset,
         )
 
-        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getDetails)
+        return getResponseAsCsv(request, TAB, siloQueryModel::getDetails)
     }
 
     @PostMapping("/details", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -627,7 +917,7 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getResponseAsCsv(request, Delimiter.COMMA, siloQueryModel::getDetails)
+        return getResponseAsCsv(request, COMMA, siloQueryModel::getDetails)
     }
 
     @PostMapping("/details", produces = [TEXT_TSV_HEADER])
@@ -641,7 +931,7 @@ class LapisController(
         @RequestBody
         request: SequenceFiltersRequestWithFields,
     ): String {
-        return getResponseAsCsv(request, Delimiter.TAB, siloQueryModel::getDetails)
+        return getResponseAsCsv(request, TAB, siloQueryModel::getDetails)
     }
 
     private fun <Request : CommonSequenceFilters> getResponseAsCsv(
@@ -650,7 +940,6 @@ class LapisController(
         getResponse: (request: Request) -> List<CsvRecord>,
     ): String {
         requestContext.filter = request
-
         val data = getResponse(request)
 
         if (data.isEmpty()) {

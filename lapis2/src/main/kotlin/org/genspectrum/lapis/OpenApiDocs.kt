@@ -117,6 +117,7 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                             .properties(nucleotideMutationProportionSchema()),
                     ),
                 )
+                .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(
                     AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
@@ -128,7 +129,6 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                             .properties(aminoAcidMutationProportionSchema()),
                     ),
                 )
-                .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
                 .addSchemas(ORDER_BY_FIELDS_SCHEMA, orderByGetSchema())
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
@@ -146,6 +146,13 @@ private fun lapisResponseSchema(dataSchema: Schema<Any>) =
 
 private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
+
+private fun proportionSchema() =
+    mapOf(
+        "mutation" to Schema<String>().type("string").description("The mutation that was found."),
+        "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
+        "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
+    )
 
 private fun mapToOpenApiType(type: MetadataType): String = when (type) {
     MetadataType.STRING -> "string"
@@ -193,6 +200,7 @@ private fun nucleotideMutationProportionSchema() =
         "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
         "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
     )
+
 private fun aminoAcidMutationProportionSchema() =
     mapOf(
         "mutation" to Schema<String>().type("string").description(
