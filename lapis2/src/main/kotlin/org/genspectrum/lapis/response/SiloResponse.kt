@@ -57,3 +57,10 @@ data class MutationData(
     val proportion: Double,
     val sequenceName: String,
 )
+
+data class InsertionData(
+    val count: Int,
+    val insertions: String,
+    val position: Int,
+    val sequenceName: String,
+)

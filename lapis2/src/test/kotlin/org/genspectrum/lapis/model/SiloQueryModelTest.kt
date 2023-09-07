@@ -5,11 +5,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
+import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
@@ -113,5 +116,47 @@ class SiloQueryModelTest {
         )
 
         assertThat(result, equalTo(listOf(AminoAcidMutationResponse("someName:A1234B", 1234, 0.1234))))
+    }
+
+    @Test
+    fun `getNucleotideInsertions ignores the field sequenceName if it is called main`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<InsertionData>>>()) } returns listOf(
+            InsertionData(42, "ABCD", 1234, "main"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.getNucleotideInsertions(
+            InsertionsRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            ),
+        )
+
+        assertThat(result, equalTo(listOf(NucleotideInsertionResponse("ins_1234:ABCD", 42))))
+    }
+
+    @Test
+    fun `getNucleotideInsertions includes the field sequenceName if it is not called main`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<InsertionData>>>()) } returns listOf(
+            InsertionData(42, "ABCD", 1234, "notMain"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.getNucleotideInsertions(
+            InsertionsRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            ),
+        )
+
+        assertThat(result, equalTo(listOf(NucleotideInsertionResponse("ins_notMain:1234:ABCD", 42))))
     }
 }

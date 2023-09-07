@@ -1,9 +1,11 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
@@ -80,15 +82,46 @@ class SiloQueryModel(
         }
     }
 
-    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields): List<DetailsData> = siloClient.sendQuery(
-        SiloQuery(
-            SiloAction.details(
-                sequenceFilters.fields,
-                sequenceFilters.orderByFields,
-                sequenceFilters.limit,
-                sequenceFilters.offset,
+    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields): List<DetailsData> =
+        siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.details(
+                    sequenceFilters.fields,
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
             ),
-            siloFilterExpressionMapper.map(sequenceFilters),
-        ),
-    )
+        )
+
+    fun getNucleotideInsertions(sequenceFilters: InsertionsRequest): List<NucleotideInsertionResponse> {
+        val data = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.nucleotideInsertions(
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+
+        return data.map { it ->
+            NucleotideInsertionResponse(
+                "ins_" +
+                    if (
+                        it.sequenceName == "main"
+                    ) {
+                        ""
+                    } else {
+                        it.sequenceName + ":"
+                    } +
+                    it.position +
+                    ":" +
+                    it.insertions,
+                it.count,
+            )
+        }
+    }
 }

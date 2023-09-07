@@ -11,8 +11,11 @@ import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,21 +33,268 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
-    val listOfMetadata = listOf(
-        DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))),
-        DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(43))),
+    @ParameterizedTest(name = "GET empty {0}")
+    @MethodSource("getEndpoints")
+    fun `GET empty return empty CSV`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnEmptyList(endpoint)
+
+        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(""))
+    }
+
+    @ParameterizedTest(name = "POST empty {0}")
+    @MethodSource("getEndpoints")
+    fun `POST empty {0} return empty CSV`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnEmptyList(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/csv")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(""))
+    }
+
+    @ParameterizedTest(name = "GET {0} returns as CSV with accept header")
+    @MethodSource("getEndpoints")
+    fun `GET returns as CSV with accept header`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(returnedCsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "POST {0} returns as CSV with accept header")
+    @MethodSource("getEndpoints")
+    fun `POST returns as CSV with accept header`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/csv")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(returnedCsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "GET {0} returns as CSV with request parameter")
+    @MethodSource("getEndpoints")
+    fun `GET returns as CSV with request parameter`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        mockMvc.perform(get(endpoint + "?country=Switzerland&dataFormat=csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(returnedCsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "POST {0} returns as CSV with request parameter")
+    @MethodSource("getEndpoints")
+    fun `POST returns as CSV with request parameter`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(returnedCsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "GET {0} returns as TSV with accept header")
+    @MethodSource("getEndpoints")
+    fun `GET returns as TSV with accept header`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/tab-separated-values"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(returnedTsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "POST {0} returns as TSV with accept header")
+    @MethodSource("getEndpoints")
+    fun `POST returns as TSV with accept header`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("text/tab-separated-values")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(returnedTsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "GET {0} returns as TSV with request parameter")
+    @MethodSource("getEndpoints")
+    fun `GET returns as TSV with request parameter`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        mockMvc.perform(get(endpoint + "?country=Switzerland&dataFormat=tsv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(returnedTsvData(endpoint)))
+    }
+
+    @ParameterizedTest(name = "POST {0} returns as TSV with request parameter")
+    @MethodSource("getEndpoints")
+    fun `POST returns as TSV with request parameter`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnData(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
+            .andExpect(content().string(returnedTsvData(endpoint)))
+    }
+
+    fun mockEndpointReturnEmptyList(endpoint: String) {
+        if (endpoint == "/details") {
+            every {
+                siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            } returns emptyList()
+        }
+        if (endpoint == "/aggregated") {
+            every {
+                siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            } returns emptyList()
+        }
+        if (endpoint == "/nucleotideMutations") {
+            every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns emptyList()
+        }
+        if (endpoint == "/aminoAcidMutations") {
+            every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns emptyList()
+        }
+        if (endpoint == "/nucleotideInsertions") {
+            every { siloQueryModelMock.getNucleotideInsertions(any()) } returns emptyList()
+        }
+    }
+
+    fun mockEndpointReturnData(endpoint: String) {
+        if (endpoint == "/details") {
+            every {
+                siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            } returns detailsData
+        }
+        if (endpoint == "/aggregated") {
+            every {
+                siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            } returns aggregationData
+        }
+        if (endpoint == "/nucleotideMutations") {
+            every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
+        }
+        if (endpoint == "/aminoAcidMutations") {
+            every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
+        }
+        if (endpoint == "/nucleotideInsertions") {
+            every { siloQueryModelMock.getNucleotideInsertions(any()) } returns nucleotideInsertionData
+        }
+    }
+
+    fun returnedCsvData(endpoint: String): String {
+        if (endpoint == "/details") {
+            return detailsDataCsv
+        }
+        if (endpoint == "/aggregated") {
+            return aggregationDataCsv
+        }
+        if (endpoint == "/nucleotideMutations") {
+            return mutationDataCsv
+        }
+        if (endpoint == "/aminoAcidMutations") {
+            return mutationDataCsv
+        }
+        if (endpoint == "/nucleotideInsertions") {
+            return nucleotideInsertionDataCsv
+        }
+        return ""
+    }
+
+    fun returnedTsvData(endpoint: String): String {
+        if (endpoint == "/details") {
+            return detailsDataTsv
+        }
+        if (endpoint == "/aggregated") {
+            return aggregationDataTsv
+        }
+        if (endpoint == "/nucleotideMutations") {
+            return mutationDataTsv
+        }
+        if (endpoint == "/aminoAcidMutations") {
+            return mutationDataTsv
+        }
+        if (endpoint == "/nucleotideInsertions") {
+            return nucleotideInsertionDataTsv
+        }
+        return ""
+    }
+
+    val detailsData = listOf(
+        DetailsData(
+            mapOf(
+                "country" to TextNode("Switzerland"),
+                "age" to IntNode(42),
+                "floatValue" to DoubleNode(3.14),
+            ),
+        ),
+        DetailsData(
+            mapOf(
+                "country" to TextNode("Switzerland"),
+                "age" to IntNode(43),
+                "floatValue" to NullNode.instance,
+            ),
+        ),
     )
 
-    val metadataCsv = """
-        country,age
-        Switzerland,42
-        Switzerland,43
+    val detailsDataCsv = """
+        country,age,floatValue
+        Switzerland,42,3.14
+        Switzerland,43,null
     """.trimIndent()
 
-    val metadataTsv = """
-        country	age
-        Switzerland	42
-        Switzerland	43
+    val detailsDataTsv = """
+        country	age	floatValue
+        Switzerland	42	3.14
+        Switzerland	43	null
     """.trimIndent()
 
     val aggregationData = listOf(
@@ -90,170 +340,32 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         sequenceName:1234	2345	0.987
     """.trimIndent()
 
-    @Test
-    fun `GET empty details return empty CSV`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns emptyList()
+    val nucleotideInsertionData = listOf(
+        NucleotideInsertionResponse(
+            "ins_1234:CAGAA",
+            41,
+        ),
+    )
 
-        mockMvc.perform(get("/details?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
+    val nucleotideInsertionDataCsv = """
+        insertion,count
+        ins_1234:CAGAA,41
+    """.trimIndent()
 
-    @Test
-    fun `GET details as CSV with accept header`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(
-            DetailsData(
-                mapOf(
-                    "country" to TextNode("Switzerland"),
-                    "age" to IntNode(42),
-                    "floatValue" to DoubleNode(3.14),
-                ),
-            ),
-            DetailsData(
-                mapOf(
-                    "country" to TextNode("Switzerland"),
-                    "age" to IntNode(43),
-                    "floatValue" to NullNode.instance,
-                ),
-            ),
+    val nucleotideInsertionDataTsv = """
+        insertion	count
+        ins_1234:CAGAA	41
+    """.trimIndent()
+
+    private companion object {
+        @JvmStatic
+        fun getEndpoints() = listOf(
+            Arguments.of("/details"),
+            Arguments.of("/aggregated"),
+            Arguments.of("/nucleotideMutations"),
+            Arguments.of("/aminoAcidMutations"),
+            Arguments.of("/nucleotideInsertions"),
         )
-
-        mockMvc.perform(get("/details?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(
-                content().string(
-                    """
-                       country,age,floatValue
-                       Switzerland,42,3.14
-                       Switzerland,43,null
-                    """.trimIndent(),
-                ),
-            )
-    }
-
-    @Test
-    fun `GET details as TSV with accept header`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        mockMvc.perform(get("/details?country=Switzerland").header("Accept", "text/tab-separated-values"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(metadataTsv))
-    }
-
-    @Test
-    fun `GET details as CSV with request parameter`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        mockMvc.perform(get("/details?country=Switzerland&dataFormat=csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(metadataCsv))
-    }
-
-    @Test
-    fun `GET details as TSV with request parameter`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        mockMvc.perform(get("/details?country=Switzerland&dataFormat=tsv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(metadataTsv))
-    }
-
-    @Test
-    fun `POST details returns empty CSV`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns emptyList()
-
-        val request = post("/details")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `POST details as CSV with accept header`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        val request = post("/details")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(metadataCsv))
-    }
-
-    @Test
-    fun `POST details as TSV with accept header`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        val request = post("/details")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/tab-separated-values")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(metadataTsv))
-    }
-
-    @Test
-    fun `POST details as CSV with request parameter`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        val request = post("/details")
-            .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(metadataCsv))
-    }
-
-    @Test
-    fun `POST details as TSV with request parameter`() {
-        every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOfMetadata
-
-        val request = post("/details")
-            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(metadataTsv))
     }
 
     private fun sequenceFiltersRequestWithFields(
@@ -268,309 +380,4 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         fields,
         emptyList(),
     )
-
-    @Test
-    fun `GET aggregated returns empty CSV`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
-
-        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `GET aggregated as CSV with accept header`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataCsv))
-    }
-
-    @Test
-    fun `GET aggregated as TSV with accept header`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        mockMvc.perform(get("/aggregated?country=Switzerland").header("Accept", "text/tab-separated-values"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataTsv))
-    }
-
-    @Test
-    fun `GET aggregated as CSV with request parameter`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        mockMvc.perform(get("/aggregated?country=Switzerland&dataFormat=csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataCsv))
-    }
-
-    @Test
-    fun `GET aggregated as TSV with request parameter`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        mockMvc.perform(get("/aggregated?country=Switzerland&dataFormat=tsv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataTsv))
-    }
-
-    @Test
-    fun `POST aggregated returns empty CSV`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
-
-        val request = post("/aggregated")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `POST aggregated as CSV with accept header`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        val request = post("/aggregated")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataCsv))
-    }
-
-    @Test
-    fun `POST aggregated as TSV with accept header`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        val request = post("/aggregated")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/tab-separated-values")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataTsv))
-    }
-
-    @Test
-    fun `POST aggregated as CSV with request parameter`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        val request = post("/aggregated")
-            .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataCsv))
-    }
-
-    @Test
-    fun `POST aggregated as TSV with request parameter`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns aggregationData
-
-        val request = post("/aggregated")
-            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(aggregationDataTsv))
-    }
-
-    @Test
-    fun `POST nucleotideMutations returns empty CSV`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns emptyList()
-
-        val request = post("/nucleotideMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `POST nucleotideMutations as CSV with accept header`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-
-        val request = post("/nucleotideMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `POST nucleotideMutations as TSV with accept header`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-
-        val request = post("/nucleotideMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/tab-separated-values")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
-
-    @Test
-    fun `GET nucleotideMutations returns empty CSV`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns emptyList()
-
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `GET nucleotideMutations as CSV with accept header`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `GET nucleotideMutations as TSV with accept header`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland").header("Accept", "text/tab-separated-values"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
-
-    @Test
-    fun `GET nucleotideMutations as CSV with request parameter`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland&dataFormat=csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `GET nucleotideMutations as TSV with request parameter`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-        mockMvc.perform(get("/nucleotideMutations?country=Switzerland&dataFormat=tsv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
-
-    @Test
-    fun `POST aminoAcidMutations returns empty CSV`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns emptyList()
-
-        val request = post("/aminoAcidMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `POST aminoAcidMutations as CSV with accept header`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-
-        val request = post("/aminoAcidMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `POST aminoAcidMutations as TSV with accept header`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-
-        val request = post("/aminoAcidMutations")
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/tab-separated-values")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
-
-    @Test
-    fun `GET aminoAcidMutations returns empty CSV`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns emptyList()
-
-        mockMvc.perform(get("/aminoAcidMutations?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @Test
-    fun `GET aminoAcidMutations as CSV with accept header`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-        mockMvc.perform(get("/aminoAcidMutations?country=Switzerland").header("Accept", "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `GET aminoAcidMutations as TSV with accept header`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-        mockMvc.perform(get("/aminoAcidMutations?country=Switzerland").header("Accept", "text/tab-separated-values"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
-
-    @Test
-    fun `GET aminoAcidMutations as CSV with request parameter`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-        mockMvc.perform(get("/aminoAcidMutations?country=Switzerland&dataFormat=csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(mutationDataCsv))
-    }
-
-    @Test
-    fun `GET aminoAcidMutations as TSV with request parameter`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-        mockMvc.perform(get("/aminoAcidMutations?country=Switzerland&dataFormat=tsv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(mutationDataTsv))
-    }
 }

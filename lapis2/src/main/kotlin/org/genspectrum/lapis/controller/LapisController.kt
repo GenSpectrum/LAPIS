@@ -15,6 +15,7 @@ import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -23,6 +24,7 @@ import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,10 +37,13 @@ const val SEQUENCE_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
+const val NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA = "NucleotideInsertionsRequest"
+const val AMINO_ACID_INSERTIONS_REQUEST_SCHEMA = "AminoAcidInsertionsRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
+const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -58,6 +63,9 @@ const val NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION =
 const val AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION =
     "Returns the number of sequences matching the specified sequence filters, " +
         "grouped by amino acid mutations."
+const val NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION =
+    "Returns the number of sequences matching the specified sequence filters, " +
+        "grouped by nucleotide insertions."
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
@@ -65,6 +73,9 @@ const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
         "Fields specified here must either be \"count\" or also be present in \"fields\"."
 const val DETAILS_FIELDS_DESCRIPTION =
     "The fields that the response items should contain. If empty, all fields are returned"
+const val NUCLEOTIDE_INSERTIONS_FIELDS_DESCRIPTION =
+    "The fields of the response to order by." +
+        "Fields specified here must either be \"count\" or also be present in \"fields\"."
 const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
     "The fields of the response to order by. Fields specified here must also be present in \"fields\"."
 const val LIMIT_DESCRIPTION = "The maximum number of entries to return in the response"
@@ -1048,6 +1059,248 @@ class LapisController(
         return getResponseAsCsv(request, TAB, siloQueryModel::getDetails)
     }
 
+    @GetMapping("/nucleotideInsertions", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @LapisNucleotideInsertionsResponse
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertions",
+    )
+    fun getNucleotideInsertions(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
+            explode = Explode.TRUE,
+        )
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = FORMAT_DESCRIPTION,
+        )
+        @RequestParam
+        dataFormat: String? = null,
+    ): LapisResponse<List<NucleotideInsertionResponse>> {
+        val insertionRequest = InsertionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = insertionRequest
+
+        val result = siloQueryModel.getNucleotideInsertions(insertionRequest)
+        return LapisResponse(result)
+    }
+
+    @GetMapping("/nucleotideInsertions", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertionsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getNucleotideInsertionsAsCsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
+            explode = Explode.TRUE,
+        )
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = FORMAT_DESCRIPTION,
+        )
+        @RequestParam
+        dataFormat: String? = null,
+    ): String {
+        val insertionRequest = InsertionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = insertionRequest
+
+        return getResponseAsCsv(insertionRequest, COMMA, siloQueryModel::getNucleotideInsertions)
+    }
+
+    @GetMapping("/nucleotideInsertions", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertionsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun getNucleotideInsertionsAsTsv(
+        @SequenceFilters
+        @RequestParam
+        sequenceFilters: Map<String, String>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
+        )
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
+            explode = Explode.TRUE,
+        )
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
+            description = LIMIT_DESCRIPTION,
+        )
+        @RequestParam
+        limit: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
+            description = OFFSET_DESCRIPTION,
+        )
+        @RequestParam
+        offset: Int? = null,
+        @Parameter(
+            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
+            description = FORMAT_DESCRIPTION,
+        )
+        @RequestParam
+        dataFormat: String? = null,
+    ): String {
+        val insertionRequest = InsertionsRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = insertionRequest
+
+        return getResponseAsCsv(insertionRequest, TAB, siloQueryModel::getNucleotideInsertions)
+    }
+
+    @PostMapping("/nucleotideInsertions", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @LapisNucleotideInsertionsResponse
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertions",
+    )
+    fun postNucleotideInsertions(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: InsertionsRequest,
+    ): LapisResponse<List<NucleotideInsertionResponse>> {
+        requestContext.filter = request
+
+        val result = siloQueryModel.getNucleotideInsertions(request)
+        return LapisResponse(result)
+    }
+
+    @PostMapping("/nucleotideInsertions", produces = [TEXT_CSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertionsAsCsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postNucleotideInsertionsAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: InsertionsRequest,
+    ): String {
+        requestContext.filter = request
+
+        return getResponseAsCsv(request, COMMA, siloQueryModel::getNucleotideInsertions)
+    }
+
+    @PostMapping("/nucleotideInsertions", produces = [TEXT_TSV_HEADER])
+    @Operation(
+        description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
+        operationId = "postNucleotideInsertionsAsTsv",
+        responses = [ApiResponse(responseCode = "200")],
+    )
+    fun postNucleotideInsertionsAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA"))
+        @RequestBody
+        request: InsertionsRequest,
+    ): String {
+        requestContext.filter = request
+
+        return getResponseAsCsv(request, TAB, siloQueryModel::getNucleotideInsertions)
+    }
+
     private fun <Request : CommonSequenceFilters> getResponseAsCsv(
         request: Request,
         delimiter: Delimiter,
@@ -1118,6 +1371,21 @@ private annotation class LapisAminoAcidMutationsResponse
     ],
 )
 private annotation class LapisDetailsResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Operation(
+    description = "Returns a list of insertions along with the counts Only sequences matching the specified " +
+        "sequence filters are considered.",
+)
+@ApiResponse(
+    responseCode = "200",
+    description = "OK",
+    content = [
+        Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA")),
+    ],
+)
+private annotation class LapisNucleotideInsertionsResponse
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

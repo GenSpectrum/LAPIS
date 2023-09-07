@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MutationData
 import java.time.LocalDate
 
@@ -15,6 +16,7 @@ class AggregationDataTypeReference : TypeReference<SiloQueryResponse<List<Aggreg
 class MutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
 class AminoAcidMutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
 class DetailsDataTypeReference : TypeReference<SiloQueryResponse<List<DetailsData>>>()
+class NucleotideInsertionDataTypeReference : TypeReference<SiloQueryResponse<List<InsertionData>>>()
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -64,6 +66,12 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<List<DetailsData>> = DetailsAction(fields, orderByFields, limit, offset)
+
+        fun nucleotideInsertions(
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<InsertionData>> = NucleotideInsertionsAction(orderByFields, limit, offset)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -95,13 +103,20 @@ sealed class SiloAction<ResponseType>(
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class DetailsAction(
-
         val fields: List<String> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Details",
     ) : SiloAction<List<DetailsData>>(DetailsDataTypeReference())
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class NucleotideInsertionsAction(
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        val type: String = "Insertions",
+    ) : SiloAction<List<InsertionData>>(NucleotideInsertionDataTypeReference())
 }
 
 sealed class SiloFilterExpression(val type: String)
