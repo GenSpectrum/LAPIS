@@ -9,6 +9,7 @@ import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MutationData
@@ -158,5 +159,26 @@ class SiloQueryModelTest {
         )
 
         assertThat(result, equalTo(listOf(NucleotideInsertionResponse("ins_notMain:1234:ABCD", 42))))
+    }
+
+    @Test
+    fun `getAminoAcidInsertions returns the sequenceName with the position`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<List<InsertionData>>>()) } returns listOf(
+            InsertionData(42, "ABCD", 1234, "someGene"),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.getAminoAcidInsertions(
+            InsertionsRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            ),
+        )
+
+        assertThat(result, equalTo(listOf(AminoAcidInsertionResponse("ins_someGene:1234:ABCD", 42))))
     }
 }

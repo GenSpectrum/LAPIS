@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.AGGREGATED_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA
@@ -23,14 +24,14 @@ import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_SCHEMA
+import org.genspectrum.lapis.controller.INSERTIONS_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_SCHEMA
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
-import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA
-import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_SCHEMA
@@ -92,9 +93,9 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                     requestSchemaWithFields(sequenceFilters, DETAILS_FIELDS_DESCRIPTION),
                 )
                 .addSchemas(
-                    NUCLEOTIDE_INSERTIONS_REQUEST_SCHEMA,
-                    requestSchemaForCommonSequencenFilters(sequenceFilters),
-                )                
+                    INSERTIONS_REQUEST_SCHEMA,
+                    requestSchemaForCommonSequenceFilters(sequenceFilters),
+                )
                 .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisResponseSchema(
@@ -152,6 +153,15 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                             .properties(nucleotideInsertionSchema()),
                     ),
                 )
+                .addSchemas(
+                    AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA,
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description("Amino Acid Insertion data.")
+                            .properties(aminoAcidInsertionSchema()),
+                    ),
+                )
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
                 .addSchemas(NUCLEOTIDE_INSERTIONS_SCHEMA, nucleotideInsertions())
                 .addSchemas(AMINO_ACID_INSERTIONS_SCHEMA, aminoAcidInsertions())
@@ -194,7 +204,7 @@ private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFi
         .map { (fieldName, fieldType) -> fieldName to Schema<String>().type(fieldType.openApiType) }
         .toMap()
 
-private fun requestSchemaForCommonSequencenFilters(
+private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
 ): Schema<*> =
     Schema<String>()
@@ -249,6 +259,15 @@ private fun nucleotideInsertionSchema() =
     mapOf(
         "insertion" to Schema<String>().type("string")
             .example("ins_segment:123:AAT")
+            .description("The insertion that was found."),
+        "count" to Schema<String>().type("number")
+            .description("The number of sequences matching having the insertion."),
+    )
+
+private fun aminoAcidInsertionSchema() =
+    mapOf(
+        "insertion" to Schema<String>().type("string")
+            .example("ins_gene:123:AAT")
             .description("The insertion that was found."),
         "count" to Schema<String>().type("number")
             .description("The number of sequences matching having the insertion."),

@@ -7,6 +7,15 @@ import { AggregatedResponse } from './lapisClient/models/AggregatedResponse';
 const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);
 
+function getAggregated(params?: URLSearchParams) {
+  const aggregatedEndpoint = '/aggregated';
+  if (params === undefined) {
+    return fetch(basePath + aggregatedEndpoint);
+  }
+
+  return fetch(basePath + aggregatedEndpoint + '?' + params.toString());
+}
+
 type TestCase = {
   testCaseName: string;
   lapisRequest: AggregatedPostRequest;
@@ -39,36 +48,41 @@ describe('The /aggregated endpoint', () => {
     );
 
   it('should correctly handle mutliple mutation requests in GET requests', async () => {
-    const result = await lapisClient.postAggregated1({
-      aggregatedPostRequest: {
-        nucleotideMutations: ['T1-', 'A23062T'],
-        aminoAcidMutations: ['S:501Y', 'ORF1b:12'],
-      },
+    const urlParams = new URLSearchParams({
+      nucleotideMutations: 'T1-,A23062T',
+      aminoAcidMutations: 'S:501Y,ORF1b:12',
     });
 
-    expect(result.data).to.have.length(1);
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
   });
 
+
   it('should correctly handle nucleotide insertion requests in GET requests', async () => {
-    const result = await lapisClient.postAggregated1({
-      aggregatedPostRequest: {
-        nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
-      },
+    const urlParams = new URLSearchParams({
+      nucleotideInsertions: 'ins_25701:CC?,ins_5959:?AT',
     });
 
-    expect(result.data).to.have.length(1);
-    expect(result.data[0].count).to.equal(1);
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
   });
 
   it('should correctly handle amino acid insertion requests in GET requests', async () => {
-    const result = await lapisClient.postAggregated1({
-      aggregatedPostRequest: {
-        aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
-      },
+    const urlParams = new URLSearchParams({
+      aminoAcidInsertions: 'ins_S:143:T,ins_ORF1a:3602:F?P',
     });
 
-    expect(result.data).to.have.length(1);
-    expect(result.data[0].count).to.equal(1);
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
   });
 
   it('should order by specified fields', async () => {
@@ -124,7 +138,7 @@ describe('The /aggregated endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/aggregated?' + urlParams.toString());
+    const result = await getAggregated(urlParams);
 
     expect(await result.text()).to.be.equal(
       String.raw`
@@ -154,7 +168,7 @@ null,Switzerland,2
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/aggregated?' + urlParams.toString());
+    const result = await getAggregated(urlParams);
 
     expect(await result.text()).to.be.equal(
       String.raw`
@@ -178,7 +192,7 @@ null	Switzerland	2
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/aggregated');
+    const result = await getAggregated();
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

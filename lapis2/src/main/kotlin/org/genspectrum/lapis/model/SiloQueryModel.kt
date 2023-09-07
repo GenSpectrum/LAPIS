@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
@@ -108,18 +109,33 @@ class SiloQueryModel(
         )
 
         return data.map { it ->
+            val sequenceName = when (it.sequenceName) {
+                "main" -> ""
+                else -> "${it.sequenceName}:"
+            }
+
             NucleotideInsertionResponse(
-                "ins_" +
-                    if (
-                        it.sequenceName == "main"
-                    ) {
-                        ""
-                    } else {
-                        it.sequenceName + ":"
-                    } +
-                    it.position +
-                    ":" +
-                    it.insertions,
+                "ins_${sequenceName}${it.position}:${it.insertions}",
+                it.count,
+            )
+        }
+    }
+
+    fun getAminoAcidInsertions(sequenceFilters: InsertionsRequest): List<AminoAcidInsertionResponse> {
+        val data = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.aminoAcidInsertions(
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+
+        return data.map { it ->
+            AminoAcidInsertionResponse(
+                "ins_${it.sequenceName}:${it.position}:${it.insertions}",
                 it.count,
             )
         }

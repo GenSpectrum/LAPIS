@@ -9,6 +9,7 @@ import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
@@ -33,22 +35,53 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
-    @ParameterizedTest(name = "GET empty {0}")
+    @ParameterizedTest(name = "GET {0} returns empty JSON")
     @MethodSource("getEndpoints")
-    fun `GET empty return empty CSV`(
+    fun `GET returns empty json`(
         endpoint: String,
     ) {
         mockEndpointReturnEmptyList(endpoint)
 
-        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(get(endpoint + "?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "application/json"))
+            .andExpect(jsonPath("\$.data").isEmpty())
+    }
+
+    @ParameterizedTest(name = "POST {0} returns empty JSON")
+    @MethodSource("getEndpoints")
+    fun `POST returns empty json`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnEmptyList(endpoint)
+
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept("application/json")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "application/json"))
+            .andExpect(jsonPath("\$.data").isEmpty())
+    }
+
+    @ParameterizedTest(name = "GET {0} returns empty CSV")
+    @MethodSource("getEndpoints")
+    fun `GET returns empty CSV`(
+        endpoint: String,
+    ) {
+        mockEndpointReturnEmptyList(endpoint)
+
+        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(""))
     }
 
-    @ParameterizedTest(name = "POST empty {0}")
+    @ParameterizedTest(name = "POST {0} returns empty CSV")
     @MethodSource("getEndpoints")
-    fun `POST empty {0} return empty CSV`(
+    fun `POST {0} returns empty CSV`(
         endpoint: String,
     ) {
         mockEndpointReturnEmptyList(endpoint)
@@ -71,7 +104,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     ) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(returnedCsvData(endpoint)))
@@ -102,7 +135,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     ) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get(endpoint + "?country=Switzerland&dataFormat=csv"))
+        mockMvc.perform(get("$endpoint?country=Switzerland&dataFormat=csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(returnedCsvData(endpoint)))
@@ -132,7 +165,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     ) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get(endpoint + "?country=Switzerland").header("Accept", "text/tab-separated-values"))
+        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/tab-separated-values"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
             .andExpect(content().string(returnedTsvData(endpoint)))
@@ -163,7 +196,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     ) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get(endpoint + "?country=Switzerland&dataFormat=tsv"))
+        mockMvc.perform(get("$endpoint?country=Switzerland&dataFormat=tsv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
             .andExpect(content().string(returnedTsvData(endpoint)))
@@ -186,86 +219,95 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(content().string(returnedTsvData(endpoint)))
     }
 
-    fun mockEndpointReturnEmptyList(endpoint: String) {
-        if (endpoint == "/details") {
-            every {
-                siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-            } returns emptyList()
-        }
-        if (endpoint == "/aggregated") {
-            every {
-                siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-            } returns emptyList()
-        }
-        if (endpoint == "/nucleotideMutations") {
-            every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns emptyList()
-        }
-        if (endpoint == "/aminoAcidMutations") {
-            every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns emptyList()
-        }
-        if (endpoint == "/nucleotideInsertions") {
-            every { siloQueryModelMock.getNucleotideInsertions(any()) } returns emptyList()
-        }
-    }
+    fun mockEndpointReturnEmptyList(endpoint: String) =
+        when (endpoint) {
+            "/details" ->
+                every {
+                    siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+                } returns emptyList()
 
-    fun mockEndpointReturnData(endpoint: String) {
-        if (endpoint == "/details") {
+            "/aggregated" ->
+                every {
+                    siloQueryModelMock.getAggregated(
+                        sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")),
+                    )
+                } returns emptyList()
+
+            "/nucleotideMutations" ->
+                every {
+                    siloQueryModelMock.computeNucleotideMutationProportions(any())
+                } returns emptyList()
+
+            "/aminoAcidMutations" ->
+                every {
+                    siloQueryModelMock.computeAminoAcidMutationProportions(any())
+                } returns emptyList()
+
+            "/nucleotideInsertions" ->
+                every {
+                    siloQueryModelMock.getNucleotideInsertions(any())
+                } returns emptyList()
+
+            "/aminoAcidInsertions" ->
+                every {
+                    siloQueryModelMock.getAminoAcidInsertions(any())
+                } returns emptyList()
+
+            else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
+        }
+
+    fun mockEndpointReturnData(endpoint: String) = when (endpoint) {
+        "/details" ->
             every {
                 siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
             } returns detailsData
-        }
-        if (endpoint == "/aggregated") {
+
+        "/aggregated" ->
             every {
                 siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
             } returns aggregationData
-        }
-        if (endpoint == "/nucleotideMutations") {
-            every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData
-        }
-        if (endpoint == "/aminoAcidMutations") {
-            every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData
-        }
-        if (endpoint == "/nucleotideInsertions") {
-            every { siloQueryModelMock.getNucleotideInsertions(any()) } returns nucleotideInsertionData
-        }
+
+        "/nucleotideMutations" ->
+            every {
+                siloQueryModelMock.computeNucleotideMutationProportions(any())
+            } returns nucleotideMutationData
+
+        "/aminoAcidMutations" ->
+            every {
+                siloQueryModelMock.computeAminoAcidMutationProportions(any())
+            } returns aminoAcidMutationData
+
+        "/nucleotideInsertions" ->
+            every {
+                siloQueryModelMock.getNucleotideInsertions(any())
+            } returns nucleotideInsertionData
+
+        "/aminoAcidInsertions" ->
+            every {
+                siloQueryModelMock.getAminoAcidInsertions(any())
+            } returns aminoAcidInsertionData
+
+        else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
     }
 
-    fun returnedCsvData(endpoint: String): String {
-        if (endpoint == "/details") {
-            return detailsDataCsv
-        }
-        if (endpoint == "/aggregated") {
-            return aggregationDataCsv
-        }
-        if (endpoint == "/nucleotideMutations") {
-            return mutationDataCsv
-        }
-        if (endpoint == "/aminoAcidMutations") {
-            return mutationDataCsv
-        }
-        if (endpoint == "/nucleotideInsertions") {
-            return nucleotideInsertionDataCsv
-        }
-        return ""
+    fun returnedCsvData(endpoint: String) = when (endpoint) {
+        "/details" -> detailsDataCsv
+        "/aggregated" -> aggregationDataCsv
+        "/nucleotideMutations" -> mutationDataCsv
+        "/aminoAcidMutations" -> mutationDataCsv
+        "/nucleotideInsertions" -> nucleotideInsertionDataCsv
+        "/aminoAcidInsertions" -> aminoAcidInsertionDataCsv
+        else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
     }
 
-    fun returnedTsvData(endpoint: String): String {
-        if (endpoint == "/details") {
-            return detailsDataTsv
-        }
-        if (endpoint == "/aggregated") {
-            return aggregationDataTsv
-        }
-        if (endpoint == "/nucleotideMutations") {
-            return mutationDataTsv
-        }
-        if (endpoint == "/aminoAcidMutations") {
-            return mutationDataTsv
-        }
-        if (endpoint == "/nucleotideInsertions") {
-            return nucleotideInsertionDataTsv
-        }
-        return ""
+    fun returnedTsvData(endpoint: String) = when (endpoint) {
+        "/details" -> detailsDataTsv
+        "/aggregated" -> aggregationDataTsv
+        "/nucleotideMutations" -> mutationDataTsv
+        "/aminoAcidMutations" -> mutationDataTsv
+        "/nucleotideInsertions" -> nucleotideInsertionDataTsv
+        "/aminoAcidInsertions" -> aminoAcidInsertionDataTsv
+        else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
     }
 
     val detailsData = listOf(
@@ -357,6 +399,23 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         ins_1234:CAGAA	41
     """.trimIndent()
 
+    val aminoAcidInsertionData = listOf(
+        AminoAcidInsertionResponse(
+            "ins_ORF1a:1234:CAGAA",
+            41,
+        ),
+    )
+
+    val aminoAcidInsertionDataCsv = """
+        insertion,count
+        ins_ORF1a:1234:CAGAA,41
+    """.trimIndent()
+
+    val aminoAcidInsertionDataTsv = """
+        insertion	count
+        ins_ORF1a:1234:CAGAA	41
+    """.trimIndent()
+
     private companion object {
         @JvmStatic
         fun getEndpoints() = listOf(
@@ -365,6 +424,7 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
             Arguments.of("/nucleotideMutations"),
             Arguments.of("/aminoAcidMutations"),
             Arguments.of("/nucleotideInsertions"),
+            Arguments.of("/aminoAcidInsertions"),
         )
     }
 
