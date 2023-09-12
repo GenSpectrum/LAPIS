@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="LapisV2Open" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-        <module name="lapis-v2.main" />
-        <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8081 --lapis.databaseConfig.path=siloLapisTests/testData/testDatabaseConfig.yaml" />
-        <option name="SPRING_BOOT_MAIN_CLASS" value="org.genspectrum.lapis.LapisApplicationKt" />
-        <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-        <method v="2">
-            <option name="Make" enabled="true" />
-        </method>
-    </configuration>
+  <configuration default="false" name="LapisV2Open" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="lapis-v2.main" />
+    <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8081 --lapis.databaseConfig.path=siloLapisTests/testData/testDatabaseConfig.yaml --referenceGenomeFilename=siloLapisTests/testData/reference-genomes.json" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.genspectrum.lapis.LapisApplicationKt" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
 </component>

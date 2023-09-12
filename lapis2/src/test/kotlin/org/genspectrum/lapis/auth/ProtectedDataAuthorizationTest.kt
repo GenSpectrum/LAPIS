@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.verify
+import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.junit.jupiter.api.BeforeEach
@@ -34,7 +35,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
-    private val validRoute = "/aggregated"
+    private val validRoute = AGGREGATED_ROUTE
 
     @BeforeEach
     fun setUp() {

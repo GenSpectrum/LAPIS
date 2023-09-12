@@ -2,12 +2,14 @@ package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.type.TypeReference
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.SequenceData
 import java.time.LocalDate
 
 data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
@@ -17,6 +19,7 @@ class MutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationD
 class AminoAcidMutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
 class DetailsDataTypeReference : TypeReference<SiloQueryResponse<List<DetailsData>>>()
 class InsertionDataTypeReference : TypeReference<SiloQueryResponse<List<InsertionData>>>()
+class SequenceDataTypeReference : TypeReference<SiloQueryResponse<List<SequenceData>>>()
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -78,6 +81,14 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<List<InsertionData>> = AminoAcidInsertionsAction(orderByFields, limit, offset)
+
+        fun genomicSequence(
+            type: SequenceType,
+            sequenceName: String,
+            orderByFields: List<OrderByField> = emptyList(),
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<List<SequenceData>> = SequenceAction(orderByFields, limit, offset, type, sequenceName)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -131,6 +142,15 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
         val type: String = "AminoAcidInsertions",
     ) : SiloAction<List<InsertionData>>(InsertionDataTypeReference())
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private data class SequenceAction(
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        val type: SequenceType,
+        val sequenceName: String,
+    ) : SiloAction<List<SequenceData>>(SequenceDataTypeReference())
 }
 
 sealed class SiloFilterExpression(val type: String)
@@ -184,3 +204,11 @@ data class IntBetween(val column: String, val from: Int?, val to: Int?) : SiloFi
 data class FloatEquals(val column: String, val value: Double) : SiloFilterExpression("FloatEquals")
 
 data class FloatBetween(val column: String, val from: Double?, val to: Double?) : SiloFilterExpression("FloatBetween")
+
+enum class SequenceType {
+    @JsonProperty("Fasta")
+    UNALIGNED,
+
+    @JsonProperty("FastaAligned")
+    ALIGNED,
+}

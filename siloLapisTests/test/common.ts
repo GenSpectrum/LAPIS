@@ -1,8 +1,13 @@
-import { Configuration, LapisControllerApi } from './lapisClient';
+import {
+  Configuration,
+  LapisControllerApi,
+  Middleware,
+  SingleSegmentedSequenceControllerApi,
+} from './lapisClient';
 
 export const basePath = 'http://localhost:8080';
 
-export const lapisClient = new LapisControllerApi(new Configuration({ basePath })).withMiddleware({
+const middleware: Middleware = {
   onError: errorContext => {
     if (errorContext.response) {
       console.log('Response status code: ', errorContext.response.status);
@@ -22,4 +27,21 @@ export const lapisClient = new LapisControllerApi(new Configuration({ basePath }
     }
     return Promise.resolve(responseContext.response);
   },
-});
+};
+
+export const lapisClient = new LapisControllerApi(new Configuration({ basePath })).withMiddleware(middleware);
+
+export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenceControllerApi(
+  new Configuration({ basePath })
+).withMiddleware(middleware);
+
+export function sequenceData(serverResponse: string) {
+  const lines = serverResponse.split('\n');
+  const primaryKeys = lines.filter(line => line.startsWith('>'));
+  const sequences = lines.filter(line => !line.startsWith('>'));
+
+  return {
+    primaryKeys,
+    sequences,
+  };
+}

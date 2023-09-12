@@ -4,6 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.NucleotideSequence
+import org.genspectrum.lapis.config.REFERENCE_GENOME_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
@@ -60,4 +63,11 @@ class LapisSpringConfig {
     fun dataOpennessAuthorizationFilter(
         dataOpennessAuthorizationFilterFactory: DataOpennessAuthorizationFilterFactory,
     ) = dataOpennessAuthorizationFilterFactory.create()
+
+    @Bean
+    fun referenceGenome(
+        @Value("\${$REFERENCE_GENOME_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
+    ): ReferenceGenome {
+        return ReferenceGenome(nucleotideSegments.map { NucleotideSequence(it) })
+    }
 }

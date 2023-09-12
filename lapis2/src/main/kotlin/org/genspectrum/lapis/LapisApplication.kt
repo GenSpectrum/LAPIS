@@ -1,5 +1,6 @@
 package org.genspectrum.lapis
 
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
@@ -7,5 +8,7 @@ import org.springframework.boot.runApplication
 class Lapisv2Application
 
 fun main(args: Array<String>) {
-    runApplication<Lapisv2Application>(*args)
+    val referenceGenomeArgs = ReferenceGenome.readFromFileFromProgramArgs(args).toSpringApplicationArgs()
+
+    runApplication<Lapisv2Application>(*(args + referenceGenomeArgs))
 }

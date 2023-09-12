@@ -9,8 +9,13 @@ import org.genspectrum.lapis.config.AccessKeysReader
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
+import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
 import org.genspectrum.lapis.controller.LapisError
 import org.genspectrum.lapis.controller.LapisErrorResponse
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -93,7 +98,13 @@ private class ProtectedDataAuthorizationFilter(
 
     companion object {
         private val WHITELISTED_PATHS = listOf("/swagger-ui", "/api-docs")
-        private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf("/aggregated", "/nucleotideMutations")
+        private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf(
+            AGGREGATED_ROUTE,
+            NUCLEOTIDE_MUTATIONS_ROUTE,
+            AMINO_ACID_MUTATIONS_ROUTE,
+            NUCLEOTIDE_INSERTIONS_ROUTE,
+            AMINO_ACID_INSERTIONS_ROUTE,
+        )
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {

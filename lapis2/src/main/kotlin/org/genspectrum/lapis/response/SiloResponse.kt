@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import io.swagger.v3.oas.annotations.media.Schema
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.CsvRecord
 import org.springframework.boot.jackson.JsonComponent
 
@@ -64,3 +65,19 @@ data class InsertionData(
     val position: Int,
     val sequenceName: String,
 )
+
+data class SequenceData(
+    val sequenceKey: String,
+    val sequence: String,
+)
+
+@JsonComponent
+class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeserializer<SequenceData>() {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): SequenceData {
+        val node = p.readValueAsTree<JsonNode>()
+        val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
+        val sequence =
+            node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }.value.asText()
+        return SequenceData(sequenceKey, sequence)
+    }
+}

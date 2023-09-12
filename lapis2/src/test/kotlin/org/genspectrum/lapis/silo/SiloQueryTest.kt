@@ -196,6 +196,66 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
+                """
+                {
+                    "type": "FastaAligned",
+                    "sequenceName": "someSequenceName"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.genomicSequence(
+                    SequenceType.ALIGNED,
+                    "someSequenceName",
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
+                """
+                {
+                    "type": "FastaAligned",
+                    "sequenceName": "someSequenceName",
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.genomicSequence(SequenceType.UNALIGNED, "someSequenceName"),
+                """
+                {
+                    "type": "Fasta",
+                    "sequenceName": "someSequenceName"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.genomicSequence(
+                    SequenceType.UNALIGNED,
+                    "someSequenceName",
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
+                """
+                {
+                    "type": "Fasta",
+                    "sequenceName": "someSequenceName",
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
+                }
+                """,
+            ),
         )
 
         @JvmStatic

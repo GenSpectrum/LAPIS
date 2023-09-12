@@ -42,6 +42,7 @@ import org.genspectrum.lapis.controller.ORDER_BY_FIELDS_SCHEMA
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.controller.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.controller.SEQUENCE_FILTERS_SCHEMA
+import org.genspectrum.lapis.controller.SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -64,8 +65,9 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
         Pair(AMINO_ACID_INSERTIONS_PROPERTY, aminoAcidInsertions()) +
         Pair(ORDER_BY_PROPERTY, orderByPostSchema()) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
-        Pair(OFFSET_PROPERTY, offsetSchema()) +
-        Pair(FORMAT_PROPERTY, formatSchema())
+        Pair(OFFSET_PROPERTY, offsetSchema())
+
+    val sequenceFiltersWithFormat = sequenceFilters + Pair(FORMAT_PROPERTY, formatSchema())
 
     return OpenAPI()
         .components(
@@ -82,18 +84,24 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                     Schema<String>()
                         .type("object")
                         .description("valid filters for sequence data")
-                        .properties(sequenceFilters + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number"))),
+                        .properties(
+                            sequenceFiltersWithFormat + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number")),
+                        ),
                 )
                 .addSchemas(
                     AGGREGATED_REQUEST_SCHEMA,
-                    requestSchemaWithFields(sequenceFilters, AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION),
+                    requestSchemaWithFields(sequenceFiltersWithFormat, AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION),
                 )
                 .addSchemas(
                     DETAILS_REQUEST_SCHEMA,
-                    requestSchemaWithFields(sequenceFilters, DETAILS_FIELDS_DESCRIPTION),
+                    requestSchemaWithFields(sequenceFiltersWithFormat, DETAILS_FIELDS_DESCRIPTION),
                 )
                 .addSchemas(
                     INSERTIONS_REQUEST_SCHEMA,
+                    requestSchemaForCommonSequenceFilters(sequenceFiltersWithFormat),
+                )
+                .addSchemas(
+                    SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(sequenceFilters),
                 )
                 .addSchemas(

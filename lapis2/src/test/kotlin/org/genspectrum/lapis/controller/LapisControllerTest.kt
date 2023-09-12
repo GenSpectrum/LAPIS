@@ -6,9 +6,9 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DataVersion
-import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -59,7 +59,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             ),
         )
 
-        mockMvc.perform(get("/aggregated?country=Switzerland"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -103,7 +103,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             ),
         )
 
-        mockMvc.perform(get("/aggregated?country=Switzerland&fields=country,age"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?country=Switzerland&fields=country,age"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -125,7 +125,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("/aggregated?nucleotideMutations=123A,124B"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?nucleotideMutations=123A,124B"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -146,7 +146,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             ),
         )
 
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"country": "Switzerland", "fields": ["country","age"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -299,15 +299,17 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
     private fun setupInsertionMock(endpoint: String) {
         when (endpoint) {
-            "/nucleotideInsertions" -> {
+            NUCLEOTIDE_INSERTIONS_ROUTE -> {
                 every {
-                    siloQueryModelMock.getNucleotideInsertions(insertionRequest(mapOf("country" to "Switzerland")))
+                    siloQueryModelMock.getNucleotideInsertions(
+                        sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                    )
                 } returns listOf(someNucleotideInsertion())
             }
 
-            "/aminoAcidInsertions" -> {
+            AMINO_ACID_INSERTIONS_ROUTE -> {
                 every {
-                    siloQueryModelMock.getAminoAcidInsertions(insertionRequest(mapOf("country" to "Switzerland")))
+                    siloQueryModelMock.getAminoAcidInsertions(sequenceFiltersRequest(mapOf("country" to "Switzerland")))
                 } returns listOf(someAminoAcidInsertion())
             }
 
@@ -318,14 +320,14 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     private companion object {
         @JvmStatic
         fun getMutationEndpoints() = listOf(
-            Arguments.of("/nucleotideMutations"),
-            Arguments.of("/aminoAcidMutations"),
+            Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
+            Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
         )
 
         @JvmStatic
         fun getInsertionEndpoints() = listOf(
-            Arguments.of("/nucleotideInsertions"),
-            Arguments.of("/aminoAcidInsertions"),
+            Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
+            Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
         )
     }
 
@@ -335,7 +337,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        mockMvc.perform(get("/details?country=Switzerland"))
+        mockMvc.perform(get("$DETAILS_ROUTE?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
@@ -353,7 +355,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        mockMvc.perform(get("/details?country=Switzerland&fields=country&fields=age"))
+        mockMvc.perform(get("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=age"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
@@ -365,7 +367,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        val request = post("/details")
+        val request = post(DETAILS_ROUTE)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -387,7 +389,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        val request = post("/details")
+        val request = post(DETAILS_ROUTE)
             .content("""{"country": "Switzerland", "fields": ["country", "age"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -410,9 +412,9 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         emptyList(),
     )
 
-    private fun insertionRequest(
+    private fun sequenceFiltersRequest(
         sequenceFilters: Map<String, String>,
-    ) = InsertionsRequest(
+    ) = SequenceFiltersRequest(
         sequenceFilters,
         emptyList(),
         emptyList(),

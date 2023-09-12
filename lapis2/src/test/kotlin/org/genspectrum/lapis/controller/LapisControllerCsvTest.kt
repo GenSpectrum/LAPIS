@@ -221,34 +221,34 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
 
     fun mockEndpointReturnEmptyList(endpoint: String) =
         when (endpoint) {
-            "/details" ->
+            DETAILS_ROUTE ->
                 every {
                     siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
                 } returns emptyList()
 
-            "/aggregated" ->
+            AGGREGATED_ROUTE ->
                 every {
                     siloQueryModelMock.getAggregated(
                         sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")),
                     )
                 } returns emptyList()
 
-            "/nucleotideMutations" ->
+            NUCLEOTIDE_MUTATIONS_ROUTE ->
                 every {
                     siloQueryModelMock.computeNucleotideMutationProportions(any())
                 } returns emptyList()
 
-            "/aminoAcidMutations" ->
+            AMINO_ACID_MUTATIONS_ROUTE ->
                 every {
                     siloQueryModelMock.computeAminoAcidMutationProportions(any())
                 } returns emptyList()
 
-            "/nucleotideInsertions" ->
+            NUCLEOTIDE_INSERTIONS_ROUTE ->
                 every {
                     siloQueryModelMock.getNucleotideInsertions(any())
                 } returns emptyList()
 
-            "/aminoAcidInsertions" ->
+            AMINO_ACID_INSERTIONS_ROUTE ->
                 every {
                     siloQueryModelMock.getAminoAcidInsertions(any())
                 } returns emptyList()
@@ -257,32 +257,32 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
         }
 
     fun mockEndpointReturnData(endpoint: String) = when (endpoint) {
-        "/details" ->
+        DETAILS_ROUTE ->
             every {
                 siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
             } returns detailsData
 
-        "/aggregated" ->
+        AGGREGATED_ROUTE ->
             every {
                 siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
             } returns aggregationData
 
-        "/nucleotideMutations" ->
+        NUCLEOTIDE_MUTATIONS_ROUTE ->
             every {
                 siloQueryModelMock.computeNucleotideMutationProportions(any())
             } returns nucleotideMutationData
 
-        "/aminoAcidMutations" ->
+        AMINO_ACID_MUTATIONS_ROUTE ->
             every {
                 siloQueryModelMock.computeAminoAcidMutationProportions(any())
             } returns aminoAcidMutationData
 
-        "/nucleotideInsertions" ->
+        NUCLEOTIDE_INSERTIONS_ROUTE ->
             every {
                 siloQueryModelMock.getNucleotideInsertions(any())
             } returns nucleotideInsertionData
 
-        "/aminoAcidInsertions" ->
+        AMINO_ACID_INSERTIONS_ROUTE ->
             every {
                 siloQueryModelMock.getAminoAcidInsertions(any())
             } returns aminoAcidInsertionData
@@ -291,22 +291,22 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     }
 
     fun returnedCsvData(endpoint: String) = when (endpoint) {
-        "/details" -> detailsDataCsv
-        "/aggregated" -> aggregationDataCsv
-        "/nucleotideMutations" -> mutationDataCsv
-        "/aminoAcidMutations" -> mutationDataCsv
-        "/nucleotideInsertions" -> nucleotideInsertionDataCsv
-        "/aminoAcidInsertions" -> aminoAcidInsertionDataCsv
+        DETAILS_ROUTE -> detailsDataCsv
+        AGGREGATED_ROUTE -> aggregationDataCsv
+        NUCLEOTIDE_MUTATIONS_ROUTE -> mutationDataCsv
+        AMINO_ACID_MUTATIONS_ROUTE -> mutationDataCsv
+        NUCLEOTIDE_INSERTIONS_ROUTE -> nucleotideInsertionDataCsv
+        AMINO_ACID_INSERTIONS_ROUTE -> aminoAcidInsertionDataCsv
         else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
     }
 
     fun returnedTsvData(endpoint: String) = when (endpoint) {
-        "/details" -> detailsDataTsv
-        "/aggregated" -> aggregationDataTsv
-        "/nucleotideMutations" -> mutationDataTsv
-        "/aminoAcidMutations" -> mutationDataTsv
-        "/nucleotideInsertions" -> nucleotideInsertionDataTsv
-        "/aminoAcidInsertions" -> aminoAcidInsertionDataTsv
+        DETAILS_ROUTE -> detailsDataTsv
+        AGGREGATED_ROUTE -> aggregationDataTsv
+        NUCLEOTIDE_MUTATIONS_ROUTE -> mutationDataTsv
+        AMINO_ACID_MUTATIONS_ROUTE -> mutationDataTsv
+        NUCLEOTIDE_INSERTIONS_ROUTE -> nucleotideInsertionDataTsv
+        AMINO_ACID_INSERTIONS_ROUTE -> aminoAcidInsertionDataTsv
         else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
     }
 
@@ -419,12 +419,12 @@ class LapisControllerCsvTest(@Autowired val mockMvc: MockMvc) {
     private companion object {
         @JvmStatic
         fun getEndpoints() = listOf(
-            Arguments.of("/details"),
-            Arguments.of("/aggregated"),
-            Arguments.of("/nucleotideMutations"),
-            Arguments.of("/aminoAcidMutations"),
-            Arguments.of("/nucleotideInsertions"),
-            Arguments.of("/aminoAcidInsertions"),
+            Arguments.of(DETAILS_ROUTE),
+            Arguments.of(AGGREGATED_ROUTE),
+            Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
+            Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
+            Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
+            Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
         )
     }
 

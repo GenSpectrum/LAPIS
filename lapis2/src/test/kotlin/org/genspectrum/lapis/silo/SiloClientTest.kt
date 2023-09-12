@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
@@ -150,6 +151,43 @@ class SiloClientTest {
             containsInAnyOrder(
                 MutationData("first mutation", 45, 0.9, "main"),
                 MutationData("second mutation", 44, 0.7, "otherSequence"),
+            ),
+        )
+    }
+
+    @Test
+    fun `given server returns sequence data then response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """{
+                        "queryResult": [
+                            {
+                              "gisaid_epi_isl": "key1",
+                              "someSequenceName": "ABCD"
+                            },
+                            {
+                              "gisaid_epi_isl": "key2",
+                              "someSequenceName": "DEFG"
+                            }
+                        ]
+                    }""",
+                ),
+        )
+
+        val query = SiloQuery(
+            SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
+            StringEquals("theColumn", "theValue"),
+        )
+        val result = underTest.sendQuery(query)
+
+        assertThat(result, hasSize(2))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                SequenceData("key1", "ABCD"),
+                SequenceData("key2", "DEFG"),
             ),
         )
     }

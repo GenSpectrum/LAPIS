@@ -34,7 +34,6 @@ class DatabaseConfigTest {
             underTest.schema.features,
             containsInAnyOrder(
                 DatabaseFeature(name = SARS_COV2_VARIANT_QUERY_FEATURE),
-                DatabaseFeature(name = IS_SEQUENCE_SINGLE_SEGMENTED_FEATURE),
             ),
         )
     }

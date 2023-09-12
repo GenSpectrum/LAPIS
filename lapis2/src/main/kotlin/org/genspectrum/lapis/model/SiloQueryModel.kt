@@ -1,14 +1,15 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.SingleSegmentedSequenceFeature
-import org.genspectrum.lapis.request.InsertionsRequest
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component
 class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
-    private val singleSegmentedSequenceFeature: SingleSegmentedSequenceFeature,
+    private val referenceGenome: ReferenceGenome,
 ) {
 
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
@@ -49,7 +50,7 @@ class SiloQueryModel(
         )
         return data.map { it ->
             val sequenceName =
-                if (singleSegmentedSequenceFeature.isEnabled()) it.mutation else "${it.sequenceName}:${it.mutation}"
+                if (referenceGenome.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
 
             NucleotideMutationResponse(
                 sequenceName,
@@ -95,7 +96,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getNucleotideInsertions(sequenceFilters: InsertionsRequest): List<NucleotideInsertionResponse> {
+    fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): List<NucleotideInsertionResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.nucleotideInsertions(
@@ -108,7 +109,7 @@ class SiloQueryModel(
         )
 
         return data.map { it ->
-            val sequenceName = if (singleSegmentedSequenceFeature.isEnabled()) "" else "${it.sequenceName}:"
+            val sequenceName = if (referenceGenome.isSingleSegmented()) "" else "${it.sequenceName}:"
 
             NucleotideInsertionResponse(
                 "ins_${sequenceName}${it.position}:${it.insertions}",
@@ -117,7 +118,7 @@ class SiloQueryModel(
         }
     }
 
-    fun getAminoAcidInsertions(sequenceFilters: InsertionsRequest): List<AminoAcidInsertionResponse> {
+    fun getAminoAcidInsertions(sequenceFilters: SequenceFiltersRequest): List<AminoAcidInsertionResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aminoAcidInsertions(
@@ -135,5 +136,24 @@ class SiloQueryModel(
                 it.count,
             )
         }
+    }
+
+    fun getGenomicSequence(
+        sequenceFilters: SequenceFiltersRequest,
+        sequenceType: SequenceType,
+        sequenceName: String,
+    ): String {
+        return siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.genomicSequence(
+                    sequenceType,
+                    sequenceName,
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        ).joinToString("\n") { ">${it.sequenceKey}\n${it.sequence}" }
     }
 }
