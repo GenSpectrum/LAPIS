@@ -32,6 +32,12 @@ enum class MetadataType {
 
     @JsonProperty("float")
     FLOAT,
+
+    @JsonProperty("insertion")
+    NUCLEOTIDE_INSERTION,
+
+    @JsonProperty("aaInsertion")
+    AMINO_ACID_INSERTION,
 }
 
 data class DatabaseFeature(val name: String)

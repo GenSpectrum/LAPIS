@@ -39,6 +39,8 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
         "${databaseMetadata.name}From" to SequenceFilterFieldType.FloatFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.FloatTo(databaseMetadata.name),
     )
+    MetadataType.NUCLEOTIDE_INSERTION -> emptyList()
+    MetadataType.AMINO_ACID_INSERTION -> emptyList()
 }
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) = when (databaseFeature.name) {

@@ -54,6 +54,8 @@ class SequenceFiltersRequestWithFieldsTest {
                     mapOf("country" to "Switzerland"),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                     listOf("division", "country"),
                 ),
             ),
@@ -67,6 +69,8 @@ class SequenceFiltersRequestWithFieldsTest {
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     listOf("division", "country"),
                 ),
@@ -82,6 +86,46 @@ class SequenceFiltersRequestWithFieldsTest {
                     emptyMap(),
                     emptyList(),
                     listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
+                    emptyList(),
+                    emptyList(),
+                    listOf("division", "country"),
+                ),
+            ),
+            Arguments.of(
+                """
+                {
+                    "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"],
+                    "fields": ["division", "country"]
+                }
+                """,
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(
+                        NucleotideInsertion(501, "Y", "S"),
+                        NucleotideInsertion(12, "ABCD", null),
+                    ),
+                    emptyList(),
+                    listOf("division", "country"),
+                ),
+            ),
+            Arguments.of(
+                """
+                {
+                    "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"],
+                    "fields": ["division", "country"]
+                }
+                """,
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(
+                        AminoAcidInsertion(501, "S", "Y"),
+                        AminoAcidInsertion(12, "ORF1", "ABCD"),
+                    ),
                     listOf("division", "country"),
                 ),
             ),
@@ -93,6 +137,8 @@ class SequenceFiltersRequestWithFieldsTest {
                 """,
                 SequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -109,12 +155,16 @@ class SequenceFiltersRequestWithFieldsTest {
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    emptyList(),
+                    emptyList(),
                 ),
             ),
             Arguments.of(
                 "{}",
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -147,6 +197,22 @@ class SequenceFiltersRequestWithFieldsTest {
                 }
                 """,
                 "aminoAcidMutations must be an array or null",
+            ),
+            Arguments.of(
+                """
+                {
+                    "nucleotideInsertions": "not an array"
+                }
+                """,
+                "nucleotideInsertions must be an array or null",
+            ),
+            Arguments.of(
+                """
+                {
+                    "aminoAcidInsertions": "not an array"
+                }
+                """,
+                "aminoAcidInsertions must be an array or null",
             ),
         )
     }

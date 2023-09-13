@@ -30,7 +30,9 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     private val validRoute = "/aggregated"
-    private fun MockKMatcherScope.validControllerCall() = lapisController.aggregated(any(), any(), any(), any(), any())
+    private fun MockKMatcherScope.validControllerCall() =
+        lapisController.aggregated(any(), any(), any(), any(), any(), any(), any())
+
     private val validResponse = LapisResponse(emptyList<AggregationData>())
 
     @Test

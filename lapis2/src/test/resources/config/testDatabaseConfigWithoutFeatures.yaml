@@ -12,4 +12,8 @@ schema:
       type: string
     - name: pangoLineage
       type: pango_lineage
+    - name: nucInsertion
+      type: insertion
+    - name: aaInsertion
+      type: aaInsertion
   primaryKey: gisaid_epi_isl

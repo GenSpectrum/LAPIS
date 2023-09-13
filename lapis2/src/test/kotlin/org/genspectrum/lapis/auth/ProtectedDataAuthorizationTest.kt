@@ -185,7 +185,14 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
     }
 
     private fun sequenceFilterRequest() =
-        SequenceFiltersRequestWithFields(mapOf("field1" to "value1"), emptyList(), emptyList(), emptyList())
+        SequenceFiltersRequestWithFields(
+            mapOf("field1" to "value1"),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
 
     @Test
     fun `the swagger ui and api docs are always accessible`() {

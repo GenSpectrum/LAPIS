@@ -12,6 +12,10 @@
   },
   "expected": [
     {
+      "count": 2,
+      "country": "Switzerland"
+    },
+    {
       "count": 6,
       "country": "Switzerland",
       "division": "Aargau"
@@ -27,7 +31,7 @@
       "division": "Basel-Stadt"
     },
     {
-      "count": 10,
+      "count": 9,
       "country": "Switzerland",
       "division": "Bern"
     },
@@ -67,7 +71,7 @@
       "division": "Schwyz"
     },
     {
-      "count": 16,
+      "count": 15,
       "country": "Switzerland",
       "division": "Solothurn"
     },

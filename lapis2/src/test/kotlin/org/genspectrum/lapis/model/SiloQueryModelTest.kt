@@ -39,7 +39,16 @@ class SiloQueryModelTest {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        underTest.getAggregated(SequenceFiltersRequestWithFields(emptyMap(), emptyList(), emptyList(), emptyList()))
+        underTest.getAggregated(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            ),
+        )
 
         verify {
             siloClientMock.sendQuery(
@@ -54,7 +63,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), 0.5),
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.5),
         )
 
         verify {
@@ -72,7 +81,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         assertThat(result, equalTo(listOf(NucleotideMutationResponse("A1234B", 1234, 0.1234))))
@@ -86,7 +95,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         assertThat(result, equalTo(listOf(NucleotideMutationResponse("NotMain:A1234B", 1234, 0.1234))))
@@ -100,7 +109,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.computeAminoAcidMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList()),
+            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         assertThat(result, equalTo(listOf(AminoAcidMutationResponse("someName:A1234B", 1234, 0.1234))))

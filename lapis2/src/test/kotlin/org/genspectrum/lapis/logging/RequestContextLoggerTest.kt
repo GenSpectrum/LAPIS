@@ -105,12 +105,21 @@ internal class RequestContextLoggerTest {
         @JvmStatic
         fun provideInputFilters() = listOf(
             Arguments.of(
-                SequenceFiltersRequestWithFields(mapOf("country" to "Germany"), emptyList(), emptyList(), emptyList()),
+                SequenceFiltersRequestWithFields(
+                    mapOf("country" to "Germany"),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                ),
                 """"country":"Germany"""",
             ),
             Arguments.of(
                 SequenceFiltersRequestWithFields(
                     mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
+                    emptyList(),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),

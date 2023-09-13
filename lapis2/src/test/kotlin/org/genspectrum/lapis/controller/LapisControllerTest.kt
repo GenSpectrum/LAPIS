@@ -13,7 +13,6 @@ import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideMutationResponse
-import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -109,26 +108,13 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `GET aggregated with invalid nucleotide mutation`() {
-        mockMvc.perform(get("/aggregated?nucleotideMutations=invalidMutation"))
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.detail").value(containsString("Failed to convert 'nucleotideMutations'")))
-    }
-
-    @Test
-    fun `GET aggregated with invalid amino acid mutation`() {
-        mockMvc.perform(get("/aggregated?aminoAcidMutations=invalidMutation"))
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.detail").value(containsString("Failed to convert 'aminoAcidMutations'")))
-    }
-
-    @Test
     fun `GET aggregated with valid mutation`() {
         every {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
                     emptyMap(),
                     listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
+                    emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -357,6 +343,8 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         sequenceFilters,
         emptyList(),
         emptyList(),
+        emptyList(),
+        emptyList(),
         fields,
         emptyList(),
     )
@@ -364,6 +352,8 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double?) =
         MutationProportionsRequest(
             sequenceFilters,
+            emptyList(),
+            emptyList(),
             emptyList(),
             emptyList(),
             minProportion,

@@ -12,6 +12,10 @@ schema:
       type: string
     - name: pangoLineage
       type: pango_lineage
+    - name: nucInsertion
+      type: insertion
+    - name: aaInsertion
+      type: aaInsertion
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl

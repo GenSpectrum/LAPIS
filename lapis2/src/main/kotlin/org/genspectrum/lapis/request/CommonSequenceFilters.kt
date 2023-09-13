@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.OFFSET_PROPERTY
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
@@ -15,11 +17,15 @@ interface CommonSequenceFilters {
     val sequenceFilters: Map<String, String>
     val nucleotideMutations: List<NucleotideMutation>
     val aaMutations: List<AminoAcidMutation>
+    val nucleotideInsertions: List<NucleotideInsertion>
+    val aminoAcidInsertions: List<AminoAcidInsertion>
     val orderByFields: List<OrderByField>
     val limit: Int?
     val offset: Int?
 
-    fun isEmpty() = sequenceFilters.isEmpty() && nucleotideMutations.isEmpty() && aaMutations.isEmpty()
+    fun isEmpty() =
+        sequenceFilters.isEmpty() && nucleotideMutations.isEmpty() &&
+            aaMutations.isEmpty() && nucleotideInsertions.isEmpty() && aminoAcidInsertions.isEmpty()
 }
 
 fun parseCommonFields(node: JsonNode, codec: ObjectCodec): ParsedCommonFields {
@@ -36,6 +42,22 @@ fun parseCommonFields(node: JsonNode, codec: ObjectCodec): ParsedCommonFields {
         is ArrayNode -> aminoAcidMutationsNode.map { codec.treeToValue(it, AminoAcidMutation::class.java) }
         else -> throw IllegalArgumentException(
             "aminoAcidMutations must be an array or null",
+        )
+    }
+
+    val nucleotideInsertions = when (val nucleotideInsertionsNode = node.get(NUCLEOTIDE_INSERTIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> nucleotideInsertionsNode.map { codec.treeToValue(it, NucleotideInsertion::class.java) }
+        else -> throw IllegalArgumentException(
+            "nucleotideInsertions must be an array or null",
+        )
+    }
+
+    val aminoAcidInsertions = when (val aminoAcidInsertionsNode = node.get(AMINO_ACID_INSERTIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> aminoAcidInsertionsNode.map { codec.treeToValue(it, AminoAcidInsertion::class.java) }
+        else -> throw IllegalArgumentException(
+            "aminoAcidInsertions must be an array or null",
         )
     }
 
@@ -61,28 +83,35 @@ fun parseCommonFields(node: JsonNode, codec: ObjectCodec): ParsedCommonFields {
         else -> throw IllegalArgumentException("offset must be a number or null")
     }
 
-    val sequenceFilters = node.fields()
-        .asSequence()
-        .filter { isStringOrNumber(it.value) }
-        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
-        .associate { it.key to it.value.asText() }
-    return ParsedCommonFields(nucleotideMutations, aminoAcidMutations, sequenceFilters, orderByFields, limit, offset)
+    val sequenceFilters = node.fields().asSequence().filter { isStringOrNumber(it.value) }
+        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }.associate { it.key to it.value.asText() }
+    return ParsedCommonFields(
+        nucleotideMutations,
+        aminoAcidMutations,
+        nucleotideInsertions,
+        aminoAcidInsertions,
+        sequenceFilters,
+        orderByFields,
+        limit,
+        offset,
+    )
 }
 
 data class ParsedCommonFields(
     val nucleotideMutations: List<NucleotideMutation>,
     val aminoAcidMutations: List<AminoAcidMutation>,
+    val nucleotideInsertions: List<NucleotideInsertion>,
+    val aminoAcidInsertions: List<AminoAcidInsertion>,
     val sequenceFilters: Map<String, String>,
     val orderByFields: List<OrderByField>,
     val limit: Int?,
     val offset: Int?,
 )
 
-private fun isStringOrNumber(jsonNode: JsonNode) =
-    when (jsonNode.nodeType) {
-        JsonNodeType.STRING,
-        JsonNodeType.NUMBER,
-        -> true
+private fun isStringOrNumber(jsonNode: JsonNode) = when (jsonNode.nodeType) {
+    JsonNodeType.STRING,
+    JsonNodeType.NUMBER,
+    -> true
 
-        else -> false
-    }
+    else -> false
+}

@@ -81,6 +81,40 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
+  it('should correctly handle nucleotide insertion requests in GET requests', async () => {
+    const expectedFirstResultWithNucleotideInsertion = {
+      count: 1,
+      mutation: 'E:T9I',
+      proportion: 1.0,
+    };
+
+    const result = await lapisClient.postAminoAcidMutations1({
+      sequenceFiltersWithMinProportion: {
+        nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
+      },
+    });
+
+    expect(result.data).to.have.length(55);
+    expect(result.data[0]).to.deep.equal(expectedFirstResultWithNucleotideInsertion);
+  });
+
+  it('should correctly handle amino acid insertion requests in GET requests', async () => {
+    const expectedFirstResultWithAminoAcidInsertion = {
+      count: 1,
+      mutation: 'N:A220V',
+      proportion: 1.0,
+    };
+
+    const result = await lapisClient.postAminoAcidMutations1({
+      sequenceFiltersWithMinProportion: {
+        aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+      },
+    });
+
+    expect(result.data).to.have.length(25);
+    expect(result.data[0]).to.deep.equal(expectedFirstResultWithAminoAcidInsertion);
+  });
+
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
       country: 'Switzerland',

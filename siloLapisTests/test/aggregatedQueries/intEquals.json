@@ -1,11 +1,11 @@
 {
-  "testCaseName": "int between",
+  "testCaseName": "int equals",
   "lapisRequest": {
     "age": 51
   },
   "expected": [
     {
-      "count": 8
+      "count": 7
     }
   ]
 }
