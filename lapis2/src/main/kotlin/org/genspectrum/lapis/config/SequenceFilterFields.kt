@@ -2,6 +2,12 @@ package org.genspectrum.lapis.config
 
 typealias SequenceFilterFieldName = String
 
+const val SARS_COV2_VARIANT_QUERY_FEATURE = "sarsCoV2VariantQuery"
+
+val FEATURES_FOR_SEQUENCE_FILTERS = listOf(
+    SARS_COV2_VARIANT_QUERY_FEATURE,
+)
+
 data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, SequenceFilterFieldType>) {
     companion object {
         fun fromDatabaseConfig(databaseConfig: DatabaseConfig): SequenceFilterFields {
@@ -13,7 +19,9 @@ data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, Sequenc
             val featuresFields = if (databaseConfig.schema.features.isEmpty()) {
                 emptyMap<SequenceFilterFieldName, SequenceFilterFieldType>()
             } else {
-                databaseConfig.schema.features.associate(::mapToSequenceFilterFieldsFromFeatures)
+                databaseConfig.schema.features
+                    .filter { it.name in FEATURES_FOR_SEQUENCE_FILTERS }
+                    .associate(::mapToSequenceFilterFieldsFromFeatures)
             }
 
             return SequenceFilterFields(fields = metadataFields + featuresFields)
@@ -29,22 +37,25 @@ private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) = when
         "${databaseMetadata.name}From" to SequenceFilterFieldType.DateFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.DateTo(databaseMetadata.name),
     )
+
     MetadataType.INT -> listOf(
         databaseMetadata.name to SequenceFilterFieldType.Int,
         "${databaseMetadata.name}From" to SequenceFilterFieldType.IntFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.IntTo(databaseMetadata.name),
     )
+
     MetadataType.FLOAT -> listOf(
         databaseMetadata.name to SequenceFilterFieldType.Float,
         "${databaseMetadata.name}From" to SequenceFilterFieldType.FloatFrom(databaseMetadata.name),
         "${databaseMetadata.name}To" to SequenceFilterFieldType.FloatTo(databaseMetadata.name),
     )
+
     MetadataType.NUCLEOTIDE_INSERTION -> emptyList()
     MetadataType.AMINO_ACID_INSERTION -> emptyList()
 }
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) = when (databaseFeature.name) {
-    "sarsCoV2VariantQuery" -> "variantQuery" to SequenceFilterFieldType.VariantQuery
+    SARS_COV2_VARIANT_QUERY_FEATURE -> "variantQuery" to SequenceFilterFieldType.VariantQuery
     else -> throw IllegalArgumentException(
         "Unknown feature '${databaseFeature.name}'",
     )

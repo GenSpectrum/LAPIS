@@ -4,6 +4,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
+import org.genspectrum.lapis.config.SingleSegmentedSequenceFeature
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -29,19 +30,24 @@ class SiloQueryModelTest {
     lateinit var siloClientMock: SiloClient
 
     @MockK
+    lateinit var singleSegmentedSequenceFeatureMock: SingleSegmentedSequenceFeature
+
+    @MockK
     lateinit var siloFilterExpressionMapperMock: SiloFilterExpressionMapper
+
     private lateinit var underTest: SiloQueryModel
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock)
+        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, singleSegmentedSequenceFeatureMock)
     }
 
     @Test
     fun `aggregate calls the SILO client with an aggregated action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns true
 
         underTest.getAggregated(
             SequenceFiltersRequestWithFields(
@@ -65,6 +71,7 @@ class SiloQueryModelTest {
     fun `computeNucleotideMutationProportions calls the SILO client with a mutations action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns true
 
         underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.5),
@@ -78,11 +85,12 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `computeNucleotideMutationProportions ignores the field sequenceName if it is called main`() {
+    fun `computeNucleotideMutationProportions ignores the segmentName if singleSegmentedSequenceFeature is enabled`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns listOf(
-            MutationData("A1234B", 1234, 0.1234, "main"),
+            MutationData("A1234B", 1234, 0.1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns true
 
         val result = underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
@@ -92,17 +100,18 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `computeNucleotideMutationProportions include the field sequenceName if it is not called main`() {
+    fun `computeNucleotideMutationProportions includes segmentName if singleSegmentedSequenceFeature is not enabled`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns listOf(
-            MutationData("A1234B", 1234, 0.1234, "NotMain"),
+            MutationData("A1234B", 1234, 0.1234, "someSegmentName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns false
 
         val result = underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
-        assertThat(result, equalTo(listOf(NucleotideMutationResponse("NotMain:A1234B", 1234, 0.1234))))
+        assertThat(result, equalTo(listOf(NucleotideMutationResponse("someSegmentName:A1234B", 1234, 0.1234))))
     }
 
     @Test
@@ -120,11 +129,12 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `getNucleotideInsertions ignores the field sequenceName if it is called main`() {
+    fun `getNucleotideInsertions ignores the field sequenceName if if singleSegmentedSequenceFeature is enabled`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<InsertionData>>>()) } returns listOf(
-            InsertionData(42, "ABCD", 1234, "main"),
+            InsertionData(42, "ABCD", 1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns true
 
         val result = underTest.getNucleotideInsertions(
             InsertionsRequest(
@@ -141,11 +151,12 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `getNucleotideInsertions includes the field sequenceName if it is not called main`() {
+    fun `getNucleotideInsertions includes the field sequenceName if singleSegmentedSequenceFeature is not enabled`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<InsertionData>>>()) } returns listOf(
-            InsertionData(42, "ABCD", 1234, "notMain"),
+            InsertionData(42, "ABCD", 1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { singleSegmentedSequenceFeatureMock.isEnabled() } returns false
 
         val result = underTest.getNucleotideInsertions(
             InsertionsRequest(
@@ -158,7 +169,7 @@ class SiloQueryModelTest {
             ),
         )
 
-        assertThat(result, equalTo(listOf(NucleotideInsertionResponse("ins_notMain:1234:ABCD", 42))))
+        assertThat(result, equalTo(listOf(NucleotideInsertionResponse("ins_someSequenceName:1234:ABCD", 42))))
     }
 
     @Test

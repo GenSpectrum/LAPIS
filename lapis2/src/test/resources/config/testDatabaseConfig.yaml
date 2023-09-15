@@ -18,4 +18,5 @@ schema:
       type: aaInsertion
   features:
     - name: sarsCoV2VariantQuery
+    - name: isSingleSegmentedSequence
   primaryKey: gisaid_epi_isl

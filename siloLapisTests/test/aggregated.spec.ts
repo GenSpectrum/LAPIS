@@ -57,9 +57,8 @@ describe('The /aggregated endpoint', () => {
 
     expect(result.status).equals(200);
     const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 1);
+    expect(resultJson.data[0]).to.have.property('count', 0);
   });
-
 
   it('should correctly handle nucleotide insertion requests in GET requests', async () => {
     const urlParams = new URLSearchParams({

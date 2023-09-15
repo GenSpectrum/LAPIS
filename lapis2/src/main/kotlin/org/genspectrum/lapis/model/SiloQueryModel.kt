@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.SingleSegmentedSequenceFeature
 import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component
 class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
+    private val singleSegmentedSequenceFeature: SingleSegmentedSequenceFeature,
 ) {
 
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
@@ -46,14 +48,11 @@ class SiloQueryModel(
             ),
         )
         return data.map { it ->
+            val sequenceName =
+                if (singleSegmentedSequenceFeature.isEnabled()) it.mutation else "${it.sequenceName}:${it.mutation}"
+
             NucleotideMutationResponse(
-                if (
-                    it.sequenceName == "main"
-                ) {
-                    it.mutation
-                } else {
-                    it.sequenceName + ":" + it.mutation
-                },
+                sequenceName,
                 it.count,
                 it.proportion,
             )
@@ -76,7 +75,7 @@ class SiloQueryModel(
         )
         return data.map { it ->
             AminoAcidMutationResponse(
-                it.sequenceName + ":" + it.mutation,
+                "${it.sequenceName}:${it.mutation}",
                 it.count,
                 it.proportion,
             )
@@ -109,10 +108,7 @@ class SiloQueryModel(
         )
 
         return data.map { it ->
-            val sequenceName = when (it.sequenceName) {
-                "main" -> ""
-                else -> "${it.sequenceName}:"
-            }
+            val sequenceName = if (singleSegmentedSequenceFeature.isEnabled()) "" else "${it.sequenceName}:"
 
             NucleotideInsertionResponse(
                 "ins_${sequenceName}${it.position}:${it.insertions}",
