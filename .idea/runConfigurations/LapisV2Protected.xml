@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="LapisV2Protected" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+        <module name="lapis-v2.main" />
+        <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8081 --lapis.databaseConfig.path=lapis2/src/test/resources/config/protectedDataDatabaseConfig.yaml --lapis.accessKeys.path=lapis2/src/test/resources/config/testAccessKeys.yaml" />
+        <option name="SPRING_BOOT_MAIN_CLASS" value="org.genspectrum.lapis.LapisApplicationKt" />
+        <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+        <method v="2">
+            <option name="Make" enabled="true" />
+        </method>
+    </configuration>
+</component>
