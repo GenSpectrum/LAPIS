@@ -170,6 +170,32 @@ class SiloQueryTest {
                 }
                 """,
             ),
+            Arguments.of(
+                SiloAction.nucleotideInsertions(),
+                """
+                {
+                    "type": "Insertions"
+                }
+                """,
+            ),
+            Arguments.of(
+                SiloAction.nucleotideInsertions(
+                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                    100,
+                    50,
+                ),
+                """
+                {
+                    "type": "Insertions",
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "limit": 100,
+                    "offset": 50
+                }
+                """,
+            ),
         )
 
         @JvmStatic

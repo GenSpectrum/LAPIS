@@ -136,7 +136,7 @@ Solothurn	EPI_ISL_1002052	B.1
     );
   });
 
-  it('should correctly handle nucleotide insertion requests in POST requests', async () => {
+  it('should correctly handle nucleotide insertion requests', async () => {
     const expectedResultWithNucleotideInsertion = {
       aaInsertions: undefined,
       age: 57,
@@ -160,7 +160,7 @@ Solothurn	EPI_ISL_1002052	B.1
     expect(result.data[0]).to.deep.equal(expectedResultWithNucleotideInsertion);
   });
 
-  it('should correctly handle amino acid insertion requests in POST requests', async () => {
+  it('should correctly handle amino acid insertion requests', async () => {
     const expectedResultWithAminoAcidInsertion = {
       aaInsertions: 'S:143:T,ORF1a:3602:FEP',
       insertions: undefined,

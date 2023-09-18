@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.AGGREGATED_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
+import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA
@@ -23,11 +24,13 @@ import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_SCHEMA
+import org.genspectrum.lapis.controller.INSERTIONS_REQUEST_SCHEMA
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.LIMIT_SCHEMA
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_SCHEMA
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA
@@ -90,6 +93,10 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                     requestSchemaWithFields(sequenceFilters, DETAILS_FIELDS_DESCRIPTION),
                 )
                 .addSchemas(
+                    INSERTIONS_REQUEST_SCHEMA,
+                    requestSchemaForCommonSequenceFilters(sequenceFilters),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
@@ -137,6 +144,24 @@ fun buildOpenApiSchema(sequenceFilterFields: SequenceFilterFields, databaseConfi
                             .properties(aminoAcidMutationProportionSchema()),
                     ),
                 )
+                .addSchemas(
+                    NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA,
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description("Nucleotide Insertion data.")
+                            .properties(nucleotideInsertionSchema()),
+                    ),
+                )
+                .addSchemas(
+                    AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA,
+                    lapisResponseSchema(
+                        Schema<String>()
+                            .type("object")
+                            .description("Amino Acid Insertion data.")
+                            .properties(aminoAcidInsertionSchema()),
+                    ),
+                )
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
                 .addSchemas(NUCLEOTIDE_INSERTIONS_SCHEMA, nucleotideInsertions())
                 .addSchemas(AMINO_ACID_INSERTIONS_SCHEMA, aminoAcidInsertions())
@@ -179,6 +204,14 @@ private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFi
         .map { (fieldName, fieldType) -> fieldName to Schema<String>().type(fieldType.openApiType) }
         .toMap()
 
+private fun requestSchemaForCommonSequenceFilters(
+    requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
+): Schema<*> =
+    Schema<String>()
+        .type("object")
+        .description("valid filters for sequence data")
+        .properties(requestProperties)
+
 private fun requestSchemaWithFields(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
     fieldsDescription: String,
@@ -208,18 +241,36 @@ private fun accessKeySchema() = Schema<String>()
 
 private fun nucleotideMutationProportionSchema() =
     mapOf(
-        "mutation" to Schema<String>().type("string").description("The mutation that was found."),
+        "mutation" to Schema<String>().type("string").example("T123C").description("The mutation that was found."),
         "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
         "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
     )
 
 private fun aminoAcidMutationProportionSchema() =
     mapOf(
-        "mutation" to Schema<String>().type("string").description(
+        "mutation" to Schema<String>().type("string").example("ORF1a:123").description(
             "A amino acid mutation that was found in the format \"\\<gene\\>:\\<position\\>",
         ),
         "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
         "count" to Schema<String>().type("number").description("The number of sequences matching having the mutation."),
+    )
+
+private fun nucleotideInsertionSchema() =
+    mapOf(
+        "insertion" to Schema<String>().type("string")
+            .example("ins_segment:123:AAT")
+            .description("The insertion that was found."),
+        "count" to Schema<String>().type("number")
+            .description("The number of sequences matching having the insertion."),
+    )
+
+private fun aminoAcidInsertionSchema() =
+    mapOf(
+        "insertion" to Schema<String>().type("string")
+            .example("ins_gene:123:AAT")
+            .description("The insertion that was found."),
+        "count" to Schema<String>().type("number")
+            .description("The number of sequences matching having the insertion."),
     )
 
 private fun nucleotideMutations() =

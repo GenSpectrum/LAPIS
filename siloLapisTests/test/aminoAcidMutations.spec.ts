@@ -81,7 +81,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
-  it('should correctly handle nucleotide insertion requests in GET requests', async () => {
+  it('should correctly handle nucleotide insertion requests', async () => {
     const expectedFirstResultWithNucleotideInsertion = {
       count: 1,
       mutation: 'E:T9I',
@@ -98,7 +98,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(result.data[0]).to.deep.equal(expectedFirstResultWithNucleotideInsertion);
   });
 
-  it('should correctly handle amino acid insertion requests in GET requests', async () => {
+  it('should correctly handle amino acid insertion requests', async () => {
     const expectedFirstResultWithAminoAcidInsertion = {
       count: 1,
       mutation: 'N:A220V',

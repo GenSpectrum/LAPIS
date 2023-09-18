@@ -73,7 +73,7 @@ class SequenceFilterFieldsTest {
 
     @Test
     fun `given database config with a feature of 'sarsCoV2VariantQuery' then contains variantQuery`() {
-        val input = databaseConfigWithFields(emptyList(), listOf(DatabaseFeature("sarsCoV2VariantQuery")))
+        val input = databaseConfigWithFields(emptyList(), listOf(DatabaseFeature(SARS_COV2_VARIANT_QUERY_FEATURE)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 

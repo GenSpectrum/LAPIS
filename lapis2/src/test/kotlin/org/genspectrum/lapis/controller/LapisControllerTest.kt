@@ -6,12 +6,15 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DataVersion
+import org.genspectrum.lapis.request.InsertionsRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -155,7 +158,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @ParameterizedTest(name = "GET {0} without explicit minProportion")
-    @MethodSource("getMutationEndpointTypes")
+    @MethodSource("getMutationEndpoints")
     fun `GET mutations without explicit minProportion`(
         endpoint: String,
     ) {
@@ -170,7 +173,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @ParameterizedTest(name = "GET {0} with minProportion")
-    @MethodSource("getMutationEndpointTypes")
+    @MethodSource("getMutationEndpoints")
     fun `GET mutations with minProportion`(
         endpoint: String,
     ) {
@@ -184,7 +187,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @ParameterizedTest(name = "POST {0} without explicit minProportion")
-    @MethodSource("getMutationEndpointTypes")
+    @MethodSource("getMutationEndpoints")
     fun `POST mutations without explicit minProportion`(
         endpoint: String,
     ) {
@@ -202,7 +205,7 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @ParameterizedTest(name = "POST {0} with minProportion")
-    @MethodSource("getMutationEndpointTypes")
+    @MethodSource("getMutationEndpoints")
     fun `POST mutations with minProportion`(
         endpoint: String,
     ) {
@@ -218,6 +221,23 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    @ParameterizedTest(name = "POST {0} with invalid minProportion returns bad request")
+    @MethodSource("getMutationEndpoints")
+    fun `POST mutations with invalid minProportion returns bad request`(
+        endpoint: String,
+    ) {
+        val request = post(endpoint)
+            .content("""{"country": "Switzerland", "minProportion": "this is not a float"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.error.title").value("Bad request"))
+            .andExpect(
+                jsonPath("\$.error.message").value("minProportion must be a number"),
+            )
     }
 
     private fun setupMutationMock(endpoint: String, minProportion: Double?) {
@@ -243,28 +263,69 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         }
     }
 
-    @ParameterizedTest(name = "POST {0} with invalid minProportion returns bad request")
-    @MethodSource("getMutationEndpointTypes")
-    fun `POST mutations with invalid minProportion returns bad request`(
+    @ParameterizedTest(name = "POST {0}")
+    @MethodSource("getInsertionEndpoints")
+    fun `POST insertions`(
         endpoint: String,
     ) {
+        setupInsertionMock(endpoint)
+
         val request = post(endpoint)
-            .content("""{"country": "Switzerland", "minProportion": "this is not a float"}""")
+            .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.title").value("Bad request"))
-            .andExpect(
-                jsonPath("\$.error.message").value("minProportion must be a number"),
-            )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].insertion").value("the insertion"))
+            .andExpect(jsonPath("\$.data[0].count").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    @ParameterizedTest(name = "GET {0}")
+    @MethodSource("getInsertionEndpoints")
+    fun `GET insertions`(
+        endpoint: String,
+    ) {
+        setupInsertionMock(endpoint)
+
+        val request = get("$endpoint?country=Switzerland")
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].insertion").value("the insertion"))
+            .andExpect(jsonPath("\$.data[0].count").value(42))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    private fun setupInsertionMock(endpoint: String) {
+        when (endpoint) {
+            "/nucleotideInsertions" -> {
+                every {
+                    siloQueryModelMock.getNucleotideInsertions(insertionRequest(mapOf("country" to "Switzerland")))
+                } returns listOf(someNucleotideInsertion())
+            }
+
+            "/aminoAcidInsertions" -> {
+                every {
+                    siloQueryModelMock.getAminoAcidInsertions(insertionRequest(mapOf("country" to "Switzerland")))
+                } returns listOf(someAminoAcidInsertion())
+            }
+
+            else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
+        }
     }
 
     private companion object {
         @JvmStatic
-        fun getMutationEndpointTypes() = listOf(
+        fun getMutationEndpoints() = listOf(
             Arguments.of("/nucleotideMutations"),
             Arguments.of("/aminoAcidMutations"),
+        )
+
+        @JvmStatic
+        fun getInsertionEndpoints() = listOf(
+            Arguments.of("/nucleotideInsertions"),
+            Arguments.of("/aminoAcidInsertions"),
         )
     }
 
@@ -349,6 +410,17 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
         emptyList(),
     )
 
+    private fun insertionRequest(
+        sequenceFilters: Map<String, String>,
+    ) = InsertionsRequest(
+        sequenceFilters,
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+    )
+
     private fun mutationProportionsRequest(sequenceFilters: Map<String, String>, minProportion: Double?) =
         MutationProportionsRequest(
             sequenceFilters,
@@ -362,4 +434,6 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
     private fun someNucleotideMutationProportion() = NucleotideMutationResponse("the mutation", 42, 0.5)
     private fun someAminoAcidMutationProportion() = AminoAcidMutationResponse("the mutation", 42, 0.5)
+    private fun someNucleotideInsertion() = NucleotideInsertionResponse("the insertion", 42)
+    private fun someAminoAcidInsertion() = AminoAcidInsertionResponse("the insertion", 42)
 }
