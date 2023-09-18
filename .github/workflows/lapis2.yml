@@ -54,7 +54,7 @@ jobs:
       -
         name: Docker metadata
         id: dockerMetadata
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKER_IMAGE_NAME }}
           tags: |
@@ -118,7 +118,7 @@ jobs:
       -
         name: Docker metadata
         id: dockerMetadata
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.DOCKER_IMAGE_NAME }}
           tags: |
