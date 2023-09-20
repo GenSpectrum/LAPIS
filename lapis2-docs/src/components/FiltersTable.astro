@@ -1,5 +1,6 @@
 ---
 import { getConfig, Metadata } from '../config';
+import BaseAwareLink from './BaseAwareLink.astro';
 
 const config = getConfig();
 const filters: Metadata[] = [];
@@ -32,7 +33,8 @@ for (let meta of config.schema.metadata) {
                     <td>
                         {f.type === 'pango_lineage' ? (
                             <>
-                                See <a href='/concepts/pango-lineage-query/'>Pango lineage query</a>
+                                See
+                                <BaseAwareLink href='/concepts/pango-lineage-query/'>Pango lineage query</BaseAwareLink>
                             </>
                         ) : (
                             <i>TODO</i>

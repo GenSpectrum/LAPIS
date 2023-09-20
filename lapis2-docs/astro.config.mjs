@@ -94,6 +94,8 @@ export default defineConfig({
             entrypoint: 'astro/assets/services/sharp',
         },
     },
+    base: process.env.BASE_URL,
+    site: process.env.ASTRO_SITE,
 });
 
 /**
