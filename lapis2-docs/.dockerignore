@@ -1,0 +1,8 @@
+*
+!src/
+!public/
+!astro.config.mjs
+!package.json
+!package-lock.json
+!tailwind.config.js
+!tsconfig.json
