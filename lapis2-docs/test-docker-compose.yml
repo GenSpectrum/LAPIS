@@ -6,3 +6,5 @@ services:
       - "3000:3000"
     volumes:
       - ../siloLapisTests/testData/testDatabaseConfig.yaml:/config/database_config.yaml
+    environment:
+      LAPIS_URL: localhost:8080

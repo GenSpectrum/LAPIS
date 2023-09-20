@@ -7,9 +7,10 @@ import type { Config } from '../../config';
 
 type Props = {
     config: Config;
+    lapisUrl: string;
 };
 
-export const QueryGenerator = ({ config }: Props) => {
+export const QueryGenerator = ({ config, lapisUrl }: Props) => {
     const [step, setStep] = useState(0);
     const [queryType, setQueryType] = useState<QueryTypeSelectionState>({
         selection: 'aggregatedAll',
@@ -52,7 +53,7 @@ export const QueryGenerator = ({ config }: Props) => {
                 {step === 0 && <QueryTypeSelection config={config} state={queryType} onStateChange={setQueryType} />}
                 {step === 1 && <FiltersSelection config={config} filters={filters} onFiltersChange={setFilters} />}
                 {step === 2 && <>TODO</>}
-                {step === 3 && <Result queryType={queryType} filters={filters} config={config} />}
+                {step === 3 && <Result queryType={queryType} filters={filters} config={config} lapisUrl={lapisUrl} />}
             </div>
 
             <div className='w-full flex justify-between mt-8'>
