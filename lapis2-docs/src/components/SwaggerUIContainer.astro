@@ -1,11 +1,9 @@
 ---
-interface Props {
-    url: string;
-}
-
-const { url } = Astro.props;
-const test = 'df';
+import { getLapisUrl } from '../lapisUrl';
+const openApiUrl = getLapisUrl() + '/api-docs';
 ---
+
+YAML definition: <a href={openApiUrl}>{openApiUrl}</a>
 
 <head>
     <!-- TODO Don't fetch from external source! -->
@@ -13,7 +11,7 @@ const test = 'df';
 </head>
 
 <div class='not-content'>
-    <swagger-ui-container data-url={url}></swagger-ui-container>
+    <swagger-ui-container data-url={openApiUrl}></swagger-ui-container>
 </div>
 
 <script>

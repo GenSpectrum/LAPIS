@@ -14,6 +14,7 @@ type Props = {
     queryType: QueryTypeSelectionState;
     filters: Filters;
     config: Config;
+    lapisUrl: string;
 };
 
 export const Result = (props: Props) => {
@@ -94,17 +95,18 @@ const PythonTab = (props: Props) => {
     const propsWithJson: Props = {
         ...props,
     };
-    const { endpoint, body, resultFields } = constructPostQuery(propsWithJson);
-    const code = generateNonFastaQuery('', endpoint, body, resultFields);
+    const { lapisUrl, endpoint, body, resultFields } = constructPostQuery(propsWithJson);
+    const code = generateNonFastaQuery(lapisUrl, endpoint, body, resultFields);
     return <CodeBlock>{code}</CodeBlock>;
 };
 
-function constructPostQuery({ queryType, filters, config }: Props): {
+function constructPostQuery({ queryType, filters, config, lapisUrl }: Props): {
+    lapisUrl: string;
     endpoint: string;
     body: object;
     resultFields: ResultField[];
 } {
-    let endpoint = '/sample/';
+    let endpoint = '/';
     const body: any = {};
     const resultFields: ResultField[] = [];
 
@@ -158,7 +160,7 @@ function constructPostQuery({ queryType, filters, config }: Props): {
             body[name] = value;
         }
     }
-    return { endpoint, body, resultFields };
+    return { lapisUrl, endpoint, body, resultFields };
 }
 
 function mapMetadataTypeToResultFieldType(type: MetadataType): ResultFieldType {

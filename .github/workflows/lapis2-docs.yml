@@ -44,7 +44,7 @@ jobs:
         name: Start Docker container and check that it responds
         run: |
           docker compose -f lapis2-docs/test-docker-compose.yml up -d --wait
-          curl --fail --silent localhost:3000 | grep "Welcome to LAPIS" \
+          curl --fail --silent localhost:3000/docs/ | grep "Welcome to LAPIS" \
             || (echo "Did not find expected text in website" && exit 1)
         env:
           IMAGE: ${{ steps.dockerMetadata.outputs.tags }}

@@ -4,7 +4,8 @@ description: A step-by-step wizard to help you generate a request
 ---
 
 import { getConfig } from '../../../config.ts';
+import { getLapisUrl } from '../../../lapisUrl.js';
 
 import { QueryGenerator } from '../../../components/QueryGenerator/QueryGenerator.tsx';
 
-<QueryGenerator client:load config={getConfig()} />
+<QueryGenerator client:load config={getConfig()} lapisUrl={getLapisUrl()} />

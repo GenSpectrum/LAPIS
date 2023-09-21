@@ -4,5 +4,5 @@
 !astro.config.mjs
 !package.json
 !package-lock.json
-!tailwind.config.js
+!tailwind.config.cjs
 !tsconfig.json
