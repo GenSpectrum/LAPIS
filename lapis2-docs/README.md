@@ -1,45 +1,12 @@
 # Starlight Starter Kit: Basics
 
-```
-npm create astro@latest -- --template starlight
-```
+This documentation is a website built with
+[Starlight](https://starlight.astro.build/) and [Astro](https://docs.astro.build).
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   ├── docs/
-│   │   └── config.ts
-│   └── env.d.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
-
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on
-its file name.
-
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
-
-Static assets, like favicons, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
+## Commands
 
 | Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
+|:--------------------------|:-------------------------------------------------|
 | `npm install`             | Installs dependencies                            |
 | `npm run dev`             | Starts local dev server at `localhost:3000`      |
 | `npm run build`           | Build your production site to `./dist/`          |
@@ -47,7 +14,37 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
+For running and building the website, the environment variables `LAPIS_URL` and `CONFIG_FILE` must be set, e.g.:
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build),
-or jump into the [Astro Discord server](https://astro.build/chat).
+```shell
+CONFIG_FILE=../siloLapisTests/testData/testDatabaseConfig.yaml LAPIS_URL=http://localhost:8080 npm run dev
+```
+
+## Deploying
+
+Starlight is meant to be used to generate static HTML files that can be hosted by any standard web server.
+This documentation however is meant to be specific for a given database configuration for LAPIS and SILO.
+
+Thus, the documentation can only be built at deployment time (i.e. when the config is known), and not ahead of time.
+We provide Docker images that can be used to build the documentation, and then serve it.
+
+See [the Docker compose file](./test-docker-compose.yml) for an example of how to use the Docker image:
+* The database config must be mounted to `/config/database_config.yaml`.
+* The environment variable `LAPIS_URL` must be set to the URL of the backing LAPIS instance. 
+This is used to generate links to that instance.
+* Astro recommends to set the [`site` config option](https://docs.astro.build/en/reference/configuration-reference/#site).
+This can be done via the environment variable `ASTRO_SITE`.
+
+```shell
+IMAGE=ghcr.io/genspectrum/lapis-v2-docs docker compose -f test-docker-compose.yml up
+```
+
+### Deploying behind a proxy
+
+The environment variable `BASE_URL` can be set to change the base URL of the documentation.
+This is especially necessary when deploying to a subdirectory of a domain.
+
+Suppose you want to host LAPIS on `your.domain` and the documentation on `your.domain/docs`,
+and the documentation container will be running on `127.0.0.1:3000`.
+Then you can set `BASE_URL` to `/docs/` and
+configure your proxy to forward requests to `your.domain/docs` to `localhost:3000/docs`.

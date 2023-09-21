@@ -8,3 +8,5 @@ services:
       - ../siloLapisTests/testData/testDatabaseConfig.yaml:/config/database_config.yaml
     environment:
       LAPIS_URL: localhost:8080
+      BASE_URL: /docs/
+      ASTRO_SITE: http://localhost:8080/docs/
