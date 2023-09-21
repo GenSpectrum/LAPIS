@@ -12,12 +12,12 @@
         "format": "prettier --ignore-path \".gitignore\" --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs}\""
     },
     "dependencies": {
-        "@astrojs/react": "^2.2.1",
-        "@astrojs/starlight": "^0.5.6",
-        "@astrojs/tailwind": "^4.0.0",
+        "@astrojs/react": "^3.0.2",
+        "@astrojs/starlight": "^0.10.1",
+        "@astrojs/tailwind": "^5.0.0",
         "@types/react": "^18.2.16",
         "@types/react-dom": "^18.2.7",
-        "astro": "^2.8.5",
+        "astro": "^3.1.1",
         "daisyui": "^3.5.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
