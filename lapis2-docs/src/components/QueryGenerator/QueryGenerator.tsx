@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { QueryTypeSelection, QueryTypeSelectionState } from './QueryTypeSelection';
-import { Filters, FiltersSelection } from './FiltersSelection';
-import { TabularOutputFormat, OutputFormatSelection } from './OutputFormatSelection';
+import { QueryTypeSelection, type QueryTypeSelectionState } from './QueryTypeSelection';
+import { type Filters, FiltersSelection } from './FiltersSelection';
 import { Result } from './Result';
 import type { Config } from '../../config';
 
