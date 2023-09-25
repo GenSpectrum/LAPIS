@@ -79,8 +79,9 @@ openApi {
     apiDocsUrl.set("http://localhost:8080/api-docs")
     customBootRun {
         args.set([
-            "--silo.url=does.not.matter.here",
-            "--lapis.databaseConfig.path=../siloLapisTests/testData/testDatabaseConfig.yaml"
+                "--silo.url=does.not.matter.here",
+                "--lapis.databaseConfig.path=../siloLapisTests/testData/testDatabaseConfig.yaml",
+                "--referenceGenomeFilename=../siloLapisTests/testData/reference-genomes.json"
         ])
     }
 }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.boot.jackson.JsonComponent
 
-data class InsertionsRequest(
+data class SequenceFiltersRequest(
     override val sequenceFilters: Map<String, String>,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
@@ -18,14 +18,14 @@ data class InsertionsRequest(
 ) : CommonSequenceFilters
 
 @JsonComponent
-class InsertionRequestDeserializer : JsonDeserializer<InsertionsRequest>() {
-    override fun deserialize(jsonParser: JsonParser, ctxt: DeserializationContext): InsertionsRequest {
+class SequenceFiltersRequestDeserializer : JsonDeserializer<SequenceFiltersRequest>() {
+    override fun deserialize(jsonParser: JsonParser, ctxt: DeserializationContext): SequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
         val parsedCommonFields = parseCommonFields(node, codec)
 
-        return InsertionsRequest(
+        return SequenceFiltersRequest(
             parsedCommonFields.sequenceFilters,
             parsedCommonFields.nucleotideMutations,
             parsedCommonFields.aminoAcidMutations,

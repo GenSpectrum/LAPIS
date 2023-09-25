@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { lapisClient, basePath } from './common';
+import { basePath, lapisClient } from './common';
 import fs from 'fs';
-import { AggregatedPostRequest } from './lapisClient/models/AggregatedPostRequest';
-import { AggregatedResponse } from './lapisClient/models/AggregatedResponse';
+import { AggregatedPostRequest } from './lapisClient';
+import { AggregatedResponse } from './lapisClient';
 
 const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);

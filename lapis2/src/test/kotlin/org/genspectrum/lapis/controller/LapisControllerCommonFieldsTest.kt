@@ -27,7 +27,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
+class LapisControllerCommonFieldsTest(
+    @Autowired val mockMvc: MockMvc,
+) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
@@ -47,7 +49,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("/aggregated?orderBy=country"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?orderBy=country"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -69,7 +71,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("/aggregated?orderBy=country,date"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?orderBy=country,date"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -91,7 +93,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"orderBy": ["country", "date"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -120,7 +122,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content(
                 """
                 {
@@ -141,7 +143,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `POST aggregated with invalid orderBy fields`() {
-        val request = post("/aggregated")
+        val request = post("$AGGREGATED_ROUTE")
             .content("""{"orderBy": [ { "field": ["this is an array, not a string"] } ]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -167,7 +169,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("/aggregated?limit=100"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?limit=100"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -190,7 +192,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"limit": 100}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -201,7 +203,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `POST aggregated with invalid limit`() {
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"limit": "this is not a number"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -228,7 +230,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("/aggregated?offset=5"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?offset=5"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -252,7 +254,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"offset": 5}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -263,7 +265,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `POST aggregated with invalid offset`() {
-        val request = post("/aggregated")
+        val request = post(AGGREGATED_ROUTE)
             .content("""{"offset": "this is not a number"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -287,7 +289,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("/aggregated?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -307,7 +309,7 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("/aggregated?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
+        mockMvc.perform(get("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -351,20 +353,23 @@ class LapisControllerCommonFieldsTest(@Autowired val mockMvc: MockMvc) {
     }
 
     private companion object {
-        fun allEndpoints() = listOf(
-            Arguments.of("/nucleotideMutations"),
-            Arguments.of("/aminoAcidMutations"),
-            Arguments.of("/aggregated"),
-            Arguments.of("/details"),
+        fun endpointsOfController() = listOf(
+            Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
+            Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
+            Arguments.of(AGGREGATED_ROUTE),
+            Arguments.of(DETAILS_ROUTE),
+            Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
+            Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
+            Arguments.of("$AMINO_ACID_SEQUENCES_ROUTE/S"),
         )
 
         @JvmStatic
-        fun getEndpointsWithInsertionFilter() = allEndpoints()
+        fun getEndpointsWithInsertionFilter() = endpointsOfController()
 
         @JvmStatic
-        fun getEndpointsWithNucleotideMutationFilter() = allEndpoints()
+        fun getEndpointsWithNucleotideMutationFilter() = endpointsOfController()
 
         @JvmStatic
-        fun getEndpointsWithAminoAcidMutationFilter() = allEndpoints()
+        fun getEndpointsWithAminoAcidMutationFilter() = endpointsOfController()
     }
 }
