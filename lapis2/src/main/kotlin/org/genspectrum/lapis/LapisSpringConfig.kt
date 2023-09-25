@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.filter.CommonsRequestLoggingFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.io.File
 
 @Configuration
@@ -69,5 +71,20 @@ class LapisSpringConfig {
         @Value("\${$REFERENCE_GENOME_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
     ): ReferenceGenome {
         return ReferenceGenome(nucleotideSegments.map { NucleotideSequence(it) })
+    }
+
+    @Bean
+    fun corsConfigurer(databaseConfig: DatabaseConfig): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                if (databaseConfig.schema.allowedCorsOrigins.isEmpty()) {
+                    return
+                }
+
+                registry.addMapping("/*")
+                    .allowedOrigins(*(databaseConfig.schema.allowedCorsOrigins.toTypedArray()))
+                    .allowedMethods("GET", "POST")
+            }
+        }
     }
 }

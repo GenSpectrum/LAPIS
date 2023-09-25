@@ -196,4 +196,11 @@ null	Switzerland	2
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
   });
+
+  it('should return cors headers', async () => {
+    const result = await getAggregated();
+    expect(result.headers.get('vary')).to.deep.equal(
+      'Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    );
+  });
 });

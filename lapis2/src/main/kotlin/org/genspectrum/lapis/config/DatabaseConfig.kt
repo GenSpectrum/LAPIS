@@ -12,6 +12,7 @@ data class DatabaseSchema(
     val metadata: List<DatabaseMetadata>,
     val primaryKey: String,
     val features: List<DatabaseFeature> = emptyList(),
+    val allowedCorsOrigins: List<String> = emptyList(),
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

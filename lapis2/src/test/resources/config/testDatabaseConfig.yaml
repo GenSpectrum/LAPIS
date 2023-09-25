@@ -19,3 +19,6 @@ schema:
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: gisaid_epi_isl
+  allowedCorsOrigins:
+    - http://localhost:3000
+    - https://cov-spectrum.org

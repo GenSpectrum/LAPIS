@@ -30,3 +30,6 @@ schema:
   primaryKey: gisaid_epi_isl
   dateToSortBy: date
   partitionBy: pango_lineage
+  allowedCorsOrigins:
+    - http://localhost:3000
+    - https://cov-spectrum.org

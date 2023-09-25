@@ -36,6 +36,10 @@ class DatabaseConfigTest {
                 DatabaseFeature(name = SARS_COV2_VARIANT_QUERY_FEATURE),
             ),
         )
+        assertThat(
+            underTest.schema.allowedCorsOrigins,
+            containsInAnyOrder("http://localhost:3000", "https://cov-spectrum.org"),
+        )
     }
 }
 
@@ -63,5 +67,6 @@ class DatabaseConfigWithoutFeaturesTest {
             ),
         )
         assertThat(underTest.schema.features, `is`(emptyList()))
+        assertThat(underTest.schema.allowedCorsOrigins, `is`(emptyList()))
     }
 }
