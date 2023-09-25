@@ -1,0 +1,94 @@
+[
+  {
+    "url": "/v1/sample/aggregated?country=Switzerland"
+  },
+  {
+    "url": "/v1/sample/aggregated"
+  },
+  {
+    "url": "/v1/sample/aggregated?fields=country"
+  },
+  {
+    "url": "/v1/sample/aggregated?fields=host",
+    "sortResultsBy": "host"
+  },
+  {
+    "url": "/v1/sample/aggregated?country=Germany&host=Homo+sapiens&fields=division%2Cage%2Csex%2Chospitalized%2Cdied"
+  },
+  {
+    "url": "/v1/sample/aggregated?host=Homo+sapiens&fields=division%2Cage%2Csex%2Chospitalized%2Cdied"
+  },
+  {
+    "url": "/v1/sample/aggregated?country=Germany&host=Homo+sapiens&fields=date",
+    "sortResultBy": "date"
+  },
+  {
+    "url": "/v1/sample/aggregated?host=Homo+sapiens&fields=date",
+    "sortResultBy": "date"
+  },
+  {
+    "url": "/v1/sample/aggregated?host=Homo+sapiens&fields=pangoLineage",
+    "sortResultBy": "pangoLineage"
+  },
+  {
+    "url": "/v1/sample/aggregated?host=Homo+sapiens&fields=nextstrainClade",
+    "sortResultBy": "nextstrainClade"
+  },
+  {
+    "url": "/v1/sample/aggregated?country=Germany&dateFrom=2023-09-04&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens&fields=date"
+  },
+  {
+    "url": "/v1/sample/aggregated?dateFrom=2023-09-04&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens&fields=date"
+  },
+  {
+    "url": "/v1/sample/aggregated?country=Germany&dateFrom=2023-09-04&dateTo=2023-11-28&nextcladePangoLineage=DV.7.1*&host=Homo+sapiens&fields=date"
+  },
+  {
+    "url": "/v1/sample/aggregated?host=Homo+sapiens&fields=pangoLineage"
+  },
+  {
+    "url": "/v1/sample/aa-mutations?country=Germany&dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/aa-mutations?dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?country=Germany&dateFrom=2023-06-05&dateTo=2023-06-11&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?country=Germany&dateFrom=2023-06-12&dateTo=2023-06-18&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?dateFrom=2023-06-12&dateTo=2023-06-18&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?country=Germany&dateFrom=2023-11-27&dateTo=2023-12-03&nextcladePangoLineage=xbb*&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/aa-insertions?country=Germany&dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens"
+  },
+  {
+    "url": "/v1/sample/aa-insertions?dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens"
+  },
+  {
+    "url": "/v1/sample/nuc-insertions?country=Germany&dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens"
+  },
+  {
+    "url": "/v1/sample/nuc-insertions?dateFrom=2023-06-05&dateTo=2023-11-28&nextcladePangoLineage=xbb*&host=Homo+sapiens"
+  },
+  {
+    "url": "/v1/sample/aa-mutations?country=Germany&dateFrom=2023-06-05&dateTo=2023-11-28&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/aa-mutations?dateFrom=2023-06-05&dateTo=2023-11-28&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?country=Germany&dateFrom=2023-06-05&dateTo=2023-11-28&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?dateFrom=2023-06-05&dateTo=2023-11-28&host=Homo+sapiens&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/nuc-mutations?dateFrom=2023-08-24&dateTo=2023-08-25&host=Human&nextcladePangoLineage=jn.1*&minProportion=0.001"
+  }
+]
