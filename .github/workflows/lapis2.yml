@@ -99,7 +99,7 @@ jobs:
         name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: lts/*
       -
         name: Build OpenAPI Spec
         uses: gradle/gradle-build-action@v2
