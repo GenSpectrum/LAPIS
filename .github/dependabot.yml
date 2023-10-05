@@ -26,3 +26,12 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: npm
+    directory: lapis2-docs/
+    schedule:
+      interval: weekly
+    groups:
+      minorAndPatch:
+        update-types:
+          - "minor"
+          - "patch"
