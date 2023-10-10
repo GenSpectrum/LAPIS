@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.7.0",
-    "@types/chai": "^4.3.6",
+    "@types/chai": "^4.3.7",
     "@types/mocha": "^10.0.2",
     "@types/node": "^20.8.4",
     "chai": "^4.3.10",
