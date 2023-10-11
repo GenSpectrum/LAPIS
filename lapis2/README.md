@@ -9,7 +9,7 @@ The swagger ui is available at `url.to.lapis:<port>/swagger-ui.html`.
 The OpenAPI specification is available at `url.to.lapis:<port>/api-docs` (in JSON format) or at 
 `url.to.lapis:<port>/api-docs.yaml` (in YAML format).
 
-## Setup
+## Local Setup
 
 Run tests:
 ```
@@ -26,8 +26,12 @@ When running LAPIS, you need to pass the following arguments:
 * the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
 e.g. when running via gradle:
 ```
-./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config>'
+./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>
 ```
+
+## Running the Docker image
+
+Check the [Docker compose file](docker-compose.yml) for an example on how to run the LAPIS Docker images.
 
 Use Docker Compose to run SILO and LAPIS:
 ```

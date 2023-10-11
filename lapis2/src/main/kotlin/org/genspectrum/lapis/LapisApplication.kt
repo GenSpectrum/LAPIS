@@ -8,7 +8,12 @@ import org.springframework.boot.runApplication
 class Lapisv2Application
 
 fun main(args: Array<String>) {
-    val referenceGenomeArgs = ReferenceGenome.readFromFileFromProgramArgs(args).toSpringApplicationArgs()
+    val referenceGenomeArgs = ReferenceGenome.readFromFileFromProgramArgsOrEnv(args).toSpringApplicationArgs()
 
-    runApplication<Lapisv2Application>(*(args + referenceGenomeArgs))
+    try {
+        runApplication<Lapisv2Application>(*(args + referenceGenomeArgs))
+    } catch (e: Exception) {
+        e.printStackTrace()
+        throw e
+    }
 }

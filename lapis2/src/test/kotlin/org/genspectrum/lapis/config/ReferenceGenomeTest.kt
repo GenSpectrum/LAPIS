@@ -19,7 +19,7 @@ class ReferenceGenomeTest {
     @Test
     fun `should read from file through program args`() {
         val args = arrayOf("--referenceGenomeFilename=$REFERENCE_GENOME_DEFAULT_FILENAME")
-        val referenceGenome = ReferenceGenome.readFromFileFromProgramArgs(args)
+        val referenceGenome = ReferenceGenome.readFromFileFromProgramArgsOrEnv(args)
         assertThat(referenceGenome.nucleotideSequences.size, equalTo(1))
         assertThat(referenceGenome.nucleotideSequences[0].name, equalTo("main"))
     }
@@ -27,7 +27,7 @@ class ReferenceGenomeTest {
     @Test
     fun `should throw if no reference genome filename is given in the args`() {
         val args = emptyArray<String>()
-        assertThrows<IllegalArgumentException> { ReferenceGenome.readFromFileFromProgramArgs(args) }
+        assertThrows<IllegalArgumentException> { ReferenceGenome.readFromFileFromProgramArgsOrEnv(args) }
     }
 
     @Test

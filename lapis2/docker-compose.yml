@@ -4,15 +4,15 @@ services:
     image: ghcr.io/genspectrum/lapis-v2:${LAPIS_TAG}
     ports:
       - "8080:8080"
-    command: --silo.url=http://silo:8081 --lapis.databaseConfig.path=databaseConfig.yaml --referenceGenomeFilename=reference-genomes.json
+    command: --silo.url=http://silo:8081
     volumes:
       - type: bind
         source: ../siloLapisTests/testData/testDatabaseConfig.yaml
-        target: /workspace/databaseConfig.yaml
+        target: /workspace/database_config.yaml
         read_only: true
       - type: bind
-        source: ../siloLapisTests/testData/reference-genomes.json
-        target: /workspace/reference-genomes.json
+        source: ../siloLapisTests/testData/reference_genomes.json
+        target: /workspace/reference_genomes.json
         read_only: true
 
   silo:
