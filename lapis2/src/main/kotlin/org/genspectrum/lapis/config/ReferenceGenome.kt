@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.config
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
@@ -12,10 +11,8 @@ private const val ENV_VARIABLE_NAME = "LAPIS_REFERENCE_GENOME_FILENAME"
 private const val ARGS_NAME = "referenceGenomeFilename"
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class ReferenceGenome(
-    @JsonProperty("nucleotide_sequences")
-    val nucleotideSequences: List<NucleotideSequence>,
-) {
+class ReferenceGenome(val nucleotideSequences: List<NucleotideSequence>) {
+
     fun isSingleSegmented(): Boolean {
         return nucleotideSequences.size == 1
     }
