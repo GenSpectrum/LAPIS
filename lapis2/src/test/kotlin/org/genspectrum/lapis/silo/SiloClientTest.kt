@@ -249,18 +249,38 @@ class SiloClientTest {
     }
 
     @Test
-    fun `given server returns error then throws exception`() {
+    fun `given server returns error in unexpected format then throws exception`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
-                .withStatusCode(500)
-                .withBody("""{"someError":  "some message"}"""),
+                .withStatusCode(432)
+                .withBody("""{"unexpectedKey":  "some unexpected message"}"""),
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
 
         val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
-        assertThat(exception.message, equalTo("""{"someError":  "some message"}"""))
+        assertThat(exception.statusCode, equalTo(500))
+        assertThat(
+            exception.message,
+            equalTo("""Unexpected error from SILO: {"unexpectedKey":  "some unexpected message"}"""),
+        )
+    }
+
+    @Test
+    fun `given server returns SILO error then throws exception with details and response code`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withStatusCode(432)
+                .withBody("""{"error":  "Test Error", "message": "test message with details"}"""),
+        )
+
+        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+
+        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        assertThat(exception.statusCode, equalTo(432))
+        assertThat(exception.message, equalTo("Error from SILO: test message with details"))
     }
 
     @Test
@@ -274,7 +294,7 @@ class SiloClientTest {
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        val exception = assertThrows<RuntimeException> { underTest.sendQuery(query) }
         assertThat(exception.message, containsString("value failed for JSON property"))
     }
 

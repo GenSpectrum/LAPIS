@@ -65,18 +65,18 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun `throw INTERNAL_SERVER_ERROR(500) with additional info for SiloExceptions`() {
-        every { validControllerCall() } throws SiloException("SomeMessage", Exception("SomeCause"))
+    fun `Passes through exception with status code from SILO`() {
+        every { validControllerCall() } throws SiloException(123, "SomeTitle", "SomeMessage",)
 
         mockMvc.perform(get(validRoute))
-            .andExpect(status().isInternalServerError)
+            .andExpect(status().`is`(123))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
                 content().json(
                     """
                     {
                         "error": {
-                            "title": "Silo error",
+                            "title": "SomeTitle",
                             "message": "SomeMessage"
                          }
                     }
