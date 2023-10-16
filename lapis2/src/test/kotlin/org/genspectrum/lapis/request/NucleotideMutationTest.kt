@@ -2,6 +2,7 @@ package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -30,7 +31,7 @@ class NucleotideMutationTest {
     @ParameterizedTest
     @MethodSource("getNucleotideMutationWithWrongSyntax")
     fun `Given invalid NucleotideMutation then should throw an error`(input: String) {
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(BadRequestException::class.java) {
             objectMapper.readValue<NucleotideMutation>(input)
         }
     }

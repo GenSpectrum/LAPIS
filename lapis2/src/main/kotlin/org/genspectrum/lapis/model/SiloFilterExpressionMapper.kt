@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -103,7 +104,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
 
-            null -> throw IllegalArgumentException(
+            null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
                     allowedSequenceFilterFields.fields.keys.joinToString(),
             )
@@ -122,7 +123,7 @@ class SiloFilterExpressionMapper(
             aaMutations.isNotEmpty()
 
         if (containsAdvancedVariantQuery && containsSimpleVariantQuery) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "variantQuery filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
             )
@@ -135,7 +136,7 @@ class SiloFilterExpressionMapper(
             ]
 
             if (intBetweenFilterForSameColumn != null) {
-                throw IllegalArgumentException(
+                throw BadRequestException(
                     "Cannot filter by exact int field '$intEqualsColumnName' " +
                         "and by int range field '${intBetweenFilterForSameColumn[0].originalKey}'.",
                 )
@@ -149,7 +150,7 @@ class SiloFilterExpressionMapper(
             ]
 
             if (floatBetweenFilterForSameColumn != null) {
-                throw IllegalArgumentException(
+                throw BadRequestException(
                     "Cannot filter by exact float field '$floatEqualsColumnName' " +
                         "and by float range field '${floatBetweenFilterForSameColumn[0].originalKey}'.",
                 )
@@ -159,9 +160,7 @@ class SiloFilterExpressionMapper(
 
     private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
         if (variantQuery.isBlank()) {
-            throw IllegalArgumentException(
-                "variantQuery must not be empty",
-            )
+            throw BadRequestException("variantQuery must not be empty")
         }
 
         return variantQueryFacade.map(variantQuery)
@@ -176,7 +175,7 @@ class SiloFilterExpressionMapper(
         }
 
         if (exactDateFilters.isNotEmpty() && dateRangeFilters.isNotEmpty()) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "Cannot filter by exact date field '${exactDateFilters[0].originalKey}' " +
                     "and by date range field '${dateRangeFilters[0].originalKey}'.",
             )
@@ -211,14 +210,14 @@ class SiloFilterExpressionMapper(
         try {
             return LocalDate.parse(value)
         } catch (exception: DateTimeParseException) {
-            throw IllegalArgumentException("$originalKey '$value' is not a valid date: ${exception.message}", exception)
+            throw BadRequestException("$originalKey '$value' is not a valid date: ${exception.message}", exception)
         }
     }
 
     private fun mapToPangoLineageFilter(column: String, value: String) = when {
         value.endsWith(".*") -> PangoLineageEquals(column, value.substringBeforeLast(".*"), includeSublineages = true)
         value.endsWith('*') -> PangoLineageEquals(column, value.substringBeforeLast('*'), includeSublineages = true)
-        value.endsWith('.') -> throw IllegalArgumentException(
+        value.endsWith('.') -> throw BadRequestException(
             "Invalid pango lineage: $value must not end with a dot. Did you mean '$value*'?",
         )
 
@@ -233,7 +232,7 @@ class SiloFilterExpressionMapper(
         try {
             return IntEquals(siloColumnName, value.toInt())
         } catch (exception: NumberFormatException) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "$siloColumnName '$value' is not a valid integer: ${exception.message}",
                 exception,
             )
@@ -248,7 +247,7 @@ class SiloFilterExpressionMapper(
         try {
             return FloatEquals(siloColumnName, value.toDouble())
         } catch (exception: NumberFormatException) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "$siloColumnName '$value' is not a valid float: ${exception.message}",
                 exception,
             )
@@ -274,7 +273,7 @@ class SiloFilterExpressionMapper(
         try {
             return value.toInt()
         } catch (exception: NumberFormatException) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "$originalKey '$value' is not a valid integer: ${exception.message}",
                 exception,
             )
@@ -300,7 +299,7 @@ class SiloFilterExpressionMapper(
         try {
             return value.toDouble()
         } catch (exception: NumberFormatException) {
-            throw IllegalArgumentException(
+            throw BadRequestException(
                 "$originalKey '$value' is not a valid float: ${exception.message}",
                 exception,
             )

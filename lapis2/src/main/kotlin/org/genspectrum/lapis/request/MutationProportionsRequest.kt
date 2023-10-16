@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.NumericNode
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
@@ -31,7 +32,7 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
             null, is NullNode -> null
             is NumericNode -> minProportionNode.doubleValue()
 
-            else -> throw IllegalArgumentException("minProportion must be a number")
+            else -> throw BadRequestException("minProportion must be a number")
         }
 
         val parsedCommonFields = parseCommonFields(node, codec)

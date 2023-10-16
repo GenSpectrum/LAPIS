@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
@@ -11,12 +12,12 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
     companion object {
         fun fromString(nucleotideMutation: String): NucleotideMutation {
             val match = NUCLEOTIDE_MUTATION_REGEX.find(nucleotideMutation)
-                ?: throw IllegalArgumentException("Invalid nucleotide mutation: $nucleotideMutation")
+                ?: throw BadRequestException("Invalid nucleotide mutation: $nucleotideMutation")
 
             val matchGroups = match.groups
 
             val position = matchGroups["position"]?.value?.toInt()
-                ?: throw IllegalArgumentException(
+                ?: throw BadRequestException(
                     "Invalid nucleotide mutation: $nucleotideMutation: Did not find position",
                 )
 

@@ -2,6 +2,7 @@ package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -30,7 +31,7 @@ class AminoAcidInsertionTest {
     @ParameterizedTest
     @MethodSource("getAminoAcidInsertionWithWrongSyntax")
     fun `Given invalid AminoAcidInsertion then should throw an error`(input: String) {
-        assertThrows(IllegalArgumentException::class.java) {
+        assertThrows(BadRequestException::class.java) {
             objectMapper.readValue<AminoAcidInsertion>(input)
         }
     }
@@ -78,7 +79,6 @@ class AminoAcidInsertionTest {
                 "\"ins_gene:123:AB.*?CD\"",
                 AminoAcidInsertion(123, "gene", "AB.*.*CD"),
             ),
-
         )
 
         @JvmStatic

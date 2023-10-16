@@ -87,7 +87,7 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `throw BAD_REQUEST(400) with additional info for bad requests`() {
-        every { validControllerCall() } throws IllegalArgumentException("SomeMessage")
+        every { validControllerCall() } throws BadRequestException("SomeMessage")
 
         mockMvc.perform(get(validRoute))
             .andExpect(status().isBadRequest)

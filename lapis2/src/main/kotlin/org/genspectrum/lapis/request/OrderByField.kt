@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
+import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
@@ -32,20 +33,20 @@ class OrderByFieldDeserializer : JsonDeserializer<OrderByField>() {
         return when (val value = jsonParser.readValueAsTree<JsonNode>()) {
             is TextNode -> OrderByField(value.asText(), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
-            else -> throw IllegalArgumentException("orderByField must be a string or an object")
+            else -> throw BadRequestException("orderByField must be a string or an object")
         }
     }
 
     private fun deserializeOrderByField(value: ObjectNode): OrderByField {
         val fieldNode = value.get("field")
         if (fieldNode == null || fieldNode !is TextNode) {
-            throw IllegalArgumentException("orderByField must have a string property \"field\"")
+            throw BadRequestException("orderByField must have a string property \"field\"")
         }
 
         val ascending = when (value.get("type")?.asText()) {
             "ascending", null -> Order.ASCENDING
             "descending" -> Order.DESCENDING
-            else -> throw IllegalArgumentException("orderByField type must be \"ascending\" or \"descending\"")
+            else -> throw BadRequestException("orderByField type must be \"ascending\" or \"descending\"")
         }
 
         return OrderByField(fieldNode.asText(), ascending)

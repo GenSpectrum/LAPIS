@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -65,7 +66,7 @@ class SiloFilterExpressionMapperTest {
     fun `given invalid filter key then throws exception`() {
         val filterParameter = getSequenceFilters(mapOf("invalid query key" to "some value"))
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
 
         assertThat(
             exception.message,
@@ -97,7 +98,7 @@ class SiloFilterExpressionMapperTest {
     fun `given invalid date then should throw an exception`() {
         val filterParameter = getSequenceFilters(mapOf("date" to "this is not a date"))
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("date 'this is not a date' is not a valid date"))
     }
 
@@ -105,7 +106,7 @@ class SiloFilterExpressionMapperTest {
     fun `given invalid dateTo then should throw an exception`() {
         val filterParameter = getSequenceFilters(mapOf("dateTo" to "this is not a date"))
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateTo 'this is not a date' is not a valid date"))
     }
 
@@ -113,7 +114,7 @@ class SiloFilterExpressionMapperTest {
     fun `given invalid dateFrom then should throw an exception`() {
         val filterParameter = getSequenceFilters(mapOf("dateFrom" to "this is not a date either"))
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
     }
 
@@ -125,7 +126,7 @@ class SiloFilterExpressionMapperTest {
                 "dateFrom" to "2021-06-03",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("Cannot filter by exact date field 'date' and by date range field 'dateFrom'."),
@@ -140,7 +141,7 @@ class SiloFilterExpressionMapperTest {
                 "dateTo" to "2021-06-03",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("Cannot filter by exact date field 'date' and by date range field 'dateTo'."),
@@ -154,7 +155,7 @@ class SiloFilterExpressionMapperTest {
                 "intField" to "not a number",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("intField 'not a number' is not a valid integer"),
@@ -168,7 +169,7 @@ class SiloFilterExpressionMapperTest {
                 "intFieldTo" to "not a number",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("intFieldTo 'not a number' is not a valid integer"),
@@ -182,7 +183,7 @@ class SiloFilterExpressionMapperTest {
                 "floatField" to "not a number",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("floatField 'not a number' is not a valid float"),
@@ -196,7 +197,7 @@ class SiloFilterExpressionMapperTest {
                 "floatFieldTo" to "not a number",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("floatFieldTo 'not a number' is not a valid float"),
@@ -211,7 +212,7 @@ class SiloFilterExpressionMapperTest {
                 "intFieldFrom" to "43",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldFrom'."),
@@ -226,7 +227,7 @@ class SiloFilterExpressionMapperTest {
                 "intField" to "42",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldTo'."),
@@ -241,7 +242,7 @@ class SiloFilterExpressionMapperTest {
                 "floatFieldFrom" to "42.3",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString(
@@ -258,7 +259,7 @@ class SiloFilterExpressionMapperTest {
                 "floatField" to "42.1",
             ),
         )
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("Cannot filter by exact float field 'floatField' and by float range field 'floatFieldTo'."),
@@ -371,7 +372,7 @@ class SiloFilterExpressionMapperTest {
     fun `given a query with an empty variantQuery then it should throw an error`() {
         val filterParameter = getSequenceFilters(mapOf("variantQuery" to ""))
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(exception.message, containsString("variantQuery must not be empty"))
     }
 
@@ -385,7 +386,7 @@ class SiloFilterExpressionMapperTest {
             emptyList(),
         )
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("variantQuery filter cannot be used with other variant filters such as: "),
@@ -402,7 +403,7 @@ class SiloFilterExpressionMapperTest {
             emptyList(),
         )
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("variantQuery filter cannot be used with other variant filters such as: "),
@@ -418,7 +419,7 @@ class SiloFilterExpressionMapperTest {
             ),
         )
 
-        val exception = assertThrows<IllegalArgumentException> { underTest.map(filterParameter) }
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
             exception.message,
             containsString("variantQuery filter cannot be used with other variant filters such as: "),

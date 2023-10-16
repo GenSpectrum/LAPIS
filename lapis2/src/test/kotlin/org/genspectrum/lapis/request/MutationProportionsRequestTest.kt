@@ -2,6 +2,7 @@ package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -33,7 +34,7 @@ class MutationProportionsRequestTest {
         input: String,
         expectedErrorMessage: String,
     ) {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertThrows(BadRequestException::class.java) {
             objectMapper.readValue<MutationProportionsRequest>(input)
         }
 
