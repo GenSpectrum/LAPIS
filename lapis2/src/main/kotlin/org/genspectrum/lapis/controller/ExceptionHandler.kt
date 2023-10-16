@@ -4,7 +4,9 @@ import mu.KotlinLogging
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.silo.SiloException
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -20,85 +22,60 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleUnexpectedException(e: Throwable): ErrorResponse {
-        log.error(e) { "Caught unexpected exception: ${e.message}" }
+        log.warn(e) { "Caught unexpected exception: ${e.message}" }
 
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                LapisErrorResponse(
-                    LapisError(
-                        "Unexpected error",
-                        "${e.message}",
-                    ),
-                ),
-            )
+        return responseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleIllegalArgumentException(e: IllegalArgumentException): ErrorResponse {
-        log.error(e) { "Caught IllegalArgumentException: ${e.message}" }
+        log.warn(e) { "Caught IllegalArgumentException: ${e.message}" }
 
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                LapisErrorResponse(
-                    LapisError(
-                        "Bad request",
-                        "${e.message}",
-                    ),
-                ),
-            )
+        return responseEntity(HttpStatus.BAD_REQUEST, e.message)
     }
 
     @ExceptionHandler(AddForbiddenToOpenApiDocsHelper::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     fun handleForbiddenException(e: AddForbiddenToOpenApiDocsHelper): ErrorResponse {
-        return ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                LapisErrorResponse(
-                    LapisError(
-                        "Forbidden",
-                        "${e.message}",
-                    ),
-                ),
-            )
+        return responseEntity(HttpStatus.FORBIDDEN, e.message)
     }
 
     @ExceptionHandler(SiloException::class)
     fun handleSiloException(e: SiloException): ErrorResponse {
-        log.error(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
+        log.warn(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
 
-        return ResponseEntity
-            .status(e.statusCode)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                LapisErrorResponse(
-                    LapisError(
-                        e.title,
-                        e.message,
-                    ),
-                ),
-            )
+        return responseEntity(e.statusCode, e.title, e.message)
     }
 
     @ExceptionHandler(SiloNotImplementedError::class)
     @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
     fun handleNotImplementedError(e: SiloNotImplementedError): ErrorResponse {
-        log.error(e) { "Caught SiloNotImplementedError: ${e.message}" }
+        log.warn(e) { "Caught SiloNotImplementedError: ${e.message}" }
+
+        return responseEntity(HttpStatus.NOT_IMPLEMENTED, e.message)
+    }
+
+    private fun responseEntity(httpStatus: HttpStatus, detail: String?) =
+        responseEntity(httpStatus, httpStatus.reasonPhrase, detail)
+
+    private fun responseEntity(httpStatus: HttpStatusCode, title: String, detail: String?) =
+        responseEntity(httpStatus.value(), title, detail)
+
+    private fun responseEntity(
+        httpStatus: Int,
+        title: String,
+        detail: String?,
+    ): ErrorResponse {
         return ResponseEntity
-            .status(HttpStatus.NOT_IMPLEMENTED)
+            .status(httpStatus)
             .contentType(MediaType.APPLICATION_JSON)
             .body(
                 LapisErrorResponse(
-                    LapisError(
-                        "Not implemented",
-                        "${e.message}",
-                    ),
+                    ProblemDetail.forStatus(httpStatus).also {
+                        it.title = title
+                        it.detail = detail
+                    },
                 ),
             )
     }
@@ -106,5 +83,3 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
 
 /** This is not yet actually thrown, but makes "403 Forbidden" appear in OpenAPI docs. */
 class AddForbiddenToOpenApiDocsHelper(message: String) : Exception(message)
-
-data class LapisError(val title: String, val message: String)

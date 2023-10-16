@@ -55,8 +55,8 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                         "error": {
-                            "title": "Unexpected error",
-                            "message": "SomeMessage"
+                            "title": "Internal Server Error",
+                            "detail": "SomeMessage"
                          }
                     }
                     """,
@@ -66,7 +66,7 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun `Passes through exception with status code from SILO`() {
-        every { validControllerCall() } throws SiloException(123, "SomeTitle", "SomeMessage",)
+        every { validControllerCall() } throws SiloException(123, "SomeTitle", "SomeMessage")
 
         mockMvc.perform(get(validRoute))
             .andExpect(status().`is`(123))
@@ -77,7 +77,7 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                     {
                         "error": {
                             "title": "SomeTitle",
-                            "message": "SomeMessage"
+                            "detail": "SomeMessage"
                          }
                     }
                     """,
@@ -97,8 +97,8 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                         "error": {
-                            "title": "Bad request",
-                            "message": "SomeMessage"
+                            "title": "Bad Request",
+                            "detail": "SomeMessage"
                          }
                     }
                     """,
@@ -118,8 +118,8 @@ class ExceptionHandlerTest(@Autowired val mockMvc: MockMvc) {
                     """
                     {
                         "error": {
-                            "title": "Not implemented",
-                            "message": "SomeMessage"
+                            "title": "Not Implemented",
+                            "detail": "SomeMessage"
                          }
                     }
                     """,

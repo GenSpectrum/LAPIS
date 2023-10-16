@@ -149,7 +149,7 @@ class LapisControllerCommonFieldsTest(
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.message").value("orderByField must have a string property \"field\""))
+            .andExpect(jsonPath("\$.error.detail").value("orderByField must have a string property \"field\""))
     }
 
     @Test
@@ -209,7 +209,7 @@ class LapisControllerCommonFieldsTest(
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.message").value("limit must be a number or null"))
+            .andExpect(jsonPath("\$.error.detail").value("limit must be a number or null"))
     }
 
     @Test
@@ -271,7 +271,7 @@ class LapisControllerCommonFieldsTest(
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.message").value("offset must be a number or null"))
+            .andExpect(jsonPath("\$.error.detail").value("offset must be a number or null"))
     }
 
     @Test

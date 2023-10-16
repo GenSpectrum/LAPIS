@@ -23,7 +23,7 @@ private const val notAuthorizedToAccessEndpointError = """
 {
     "error" : {
         "title": "Forbidden",
-        "message": "You are not authorized to access /aggregated."
+        "detail": "You are not authorized to access /aggregated."
     }
 }
 """
@@ -55,7 +55,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     {
                         "error" : {
                             "title": "Forbidden",
-                            "message": "An access key is required to access /aggregated."
+                            "detail": "An access key is required to access /aggregated."
                         }
                     }
                     """,
@@ -74,7 +74,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
                     {
                         "error" : {
                             "title": "Forbidden",
-                            "message": "An access key is required to access /aggregated."
+                            "detail": "An access key is required to access /aggregated."
                         }
                     }
                     """,

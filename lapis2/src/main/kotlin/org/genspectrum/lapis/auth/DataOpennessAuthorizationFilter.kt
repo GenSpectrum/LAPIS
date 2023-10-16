@@ -12,13 +12,13 @@ import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
-import org.genspectrum.lapis.controller.LapisError
 import org.genspectrum.lapis.controller.LapisErrorResponse
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ProblemDetail
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -54,10 +54,10 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
                 response.writer.write(
                     objectMapper.writeValueAsString(
                         LapisErrorResponse(
-                            LapisError(
-                                "Forbidden",
-                                result.message,
-                            ),
+                            ProblemDetail.forStatus(HttpStatus.FORBIDDEN).also {
+                                it.title = HttpStatus.FORBIDDEN.reasonPhrase
+                                it.detail = result.message
+                            },
                         ),
                     ),
                 )

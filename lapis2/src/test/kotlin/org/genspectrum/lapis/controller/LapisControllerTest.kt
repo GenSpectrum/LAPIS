@@ -234,9 +234,9 @@ class LapisControllerTest(@Autowired val mockMvc: MockMvc) {
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.title").value("Bad request"))
+            .andExpect(jsonPath("\$.error.title").value("Bad Request"))
             .andExpect(
-                jsonPath("\$.error.message").value("minProportion must be a number"),
+                jsonPath("\$.error.detail").value("minProportion must be a number"),
             )
     }
 
