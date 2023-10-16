@@ -27,10 +27,10 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         return responseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
     }
 
-    @ExceptionHandler(IllegalArgumentException::class)
+    @ExceptionHandler(BadRequestException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleIllegalArgumentException(e: IllegalArgumentException): ErrorResponse {
-        log.warn(e) { "Caught IllegalArgumentException: ${e.message}" }
+    fun handleBadRequestException(e: BadRequestException): ErrorResponse {
+        log.warn(e) { "Caught BadRequestException: ${e.message}" }
 
         return responseEntity(HttpStatus.BAD_REQUEST, e.message)
     }
@@ -83,3 +83,5 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
 
 /** This is not yet actually thrown, but makes "403 Forbidden" appear in OpenAPI docs. */
 class AddForbiddenToOpenApiDocsHelper(message: String) : Exception(message)
+
+class BadRequestException(message: String, cause: Throwable? = null) : Exception(message, cause)

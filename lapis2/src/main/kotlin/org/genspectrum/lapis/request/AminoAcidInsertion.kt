@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
@@ -11,22 +12,22 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
     companion object {
         fun fromString(aminoAcidInsertion: String): AminoAcidInsertion {
             val match = AMINO_ACID_INSERTION_REGEX.find(aminoAcidInsertion)
-                ?: throw IllegalArgumentException("Invalid nucleotide mutation: $aminoAcidInsertion")
+                ?: throw BadRequestException("Invalid nucleotide mutation: $aminoAcidInsertion")
 
             val matchGroups = match.groups
 
             val position = matchGroups["position"]?.value?.toInt()
-                ?: throw IllegalArgumentException(
+                ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find position",
                 )
 
             val gene = matchGroups["gene"]?.value
-                ?: throw IllegalArgumentException(
+                ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
 
             val insertions = matchGroups["insertions"]?.value?.replace("?", ".*")
-                ?: throw IllegalArgumentException(
+                ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find insertions",
                 )
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
@@ -29,7 +30,7 @@ class SequenceFiltersRequestWithFieldsDeserializer : JsonDeserializer<SequenceFi
         val fields = when (val fields = node.get(FIELDS_PROPERTY)) {
             null -> emptyList()
             is ArrayNode -> fields.asSequence().map { it.asText() }.toList()
-            else -> throw IllegalArgumentException(
+            else -> throw BadRequestException(
                 "fields must be an array or null",
             )
         }
