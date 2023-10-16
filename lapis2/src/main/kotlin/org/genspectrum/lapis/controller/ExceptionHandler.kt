@@ -70,18 +70,17 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(SiloException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleSiloException(e: SiloException): ErrorResponse {
-        log.error(e) { "Caught SiloException: ${e.message}" }
+        log.error(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
 
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .status(e.statusCode)
             .contentType(MediaType.APPLICATION_JSON)
             .body(
                 LapisErrorResponse(
                     LapisError(
-                        "Silo error",
-                        "${e.message}",
+                        e.title,
+                        e.message,
                     ),
                 ),
             )

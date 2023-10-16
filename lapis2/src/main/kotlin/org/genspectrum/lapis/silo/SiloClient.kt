@@ -1,10 +1,12 @@
 package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.request.DataVersion
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -24,26 +26,41 @@ class SiloClient(
     fun <ResponseType> sendQuery(
         query: SiloQuery<ResponseType>,
     ): ResponseType {
+        val queryJson = objectMapper.writeValueAsString(query)
+
+        log.info { "Calling SILO: $queryJson" }
+
         val client = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder(URI("$siloUrl/query"))
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(query)))
+            .POST(HttpRequest.BodyPublishers.ofString(queryJson))
             .build()
 
-        log.info { "Calling SILO: $query" }
-
-        val response =
-            try {
-                client.send(request, BodyHandlers.ofString())
-            } catch (exception: Exception) {
-                val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
-                throw SiloException(message, exception)
-            }
+        val response = try {
+            client.send(request, BodyHandlers.ofString())
+        } catch (exception: Exception) {
+            val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
+            throw RuntimeException(message, exception)
+        }
 
         log.info { "Response from SILO: ${response.statusCode()} - ${response.body()}" }
 
         if (response.statusCode() != 200) {
-            throw SiloException(response.body(), null)
+            val siloErrorResponse = try {
+                objectMapper.readValue<SiloErrorResponse>(response.body())
+            } catch (e: Exception) {
+                log.error { "Failed to deserialize error response from SILO: $e" }
+                throw SiloException(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal Server Error",
+                    "Unexpected error from SILO: ${response.body()}",
+                )
+            }
+            throw SiloException(
+                response.statusCode(),
+                siloErrorResponse.error,
+                "Error from SILO: " + siloErrorResponse.message,
+            )
         }
 
         addDataVersion(response)
@@ -52,7 +69,7 @@ class SiloClient(
             return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
         } catch (exception: Exception) {
             val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
-            throw SiloException(message, exception)
+            throw RuntimeException(message, exception)
         }
     }
 
@@ -61,8 +78,10 @@ class SiloClient(
     }
 }
 
-class SiloException(message: String?, cause: Throwable?) : Exception(message, cause)
+class SiloException(val statusCode: Int, val title: String, override val message: String) : Exception(message)
 
 data class SiloQueryResponse<ResponseType>(
     val queryResult: ResponseType,
 )
+
+data class SiloErrorResponse(val error: String, val message: String)
