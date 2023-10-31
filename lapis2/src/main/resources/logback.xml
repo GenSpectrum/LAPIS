@@ -3,11 +3,12 @@
     <property name="LOG_FILE" value="LAPIS"/>
     <property name="STATISTICS_LOG_FILE" value="statistics"/>
     <property name="LOG_DIR" value="log"/>
+    <property name="PATTERN" value="%date %level [%thread] %class: %message%n"/>
 
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%date %level [%thread] %class: %message%n</Pattern>
+            <Pattern>${PATTERN}</Pattern>
         </encoder>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -30,6 +31,12 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>${PATTERN}</Pattern>
+        </layout>
+    </appender>
+
     <root level="info">
         <appender-ref ref="RollingFile"/>
     </root>
@@ -37,6 +44,10 @@
     <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="debug" additivity="false">
         <appender-ref ref="RollingFile"/>
     </logger>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
 
     <logger name="StatisticsLogger" level="info" additivity="false">
         <appender-ref ref="StatisticsRollingFile"/>
