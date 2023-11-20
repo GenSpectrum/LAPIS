@@ -12,7 +12,7 @@
         "format": "prettier --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\""
     },
     "dependencies": {
-        "@astrojs/react": "^3.0.4",
+        "@astrojs/react": "^3.0.5",
         "@astrojs/starlight": "^0.12.0",
         "@astrojs/starlight-tailwind": "^2.0.1",
         "@astrojs/tailwind": "^5.0.2",
