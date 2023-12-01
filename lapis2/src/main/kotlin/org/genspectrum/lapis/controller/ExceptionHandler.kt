@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import mu.KotlinLogging
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.silo.SiloException
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -12,10 +13,31 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 private val log = KotlinLogging.logger {}
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
+
+/**
+ * Taken from https://github.com/spring-projects/spring-framework/issues/31569#issuecomment-1825444419
+ * Due to https://github.com/spring-projects/spring-framework/commit/c00508d6cf2408d06a0447ed193ad96466d0d7b4
+ *
+ * This forwards "404" errors to the ErrorController to allow it to return a view.
+ * Thus, browsers get their own error page.
+ *
+ * Spring reworked handling of "404 not found" errors. This was introduced with the upgrade to Spring boot 3.2.0.
+ * This can be removed/reworked once Spring decides on how to return a view from an ExceptionHandler
+ * or allows them to respect the Accept header.
+ */
+@ControllerAdvice
+@Order(-1)
+internal class ExceptionToErrorControllerBypass {
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleResourceNotFound(e: Exception): Nothing {
+        throw e
+    }
+}
 
 @ControllerAdvice
 class ExceptionHandler : ResponseEntityExceptionHandler() {

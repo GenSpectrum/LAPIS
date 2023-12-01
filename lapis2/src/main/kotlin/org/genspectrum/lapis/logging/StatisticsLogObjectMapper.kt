@@ -10,15 +10,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class StatisticsLogObjectMapper(objectMapperBuilder: Jackson2ObjectMapperBuilder) {
-    private val mapper: ObjectMapper
-
-    init {
-        mapper = objectMapperBuilder.build()
-        mapper.registerModule(JavaTimeModule())
-        mapper.registerModule(kotlinModule())
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    private val mapper = objectMapperBuilder.build<ObjectMapper>().apply {
+        registerModule(JavaTimeModule())
+        registerModule(kotlinModule())
+        configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
 
     fun writeValueAsString(requestContext: RequestContext): String {
