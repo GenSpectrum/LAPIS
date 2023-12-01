@@ -87,36 +87,35 @@ jobs:
   endToEndTests:
     runs-on: ubuntu-latest
     steps:
-      -
-        uses: actions/checkout@v4
-      -
-        name: Set up JDK
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'adopt'
-      -
-        name: Setup Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      -
-        name: Build OpenAPI Spec
+
+      - name: Build OpenAPI Spec
         uses: gradle/gradle-build-action@v2
         with:
           arguments: generateOpenApiDocs
           build-root-directory: lapis2
-      -
-        name: Prepare Tests
+
+      - name: Prepare Tests
         run: |
           cd siloLapisTests
           npm ci
           npm run generateLapisClient
-      -
-        name: Check Format
+
+      - name: Check Format
         run: cd siloLapisTests && npm run check-format
-      -
-        name: Docker metadata
+
+      - name: Docker metadata
         id: dockerMetadata
         uses: docker/metadata-action@v5
         with:
@@ -124,24 +123,42 @@ jobs:
           tags: |
             type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-      -
-        name: Get LAPIS Branch Tag
+
+      - name: Get LAPIS Branch Tag
         id: lapisBranchTag
         env:
           TAG: ${{ steps.dockerMetadata.outputs.tags }}
         run: echo "lapisTag=${TAG##*:}" >> $GITHUB_OUTPUT
-      -
-        name: Wait for Docker Image
+
+      - name: Wait for Docker Image
         uses: lewagon/wait-on-check-action@v1.3.1
         with:
           ref: ${{ github.ref }}
           check-name: Build Docker Image
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Start SILO and LAPIS and Run Tests
+
+      - name: Start SILO and LAPIS and Run Tests
         run: |
           docker compose -f lapis2/docker-compose.yml up -d --wait
           cd siloLapisTests && npm run test
         env:
           SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
+
+      - name: Store Logs
+        if: ${{ always() }}
+        run: |
+          cd lapis2
+          mkdir p e2e-logs
+          docker compose logs silo > e2e-logs/silo.log
+          docker compose logs lapis > e2e-logs/lapis.log
+        env:
+          SILO_TAG: latest
+          LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
+
+      - name: Upload logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: lapis2/e2e-logs
