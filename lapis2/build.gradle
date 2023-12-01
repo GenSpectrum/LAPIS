@@ -1,12 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id 'org.springframework.boot' version '3.1.5'
+    id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.20'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.20'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.21'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.9.21'
     id 'org.jlleitschuh.gradle.ktlint' version "11.6.1"
     id 'org.springdoc.openapi-gradle-plugin' version "1.8.0"
     id 'antlr'
@@ -14,7 +13,15 @@ plugins {
 
 group = 'org.genspectrum'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
+
+java {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+kotlin {
+    jvmToolchain(21)
+}
 
 repositories {
     mavenCentral()
@@ -43,10 +50,6 @@ dependencies {
 
 compileKotlin {
     dependsOn generateGrammarSource
-    compilerOptions {
-        freeCompilerArgs.add("-Xexport-kdoc")
-        jvmTarget.set(JvmTarget.JVM_19)
-    }
 }
 
 tasks.named('runKtlintCheckOverMainSourceSet') {
@@ -69,7 +72,7 @@ tasks.named('test') {
 }
 
 tasks.named('bootBuildImage') {
-    environment["BP_JVM_VERSION"] = "20"
+    environment["BP_JVM_VERSION"] = "21"
     environment["BPE_SPRING_PROFILES_ACTIVE"] = "docker"
     environment["BPE_LAPIS_REFERENCE_GENOME_FILENAME"] = "./reference_genomes.json"
     imageName = "ghcr.io/genspectrum/${project.name}"
