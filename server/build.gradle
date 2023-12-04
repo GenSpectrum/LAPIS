@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.mchange:c3p0:0.9.5.5'
     implementation 'org.javatuples:javatuples:1.2'
     implementation 'org.apache.commons:commons-csv:1.10.0'
-    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-io:commons-io:2.15.1'
     implementation 'org.tukaani:xz:1.9'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'jakarta.activation:jakarta.activation-api:2.1.1'
