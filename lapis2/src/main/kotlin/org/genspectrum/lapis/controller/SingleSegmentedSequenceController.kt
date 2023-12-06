@@ -1,14 +1,21 @@
 package org.genspectrum.lapis.controller
 
-import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.config.REFERENCE_GENOME_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.openApi.AminoAcidInsertions
+import org.genspectrum.lapis.openApi.AminoAcidMutations
+import org.genspectrum.lapis.openApi.LapisAlignedSingleSegmentedNucleotideSequenceResponse
+import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.NucleotideInsertions
+import org.genspectrum.lapis.openApi.NucleotideMutations
+import org.genspectrum.lapis.openApi.Offset
+import org.genspectrum.lapis.openApi.OrderByFields
+import org.genspectrum.lapis.openApi.SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.SequenceFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -22,10 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-
-private const val ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    "Returns a string of fasta formatted aligned nucleotide sequences. Only sequences matching the " +
-        "specified sequence filters are considered."
 
 const val isSingleSegmentSequenceExpression = "#{'\${$REFERENCE_GENOME_APPLICATION_ARG_PREFIX}'.split(',').length == 1}"
 
@@ -43,37 +46,25 @@ class SingleSegmentedSequenceController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
     ): String {
@@ -113,14 +104,3 @@ class SingleSegmentedSequenceController(
         )
     }
 }
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-)
-private annotation class LapisAlignedSingleSegmentedNucleotideSequenceResponse

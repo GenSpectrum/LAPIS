@@ -16,6 +16,8 @@ class DataVersion {
     var dataVersion: String? = null
 }
 
+const val LAPIS_DATA_VERSION_HEADER = "Lapis-Data-Version"
+
 @ControllerAdvice
 class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : ResponseBodyAdvice<Any> {
     override fun beforeBodyWrite(
@@ -26,7 +28,7 @@ class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : Resp
         request: ServerHttpRequest,
         response: ServerHttpResponse,
     ): Any? {
-        response.headers.add("Lapis-Data-Version", dataVersion.dataVersion)
+        response.headers.add(LAPIS_DATA_VERSION_HEADER, dataVersion.dataVersion)
         return body
     }
 
