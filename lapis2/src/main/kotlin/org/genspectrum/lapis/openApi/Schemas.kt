@@ -9,12 +9,16 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
@@ -23,12 +27,13 @@ import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.request.LAPIS_DATA_VERSION_HEADER
 import org.springframework.core.annotation.AliasFor
 
-const val SEQUENCE_FILTERS_SCHEMA = "SequenceFilters"
+const val PRIMITIVE_FIELD_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
-const val SEQUENCE_REQUEST_SCHEMA = "SequenceRequest"
+const val AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
+const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
@@ -42,11 +47,17 @@ const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
 const val NUCLEOTIDE_INSERTIONS_SCHEMA = "NucleotideInsertions"
 const val AMINO_ACID_INSERTIONS_SCHEMA = "AminoAcidInsertions"
 
-const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
+const val AGGREGATED_ORDER_BY_FIELDS_SCHEMA = "AggregatedOrderByFields"
+const val DETAILS_ORDER_BY_FIELDS_SCHEMA = "DetailsOrderByFields"
+const val MUTATIONS_ORDER_BY_FIELDS_SCHEMA = "MutationsOrderByFields"
+const val INSERTIONS_ORDER_BY_FIELDS_SCHEMA = "InsertionsOrderByFields"
+const val AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA = "AminoAcidSequencesOrderByFields"
+const val NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA = "NucleotideSequencesOrderByFields"
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
-
+const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
+const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -141,23 +152,59 @@ annotation class LapisAlignedMultiSegmentedNucleotideSequenceResponse
 @Parameter(
     description =
     "Valid filters for sequence data. This may be empty. Only provide the fields that should be filtered by.",
-    schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
+    schema = Schema(ref = "#/components/schemas/$PRIMITIVE_FIELD_FILTERS_SCHEMA"),
     explode = Explode.TRUE,
     style = ParameterStyle.FORM,
 )
-annotation class SequenceFilters
+annotation class PrimitiveFieldFilters
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
-    schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
+    schema = Schema(ref = "#/components/schemas/$AGGREGATED_ORDER_BY_FIELDS_SCHEMA"),
+    description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
 )
-annotation class OrderByFields(
-    @get:AliasFor(
-        annotation = Parameter::class,
-        attribute = "description",
-    ) val value: String = "The fields of the response to order by.",
+annotation class AggregatedOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$DETAILS_ORDER_BY_FIELDS_SCHEMA"),
+    description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
 )
+annotation class DetailsOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$MUTATIONS_ORDER_BY_FIELDS_SCHEMA"),
+    description = "The fields of the response to order by.",
+)
+annotation class MutationsOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$INSERTIONS_ORDER_BY_FIELDS_SCHEMA"),
+    description = "The fields of the response to order by.",
+)
+annotation class InsertionsOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA"),
+    description = "The parts of the fasta header to order by.",
+)
+annotation class AminoAcidSequencesOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA"),
+    description = "The parts of the fasta header to order by.",
+)
+annotation class NucleotideSequencesOrderByFields
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
@@ -205,3 +252,19 @@ annotation class Offset
     description = FORMAT_DESCRIPTION,
 )
 annotation class DataFormat
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$FIELDS_TO_AGGREGATE_BY_SCHEMA"),
+    description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
+)
+annotation class FieldsToAggregateBy
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$DETAILS_FIELDS_SCHEMA"),
+    description = DETAILS_FIELDS_DESCRIPTION,
+)
+annotation class DetailsFields

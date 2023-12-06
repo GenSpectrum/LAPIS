@@ -2,7 +2,7 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
-import org.genspectrum.lapis.config.REFERENCE_GENOME_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -10,12 +10,12 @@ import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
 import org.genspectrum.lapis.openApi.LapisAlignedSingleSegmentedNucleotideSequenceResponse
 import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
+import org.genspectrum.lapis.openApi.NucleotideSequencesOrderByFields
 import org.genspectrum.lapis.openApi.Offset
-import org.genspectrum.lapis.openApi.OrderByFields
-import org.genspectrum.lapis.openApi.SEQUENCE_REQUEST_SCHEMA
-import org.genspectrum.lapis.openApi.SequenceFilters
+import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -30,7 +30,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val isSingleSegmentSequenceExpression = "#{'\${$REFERENCE_GENOME_APPLICATION_ARG_PREFIX}'.split(',').length == 1}"
+const val isSingleSegmentSequenceExpression =
+    "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length == 1}"
 
 @RestController
 @ConditionalOnExpression(isSingleSegmentSequenceExpression)
@@ -43,10 +44,10 @@ class SingleSegmentedSequenceController(
     @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequences(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @NucleotideSequencesOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -91,7 +92,7 @@ class SingleSegmentedSequenceController(
     @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$SEQUENCE_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
     ): String {

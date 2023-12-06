@@ -2,8 +2,6 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.enums.Explode
-import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -12,11 +10,18 @@ import org.genspectrum.lapis.controller.Delimiter.TAB
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.AggregatedOrderByFields
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
+import org.genspectrum.lapis.openApi.AminoAcidSequencesOrderByFields
 import org.genspectrum.lapis.openApi.DETAILS_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.DataFormat
+import org.genspectrum.lapis.openApi.DetailsFields
+import org.genspectrum.lapis.openApi.DetailsOrderByFields
+import org.genspectrum.lapis.openApi.FieldsToAggregateBy
 import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.InsertionsOrderByFields
 import org.genspectrum.lapis.openApi.LapisAggregatedResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidMutationsResponse
@@ -25,16 +30,12 @@ import org.genspectrum.lapis.openApi.LapisDetailsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
 import org.genspectrum.lapis.openApi.Limit
-import org.genspectrum.lapis.openApi.NUCLEOTIDE_MUTATIONS_SCHEMA
+import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
-import org.genspectrum.lapis.openApi.ORDER_BY_FIELDS_SCHEMA
 import org.genspectrum.lapis.openApi.Offset
-import org.genspectrum.lapis.openApi.OrderByFields
+import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
-import org.genspectrum.lapis.openApi.SEQUENCE_FILTERS_SCHEMA
-import org.genspectrum.lapis.openApi.SEQUENCE_REQUEST_SCHEMA
-import org.genspectrum.lapis.openApi.SequenceFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -77,13 +78,13 @@ class LapisController(
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
     fun aggregated(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
+        @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -132,13 +133,13 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAggregatedAsCsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
+        @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -185,13 +186,13 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAggregatedAsTsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
+        @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
+        @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -277,11 +278,7 @@ class LapisController(
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideMutationsResponse
     fun getNucleotideMutations(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
@@ -291,7 +288,7 @@ class LapisController(
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @OrderByFields
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -336,24 +333,17 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getNucleotideMutationsAsCsv(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -392,24 +382,17 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getNucleotideMutationsAsTsv(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -488,24 +471,17 @@ class LapisController(
     @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidMutationsResponse
     fun getAminoAcidMutations(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -546,24 +522,17 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAminoAcidMutationsAsCsv(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -602,24 +571,17 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAminoAcidMutationsAsTsv(
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-            explode = Explode.TRUE,
-            style = ParameterStyle.FORM,
-        )
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @Limit
@@ -714,16 +676,16 @@ class LapisController(
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
     fun getDetailsAsJson(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @DetailsFields
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
+        @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
         @AminoAcidMutations
@@ -768,13 +730,13 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getDetailsAsCsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @DetailsFields
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
+        @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideInsertions
@@ -818,13 +780,13 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getDetailsAsTsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
+        @DetailsFields
         @RequestParam
         fields: List<String>?,
-        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
+        @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -907,10 +869,10 @@ class LapisController(
     @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideInsertionsResponse
     fun getNucleotideInsertions(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -959,10 +921,10 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getNucleotideInsertionsAsCsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1010,10 +972,10 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getNucleotideInsertionsAsTsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1105,10 +1067,10 @@ class LapisController(
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidInsertionsResponse
     fun getAminoAcidInsertions(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1157,10 +1119,10 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAminoAcidInsertionsAsCsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1208,10 +1170,10 @@ class LapisController(
         responses = [ApiResponse(responseCode = "200")],
     )
     fun getAminoAcidInsertionsAsTsv(
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1304,10 +1266,10 @@ class LapisController(
     @LapisAminoAcidSequenceResponse
     fun getAminoAcidSequence(
         @PathVariable(name = "gene", required = true) gene: String,
-        @SequenceFilters
+        @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @OrderByFields
+        @AminoAcidSequencesOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -1349,7 +1311,7 @@ class LapisController(
     @LapisAminoAcidSequenceResponse
     fun postAminoAcidSequence(
         @PathVariable(name = "gene", required = true) gene: String,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$SEQUENCE_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
     ): String {

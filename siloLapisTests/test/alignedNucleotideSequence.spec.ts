@@ -4,7 +4,7 @@ import { basePath, lapisSingleSegmentedSequenceController, sequenceData } from '
 describe('The /alignedNucleotideSequence endpoint', () => {
   it('should return aligned nucleotide sequences for Switzerland', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: { country: 'Switzerland' },
+      nucleotideSequenceRequest: { country: 'Switzerland' },
     });
 
     const { primaryKeys, sequences } = sequenceData(result);
@@ -17,7 +17,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }] },
+      nucleotideSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }] },
     });
 
     const { primaryKeys, sequences } = sequenceData(result);
@@ -30,7 +30,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
   it('should order descending by specified fields', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'descending' }] },
+      nucleotideSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'descending' }] },
     });
 
     const { primaryKeys, sequences } = sequenceData(result);
@@ -43,7 +43,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: {
+      nucleotideSequenceRequest: {
         orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
         limit: 2,
       },
@@ -59,7 +59,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
     const resultWithLimitAndOffset =
       await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-        sequenceRequest: {
+        nucleotideSequenceRequest: {
           orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
           limit: 2,
           offset: 1,
@@ -77,7 +77,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
   it('should correctly handle nucleotide insertion requests', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: {
+      nucleotideSequenceRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
     });
@@ -91,7 +91,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
   it('should correctly handle amino acid insertion requests', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      sequenceRequest: {
+      nucleotideSequenceRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
       },
     });

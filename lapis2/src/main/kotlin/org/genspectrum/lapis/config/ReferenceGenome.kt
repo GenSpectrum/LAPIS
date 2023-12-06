@@ -5,13 +5,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 
-const val REFERENCE_GENOME_APPLICATION_ARG_PREFIX = "referenceGenome.nucleotideSequences"
+const val REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX = "referenceGenome.segments"
+const val REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX = "referenceGenome.genes"
 
 private const val ENV_VARIABLE_NAME = "LAPIS_REFERENCE_GENOME_FILENAME"
 private const val ARGS_NAME = "referenceGenomeFilename"
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class ReferenceGenome(val nucleotideSequences: List<NucleotideSequence>) {
+class ReferenceGenome(val nucleotideSequences: List<ReferenceSequence>, val genes: List<ReferenceSequence>) {
 
     fun isSingleSegmented(): Boolean {
         return nucleotideSequences.size == 1
@@ -40,18 +41,16 @@ class ReferenceGenome(val nucleotideSequences: List<NucleotideSequence>) {
     }
 
     fun toSpringApplicationArgs(): Array<String> {
-        val nucleotideSequenceArgs =
-            "--$REFERENCE_GENOME_APPLICATION_ARG_PREFIX=" + this.nucleotideSequences.joinToString(
-                separator = ",",
-            ) {
-                it.name
-            }
+        val nucleotideSequenceArg = "--$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=" +
+            this.nucleotideSequences.joinToString(separator = ",") { it.name }
+        val genesArg = "--$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=" +
+            this.genes.joinToString(separator = ",") { it.name }
 
-        return arrayOf(nucleotideSequenceArgs)
+        return arrayOf(nucleotideSequenceArg, genesArg)
     }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class NucleotideSequence(
+data class ReferenceSequence(
     val name: String,
 )

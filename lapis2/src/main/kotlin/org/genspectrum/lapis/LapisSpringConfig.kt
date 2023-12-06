@@ -4,9 +4,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.NucleotideSequence
-import org.genspectrum.lapis.config.REFERENCE_GENOME_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceSequence
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
@@ -23,8 +24,12 @@ import java.io.File
 @Configuration
 class LapisSpringConfig {
     @Bean
-    fun openAPI(sequenceFilterFields: SequenceFilterFields, databaseConfig: DatabaseConfig) =
-        buildOpenApiSchema(sequenceFilterFields, databaseConfig)
+    fun openAPI(
+        sequenceFilterFields: SequenceFilterFields,
+        databaseConfig: DatabaseConfig,
+        referenceGenome: ReferenceGenome,
+    ) =
+        buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenome)
 
     @Bean
     fun databaseConfig(
@@ -67,8 +72,11 @@ class LapisSpringConfig {
 
     @Bean
     fun referenceGenome(
-        @Value("\${$REFERENCE_GENOME_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
-    ): ReferenceGenome {
-        return ReferenceGenome(nucleotideSegments.map { NucleotideSequence(it) })
-    }
+        @Value("\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
+        @Value("\${$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX}") genes: List<String>,
+    ) =
+        ReferenceGenome(
+            nucleotideSegments.map { ReferenceSequence(it) },
+            genes.map { ReferenceSequence(it) },
+        )
 }
