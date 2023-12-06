@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
-import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -12,6 +11,30 @@ import org.genspectrum.lapis.controller.Delimiter.COMMA
 import org.genspectrum.lapis.controller.Delimiter.TAB
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.AminoAcidInsertions
+import org.genspectrum.lapis.openApi.AminoAcidMutations
+import org.genspectrum.lapis.openApi.DETAILS_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.DataFormat
+import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.LapisAggregatedResponse
+import org.genspectrum.lapis.openApi.LapisAminoAcidInsertionsResponse
+import org.genspectrum.lapis.openApi.LapisAminoAcidMutationsResponse
+import org.genspectrum.lapis.openApi.LapisAminoAcidSequenceResponse
+import org.genspectrum.lapis.openApi.LapisDetailsResponse
+import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
+import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
+import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.NUCLEOTIDE_MUTATIONS_SCHEMA
+import org.genspectrum.lapis.openApi.NucleotideInsertions
+import org.genspectrum.lapis.openApi.NucleotideMutations
+import org.genspectrum.lapis.openApi.ORDER_BY_FIELDS_SCHEMA
+import org.genspectrum.lapis.openApi.Offset
+import org.genspectrum.lapis.openApi.OrderByFields
+import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
+import org.genspectrum.lapis.openApi.SEQUENCE_FILTERS_SCHEMA
+import org.genspectrum.lapis.openApi.SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.SequenceFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -35,65 +58,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-
-const val SEQUENCE_FILTERS_SCHEMA = "SequenceFilters"
-const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
-const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
-const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
-const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
-const val SEQUENCE_REQUEST_SCHEMA = "SequenceRequest"
-
-const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
-const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
-const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
-const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
-const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
-const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
-
-const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
-const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
-const val NUCLEOTIDE_INSERTIONS_SCHEMA = "NucleotideInsertions"
-const val AMINO_ACID_INSERTIONS_SCHEMA = "AminoAcidInsertions"
-
-const val ORDER_BY_FIELDS_SCHEMA = "OrderByFields"
-const val LIMIT_SCHEMA = "Limit"
-const val OFFSET_SCHEMA = "Offset"
-const val FORMAT_SCHEMA = "DataFormat"
-
-const val DETAILS_ENDPOINT_DESCRIPTION = "Returns the specified metadata fields of sequences matching the filter."
-const val AGGREGATED_ENDPOINT_DESCRIPTION = "Returns the number of sequences matching the specified sequence filters"
-const val NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION =
-    "Returns the number of sequences matching the specified sequence filters, " +
-        "grouped by nucleotide mutations."
-const val AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION =
-    "Returns the number of sequences matching the specified sequence filters, " +
-        "grouped by amino acid mutations."
-const val NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION =
-    "Returns the number of sequences matching the specified sequence filters, " +
-        "grouped by nucleotide insertions."
-const val AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION =
-    "Returns a list of mutations along with the counts and proportions whose proportions are greater " +
-        "than or equal to the specified minProportion. Only sequences matching the specified " +
-        "sequence filters are considered."
-
-const val AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
-    "Returns a string of fasta formated amino acid sequences. Only sequences matching the specified " +
-        "sequence filters are considered."
-const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
-    "The fields to stratify by. If empty, only the overall count is returned"
-const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
-    "The fields of the response to order by." +
-        "Fields specified here must either be \"count\" or also be present in \"fields\"."
-const val DETAILS_FIELDS_DESCRIPTION =
-    "The fields that the response items should contain. If empty, all fields are returned"
-const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
-    "The fields of the response to order by. Fields specified here must also be present in \"fields\"."
-const val LIMIT_DESCRIPTION = "The maximum number of entries to return in the response"
-const val OFFSET_DESCRIPTION = "The offset of the first entry to return in the response. " +
-    "This is useful for pagination in combination with \"limit\"."
-const val FORMAT_DESCRIPTION = "The data format of the response. " +
-    "Alternatively, the data format can be specified by setting the \"Accept\"-header. When both are specified, " +
-    "this parameter takes precedence."
 
 const val AGGREGATED_ROUTE = "/aggregated"
 const val DETAILS_ROUTE = "/details"
@@ -119,43 +83,28 @@ class LapisController(
         @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): LapisResponse<List<AggregationData>> {
@@ -189,44 +138,29 @@ class LapisController(
         @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -257,44 +191,29 @@ class LapisController(
         @Parameter(description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -366,42 +285,30 @@ class LapisController(
         @RequestParam
         sequenceFilters: Map<String, String>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = "The fields of the response to order by.",
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
         request: HttpServletRequest,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = "The format of the response.",
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<NucleotideMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -440,7 +347,7 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
         @Parameter(
@@ -449,23 +356,17 @@ class LapisController(
         )
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = MutationProportionsRequest(
@@ -502,7 +403,7 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
         @Parameter(
@@ -511,23 +412,17 @@ class LapisController(
         )
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = MutationProportionsRequest(
@@ -604,7 +499,7 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
         @Parameter(
@@ -613,23 +508,17 @@ class LapisController(
         )
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<AminoAcidMutationResponse>> {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -668,7 +557,7 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
         @Parameter(
@@ -677,23 +566,17 @@ class LapisController(
         )
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -730,7 +613,7 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         nucleotideMutations: List<NucleotideMutation>?,
         @RequestParam(required = false)
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
         @RequestParam minProportion: Double?,
         @Parameter(
@@ -739,23 +622,17 @@ class LapisController(
         )
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val mutationProportionsRequest = MutationProportionsRequest(
@@ -843,41 +720,29 @@ class LapisController(
         @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): LapisResponse<List<DetailsData>> {
         val request = SequenceFiltersRequestWithFields(
@@ -899,7 +764,6 @@ class LapisController(
 
     @GetMapping(DETAILS_ROUTE, produces = [TEXT_CSV_HEADER])
     @Operation(
-        description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "getDetailsAsCsv",
         responses = [ApiResponse(responseCode = "200")],
     )
@@ -910,35 +774,26 @@ class LapisController(
         @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideInsertions
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -969,35 +824,26 @@ class LapisController(
         @Parameter(description = DETAILS_FIELDS_DESCRIPTION)
         @RequestParam
         fields: List<String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = DETAILS_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields(DETAILS_ORDER_BY_FIELDS_DESCRIPTION)
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"))
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
     ): String {
         val request = SequenceFiltersRequestWithFields(
@@ -1064,43 +910,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): LapisResponse<List<NucleotideInsertionResponse>> {
@@ -1131,42 +962,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): String {
@@ -1196,43 +1013,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): String {
@@ -1306,43 +1108,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): LapisResponse<List<AminoAcidInsertionResponse>> {
@@ -1373,43 +1160,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): String {
@@ -1439,43 +1211,28 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-            description = FORMAT_DESCRIPTION,
-        )
+        @DataFormat
         @RequestParam
         dataFormat: String? = null,
     ): String {
@@ -1550,37 +1307,25 @@ class LapisController(
         @SequenceFilters
         @RequestParam
         sequenceFilters: Map<String, String>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$ORDER_BY_FIELDS_SCHEMA"),
-            description = AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION,
-        )
+        @OrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_SCHEMA"),
-            explode = Explode.TRUE,
-        )
+        @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_SCHEMA"))
+        @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_SCHEMA"))
         nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
         @RequestParam
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_SCHEMA"))
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$LIMIT_SCHEMA"),
-            description = LIMIT_DESCRIPTION,
-        )
+        @Limit
         @RequestParam
         limit: Int? = null,
-        @Parameter(
-            schema = Schema(ref = "#/components/schemas/$OFFSET_SCHEMA"),
-            description = OFFSET_DESCRIPTION,
-        )
+        @Offset
         @RequestParam
         offset: Int? = null,
     ): String {
@@ -1629,103 +1374,3 @@ class LapisController(
         return csvWriter.write(headers, data, delimiter)
     }
 }
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(description = AGGREGATED_ENDPOINT_DESCRIPTION)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisAggregatedResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisNucleotideMutationsResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisAminoAcidMutationsResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisDetailsResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisNucleotideInsertionsResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-    content = [
-        Content(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA")),
-    ],
-)
-private annotation class LapisAminoAcidInsertionsResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@Operation(
-    description = AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
-)
-@ApiResponse(
-    responseCode = "200",
-    description = "OK",
-)
-private annotation class LapisAminoAcidSequenceResponse
-
-@Target(AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.RUNTIME)
-@Parameter(
-    description = "Valid filters for sequence data. Only provide the fields that should be filtered by.",
-    schema = Schema(ref = "#/components/schemas/$SEQUENCE_FILTERS_SCHEMA"),
-    explode = Explode.TRUE,
-    style = ParameterStyle.FORM,
-)
-annotation class SequenceFilters
