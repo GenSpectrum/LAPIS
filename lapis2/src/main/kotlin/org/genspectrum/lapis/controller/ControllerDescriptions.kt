@@ -35,7 +35,6 @@ const val FORMAT_DESCRIPTION = "The data format of the response. " +
     "Alternatively, the data format can be specified by setting the \"Accept\"-header. When both are specified, " +
     "this parameter takes precedence."
 
-
 const val ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     "Returns a string of fasta formatted aligned nucleotide sequences. Only sequences matching the " +
         "specified sequence filters are considered."

@@ -4,7 +4,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 
 private const val REFERENCE_GENOME_DEFAULT_FILENAME = "src/test/resources/config/reference-genomes.json"
 
@@ -33,21 +32,25 @@ class ReferenceGenomeTest {
     @Test
     fun `should generate spring application arguments`() {
         val referenceGenome = ReferenceGenome(
-            listOf(NucleotideSequence("main"), NucleotideSequence("other_segment")),
+            listOf(ReferenceSequence("main"), ReferenceSequence("other_segment")),
+            listOf(ReferenceSequence("gene1"), ReferenceSequence("gene2")),
         )
         val springArgs = referenceGenome.toSpringApplicationArgs()
-        assertThat(springArgs[0], equalTo("--$REFERENCE_GENOME_APPLICATION_ARG_PREFIX=main,other_segment"))
+        assertThat(springArgs[0], equalTo("--$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=main,other_segment"))
+        assertThat(springArgs[1], equalTo("--$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=gene1,gene2"))
     }
 
     @Test
     fun `should detect single segmented sequence`() {
         val singleSegmented = ReferenceGenome(
-            listOf(NucleotideSequence("main")),
+            listOf(ReferenceSequence("main")),
+            listOf(ReferenceSequence("gene1"), ReferenceSequence("gene2")),
         )
         assertThat(singleSegmented.isSingleSegmented(), equalTo(true))
 
         val multiSegmented = ReferenceGenome(
-            listOf(NucleotideSequence("main"), NucleotideSequence("other_segment")),
+            listOf(ReferenceSequence("main"), ReferenceSequence("other_segment")),
+            listOf(ReferenceSequence("gene1"), ReferenceSequence("gene2")),
         )
         assertThat(multiSegmented.isSingleSegmented(), equalTo(false))
     }

@@ -2,7 +2,8 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.config.REFERENCE_GENOME_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DataVersion
 import org.genspectrum.lapis.request.SequenceFiltersRequest
@@ -21,7 +22,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(
-    properties = ["$REFERENCE_GENOME_APPLICATION_ARG_PREFIX=someSegment,otherSegment"],
+    properties = [
+        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=someSegment,otherSegment",
+        "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=gene1,gene2",
+    ],
 )
 @AutoConfigureMockMvc
 class MultiSegmentedSequenceControllerTest(@Autowired val mockMvc: MockMvc) {
