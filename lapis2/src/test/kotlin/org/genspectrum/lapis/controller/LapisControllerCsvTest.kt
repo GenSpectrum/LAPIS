@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -14,6 +15,7 @@ import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -36,6 +38,16 @@ class LapisControllerCsvTest(
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
+
+    @MockkBean
+    lateinit var lapisInfo: LapisInfo
+
+    @BeforeEach
+    fun setup() {
+        every {
+            lapisInfo.dataVersion
+        } returns "1234"
+    }
 
     @ParameterizedTest(name = "GET {0} returns empty JSON")
     @MethodSource("getEndpoints")

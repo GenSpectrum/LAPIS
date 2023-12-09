@@ -1,20 +1,17 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.controller.LapisErrorResponse
+import org.genspectrum.lapis.controller.LapisResponse
+import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
-import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
-import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
-@Component
-@RequestScope
-class DataVersion {
-    var dataVersion: String? = null
-}
+data class LapisInfo(var dataVersion: String? = null)
 
 const val LAPIS_DATA_VERSION_HEADER = "Lapis-Data-Version"
 
@@ -29,6 +26,12 @@ class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : Resp
         response: ServerHttpResponse,
     ): Any? {
         response.headers.add(LAPIS_DATA_VERSION_HEADER, dataVersion.dataVersion)
+
+        when (body) {
+            is LapisResponse<*> -> return LapisResponse(body.data, LapisInfo(dataVersion.dataVersion))
+            is LapisErrorResponse -> return LapisErrorResponse(body.error, LapisInfo(dataVersion.dataVersion))
+        }
+
         return body
     }
 

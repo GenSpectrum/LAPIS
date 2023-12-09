@@ -27,6 +27,7 @@ import org.genspectrum.lapis.controller.OFFSET_PROPERTY
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.LAPIS_DATA_VERSION_HEADER
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
@@ -249,8 +250,23 @@ private fun lapisResponseSchema(dataSchema: Schema<Any>) =
     Schema<Any>().type("object").properties(
         mapOf(
             "data" to Schema<Any>().type("array").items(dataSchema),
+            "info" to infoResponseSchema(),
         ),
-    ).required(listOf("data"))
+    ).required(listOf("data", "info"))
+
+private fun infoResponseSchema() =
+    Schema<Any>().type("object")
+        .description("Information about LAPIS.")
+        .properties(
+            mapOf(
+                "dataVersion" to Schema<String>().type("string")
+                    .description(
+                        "$LAPIS_DATA_VERSION_DESCRIPTION " +
+                            "Same as the value of the header \"$LAPIS_DATA_VERSION_HEADER\".",
+                    )
+                    .example("1702305399"),
+            ),
+        ).required(listOf("dataVersion"))
 
 private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
