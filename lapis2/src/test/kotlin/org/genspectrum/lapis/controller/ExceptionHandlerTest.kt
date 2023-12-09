@@ -5,7 +5,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloNotImplementedError
+import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SiloException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -26,9 +28,16 @@ class ExceptionHandlerTest(
     @MockkBean
     lateinit var lapisController: LapisController
 
+    @MockkBean
+    lateinit var dataVersion: DataVersion
+
     @BeforeEach
     fun setUp() {
         MockKAnnotations.init(this)
+
+        every {
+            dataVersion.dataVersion
+        } returns "1234"
     }
 
     private val validRoute = "/aggregated"
@@ -36,7 +45,7 @@ class ExceptionHandlerTest(
     private fun MockKMatcherScope.validControllerCall() =
         lapisController.aggregated(any(), any(), any(), any(), any(), any(), any())
 
-    private val validResponse = LapisResponse(emptyList<AggregationData>())
+    private val validResponse = LapisResponse(emptyList<AggregationData>(), LapisInfo())
 
     @Test
     fun `throw NOT_FOUND(404) when route is not found`() {
@@ -60,6 +69,9 @@ class ExceptionHandlerTest(
                         "error": {
                             "title": "Internal Server Error",
                             "detail": "SomeMessage"
+                         },
+                         "info": {
+                            "dataVersion": "1234"
                          }
                     }
                     """,
@@ -81,6 +93,9 @@ class ExceptionHandlerTest(
                         "error": {
                             "title": "SomeTitle",
                             "detail": "SomeMessage"
+                         },
+                         "info": {
+                            "dataVersion": "1234"
                          }
                     }
                     """,
@@ -102,6 +117,9 @@ class ExceptionHandlerTest(
                         "error": {
                             "title": "Bad Request",
                             "detail": "SomeMessage"
+                         },
+                         "info": {
+                            "dataVersion": "1234"
                          }
                     }
                     """,
@@ -123,6 +141,9 @@ class ExceptionHandlerTest(
                         "error": {
                             "title": "Not Implemented",
                             "detail": "SomeMessage"
+                         },
+                         "info": {
+                            "dataVersion": "1234"
                          }
                     }
                     """,

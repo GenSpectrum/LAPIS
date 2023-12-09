@@ -59,6 +59,8 @@ const val FORMAT_SCHEMA = "DataFormat"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 
+const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
+
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation
@@ -68,7 +70,8 @@ const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
     headers = [
         Header(
             name = LAPIS_DATA_VERSION_HEADER,
-            description = "A timestamp of when the data was last updated.",
+            description = "$LAPIS_DATA_VERSION_DESCRIPTION " +
+                "Same as the value returned in the info object in the response body.",
             schema = Schema(type = "string"),
         ),
     ],

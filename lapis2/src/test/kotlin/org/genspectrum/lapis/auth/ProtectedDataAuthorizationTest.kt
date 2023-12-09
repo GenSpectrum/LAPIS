@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,9 +39,16 @@ class ProtectedDataAuthorizationTest(
 
     private val validRoute = AGGREGATED_ROUTE
 
+    @MockkBean
+    lateinit var lapisInfo: LapisInfo
+
     @BeforeEach
     fun setUp() {
         every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
+
+        every {
+            lapisInfo.dataVersion
+        } returns "1234"
 
         MockKAnnotations.init(this)
     }

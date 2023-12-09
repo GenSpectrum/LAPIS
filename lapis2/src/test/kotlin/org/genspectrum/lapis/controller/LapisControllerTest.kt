@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.DataVersion
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequest
@@ -16,6 +15,7 @@ import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.silo.DataVersion
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -67,6 +67,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @Test
@@ -87,6 +88,7 @@ class LapisControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @Test
@@ -170,6 +172,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @ParameterizedTest(name = "GET {0} with minProportion")
@@ -215,6 +218,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @ParameterizedTest(name = "POST {0} with invalid minProportion returns bad request")
@@ -272,6 +276,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].insertion").value("the insertion"))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @ParameterizedTest(name = "GET {0}")
@@ -286,6 +291,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].insertion").value("the insertion"))
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     private fun setupInsertionMock(endpoint: String) {
@@ -335,6 +341,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @Test
@@ -369,6 +376,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
     @Test

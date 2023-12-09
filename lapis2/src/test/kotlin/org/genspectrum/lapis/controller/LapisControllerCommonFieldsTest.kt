@@ -5,12 +5,14 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
+import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -32,6 +34,16 @@ class LapisControllerCommonFieldsTest(
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
+
+    @MockkBean
+    lateinit var lapisInfo: LapisInfo
+
+    @BeforeEach
+    fun setup() {
+        every {
+            lapisInfo.dataVersion
+        } returns "1234"
+    }
 
     @Test
     fun `GET aggregated with a single orderBy field`() {
