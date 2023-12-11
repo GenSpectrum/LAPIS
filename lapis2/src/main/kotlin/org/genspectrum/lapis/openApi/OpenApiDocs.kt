@@ -255,15 +255,16 @@ private fun lapisResponseSchema(dataSchema: Schema<Any>) =
 private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
 
-private fun mapToOpenApiType(type: MetadataType): String = when (type) {
-    MetadataType.STRING -> "string"
-    MetadataType.PANGO_LINEAGE -> "string"
-    MetadataType.DATE -> "string"
-    MetadataType.INT -> "integer"
-    MetadataType.FLOAT -> "number"
-    MetadataType.NUCLEOTIDE_INSERTION -> "string"
-    MetadataType.AMINO_ACID_INSERTION -> "string"
-}
+private fun mapToOpenApiType(type: MetadataType): String =
+    when (type) {
+        MetadataType.STRING -> "string"
+        MetadataType.PANGO_LINEAGE -> "string"
+        MetadataType.DATE -> "string"
+        MetadataType.INT -> "integer"
+        MetadataType.FLOAT -> "number"
+        MetadataType.NUCLEOTIDE_INSERTION -> "string"
+        MetadataType.AMINO_ACID_INSERTION -> "string"
+    }
 
 private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFilterFields) =
     sequenceFilterFields.fields
@@ -303,13 +304,14 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
         COUNT_PROPERTY to Schema<String>().type("integer").description("The number of sequences matching the filters."),
     )
 
-private fun accessKeySchema() = Schema<String>()
-    .type("string")
-    .description(
-        "An access key that grants access to the protected data that this instance serves. " +
-            "There are two types or access keys: One only grants access to aggregated data, " +
-            "the other also grants access to detailed data.",
-    )
+private fun accessKeySchema() =
+    Schema<String>()
+        .type("string")
+        .description(
+            "An access key that grants access to the protected data that this instance serves. " +
+                "There are two types or access keys: One only grants access to aggregated data, " +
+                "the other also grants access to detailed data.",
+        )
 
 private fun nucleotideMutationProportionSchema() =
     mapOf(
@@ -408,74 +410,86 @@ private fun aminoAcidInsertions() =
                 ),
         )
 
-private fun orderByGetSchema(orderByFieldsSchema: Schema<Any>) = Schema<List<String>>()
-    .type("array")
-    .items(orderByFieldsSchema)
-    .description("The fields by which the result is ordered in ascending order.")
+private fun orderByGetSchema(orderByFieldsSchema: Schema<Any>) =
+    Schema<List<String>>()
+        .type("array")
+        .items(orderByFieldsSchema)
+        .description("The fields by which the result is ordered in ascending order.")
 
-private fun orderByPostSchema(orderByFieldsSchema: Schema<Any>) = Schema<List<String>>()
-    .type("array")
-    .items(
-        Schema<String>().anyOf(
-            listOf(
-                orderByFieldsSchema,
-                Schema<OrderByField>()
-                    .type("object")
-                    .description("The fields by which the result is ordered with ascending or descending order.")
-                    .required(listOf("field"))
-                    .properties(
-                        mapOf(
-                            "field" to orderByFieldsSchema,
-                            "type" to Schema<String>()
-                                .type("string")
-                                ._enum(listOf("ascending", "descending"))
-                                ._default("ascending"),
+private fun orderByPostSchema(orderByFieldsSchema: Schema<Any>) =
+    Schema<List<String>>()
+        .type("array")
+        .items(
+            Schema<String>().anyOf(
+                listOf(
+                    orderByFieldsSchema,
+                    Schema<OrderByField>()
+                        .type("object")
+                        .description("The fields by which the result is ordered with ascending or descending order.")
+                        .required(listOf("field"))
+                        .properties(
+                            mapOf(
+                                "field" to orderByFieldsSchema,
+                                "type" to Schema<String>()
+                                    .type("string")
+                                    ._enum(listOf("ascending", "descending"))
+                                    ._default("ascending"),
+                            ),
                         ),
-                    ),
+                ),
             ),
-        ),
-    )
+        )
 
-private fun limitSchema() = Schema<Int>()
-    .type("integer")
-    .description(LIMIT_DESCRIPTION)
-    .example(100)
+private fun limitSchema() =
+    Schema<Int>()
+        .type("integer")
+        .description(LIMIT_DESCRIPTION)
+        .example(100)
 
-private fun offsetSchema() = Schema<Int>()
-    .type("integer")
-    .description(OFFSET_DESCRIPTION)
+private fun offsetSchema() =
+    Schema<Int>()
+        .type("integer")
+        .description(OFFSET_DESCRIPTION)
 
-private fun formatSchema() = Schema<String>()
-    .type("string")
-    .description(
-        FORMAT_DESCRIPTION,
-    )
-    ._enum(listOf("csv", "tsv", "json"))
-    ._default("json")
+private fun formatSchema() =
+    Schema<String>()
+        .type("string")
+        .description(
+            FORMAT_DESCRIPTION,
+        )
+        ._enum(listOf("csv", "tsv", "json"))
+        ._default("json")
 
-private fun fieldsArray(databaseConfig: List<DatabaseMetadata>, additionalFields: List<String> = emptyList()) =
-    arraySchema(fieldsEnum(databaseConfig, additionalFields))
+private fun fieldsArray(
+    databaseConfig: List<DatabaseMetadata>,
+    additionalFields: List<String> = emptyList(),
+) = arraySchema(fieldsEnum(databaseConfig, additionalFields))
 
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
     fieldsEnum(databaseConfig.schema.metadata, listOf("count"))
 
-private fun mutationsOrderByFieldsEnum() =
-    fieldsEnum(emptyList(), listOf("mutation", "count", "proportion"))
+private fun mutationsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("mutation", "count", "proportion"))
 
-private fun insertionsOrderByFieldsEnum() =
-    fieldsEnum(emptyList(), listOf("insertion", "count"))
+private fun insertionsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("insertion", "count"))
 
-private fun aminoAcidSequenceFieldsEnum(referenceGenome: ReferenceGenome, databaseConfig: DatabaseConfig) =
-    fieldsEnum(emptyList(), referenceGenome.genes.map { it.name } + databaseConfig.schema.primaryKey)
+private fun aminoAcidSequenceFieldsEnum(
+    referenceGenome: ReferenceGenome,
+    databaseConfig: DatabaseConfig,
+) = fieldsEnum(emptyList(), referenceGenome.genes.map { it.name } + databaseConfig.schema.primaryKey)
 
-private fun nucleotideSequenceFieldsEnum(referenceGenome: ReferenceGenome, databaseConfig: DatabaseConfig) =
-    fieldsEnum(emptyList(), referenceGenome.nucleotideSequences.map { it.name } + databaseConfig.schema.primaryKey)
+private fun nucleotideSequenceFieldsEnum(
+    referenceGenome: ReferenceGenome,
+    databaseConfig: DatabaseConfig,
+) = fieldsEnum(emptyList(), referenceGenome.nucleotideSequences.map { it.name } + databaseConfig.schema.primaryKey)
 
-private fun fieldsEnum(databaseConfig: List<DatabaseMetadata>, additionalFields: List<String> = emptyList()) =
-    Schema<String>()
-        .type("string")
-        ._enum(databaseConfig.map { it.name } + additionalFields)
+private fun fieldsEnum(
+    databaseConfig: List<DatabaseMetadata>,
+    additionalFields: List<String> = emptyList(),
+) = Schema<String>()
+    .type("string")
+    ._enum(databaseConfig.map { it.name } + additionalFields)
 
-private fun arraySchema(schema: Schema<Any>) = Schema<Any>()
-    .type("array")
-    .items(schema)
+private fun arraySchema(schema: Schema<Any>) =
+    Schema<Any>()
+        .type("array")
+        .items(schema)

@@ -15,26 +15,38 @@ import org.springframework.boot.jackson.JsonComponent
 
 const val COUNT_PROPERTY = "count"
 
-data class AggregationData(val count: Int, @Schema(hidden = true) val fields: Map<String, JsonNode>) : CsvRecord {
+data class AggregationData(
+    val count: Int,
+    @Schema(hidden = true) val fields: Map<String, JsonNode>,
+) : CsvRecord {
     override fun asArray() = fields.values.map { it.asText() }.plus(count.toString()).toTypedArray()
+
     override fun getHeader() = fields.keys.plus(COUNT_PROPERTY).toTypedArray()
 }
 
 data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
     override fun asArray() = values.map { it.asText() }.toTypedArray()
+
     override fun getHeader() = keys.toTypedArray()
 }
 
 @JsonComponent
 class DetailsDataDeserializer : JsonDeserializer<DetailsData>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): DetailsData {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): DetailsData {
         return DetailsData(p.readValueAs(object : TypeReference<Map<String, JsonNode>>() {}))
     }
 }
 
 @JsonComponent
 class AggregationDataSerializer : JsonSerializer<AggregationData>() {
-    override fun serialize(value: AggregationData, gen: JsonGenerator, serializers: SerializerProvider) {
+    override fun serialize(
+        value: AggregationData,
+        gen: JsonGenerator,
+        serializers: SerializerProvider,
+    ) {
         gen.writeStartObject()
         gen.writeNumberField(COUNT_PROPERTY, value.count)
         value.fields.forEach { (key, value) -> gen.writeObjectField(key, value) }
@@ -44,7 +56,10 @@ class AggregationDataSerializer : JsonSerializer<AggregationData>() {
 
 @JsonComponent
 class AggregationDataDeserializer : JsonDeserializer<AggregationData>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): AggregationData {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): AggregationData {
         val node = p.readValueAsTree<JsonNode>()
         val count = node.get(COUNT_PROPERTY).asInt()
         val fields = node.fields().asSequence().filter { it.key != COUNT_PROPERTY }.associate { it.key to it.value }
@@ -73,7 +88,10 @@ data class SequenceData(
 
 @JsonComponent
 class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeserializer<SequenceData>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): SequenceData {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): SequenceData {
         val node = p.readValueAsTree<JsonNode>()
         val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
         val sequence =

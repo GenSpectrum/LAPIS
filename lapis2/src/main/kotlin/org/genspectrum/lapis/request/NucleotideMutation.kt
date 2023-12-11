@@ -37,8 +37,10 @@ private val NUCLEOTIDE_MUTATION_REGEX =
 
 @JsonComponent
 class NucleotideMutationDeserializer : JsonDeserializer<NucleotideMutation>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext) =
-        NucleotideMutation.fromString(p.valueAsString)
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ) = NucleotideMutation.fromString(p.valueAsString)
 }
 
 @Component

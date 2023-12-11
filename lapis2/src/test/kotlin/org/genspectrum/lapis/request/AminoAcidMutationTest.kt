@@ -38,48 +38,50 @@ class AminoAcidMutationTest {
 
     companion object {
         @JvmStatic
-        fun getAminoAcidMutationWithValidSyntax() = listOf(
-            Arguments.of(
-                "\"gene:G123A\"",
-                AminoAcidMutation("gene", 123, "A"),
-            ),
-            Arguments.of(
-                "\"gene:123A\"",
-                AminoAcidMutation("gene", 123, "A"),
-            ),
-            Arguments.of(
-                "\"gene:123.\"",
-                AminoAcidMutation("gene", 123, "."),
-            ),
-            Arguments.of(
-                "\"gene:123-\"",
-                AminoAcidMutation("gene", 123, "-"),
-            ),
-            Arguments.of(
-                "\"gene:123\"",
-                AminoAcidMutation("gene", 123, null),
-            ),
-            Arguments.of(
-                "\"gene:A123\"",
-                AminoAcidMutation("gene", 123, null),
-            ),
-            Arguments.of(
-                "\"ORF1b:123X\"",
-                AminoAcidMutation("ORF1b", 123, "X"),
-            ),
-        )
+        fun getAminoAcidMutationWithValidSyntax() =
+            listOf(
+                Arguments.of(
+                    "\"gene:G123A\"",
+                    AminoAcidMutation("gene", 123, "A"),
+                ),
+                Arguments.of(
+                    "\"gene:123A\"",
+                    AminoAcidMutation("gene", 123, "A"),
+                ),
+                Arguments.of(
+                    "\"gene:123.\"",
+                    AminoAcidMutation("gene", 123, "."),
+                ),
+                Arguments.of(
+                    "\"gene:123-\"",
+                    AminoAcidMutation("gene", 123, "-"),
+                ),
+                Arguments.of(
+                    "\"gene:123\"",
+                    AminoAcidMutation("gene", 123, null),
+                ),
+                Arguments.of(
+                    "\"gene:A123\"",
+                    AminoAcidMutation("gene", 123, null),
+                ),
+                Arguments.of(
+                    "\"ORF1b:123X\"",
+                    AminoAcidMutation("ORF1b", 123, "X"),
+                ),
+            )
 
         @JvmStatic
-        fun getAminoAcidMutationWithWrongSyntax() = listOf(
-            Arguments.of("\"A123G\""),
-            Arguments.of("\"gene:AA123\""),
-            Arguments.of("\"gene:123AA\""),
-            Arguments.of("\"\""),
-            Arguments.of("\"gene:\""),
-            Arguments.of("\"gene:AA123A\""),
-            Arguments.of("\"gene:A\""),
-            Arguments.of("\":123A\""),
-            Arguments.of("\"gene\$name&with/invalid)chars:123A\""),
-        )
+        fun getAminoAcidMutationWithWrongSyntax() =
+            listOf(
+                Arguments.of("\"A123G\""),
+                Arguments.of("\"gene:AA123\""),
+                Arguments.of("\"gene:123AA\""),
+                Arguments.of("\"\""),
+                Arguments.of("\"gene:\""),
+                Arguments.of("\"gene:AA123A\""),
+                Arguments.of("\"gene:A\""),
+                Arguments.of("\":123A\""),
+                Arguments.of("\"gene\$name&with/invalid)chars:123A\""),
+            )
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class DatabaseConfigTest {
-
     @Autowired
     private lateinit var underTest: DatabaseConfig
 

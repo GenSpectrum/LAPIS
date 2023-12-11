@@ -30,17 +30,16 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val isSingleSegmentSequenceExpression =
+const val IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION =
     "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length == 1}"
 
 @RestController
-@ConditionalOnExpression(isSingleSegmentSequenceExpression)
+@ConditionalOnExpression(IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION)
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
     private val referenceGenome: ReferenceGenome,
 ) {
-
     @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequences(

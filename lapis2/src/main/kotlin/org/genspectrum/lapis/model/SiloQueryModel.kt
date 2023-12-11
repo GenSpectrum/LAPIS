@@ -21,18 +21,18 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
 ) {
-
-    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) = siloClient.sendQuery(
-        SiloQuery(
-            SiloAction.aggregated(
-                sequenceFilters.fields,
-                sequenceFilters.orderByFields,
-                sequenceFilters.limit,
-                sequenceFilters.offset,
+    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
+        siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.aggregated(
+                    sequenceFilters.fields,
+                    sequenceFilters.orderByFields,
+                    sequenceFilters.limit,
+                    sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
             ),
-            siloFilterExpressionMapper.map(sequenceFilters),
-        ),
-    )
+        )
 
     fun computeNucleotideMutationProportions(
         sequenceFilters: MutationProportionsRequest,

@@ -25,9 +25,7 @@ class SiloClient(
     private val objectMapper: ObjectMapper,
     private val dataVersion: DataVersion,
 ) {
-    fun <ResponseType> sendQuery(
-        query: SiloQuery<ResponseType>,
-    ): ResponseType {
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
         val queryJson = objectMapper.writeValueAsString(query)
 
         log.info { "Calling SILO: $queryJson" }

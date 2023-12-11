@@ -41,7 +41,10 @@ class SiloQueryTest {
 
     @ParameterizedTest(name = "Test SiloAction {1}")
     @MethodSource("getTestSiloActions")
-    fun `SiloAction is correctly serialized to JSON`(underTest: SiloAction<*>, expected: String) {
+    fun `SiloAction is correctly serialized to JSON`(
+        underTest: SiloAction<*>,
+        expected: String,
+    ) {
         val result = objectMapper.writeValueAsString(underTest)
 
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
@@ -49,7 +52,10 @@ class SiloQueryTest {
 
     @ParameterizedTest(name = "Test SiloFilterExpression {1}")
     @MethodSource("getTestSiloFilterExpression")
-    fun `SiloFilterExpressions is correctly serialized to JSON`(underTest: SiloFilterExpression, expected: String) {
+    fun `SiloFilterExpressions is correctly serialized to JSON`(
+        underTest: SiloFilterExpression,
+        expected: String,
+    ) {
         val result = objectMapper.writeValueAsString(underTest)
 
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
@@ -57,23 +63,24 @@ class SiloQueryTest {
 
     companion object {
         @JvmStatic
-        fun getTestSiloActions() = listOf(
-            Arguments.of(
-                SiloAction.aggregated(),
-                """
+        fun getTestSiloActions() =
+            listOf(
+                Arguments.of(
+                    SiloAction.aggregated(),
+                    """
                 {
                     "type": "Aggregated"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.aggregated(
-                    listOf("field1", "field2"),
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.aggregated(
+                        listOf("field1", "field2"),
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "Aggregated",
                     "groupByFields": ["field1", "field2"],
@@ -85,23 +92,23 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.mutations(),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.mutations(),
+                    """
                 {
                     "type": "Mutations"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.mutations(
-                    0.5,
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.mutations(
+                        0.5,
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "Mutations",
                     "minProportion": 0.5,
@@ -113,23 +120,23 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.aminoAcidMutations(),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.aminoAcidMutations(),
+                    """
                 {
                     "type": "AminoAcidMutations"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.aminoAcidMutations(
-                    0.5,
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.aminoAcidMutations(
+                        0.5,
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "AminoAcidMutations",
                     "minProportion": 0.5,
@@ -141,23 +148,23 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.details(),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.details(),
+                    """
                 {
                     "type": "Details"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.details(
-                    listOf("age", "pango_lineage"),
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.details(
+                        listOf("age", "pango_lineage"),
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "Details",
                     "fields": ["age", "pango_lineage"],
@@ -169,22 +176,22 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.nucleotideInsertions(),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.nucleotideInsertions(),
+                    """
                 {
                     "type": "Insertions"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.nucleotideInsertions(
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.nucleotideInsertions(
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "Insertions",
                     "orderByFields": [
@@ -195,25 +202,25 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
+                    """
                 {
                     "type": "FastaAligned",
                     "sequenceName": "someSequenceName"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.genomicSequence(
-                    SequenceType.ALIGNED,
-                    "someSequenceName",
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.genomicSequence(
+                        SequenceType.ALIGNED,
+                        "someSequenceName",
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "FastaAligned",
                     "sequenceName": "someSequenceName",
@@ -225,25 +232,25 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.genomicSequence(SequenceType.UNALIGNED, "someSequenceName"),
-                """
+                ),
+                Arguments.of(
+                    SiloAction.genomicSequence(SequenceType.UNALIGNED, "someSequenceName"),
+                    """
                 {
                     "type": "Fasta",
                     "sequenceName": "someSequenceName"
                 }
                 """,
-            ),
-            Arguments.of(
-                SiloAction.genomicSequence(
-                    SequenceType.UNALIGNED,
-                    "someSequenceName",
-                    listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
-                    100,
-                    50,
                 ),
-                """
+                Arguments.of(
+                    SiloAction.genomicSequence(
+                        SequenceType.UNALIGNED,
+                        "someSequenceName",
+                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        100,
+                        50,
+                    ),
+                    """
                 {
                     "type": "Fasta",
                     "sequenceName": "someSequenceName",
@@ -255,32 +262,33 @@ class SiloQueryTest {
                     "offset": 50
                 }
                 """,
-            ),
-        )
+                ),
+            )
 
         @JvmStatic
-        fun getTestSiloFilterExpression() = listOf(
-            Arguments.of(
-                True,
-                """
+        fun getTestSiloFilterExpression() =
+            listOf(
+                Arguments.of(
+                    True,
+                    """
                 {
                     "type": "True"
                 }
                 """,
-            ),
-            Arguments.of(
-                StringEquals("theColumn", "theValue"),
-                """
+                ),
+                Arguments.of(
+                    StringEquals("theColumn", "theValue"),
+                    """
                 {
                     "type": "StringEquals",
                     "column": "theColumn",
                     "value": "theValue"
                 }
                 """,
-            ),
-            Arguments.of(
-                PangoLineageEquals("fieldName", "ABC", includeSublineages = false),
-                """
+                ),
+                Arguments.of(
+                    PangoLineageEquals("fieldName", "ABC", includeSublineages = false),
+                    """
                 {
                     "type": "PangoLineage",
                     "column": "fieldName",
@@ -288,10 +296,10 @@ class SiloQueryTest {
                     "includeSublineages": false
                 }
                 """,
-            ),
-            Arguments.of(
-                PangoLineageEquals("fieldName", "ABC", includeSublineages = true),
-                """
+                ),
+                Arguments.of(
+                    PangoLineageEquals("fieldName", "ABC", includeSublineages = true),
+                    """
                 {
                     "type": "PangoLineage",
                     "column": "fieldName",
@@ -299,10 +307,10 @@ class SiloQueryTest {
                     "includeSublineages": true
                 }
                 """,
-            ),
-            Arguments.of(
-                And(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
-                """
+                ),
+                Arguments.of(
+                    And(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                    """
                 {
                     "type": "And",
                     "children": [
@@ -319,20 +327,20 @@ class SiloQueryTest {
                     ]
                 }
                 """,
-            ),
-            Arguments.of(
-                NucleotideSymbolEquals(null, 1234, "A"),
-                """
+                ),
+                Arguments.of(
+                    NucleotideSymbolEquals(null, 1234, "A"),
+                    """
                 {
                     "type": "NucleotideEquals",
                     "position": 1234,
                     "symbol": "A"
                 }
                 """,
-            ),
-            Arguments.of(
-                NucleotideSymbolEquals("sequence name", 1234, "A"),
-                """
+                ),
+                Arguments.of(
+                    NucleotideSymbolEquals("sequence name", 1234, "A"),
+                    """
                 {
                     "type": "NucleotideEquals",
                     "sequenceName": "sequence name",
@@ -340,29 +348,29 @@ class SiloQueryTest {
                     "symbol": "A"
                 }
                 """,
-            ),
-            Arguments.of(
-                HasNucleotideMutation("sequence name", 1234),
-                """
+                ),
+                Arguments.of(
+                    HasNucleotideMutation("sequence name", 1234),
+                    """
                 {
                     "type": "HasNucleotideMutation",
                     "sequenceName": "sequence name",
                     "position": 1234
                 }
                 """,
-            ),
-            Arguments.of(
-                HasNucleotideMutation(null, 1234),
-                """
+                ),
+                Arguments.of(
+                    HasNucleotideMutation(null, 1234),
+                    """
                 {
                     "type": "HasNucleotideMutation",
                     "position": 1234
                 }
                 """,
-            ),
-            Arguments.of(
-                AminoAcidSymbolEquals("gene name", 1234, "A"),
-                """
+                ),
+                Arguments.of(
+                    AminoAcidSymbolEquals("gene name", 1234, "A"),
+                    """
                 {
                     "type": "AminoAcidEquals",
                     "sequenceName": "gene name",
@@ -370,20 +378,20 @@ class SiloQueryTest {
                     "symbol": "A"
                 }
                 """,
-            ),
-            Arguments.of(
-                HasAminoAcidMutation("gene name", 1234),
-                """
+                ),
+                Arguments.of(
+                    HasAminoAcidMutation("gene name", 1234),
+                    """
                 {
                     "type": "HasAminoAcidMutation",
                     "sequenceName": "gene name",
                     "position": 1234
                 }
                 """,
-            ),
-            Arguments.of(
-                DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
-                """
+                ),
+                Arguments.of(
+                    DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
+                    """
                 {
                     "type": "DateBetween",
                     "column": "fieldName",
@@ -391,10 +399,10 @@ class SiloQueryTest {
                     "to": "2022-06-03"
                 }
                 """,
-            ),
-            Arguments.of(
-                DateBetween("fieldName", null, LocalDate.of(2022, 6, 3)),
-                """
+                ),
+                Arguments.of(
+                    DateBetween("fieldName", null, LocalDate.of(2022, 6, 3)),
+                    """
                 {
                     "type": "DateBetween",
                     "column": "fieldName",
@@ -402,10 +410,10 @@ class SiloQueryTest {
                     "to": "2022-06-03"
                 }
                 """,
-            ),
-            Arguments.of(
-                DateBetween("fieldName", LocalDate.of(2021, 3, 31), null),
-                """
+                ),
+                Arguments.of(
+                    DateBetween("fieldName", LocalDate.of(2021, 3, 31), null),
+                    """
                 {
                     "type": "DateBetween",
                     "column": "fieldName",
@@ -413,10 +421,10 @@ class SiloQueryTest {
                     "to": null
                 }
                 """,
-            ),
-            Arguments.of(
-                Not(StringEquals("theColumn", "theValue")),
-                """
+                ),
+                Arguments.of(
+                    Not(StringEquals("theColumn", "theValue")),
+                    """
                 {
                     "type": "Not",
                     "child": {
@@ -426,10 +434,10 @@ class SiloQueryTest {
                     }
                 }
                 """,
-            ),
-            Arguments.of(
-                Or(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
-                """
+                ),
+                Arguments.of(
+                    Or(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                    """
                 {
                     "type": "Or",
                     "children": [
@@ -446,10 +454,10 @@ class SiloQueryTest {
                     ]
                 }
                 """,
-            ),
-            Arguments.of(
-                Maybe(StringEquals("theColumn", "theValue")),
-                """
+                ),
+                Arguments.of(
+                    Maybe(StringEquals("theColumn", "theValue")),
+                    """
                 {
                     "type": "Maybe",
                     "child": {
@@ -459,17 +467,17 @@ class SiloQueryTest {
                     }
                 }
                 """,
-            ),
-            Arguments.of(
-                NOf(
-                    2,
-                    true,
-                    listOf(
-                        StringEquals("theColumn", "theValue"),
-                        StringEquals("theOtherColumn", "theOtherValue"),
-                    ),
                 ),
-                """
+                Arguments.of(
+                    NOf(
+                        2,
+                        true,
+                        listOf(
+                            StringEquals("theColumn", "theValue"),
+                            StringEquals("theOtherColumn", "theOtherValue"),
+                        ),
+                    ),
+                    """
                 {
                     "type": "N-Of",
                     "numberOfMatchers": 2,
@@ -488,7 +496,7 @@ class SiloQueryTest {
                     ]
                 }
                 """,
-            ),
-        )
+                ),
+            )
     }
 }

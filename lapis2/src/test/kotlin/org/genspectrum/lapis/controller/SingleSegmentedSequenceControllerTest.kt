@@ -28,7 +28,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
     ],
 )
 @AutoConfigureMockMvc
-class SingleSegmentedSequenceControllerTest(@Autowired val mockMvc: MockMvc) {
+class SingleSegmentedSequenceControllerTest(
+    @Autowired val mockMvc: MockMvc,
+) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
@@ -152,14 +154,13 @@ class SingleSegmentedSequenceControllerTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(status().isNotFound)
     }
 
-    private fun sequenceFiltersRequest(
-        sequenceFilters: Map<String, String>,
-    ) = SequenceFiltersRequest(
-        sequenceFilters,
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        emptyList(),
-    )
+    private fun sequenceFiltersRequest(sequenceFilters: Map<String, String>) =
+        SequenceFiltersRequest(
+            sequenceFilters,
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
 }

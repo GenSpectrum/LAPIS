@@ -9,7 +9,10 @@ import org.springframework.web.method.HandlerMethod
 
 @Component
 class OperationsSorter : OperationCustomizer {
-    override fun customize(operation: Operation, handlerMethod: HandlerMethod): Operation {
+    override fun customize(
+        operation: Operation,
+        handlerMethod: HandlerMethod,
+    ): Operation {
         operation.responses.forEach { _, response ->
             val applicationJsonFirstContents =
                 response.content.toSortedMap(

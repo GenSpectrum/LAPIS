@@ -316,9 +316,7 @@ class LapisControllerCommonFieldsTest(
 
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithNucleotideMutationFilter")
-    fun `GET endpoint with invalid nucleotide mutation filter`(
-        endpoint: String,
-    ) {
+    fun `GET endpoint with invalid nucleotide mutation filter`(endpoint: String) {
         mockMvc.perform(get("$endpoint?nucleotideMutations=invalidMutation"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideMutations'")))
@@ -334,9 +332,7 @@ class LapisControllerCommonFieldsTest(
 
     @ParameterizedTest(name = "GET {0} with invalid nucleotideInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
-    fun `GET with invalid nucleotide insertion filter`(
-        endpoint: String,
-    ) {
+    fun `GET with invalid nucleotide insertion filter`(endpoint: String) {
         mockMvc.perform(get(endpoint + "?nucleotideInsertions=invalidInsertion"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideInsertions'")))
@@ -344,24 +340,23 @@ class LapisControllerCommonFieldsTest(
 
     @ParameterizedTest(name = "GET {0} with invalid aminoAcidInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
-    fun `GET with invalid amino acid insertionFilter`(
-        endpoint: String,
-    ) {
+    fun `GET with invalid amino acid insertionFilter`(endpoint: String) {
         mockMvc.perform(get(endpoint + "?aminoAcidInsertions=invalidInsertion"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidInsertions'")))
     }
 
     private companion object {
-        fun endpointsOfController() = listOf(
-            Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
-            Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
-            Arguments.of(AGGREGATED_ROUTE),
-            Arguments.of(DETAILS_ROUTE),
-            Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
-            Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
-            Arguments.of("$AMINO_ACID_SEQUENCES_ROUTE/S"),
-        )
+        fun endpointsOfController() =
+            listOf(
+                Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
+                Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
+                Arguments.of(AGGREGATED_ROUTE),
+                Arguments.of(DETAILS_ROUTE),
+                Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
+                Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
+                Arguments.of("$AMINO_ACID_SEQUENCES_ROUTE/S"),
+            )
 
         @JvmStatic
         fun getEndpointsWithInsertionFilter() = endpointsOfController()

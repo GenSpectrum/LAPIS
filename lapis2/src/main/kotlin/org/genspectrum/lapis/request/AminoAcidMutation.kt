@@ -39,8 +39,10 @@ private val AMINO_ACID_MUTATION_REGEX =
 
 @JsonComponent
 class AminoAcidMutationDeserializer : JsonDeserializer<AminoAcidMutation>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext) =
-        AminoAcidMutation.fromString(p.valueAsString)
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ) = AminoAcidMutation.fromString(p.valueAsString)
 }
 
 @Component

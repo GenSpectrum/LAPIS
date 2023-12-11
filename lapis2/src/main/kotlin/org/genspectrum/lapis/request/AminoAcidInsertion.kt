@@ -47,8 +47,10 @@ private val AMINO_ACID_INSERTION_REGEX =
 
 @JsonComponent
 class AminoAcidInsertionDeserializer : JsonDeserializer<AminoAcidInsertion>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext) =
-        AminoAcidInsertion.fromString(p.valueAsString)
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ) = AminoAcidInsertion.fromString(p.valueAsString)
 }
 
 @Component

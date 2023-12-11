@@ -17,8 +17,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-class SwaggerUiTest(@Autowired val mockMvc: MockMvc) {
-
+class SwaggerUiTest(
+    @Autowired val mockMvc: MockMvc,
+) {
     @Test
     fun `Swagger UI endpoint is reachable`() {
         mockMvc.perform(get("/swagger-ui/index.html"))

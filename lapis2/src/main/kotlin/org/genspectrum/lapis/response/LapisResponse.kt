@@ -23,6 +23,7 @@ data class NucleotideMutationResponse(
     ) val proportion: Double,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -43,6 +44,7 @@ data class AminoAcidMutationResponse(
     ) val proportion: Double,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -50,8 +52,8 @@ data class NucleotideInsertionResponse(
     @Schema(
         example = "ins_22204:CAGAA",
         description =
-        "|A nucleotide insertion in the format \"ins_\\<segment\\>?:\\<position\\>:\\<insertion\\>\".  " +
-            "|If the pathogen has only one segment LAPIS will omit the segment name.",
+            "|A nucleotide insertion in the format \"ins_\\<segment\\>?:\\<position\\>:\\<insertion\\>\".  " +
+                "|If the pathogen has only one segment LAPIS will omit the segment name.",
     )
     val insertion: String,
     @Schema(
@@ -61,6 +63,7 @@ data class NucleotideInsertionResponse(
     val count: Int,
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
+
     override fun getHeader() = arrayOf("insertion", "count")
 }
 
@@ -68,7 +71,7 @@ data class AminoAcidInsertionResponse(
     @Schema(
         example = "ins_ORF1a:22204:CAGAA",
         description =
-        "|A amino acid insertion in the format \"ins_\\<gene\\>:\\<position\\>:\\<insertion\\>\".",
+            "|A amino acid insertion in the format \"ins_\\<gene\\>:\\<position\\>:\\<insertion\\>\".",
     )
     val insertion: String,
     @Schema(
@@ -78,5 +81,6 @@ data class AminoAcidInsertionResponse(
     val count: Int,
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
+
     override fun getHeader() = arrayOf("insertion", "count")
 }

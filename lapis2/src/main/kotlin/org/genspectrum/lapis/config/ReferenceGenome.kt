@@ -13,7 +13,6 @@ private const val ARGS_NAME = "referenceGenomeFilename"
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ReferenceGenome(val nucleotideSequences: List<ReferenceSequence>, val genes: List<ReferenceSequence>) {
-
     fun isSingleSegmented(): Boolean {
         return nucleotideSequences.size == 1
     }
