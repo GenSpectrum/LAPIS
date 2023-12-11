@@ -1,31 +1,22 @@
 ---
 import { getLapisUrl } from '../lapisUrl';
+import SwaggerUI from 'swagger-ui-react';
+import 'swagger-ui-react/swagger-ui.css';
+
+const swaggerUiUrl = getLapisUrl() + '/swagger-ui.html';
 const openApiUrl = getLapisUrl() + '/api-docs';
 ---
 
-YAML definition: <a href={openApiUrl}>{openApiUrl}</a>
-
-<head>
-    <!-- TODO Don't fetch from external source! -->
-    <link rel='stylesheet' href='https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css' />
-</head>
+<p>
+    An <a href='https://www.openapis.org/'>OpenAPI specification</a> is a formal description of an API. You can find the
+    specification of this LAPIS instance here: <a href={openApiUrl}>{openApiUrl}</a>.
+</p>
+<h2>Swagger UI</h2>
+<p>
+    A Swagger UI is an interactive UI generated from the OpenAPI specification. You can find LAPIS' Swagger UI included
+    below or behind this link: <a href={swaggerUiUrl}>{swaggerUiUrl}</a>. Feel free to explore the API and try it out.
+</p>
 
 <div class='not-content'>
-    <swagger-ui-container data-url={openApiUrl}></swagger-ui-container>
+    <SwaggerUI url={openApiUrl} client:load />
 </div>
-
-<script>
-    import SwaggerUI from 'swagger-ui';
-
-    class SwaggerUiContainer extends HTMLElement {
-        constructor() {
-            super();
-            SwaggerUI({
-                domNode: this,
-                url: this.dataset.url,
-            });
-        }
-    }
-
-    customElements.define('swagger-ui-container', SwaggerUiContainer);
-</script>
