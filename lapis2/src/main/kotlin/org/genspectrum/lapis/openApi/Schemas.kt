@@ -59,7 +59,13 @@ const val FORMAT_SCHEMA = "DataFormat"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 
+const val LAPIS_INFO_DESCRIPTION = "Information about LAPIS."
+const val LAPIS_DATA_VERSION_EXAMPLE = "1702305399"
 const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
+const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
+    "Same as the value returned in the info object in the response body."
+const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
+    "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION_HEADER'."
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -70,8 +76,7 @@ const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
     headers = [
         Header(
             name = LAPIS_DATA_VERSION_HEADER,
-            description = "$LAPIS_DATA_VERSION_DESCRIPTION " +
-                "Same as the value returned in the info object in the response body.",
+            description = LAPIS_DATA_VERSION_HEADER_DESCRIPTION,
             schema = Schema(type = "string"),
         ),
     ],

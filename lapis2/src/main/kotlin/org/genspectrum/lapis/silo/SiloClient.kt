@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
+import org.genspectrum.lapis.response.InfoData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -35,6 +36,20 @@ class SiloClient(
             .POST(HttpRequest.BodyPublishers.ofString(queryJson))
             .build()
 
+        val response = send(client, request)
+
+        try {
+            return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
+        } catch (exception: Exception) {
+            val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
+            throw RuntimeException(message, exception)
+        }
+    }
+
+    private fun send(
+        client: HttpClient,
+        request: HttpRequest?,
+    ): HttpResponse<String> {
         val response = try {
             client.send(request, BodyHandlers.ofString())
         } catch (exception: Exception) {
@@ -70,18 +85,27 @@ class SiloClient(
             )
         }
 
-        addDataVersion(response)
-
-        try {
-            return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
-        } catch (exception: Exception) {
-            val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
-            throw RuntimeException(message, exception)
-        }
+        addDataVersionToRequestScope(response)
+        return response
     }
 
-    private fun addDataVersion(response: HttpResponse<String>) {
-        dataVersion.dataVersion = response.headers().firstValue("data-version").orElse("")
+    fun callInfo(): InfoData {
+        log.info { "Calling SILO info" }
+
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder(URI("$siloUrl/info")).GET().build()
+
+        val response = send(client, request)
+
+        return InfoData(getDataVersion(response))
+    }
+
+    private fun addDataVersionToRequestScope(response: HttpResponse<String>) {
+        dataVersion.dataVersion = getDataVersion(response)
+    }
+
+    private fun getDataVersion(response: HttpResponse<String>): String {
+        return response.headers().firstValue("data-version").orElse("")
     }
 }
 

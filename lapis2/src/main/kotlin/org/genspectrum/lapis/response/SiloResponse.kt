@@ -86,6 +86,10 @@ data class SequenceData(
     val sequence: String,
 )
 
+data class InfoData(
+    val dataVersion: String,
+)
+
 @JsonComponent
 class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeserializer<SequenceData>() {
     override fun deserialize(
