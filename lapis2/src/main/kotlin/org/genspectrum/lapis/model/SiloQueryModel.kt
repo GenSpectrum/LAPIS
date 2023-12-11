@@ -7,6 +7,7 @@ import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.silo.SequenceType
@@ -156,4 +157,6 @@ class SiloQueryModel(
             ),
         ).joinToString("\n") { ">${it.sequenceKey}\n${it.sequence}" }
     }
+
+    fun getInfo(): InfoData = siloClient.callInfo()
 }

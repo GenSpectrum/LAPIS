@@ -15,6 +15,7 @@ const val AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION =
     "Returns a list of mutations along with the counts and proportions whose proportions are greater " +
         "than or equal to the specified minProportion. Only sequences matching the specified " +
         "sequence filters are considered."
+const val INFO_ENDPOINT_DESCRIPTION = "Returns information about LAPIS"
 
 const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
     "Returns a string of fasta formated aligned amino acid sequences. Only sequences matching the specified " +
