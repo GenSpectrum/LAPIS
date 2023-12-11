@@ -17,6 +17,8 @@ import java.net.http.HttpResponse.BodyHandlers
 
 private val log = KotlinLogging.logger {}
 
+const val SILO_RESPONSE_MAX_LOG_LENGTH = 10_000
+
 @Component
 class SiloClient(
     @Value("\${silo.url}") private val siloUrl: String,
@@ -43,7 +45,15 @@ class SiloClient(
             throw RuntimeException(message, exception)
         }
 
-        log.info { "Response from SILO: ${response.statusCode()} - ${response.body()}" }
+        log.info { "Response from SILO: ${response.statusCode()}" }
+        log.debug {
+            val body = response.body()
+            val truncationPostfix = when {
+                body.length > SILO_RESPONSE_MAX_LOG_LENGTH -> "(...truncated)"
+                else -> ""
+            }
+            "Data from SILO: ${body.take(SILO_RESPONSE_MAX_LOG_LENGTH)}$truncationPostfix"
+        }
 
         if (response.statusCode() != 200) {
             val siloErrorResponse = try {
