@@ -201,7 +201,8 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Pangolineage' expression (including sublineages) then map should return the corresponding SiloQuery`() { // ktlint-disable max-line-length
+    @Suppress("ktlint:standard:max-line-length")
+    fun `given a variantQuery with a 'Pangolineage' expression (including sublineages) then map should return the corresponding SiloQuery`() {
         val variantQuery = "A.1.2.3*"
 
         val result = underTest.map(variantQuery)

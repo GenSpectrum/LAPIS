@@ -101,31 +101,31 @@ internal class RequestContextLoggerTest {
     }
 
     companion object {
-
         @JvmStatic
-        fun provideInputFilters() = listOf(
-            Arguments.of(
-                SequenceFiltersRequestWithFields(
-                    mapOf("country" to "Germany"),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+        fun provideInputFilters() =
+            listOf(
+                Arguments.of(
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to "Germany"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
+                    """"country":"Germany"""",
                 ),
-                """"country":"Germany"""",
-            ),
-            Arguments.of(
-                SequenceFiltersRequestWithFields(
-                    mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                Arguments.of(
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
+                    """"country":"Germany","nucleotideMutation":"A123T"""",
                 ),
-                """"country":"Germany","nucleotideMutation":"A123T"""",
-            ),
-        )
+            )
     }
 }

@@ -713,7 +713,6 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-
             fields ?: emptyList(),
             orderBy ?: emptyList(),
             limit,

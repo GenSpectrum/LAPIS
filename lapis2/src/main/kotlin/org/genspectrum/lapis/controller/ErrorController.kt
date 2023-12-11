@@ -18,9 +18,11 @@ private val log = KotlinLogging.logger { }
 @Component
 class ErrorController(errorAttributes: ErrorAttributes) :
     BasicErrorController(errorAttributes, ErrorProperties()) {
-
     @RequestMapping(produces = [MediaType.TEXT_HTML_VALUE])
-    override fun errorHtml(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
+    override fun errorHtml(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ModelAndView {
         val modelAndView = super.errorHtml(request, response)
 
         response.addHeader("Content-Type", MediaType.TEXT_HTML_VALUE)
@@ -41,8 +43,11 @@ class ErrorController(errorAttributes: ErrorAttributes) :
 }
 
 data class NotFoundView(private val url: String?) : View {
-
-    override fun render(model: MutableMap<String, *>?, request: HttpServletRequest, response: HttpServletResponse) {
+    override fun render(
+        model: MutableMap<String, *>?,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
         val html: String = """
             <!DOCTYPE html>
             <html lang="en">

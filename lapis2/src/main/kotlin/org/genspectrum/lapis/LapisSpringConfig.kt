@@ -28,8 +28,7 @@ class LapisSpringConfig {
         sequenceFilterFields: SequenceFilterFields,
         databaseConfig: DatabaseConfig,
         referenceGenome: ReferenceGenome,
-    ) =
-        buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenome)
+    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenome)
 
     @Bean
     fun databaseConfig(
@@ -74,9 +73,8 @@ class LapisSpringConfig {
     fun referenceGenome(
         @Value("\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
         @Value("\${$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX}") genes: List<String>,
-    ) =
-        ReferenceGenome(
-            nucleotideSegments.map { ReferenceSequence(it) },
-            genes.map { ReferenceSequence(it) },
-        )
+    ) = ReferenceGenome(
+        nucleotideSegments.map { ReferenceSequence(it) },
+        genes.map { ReferenceSequence(it) },
+    )
 }

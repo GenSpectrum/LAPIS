@@ -20,7 +20,6 @@ const val TEXT_TSV_HEADER = "text/tab-separated-values"
 
 @Component
 class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter() {
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -35,7 +34,6 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
 class AcceptHeaderModifyingRequestWrapper(
     private val reReadableRequest: CachedBodyHttpServletRequest,
 ) : HttpServletRequestWrapper(reReadableRequest) {
-
     override fun getHeader(name: String): String? {
         if (name.equals("Accept", ignoreCase = true)) {
             when (reReadableRequest.getRequestFields()[FORMAT_PROPERTY]?.textValue()?.uppercase()) {

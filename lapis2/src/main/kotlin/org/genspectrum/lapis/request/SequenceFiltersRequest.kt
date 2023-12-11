@@ -19,7 +19,10 @@ data class SequenceFiltersRequest(
 
 @JsonComponent
 class SequenceFiltersRequestDeserializer : JsonDeserializer<SequenceFiltersRequest>() {
-    override fun deserialize(jsonParser: JsonParser, ctxt: DeserializationContext): SequenceFiltersRequest {
+    override fun deserialize(
+        jsonParser: JsonParser,
+        ctxt: DeserializationContext,
+    ): SequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 

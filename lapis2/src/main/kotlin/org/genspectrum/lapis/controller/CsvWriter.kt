@@ -7,12 +7,17 @@ import java.io.StringWriter
 
 interface CsvRecord {
     fun asArray(): Array<String>
+
     fun getHeader(): Array<String>
 }
 
 @Component
 class CsvWriter {
-    fun write(headers: Array<String>, data: List<CsvRecord>, delimiter: Delimiter): String {
+    fun write(
+        headers: Array<String>,
+        data: List<CsvRecord>,
+        delimiter: Delimiter,
+    ): String {
         val stringWriter = StringWriter()
         CSVPrinter(
             stringWriter,

@@ -38,46 +38,48 @@ class NucleotideMutationTest {
 
     companion object {
         @JvmStatic
-        fun getMutationWithValidSyntax() = listOf(
-            Arguments.of(
-                "\"G123A\"",
-                NucleotideMutation(null, 123, "A"),
-            ),
-            Arguments.of(
-                "\"123A\"",
-                NucleotideMutation(null, 123, "A"),
-            ),
-            Arguments.of(
-                "\"123.\"",
-                NucleotideMutation(null, 123, "."),
-            ),
-            Arguments.of(
-                "\"123-\"",
-                NucleotideMutation(null, 123, "-"),
-            ),
-            Arguments.of(
-                "\"123\"",
-                NucleotideMutation(null, 123, null),
-            ),
-            Arguments.of(
-                "\"A123\"",
-                NucleotideMutation(null, 123, null),
-            ),
-            Arguments.of(
-                "\"sequence-Name_1:123X\"",
-                NucleotideMutation("sequence-Name_1", 123, "X"),
-            ),
-        )
+        fun getMutationWithValidSyntax() =
+            listOf(
+                Arguments.of(
+                    "\"G123A\"",
+                    NucleotideMutation(null, 123, "A"),
+                ),
+                Arguments.of(
+                    "\"123A\"",
+                    NucleotideMutation(null, 123, "A"),
+                ),
+                Arguments.of(
+                    "\"123.\"",
+                    NucleotideMutation(null, 123, "."),
+                ),
+                Arguments.of(
+                    "\"123-\"",
+                    NucleotideMutation(null, 123, "-"),
+                ),
+                Arguments.of(
+                    "\"123\"",
+                    NucleotideMutation(null, 123, null),
+                ),
+                Arguments.of(
+                    "\"A123\"",
+                    NucleotideMutation(null, 123, null),
+                ),
+                Arguments.of(
+                    "\"sequence-Name_1:123X\"",
+                    NucleotideMutation("sequence-Name_1", 123, "X"),
+                ),
+            )
 
         @JvmStatic
-        fun getNucleotideMutationWithWrongSyntax() = listOf(
-            Arguments.of("\"AA123\""),
-            Arguments.of("\"123AA\""),
-            Arguments.of("\"\""),
-            Arguments.of("\"AA123A\""),
-            Arguments.of("\"A\""),
-            Arguments.of("\":123A\""),
-            Arguments.of("\"sequence\$name&with/invalid)chars:G123A\""),
-        )
+        fun getNucleotideMutationWithWrongSyntax() =
+            listOf(
+                Arguments.of("\"AA123\""),
+                Arguments.of("\"123AA\""),
+                Arguments.of("\"\""),
+                Arguments.of("\"AA123A\""),
+                Arguments.of("\"A\""),
+                Arguments.of("\":123A\""),
+                Arguments.of("\"sequence\$name&with/invalid)chars:G123A\""),
+            )
     }
 }

@@ -151,7 +151,7 @@ annotation class LapisAlignedMultiSegmentedNucleotideSequenceResponse
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     description =
-    "Valid filters for sequence data. This may be empty. Only provide the fields that should be filtered by.",
+        "Valid filters for sequence data. This may be empty. Only provide the fields that should be filtered by.",
     schema = Schema(ref = "#/components/schemas/$PRIMITIVE_FIELD_FILTERS_SCHEMA"),
     explode = Explode.TRUE,
     style = ParameterStyle.FORM,

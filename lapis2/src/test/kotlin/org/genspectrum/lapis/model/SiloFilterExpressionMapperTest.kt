@@ -428,146 +428,147 @@ class SiloFilterExpressionMapperTest {
 
     companion object {
         @JvmStatic
-        fun getFilterParametersWithExpectedSiloQuery() = listOf(
-            Arguments.of(
-                mapOf(
-                    "some_metadata" to "ABC",
-                    "other_metadata" to "def",
-                ),
-                And(
-                    listOf(
-                        StringEquals("some_metadata", "ABC"),
-                        StringEquals("other_metadata", "def"),
+        fun getFilterParametersWithExpectedSiloQuery() =
+            listOf(
+                Arguments.of(
+                    mapOf(
+                        "some_metadata" to "ABC",
+                        "other_metadata" to "def",
+                    ),
+                    And(
+                        listOf(
+                            StringEquals("some_metadata", "ABC"),
+                            StringEquals("other_metadata", "def"),
+                        ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                mapOf("pangoLineage" to "A.1.2.3"),
-                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
-            ),
-            Arguments.of(
-                mapOf("pangoLineage" to "A.1.2.3*"),
-                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
-            ),
-            Arguments.of(
-                mapOf("pangoLineage" to "A.1.2.3.*"),
-                And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "pangoLineage" to "A.1.2.3",
-                    "some_metadata" to "ABC",
-                    "other_metadata" to "DEF",
+                Arguments.of(
+                    mapOf("pangoLineage" to "A.1.2.3"),
+                    And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
                 ),
-                And(
-                    listOf(
-                        PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
-                        StringEquals("some_metadata", "ABC"),
-                        StringEquals("other_metadata", "DEF"),
+                Arguments.of(
+                    mapOf("pangoLineage" to "A.1.2.3*"),
+                    And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage" to "A.1.2.3.*"),
+                    And(listOf(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "pangoLineage" to "A.1.2.3",
+                        "some_metadata" to "ABC",
+                        "other_metadata" to "DEF",
+                    ),
+                    And(
+                        listOf(
+                            PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
+                            StringEquals("some_metadata", "ABC"),
+                            StringEquals("other_metadata", "DEF"),
+                        ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                mapOf(
-                    "date" to "2021-06-03",
+                Arguments.of(
+                    mapOf(
+                        "date" to "2021-06-03",
+                    ),
+                    And(listOf(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)))),
                 ),
-                And(listOf(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "dateTo" to "2021-06-03",
+                Arguments.of(
+                    mapOf(
+                        "dateTo" to "2021-06-03",
+                    ),
+                    And(listOf(DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)))),
                 ),
-                And(listOf(DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "dateFrom" to "2021-03-28",
+                Arguments.of(
+                    mapOf(
+                        "dateFrom" to "2021-03-28",
+                    ),
+                    And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null))),
                 ),
-                And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "dateFrom" to "2021-03-28",
-                    "dateTo" to "2021-06-03",
+                Arguments.of(
+                    mapOf(
+                        "dateFrom" to "2021-03-28",
+                        "dateTo" to "2021-06-03",
+                    ),
+                    And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3)))),
                 ),
-                And(listOf(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3)))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "dateTo" to "2021-06-03",
-                    "some_metadata" to "ABC",
-                ),
-                And(
-                    listOf(
-                        DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
-                        StringEquals("some_metadata", "ABC"),
+                Arguments.of(
+                    mapOf(
+                        "dateTo" to "2021-06-03",
+                        "some_metadata" to "ABC",
+                    ),
+                    And(
+                        listOf(
+                            DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
+                            StringEquals("some_metadata", "ABC"),
+                        ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                mapOf(
-                    "variantQuery" to "300G & 400A",
-                ),
-                And(
-                    listOf(
-                        And(
-                            listOf(
-                                NucleotideSymbolEquals(null, 300, "G"),
-                                NucleotideSymbolEquals(null, 400, "A"),
+                Arguments.of(
+                    mapOf(
+                        "variantQuery" to "300G & 400A",
+                    ),
+                    And(
+                        listOf(
+                            And(
+                                listOf(
+                                    NucleotideSymbolEquals(null, 300, "G"),
+                                    NucleotideSymbolEquals(null, 400, "A"),
+                                ),
                             ),
                         ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                mapOf(
-                    "variantQuery" to "300G",
-                    "some_metadata" to "ABC",
-                ),
-                And(
-                    listOf(
-                        NucleotideSymbolEquals(null, 300, "G"),
-                        StringEquals("some_metadata", "ABC"),
+                Arguments.of(
+                    mapOf(
+                        "variantQuery" to "300G",
+                        "some_metadata" to "ABC",
+                    ),
+                    And(
+                        listOf(
+                            NucleotideSymbolEquals(null, 300, "G"),
+                            StringEquals("some_metadata", "ABC"),
+                        ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                mapOf(
-                    "intField" to "42",
+                Arguments.of(
+                    mapOf(
+                        "intField" to "42",
+                    ),
+                    And(listOf(IntEquals("intField", 42))),
                 ),
-                And(listOf(IntEquals("intField", 42))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "intFieldFrom" to "42",
+                Arguments.of(
+                    mapOf(
+                        "intFieldFrom" to "42",
+                    ),
+                    And(listOf(IntBetween("intField", 42, null))),
                 ),
-                And(listOf(IntBetween("intField", 42, null))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "intFieldTo" to "42",
+                Arguments.of(
+                    mapOf(
+                        "intFieldTo" to "42",
+                    ),
+                    And(listOf(IntBetween("intField", null, 42))),
                 ),
-                And(listOf(IntBetween("intField", null, 42))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "floatField" to "42.45",
+                Arguments.of(
+                    mapOf(
+                        "floatField" to "42.45",
+                    ),
+                    And(listOf(FloatEquals("floatField", 42.45))),
                 ),
-                And(listOf(FloatEquals("floatField", 42.45))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "floatFieldFrom" to "42.45",
+                Arguments.of(
+                    mapOf(
+                        "floatFieldFrom" to "42.45",
+                    ),
+                    And(listOf(FloatBetween("floatField", 42.45, null))),
                 ),
-                And(listOf(FloatBetween("floatField", 42.45, null))),
-            ),
-            Arguments.of(
-                mapOf(
-                    "floatFieldTo" to "42.45",
+                Arguments.of(
+                    mapOf(
+                        "floatFieldTo" to "42.45",
+                    ),
+                    And(listOf(FloatBetween("floatField", null, 42.45))),
                 ),
-                And(listOf(FloatBetween("floatField", null, 42.45))),
-            ),
-        )
+            )
     }
 
     private fun getSequenceFilters(sequenceFilters: Map<String, String>) =

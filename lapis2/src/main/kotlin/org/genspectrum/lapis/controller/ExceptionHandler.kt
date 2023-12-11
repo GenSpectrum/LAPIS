@@ -78,11 +78,16 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         return responseEntity(HttpStatus.NOT_IMPLEMENTED, e.message)
     }
 
-    private fun responseEntity(httpStatus: HttpStatus, detail: String?) =
-        responseEntity(httpStatus, httpStatus.reasonPhrase, detail)
+    private fun responseEntity(
+        httpStatus: HttpStatus,
+        detail: String?,
+    ) = responseEntity(httpStatus, httpStatus.reasonPhrase, detail)
 
-    private fun responseEntity(httpStatus: HttpStatusCode, title: String, detail: String?) =
-        responseEntity(httpStatus.value(), title, detail)
+    private fun responseEntity(
+        httpStatus: HttpStatusCode,
+        title: String,
+        detail: String?,
+    ) = responseEntity(httpStatus.value(), title, detail)
 
     private fun responseEntity(
         httpStatus: Int,

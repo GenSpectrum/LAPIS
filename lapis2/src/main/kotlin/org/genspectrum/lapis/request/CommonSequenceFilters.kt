@@ -29,7 +29,10 @@ interface CommonSequenceFilters {
             aaMutations.isEmpty() && nucleotideInsertions.isEmpty() && aminoAcidInsertions.isEmpty()
 }
 
-fun parseCommonFields(node: JsonNode, codec: ObjectCodec): ParsedCommonFields {
+fun parseCommonFields(
+    node: JsonNode,
+    codec: ObjectCodec,
+): ParsedCommonFields {
     val nucleotideMutations = when (val nucleotideMutationsNode = node.get(NUCLEOTIDE_MUTATIONS_PROPERTY)) {
         null -> emptyList()
         is ArrayNode -> nucleotideMutationsNode.map { codec.treeToValue(it, NucleotideMutation::class.java) }
@@ -109,10 +112,11 @@ data class ParsedCommonFields(
     val offset: Int?,
 )
 
-private fun isStringOrNumber(jsonNode: JsonNode) = when (jsonNode.nodeType) {
-    JsonNodeType.STRING,
-    JsonNodeType.NUMBER,
-    -> true
+private fun isStringOrNumber(jsonNode: JsonNode) =
+    when (jsonNode.nodeType) {
+        JsonNodeType.STRING,
+        JsonNodeType.NUMBER,
+        -> true
 
-    else -> false
-}
+        else -> false
+    }

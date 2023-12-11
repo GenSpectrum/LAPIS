@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class VariantQueryFacade {
-
     fun map(variantQuery: String): SiloFilterExpression {
         val lexer = VariantQueryLexer(CharStreams.fromString(variantQuery))
         val tokens = CommonTokenStream(lexer)

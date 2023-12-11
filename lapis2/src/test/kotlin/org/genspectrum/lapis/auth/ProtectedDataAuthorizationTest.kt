@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-private const val notAuthorizedToAccessEndpointError = """
+private const val NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR = """
 {
     "error" : {
         "title": "Forbidden",
@@ -30,8 +30,9 @@ private const val notAuthorizedToAccessEndpointError = """
 
 @SpringBootTest(properties = ["lapis.databaseConfig.path=src/test/resources/config/protectedDataDatabaseConfig.yaml"])
 @AutoConfigureMockMvc
-class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
-
+class ProtectedDataAuthorizationTest(
+    @Autowired val mockMvc: MockMvc,
+) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
@@ -89,7 +90,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
                 content().json(
-                    notAuthorizedToAccessEndpointError,
+                    NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR,
                 ),
             )
     }
@@ -101,7 +102,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
                 content().json(
-                    notAuthorizedToAccessEndpointError,
+                    NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR,
                 ),
             )
     }
@@ -140,7 +141,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(notAuthorizedToAccessEndpointError))
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test
@@ -155,7 +156,7 @@ class ProtectedDataAuthorizationTest(@Autowired val mockMvc: MockMvc) {
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(notAuthorizedToAccessEndpointError))
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test

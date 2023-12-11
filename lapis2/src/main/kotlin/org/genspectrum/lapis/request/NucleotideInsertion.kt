@@ -42,8 +42,10 @@ private val NUCLEOTIDE_INSERTION_REGEX =
 
 @JsonComponent
 class NucleotideInsertionDeserializer : JsonDeserializer<NucleotideInsertion>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext) =
-        NucleotideInsertion.fromString(p.valueAsString)
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ) = NucleotideInsertion.fromString(p.valueAsString)
 }
 
 @Component

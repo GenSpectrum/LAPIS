@@ -24,7 +24,10 @@ data class MutationProportionsRequest(
 
 @JsonComponent
 class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProportionsRequest>() {
-    override fun deserialize(jsonParser: JsonParser, ctxt: DeserializationContext): MutationProportionsRequest {
+    override fun deserialize(
+        jsonParser: JsonParser,
+        ctxt: DeserializationContext,
+    ): MutationProportionsRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 

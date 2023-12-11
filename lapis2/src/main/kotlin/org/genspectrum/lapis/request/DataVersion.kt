@@ -32,7 +32,10 @@ class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : Resp
         return body
     }
 
-    override fun supports(returnType: MethodParameter, converterType: Class<out HttpMessageConverter<*>>): Boolean {
+    override fun supports(
+        returnType: MethodParameter,
+        converterType: Class<out HttpMessageConverter<*>>,
+    ): Boolean {
         return true
     }
 }

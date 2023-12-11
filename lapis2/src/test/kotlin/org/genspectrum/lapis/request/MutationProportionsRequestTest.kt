@@ -43,158 +43,160 @@ class MutationProportionsRequestTest {
 
     companion object {
         @JvmStatic
-        fun getTestMutationProportionsRequests() = listOf(
-            Arguments.of(
-                """
+        fun getTestMutationProportionsRequests() =
+            listOf(
+                Arguments.of(
+                    """
                 {
                     "country": "Switzerland"
                 }
                 """,
-                MutationProportionsRequest(
-                    mapOf("country" to "Switzerland"),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                    MutationProportionsRequest(
+                        mapOf("country" to "Switzerland"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "nucleotideMutations": ["T1-", "A23062T"]
                 }
                 """,
-                MutationProportionsRequest(
-                    emptyMap(),
-                    listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "aminoAcidMutations": ["S:501Y", "ORF1b:12"]
                 }
                 """,
-                MutationProportionsRequest(
-                    emptyMap(),
-                    emptyList(),
-                    listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
-                    emptyList(),
-                    emptyList(),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        emptyList(),
+                        listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"]
                 }
                 """,
-                MutationProportionsRequest(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(
-                        NucleotideInsertion(501, "Y", "S"),
-                        NucleotideInsertion(12, "ABCD", null),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            NucleotideInsertion(501, "Y", "S"),
+                            NucleotideInsertion(12, "ABCD", null),
+                        ),
+                        emptyList(),
                     ),
-                    emptyList(),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"]
                 }
                 """,
-                MutationProportionsRequest(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(
-                        AminoAcidInsertion(501, "S", "Y"),
-                        AminoAcidInsertion(12, "ORF1", "ABCD"),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            AminoAcidInsertion(501, "S", "Y"),
+                            AminoAcidInsertion(12, "ORF1", "ABCD"),
+                        ),
                     ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "minProportion": 0.7
                 }
                 """,
-                MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.7),
-            ),
-            Arguments.of(
-                """
+                    MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.7),
+                ),
+                Arguments.of(
+                    """
                 {
                     "accessKey": "some access key"                
                 }
                 """,
-                MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
-            ),
-            Arguments.of(
-                """
+                    MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
+                ),
+                Arguments.of(
+                    """
                 {
                 }
                 """,
-                MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
-            ),
-        )
+                    MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
+                ),
+            )
 
         @JvmStatic
-        fun getInvalidRequests() = listOf(
-            Arguments.of(
-                """
+        fun getInvalidRequests() =
+            listOf(
+                Arguments.of(
+                    """
                 {
                     "minProportion": "not a number"
                 }
                 """,
-                "minProportion must be a number",
-            ),
-            Arguments.of(
-                """
+                    "minProportion must be a number",
+                ),
+                Arguments.of(
+                    """
                 {
                     "minProportion": ["not a number"]
                 }
                 """,
-                "minProportion must be a number",
-            ),
-            Arguments.of(
-                """
+                    "minProportion must be a number",
+                ),
+                Arguments.of(
+                    """
                 {
                     "nucleotideMutations": "not an array"
                 }
                 """,
-                "nucleotideMutations must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "nucleotideMutations must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "nucleotideInsertions": "not an array"
                 }
                 """,
-                "nucleotideInsertions must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "nucleotideInsertions must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "aminoAcidInsertions": "not an array"
                 }
                 """,
-                "aminoAcidInsertions must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "aminoAcidInsertions must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "aminoAcidMutations": "not an array"
                 }
                 """,
-                "aminoAcidMutations must be an array or null",
-            ),
-        )
+                    "aminoAcidMutations must be an array or null",
+                ),
+            )
     }
 }

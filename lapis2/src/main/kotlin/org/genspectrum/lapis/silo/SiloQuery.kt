@@ -15,10 +15,15 @@ import java.time.LocalDate
 data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
 
 class AggregationDataTypeReference : TypeReference<SiloQueryResponse<List<AggregationData>>>()
+
 class MutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
+
 class AminoAcidMutationDataTypeReference : TypeReference<SiloQueryResponse<List<MutationData>>>()
+
 class DetailsDataTypeReference : TypeReference<SiloQueryResponse<List<DetailsData>>>()
+
 class InsertionDataTypeReference : TypeReference<SiloQueryResponse<List<InsertionData>>>()
+
 class SequenceDataTypeReference : TypeReference<SiloQueryResponse<List<SequenceData>>>()
 
 interface CommonActionFields {
@@ -36,32 +41,33 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<AggregationData>> =
-            AggregatedAction(groupByFields, orderByFields, limit, offset)
+        ): SiloAction<List<AggregationData>> = AggregatedAction(groupByFields, orderByFields, limit, offset)
 
         fun mutations(
             minProportion: Double? = null,
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<MutationData>> = MutationsAction(
-            minProportion,
-            orderByFields,
-            limit,
-            offset,
-        )
+        ): SiloAction<List<MutationData>> =
+            MutationsAction(
+                minProportion,
+                orderByFields,
+                limit,
+                offset,
+            )
 
         fun aminoAcidMutations(
             minProportion: Double? = null,
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<MutationData>> = AminoAcidMutationsAction(
-            minProportion,
-            orderByFields,
-            limit,
-            offset,
-        )
+        ): SiloAction<List<MutationData>> =
+            AminoAcidMutationsAction(
+                minProportion,
+                orderByFields,
+                limit,
+                offset,
+            )
 
         fun details(
             fields: List<String> = emptyList(),

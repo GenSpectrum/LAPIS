@@ -214,7 +214,10 @@ class SiloFilterExpressionMapper(
         }
     }
 
-    private fun mapToPangoLineageFilter(column: String, value: String) = when {
+    private fun mapToPangoLineageFilter(
+        column: String,
+        value: String,
+    ) = when {
         value.endsWith(".*") -> PangoLineageEquals(column, value.substringBeforeLast(".*"), includeSublineages = true)
         value.endsWith('*') -> PangoLineageEquals(column, value.substringBeforeLast('*'), includeSublineages = true)
         value.endsWith('.') -> throw BadRequestException(

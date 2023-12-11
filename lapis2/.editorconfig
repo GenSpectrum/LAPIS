@@ -6,9 +6,11 @@ insert_final_newline = true
 end_of_line = crlf
 
 [*.{kt,kts}]
-ktlint_code_style = official
-trailing-comma-on-call-site = true
-trailing-comma-on-declaration-site = true
+ktlint_code_style = ktlint_official
+ktlint_standard_trailing-comma-on-call-site = true
+ktlint_standard_trailing-comma-on-declaration-site = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
 ij_kotlin_allow_trailing_comma = true
 max_line_length = 120
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_string-template-indent = disabled

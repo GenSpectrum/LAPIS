@@ -30,11 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val isMultiSegmentSequenceExpression =
+const val IS_MULTI_SEGMENT_SEQUENCE_EXPRESSION =
     "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length > 1}"
 
 @RestController
-@ConditionalOnExpression(isMultiSegmentSequenceExpression)
+@ConditionalOnExpression(IS_MULTI_SEGMENT_SEQUENCE_EXPRESSION)
 class MultiSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,

@@ -33,7 +33,6 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
 
     private inner class CachedBodyServletInputStream(private val cachedInputStream: ByteArrayInputStream) :
         ServletInputStream() {
-
         override fun isFinished(): Boolean {
             return cachedInputStream.available() == 0
         }

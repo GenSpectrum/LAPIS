@@ -29,7 +29,10 @@ enum class Order {
 
 @JsonComponent
 class OrderByFieldDeserializer : JsonDeserializer<OrderByField>() {
-    override fun deserialize(jsonParser: JsonParser, ctxt: DeserializationContext): OrderByField {
+    override fun deserialize(
+        jsonParser: JsonParser,
+        ctxt: DeserializationContext,
+    ): OrderByField {
         return when (val value = jsonParser.readValueAsTree<JsonNode>()) {
             is TextNode -> OrderByField(value.asText(), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)

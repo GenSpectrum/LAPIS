@@ -43,178 +43,180 @@ class SequenceFiltersRequestWithFieldsTest {
 
     companion object {
         @JvmStatic
-        fun getTestSequenceFiltersRequestWithFields() = listOf(
-            Arguments.of(
-                """
+        fun getTestSequenceFiltersRequestWithFields() =
+            listOf(
+                Arguments.of(
+                    """
                 {
                     "country": "Switzerland",
                     "fields": ["division", "country"]
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    mapOf("country" to "Switzerland"),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf("division", "country"),
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to "Switzerland"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf("division", "country"),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "nucleotideMutations": ["T1-", "A23062T"],
                     "fields": ["division", "country"]
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf("division", "country"),
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf("division", "country"),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "aminoAcidMutations": ["S:501Y", "ORF1b:12"],
                     "fields": ["division", "country"]
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
-                    emptyList(),
-                    emptyList(),
-                    listOf("division", "country"),
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
+                        emptyList(),
+                        emptyList(),
+                        listOf("division", "country"),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"],
                     "fields": ["division", "country"]
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(
-                        NucleotideInsertion(501, "Y", "S"),
-                        NucleotideInsertion(12, "ABCD", null),
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            NucleotideInsertion(501, "Y", "S"),
+                            NucleotideInsertion(12, "ABCD", null),
+                        ),
+                        emptyList(),
+                        listOf("division", "country"),
                     ),
-                    emptyList(),
-                    listOf("division", "country"),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"],
                     "fields": ["division", "country"]
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(
-                        AminoAcidInsertion(501, "S", "Y"),
-                        AminoAcidInsertion(12, "ORF1", "ABCD"),
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            AminoAcidInsertion(501, "S", "Y"),
+                            AminoAcidInsertion(12, "ORF1", "ABCD"),
+                        ),
+                        listOf("division", "country"),
                     ),
-                    listOf("division", "country"),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "country": "Switzerland"
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    mapOf("country" to "Switzerland"),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to "Switzerland"),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                """
+                Arguments.of(
+                    """
                 {
                     "accessKey": "some access key"                
                 }
                 """,
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-            Arguments.of(
-                "{}",
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
+                Arguments.of(
+                    "{}",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
                 ),
-            ),
-        )
+            )
 
         @JvmStatic
-        fun getInvalidRequests() = listOf(
-            Arguments.of(
-                """
+        fun getInvalidRequests() =
+            listOf(
+                Arguments.of(
+                    """
                 {
                     "fields": "not an array"
                 }
                 """,
-                "fields must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "fields must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "nucleotideMutations": "not an array"
                 }
                 """,
-                "nucleotideMutations must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "nucleotideMutations must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "aminoAcidMutations": "not an array"
                 }
                 """,
-                "aminoAcidMutations must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "aminoAcidMutations must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "nucleotideInsertions": "not an array"
                 }
                 """,
-                "nucleotideInsertions must be an array or null",
-            ),
-            Arguments.of(
-                """
+                    "nucleotideInsertions must be an array or null",
+                ),
+                Arguments.of(
+                    """
                 {
                     "aminoAcidInsertions": "not an array"
                 }
                 """,
-                "aminoAcidInsertions must be an array or null",
-            ),
-        )
+                    "aminoAcidInsertions must be an array or null",
+                ),
+            )
     }
 }

@@ -28,14 +28,15 @@ class DataOpennessAuthorizationFilterFactory(
     private val objectMapper: ObjectMapper,
     private val accessKeysReader: AccessKeysReader,
 ) {
-    fun create() = when (databaseConfig.schema.opennessLevel) {
-        OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(objectMapper)
-        OpennessLevel.PROTECTED -> ProtectedDataAuthorizationFilter(
-            objectMapper,
-            accessKeysReader.read(),
-            databaseConfig.schema.metadata.filter { it.valuesAreUnique }.map { it.name },
-        )
-    }
+    fun create() =
+        when (databaseConfig.schema.opennessLevel) {
+            OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(objectMapper)
+            OpennessLevel.PROTECTED -> ProtectedDataAuthorizationFilter(
+                objectMapper,
+                accessKeysReader.read(),
+                databaseConfig.schema.metadata.filter { it.valuesAreUnique }.map { it.name },
+            )
+        }
 }
 
 abstract class DataOpennessAuthorizationFilter(protected val objectMapper: ObjectMapper) : OncePerRequestFilter() {
@@ -85,7 +86,6 @@ sealed interface AuthorizationResult {
 
 private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper) :
     DataOpennessAuthorizationFilter(objectMapper) {
-
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest) = AuthorizationResult.success()
 }
 
@@ -95,7 +95,6 @@ private class ProtectedDataAuthorizationFilter(
     private val fieldsThatServeNonAggregatedData: List<String>,
 ) :
     DataOpennessAuthorizationFilter(objectMapper) {
-
     companion object {
         private val WHITELISTED_PATHS = listOf("/swagger-ui", "/api-docs")
         private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf(

@@ -38,65 +38,67 @@ class NucleotideInsertionTest {
 
     companion object {
         @JvmStatic
-        fun getNucleotideInsertionWithValidSyntax() = listOf(
-            Arguments.of(
-                "\"ins_segment:123:ABCD\"",
-                NucleotideInsertion(123, "ABCD", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:A\"",
-                NucleotideInsertion(123, "A", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_123:ABCD\"",
-                NucleotideInsertion(123, "ABCD", null),
-            ),
-            Arguments.of(
-                "\"ins_123:AB?CD\"",
-                NucleotideInsertion(123, "AB.*CD", null),
-            ),
-            Arguments.of(
-                "\"ins_123:???\"",
-                NucleotideInsertion(123, ".*.*.*", null),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:?\"",
-                NucleotideInsertion(123, ".*", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:AB.*CD\"",
-                NucleotideInsertion(123, "AB.*CD", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:.*CD\"",
-                NucleotideInsertion(123, ".*CD", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:AB.*.*\"",
-                NucleotideInsertion(123, "AB.*.*", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:?CD\"",
-                NucleotideInsertion(123, ".*CD", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:AB??\"",
-                NucleotideInsertion(123, "AB.*.*", "segment"),
-            ),
-            Arguments.of(
-                "\"ins_segment:123:AB.*?CD\"",
-                NucleotideInsertion(123, "AB.*.*CD", "segment"),
-            ),
-        )
+        fun getNucleotideInsertionWithValidSyntax() =
+            listOf(
+                Arguments.of(
+                    "\"ins_segment:123:ABCD\"",
+                    NucleotideInsertion(123, "ABCD", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:A\"",
+                    NucleotideInsertion(123, "A", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_123:ABCD\"",
+                    NucleotideInsertion(123, "ABCD", null),
+                ),
+                Arguments.of(
+                    "\"ins_123:AB?CD\"",
+                    NucleotideInsertion(123, "AB.*CD", null),
+                ),
+                Arguments.of(
+                    "\"ins_123:???\"",
+                    NucleotideInsertion(123, ".*.*.*", null),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:?\"",
+                    NucleotideInsertion(123, ".*", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:AB.*CD\"",
+                    NucleotideInsertion(123, "AB.*CD", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:.*CD\"",
+                    NucleotideInsertion(123, ".*CD", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:AB.*.*\"",
+                    NucleotideInsertion(123, "AB.*.*", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:?CD\"",
+                    NucleotideInsertion(123, ".*CD", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:AB??\"",
+                    NucleotideInsertion(123, "AB.*.*", "segment"),
+                ),
+                Arguments.of(
+                    "\"ins_segment:123:AB.*?CD\"",
+                    NucleotideInsertion(123, "AB.*.*CD", "segment"),
+                ),
+            )
 
         @JvmStatic
-        fun getNucleotideInsertionWithWrongSyntax() = listOf(
-            Arguments.of("\"ins_::123:G\""),
-            Arguments.of("\"ins_:123:\""),
-            Arguments.of("\"ins_segment:123:\""),
-            Arguments.of("\"ins_segment:segment:123:ABC\""),
-            Arguments.of("\"ins_segmentWithDotWithoutStar:123:AB.C\""),
-            Arguments.of("\"ins_segment\$name&with/invalid)chars:123:A\""),
-        )
+        fun getNucleotideInsertionWithWrongSyntax() =
+            listOf(
+                Arguments.of("\"ins_::123:G\""),
+                Arguments.of("\"ins_:123:\""),
+                Arguments.of("\"ins_segment:123:\""),
+                Arguments.of("\"ins_segment:segment:123:ABC\""),
+                Arguments.of("\"ins_segmentWithDotWithoutStar:123:AB.C\""),
+                Arguments.of("\"ins_segment\$name&with/invalid)chars:123:A\""),
+            )
     }
 }
