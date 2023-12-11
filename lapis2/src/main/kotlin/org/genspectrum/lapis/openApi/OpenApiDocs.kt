@@ -187,24 +187,24 @@ fun buildOpenApiSchema(
                 .addSchemas(AMINO_ACID_INSERTIONS_SCHEMA, aminoAcidInsertions())
                 .addSchemas(
                     AGGREGATED_ORDER_BY_FIELDS_SCHEMA,
-                    aggregatedOrderByFieldsEnum(databaseConfig),
+                    arraySchema(aggregatedOrderByFieldsEnum(databaseConfig)),
                 )
                 .addSchemas(DETAILS_ORDER_BY_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
                     MUTATIONS_ORDER_BY_FIELDS_SCHEMA,
-                    mutationsOrderByFieldsEnum(),
+                    arraySchema(mutationsOrderByFieldsEnum()),
                 )
                 .addSchemas(
                     INSERTIONS_ORDER_BY_FIELDS_SCHEMA,
-                    insertionsOrderByFieldsEnum(),
+                    arraySchema(insertionsOrderByFieldsEnum()),
                 )
                 .addSchemas(
                     AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    aminoAcidSequenceFieldsEnum(referenceGenome, databaseConfig),
+                    arraySchema(aminoAcidSequenceFieldsEnum(referenceGenome, databaseConfig)),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    nucleotideSequenceFieldsEnum(referenceGenome, databaseConfig),
+                    arraySchema(nucleotideSequenceFieldsEnum(referenceGenome, databaseConfig)),
                 )
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
@@ -454,9 +454,7 @@ private fun formatSchema() = Schema<String>()
     ._default("json")
 
 private fun fieldsArray(databaseConfig: List<DatabaseMetadata>, additionalFields: List<String> = emptyList()) =
-    Schema<Any>()
-        .type("array")
-        .items(fieldsEnum(databaseConfig, additionalFields))
+    arraySchema(fieldsEnum(databaseConfig, additionalFields))
 
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
     fieldsEnum(databaseConfig.schema.metadata, listOf("count"))
@@ -477,3 +475,7 @@ private fun fieldsEnum(databaseConfig: List<DatabaseMetadata>, additionalFields:
     Schema<String>()
         .type("string")
         ._enum(databaseConfig.map { it.name } + additionalFields)
+
+private fun arraySchema(schema: Schema<Any>) = Schema<Any>()
+    .type("array")
+    .items(schema)
