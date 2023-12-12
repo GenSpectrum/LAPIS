@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { basePath, lapisClient, sequenceData } from './common';
 
-describe('The /aminoAcidSequence endpoint', () => {
+describe('The /alignedAminoAcidSequence endpoint', () => {
   it('should return amino acid sequences for Switzerland', async () => {
-    const result = await lapisClient.postAminoAcidSequence({
+    const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: { country: 'Switzerland' },
     });
@@ -17,7 +17,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should order ascending by specified fields', async () => {
-    const result = await lapisClient.postAminoAcidSequence({
+    const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }] },
     });
@@ -31,7 +31,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should order descending by specified fields', async () => {
-    const result = await lapisClient.postAminoAcidSequence({
+    const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'descending' }] },
     });
@@ -45,7 +45,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postAminoAcidSequence({
+    const resultWithLimit = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
         orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
@@ -61,7 +61,7 @@ describe('The /aminoAcidSequence endpoint', () => {
     expect(primaryKeysWithLimit[0]).to.equal('>EPI_ISL_1001493');
     expect(sequencesWithLimit[0]).to.have.length(1274);
 
-    const resultWithLimitAndOffset = await lapisClient.postAminoAcidSequence({
+    const resultWithLimitAndOffset = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
         orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
@@ -80,7 +80,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
-    const result = await lapisClient.postAminoAcidSequence({
+    const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
@@ -96,7 +96,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should correctly handle amino acid insertion requests', async () => {
-    const result = await lapisClient.postAminoAcidSequence({
+    const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
@@ -111,7 +111,7 @@ describe('The /aminoAcidSequence endpoint', () => {
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/aminoAcidSequences/S');
+    const result = await fetch(basePath + '/alignedAminoAcidSequences/S');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
