@@ -16,8 +16,8 @@ const val AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION =
         "than or equal to the specified minProportion. Only sequences matching the specified " +
         "sequence filters are considered."
 
-const val AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
-    "Returns a string of fasta formated amino acid sequences. Only sequences matching the specified " +
+const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
+    "Returns a string of fasta formated aligned amino acid sequences. Only sequences matching the specified " +
         "sequence filters are considered."
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     "The fields to stratify by. If empty, only the overall count is returned"

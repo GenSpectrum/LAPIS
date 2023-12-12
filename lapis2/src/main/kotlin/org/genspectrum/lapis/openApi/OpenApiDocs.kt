@@ -96,7 +96,7 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
-                    AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
+                    ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
                         getSequenceFilters(
                             databaseConfig,

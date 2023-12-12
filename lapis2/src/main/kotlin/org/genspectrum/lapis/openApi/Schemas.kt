@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.controller.AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
@@ -32,7 +32,7 @@ const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
-const val AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
+const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
 const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
@@ -132,9 +132,9 @@ annotation class LapisAminoAcidInsertionsResponse
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
-    description = AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
+    description = ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
 )
-annotation class LapisAminoAcidSequenceResponse
+annotation class LapisAlignedAminoAcidSequenceResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

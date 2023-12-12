@@ -367,7 +367,7 @@ class LapisControllerCommonFieldsTest(
                 Arguments.of(DETAILS_ROUTE),
                 Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
                 Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
-                Arguments.of("$AMINO_ACID_SEQUENCES_ROUTE/S"),
+                Arguments.of("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/S"),
             )
 
         @JvmStatic

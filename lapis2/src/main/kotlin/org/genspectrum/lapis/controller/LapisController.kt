@@ -10,7 +10,7 @@ import org.genspectrum.lapis.controller.Delimiter.TAB
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
-import org.genspectrum.lapis.openApi.AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.AggregatedOrderByFields
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
@@ -23,9 +23,9 @@ import org.genspectrum.lapis.openApi.FieldsToAggregateBy
 import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.InsertionsOrderByFields
 import org.genspectrum.lapis.openApi.LapisAggregatedResponse
+import org.genspectrum.lapis.openApi.LapisAlignedAminoAcidSequenceResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidMutationsResponse
-import org.genspectrum.lapis.openApi.LapisAminoAcidSequenceResponse
 import org.genspectrum.lapis.openApi.LapisDetailsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
@@ -67,7 +67,7 @@ const val AMINO_ACID_MUTATIONS_ROUTE = "/aminoAcidMutations"
 const val NUCLEOTIDE_INSERTIONS_ROUTE = "/nucleotideInsertions"
 const val AMINO_ACID_INSERTIONS_ROUTE = "/aminoAcidInsertions"
 const val ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/alignedNucleotideSequences"
-const val AMINO_ACID_SEQUENCES_ROUTE = "/aminoAcidSequences"
+const val ALIGNED_AMINO_ACID_SEQUENCES_ROUTE = "/alignedAminoAcidSequences"
 
 @RestController
 class LapisController(
@@ -1261,9 +1261,9 @@ class LapisController(
         return getResponseAsCsv(request, TAB, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @GetMapping("$AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
-    @LapisAminoAcidSequenceResponse
-    fun getAminoAcidSequence(
+    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
+    @LapisAlignedAminoAcidSequenceResponse
+    fun getAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true) gene: String,
         @PrimitiveFieldFilters
         @RequestParam
@@ -1306,11 +1306,11 @@ class LapisController(
         return siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
     }
 
-    @PostMapping("$AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
-    @LapisAminoAcidSequenceResponse
-    fun postAminoAcidSequence(
+    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
+    @LapisAlignedAminoAcidSequenceResponse
+    fun postAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true) gene: String,
-        @Parameter(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
     ): String {
