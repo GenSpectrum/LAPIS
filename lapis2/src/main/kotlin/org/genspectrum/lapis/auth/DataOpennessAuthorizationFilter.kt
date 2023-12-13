@@ -96,7 +96,7 @@ private class ProtectedDataAuthorizationFilter(
 ) :
     DataOpennessAuthorizationFilter(objectMapper) {
     companion object {
-        private val WHITELISTED_PATHS = listOf("/swagger-ui", "/api-docs")
+        private val WHITELISTED_PATH_PREFIXES = listOf("/swagger-ui", "/api-docs")
         private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf(
             AGGREGATED_ROUTE,
             NUCLEOTIDE_MUTATIONS_ROUTE,
@@ -107,26 +107,28 @@ private class ProtectedDataAuthorizationFilter(
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {
-        if (WHITELISTED_PATHS.any { request.requestURI.startsWith(it) }) {
+        val path = request.servletPath
+
+        if (path == "/" || WHITELISTED_PATH_PREFIXES.any { path.startsWith(it) }) {
             return AuthorizationResult.success()
         }
 
         val requestFields = request.getRequestFields()
 
         val accessKey = requestFields[ACCESS_KEY_PROPERTY]?.textValue()
-            ?: return AuthorizationResult.failure("An access key is required to access ${request.requestURI}.")
+            ?: return AuthorizationResult.failure("An access key is required to access ${path}.")
 
         if (accessKeys.fullAccessKey == accessKey) {
             return AuthorizationResult.success()
         }
 
-        val endpointServesAggregatedData = ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(request.requestURI) &&
+        val endpointServesAggregatedData = ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(path) &&
             fieldsThatServeNonAggregatedData.intersect(requestFields.keys).isEmpty()
 
         if (endpointServesAggregatedData && accessKeys.aggregatedDataAccessKey == accessKey) {
             return AuthorizationResult.success()
         }
 
-        return AuthorizationResult.failure("You are not authorized to access ${request.requestURI}.")
+        return AuthorizationResult.failure("You are not authorized to access ${path}.")
     }
 }
