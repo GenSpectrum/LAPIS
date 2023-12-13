@@ -107,7 +107,11 @@ private class ProtectedDataAuthorizationFilter(
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {
-        val path = request.servletPath
+        val isOperatedBehindAProxy = !request.contextPath.isNullOrBlank()
+        val path = when {
+            isOperatedBehindAProxy -> request.servletPath
+            else -> request.requestURI
+        }
 
         if (path == "/" || WHITELISTED_PATH_PREFIXES.any { path.startsWith(it) }) {
             return AuthorizationResult.success()
@@ -116,7 +120,7 @@ private class ProtectedDataAuthorizationFilter(
         val requestFields = request.getRequestFields()
 
         val accessKey = requestFields[ACCESS_KEY_PROPERTY]?.textValue()
-            ?: return AuthorizationResult.failure("An access key is required to access ${path}.")
+            ?: return AuthorizationResult.failure("An access key is required to access $path.")
 
         if (accessKeys.fullAccessKey == accessKey) {
             return AuthorizationResult.success()
@@ -129,6 +133,6 @@ private class ProtectedDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        return AuthorizationResult.failure("You are not authorized to access ${path}.")
+        return AuthorizationResult.failure("You are not authorized to access $path.")
     }
 }
