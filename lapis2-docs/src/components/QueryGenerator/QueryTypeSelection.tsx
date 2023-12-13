@@ -1,46 +1,15 @@
 import type { ReactNode } from 'react';
 import type { Config } from '../../config';
 import { CheckBoxesWrapper, ContainerWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
-
-type Selection =
-    | 'aggregatedAll'
-    | 'aggregatedStratified'
-    | 'mutations'
-    | 'insertions'
-    | 'details'
-    | 'nucleotideSequences'
-    | 'aminoAcidSequences';
-
-const sequenceTypes = ['nucleotide', 'aminoAcid'] as const;
-type SequenceType = (typeof sequenceTypes)[number];
-type DetailsType = 'all' | 'selected';
-const alignmentTypes = ['unaligned', 'aligned'] as const;
-type AlignmentType = (typeof alignmentTypes)[number];
-
-export type QueryTypeSelectionState = {
-    selection: Selection;
-    aggregatedAll: {};
-    aggregatedStratified: {
-        fields: Set<string>;
-    };
-    mutations: {
-        type: SequenceType;
-        minProportion: string;
-    };
-    insertions: {
-        type: SequenceType;
-    };
-    details: {
-        type: DetailsType;
-        fields: Set<string>;
-    };
-    nucleotideSequences: {
-        type: AlignmentType;
-    };
-    aminoAcidSequences: {
-        gene: string;
-    };
-};
+import {
+    type AlignmentType,
+    alignmentTypes,
+    type DetailsType,
+    type QueryTypeSelectionState,
+    type Selection,
+    type SequenceType,
+    sequenceTypes,
+} from './QueryTypeSelectionState.ts';
 
 type Props = {
     config: Config;
