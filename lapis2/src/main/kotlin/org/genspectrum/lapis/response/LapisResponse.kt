@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.response
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.CsvRecord
 
@@ -24,6 +25,7 @@ data class NucleotideMutationResponse(
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
 
+    @JsonIgnore
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -45,6 +47,7 @@ data class AminoAcidMutationResponse(
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
 
+    @JsonIgnore
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -64,6 +67,7 @@ data class NucleotideInsertionResponse(
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
 
+    @JsonIgnore
     override fun getHeader() = arrayOf("insertion", "count")
 }
 
@@ -82,5 +86,6 @@ data class AminoAcidInsertionResponse(
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
 
+    @JsonIgnore
     override fun getHeader() = arrayOf("insertion", "count")
 }

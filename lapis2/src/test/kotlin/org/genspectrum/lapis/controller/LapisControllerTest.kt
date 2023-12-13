@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
@@ -16,6 +17,9 @@ import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.silo.DataVersion
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -236,6 +240,23 @@ class LapisControllerTest(
             )
     }
 
+    @ParameterizedTest(name = "GET {0} only returns mutation, proportion and count")
+    @MethodSource("getMutationEndpoints")
+    fun `GET mutations only returns mutation, proportion and count`(endpoint: String) {
+        setupMutationMock(endpoint, null)
+
+        val mvcResult = mockMvc.perform(get("$endpoint?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val response = ObjectMapper().readValue(mvcResult.response.contentAsString, Map::class.java)
+        val data = response["data"] as List<*>
+        val firstDataObject = data[0] as Map<*, *>
+
+        assertThat(firstDataObject.keys, hasSize(3))
+        assertThat(firstDataObject.keys, containsInAnyOrder("mutation", "proportion", "count"))
+    }
+
     private fun setupMutationMock(
         endpoint: String,
         minProportion: Double?,
@@ -292,6 +313,23 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].count").value(42))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
             .andExpect(jsonPath("\$.info.dataVersion").value(1234))
+    }
+
+    @ParameterizedTest(name = "GET {0} only returns mutation, proportion and count")
+    @MethodSource("getInsertionEndpoints")
+    fun `GET insertions only returns insertion and count`(endpoint: String) {
+        setupInsertionMock(endpoint)
+
+        val mvcResult = mockMvc.perform(get("$endpoint?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val response = ObjectMapper().readValue(mvcResult.response.contentAsString, Map::class.java)
+        val data = response["data"] as List<*>
+        val firstDataObject = data[0] as Map<*, *>
+
+        assertThat(firstDataObject.keys, hasSize(2))
+        assertThat(firstDataObject.keys, containsInAnyOrder("insertion", "count"))
     }
 
     private fun setupInsertionMock(endpoint: String) {
