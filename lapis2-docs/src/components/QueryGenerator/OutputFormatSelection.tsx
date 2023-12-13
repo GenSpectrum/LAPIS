@@ -1,5 +1,5 @@
-import type { QueryTypeSelectionState } from './QueryTypeSelection';
 import { CheckBoxesWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
+import type { QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
 
 const availableFormats = ['json', 'tsv', 'csv'] as const;
 export type TabularOutputFormat = (typeof availableFormats)[number];

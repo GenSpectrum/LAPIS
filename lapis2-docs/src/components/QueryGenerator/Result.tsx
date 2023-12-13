@@ -1,18 +1,20 @@
-import type { QueryTypeSelectionState } from './QueryTypeSelection';
 import type { Filters } from './FiltersSelection';
 import type { TabularOutputFormat } from './OutputFormatSelection';
+import { OutputFormatSelection } from './OutputFormatSelection';
 import { CodeBlock } from '../CodeBlock';
 import { Tab, TabsBox } from '../TabsBox/react/TabsBox';
 import { generateNonFastaQuery } from '../../utils/code-generators/python/generator';
-import type { Config, MetadataType } from '../../config';
-import { OutputFormatSelection } from './OutputFormatSelection';
+import type { Config } from '../../config';
 import { useState } from 'react';
-import type { ResultField, ResultFieldType } from '../../utils/code-generators/types';
+import type { ResultField } from '../../utils/code-generators/types';
 import { ContainerWrapper, LabelWrapper } from './styled-components';
+import { getResultFields, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
+import type { OrderByLimitOffset } from './OrderLimitOffsetSelection.tsx';
 
 type Props = {
     queryType: QueryTypeSelectionState;
     filters: Filters;
+    orderByLimitOffset: OrderByLimitOffset;
     config: Config;
     lapisUrl: string;
 };
@@ -38,7 +40,9 @@ function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFo
     const params = new URLSearchParams();
     for (let [name, value] of Object.entries(body)) {
         if (Array.isArray(value)) {
-            params.set(name, value.join(','));
+            for (let valueElement of value) {
+                params.append(name, valueElement);
+            }
         } else {
             params.set(name, value);
         }
@@ -57,7 +61,7 @@ function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFo
 const QueryUrlTab = (props: Props) => {
     const [tabularOutputFormat, setTabularOutputFormat] = useState<TabularOutputFormat>('json');
 
-    // TODO Prepend the URL to the instance
+    // TODO(#522) Prepend the URL to the instance
     const queryUrl = constructGetQueryUrl(props, tabularOutputFormat);
 
     return (
@@ -100,55 +104,43 @@ const PythonTab = (props: Props) => {
     return <CodeBlock>{code}</CodeBlock>;
 };
 
-function constructPostQuery({ queryType, filters, config, lapisUrl }: Props): {
+function constructPostQuery({ queryType, filters, config, lapisUrl, orderByLimitOffset }: Props): {
     lapisUrl: string;
     endpoint: string;
     body: object;
     resultFields: ResultField[];
 } {
-    let endpoint = '/';
+    let endpoint = '/sample/';
     const body: any = {};
-    const resultFields: ResultField[] = [];
+    const resultFields = getResultFields(queryType, config);
 
     switch (queryType.selection) {
         case 'aggregatedAll':
             endpoint += 'aggregated';
-            resultFields.push({ name: 'count', type: 'integer', nullable: false });
             break;
         case 'aggregatedStratified':
             endpoint += 'aggregated';
-            resultFields.push({ name: 'count', type: 'integer', nullable: false });
             const aggregatedFields = queryType.aggregatedStratified.fields;
             if (aggregatedFields.size > 0) {
                 body.fields = [...aggregatedFields];
-                resultFields.push(...fieldNamesToResultFields(aggregatedFields, config));
             }
             break;
         case 'mutations':
             endpoint += queryType.mutations.type === 'nucleotide' ? 'nuc-mutations' : 'aa-mutations';
             body.minProportion = queryType.mutations.minProportion;
-            resultFields.push(
-                { name: 'mutation', type: 'string', nullable: false },
-                { name: 'proportion', type: 'float', nullable: false },
-                { name: 'count', type: 'integer', nullable: false },
-            );
             break;
         case 'insertions':
             endpoint += queryType.insertions.type === 'nucleotide' ? 'nuc-insertions' : 'aa-insertions';
-            resultFields.push(
-                { name: 'insertion', type: 'string', nullable: false },
-                { name: 'count', type: 'integer', nullable: false },
-            );
             break;
         case 'details':
             endpoint += 'details';
             const detailsFields = queryType.details.fields;
             if (detailsFields.size > 0) {
                 body.fields = [...detailsFields];
-                resultFields.push(...fieldNamesToResultFields(detailsFields, config));
             }
             break;
         case 'nucleotideSequences':
+            // TODO(#521): multi segment case
             endpoint += queryType.nucleotideSequences.type === 'unaligned' ? 'nuc-sequences' : 'nuc-sequences-aligned';
             break;
         case 'aminoAcidSequences':
@@ -160,23 +152,14 @@ function constructPostQuery({ queryType, filters, config, lapisUrl }: Props): {
             body[name] = value;
         }
     }
-    return { lapisUrl, endpoint, body, resultFields };
-}
-
-function mapMetadataTypeToResultFieldType(type: MetadataType): ResultFieldType {
-    switch (type) {
-        case 'pango_lineage':
-        case 'date':
-        case 'string':
-            return 'string';
+    if (orderByLimitOffset.orderBy.length > 0) {
+        body.orderBy = orderByLimitOffset.orderBy;
     }
-}
-
-function fieldNamesToResultFields(fields: Set<string>, config: Config): ResultField[] {
-    const metadataMap = new Map(config.schema.metadata.map((m) => [m.name, m.type]));
-    return [...fields].map((field) => ({
-        name: field,
-        type: mapMetadataTypeToResultFieldType(metadataMap.get(field)!),
-        nullable: true,
-    }));
+    if (orderByLimitOffset.limit !== undefined) {
+        body.limit = orderByLimitOffset.limit;
+    }
+    if (orderByLimitOffset.offset !== undefined) {
+        body.offset = orderByLimitOffset.offset;
+    }
+    return { lapisUrl, endpoint, body, resultFields };
 }

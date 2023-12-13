@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 // This code is largely based/copied from
 // https://github.com/withastro/starlight/tree/6c387705f1019466ad177355d78eb25f58d928ec/packages/starlight/user-components
 import { select } from 'hast-util-select';

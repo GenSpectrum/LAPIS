@@ -9,7 +9,8 @@
         "preview": "astro preview",
         "astro": "astro",
         "check-format": "prettier --check \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
-        "format": "prettier --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\""
+        "format": "prettier --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
+        "check-types": "tsc --noEmit && CONFIG_FILE=../siloLapisTests/testData/testDatabaseConfig.yaml astro check"
     },
     "dependencies": {
         "@astrojs/react": "^3.0.7",
@@ -29,8 +30,10 @@
         "yaml": "^2.3.4"
     },
     "devDependencies": {
-        "@types/swagger-ui": "^3.52.3",
+        "@astrojs/check": "^0.3.2",
+        "@types/swagger-ui": "^3.52.4",
         "prettier": "^3.0.0",
-        "prettier-plugin-astro": "^0.12.1"
+        "prettier-plugin-astro": "^0.12.1",
+        "typescript": "^5.3.3"
     }
 }
