@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
@@ -7,14 +8,15 @@ import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
+import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
+import org.genspectrum.lapis.silo.StringEquals
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class VariantQueryFacadeTest {
     private lateinit var underTest: VariantQueryFacade
@@ -74,7 +76,7 @@ class VariantQueryFacadeTest {
                             ),
                         ),
                     ),
-                    PangoLineageEquals("pango_lineage", "A.1.2.3", true),
+                    PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
                 ),
             )
 
@@ -196,7 +198,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", false)
+        val expectedResult = PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", false)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -207,7 +209,18 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals("pango_lineage", "A.1.2.3", true)
+        val expectedResult = PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `given a variantQuery with a 'NextcladePangolineage' expression then map should return the corresponding SiloQuery`() {
+        val variantQuery = "nextcladePangoLineage:A.1.2.3*"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -248,19 +261,25 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Insertion' expression then map should throw an error`() {
+    fun `given a variantQuery with a 'Insertion' expression then returns SILO query`() {
         val variantQuery = "ins_1234:GAG"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        assertThat(
-            exception.message,
-            equalTo("Nucleotide insertions are not supported yet."),
-        )
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG")))
     }
 
     @Test
-    fun `given amino acidAA mutation expression then should map to AminoAcidSymbolEquals`() {
+    fun `given a variantQuery with a 'Insertion' with wildcard expression then returns SILO query`() {
+        val variantQuery = "ins_1234:G?A?G"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "G.*A.*G")))
+    }
+
+    @Test
+    fun `given amino acid mutation expression then should map to AminoAcidSymbolEquals`() {
         val variantQuery = "S:N501Y"
 
         val result = underTest.map(variantQuery)
@@ -296,50 +315,56 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' expression then map should throw an error`() {
+    fun `given a valid variantQuery with a 'AA insertion' expression then returns SILO query`() {
         val variantQuery = "ins_S:501:EPE"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        assertThat(
-            exception.message,
-            equalTo("Amino acid insertions are not supported yet."),
-        )
+        assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "S")))
     }
 
     @Test
-    fun `given a valid variantQuery with a 'nextclade pango lineage' expression then map should throw an error`() {
-        val variantQuery = "nextcladePangoLineage:BA.5*"
+    fun `given a valid variantQuery with a 'AA insertion' with wildcard then returns SILO query`() {
+        val variantQuery = "ins_S:501:E?E?"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        assertThat(
-            exception.message,
-            equalTo("Nextclade pango lineages are not supported yet."),
-        )
+        assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*E.*", "S")))
     }
 
     @Test
-    fun `given a valid variantQuery with a 'Nextstrain clade lineage' expression then map should throw an error`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression then returns SILO query`() {
         val variantQuery = "nextstrainClade:22B"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        assertThat(
-            exception.message,
-            equalTo("Nextstrain clade lineages are not supported yet."),
-        )
+        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "22B")))
     }
 
     @Test
-    fun `given a valid variantQuery with a 'Gisaid clade lineage' expression then map should throw an error`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression then returns SILO query`() {
+        val variantQuery = "nextstrainClade:RECOMBINANT"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "recombinant")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression then returns SILO query`() {
+        val variantQuery = "gisaid:X"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "X")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with a 'GisaidCladeLineage' expression then returns SILO query`() {
         val variantQuery = "gisaid:AB"
 
-        val exception = assertThrows<SiloNotImplementedError> { underTest.map(variantQuery) }
+        val result = underTest.map(variantQuery)
 
-        assertThat(
-            exception.message,
-            equalTo("Gisaid clade lineages are not supported yet."),
-        )
+        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "AB")))
     }
 }
