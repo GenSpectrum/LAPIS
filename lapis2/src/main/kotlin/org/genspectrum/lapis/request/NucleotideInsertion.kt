@@ -8,6 +8,9 @@ import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
+const val LAPIS_INSERTION_AMBIGUITY_SYMBOL = "?"
+const val SILO_INSERTION_AMBIGUITY_SYMBOL = ".*"
+
 data class NucleotideInsertion(val position: Int, val insertions: String, val segment: String?) {
     companion object {
         fun fromString(nucleotideInsertion: String): NucleotideInsertion {
@@ -21,7 +24,10 @@ data class NucleotideInsertion(val position: Int, val insertions: String, val se
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find position",
                 )
 
-            val insertions = matchGroups["insertions"]?.value?.replace("?", ".*")
+            val insertions = matchGroups["insertions"]?.value?.replace(
+                LAPIS_INSERTION_AMBIGUITY_SYMBOL,
+                SILO_INSERTION_AMBIGUITY_SYMBOL,
+            )
                 ?: throw BadRequestException(
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find insertions",
                 )

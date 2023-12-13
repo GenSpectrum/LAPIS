@@ -1,4 +1,4 @@
-gisaid_epi_isl	pango_lineage	date	region	country	division	unsorted_date	age	qc_value	insertions	aaInsertions
+gisaid_epi_isl	pangoLineage	date	region	country	division	unsorted_date	age	qc_value	insertions	aaInsertions
 EPI_ISL_1408408	B.1.1.7	2021-03-18	Europe	Switzerland	Basel-Land		4	0.98		S:214:EPE
 EPI_ISL_1749899	B.1.1.7	2021-04-13	Europe	Switzerland	Bern	2020-03-08	5	0.97		
 EPI_ISL_2016901	B.1.1.7	2021-04-25	Europe	Switzerland	Aargau	2021-01-29	6	0.96		

@@ -26,7 +26,10 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
 
-            val insertions = matchGroups["insertions"]?.value?.replace("?", ".*")
+            val insertions = matchGroups["insertions"]?.value?.replace(
+                LAPIS_INSERTION_AMBIGUITY_SYMBOL,
+                SILO_INSERTION_AMBIGUITY_SYMBOL,
+            )
                 ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find insertions",
                 )

@@ -8,7 +8,7 @@ describe('The /details endpoint', () => {
     const result = await lapisClient.postDetails1({
       detailsPostRequest: {
         pangoLineage: 'B.1.617.2',
-        fields: ['pango_lineage', 'division'],
+        fields: ['pangoLineage', 'division'],
       },
     });
 
@@ -98,7 +98,7 @@ describe('The /details endpoint', () => {
 
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'gisaid_epi_isl,pango_lineage,division',
+      fields: 'gisaid_epi_isl,pangoLineage,division',
       orderBy: 'gisaid_epi_isl',
       limit: '3',
       dataFormat: 'csv',
@@ -108,7 +108,7 @@ describe('The /details endpoint', () => {
 
     expect(await result.text()).to.be.equal(
       String.raw`
-division,gisaid_epi_isl,pango_lineage
+division,gisaid_epi_isl,pangoLineage
 Vaud,EPI_ISL_1001493,B.1.177.44
 Bern,EPI_ISL_1001920,B.1.177
 Solothurn,EPI_ISL_1002052,B.1
@@ -118,7 +118,7 @@ Solothurn,EPI_ISL_1002052,B.1
 
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'gisaid_epi_isl,pango_lineage,division',
+      fields: 'gisaid_epi_isl,pangoLineage,division',
       orderBy: 'gisaid_epi_isl',
       limit: '3',
       dataFormat: 'tsv',
@@ -128,7 +128,7 @@ Solothurn,EPI_ISL_1002052,B.1
 
     expect(await result.text()).to.be.equal(
       String.raw`
-division	gisaid_epi_isl	pango_lineage
+division	gisaid_epi_isl	pangoLineage
 Vaud	EPI_ISL_1001493	B.1.177.44
 Bern	EPI_ISL_1001920	B.1.177
 Solothurn	EPI_ISL_1002052	B.1
