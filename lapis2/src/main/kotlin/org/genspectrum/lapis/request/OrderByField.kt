@@ -28,13 +28,14 @@ enum class Order {
 }
 
 @JsonComponent
-class OrderByFieldDeserializer : JsonDeserializer<OrderByField>() {
+class OrderByFieldDeserializer(private val orderByFieldsCleaner: OrderByFieldsCleaner) :
+    JsonDeserializer<OrderByField>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): OrderByField {
         return when (val value = jsonParser.readValueAsTree<JsonNode>()) {
-            is TextNode -> OrderByField(value.asText(), Order.ASCENDING)
+            is TextNode -> OrderByField(orderByFieldsCleaner.clean(value.asText()), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
             else -> throw BadRequestException("orderByField must be a string or an object")
         }
@@ -52,11 +53,16 @@ class OrderByFieldDeserializer : JsonDeserializer<OrderByField>() {
             else -> throw BadRequestException("orderByField type must be \"ascending\" or \"descending\"")
         }
 
-        return OrderByField(fieldNode.asText(), ascending)
+        return OrderByField(orderByFieldsCleaner.clean(fieldNode.asText()), ascending)
     }
 }
 
 @Component
-class OrderByFieldConverter : Converter<String, OrderByField> {
-    override fun convert(source: String) = OrderByField(source, Order.ASCENDING)
+class OrderByFieldConverter(private val orderByFieldsCleaner: OrderByFieldsCleaner) : Converter<String, OrderByField> {
+    override fun convert(source: String) = OrderByField(orderByFieldsCleaner.clean(source), Order.ASCENDING)
+}
+
+@Component
+class OrderByFieldsCleaner(private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner) {
+    fun clean(fieldName: String): String = caseInsensitiveFieldsCleaner.clean(fieldName) ?: fieldName
 }

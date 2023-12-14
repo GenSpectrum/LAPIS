@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.SequenceFilterFieldType
-import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -36,35 +36,19 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
-class SiloFilterExpressionMapperTest {
-    private val sequenceFilterFields = SequenceFilterFields(
-        mapOf(
-            "date" to SequenceFilterFieldType.Date,
-            "dateTo" to SequenceFilterFieldType.DateTo("date"),
-            "dateFrom" to SequenceFilterFieldType.DateFrom("date"),
-            "pangoLineage" to SequenceFilterFieldType.PangoLineage,
-            "some_metadata" to SequenceFilterFieldType.String,
-            "other_metadata" to SequenceFilterFieldType.String,
-            "variantQuery" to SequenceFilterFieldType.VariantQuery,
-            "intField" to SequenceFilterFieldType.Int,
-            "intFieldTo" to SequenceFilterFieldType.IntTo("intField"),
-            "intFieldFrom" to SequenceFilterFieldType.IntFrom("intField"),
-            "floatField" to SequenceFilterFieldType.Float,
-            "floatFieldTo" to SequenceFilterFieldType.FloatTo("floatField"),
-            "floatFieldFrom" to SequenceFilterFieldType.FloatFrom("floatField"),
-        ),
-    )
+private const val SOME_VALUE = "some value"
 
+class SiloFilterExpressionMapperTest {
     private lateinit var underTest: SiloFilterExpressionMapper
 
     @BeforeEach
     fun setup() {
-        underTest = SiloFilterExpressionMapper(sequenceFilterFields, VariantQueryFacade())
+        underTest = SiloFilterExpressionMapper(dummySequenceFilterFields, VariantQueryFacade())
     }
 
     @Test
     fun `given invalid filter key then throws exception`() {
-        val filterParameter = getSequenceFilters(mapOf("invalid query key" to "some value"))
+        val filterParameter = getSequenceFilters(mapOf("invalid query key" to SOME_VALUE))
 
         val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
 
@@ -72,6 +56,28 @@ class SiloFilterExpressionMapperTest {
             exception.message,
             containsString("'invalid query key' is not a valid sequence filter key. Valid keys are:"),
         )
+    }
+
+    @Test
+    fun `GIVEN all uppercase key THEN is mapped to corresponding field`() {
+        val filterParameter = getSequenceFilters(mapOf("PANGOLINEAGE" to SOME_VALUE))
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `GIVEN all lowercase key THEN is mapped to corresponding field`() {
+        val filterParameter = getSequenceFilters(mapOf("pangolineage" to SOME_VALUE))
+
+        val result = underTest.map(filterParameter)
+
+        val expected =
+            And(listOf(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+        assertThat(result, equalTo(expected))
     }
 
     @Test

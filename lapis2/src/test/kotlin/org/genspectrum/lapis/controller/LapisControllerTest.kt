@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFiltersRequest
@@ -102,21 +103,21 @@ class LapisControllerTest(
             siloQueryModelMock.getAggregated(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
-                    listOf("country", "age"),
+                    listOf("country", "date"),
                 ),
             )
         } returns listOf(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+                mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date")),
             ),
         )
 
-        mockMvc.perform(getSample("$AGGREGATED_ROUTE?country=Switzerland&fields=country,age"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?country=Switzerland&fields=country,date"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
-            .andExpect(jsonPath("\$.data[0].age").value(42))
+            .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
     @Test
@@ -145,25 +146,25 @@ class LapisControllerTest(
             siloQueryModelMock.getAggregated(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
-                    listOf("country", "age"),
+                    listOf("country", "date"),
                 ),
             )
         } returns listOf(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+                mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date")),
             ),
         )
 
         val request = postSample(AGGREGATED_ROUTE)
-            .content("""{"country": "Switzerland", "fields": ["country","age"]}""")
+            .content("""{"country": "Switzerland", "fields": ["country","date"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
-            .andExpect(jsonPath("\$.data[0].age").value(42))
+            .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
     @ParameterizedTest(name = "GET {0} without explicit minProportion")
@@ -389,15 +390,15 @@ class LapisControllerTest(
             siloQueryModelMock.getDetails(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
-                    listOf("country", "age"),
+                    listOf("country", "date"),
                 ),
             )
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
 
-        mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=age"))
+        mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=date"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
-            .andExpect(jsonPath("\$.data[0].age").value(42))
+            .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
     @Test
@@ -424,19 +425,19 @@ class LapisControllerTest(
             siloQueryModelMock.getDetails(
                 sequenceFiltersRequestWithFields(
                     mapOf("country" to "Switzerland"),
-                    listOf("country", "age"),
+                    listOf("country", "date"),
                 ),
             )
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
+        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
 
         val request = postSample(DETAILS_ROUTE)
-            .content("""{"country": "Switzerland", "fields": ["country", "age"]}""")
+            .content("""{"country": "Switzerland", "fields": ["country", "date"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
-            .andExpect(jsonPath("\$.data[0].age").value(42))
+            .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
     private fun sequenceFiltersRequestWithFields(
@@ -448,7 +449,7 @@ class LapisControllerTest(
         emptyList(),
         emptyList(),
         emptyList(),
-        fields,
+        fields.map { Field(it) },
         emptyList(),
     )
 

@@ -1,6 +1,9 @@
 package org.genspectrum.lapis.config
 
+import java.util.Locale
+
 typealias SequenceFilterFieldName = String
+typealias LowercaseName = String
 
 const val SARS_COV2_VARIANT_QUERY_FEATURE = "sarsCoV2VariantQuery"
 
@@ -8,16 +11,15 @@ val FEATURES_FOR_SEQUENCE_FILTERS = listOf(
     SARS_COV2_VARIANT_QUERY_FEATURE,
 )
 
-data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, SequenceFilterFieldType>) {
+data class SequenceFilterFields(val fields: Map<LowercaseName, SequenceFilterField>) {
     companion object {
         fun fromDatabaseConfig(databaseConfig: DatabaseConfig): SequenceFilterFields {
             val metadataFields = databaseConfig.schema.metadata
-                .map(::mapToSequenceFilterFields)
-                .flatten()
-                .toMap()
+                .flatMap(::mapToSequenceFilterField)
+                .associateBy { it.name.lowercase(Locale.US) }
 
             val featuresFields = if (databaseConfig.schema.features.isEmpty()) {
-                emptyMap<SequenceFilterFieldName, SequenceFilterFieldType>()
+                emptyMap()
             } else {
                 databaseConfig.schema.features
                     .filter { it.name in FEATURES_FOR_SEQUENCE_FILTERS }
@@ -29,35 +31,76 @@ data class SequenceFilterFields(val fields: Map<SequenceFilterFieldName, Sequenc
     }
 }
 
-private fun mapToSequenceFilterFields(databaseMetadata: DatabaseMetadata) =
+data class SequenceFilterField(
+    val name: SequenceFilterFieldName,
+    val type: SequenceFilterFieldType,
+)
+
+private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
     when (databaseMetadata.type) {
-        MetadataType.STRING -> listOf(databaseMetadata.name to SequenceFilterFieldType.String)
-        MetadataType.PANGO_LINEAGE -> listOf(databaseMetadata.name to SequenceFilterFieldType.PangoLineage)
+        MetadataType.STRING -> listOf(
+            SequenceFilterField(
+                name = databaseMetadata.name,
+                type = SequenceFilterFieldType.String,
+            ),
+        )
+
+        MetadataType.PANGO_LINEAGE -> listOf(
+            SequenceFilterField(
+                name = databaseMetadata.name,
+                type = SequenceFilterFieldType.PangoLineage,
+            ),
+        )
+
         MetadataType.DATE -> listOf(
-            databaseMetadata.name to SequenceFilterFieldType.Date,
-            "${databaseMetadata.name}From" to SequenceFilterFieldType.DateFrom(databaseMetadata.name),
-            "${databaseMetadata.name}To" to SequenceFilterFieldType.DateTo(databaseMetadata.name),
+            SequenceFilterField(name = databaseMetadata.name, type = SequenceFilterFieldType.Date),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}From",
+                type = SequenceFilterFieldType.DateFrom(databaseMetadata.name),
+            ),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}To",
+                type = SequenceFilterFieldType.DateTo(databaseMetadata.name),
+            ),
         )
 
         MetadataType.INT -> listOf(
-            databaseMetadata.name to SequenceFilterFieldType.Int,
-            "${databaseMetadata.name}From" to SequenceFilterFieldType.IntFrom(databaseMetadata.name),
-            "${databaseMetadata.name}To" to SequenceFilterFieldType.IntTo(databaseMetadata.name),
+            SequenceFilterField(name = databaseMetadata.name, type = SequenceFilterFieldType.Int),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}From",
+                type = SequenceFilterFieldType.IntFrom(databaseMetadata.name),
+            ),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}To",
+                type = SequenceFilterFieldType.IntTo(databaseMetadata.name),
+            ),
         )
 
         MetadataType.FLOAT -> listOf(
-            databaseMetadata.name to SequenceFilterFieldType.Float,
-            "${databaseMetadata.name}From" to SequenceFilterFieldType.FloatFrom(databaseMetadata.name),
-            "${databaseMetadata.name}To" to SequenceFilterFieldType.FloatTo(databaseMetadata.name),
+            SequenceFilterField(name = databaseMetadata.name, type = SequenceFilterFieldType.Float),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}From",
+                type = SequenceFilterFieldType.FloatFrom(databaseMetadata.name),
+            ),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}To",
+                type = SequenceFilterFieldType.FloatTo(databaseMetadata.name),
+            ),
         )
 
         MetadataType.NUCLEOTIDE_INSERTION -> emptyList()
         MetadataType.AMINO_ACID_INSERTION -> emptyList()
     }
 
+private const val VARIANT_QUERY_FIELD = "variantQuery"
+
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) =
     when (databaseFeature.name) {
-        SARS_COV2_VARIANT_QUERY_FEATURE -> "variantQuery" to SequenceFilterFieldType.VariantQuery
+        SARS_COV2_VARIANT_QUERY_FEATURE -> VARIANT_QUERY_FIELD.lowercase(Locale.US) to SequenceFilterField(
+            name = VARIANT_QUERY_FIELD,
+            type = SequenceFilterFieldType.VariantQuery,
+        )
+
         else -> throw IllegalArgumentException(
             "Unknown feature '${databaseFeature.name}'",
         )

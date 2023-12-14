@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.SequenceFilterField
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.BadRequestException
@@ -27,6 +28,7 @@ import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
+import java.util.Locale
 
 data class SequenceFilterValue(val type: SequenceFilterFieldType, val value: String, val originalKey: String)
 
@@ -45,8 +47,8 @@ class SiloFilterExpressionMapper(
         val allowedSequenceFiltersWithType = sequenceFilters
             .sequenceFilters
             .map { (key, value) ->
-                val nullableType = allowedSequenceFilterFields.fields[key]
-                val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableType, key)
+                val nullableField = allowedSequenceFilterFields.fields[key.lowercase(Locale.US)]
+                val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableField, key)
                 filterExpressionId to SequenceFilterValue(type, value, key)
             }
             .groupBy({ it.first }, { it.second })
@@ -87,26 +89,27 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToFilterExpressionIdentifier(
-        type: SequenceFilterFieldType?,
+        field: SequenceFilterField?,
         key: SequenceFilterFieldName,
     ): Pair<Pair<SequenceFilterFieldName, Filter>, SequenceFilterFieldType> {
+        val type = field?.type
         val filterExpressionId = when (type) {
             is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, Filter.DateBetween)
             is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, Filter.DateBetween)
-            SequenceFilterFieldType.Date -> Pair(key, Filter.DateBetween)
-            SequenceFilterFieldType.PangoLineage -> Pair(key, Filter.PangoLineage)
-            SequenceFilterFieldType.String -> Pair(key, Filter.StringEquals)
-            SequenceFilterFieldType.VariantQuery -> Pair(key, Filter.VariantQuery)
-            SequenceFilterFieldType.Int -> Pair(key, Filter.IntEquals)
+            SequenceFilterFieldType.Date -> Pair(field.name, Filter.DateBetween)
+            SequenceFilterFieldType.PangoLineage -> Pair(field.name, Filter.PangoLineage)
+            SequenceFilterFieldType.String -> Pair(field.name, Filter.StringEquals)
+            SequenceFilterFieldType.VariantQuery -> Pair(field.name, Filter.VariantQuery)
+            SequenceFilterFieldType.Int -> Pair(field.name, Filter.IntEquals)
             is SequenceFilterFieldType.IntFrom -> Pair(type.associatedField, Filter.IntBetween)
             is SequenceFilterFieldType.IntTo -> Pair(type.associatedField, Filter.IntBetween)
-            SequenceFilterFieldType.Float -> Pair(key, Filter.FloatEquals)
+            SequenceFilterFieldType.Float -> Pair(field.name, Filter.FloatEquals)
             is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
-                    allowedSequenceFilterFields.fields.keys.joinToString(),
+                    allowedSequenceFilterFields.fields.values.joinToString { it.name },
             )
         }
         return Pair(filterExpressionId, type)

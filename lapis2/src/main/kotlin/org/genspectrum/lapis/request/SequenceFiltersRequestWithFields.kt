@@ -15,14 +15,15 @@ data class SequenceFiltersRequestWithFields(
     override val aaMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val fields: List<String>,
+    val fields: List<Field>,
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
 ) : CommonSequenceFilters
 
 @JsonComponent
-class SequenceFiltersRequestWithFieldsDeserializer : JsonDeserializer<SequenceFiltersRequestWithFields>() {
+class SequenceFiltersRequestWithFieldsDeserializer(private val fieldConverter: FieldConverter) :
+    JsonDeserializer<SequenceFiltersRequestWithFields>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
@@ -32,7 +33,7 @@ class SequenceFiltersRequestWithFieldsDeserializer : JsonDeserializer<SequenceFi
 
         val fields = when (val fields = node.get(FIELDS_PROPERTY)) {
             null -> emptyList()
-            is ArrayNode -> fields.asSequence().map { it.asText() }.toList()
+            is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
             else -> throw BadRequestException(
                 "fields must be an array or null",
             )

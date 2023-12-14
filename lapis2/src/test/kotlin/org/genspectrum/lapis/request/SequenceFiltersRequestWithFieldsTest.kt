@@ -2,6 +2,8 @@ package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.FIELD_WITH_ONLY_LOWERCASE_LETTERS
+import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -47,59 +49,89 @@ class SequenceFiltersRequestWithFieldsTest {
             listOf(
                 Arguments.of(
                     """
-                {
-                    "country": "Switzerland",
-                    "fields": ["division", "country"]
-                }
-                """,
+                    {
+                        "country": "Switzerland",
+                        "fields": ["date", "country"]
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         mapOf("country" to "Switzerland"),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf("division", "country"),
+                        listOf(Field("date"), Field("country")),
                     ),
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideMutations": ["T1-", "A23062T"],
-                    "fields": ["division", "country"]
-                }
-                """,
+                    {
+                        "fields": ["${FIELD_WITH_UPPERCASE_LETTER.lowercase()}"]
+                    }
+                    """,
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(Field(FIELD_WITH_UPPERCASE_LETTER)),
+                    ),
+                ),
+                Arguments.of(
+                    """
+                    {
+                        "fields": ["${FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()}"]
+                    }
+                    """,
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(Field(FIELD_WITH_ONLY_LOWERCASE_LETTERS)),
+                    ),
+                ),
+                Arguments.of(
+                    """
+                    {
+                        "nucleotideMutations": ["T1-", "A23062T"],
+                        "fields": ["date", "country"]
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf("division", "country"),
+                        listOf(Field("date"), Field("country")),
                     ),
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidMutations": ["S:501Y", "ORF1b:12"],
-                    "fields": ["division", "country"]
-                }
-                """,
+                    {
+                        "aminoAcidMutations": ["S:501Y", "ORF1b:12"],
+                        "fields": ["date", "country"]
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         emptyList(),
                         listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
                         emptyList(),
                         emptyList(),
-                        listOf("division", "country"),
+                        listOf(Field("date"), Field("country")),
                     ),
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"],
-                    "fields": ["division", "country"]
-                }
-                """,
+                    {
+                        "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"],
+                        "fields": ["date", "country"]
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         emptyList(),
@@ -109,16 +141,16 @@ class SequenceFiltersRequestWithFieldsTest {
                             NucleotideInsertion(12, "ABCD", null),
                         ),
                         emptyList(),
-                        listOf("division", "country"),
+                        listOf(Field("date"), Field("country")),
                     ),
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"],
-                    "fields": ["division", "country"]
-                }
-                """,
+                    {
+                        "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"],
+                        "fields": ["date", "country"]
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         emptyList(),
@@ -128,15 +160,15 @@ class SequenceFiltersRequestWithFieldsTest {
                             AminoAcidInsertion(501, "S", "Y"),
                             AminoAcidInsertion(12, "ORF1", "ABCD"),
                         ),
-                        listOf("division", "country"),
+                        listOf(Field("date"), Field("country")),
                     ),
                 ),
                 Arguments.of(
                     """
-                {
-                    "country": "Switzerland"
-                }
-                """,
+                    {
+                        "country": "Switzerland"
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         mapOf("country" to "Switzerland"),
                         emptyList(),
@@ -148,10 +180,10 @@ class SequenceFiltersRequestWithFieldsTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "accessKey": "some access key"                
-                }
-                """,
+                    {
+                        "accessKey": "some access key"                
+                    }
+                    """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         emptyList(),
@@ -179,42 +211,42 @@ class SequenceFiltersRequestWithFieldsTest {
             listOf(
                 Arguments.of(
                     """
-                {
-                    "fields": "not an array"
-                }
-                """,
+                    {
+                        "fields": "not an array"
+                    }
+                    """,
                     "fields must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideMutations": "not an array"
-                }
-                """,
+                    {
+                        "nucleotideMutations": "not an array"
+                    }
+                    """,
                     "nucleotideMutations must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidMutations": "not an array"
-                }
-                """,
+                    {
+                        "aminoAcidMutations": "not an array"
+                    }
+                    """,
                     "aminoAcidMutations must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideInsertions": "not an array"
-                }
-                """,
+                    {
+                        "nucleotideInsertions": "not an array"
+                    }
+                    """,
                     "nucleotideInsertions must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidInsertions": "not an array"
-                }
-                """,
+                    {
+                        "aminoAcidInsertions": "not an array"
+                    }
+                    """,
                     "aminoAcidInsertions must be an array or null",
                 ),
             )

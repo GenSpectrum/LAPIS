@@ -3,6 +3,8 @@ package org.genspectrum.lapis.controller
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.FIELD_WITH_ONLY_LOWERCASE_LETTERS
+import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.LapisInfo
@@ -66,54 +68,7 @@ class LapisControllerCommonFieldsTest(
     }
 
     @Test
-    fun `GET aggregated with orderBy fields`() {
-        every {
-            siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(OrderByField("country", Order.ASCENDING), OrderByField("date", Order.ASCENDING)),
-                ),
-            )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
-
-        mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country,date"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].count").value(0))
-            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
-    }
-
-    @Test
-    fun `POST aggregated with flat orderBy fields`() {
-        every {
-            siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(OrderByField("country", Order.ASCENDING), OrderByField("date", Order.ASCENDING)),
-                ),
-            )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
-
-        val request = postSample(AGGREGATED_ROUTE)
-            .content("""{"orderBy": ["country", "date"]}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0].count").value(0))
-    }
-
-    @Test
-    fun `POST aggregated with ascending and descending orderBy fields`() {
+    fun `GET aggregated with orderBy fields is case insensitive for configured fields`() {
         every {
             siloQueryModelMock.getAggregated(
                 SequenceFiltersRequestWithFields(
@@ -124,8 +79,75 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     listOf(
-                        OrderByField("country", Order.DESCENDING),
-                        OrderByField("date", Order.ASCENDING),
+                        OrderByField("country", Order.ASCENDING),
+                        OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
+                        OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
+                    ),
+                ),
+            )
+        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+
+        val uppercaseField = FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()
+        val lowercaseField = FIELD_WITH_UPPERCASE_LETTER.lowercase()
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country,$uppercaseField,$lowercaseField"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST aggregated with flat orderBy fields is case insensitive for configured fields`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(
+                        OrderByField("country", Order.ASCENDING),
+                        OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
+                        OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
+                    ),
+                ),
+            )
+        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(AGGREGATED_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": [
+                        "country",
+                        "${FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()}",
+                        "${FIELD_WITH_UPPERCASE_LETTER.lowercase()}"
+                    ]
+                }
+                """.trimIndent(),
+            )
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+    }
+
+    @Test
+    fun `POST aggregated with ascending and descending orderBy fields is case insensitive for configured fields`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                SequenceFiltersRequestWithFields(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(
+                        OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.DESCENDING),
+                        OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
                         OrderByField("age", Order.ASCENDING),
                     ),
                 ),
@@ -137,8 +159,8 @@ class LapisControllerCommonFieldsTest(
                 """
                 {
                     "orderBy": [
-                        { "field": "country", "type": "descending" },
-                        { "field": "date", "type": "ascending" },
+                        { "field": "${FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()}", "type": "descending" },
+                        { "field": "${FIELD_WITH_UPPERCASE_LETTER.lowercase()}", "type": "ascending" },
                         { "field": "age" }
                     ]
                 }
