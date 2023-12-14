@@ -90,7 +90,7 @@ describe('The /nucleotideInsertions endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/nucleotideInsertions?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/nucleotideInsertions?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -115,7 +115,7 @@ ins_25701:CCC,17
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/nucleotideInsertions?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/nucleotideInsertions?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -135,7 +135,7 @@ ins_25701:CCC	17
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/nucleotideInsertions');
+    const result = await fetch(basePath + '/sample/nucleotideInsertions');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

@@ -24,8 +24,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -54,7 +52,7 @@ class LapisControllerCsvTest(
     fun `GET returns empty json`(endpoint: String) {
         mockEndpointReturnEmptyList(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "application/json"))
             .andExpect(jsonPath("\$.data").isEmpty())
@@ -65,7 +63,7 @@ class LapisControllerCsvTest(
     fun `POST returns empty json`(endpoint: String) {
         mockEndpointReturnEmptyList(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
             .accept("application/json")
@@ -81,7 +79,7 @@ class LapisControllerCsvTest(
     fun `GET returns empty CSV`(endpoint: String) {
         mockEndpointReturnEmptyList(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(""))
@@ -92,7 +90,7 @@ class LapisControllerCsvTest(
     fun `POST {0} returns empty CSV`(endpoint: String) {
         mockEndpointReturnEmptyList(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
             .accept("text/csv")
@@ -108,7 +106,7 @@ class LapisControllerCsvTest(
     fun `GET returns as CSV with accept header`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(returnedCsvData(endpoint)))
@@ -119,7 +117,7 @@ class LapisControllerCsvTest(
     fun `POST returns as CSV with accept header`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
             .accept("text/csv")
@@ -135,7 +133,7 @@ class LapisControllerCsvTest(
     fun `GET returns as CSV with request parameter`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland&dataFormat=csv"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland&dataFormat=csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(returnedCsvData(endpoint)))
@@ -146,7 +144,7 @@ class LapisControllerCsvTest(
     fun `POST returns as CSV with request parameter`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -161,7 +159,7 @@ class LapisControllerCsvTest(
     fun `GET returns as TSV with accept header`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland").header("Accept", "text/tab-separated-values"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/tab-separated-values"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
             .andExpect(content().string(returnedTsvData(endpoint)))
@@ -172,7 +170,7 @@ class LapisControllerCsvTest(
     fun `POST returns as TSV with accept header`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
             .accept("text/tab-separated-values")
@@ -188,7 +186,7 @@ class LapisControllerCsvTest(
     fun `GET returns as TSV with request parameter`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland&dataFormat=tsv"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland&dataFormat=tsv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
             .andExpect(content().string(returnedTsvData(endpoint)))
@@ -199,7 +197,7 @@ class LapisControllerCsvTest(
     fun `POST returns as TSV with request parameter`(endpoint: String) {
         mockEndpointReturnData(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
             .contentType(MediaType.APPLICATION_JSON)
 

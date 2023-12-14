@@ -104,7 +104,7 @@ describe('The /details endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/details?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
 
     expect(await result.text()).to.be.equal(
       String.raw`
@@ -124,7 +124,7 @@ Solothurn,EPI_ISL_1002052,B.1
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/details?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
 
     expect(await result.text()).to.be.equal(
       String.raw`
@@ -185,7 +185,7 @@ Solothurn	EPI_ISL_1002052	B.1
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/details');
+    const result = await fetch(basePath + '/sample/details');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

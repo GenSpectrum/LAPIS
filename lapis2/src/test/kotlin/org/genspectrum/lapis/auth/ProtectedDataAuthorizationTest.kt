@@ -5,6 +5,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
+import org.genspectrum.lapis.controller.getSample
+import org.genspectrum.lapis.controller.postSample
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
@@ -15,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -24,7 +25,16 @@ private const val NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR = """
 {
     "error" : {
         "title": "Forbidden",
-        "detail": "You are not authorized to access /aggregated."
+        "detail": "You are not authorized to access /sample/aggregated."
+    }
+}
+"""
+
+private const val FORBIDDEN_TO_ACCESS_ENDPOINT_ERROR = """
+{
+    "error" : {
+        "title": "Forbidden",
+        "detail": "An access key is required to access /sample/aggregated."
     }
 }
 """
@@ -55,21 +65,10 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given no access key in GET request to protected instance, then access is denied`() {
-        mockMvc.perform(get(validRoute))
+        mockMvc.perform(getSample(validRoute))
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                content().json(
-                    """
-                    {
-                        "error" : {
-                            "title": "Forbidden",
-                            "detail": "An access key is required to access /aggregated."
-                        }
-                    }
-                    """,
-                ),
-            )
+            .andExpect(content().json(FORBIDDEN_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test
@@ -77,30 +76,15 @@ class ProtectedDataAuthorizationTest(
         mockMvc.perform(postRequestWithBody(""))
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                content().json(
-                    """
-                    {
-                        "error" : {
-                            "title": "Forbidden",
-                            "detail": "An access key is required to access /aggregated."
-                        }
-                    }
-                    """,
-                ),
-            )
+            .andExpect(content().json(FORBIDDEN_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test
     fun `given wrong access key in GET request to protected instance, then access is denied`() {
-        mockMvc.perform(get("$validRoute?accessKey=invalidKey"))
+        mockMvc.perform(getSample("$validRoute?accessKey=invalidKey"))
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                content().json(
-                    NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR,
-                ),
-            )
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test
@@ -108,17 +92,13 @@ class ProtectedDataAuthorizationTest(
         mockMvc.perform(postRequestWithBody("""{"accessKey": "invalidKey"}"""))
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(
-                content().json(
-                    NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR,
-                ),
-            )
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
     }
 
     @Test
     fun `given valid access key for aggregated data in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
-            get("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -145,7 +125,7 @@ class ProtectedDataAuthorizationTest(
     @Test
     fun `given aggregated access key in GET request but filters are too fine-grained, then access is denied`() {
         mockMvc.perform(
-            get("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -170,7 +150,7 @@ class ProtectedDataAuthorizationTest(
     @Test
     fun `given valid access key for full access in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
-            get("$validRoute?accessKey=testFullAccessKey&field1=value1"),
+            getSample("$validRoute?accessKey=testFullAccessKey&field1=value1"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -217,7 +197,7 @@ class ProtectedDataAuthorizationTest(
     }
 
     private fun postRequestWithBody(body: String) =
-        MockMvcRequestBuilders.post(validRoute)
+        postSample(validRoute)
             .contentType(MediaType.APPLICATION_JSON)
             .content(body)
 }

@@ -123,7 +123,7 @@ describe('The /nucleotideMutations endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/nucleotideMutations?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/nucleotideMutations?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -149,7 +149,7 @@ C7124T,2,0.11764705882352941
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/nucleotideMutations?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/nucleotideMutations?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -168,7 +168,7 @@ C7124T	2	0.11764705882352941
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/nucleotideMutations');
+    const result = await fetch(basePath + '/sample/nucleotideMutations');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

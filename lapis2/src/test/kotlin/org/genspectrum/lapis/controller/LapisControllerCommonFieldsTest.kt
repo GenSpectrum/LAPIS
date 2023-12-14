@@ -22,8 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -61,7 +59,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?orderBy=country"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -83,7 +81,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?orderBy=country,date"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country,date"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -105,7 +103,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"orderBy": ["country", "date"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -134,7 +132,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content(
                 """
                 {
@@ -155,7 +153,7 @@ class LapisControllerCommonFieldsTest(
 
     @Test
     fun `POST aggregated with invalid orderBy fields`() {
-        val request = post("$AGGREGATED_ROUTE")
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"orderBy": [ { "field": ["this is an array, not a string"] } ]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -181,7 +179,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?limit=100"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?limit=100"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -204,7 +202,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"limit": 100}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -215,7 +213,7 @@ class LapisControllerCommonFieldsTest(
 
     @Test
     fun `POST aggregated with invalid limit`() {
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"limit": "this is not a number"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -242,7 +240,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?offset=5"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?offset=5"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -266,7 +264,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"offset": 5}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -277,7 +275,7 @@ class LapisControllerCommonFieldsTest(
 
     @Test
     fun `POST aggregated with invalid offset`() {
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"offset": "this is not a number"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -301,7 +299,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -321,7 +319,7 @@ class LapisControllerCommonFieldsTest(
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -329,7 +327,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithNucleotideMutationFilter")
     fun `GET endpoint with invalid nucleotide mutation filter`(endpoint: String) {
-        mockMvc.perform(get("$endpoint?nucleotideMutations=invalidMutation"))
+        mockMvc.perform(getSample("$endpoint?nucleotideMutations=invalidMutation"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideMutations'")))
     }
@@ -337,7 +335,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithAminoAcidMutationFilter")
     fun `GET endpoind with invalid amino acid mutation`(endpoint: String) {
-        mockMvc.perform(get("$endpoint?aminoAcidMutations=invalidMutation"))
+        mockMvc.perform(getSample("$endpoint?aminoAcidMutations=invalidMutation"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidMutations'")))
     }
@@ -345,7 +343,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotideInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid nucleotide insertion filter`(endpoint: String) {
-        mockMvc.perform(get(endpoint + "?nucleotideInsertions=invalidInsertion"))
+        mockMvc.perform(getSample("$endpoint?nucleotideInsertions=invalidInsertion"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideInsertions'")))
     }
@@ -353,7 +351,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid aminoAcidInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid amino acid insertionFilter`(endpoint: String) {
-        mockMvc.perform(get(endpoint + "?aminoAcidInsertions=invalidInsertion"))
+        mockMvc.perform(getSample("$endpoint?aminoAcidInsertions=invalidInsertion"))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidInsertions'")))
     }

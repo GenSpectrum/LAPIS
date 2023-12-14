@@ -123,7 +123,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/aminoAcidMutations?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/aminoAcidMutations?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -149,7 +149,7 @@ ORF1a:A2529V,3,0.17647058823529413
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/aminoAcidMutations?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/aminoAcidMutations?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -168,7 +168,7 @@ ORF1a:A2529V	3	0.17647058823529413
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/aminoAcidMutations');
+    const result = await fetch(basePath + '/sample/aminoAcidMutations');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

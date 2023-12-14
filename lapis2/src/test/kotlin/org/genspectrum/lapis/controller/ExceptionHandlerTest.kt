@@ -59,7 +59,7 @@ class ExceptionHandlerTest(
     fun `throw INTERNAL_SERVER_ERROR(500) with additional info for any non specific error`() {
         every { validControllerCall() } throws Exception("SomeMessage")
 
-        mockMvc.perform(get(validRoute))
+        mockMvc.perform(getSample(validRoute))
             .andExpect(status().isInternalServerError)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
@@ -83,7 +83,7 @@ class ExceptionHandlerTest(
     fun `Passes through exception with status code from SILO`() {
         every { validControllerCall() } throws SiloException(123, "SomeTitle", "SomeMessage")
 
-        mockMvc.perform(get(validRoute))
+        mockMvc.perform(getSample(validRoute))
             .andExpect(status().`is`(123))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
@@ -107,7 +107,7 @@ class ExceptionHandlerTest(
     fun `throw BAD_REQUEST(400) with additional info for bad requests`() {
         every { validControllerCall() } throws BadRequestException("SomeMessage")
 
-        mockMvc.perform(get(validRoute))
+        mockMvc.perform(getSample(validRoute))
             .andExpect(status().isBadRequest)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(
@@ -131,7 +131,7 @@ class ExceptionHandlerTest(
     fun `throw NOT_IMPLEMENTED(501) with additional info for request of a not implemented resource in SILO`() {
         every { validControllerCall() } throws SiloNotImplementedError("SomeMessage", Exception("SomeCause"))
 
-        mockMvc.perform(get(validRoute))
+        mockMvc.perform(getSample(validRoute))
             .andExpect(status().isNotImplemented)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(

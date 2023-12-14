@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -35,6 +36,7 @@ const val IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION =
 
 @RestController
 @ConditionalOnExpression(IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION)
+@RequestMapping("/sample")
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,

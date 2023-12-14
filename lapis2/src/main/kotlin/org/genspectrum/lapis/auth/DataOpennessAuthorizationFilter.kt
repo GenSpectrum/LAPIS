@@ -103,7 +103,7 @@ private class ProtectedDataAuthorizationFilter(
             AMINO_ACID_MUTATIONS_ROUTE,
             NUCLEOTIDE_INSERTIONS_ROUTE,
             AMINO_ACID_INSERTIONS_ROUTE,
-        )
+        ).map { "/sample$it" }
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {

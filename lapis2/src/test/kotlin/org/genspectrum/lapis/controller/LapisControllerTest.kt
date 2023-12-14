@@ -30,6 +30,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
@@ -65,7 +66,7 @@ class LapisControllerTest(
             ),
         )
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?country=Switzerland"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -84,7 +85,7 @@ class LapisControllerTest(
                 emptyMap(),
             ),
         )
-        val request = post("/aggregated")
+        val request = postSample("/aggregated")
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -111,7 +112,7 @@ class LapisControllerTest(
             ),
         )
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?country=Switzerland&fields=country,age"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?country=Switzerland&fields=country,age"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
@@ -133,7 +134,7 @@ class LapisControllerTest(
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(get("$AGGREGATED_ROUTE?nucleotideMutations=123A,124B"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideMutations=123A,124B"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -154,7 +155,7 @@ class LapisControllerTest(
             ),
         )
 
-        val request = post(AGGREGATED_ROUTE)
+        val request = postSample(AGGREGATED_ROUTE)
             .content("""{"country": "Switzerland", "fields": ["country","age"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -170,7 +171,7 @@ class LapisControllerTest(
     fun `GET mutations without explicit minProportion`(endpoint: String) {
         setupMutationMock(endpoint, null)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
@@ -184,7 +185,7 @@ class LapisControllerTest(
     fun `GET mutations with minProportion`(endpoint: String) {
         setupMutationMock(endpoint, 0.3)
 
-        mockMvc.perform(get("$endpoint?country=Switzerland&minProportion=0.3"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland&minProportion=0.3"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
@@ -196,7 +197,7 @@ class LapisControllerTest(
     fun `POST mutations without explicit minProportion`(endpoint: String) {
         setupMutationMock(endpoint, null)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -212,7 +213,7 @@ class LapisControllerTest(
     fun `POST mutations with minProportion`(endpoint: String) {
         setupMutationMock(endpoint, 0.7)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland", "minProportion": 0.7}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -228,7 +229,7 @@ class LapisControllerTest(
     @ParameterizedTest(name = "POST {0} with invalid minProportion returns bad request")
     @MethodSource("getMutationEndpoints")
     fun `POST mutations with invalid minProportion returns bad request`(endpoint: String) {
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland", "minProportion": "this is not a float"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -245,7 +246,7 @@ class LapisControllerTest(
     fun `GET mutations only returns mutation, proportion and count`(endpoint: String) {
         setupMutationMock(endpoint, null)
 
-        val mvcResult = mockMvc.perform(get("$endpoint?country=Switzerland"))
+        val mvcResult = mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
             .andReturn()
 
@@ -288,7 +289,7 @@ class LapisControllerTest(
     fun `POST insertions`(endpoint: String) {
         setupInsertionMock(endpoint)
 
-        val request = post(endpoint)
+        val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -305,7 +306,7 @@ class LapisControllerTest(
     fun `GET insertions`(endpoint: String) {
         setupInsertionMock(endpoint)
 
-        val request = get("$endpoint?country=Switzerland")
+        val request = getSample("$endpoint?country=Switzerland")
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -320,7 +321,7 @@ class LapisControllerTest(
     fun `GET insertions only returns insertion and count`(endpoint: String) {
         setupInsertionMock(endpoint)
 
-        val mvcResult = mockMvc.perform(get("$endpoint?country=Switzerland"))
+        val mvcResult = mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
             .andReturn()
 
@@ -374,7 +375,7 @@ class LapisControllerTest(
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        mockMvc.perform(get("$DETAILS_ROUTE?country=Switzerland"))
+        mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
@@ -393,7 +394,7 @@ class LapisControllerTest(
             )
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        mockMvc.perform(get("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=age"))
+        mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=age"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].age").value(42))
@@ -405,7 +406,7 @@ class LapisControllerTest(
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        val request = post(DETAILS_ROUTE)
+        val request = postSample(DETAILS_ROUTE)
             .content("""{"country": "Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -428,7 +429,7 @@ class LapisControllerTest(
             )
         } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
-        val request = post(DETAILS_ROUTE)
+        val request = postSample(DETAILS_ROUTE)
             .content("""{"country": "Switzerland", "fields": ["country", "age"]}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -482,3 +483,7 @@ class LapisControllerTest(
 
     private fun someAminoAcidInsertion() = AminoAcidInsertionResponse("the insertion", 42)
 }
+
+fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path")
+
+fun postSample(path: String): MockHttpServletRequestBuilder = post("/sample/$path")
