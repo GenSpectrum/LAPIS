@@ -68,6 +68,18 @@ class NucleotideMutationTest {
                     "\"sequence-Name_1:123X\"",
                     NucleotideMutation("sequence-Name_1", 123, "X"),
                 ),
+                Arguments.of(
+                    "\"g123A\"",
+                    NucleotideMutation(null, 123, "A"),
+                ),
+                Arguments.of(
+                    "\"G123a\"",
+                    NucleotideMutation(null, 123, "A"),
+                ),
+                Arguments.of(
+                    "\"g123a\"",
+                    NucleotideMutation(null, 123, "A"),
+                ),
             )
 
         @JvmStatic
