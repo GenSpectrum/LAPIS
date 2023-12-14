@@ -281,8 +281,8 @@ private fun mapToOpenApiType(type: MetadataType): String =
 
 private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFilterFields) =
     sequenceFilterFields.fields
-        .map { (fieldName, fieldType) -> fieldName to Schema<String>().type(fieldType.openApiType) }
-        .toMap()
+        .values
+        .associate { (fieldName, field) -> fieldName to Schema<String>().type(field.openApiType) }
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,

@@ -39,6 +39,7 @@ import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -85,7 +86,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -140,7 +141,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -193,7 +194,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -683,7 +684,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @DetailsFields
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -736,7 +737,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @DetailsFields
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -786,7 +787,7 @@ class LapisController(
         sequenceFilters: Map<String, String>?,
         @DetailsFields
         @RequestParam
-        fields: List<String>?,
+        fields: List<Field>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,

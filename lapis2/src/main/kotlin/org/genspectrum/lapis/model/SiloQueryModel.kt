@@ -26,7 +26,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    sequenceFilters.fields,
+                    sequenceFilters.fields.map { it.fieldName },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,
@@ -88,7 +88,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
-                    sequenceFilters.fields,
+                    sequenceFilters.fields.map { it.fieldName },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,

@@ -22,17 +22,23 @@ class SequenceFilterFieldsTest {
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(underTest.fields, hasEntry("fieldName", SequenceFilterFieldType.String))
+        assertThat(
+            underTest.fields,
+            hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
+        )
     }
 
     @Test
     fun `given database config with a pango_lineage field then contains a pango_lineage field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pango lineage", MetadataType.PANGO_LINEAGE)))
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pangoLineage", MetadataType.PANGO_LINEAGE)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(underTest.fields, hasEntry("pango lineage", SequenceFilterFieldType.PangoLineage))
+        assertThat(
+            underTest.fields,
+            hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.PangoLineage)),
+        )
     }
 
     @Test
@@ -42,9 +48,21 @@ class SequenceFilterFieldsTest {
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(3))
-        assertThat(underTest.fields, hasEntry("dateField", SequenceFilterFieldType.Date))
-        assertThat(underTest.fields, hasEntry("dateFieldFrom", SequenceFilterFieldType.DateFrom("dateField")))
-        assertThat(underTest.fields, hasEntry("dateFieldTo", SequenceFilterFieldType.DateTo("dateField")))
+        assertThat(
+            underTest.fields,
+            hasEntry("datefield", SequenceFilterField("dateField", SequenceFilterFieldType.Date)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "datefieldfrom",
+                SequenceFilterField("dateFieldFrom", SequenceFilterFieldType.DateFrom("dateField")),
+            ),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry("datefieldto", SequenceFilterField("dateFieldTo", SequenceFilterFieldType.DateTo("dateField"))),
+        )
     }
 
     @Test
@@ -54,9 +72,15 @@ class SequenceFilterFieldsTest {
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(3))
-        assertThat(underTest.fields, hasEntry("intField", SequenceFilterFieldType.Int))
-        assertThat(underTest.fields, hasEntry("intFieldFrom", SequenceFilterFieldType.IntFrom("intField")))
-        assertThat(underTest.fields, hasEntry("intFieldTo", SequenceFilterFieldType.IntTo("intField")))
+        assertThat(underTest.fields, hasEntry("intfield", SequenceFilterField("intField", SequenceFilterFieldType.Int)))
+        assertThat(
+            underTest.fields,
+            hasEntry("intfieldfrom", SequenceFilterField("intFieldFrom", SequenceFilterFieldType.IntFrom("intField"))),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry("intfieldto", SequenceFilterField("intFieldTo", SequenceFilterFieldType.IntTo("intField"))),
+        )
     }
 
     @Test
@@ -66,9 +90,24 @@ class SequenceFilterFieldsTest {
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(3))
-        assertThat(underTest.fields, hasEntry("floatField", SequenceFilterFieldType.Float))
-        assertThat(underTest.fields, hasEntry("floatFieldFrom", SequenceFilterFieldType.FloatFrom("floatField")))
-        assertThat(underTest.fields, hasEntry("floatFieldTo", SequenceFilterFieldType.FloatTo("floatField")))
+        assertThat(
+            underTest.fields,
+            hasEntry("floatfield", SequenceFilterField("floatField", SequenceFilterFieldType.Float)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "floatfieldfrom",
+                SequenceFilterField("floatFieldFrom", SequenceFilterFieldType.FloatFrom("floatField")),
+            ),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "floatfieldto",
+                SequenceFilterField("floatFieldTo", SequenceFilterFieldType.FloatTo("floatField")),
+            ),
+        )
     }
 
     @Test
@@ -78,7 +117,10 @@ class SequenceFilterFieldsTest {
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(underTest.fields, hasEntry("variantQuery", SequenceFilterFieldType.VariantQuery))
+        assertThat(
+            underTest.fields,
+            hasEntry("variantquery", SequenceFilterField("variantQuery", SequenceFilterFieldType.VariantQuery)),
+        )
     }
 
     private fun databaseConfigWithFields(
