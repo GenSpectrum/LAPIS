@@ -24,7 +24,7 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
             return NucleotideMutation(
                 matchGroups["sequenceName"]?.value,
                 position,
-                matchGroups["symbolTo"]?.value,
+                matchGroups["symbolTo"]?.value?.uppercase(),
             )
         }
     }
@@ -32,7 +32,8 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
 
 private val NUCLEOTIDE_MUTATION_REGEX =
     Regex(
-        """^((?<sequenceName>[a-zA-Z0-9_-]+)(?=:):)?(?<symbolFrom>[A-Z]?)(?<position>\d+)(?<symbolTo>[A-Z.-])?$""",
+        @Suppress("ktlint:standard:max-line-length")
+        """^((?<sequenceName>[a-zA-Z0-9_-]+)(?=:):)?(?<symbolFrom>[a-zA-Z]?)(?<position>\d+)(?<symbolTo>[a-zA-Z.-])?$""",
     )
 
 @JsonComponent
