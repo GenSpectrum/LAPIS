@@ -88,7 +88,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
       dataFormat: 'csv',
     });
 
-    const result = await fetch(basePath + '/aminoAcidInsertions?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/aminoAcidInsertions?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -113,7 +113,7 @@ ins_S:247:SGE,1
       dataFormat: 'tsv',
     });
 
-    const result = await fetch(basePath + '/aminoAcidInsertions?' + urlParams.toString());
+    const result = await fetch(basePath + '/sample/aminoAcidInsertions?' + urlParams.toString());
     const resultText = await result.text();
 
     expect(resultText).to.contain(
@@ -133,7 +133,7 @@ ins_S:247:SGE	1
   });
 
   it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/aminoAcidInsertions');
+    const result = await fetch(basePath + '/sample/aminoAcidInsertions');
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);

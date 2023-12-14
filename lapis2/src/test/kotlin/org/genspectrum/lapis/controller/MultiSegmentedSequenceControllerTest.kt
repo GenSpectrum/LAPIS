@@ -15,8 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -55,7 +53,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        mockMvc.perform(get("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
+        mockMvc.perform(getSample("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
             .andExpect(status().isOk)
             .andExpect(content().string(returnedValue))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
@@ -72,7 +70,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        mockMvc.perform(get("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment?country=Switzerland"))
+        mockMvc.perform(getSample("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment?country=Switzerland"))
             .andExpect(status().isOk)
             .andExpect(content().string(returnedValue))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
@@ -89,7 +87,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        val request = post("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment")
+        val request = postSample("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment")
             .content("""{}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -110,7 +108,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        val request = post("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment")
+        val request = postSample("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment")
             .content("""{"country":"Switzerland"}""")
             .contentType(MediaType.APPLICATION_JSON)
 
@@ -131,7 +129,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        mockMvc.perform(get(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
+        mockMvc.perform(getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
             .andExpect(status().isNotFound)
     }
 
@@ -146,7 +144,7 @@ class MultiSegmentedSequenceControllerTest(
             )
         } returns returnedValue
 
-        val request = post(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+        val request = postSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
             .content("""{}""")
             .contentType(MediaType.APPLICATION_JSON)
 

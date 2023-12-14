@@ -8,7 +8,7 @@ const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);
 
 function getAggregated(params?: URLSearchParams) {
-  const aggregatedEndpoint = '/aggregated';
+  const aggregatedEndpoint = '/sample/aggregated';
   if (params === undefined) {
     return fetch(basePath + aggregatedEndpoint);
   }

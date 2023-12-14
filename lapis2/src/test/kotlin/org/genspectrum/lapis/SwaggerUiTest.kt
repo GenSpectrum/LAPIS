@@ -34,7 +34,7 @@ class SwaggerUiTest(
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("\$.openapi").exists())
-            .andExpect(jsonPath("\$.paths./aggregated").exists())
+            .andExpect(jsonPath("\$.paths./sample/aggregated").exists())
     }
 
     @Test
@@ -47,6 +47,6 @@ class SwaggerUiTest(
         val objectMapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
         val yaml = objectMapper.readTree(result.response.contentAsString)
         assertTrue(yaml.has("openapi"))
-        assertTrue(yaml.get("paths").has("/aggregated"))
+        assertTrue(yaml.get("paths").has("/sample/aggregated"))
     }
 }
