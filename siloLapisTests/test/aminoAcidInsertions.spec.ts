@@ -22,7 +22,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_ORF1a:3602:FEP');
+    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_ORF1a:3602:F');
 
     const descendingOrderedResult = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
@@ -42,7 +42,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
     });
 
     expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_ORF1a:3602:F');
+    expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_ORF1a:3602:FEP');
 
     const resultWithLimitAndOffset = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
@@ -100,9 +100,11 @@ insertion,count
     expect(resultText).to.contain(
       String.raw`
 ins_ORF1a:3602:F,1
-ins_S:143:T,1
+ins_ORF1a:3602:FEP,1
 ins_S:210:IV,1
 ins_S:247:SGE,1
+ins_S:214:EPE,5
+ins_S:143:T,1
 `.trim()
     );
   });
@@ -125,9 +127,11 @@ insertion	count
     expect(resultText).to.contain(
       String.raw`
 ins_ORF1a:3602:F	1
-ins_S:143:T	1
+ins_ORF1a:3602:FEP	1
 ins_S:210:IV	1
 ins_S:247:SGE	1
+ins_S:214:EPE	5
+ins_S:143:T	1
     `.trim()
     );
   });
