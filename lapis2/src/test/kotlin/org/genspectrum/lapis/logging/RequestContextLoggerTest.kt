@@ -106,25 +106,28 @@ internal class RequestContextLoggerTest {
             listOf(
                 Arguments.of(
                     SequenceFiltersRequestWithFields(
-                        mapOf("country" to "Germany"),
+                        mapOf("country" to listOf("Germany")),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                     ),
-                    """"country":"Germany"""",
+                    """"country":["Germany"]""",
                 ),
                 Arguments.of(
                     SequenceFiltersRequestWithFields(
-                        mapOf("country" to "Germany", "nucleotideMutation" to "A123T"),
+                        mapOf(
+                            "country" to listOf("Germany"),
+                            "nucleotideMutation" to listOf("A123T"),
+                        ),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                     ),
-                    """"country":"Germany","nucleotideMutation":"A123T"""",
+                    """"country":["Germany"],"nucleotideMutation":["A123T"]""",
                 ),
             )
     }

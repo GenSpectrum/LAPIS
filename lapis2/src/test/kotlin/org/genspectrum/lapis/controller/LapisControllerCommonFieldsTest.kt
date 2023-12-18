@@ -13,6 +13,7 @@ import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -181,7 +182,12 @@ class LapisControllerCommonFieldsTest(
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.detail").value("orderByField must have a string property \"field\""))
+            .andExpect(
+                jsonPath(
+                    "\$.error.detail",
+                    containsString("orderByField must have a string property \"field\""),
+                ),
+            )
     }
 
     @Test

@@ -41,6 +41,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.Field
+import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -84,7 +85,7 @@ class LapisController(
     fun aggregated(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
         fields: List<Field>?,
@@ -139,7 +140,7 @@ class LapisController(
     fun getAggregatedAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
         fields: List<Field>?,
@@ -192,7 +193,7 @@ class LapisController(
     fun getAggregatedAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
         fields: List<Field>?,
@@ -284,7 +285,7 @@ class LapisController(
     fun getNucleotideMutations(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -339,7 +340,7 @@ class LapisController(
     fun getNucleotideMutationsAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -388,7 +389,7 @@ class LapisController(
     fun getNucleotideMutationsAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -477,7 +478,7 @@ class LapisController(
     fun getAminoAcidMutations(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -528,7 +529,7 @@ class LapisController(
     fun getAminoAcidMutationsAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -577,7 +578,7 @@ class LapisController(
     fun getAminoAcidMutationsAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam(required = false)
         @NucleotideMutations
         nucleotideMutations: List<NucleotideMutation>?,
@@ -682,7 +683,7 @@ class LapisController(
     fun getDetailsAsJson(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
         fields: List<Field>?,
@@ -735,7 +736,7 @@ class LapisController(
     fun getDetailsAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
         fields: List<Field>?,
@@ -785,7 +786,7 @@ class LapisController(
     fun getDetailsAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
         fields: List<Field>?,
@@ -874,7 +875,7 @@ class LapisController(
     fun getNucleotideInsertions(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -926,7 +927,7 @@ class LapisController(
     fun getNucleotideInsertionsAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -977,7 +978,7 @@ class LapisController(
     fun getNucleotideInsertionsAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -1072,7 +1073,7 @@ class LapisController(
     fun getAminoAcidInsertions(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -1124,7 +1125,7 @@ class LapisController(
     fun getAminoAcidInsertionsAsCsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -1175,7 +1176,7 @@ class LapisController(
     fun getAminoAcidInsertionsAsTsv(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @InsertionsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -1271,7 +1272,7 @@ class LapisController(
         @PathVariable(name = "gene", required = true) gene: String,
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @AminoAcidSequencesOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,

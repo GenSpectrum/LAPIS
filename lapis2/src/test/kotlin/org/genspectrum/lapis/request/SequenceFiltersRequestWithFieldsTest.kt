@@ -55,12 +55,27 @@ class SequenceFiltersRequestWithFieldsTest {
                     }
                     """,
                     SequenceFiltersRequestWithFields(
-                        mapOf("country" to "Switzerland"),
+                        mapOf("country" to listOf("Switzerland")),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         emptyList(),
                         listOf(Field("date"), Field("country")),
+                    ),
+                ),
+                Arguments.of(
+                    """
+                    {
+                        "country": ["Switzerland", "Germany"]
+                    }
+                    """,
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to listOf("Switzerland", "Germany")),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
                     ),
                 ),
                 Arguments.of(
@@ -170,7 +185,7 @@ class SequenceFiltersRequestWithFieldsTest {
                     }
                     """,
                     SequenceFiltersRequestWithFields(
-                        mapOf("country" to "Switzerland"),
+                        mapOf("country" to listOf("Switzerland")),
                         emptyList(),
                         emptyList(),
                         emptyList(),

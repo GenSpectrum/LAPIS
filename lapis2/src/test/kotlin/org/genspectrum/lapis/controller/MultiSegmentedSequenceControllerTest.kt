@@ -5,7 +5,6 @@ import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.junit.jupiter.api.BeforeEach
@@ -151,14 +150,4 @@ class MultiSegmentedSequenceControllerTest(
         mockMvc.perform(request)
             .andExpect(status().isNotFound)
     }
-
-    private fun sequenceFiltersRequest(sequenceFilters: Map<String, String>) =
-        SequenceFiltersRequest(
-            sequenceFilters,
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
 }

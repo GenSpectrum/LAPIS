@@ -20,7 +20,7 @@ describe('The /details endpoint', () => {
       country: undefined,
       date: undefined,
       division: 'Zürich',
-      gisaidEpiIsl: undefined,
+      primaryKey: undefined,
       pangoLineage: 'B.1.617.2',
       qcValue: undefined,
       region: undefined,
@@ -42,7 +42,7 @@ describe('The /details endpoint', () => {
       country: 'Switzerland',
       date: '2021-07-19',
       division: 'Zürich',
-      gisaidEpiIsl: 'EPI_ISL_3128796',
+      primaryKey: 'key_3128796',
       pangoLineage: 'B.1.617.2',
       qcValue: 0.96,
       region: 'Europe',
@@ -74,19 +74,19 @@ describe('The /details endpoint', () => {
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postDetails1({
       detailsPostRequest: {
-        orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
-        fields: ['gisaid_epi_isl'],
+        orderBy: [{ field: 'primaryKey', type: 'ascending' }],
+        fields: ['primaryKey'],
         limit: 2,
       },
     });
 
     expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('gisaidEpiIsl', 'EPI_ISL_1001920');
+    expect(resultWithLimit.data[1]).to.have.property('primaryKey', 'key_1001920');
 
     const resultWithLimitAndOffset = await lapisClient.postDetails1({
       detailsPostRequest: {
-        orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
-        fields: ['gisaid_epi_isl'],
+        orderBy: [{ field: 'primaryKey', type: 'ascending' }],
+        fields: ['primaryKey'],
         limit: 2,
         offset: 1,
       },
@@ -98,8 +98,8 @@ describe('The /details endpoint', () => {
 
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'gisaid_epi_isl,pangoLineage,division',
-      orderBy: 'gisaid_epi_isl',
+      fields: 'primaryKey,pangoLineage,division',
+      orderBy: 'primaryKey',
       limit: '3',
       dataFormat: 'csv',
     });
@@ -108,18 +108,18 @@ describe('The /details endpoint', () => {
 
     expect(await result.text()).to.be.equal(
       String.raw`
-division,gisaid_epi_isl,pangoLineage
-Vaud,EPI_ISL_1001493,B.1.177.44
-Bern,EPI_ISL_1001920,B.1.177
-Solothurn,EPI_ISL_1002052,B.1
+division,pangoLineage,primaryKey
+Vaud,B.1.177.44,key_1001493
+Bern,B.1.177,key_1001920
+Solothurn,B.1,key_1002052
     `.trim()
     );
   });
 
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'gisaid_epi_isl,pangoLineage,division',
-      orderBy: 'gisaid_epi_isl',
+      fields: 'primaryKey,pangoLineage,division',
+      orderBy: 'primaryKey',
       limit: '3',
       dataFormat: 'tsv',
     });
@@ -128,10 +128,10 @@ Solothurn,EPI_ISL_1002052,B.1
 
     expect(await result.text()).to.be.equal(
       String.raw`
-division	gisaid_epi_isl	pangoLineage
-Vaud	EPI_ISL_1001493	B.1.177.44
-Bern	EPI_ISL_1001920	B.1.177
-Solothurn	EPI_ISL_1002052	B.1
+division	pangoLineage	primaryKey
+Vaud	B.1.177.44	key_1001493
+Bern	B.1.177	key_1001920
+Solothurn	B.1	key_1002052
     `.trim()
     );
   });
@@ -143,7 +143,7 @@ Solothurn	EPI_ISL_1002052	B.1
       country: 'Switzerland',
       date: '2021-05-12',
       division: 'Zürich',
-      gisaidEpiIsl: 'EPI_ISL_3578231',
+      primaryKey: 'key_3578231',
       insertions: '25701:CCC,5959:TAT',
       pangoLineage: 'B.1.1.28.1',
       qcValue: 0.93,
@@ -168,7 +168,7 @@ Solothurn	EPI_ISL_1002052	B.1
       country: 'Switzerland',
       date: '2021-07-04',
       division: 'Vaud',
-      gisaidEpiIsl: 'EPI_ISL_3259931',
+      primaryKey: 'key_3259931',
       pangoLineage: 'B.1.617.2.43',
       qcValue: 0.98,
       region: 'Europe',

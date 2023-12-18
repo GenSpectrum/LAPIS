@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.config
 
+import org.genspectrum.lapis.PRIMARY_KEY_FIELD
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.`is`
@@ -15,12 +16,12 @@ class DatabaseConfigTest {
     @Test
     fun `load test database config`() {
         assertThat(underTest.schema.instanceName, `is`("sars_cov-2_minimal_test_config"))
-        assertThat(underTest.schema.primaryKey, `is`("gisaid_epi_isl"))
+        assertThat(underTest.schema.primaryKey, `is`(PRIMARY_KEY_FIELD))
         assertThat(underTest.schema.opennessLevel, `is`(OpennessLevel.OPEN))
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(
-                DatabaseMetadata(name = "gisaid_epi_isl", type = MetadataType.STRING),
+                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING),
                 DatabaseMetadata(name = "date", type = MetadataType.DATE),
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
@@ -48,11 +49,11 @@ class DatabaseConfigWithoutFeaturesTest {
     @Test
     fun `a config without features can be read`() {
         assertThat(underTest.schema.instanceName, `is`("sars_cov-2_minimal_test_config"))
-        assertThat(underTest.schema.primaryKey, `is`("gisaid_epi_isl"))
+        assertThat(underTest.schema.primaryKey, `is`(PRIMARY_KEY_FIELD))
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(
-                DatabaseMetadata(name = "gisaid_epi_isl", type = MetadataType.STRING),
+                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING),
                 DatabaseMetadata(name = "date", type = MetadataType.DATE),
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),

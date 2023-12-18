@@ -1,0 +1,26 @@
+{
+  "testCaseName": "filter by multiple values for the same field",
+  "lapisRequest": {
+    "primaryKey": ["key_1408408", "key_1749899", "key_2016901"],
+    "fields": ["primaryKey"],
+    "orderBy": [
+      {
+        "field": "primaryKey"
+      }
+    ]
+  },
+  "expected": [
+    {
+      "count": 1,
+      "primaryKey": "key_1408408"
+    },
+    {
+      "count": 1,
+      "primaryKey": "key_1749899"
+    },
+    {
+      "count": 1,
+      "primaryKey": "key_2016901"
+    }
+  ]
+}

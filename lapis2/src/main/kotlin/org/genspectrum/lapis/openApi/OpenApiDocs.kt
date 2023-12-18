@@ -9,6 +9,7 @@ import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.SequenceFilterFieldName
+import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
@@ -282,7 +283,20 @@ private fun mapToOpenApiType(type: MetadataType): String =
 private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFilterFields) =
     sequenceFilterFields.fields
         .values
-        .associate { (fieldName, field) -> fieldName to Schema<String>().type(field.openApiType) }
+        .associate { (fieldName, field) -> fieldName to filterFieldSchema(field) }
+
+private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
+    when (fieldType) {
+        SequenceFilterFieldType.String, SequenceFilterFieldType.PangoLineage ->
+            Schema<String>().anyOf(
+                listOf(
+                    Schema<String>().type(fieldType.openApiType),
+                    arraySchema(Schema<String>().type(fieldType.openApiType)),
+                ),
+            )
+
+        else -> Schema<String>().type(fieldType.openApiType)
+    }
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,

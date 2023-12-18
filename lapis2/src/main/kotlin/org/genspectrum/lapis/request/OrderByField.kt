@@ -44,7 +44,7 @@ class OrderByFieldDeserializer(private val orderByFieldsCleaner: OrderByFieldsCl
     private fun deserializeOrderByField(value: ObjectNode): OrderByField {
         val fieldNode = value.get("field")
         if (fieldNode == null || fieldNode !is TextNode) {
-            throw BadRequestException("orderByField must have a string property \"field\"")
+            throw BadRequestException("orderByField must have a string property \"field\", was $value")
         }
 
         val ascending = when (value.get("type")?.asText()) {

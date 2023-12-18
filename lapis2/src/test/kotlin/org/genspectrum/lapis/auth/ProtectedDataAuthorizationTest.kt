@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.verify
+import org.genspectrum.lapis.PRIMARY_KEY_FIELD
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.getSample
 import org.genspectrum.lapis.controller.postSample
@@ -125,7 +126,7 @@ class ProtectedDataAuthorizationTest(
     @Test
     fun `given aggregated access key in GET request but filters are too fine-grained, then access is denied`() {
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&gisaid_epi_isl=value"),
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&$PRIMARY_KEY_FIELD=value"),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -138,7 +139,7 @@ class ProtectedDataAuthorizationTest(
             postRequestWithBody(
                 """ {
                     "accessKey": "testAggregatedDataAccessKey",
-                    "gisaid_epi_isl": "some value"
+                    "$PRIMARY_KEY_FIELD": "some value"
                 }""",
             ),
         )
@@ -176,7 +177,7 @@ class ProtectedDataAuthorizationTest(
 
     private fun sequenceFilterRequest() =
         SequenceFiltersRequestWithFields(
-            mapOf("field1" to "value1"),
+            mapOf("field1" to listOf("value1")),
             emptyList(),
             emptyList(),
             emptyList(),
