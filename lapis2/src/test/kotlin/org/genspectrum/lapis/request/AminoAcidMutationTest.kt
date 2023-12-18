@@ -72,6 +72,10 @@ class AminoAcidMutationTest {
                     "\"gene:123a\"",
                     AminoAcidMutation("gene", 123, "A"),
                 ),
+                Arguments.of(
+                    "\"ORF1b:123*\"",
+                    AminoAcidMutation("ORF1b", 123, "*"),
+                ),
             )
 
         @JvmStatic

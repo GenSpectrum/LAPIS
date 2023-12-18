@@ -34,7 +34,7 @@ data class AminoAcidMutation(val gene: String, val position: Int, val symbol: St
 
 private val AMINO_ACID_MUTATION_REGEX =
     Regex(
-        """^((?<gene>[a-zA-Z0-9_-]+):)(?<symbolFrom>[a-zA-Z]?)(?<position>\d+)(?<symbolTo>[a-zA-Z.-])?$""",
+        """^((?<gene>[a-zA-Z0-9_-]+):)(?<symbolFrom>[a-zA-Z]?)(?<position>\d+)(?<symbolTo>[a-zA-Z*.-])?$""",
     )
 
 @JsonComponent
