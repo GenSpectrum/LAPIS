@@ -27,7 +27,7 @@ data class NucleotideInsertion(val position: Int, val insertions: String, val se
             val insertions = matchGroups["insertions"]?.value?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
                 SILO_INSERTION_AMBIGUITY_SYMBOL,
-            )
+            )?.uppercase()
                 ?: throw BadRequestException(
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find insertions",
                 )
