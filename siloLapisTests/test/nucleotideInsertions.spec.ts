@@ -101,8 +101,8 @@ insertion,count
 
     expect(resultText).to.contain(
       String.raw`
-ins_22339:GCTGGT,1
 ins_5959:TAT,2
+ins_22339:GCTGGT,1
 ins_22204:CAGAA,1
 ins_25701:CCC,17
 `.trim()
@@ -126,8 +126,8 @@ insertion	count
 
     expect(resultText).to.contain(
       String.raw`
-ins_22339:GCTGGT	1
 ins_5959:TAT	2
+ins_22339:GCTGGT	1
 ins_22204:CAGAA	1
 ins_25701:CCC	17
     `.trim()

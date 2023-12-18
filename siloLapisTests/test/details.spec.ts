@@ -19,7 +19,7 @@ describe('The /details endpoint', () => {
       age: undefined,
       country: undefined,
       date: undefined,
-      division: 'Aargau',
+      division: 'Zürich',
       gisaidEpiIsl: undefined,
       pangoLineage: 'B.1.617.2',
       qcValue: undefined,
@@ -37,14 +37,14 @@ describe('The /details endpoint', () => {
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
       aaInsertions: undefined,
-      insertions: undefined,
-      age: 50,
+      insertions: '25701:CCC',
+      age: 54,
       country: 'Switzerland',
       date: '2021-07-19',
-      division: 'Aargau',
-      gisaidEpiIsl: 'EPI_ISL_3128811',
+      division: 'Zürich',
+      gisaidEpiIsl: 'EPI_ISL_3128796',
       pangoLineage: 'B.1.617.2',
-      qcValue: 0.9,
+      qcValue: 0.96,
       region: 'Europe',
     });
   });

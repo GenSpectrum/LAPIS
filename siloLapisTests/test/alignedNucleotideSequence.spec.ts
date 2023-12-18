@@ -11,7 +11,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
     expect(primaryKeys).to.have.length(100);
     expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_3247294');
+    expect(primaryKeys[0]).to.equal('>EPI_ISL_3259931');
     expect(sequences[0]).to.have.length(29903);
   });
 
