@@ -21,6 +21,7 @@ import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
+import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
@@ -30,7 +31,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-data class SequenceFilterValue(val type: SequenceFilterFieldType, val value: String, val originalKey: String)
+data class SequenceFilterValue(val type: SequenceFilterFieldType, val values: List<String>, val originalKey: String)
 
 typealias SequenceFilterFieldName = String
 
@@ -46,10 +47,10 @@ class SiloFilterExpressionMapper(
 
         val allowedSequenceFiltersWithType = sequenceFilters
             .sequenceFilters
-            .map { (key, value) ->
+            .map { (key, values) ->
                 val nullableField = allowedSequenceFilterFields.fields[key.lowercase(Locale.US)]
                 val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableField, key)
-                filterExpressionId to SequenceFilterValue(type, value, key)
+                filterExpressionId to SequenceFilterValue(type, values, key)
             }
             .groupBy({ it.first }, { it.second })
 
@@ -62,10 +63,10 @@ class SiloFilterExpressionMapper(
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
             val (siloColumnName, filter) = key
             when (filter) {
-                Filter.StringEquals -> StringEquals(siloColumnName, values[0].value)
-                Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values[0].value)
+                Filter.StringEquals -> mapToStringEqualsFilters(siloColumnName, values)
+                Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values)
                 Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
-                Filter.VariantQuery -> mapToVariantQueryFilter(values[0].value)
+                Filter.VariantQuery -> mapToVariantQueryFilter(values[0].values[0])
                 Filter.IntEquals -> mapToIntEqualsFilter(siloColumnName, values)
                 Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
                 Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
@@ -161,6 +162,11 @@ class SiloFilterExpressionMapper(
         }
     }
 
+    private fun mapToStringEqualsFilters(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ) = Or(values[0].values.map { StringEquals(siloColumnName, it) })
+
     private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
         if (variantQuery.isBlank()) {
             throw BadRequestException("variantQuery must not be empty")
@@ -208,7 +214,8 @@ class SiloFilterExpressionMapper(
     }
 
     private fun getAsDate(sequenceFilterValue: SequenceFilterValue?): LocalDate? {
-        val (_, value, originalKey) = sequenceFilterValue ?: return null
+        val (_, values, originalKey) = sequenceFilterValue ?: return null
+        val value = extractSingleFilterValue(values, originalKey)
 
         try {
             return LocalDate.parse(value)
@@ -219,22 +226,26 @@ class SiloFilterExpressionMapper(
 
     private fun mapToPangoLineageFilter(
         column: String,
-        value: String,
-    ) = when {
-        value.endsWith(".*") -> PangoLineageEquals(column, value.substringBeforeLast(".*"), includeSublineages = true)
-        value.endsWith('*') -> PangoLineageEquals(column, value.substringBeforeLast('*'), includeSublineages = true)
-        value.endsWith('.') -> throw BadRequestException(
-            "Invalid pango lineage: $value must not end with a dot. Did you mean '$value*'?",
-        )
+        values: List<SequenceFilterValue>,
+    ) = Or(
+        values[0].values.map {
+            when {
+                it.endsWith(".*") -> PangoLineageEquals(column, it.substringBeforeLast(".*"), includeSublineages = true)
+                it.endsWith('*') -> PangoLineageEquals(column, it.substringBeforeLast('*'), includeSublineages = true)
+                it.endsWith('.') -> throw BadRequestException(
+                    "Invalid pango lineage: $it must not end with a dot. Did you mean '$it*'?",
+                )
 
-        else -> PangoLineageEquals(column, value, includeSublineages = false)
-    }
+                else -> PangoLineageEquals(column, it, includeSublineages = false)
+            }
+        },
+    )
 
     private fun mapToIntEqualsFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
-        val value = values[0].value
+        val value = extractSingleFilterValue(values[0])
         try {
             return IntEquals(siloColumnName, value.toInt())
         } catch (exception: NumberFormatException) {
@@ -249,7 +260,7 @@ class SiloFilterExpressionMapper(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
-        val value = values[0].value
+        val value = extractSingleFilterValue(values[0])
         try {
             return FloatEquals(siloColumnName, value.toDouble())
         } catch (exception: NumberFormatException) {
@@ -274,7 +285,8 @@ class SiloFilterExpressionMapper(
     private inline fun <reified T : SequenceFilterFieldType> findIntOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Int? {
-        val (_, value, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+        val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+        val value = extractSingleFilterValue(values, originalKey)
 
         try {
             return value.toInt()
@@ -300,7 +312,8 @@ class SiloFilterExpressionMapper(
     private inline fun <reified T : SequenceFilterFieldType> findFloatOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Double? {
-        val (_, value, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+        val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
+        val value = extractSingleFilterValue(values, originalKey)
 
         try {
             return value.toDouble()
@@ -356,4 +369,14 @@ class SiloFilterExpressionMapper(
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage)
+
+    private fun extractSingleFilterValue(value: SequenceFilterValue) =
+        extractSingleFilterValue(value.values, value.originalKey)
+
+    private fun extractSingleFilterValue(
+        values: List<String>,
+        originalKey: String,
+    ) = values.singleOrNull() ?: throw BadRequestException(
+        "Expected exactly one value for '$originalKey' but got ${values.size} values.",
+    )
 }

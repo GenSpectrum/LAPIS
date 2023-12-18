@@ -190,7 +190,7 @@ data class AminoAcidInsertionContains(val position: Int, val value: String, val 
         "AminoAcidInsertionContains",
     )
 
-object True : SiloFilterExpression("True")
+data object True : SiloFilterExpression("True")
 
 data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
 

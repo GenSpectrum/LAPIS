@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.boot.jackson.JsonComponent
 
 data class SequenceFiltersRequest(
-    override val sequenceFilters: Map<String, String>,
+    override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,

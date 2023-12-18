@@ -9,6 +9,7 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 
+const val PRIMARY_KEY_FIELD = "primaryKey"
 const val PANGO_LINEAGE_FIELD = "pangoLineage"
 const val DATE_FIELD = "date"
 

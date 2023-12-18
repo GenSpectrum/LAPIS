@@ -18,6 +18,7 @@ import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
@@ -47,7 +48,7 @@ class SingleSegmentedSequenceController(
     fun getAlignedNucleotideSequences(
         @PrimitiveFieldFilters
         @RequestParam
-        sequenceFilters: Map<String, String>?,
+        sequenceFilters: GetRequestSequenceFilters?,
         @NucleotideSequencesOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,

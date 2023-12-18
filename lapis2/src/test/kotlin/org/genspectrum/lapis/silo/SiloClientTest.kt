@@ -164,11 +164,11 @@ class SiloClientTest {
                     """{
                         "queryResult": [
                             {
-                              "gisaid_epi_isl": "key1",
+                              "primaryKey": "key1",
                               "someSequenceName": "ABCD"
                             },
                             {
-                              "gisaid_epi_isl": "key2",
+                              "primaryKey": "key2",
                               "someSequenceName": "DEFG"
                             }
                         ]

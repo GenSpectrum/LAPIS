@@ -2,7 +2,7 @@ schema:
   instanceName: sars_cov-2_minimal_test_config
   opennessLevel: OPEN
   metadata:
-    - name: gisaid_epi_isl
+    - name: primaryKey
       type: string
     - name: date
       type: date
@@ -18,4 +18,4 @@ schema:
       type: aaInsertion
   features:
     - name: sarsCoV2VariantQuery
-  primaryKey: gisaid_epi_isl
+  primaryKey: primaryKey

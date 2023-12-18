@@ -10,7 +10,7 @@ import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
 data class SequenceFiltersRequestWithFields(
-    override val sequenceFilters: Map<String, String>,
+    override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,

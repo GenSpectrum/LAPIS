@@ -8,10 +8,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.Field
-import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
-import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -120,6 +117,31 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
+    }
+
+    @ParameterizedTest(name = "{0} aggregated with multiple values for filter field")
+    @MethodSource("getRequestsWithMultipleValuesForField")
+    fun `aggregated with multiple values for filter field`(
+        testName: String,
+        request: MockHttpServletRequestBuilder,
+    ) {
+        every {
+            siloQueryModelMock.getAggregated(
+                sequenceFiltersRequestWithArrayValuedFilters(
+                    mapOf("country" to listOf("Switzerland", "Germany")),
+                ),
+            )
+        } returns listOf(
+            AggregationData(
+                0,
+                mapOf("country" to TextNode("Switzerland")),
+            ),
+        )
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
@@ -370,6 +392,20 @@ class LapisControllerTest(
                 Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
                 Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
             )
+
+        @JvmStatic
+        val requestsWithMultipleValuesForField = listOf(
+            Arguments.of(
+                "GET",
+                getSample("$AGGREGATED_ROUTE?country=Switzerland&country=Germany"),
+            ),
+            Arguments.of(
+                "POST",
+                postSample(AGGREGATED_ROUTE)
+                    .content("""{"country": ["Switzerland", "Germany"]}""")
+                    .contentType(MediaType.APPLICATION_JSON),
+            ),
+        )
     }
 
     @Test
@@ -441,42 +477,6 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
-
-    private fun sequenceFiltersRequestWithFields(
-        sequenceFilters: Map<String, String>,
-        fields: List<String> = emptyList(),
-    ) = SequenceFiltersRequestWithFields(
-        sequenceFilters,
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        fields.map { Field(it) },
-        emptyList(),
-    )
-
-    private fun sequenceFiltersRequest(sequenceFilters: Map<String, String>) =
-        SequenceFiltersRequest(
-            sequenceFilters,
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
-
-    private fun mutationProportionsRequest(
-        sequenceFilters: Map<String, String>,
-        minProportion: Double?,
-    ) = MutationProportionsRequest(
-        sequenceFilters,
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        minProportion,
-        emptyList(),
-    )
 
     private fun someNucleotideMutationProportion() = NucleotideMutationResponse("the mutation", 42, 0.5)
 

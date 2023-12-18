@@ -13,9 +13,13 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.OFFSET_PROPERTY
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.controller.SPECIAL_REQUEST_PROPERTIES
+import org.springframework.util.MultiValueMap
+
+typealias SequenceFilters = Map<String, List<String>>
+typealias GetRequestSequenceFilters = MultiValueMap<String, String>
 
 interface CommonSequenceFilters {
-    val sequenceFilters: Map<String, String>
+    val sequenceFilters: SequenceFilters
     val nucleotideMutations: List<NucleotideMutation>
     val aaMutations: List<AminoAcidMutation>
     val nucleotideInsertions: List<NucleotideInsertion>
@@ -87,17 +91,19 @@ fun parseCommonFields(
         else -> throw BadRequestException("offset must be a number or null")
     }
 
-    val sequenceFilters = node.fields().asSequence().filter { isStringOrNumber(it.value) }
-        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }.associate { it.key to it.value.asText() }
+    val sequenceFilters = node.fields()
+        .asSequence()
+        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
+        .associate { it.key to getValuesList(it.value, it.key) }
     return ParsedCommonFields(
-        nucleotideMutations,
-        aminoAcidMutations,
-        nucleotideInsertions,
-        aminoAcidInsertions,
-        sequenceFilters,
-        orderByFields,
-        limit,
-        offset,
+        nucleotideMutations = nucleotideMutations,
+        aminoAcidMutations = aminoAcidMutations,
+        nucleotideInsertions = nucleotideInsertions,
+        aminoAcidInsertions = aminoAcidInsertions,
+        sequenceFilters = sequenceFilters,
+        orderByFields = orderByFields,
+        limit = limit,
+        offset = offset,
     )
 }
 
@@ -106,17 +112,27 @@ data class ParsedCommonFields(
     val aminoAcidMutations: List<AminoAcidMutation>,
     val nucleotideInsertions: List<NucleotideInsertion>,
     val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val sequenceFilters: Map<String, String>,
+    val sequenceFilters: SequenceFilters,
     val orderByFields: List<OrderByField>,
     val limit: Int?,
     val offset: Int?,
 )
 
-private fun isStringOrNumber(jsonNode: JsonNode) =
-    when (jsonNode.nodeType) {
-        JsonNodeType.STRING,
-        JsonNodeType.NUMBER,
-        -> true
-
-        else -> false
+private fun getValuesList(
+    value: JsonNode,
+    key: String,
+) = when {
+    value.isValueNode -> listOf(value.asText())
+    value.nodeType == JsonNodeType.ARRAY -> value.map {
+        when {
+            it.isValueNode -> it.asText()
+            else -> throw BadRequestException(
+                "Found unexpected array value $it of type ${it.nodeType} for $key, expected a primitive",
+            )
+        }
     }
+
+    else -> throw BadRequestException(
+        "Found unexpected value $value of type ${value.nodeType} for $key, expected primitive or array",
+    )
+}

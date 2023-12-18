@@ -47,12 +47,12 @@ class MutationProportionsRequestTest {
             listOf(
                 Arguments.of(
                     """
-                {
-                    "country": "Switzerland"
-                }
-                """,
+                    {
+                        "country": "Switzerland"
+                    }
+                    """,
                     MutationProportionsRequest(
-                        mapOf("country" to "Switzerland"),
+                        mapOf("country" to listOf("Switzerland")),
                         emptyList(),
                         emptyList(),
                         emptyList(),
@@ -62,10 +62,25 @@ class MutationProportionsRequestTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideMutations": ["T1-", "A23062T"]
-                }
-                """,
+                    {
+                        "country": ["Switzerland", "Germany"]
+                    }
+                    """,
+                    MutationProportionsRequest(
+                        mapOf("country" to listOf("Switzerland", "Germany")),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
+                    ),
+                ),
+                Arguments.of(
+                    """
+                    {
+                        "nucleotideMutations": ["T1-", "A23062T"]
+                    }
+                    """,
                     MutationProportionsRequest(
                         emptyMap(),
                         listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
@@ -77,10 +92,10 @@ class MutationProportionsRequestTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidMutations": ["S:501Y", "ORF1b:12"]
-                }
-                """,
+                    {
+                        "aminoAcidMutations": ["S:501Y", "ORF1b:12"]
+                    }
+                    """,
                     MutationProportionsRequest(
                         emptyMap(),
                         emptyList(),
@@ -92,10 +107,10 @@ class MutationProportionsRequestTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"]
-                }
-                """,
+                    {
+                        "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"]
+                    }
+                    """,
                     MutationProportionsRequest(
                         emptyMap(),
                         emptyList(),
@@ -110,10 +125,10 @@ class MutationProportionsRequestTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"]
-                }
-                """,
+                    {
+                        "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"]
+                    }
+                    """,
                     MutationProportionsRequest(
                         emptyMap(),
                         emptyList(),
@@ -128,18 +143,18 @@ class MutationProportionsRequestTest {
                 ),
                 Arguments.of(
                     """
-                {
-                    "minProportion": 0.7
-                }
-                """,
+                    {
+                        "minProportion": 0.7
+                    }
+                    """,
                     MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.7),
                 ),
                 Arguments.of(
                     """
-                {
-                    "accessKey": "some access key"                
-                }
-                """,
+                    {
+                        "accessKey": "some access key"                
+                    }
+                    """,
                     MutationProportionsRequest(
                         emptyMap(),
                         emptyList(),
@@ -150,10 +165,7 @@ class MutationProportionsRequestTest {
                     ),
                 ),
                 Arguments.of(
-                    """
-                {
-                }
-                """,
+                    "{}",
                     MutationProportionsRequest(
                         emptyMap(),
                         emptyList(),
@@ -170,50 +182,50 @@ class MutationProportionsRequestTest {
             listOf(
                 Arguments.of(
                     """
-                {
-                    "minProportion": "not a number"
-                }
-                """,
+                    {
+                        "minProportion": "not a number"
+                    }
+                    """,
                     "minProportion must be a number",
                 ),
                 Arguments.of(
                     """
-                {
-                    "minProportion": ["not a number"]
-                }
-                """,
+                    {
+                        "minProportion": ["not a number"]
+                    }
+                    """,
                     "minProportion must be a number",
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideMutations": "not an array"
-                }
-                """,
+                    {
+                        "nucleotideMutations": "not an array"
+                    }
+                    """,
                     "nucleotideMutations must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "nucleotideInsertions": "not an array"
-                }
-                """,
+                    {
+                        "nucleotideInsertions": "not an array"
+                    }
+                    """,
                     "nucleotideInsertions must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidInsertions": "not an array"
-                }
-                """,
+                    {
+                        "aminoAcidInsertions": "not an array"
+                    }
+                    """,
                     "aminoAcidInsertions must be an array or null",
                 ),
                 Arguments.of(
                     """
-                {
-                    "aminoAcidMutations": "not an array"
-                }
-                """,
+                    {
+                        "aminoAcidMutations": "not an array"
+                    }
+                    """,
                     "aminoAcidMutations must be an array or null",
                 ),
             )

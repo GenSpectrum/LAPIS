@@ -12,35 +12,35 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
     expect(primaryKeys).to.have.length(100);
     expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_3259931');
+    expect(primaryKeys[0]).to.equal('>key_3259931');
     expect(sequences[0]).to.have.length(1274);
   });
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
-      aminoAcidSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }] },
+      aminoAcidSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'ascending' }] },
     });
 
     const { primaryKeys, sequences } = sequenceData(result);
 
     expect(primaryKeys).to.have.length(100);
     expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_1001493');
+    expect(primaryKeys[0]).to.equal('>key_1001493');
     expect(sequences[0]).to.have.length(1274);
   });
 
   it('should order descending by specified fields', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
-      aminoAcidSequenceRequest: { orderBy: [{ field: 'gisaid_epi_isl', type: 'descending' }] },
+      aminoAcidSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'descending' }] },
     });
 
     const { primaryKeys, sequences } = sequenceData(result);
 
     expect(primaryKeys).to.have.length(100);
     expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_931279');
+    expect(primaryKeys[0]).to.equal('>key_931279');
     expect(sequences[0]).to.have.length(1274);
   });
 
@@ -48,7 +48,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
     const resultWithLimit = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
-        orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
+        orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         limit: 2,
       },
     });
@@ -58,13 +58,13 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
     expect(primaryKeysWithLimit).to.have.length(2);
     expect(sequencesWithLimit).to.have.length(2);
-    expect(primaryKeysWithLimit[0]).to.equal('>EPI_ISL_1001493');
+    expect(primaryKeysWithLimit[0]).to.equal('>key_1001493');
     expect(sequencesWithLimit[0]).to.have.length(1274);
 
     const resultWithLimitAndOffset = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
       aminoAcidSequenceRequest: {
-        orderBy: [{ field: 'gisaid_epi_isl', type: 'ascending' }],
+        orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         limit: 2,
         offset: 1,
       },
@@ -91,7 +91,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
     expect(primaryKeys).to.have.length(1);
     expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_3578231');
+    expect(primaryKeys[0]).to.equal('>key_3578231');
     expect(sequences[0]).to.have.length(1274);
   });
 
@@ -107,7 +107,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
     expect(primaryKeys).to.have.length(1);
     expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>EPI_ISL_3259931');
+    expect(primaryKeys[0]).to.equal('>key_3259931');
   });
 
   it('should return the lapis data version in the response', async () => {

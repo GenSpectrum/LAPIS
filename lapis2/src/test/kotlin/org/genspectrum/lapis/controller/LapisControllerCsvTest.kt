@@ -7,9 +7,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.LapisInfo
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
@@ -426,17 +424,4 @@ class LapisControllerCsvTest(
                 Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
             )
     }
-
-    private fun sequenceFiltersRequestWithFields(
-        sequenceFilters: Map<String, String>,
-        fields: List<String> = emptyList(),
-    ) = SequenceFiltersRequestWithFields(
-        sequenceFilters,
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        emptyList(),
-        fields.map { Field(it) },
-        emptyList(),
-    )
 }

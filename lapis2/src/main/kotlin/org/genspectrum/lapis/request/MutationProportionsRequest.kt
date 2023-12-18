@@ -13,7 +13,7 @@ import org.springframework.boot.jackson.JsonComponent
 const val DEFAULT_MIN_PROPORTION = 0.05
 
 data class MutationProportionsRequest(
-    override val sequenceFilters: Map<String, String>,
+    override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aaMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
