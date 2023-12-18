@@ -80,6 +80,10 @@ class AminoAcidInsertionTest {
                     "\"ins_gene:123:AB.*?CD\"",
                     AminoAcidInsertion(123, "gene", "AB.*.*CD"),
                 ),
+                Arguments.of(
+                    "\"ins_gene:123:abCd\"",
+                    AminoAcidInsertion(123, "gene", "ABCD"),
+                ),
             )
 
         @JvmStatic
