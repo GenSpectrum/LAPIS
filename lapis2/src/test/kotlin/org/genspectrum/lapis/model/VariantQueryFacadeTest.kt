@@ -270,6 +270,15 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a variantQuery with a 'Insertion' expression with lower case letters then returns SILO query`() {
+        val variantQuery = "ins_1234:gAG"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG")))
+    }
+
+    @Test
     fun `given a variantQuery with a 'Insertion' with wildcard expression then returns SILO query`() {
         val variantQuery = "ins_1234:G?A?G"
 
@@ -285,6 +294,24 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
+    }
+
+    @Test
+    fun `given amino acid mutation expression with lower case letters then should map to AminoAcidSymbolEquals`() {
+        val variantQuery = "S:n501y"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
+    }
+
+    @Test
+    fun `given amino acid mutation expression with gene lower case letters then should map to AminoAcidSymbolEquals`() {
+        val variantQuery = "orf1a:N501Y"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidSymbolEquals("ORF1A", 501, "Y")))
     }
 
     @Test
@@ -324,6 +351,15 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a valid variantQuery with a 'AA insertion' expression with lower case then returns SILO query`() {
+        val variantQuery = "ins_S:501:ePe"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "S")))
+    }
+
+    @Test
     fun `given a valid variantQuery with a 'AA insertion' with wildcard then returns SILO query`() {
         val variantQuery = "ins_S:501:E?E?"
 
@@ -342,6 +378,16 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression in lower case then returns SILO query`() {
+        val variantQuery = "nextstrainClade:22b"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "22B")))
+    }
+
+    @Test
     fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression then returns SILO query`() {
         val variantQuery = "nextstrainClade:RECOMBINANT"
 
@@ -353,6 +399,16 @@ class VariantQueryFacadeTest {
     @Test
     fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression then returns SILO query`() {
         val variantQuery = "gisaid:X"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "X")))
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression with lower case then returns SILO query`() {
+        val variantQuery = "gisaid:x"
 
         val result = underTest.map(variantQuery)
 

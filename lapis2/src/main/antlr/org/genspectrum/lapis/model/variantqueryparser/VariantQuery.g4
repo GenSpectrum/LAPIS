@@ -60,11 +60,11 @@ aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageQuery;
-nextcladePangoLineagePrefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:';
+nextcladePangoLineagePrefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:' | 'nextcladepangolineage:';
 
 nextstrainCladeLineageQuery: nextstrainCladePrefix nextstrainCladeQuery;
-nextstrainCladePrefix: 'nextstrainClade:'| 'NEXTSTRAINCLADE:';
-nextstrainCladeQuery: NUMBER NUMBER nextstrainCladeCharacter | 'RECOMBINANT';
+nextstrainCladePrefix: 'nextstrainClade:'| 'NEXTSTRAINCLADE:' | 'nextstrainclade:';
+nextstrainCladeQuery: NUMBER NUMBER nextstrainCladeCharacter | 'RECOMBINANT' | 'recombinant';
 nextstrainCladeCharacter: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
 gisaidCladeLineageQuery: gisaidCladePrefix gisaidCladeNomenclature;
@@ -75,32 +75,32 @@ gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | 
 
 // lexer rules
 
-A: 'A';
-B: 'B';
-C: 'C';
-D: 'D';
-E: 'E';
-F: 'F';
-G: 'G';
-H: 'H';
-I: 'I';
-J: 'J';
-K: 'K';
-L: 'L';
-M: 'M';
-N: 'N';
-O: 'O';
-P: 'P';
-Q: 'Q';
-R: 'R';
-S: 'S';
-T: 'T';
-U: 'U';
-V: 'V';
-W: 'W';
-X: 'X';
-Y: 'Y';
-Z: 'Z';
+A: 'A' | 'a';
+B: 'B' | 'b';
+C: 'C' | 'c';
+D: 'D' | 'd';
+E: 'E' | 'e';
+F: 'F' | 'f';
+G: 'G' | 'g';
+H: 'H' | 'h';
+I: 'I' | 'i';
+J: 'J' | 'j';
+K: 'K' | 'k';
+L: 'L' | 'l';
+M: 'M' | 'm';
+N: 'N' | 'n';
+O: 'O' | 'o';
+P: 'P' | 'p';
+Q: 'Q' | 'q';
+R: 'R' | 'r';
+S: 'S' | 's';
+T: 'T' | 't';
+U: 'U' | 'u';
+V: 'V' | 'v';
+W: 'W' | 'w';
+X: 'X' | 'x';
+Y: 'Y' | 'y';
+Z: 'Z' | 'z';
 MINUS: '-';
 DOT: '.';
 ASTERISK: '*';
@@ -108,4 +108,13 @@ ASTERISK: '*';
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;
 
-ORF: 'ORF1A' | 'ORF1B' | 'ORF3A' | 'ORF6' | 'ORF7A' | 'ORF7B' | 'ORF8' | 'ORF9B';
+ORF1A: 'ORF1A' | 'orf1a';
+ORF1B: 'ORF1B' | 'orf1b';
+ORF3A: 'ORF3A' | 'orf3a';
+ORF6: 'ORF6' | 'orf6';
+ORF7A: 'ORF7A' | 'orf7a';
+ORF7B: 'ORF7B' | 'orf7b';
+ORF8: 'ORF8' | 'orf8';
+ORF9B: 'ORF9B' | 'orf9b';
+
+ORF: ORF1A | ORF1B | ORF3A | ORF6 | ORF7A | ORF7B | ORF8 | ORF9B;

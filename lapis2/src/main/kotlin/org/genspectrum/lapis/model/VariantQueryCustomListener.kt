@@ -48,7 +48,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
 
         val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
             null -> HasNucleotideMutation(null, position)
-            else -> NucleotideSymbolEquals(null, position, secondSymbol.text)
+            else -> NucleotideSymbolEquals(null, position, secondSymbol.text.uppercase())
         }
 
         expressionStack.addLast(expression)
@@ -99,7 +99,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         expressionStack.addLast(
             NucleotideInsertionContains(
                 ctx.position().text.toInt(),
-                value,
+                value.uppercase(),
             ),
         )
     }
@@ -112,7 +112,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
             null -> HasAminoAcidMutation(ctx.gene().text, position)
-            else -> AminoAcidSymbolEquals(ctx.gene().text, position, aaSymbol.text)
+            else -> AminoAcidSymbolEquals(ctx.gene().text, position, aaSymbol.text.uppercase())
         }
 
         expressionStack.addLast(expression)
@@ -123,7 +123,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
         expressionStack.addLast(
             AminoAcidInsertionContains(
                 ctx.position().text.toInt(),
-                value,
+                value.uppercase(),
                 ctx.gene().text,
             ),
         )
@@ -136,13 +136,13 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     override fun enterNextstrainCladeQuery(ctx: NextstrainCladeQueryContext) {
         val value = when (ctx.text) {
             NEXTSTRAIN_CLADE_RECOMBINANT -> ctx.text.lowercase()
-            else -> ctx.text
+            else -> ctx.text.uppercase()
         }
         expressionStack.addLast(StringEquals(NEXTSTRAIN_CLADE_COLUMN, value))
     }
 
     override fun enterGisaidCladeNomenclature(ctx: VariantQueryParser.GisaidCladeNomenclatureContext) {
-        expressionStack.addLast(StringEquals(GISAID_CLADE_COLUMN, ctx.text))
+        expressionStack.addLast(StringEquals(GISAID_CLADE_COLUMN, ctx.text.uppercase()))
     }
 
     private fun addPangoLineage(
