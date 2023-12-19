@@ -13,6 +13,14 @@ private const val ARGS_NAME = "referenceGenomeFilename"
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ReferenceGenome(val nucleotideSequences: List<ReferenceSequence>, val genes: List<ReferenceSequence>) {
+    private val geneNames: Map<LowercaseName, ReferenceSequence> = genes
+        .associateBy { it.name.lowercase() }
+
+    fun getGeneFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequence {
+        return geneNames[lowercaseName]
+            ?: throw RuntimeException("Unknown gene: $lowercaseName")
+    }
+
     fun isSingleSegmented(): Boolean {
         return nucleotideSequences.size == 1
     }
