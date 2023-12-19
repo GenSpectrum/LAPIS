@@ -65,8 +65,8 @@ class NucleotideMutationTest {
                     NucleotideMutation(null, 123, null),
                 ),
                 Arguments.of(
-                    "\"sequence-Name_1:123X\"",
-                    NucleotideMutation("sequence-Name_1", 123, "X"),
+                    "\"other_segment:123X\"",
+                    NucleotideMutation("other_segment", 123, "X"),
                 ),
                 Arguments.of(
                     "\"g123A\"",
@@ -80,6 +80,10 @@ class NucleotideMutationTest {
                     "\"g123a\"",
                     NucleotideMutation(null, 123, "A"),
                 ),
+                Arguments.of(
+                    "\"othER_SegmENt:123X\"",
+                    NucleotideMutation("other_segment", 123, "X"),
+                ),
             )
 
         @JvmStatic
@@ -92,6 +96,7 @@ class NucleotideMutationTest {
                 Arguments.of("\"A\""),
                 Arguments.of("\":123A\""),
                 Arguments.of("\"sequence\$name&with/invalid)chars:G123A\""),
+                Arguments.of("\"segmentNotInReferenceGenome:G123A\""),
             )
     }
 }

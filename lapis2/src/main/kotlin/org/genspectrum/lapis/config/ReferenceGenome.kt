@@ -3,6 +3,7 @@ package org.genspectrum.lapis.config
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.controller.BadRequestException
 import java.io.File
 
 const val REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX = "referenceGenome.segments"
@@ -13,12 +14,19 @@ private const val ARGS_NAME = "referenceGenomeFilename"
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ReferenceGenome(val nucleotideSequences: List<ReferenceSequence>, val genes: List<ReferenceSequence>) {
+    private val nucleotideSequenceNames: Map<LowercaseName, ReferenceSequence> = nucleotideSequences
+        .associateBy { it.name.lowercase() }
     private val geneNames: Map<LowercaseName, ReferenceSequence> = genes
         .associateBy { it.name.lowercase() }
 
+    fun getNucleotideSequenceFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequence {
+        return nucleotideSequenceNames[lowercaseName]
+            ?: throw BadRequestException("Unknown nucleotide sequence from lower case: $lowercaseName")
+    }
+
     fun getGeneFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequence {
         return geneNames[lowercaseName]
-            ?: throw RuntimeException("Unknown gene: $lowercaseName")
+            ?: throw BadRequestException("Unknown gene from lower case: $lowercaseName")
     }
 
     fun isSingleSegmented(): Boolean {

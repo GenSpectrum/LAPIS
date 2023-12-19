@@ -41,48 +41,52 @@ class AminoAcidInsertionTest {
         fun getAminoAcidInsertionWithValidSyntax() =
             listOf(
                 Arguments.of(
-                    "\"ins_gene:123:ABCD\"",
-                    AminoAcidInsertion(123, "gene", "ABCD"),
+                    "\"ins_gene1:123:ABCD\"",
+                    AminoAcidInsertion(123, "gene1", "ABCD"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:A\"",
-                    AminoAcidInsertion(123, "gene", "A"),
+                    "\"ins_gene1:123:A\"",
+                    AminoAcidInsertion(123, "gene1", "A"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:AB?CD\"",
-                    AminoAcidInsertion(123, "gene", "AB.*CD"),
+                    "\"ins_gene1:123:AB?CD\"",
+                    AminoAcidInsertion(123, "gene1", "AB.*CD"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:???\"",
-                    AminoAcidInsertion(123, "gene", ".*.*.*"),
+                    "\"ins_gene1:123:???\"",
+                    AminoAcidInsertion(123, "gene1", ".*.*.*"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:?\"",
-                    AminoAcidInsertion(123, "gene", ".*"),
+                    "\"ins_gene1:123:?\"",
+                    AminoAcidInsertion(123, "gene1", ".*"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:.*CD\"",
-                    AminoAcidInsertion(123, "gene", ".*CD"),
+                    "\"ins_gene1:123:.*CD\"",
+                    AminoAcidInsertion(123, "gene1", ".*CD"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:AB.*.*\"",
-                    AminoAcidInsertion(123, "gene", "AB.*.*"),
+                    "\"ins_gene1:123:AB.*.*\"",
+                    AminoAcidInsertion(123, "gene1", "AB.*.*"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:?CD\"",
-                    AminoAcidInsertion(123, "gene", ".*CD"),
+                    "\"ins_gene1:123:?CD\"",
+                    AminoAcidInsertion(123, "gene1", ".*CD"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:AB??\"",
-                    AminoAcidInsertion(123, "gene", "AB.*.*"),
+                    "\"ins_gene1:123:AB??\"",
+                    AminoAcidInsertion(123, "gene1", "AB.*.*"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:AB.*?CD\"",
-                    AminoAcidInsertion(123, "gene", "AB.*.*CD"),
+                    "\"ins_gene1:123:AB.*?CD\"",
+                    AminoAcidInsertion(123, "gene1", "AB.*.*CD"),
                 ),
                 Arguments.of(
-                    "\"ins_gene:123:abCd\"",
-                    AminoAcidInsertion(123, "gene", "ABCD"),
+                    "\"ins_gene1:123:abCd\"",
+                    AminoAcidInsertion(123, "gene1", "ABCD"),
+                ),
+                Arguments.of(
+                    "\"ins_gEne1:123:ABCD\"",
+                    AminoAcidInsertion(123, "gene1", "ABCD"),
                 ),
             )
 
@@ -91,10 +95,11 @@ class AminoAcidInsertionTest {
             listOf(
                 Arguments.of("\"ins_::123:G\""),
                 Arguments.of("\"ins_:123:\""),
-                Arguments.of("\"ins_gene:123:\""),
-                Arguments.of("\"ins_gene:gene:123:ABC\""),
+                Arguments.of("\"ins_gene1:123:\""),
+                Arguments.of("\"ins_gene1:gene:123:ABC\""),
                 Arguments.of("\"ins_123:ABCD\""),
-                Arguments.of("\"ins_gene\$name&with/invalid)chars:123:A\""),
+                Arguments.of("\"ins_gene1\$name&with/invalid)chars:123:A\""),
+                Arguments.of("\"ins_notInReferenceGenome:123:ABCD\""),
             )
     }
 }

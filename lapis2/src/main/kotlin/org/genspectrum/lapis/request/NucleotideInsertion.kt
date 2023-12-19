@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
@@ -13,7 +14,10 @@ const val SILO_INSERTION_AMBIGUITY_SYMBOL = ".*"
 
 data class NucleotideInsertion(val position: Int, val insertions: String, val segment: String?) {
     companion object {
-        fun fromString(nucleotideInsertion: String): NucleotideInsertion {
+        fun fromString(
+            nucleotideInsertion: String,
+            referenceGenome: ReferenceGenome,
+        ): NucleotideInsertion {
             val match = NUCLEOTIDE_INSERTION_REGEX.find(nucleotideInsertion)
                 ?: throw BadRequestException("Invalid nucleotide mutation: $nucleotideInsertion")
 
@@ -32,10 +36,13 @@ data class NucleotideInsertion(val position: Int, val insertions: String, val se
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find insertions",
                 )
 
+            val segmentName = matchGroups["segment"]?.value?.lowercase()
+                ?.let { referenceGenome.getNucleotideSequenceFromLowercaseName(it).name }
+
             return NucleotideInsertion(
                 position,
                 insertions,
-                matchGroups["segment"]?.value,
+                segmentName,
             )
         }
     }
@@ -47,14 +54,17 @@ private val NUCLEOTIDE_INSERTION_REGEX =
     )
 
 @JsonComponent
-class NucleotideInsertionDeserializer : JsonDeserializer<NucleotideInsertion>() {
+class NucleotideInsertionDeserializer(private val referenceGenome: ReferenceGenome) :
+    JsonDeserializer<NucleotideInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = NucleotideInsertion.fromString(p.valueAsString)
+    ) = NucleotideInsertion.fromString(p.valueAsString, referenceGenome)
 }
 
 @Component
-class StringToNucleotideInsertionConverter : Converter<String, NucleotideInsertion> {
-    override fun convert(source: String) = NucleotideInsertion.fromString(source)
+class StringToNucleotideInsertionConverter(
+    private val referenceGenome: ReferenceGenome,
+) : Converter<String, NucleotideInsertion> {
+    override fun convert(source: String) = NucleotideInsertion.fromString(source, referenceGenome)
 }
