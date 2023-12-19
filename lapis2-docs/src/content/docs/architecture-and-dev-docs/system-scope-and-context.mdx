@@ -1,0 +1,27 @@
+---
+title: System Scope and Context
+description: Putting LAPIS in the context of its surroundings
+---
+
+This chapter specifies the boundaries of SILO-LAPIS and describes the interfaces to other systems and users.
+
+- **Configuration and operation**:
+LAPIS is provisioned by the maintainer, who provides a configuration file and operates the instance
+- **Data updates**:
+the maintainer can trigger an update upon which LAPIS reads data from the disc and stores it internally
+  - the maintainer needs to make sure that the data is in the correct format
+  - providing correct data will most likely involve some preprocessing (e.g. using Nextstrain)
+  to compute e.g. aligned sequences and insertions.
+- LAPIS can be accessed by the end-user through a **REST interface**
+  - LAPIS has endpoints to fetch the following types of data:
+    - aggregated data
+      - returns how many sequences fulfill the provided filter criteria
+    - amino acid mutations, nucleotide mutations
+      - returns a list of mutations (with their proportion and count) which fulfill the provided filter criteria
+      - the proportion is relative to all sequences which fulfill the provided criteria
+    - details
+      - returns a list of metadata of the sequences which fulfill the provided criteria
+    - amino acid sequences, aligned and unaligned nucleotide sequences
+      - returns the corresponding sequences which fulfill the provided criteria
+  - the provided filter criteria can be a compilation of metadata fields, mutations and insertions.
+  - LAPIS offers an OpenAPI specification and a [Swagger UI](../references/open-api-definition) that documents the API.

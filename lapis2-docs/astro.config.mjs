@@ -83,6 +83,27 @@ export default defineConfig({
                         },
                     ]),
                 },
+                {
+                    label: 'Architecture and Dev Docs',
+                    items: [
+                        {
+                            label: 'Introduction',
+                            link: '/architecture-and-dev-docs/introduction',
+                        },
+                        {
+                            label: 'Architecture and Constraints',
+                            link: '/architecture-and-dev-docs/architecture-and-constraints',
+                        },
+                        {
+                            label: 'System Scope and Context',
+                            link: '/architecture-and-dev-docs/system-scope-and-context',
+                        },
+                        {
+                            label: 'Glossary',
+                            link: '/architecture-and-dev-docs/glossary',
+                        },
+                    ],
+                },
             ],
         }),
         react(),
