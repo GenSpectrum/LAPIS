@@ -40,14 +40,14 @@ pangolineageNumberComponent: '.' NUMBER NUMBER? NUMBER?;
 pangolineageIncludeSublineages: DOT? ASTERISK;
 
 nOfQuery: '[' nOfMatchExactly? nOfNumberOfMatchers nOfOfKeyword nOfExprs ']';
-nOfOfKeyword: '-of:' | '-OF:';
-nOfMatchExactly: 'EXACTLY-' | 'exactly-';
+nOfOfKeyword: '-' O F ':';
+nOfMatchExactly: E X A C T L Y '-';
 nOfNumberOfMatchers: NUMBER+;
 nOfExprs: expr (',' expr)*;
 
 nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbol+;
 nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
-insertionKeyword: 'ins_' | 'INS_';
+insertionKeyword: I N S '_';
 
 aaMutationQuery: gene ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
@@ -55,20 +55,29 @@ ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 gene: covidGene;
 covidGene : E | M | N | S | ORF;
+ORF: ORF1A | ORF1B | ORF3A | ORF6 | ORF7A | ORF7B | ORF8 | ORF9B;
+ORF1A: O R F '1' A;
+ORF1B: O R F '1' B;
+ORF3A: O R F '3' A;
+ORF6: O R F '6';
+ORF7A: O R F '7' A;
+ORF7B: O R F '7' B;
+ORF8: O R F '8';
+ORF9B: O R F '9' B;
 
 aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageQuery;
-nextcladePangoLineagePrefix: 'nextcladePangoLineage:' | 'NEXTCLADEPANGOLINEAGE:' | 'nextcladepangolineage:';
+nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
 
 nextstrainCladeLineageQuery: nextstrainCladePrefix nextstrainCladeQuery;
-nextstrainCladePrefix: 'nextstrainClade:'| 'NEXTSTRAINCLADE:' | 'nextstrainclade:';
-nextstrainCladeQuery: NUMBER NUMBER nextstrainCladeCharacter | 'RECOMBINANT' | 'recombinant';
+nextstrainCladePrefix: N E X T S T R A I N C L A D E ':';
+nextstrainCladeQuery: NUMBER NUMBER nextstrainCladeCharacter | R E C O M B I N A N T;
 nextstrainCladeCharacter: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
 gisaidCladeLineageQuery: gisaidCladePrefix gisaidCladeNomenclature;
-gisaidCladePrefix: ('gisaid:'| 'GISAID:');
+gisaidCladePrefix: G I S A I D ':';
 gisaidCladeNomenclature: gisaid_clade_character gisaid_clade_character?;
 gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
@@ -107,14 +116,3 @@ ASTERISK: '*';
 
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;
-
-ORF1A: 'ORF1A' | 'orf1a';
-ORF1B: 'ORF1B' | 'orf1b';
-ORF3A: 'ORF3A' | 'orf3a';
-ORF6: 'ORF6' | 'orf6';
-ORF7A: 'ORF7A' | 'orf7a';
-ORF7B: 'ORF7B' | 'orf7b';
-ORF8: 'ORF8' | 'orf8';
-ORF9B: 'ORF9B' | 'orf9b';
-
-ORF: ORF1A | ORF1B | ORF3A | ORF6 | ORF7A | ORF7B | ORF8 | ORF9B;

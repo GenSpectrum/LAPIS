@@ -16,6 +16,7 @@ import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
@@ -33,7 +34,7 @@ import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 
-class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener {
+class VariantQueryCustomListener(val referenceGenome: ReferenceGenome) : VariantQueryBaseListener(), ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
     fun getVariantQueryExpression(): SiloFilterExpression {
@@ -109,10 +110,11 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
             return
         }
         val position = ctx.position().text.toInt()
+        val gene = referenceGenome.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
-            null -> HasAminoAcidMutation(ctx.gene().text, position)
-            else -> AminoAcidSymbolEquals(ctx.gene().text, position, aaSymbol.text.uppercase())
+            null -> HasAminoAcidMutation(gene, position)
+            else -> AminoAcidSymbolEquals(gene, position, aaSymbol.text.uppercase())
         }
 
         expressionStack.addLast(expression)
@@ -120,11 +122,13 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
+        val gene = referenceGenome.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
+
         expressionStack.addLast(
             AminoAcidInsertionContains(
                 ctx.position().text.toInt(),
                 value.uppercase(),
-                ctx.gene().text,
+                gene,
             ),
         )
     }
@@ -134,7 +138,7 @@ class VariantQueryCustomListener : VariantQueryBaseListener(), ParseTreeListener
     }
 
     override fun enterNextstrainCladeQuery(ctx: NextstrainCladeQueryContext) {
-        val value = when (ctx.text) {
+        val value = when (ctx.text.uppercase()) {
             NEXTSTRAIN_CLADE_RECOMBINANT -> ctx.text.lowercase()
             else -> ctx.text.uppercase()
         }

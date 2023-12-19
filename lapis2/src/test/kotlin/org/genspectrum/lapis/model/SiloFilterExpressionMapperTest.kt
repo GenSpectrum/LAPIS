@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.DATE_FIELD
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidInsertion
@@ -31,7 +32,6 @@ import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -42,12 +42,10 @@ import java.time.LocalDate
 private const val SOME_VALUE = "some value"
 
 class SiloFilterExpressionMapperTest {
-    private lateinit var underTest: SiloFilterExpressionMapper
+    private val dummyReferenceGenome = ReferenceGenome(emptyList(), emptyList())
+    private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenome)
 
-    @BeforeEach
-    fun setup() {
-        underTest = SiloFilterExpressionMapper(dummySequenceFilterFields, VariantQueryFacade())
-    }
+    private var underTest = SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade)
 
     @Test
     fun `given invalid filter key then throws exception`() {
