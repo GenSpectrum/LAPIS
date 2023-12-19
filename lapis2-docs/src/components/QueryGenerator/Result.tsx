@@ -36,7 +36,7 @@ export const Result = (props: Props) => {
 };
 
 function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFormat) {
-    const { endpoint, body } = constructPostQuery(props);
+    const { lapisUrl, endpoint, body } = constructPostQuery(props);
     const params = new URLSearchParams();
     for (let [name, value] of Object.entries(body)) {
         if (Array.isArray(value)) {
@@ -55,13 +55,12 @@ function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFo
     ) {
         params.set('dataFormat', tabularOutputFormat);
     }
-    return `${endpoint}?${params}`;
+    return `${lapisUrl}${endpoint}?${params}`;
 }
 
 const QueryUrlTab = (props: Props) => {
     const [tabularOutputFormat, setTabularOutputFormat] = useState<TabularOutputFormat>('json');
 
-    // TODO(#522) Prepend the URL to the instance
     const queryUrl = constructGetQueryUrl(props, tabularOutputFormat);
 
     return (
