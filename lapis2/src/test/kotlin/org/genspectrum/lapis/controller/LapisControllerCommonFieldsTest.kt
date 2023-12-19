@@ -320,14 +320,14 @@ class LapisControllerCommonFieldsTest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
-                    listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "segment")),
+                    listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "other_segment")),
                     emptyList(),
                     emptyList(),
                 ),
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_segment:124:DEF"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_other_segment:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -341,13 +341,13 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    listOf(AminoAcidInsertion(123, "S", "ABC"), AminoAcidInsertion(124, "ORF1", "DEF")),
+                    listOf(AminoAcidInsertion(123, "gene1", "ABC"), AminoAcidInsertion(124, "gene2", "DEF")),
                     emptyList(),
                 ),
             )
         } returns listOf(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(getSample("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_S:123:ABC,ins_ORF1:124:DEF"))
+        mockMvc.perform(getSample("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_gene1:123:ABC,ins_gene2:124:DEF"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }

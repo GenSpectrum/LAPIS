@@ -127,14 +127,14 @@ class SequenceFiltersRequestWithFieldsTest {
                 Arguments.of(
                     """
                     {
-                        "aminoAcidMutations": ["S:501Y", "ORF1b:12"],
+                        "aminoAcidMutations": ["gene1:501Y", "gene2:12"],
                         "fields": ["date", "country"]
                     }
                     """,
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
                         emptyList(),
-                        listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
+                        listOf(AminoAcidMutation("gene1", 501, "Y"), AminoAcidMutation("gene2", 12, null)),
                         emptyList(),
                         emptyList(),
                         listOf(Field("date"), Field("country")),
@@ -143,7 +143,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 Arguments.of(
                     """
                     {
-                        "nucleotideInsertions": ["ins_S:501:Y", "ins_12:ABCD"],
+                        "nucleotideInsertions": ["ins_other_segment:501:Y", "ins_12:ABCD"],
                         "fields": ["date", "country"]
                     }
                     """,
@@ -152,7 +152,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         listOf(
-                            NucleotideInsertion(501, "Y", "S"),
+                            NucleotideInsertion(501, "Y", "other_segment"),
                             NucleotideInsertion(12, "ABCD", null),
                         ),
                         emptyList(),
@@ -162,7 +162,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 Arguments.of(
                     """
                     {
-                        "aminoAcidInsertions": ["ins_S:501:Y", "ins_ORF1:12:ABCD"],
+                        "aminoAcidInsertions": ["ins_gene1:501:Y", "ins_gene2:12:ABCD"],
                         "fields": ["date", "country"]
                     }
                     """,
@@ -172,8 +172,8 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         listOf(
-                            AminoAcidInsertion(501, "S", "Y"),
-                            AminoAcidInsertion(12, "ORF1", "ABCD"),
+                            AminoAcidInsertion(501, "gene1", "Y"),
+                            AminoAcidInsertion(12, "gene2", "ABCD"),
                         ),
                         listOf(Field("date"), Field("country")),
                     ),

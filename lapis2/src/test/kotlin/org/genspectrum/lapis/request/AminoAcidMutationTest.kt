@@ -41,40 +41,44 @@ class AminoAcidMutationTest {
         fun getAminoAcidMutationWithValidSyntax() =
             listOf(
                 Arguments.of(
-                    "\"gene:G123A\"",
-                    AminoAcidMutation("gene", 123, "A"),
+                    "\"gene1:G123A\"",
+                    AminoAcidMutation("gene1", 123, "A"),
                 ),
                 Arguments.of(
-                    "\"gene:123A\"",
-                    AminoAcidMutation("gene", 123, "A"),
+                    "\"gene1:123A\"",
+                    AminoAcidMutation("gene1", 123, "A"),
                 ),
                 Arguments.of(
-                    "\"gene:123.\"",
-                    AminoAcidMutation("gene", 123, "."),
+                    "\"gene1:123.\"",
+                    AminoAcidMutation("gene1", 123, "."),
                 ),
                 Arguments.of(
-                    "\"gene:123-\"",
-                    AminoAcidMutation("gene", 123, "-"),
+                    "\"gene1:123-\"",
+                    AminoAcidMutation("gene1", 123, "-"),
                 ),
                 Arguments.of(
-                    "\"gene:123\"",
-                    AminoAcidMutation("gene", 123, null),
+                    "\"gene1:123\"",
+                    AminoAcidMutation("gene1", 123, null),
                 ),
                 Arguments.of(
-                    "\"gene:A123\"",
-                    AminoAcidMutation("gene", 123, null),
+                    "\"gene1:A123\"",
+                    AminoAcidMutation("gene1", 123, null),
                 ),
                 Arguments.of(
-                    "\"ORF1b:123X\"",
-                    AminoAcidMutation("ORF1b", 123, "X"),
+                    "\"gene1:123X\"",
+                    AminoAcidMutation("gene1", 123, "X"),
                 ),
                 Arguments.of(
-                    "\"gene:123a\"",
-                    AminoAcidMutation("gene", 123, "A"),
+                    "\"gene1:123a\"",
+                    AminoAcidMutation("gene1", 123, "A"),
                 ),
                 Arguments.of(
-                    "\"ORF1b:123*\"",
-                    AminoAcidMutation("ORF1b", 123, "*"),
+                    "\"gene1:123*\"",
+                    AminoAcidMutation("gene1", 123, "*"),
+                ),
+                Arguments.of(
+                    "\"gENe1:123A\"",
+                    AminoAcidMutation("gene1", 123, "A"),
                 ),
             )
 
@@ -82,14 +86,15 @@ class AminoAcidMutationTest {
         fun getAminoAcidMutationWithWrongSyntax() =
             listOf(
                 Arguments.of("\"A123G\""),
-                Arguments.of("\"gene:AA123\""),
-                Arguments.of("\"gene:123AA\""),
+                Arguments.of("\"gene1:AA123\""),
+                Arguments.of("\"gene1:123AA\""),
                 Arguments.of("\"\""),
                 Arguments.of("\"gene:\""),
                 Arguments.of("\"gene:AA123A\""),
                 Arguments.of("\"gene:A\""),
                 Arguments.of("\":123A\""),
-                Arguments.of("\"gene\$name&with/invalid)chars:123A\""),
+                Arguments.of("\"gene1\$name&with/invalid)chars:123A\""),
+                Arguments.of("\"geneNotInReferenceGenome:123A\""),
             )
     }
 }
