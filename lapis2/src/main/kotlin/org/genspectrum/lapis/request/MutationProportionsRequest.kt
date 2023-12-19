@@ -10,6 +10,8 @@ import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
+const val DEFAULT_MIN_PROPORTION = 0.05
+
 data class MutationProportionsRequest(
     override val sequenceFilters: Map<String, String>,
     override val nucleotideMutations: List<NucleotideMutation>,
@@ -32,7 +34,7 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
         val codec = jsonParser.codec
 
         val minProportion = when (val minProportionNode = node.get(MIN_PROPORTION_PROPERTY)) {
-            null, is NullNode -> null
+            null, is NullNode -> DEFAULT_MIN_PROPORTION
             is NumericNode -> minProportionNode.doubleValue()
 
             else -> throw BadRequestException("minProportion must be a number")

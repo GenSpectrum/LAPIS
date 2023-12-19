@@ -39,6 +39,7 @@ import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -290,7 +291,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -345,7 +346,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -394,7 +395,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -483,7 +484,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -534,7 +535,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -583,7 +584,7 @@ class LapisController(
         @RequestParam(required = false)
         @AminoAcidMutations
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @RequestParam minProportion: Double?,
+        @RequestParam(defaultValue = "$DEFAULT_MIN_PROPORTION") minProportion: Double?,
         @MutationsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
