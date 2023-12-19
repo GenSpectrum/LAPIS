@@ -17,7 +17,7 @@ This documentation is a website built with
 For running and building the website, the environment variables `LAPIS_URL` and `CONFIG_FILE` must be set, e.g.:
 
 ```shell
-CONFIG_FILE=../siloLapisTests/testData/testDatabaseConfig.yaml LAPIS_URL=http://localhost:8080 npm run dev
+CONFIG_FILE=../siloLapisTests/testData/testDatabaseConfig.yaml REFERENCE_GENOMES_FILE=../siloLapisTests/testData/reference_genomes.json LAPIS_URL=http://localhost:8080 npm run dev
 ```
 
 ## Deploying

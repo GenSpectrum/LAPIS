@@ -58,6 +58,8 @@ const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
+const val GENE_SCHEMA = "Gene"
+const val SEGMENT_SCHEMA = "Segment"
 
 const val LAPIS_INFO_DESCRIPTION = "Information about LAPIS."
 const val LAPIS_DATA_VERSION_EXAMPLE = "1702305399"
@@ -276,3 +278,17 @@ annotation class FieldsToAggregateBy
     description = DETAILS_FIELDS_DESCRIPTION,
 )
 annotation class DetailsFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$GENE_SCHEMA"),
+)
+annotation class Gene
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$SEGMENT_SCHEMA"),
+)
+annotation class Segment

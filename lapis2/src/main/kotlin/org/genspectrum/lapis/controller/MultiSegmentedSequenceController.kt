@@ -15,6 +15,7 @@ import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.NucleotideSequencesOrderByFields
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
+import org.genspectrum.lapis.openApi.Segment
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
@@ -45,7 +46,9 @@ class MultiSegmentedSequenceController(
     @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequence(
-        @PathVariable(name = "segment", required = true) segment: String,
+        @PathVariable(name = "segment", required = true)
+        @Segment
+        segment: String,
         @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
@@ -94,7 +97,9 @@ class MultiSegmentedSequenceController(
     @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
-        @PathVariable(name = "segment", required = true) segment: String,
+        @PathVariable(name = "segment", required = true)
+        @Segment
+        segment: String,
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,

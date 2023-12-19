@@ -20,6 +20,7 @@ import org.genspectrum.lapis.openApi.DataFormat
 import org.genspectrum.lapis.openApi.DetailsFields
 import org.genspectrum.lapis.openApi.DetailsOrderByFields
 import org.genspectrum.lapis.openApi.FieldsToAggregateBy
+import org.genspectrum.lapis.openApi.Gene
 import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.InsertionsOrderByFields
 import org.genspectrum.lapis.openApi.LapisAggregatedResponse
@@ -1269,7 +1270,9 @@ class LapisController(
     @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
     @LapisAlignedAminoAcidSequenceResponse
     fun getAlignedAminoAcidSequence(
-        @PathVariable(name = "gene", required = true) gene: String,
+        @PathVariable(name = "gene", required = true)
+        @Gene
+        gene: String,
         @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
@@ -1314,7 +1317,9 @@ class LapisController(
     @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
     @LapisAlignedAminoAcidSequenceResponse
     fun postAlignedAminoAcidSequence(
-        @PathVariable(name = "gene", required = true) gene: String,
+        @PathVariable(name = "gene", required = true)
+        @Gene
+        gene: String,
         @Parameter(schema = Schema(ref = "#/components/schemas/$ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,

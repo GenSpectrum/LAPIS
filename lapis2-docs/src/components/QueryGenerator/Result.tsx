@@ -8,7 +8,7 @@ import type { Config } from '../../config';
 import { useState } from 'react';
 import type { ResultField } from '../../utils/code-generators/types';
 import { ContainerWrapper, LabelWrapper } from './styled-components';
-import { getResultFields, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
+import { getResultFields, MULTI_SEGMENTED, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
 import type { OrderByLimitOffset } from './OrderLimitOffsetSelection.tsx';
 
 type Props = {
@@ -125,11 +125,11 @@ function constructPostQuery({ queryType, filters, config, lapisUrl, orderByLimit
             }
             break;
         case 'mutations':
-            endpoint += queryType.mutations.type === 'nucleotide' ? 'nuc-mutations' : 'aa-mutations';
+            endpoint += queryType.mutations.type === 'nucleotide' ? 'nucleotideMutations' : 'aminoAcidMutations';
             body.minProportion = queryType.mutations.minProportion;
             break;
         case 'insertions':
-            endpoint += queryType.insertions.type === 'nucleotide' ? 'nuc-insertions' : 'aa-insertions';
+            endpoint += queryType.insertions.type === 'nucleotide' ? 'nucleotideInsertions' : 'aminoAcidInsertions';
             break;
         case 'details':
             endpoint += 'details';
@@ -139,11 +139,16 @@ function constructPostQuery({ queryType, filters, config, lapisUrl, orderByLimit
             }
             break;
         case 'nucleotideSequences':
-            // TODO(#521): multi segment case
-            endpoint += queryType.nucleotideSequences.type === 'unaligned' ? 'nuc-sequences' : 'nuc-sequences-aligned';
+            endpoint +=
+                queryType.nucleotideSequences.type === 'unaligned'
+                    ? 'nucleotideSequences'
+                    : 'alignedNucleotideSequences';
+            if (queryType.nucleotideSequences.segment.type === MULTI_SEGMENTED) {
+                endpoint += `/${queryType.nucleotideSequences.segment.segmentName}`;
+            }
             break;
         case 'aminoAcidSequences':
-            endpoint += `aa-sequences-aligned/${queryType.aminoAcidSequences.gene}`;
+            endpoint += `alignedAminoAcidSequences/${queryType.aminoAcidSequences.gene}`;
             break;
     }
     for (let [name, value] of filters) {
