@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
+import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.controller.LapisErrorResponse
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
@@ -103,6 +104,7 @@ private class ProtectedDataAuthorizationFilter(
             AMINO_ACID_MUTATIONS_ROUTE,
             NUCLEOTIDE_INSERTIONS_ROUTE,
             AMINO_ACID_INSERTIONS_ROUTE,
+            INFO_ROUTE,
         ).map { "/sample$it" }
     }
 
