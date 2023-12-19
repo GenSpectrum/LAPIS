@@ -1,5 +1,6 @@
 import type { Config, MetadataType } from '../../config.ts';
 import type { ResultField, ResultFieldType } from '../../utils/code-generators/types.ts';
+import { isMultiSegmented, type ReferenceGenomes } from '../../reference_genomes.ts';
 
 export type Selection = keyof Omit<QueryTypeSelectionState, 'selection'>;
 
@@ -8,6 +9,9 @@ export type SequenceType = (typeof sequenceTypes)[number];
 export type DetailsType = 'all' | 'selected';
 export const alignmentTypes = ['unaligned', 'aligned'] as const;
 export type AlignmentType = (typeof alignmentTypes)[number];
+
+export const SINGLE_SEGMENTED = 'singleSegmented' as const;
+export const MULTI_SEGMENTED = 'multiSegmented' as const;
 
 export type QueryTypeSelectionState = {
     selection: Selection;
@@ -28,13 +32,21 @@ export type QueryTypeSelectionState = {
     };
     nucleotideSequences: {
         type: AlignmentType;
+        segment:
+            | {
+                  type: typeof SINGLE_SEGMENTED;
+              }
+            | {
+                  type: typeof MULTI_SEGMENTED;
+                  segmentName: string;
+              };
     };
     aminoAcidSequences: {
         gene: string;
     };
 };
 
-export function getInitialQueryState(): QueryTypeSelectionState {
+export function getInitialQueryState(referenceGenomes: ReferenceGenomes): QueryTypeSelectionState {
     return {
         selection: 'aggregatedAll',
         aggregatedAll: {},
@@ -54,9 +66,12 @@ export function getInitialQueryState(): QueryTypeSelectionState {
         },
         nucleotideSequences: {
             type: 'unaligned',
+            segment: isMultiSegmented(referenceGenomes)
+                ? { type: MULTI_SEGMENTED, segmentName: referenceGenomes.nucleotideSequences[0].name }
+                : { type: SINGLE_SEGMENTED },
         },
         aminoAcidSequences: {
-            gene: '',
+            gene: referenceGenomes.genes[0].name,
         },
     };
 }
@@ -93,9 +108,7 @@ function getFieldsThatAreAlwaysPresent(selection: Selection): ResultField[] {
                 { name: 'count', type: 'integer', nullable: false },
             ];
         case 'details':
-            return [];
         case 'nucleotideSequences':
-            return [];
         case 'aminoAcidSequences':
             return [];
     }

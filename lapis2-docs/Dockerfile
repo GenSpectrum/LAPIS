@@ -6,6 +6,7 @@ RUN apk update && apk add curl
 
 COPY . .
 ENV CONFIG_FILE=/config/database_config.yaml
+ENV REFERENCE_GENOMES_FILE=/config/reference_genomes.json
 
 EXPOSE 3000
 VOLUME /config

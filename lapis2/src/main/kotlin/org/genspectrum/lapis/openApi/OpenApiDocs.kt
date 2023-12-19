@@ -208,6 +208,11 @@ fun buildOpenApiSchema(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
                     arraySchema(nucleotideSequenceFieldsEnum(referenceGenome, databaseConfig)),
                 )
+                .addSchemas(
+                    SEGMENT_SCHEMA,
+                    fieldsEnum(additionalFields = referenceGenome.nucleotideSequences.map { it.name }),
+                )
+                .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenome.genes.map { it.name }))
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(FORMAT_SCHEMA, formatSchema()),
@@ -510,7 +515,7 @@ private fun nucleotideSequenceFieldsEnum(
 ) = fieldsEnum(emptyList(), referenceGenome.nucleotideSequences.map { it.name } + databaseConfig.schema.primaryKey)
 
 private fun fieldsEnum(
-    databaseConfig: List<DatabaseMetadata>,
+    databaseConfig: List<DatabaseMetadata> = emptyList(),
     additionalFields: List<String> = emptyList(),
 ) = Schema<String>()
     .type("string")

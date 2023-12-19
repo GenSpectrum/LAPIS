@@ -5,15 +5,17 @@ import { Result } from './Result';
 import { type Config } from '../../config';
 import { type OrderByLimitOffset, OrderLimitOffsetSelection } from './OrderLimitOffsetSelection.tsx';
 import { getInitialQueryState, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
+import { type ReferenceGenomes } from '../../reference_genomes.ts';
 
 type Props = {
     config: Config;
+    referenceGenomes: ReferenceGenomes;
     lapisUrl: string;
 };
 
-export const QueryGenerator = ({ config, lapisUrl }: Props) => {
+export const QueryGenerator = ({ config, referenceGenomes, lapisUrl }: Props) => {
     const [step, setStep] = useState(0);
-    const [queryType, setQueryType] = useState<QueryTypeSelectionState>(getInitialQueryState());
+    const [queryType, setQueryType] = useState<QueryTypeSelectionState>(getInitialQueryState(referenceGenomes));
     const [filters, setFilters] = useState<Filters>(new Map());
     const [orderByLimitOffset, setOrderByLimitOffset] = useState<OrderByLimitOffset>({
         orderBy: [],
@@ -33,7 +35,14 @@ export const QueryGenerator = ({ config, lapisUrl }: Props) => {
             </div>
 
             <div className='mt-8'>
-                {step === 0 && <QueryTypeSelection config={config} state={queryType} onStateChange={setQueryType} />}
+                {step === 0 && (
+                    <QueryTypeSelection
+                        config={config}
+                        referenceGenomes={referenceGenomes}
+                        state={queryType}
+                        onStateChange={setQueryType}
+                    />
+                )}
                 {step === 1 && <FiltersSelection config={config} filters={filters} onFiltersChange={setFilters} />}
                 {step === 2 && (
                     <OrderLimitOffsetSelection

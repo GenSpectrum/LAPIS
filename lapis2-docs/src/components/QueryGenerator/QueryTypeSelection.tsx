@@ -1,20 +1,23 @@
-import type { ReactNode } from 'react';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { Config } from '../../config';
 import { CheckBoxesWrapper, ContainerWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
 import {
     type AlignmentType,
     alignmentTypes,
     type DetailsType,
+    MULTI_SEGMENTED,
     type QueryTypeSelectionState,
     type Selection,
     type SequenceType,
     sequenceTypes,
 } from './QueryTypeSelectionState.ts';
+import { type ReferenceGenomes } from '../../reference_genomes.ts';
 
 type Props = {
     config: Config;
+    referenceGenomes: ReferenceGenomes;
     state: QueryTypeSelectionState;
-    onStateChange: (state: QueryTypeSelectionState) => void;
+    onStateChange: Dispatch<SetStateAction<QueryTypeSelectionState>>;
 };
 
 export const QueryTypeSelection = (props: Props) => {
@@ -274,13 +277,25 @@ const Insertions = ({ state, onStateChange }: Props) => {
     );
 };
 
-const NucleotideSequences = ({ state, onStateChange }: Props) => {
+const NucleotideSequences = ({ referenceGenomes, state, onStateChange }: Props) => {
     const changeType = (type: AlignmentType) => {
         onStateChange({
             ...state,
             nucleotideSequences: { ...state.nucleotideSequences, type },
         });
     };
+
+    const changeSegment = (segmentName: string) =>
+        onStateChange((prev) => ({
+            ...prev,
+            nucleotideSequences: {
+                ...prev.nucleotideSequences,
+                segment: {
+                    type: MULTI_SEGMENTED,
+                    segmentName,
+                },
+            },
+        }));
 
     return (
         <ContainerWrapper>
@@ -299,12 +314,29 @@ const NucleotideSequences = ({ state, onStateChange }: Props) => {
                         />
                     ))}
                 </CheckBoxesWrapper>
+                {state.nucleotideSequences.segment.type === MULTI_SEGMENTED && (
+                    <>
+                        <LabelWrapper>Which segments are you interested in?</LabelWrapper>
+                        <select
+                            className='input input-bordered w-full max-w-xs'
+                            disabled={state.selection !== 'nucleotideSequences'}
+                            value={state.nucleotideSequences.segment.segmentName}
+                            onChange={(e) => changeSegment(e.target.value)}
+                        >
+                            {referenceGenomes.nucleotideSequences.map((segment) => (
+                                <option value={segment.name} key={segment.name}>
+                                    {segment.name}
+                                </option>
+                            ))}
+                        </select>
+                    </>
+                )}
             </div>
         </ContainerWrapper>
     );
 };
 
-const AminoAcidSequences = ({ state, onStateChange }: Props) => {
+const AminoAcidSequences = ({ referenceGenomes, state, onStateChange }: Props) => {
     const changeGene = (gene: string) => {
         onStateChange({
             ...state,
@@ -316,13 +348,18 @@ const AminoAcidSequences = ({ state, onStateChange }: Props) => {
         <ContainerWrapper>
             <div>
                 <LabelWrapper>Which gene/reading frame are you interested in?</LabelWrapper>
-                <input
-                    type='text'
+                <select
                     className='input input-bordered w-full max-w-xs'
                     disabled={state.selection !== 'aminoAcidSequences'}
                     value={state.aminoAcidSequences.gene}
                     onChange={(e) => changeGene(e.target.value)}
-                />
+                >
+                    {referenceGenomes.genes.map((gene) => (
+                        <option value={gene.name} key={gene.name}>
+                            {gene.name}
+                        </option>
+                    ))}
+                </select>
             </div>
         </ContainerWrapper>
     );
