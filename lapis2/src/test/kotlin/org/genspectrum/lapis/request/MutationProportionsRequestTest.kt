@@ -57,6 +57,7 @@ class MutationProportionsRequestTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
                     ),
                 ),
                 Arguments.of(
@@ -71,6 +72,7 @@ class MutationProportionsRequestTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
                     ),
                 ),
                 Arguments.of(
@@ -85,6 +87,7 @@ class MutationProportionsRequestTest {
                         listOf(AminoAcidMutation("S", 501, "Y"), AminoAcidMutation("ORF1b", 12, null)),
                         emptyList(),
                         emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
                     ),
                 ),
                 Arguments.of(
@@ -102,6 +105,7 @@ class MutationProportionsRequestTest {
                             NucleotideInsertion(12, "ABCD", null),
                         ),
                         emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
                     ),
                 ),
                 Arguments.of(
@@ -119,6 +123,7 @@ class MutationProportionsRequestTest {
                             AminoAcidInsertion(501, "S", "Y"),
                             AminoAcidInsertion(12, "ORF1", "ABCD"),
                         ),
+                        minProportion = DEFAULT_MIN_PROPORTION,
                     ),
                 ),
                 Arguments.of(
@@ -135,14 +140,28 @@ class MutationProportionsRequestTest {
                     "accessKey": "some access key"                
                 }
                 """,
-                    MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
+                    ),
                 ),
                 Arguments.of(
                     """
                 {
                 }
                 """,
-                    MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
+                    MutationProportionsRequest(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        minProportion = DEFAULT_MIN_PROPORTION,
+                    ),
                 ),
             )
 

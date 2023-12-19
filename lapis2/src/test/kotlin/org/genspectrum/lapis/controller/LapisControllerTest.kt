@@ -3,9 +3,11 @@ package org.genspectrum.lapis.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -170,7 +172,7 @@ class LapisControllerTest(
     @ParameterizedTest(name = "GET {0} without explicit minProportion")
     @MethodSource("getMutationEndpoints")
     fun `GET mutations without explicit minProportion`(endpoint: String) {
-        setupMutationMock(endpoint, null)
+        setupMutationMock(endpoint, DEFAULT_MIN_PROPORTION)
 
         mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
@@ -196,7 +198,7 @@ class LapisControllerTest(
     @ParameterizedTest(name = "POST {0} without explicit minProportion")
     @MethodSource("getMutationEndpoints")
     fun `POST mutations without explicit minProportion`(endpoint: String) {
-        setupMutationMock(endpoint, null)
+        setupMutationMock(endpoint, DEFAULT_MIN_PROPORTION)
 
         val request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
@@ -245,13 +247,13 @@ class LapisControllerTest(
     @ParameterizedTest(name = "GET {0} only returns mutation, proportion and count")
     @MethodSource("getMutationEndpoints")
     fun `GET mutations only returns mutation, proportion and count`(endpoint: String) {
-        setupMutationMock(endpoint, null)
+        setupMutationMock(endpoint, DEFAULT_MIN_PROPORTION)
 
         val mvcResult = mockMvc.perform(getSample("$endpoint?country=Switzerland"))
             .andExpect(status().isOk)
             .andReturn()
 
-        val response = ObjectMapper().readValue(mvcResult.response.contentAsString, Map::class.java)
+        val response = ObjectMapper().readValue<Map<*, *>>(mvcResult.response.contentAsString)
         val data = response["data"] as List<*>
         val firstDataObject = data[0] as Map<*, *>
 
@@ -261,7 +263,7 @@ class LapisControllerTest(
 
     private fun setupMutationMock(
         endpoint: String,
-        minProportion: Double?,
+        minProportion: Double = DEFAULT_MIN_PROPORTION,
     ) {
         if (endpoint == "/nucleotideMutations") {
             every {
