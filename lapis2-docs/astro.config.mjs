@@ -87,7 +87,7 @@ export default defineConfig({
                     label: 'Architecture and Dev Docs',
                     items: [
                         {
-                            label: 'Introduction',
+                            label: 'Introduction and Goals',
                             link: '/architecture-and-dev-docs/introduction',
                         },
                         {

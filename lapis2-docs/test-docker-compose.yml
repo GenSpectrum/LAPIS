@@ -3,11 +3,9 @@ services:
   lapis-docs:
     image: ${IMAGE}
     ports:
-      - "3000:3000"
+      - "4321:3000"
     volumes:
       - ../siloLapisTests/testData/testDatabaseConfig.yaml:/config/database_config.yaml
       - ../siloLapisTests/testData/reference_genomes.json:/config/reference_genomes.json
     environment:
-      LAPIS_URL: localhost:8080
-      BASE_URL: /docs/
-      ASTRO_SITE: http://localhost:8080/docs/
+      LAPIS_URL: http://localhost:8080

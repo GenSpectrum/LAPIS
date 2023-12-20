@@ -5,7 +5,7 @@ description: A step-by-step wizard to help you generate a request
 
 import { getConfig } from '../../../config.ts';
 import { getLapisUrl } from '../../../lapisUrl.js';
-import { getReferenceGenomes } from "../../../reference_genomes.js";
+import { getReferenceGenomes } from '../../../reference_genomes.js';
 import { QueryGenerator } from '../../../components/QueryGenerator/QueryGenerator.tsx';
 
 <QueryGenerator client:load config={getConfig()} referenceGenomes={getReferenceGenomes()} lapisUrl={getLapisUrl()} />
