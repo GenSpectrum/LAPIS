@@ -5,7 +5,7 @@ description: Introduction to the architecture and the developers docs of LAPIS
 
 This document was inspired by the [arc42 template](https://arc42.org/).
 
-It describes LAPIS (**L**ightweight **API** for **S**equences),
+It describes LAPIS (**L**ightweight **API** for **S**equences) and SILO,
 which is a platform to give easy access to genomic sequence data alongside metadata of the sequenced probes.
 It is used to filter potentially large sequence data and return the result to the user through web access,
 so that a user can develop their own evaluation of the data.
@@ -33,10 +33,8 @@ The following goals have been established for this system:
 | Requirement                             |                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------- |
 | Create an instance for a given organism | Create an instance of the whole system by giving a configuration for a organism. |
-| Load data                               | Load sequence data that has to be provided in a defined format.                  |
-| Store data                              | Store data in compressed form.                                                   |
+| Store data efficiently                  | Store data in compressed form.                                                   |
 | Provide web access to data              | Provide endpoints for custom user queries to the data.                           |
-| Provide statistics                      | Provide monitoring and statistics of usage of the system.                        |
 
 ## Quality Goals
 
@@ -49,7 +47,7 @@ The following goals have been established for this system:
 | Performance efficiency | Time behaviour   | It is possible to query millions of sequences in less than a second.                                              |
 |                        | Scalability      | Performance (query response time, memory usage) grows at most linearly with the number of stored sequences.       |
 |                        |                  |                                                                                                                   |
-| Maintainability        | Reusability      | It is possible to use LAPIS with any other database that implements the SILO query language                       |
+| Maintainability        | Reusability      | It is possible to use LAPIS with any other database that implements the SILO query language.                      |
 |                        | Testability      | SILO-LAPIS is well tested on end to end scope. The tests serve as examples for users and maintainers.             |
 
 ## Stakeholders

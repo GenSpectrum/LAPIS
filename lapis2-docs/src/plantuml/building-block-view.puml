@@ -1,0 +1,16 @@
+@startuml
+
+node SILO {
+  package "SILO Api" {
+    component "Query Engine" as query
+    component "Runtime Database" as db
+    "Web API" -> query
+    query -> db
+  }
+
+  package "SILO Preprocessing" {
+    component "Preprocessing Database"
+  }
+}
+
+@enduml

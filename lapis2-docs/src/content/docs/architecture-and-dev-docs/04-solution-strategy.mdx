@@ -1,0 +1,58 @@
+---
+title: Solution Strategy
+description: How LAPIS and SILO aim to solve the problem
+---
+
+## Setting Up Your Own Instance
+
+We want to make it as easy as possible for you to set up your own instance of SILO-LAPIS for an organism of your
+choice.
+We solve this in two aspects:
+
+-   **Configuration:** LAPIS and SILO are highly configurable regarding the data that they process.
+    The available data and the reference genome can be configured to fit your needs.
+-   **Deployment:** We provide Docker containers for LAPIS and SILO that are ready to use.
+    You only need to provide the data and the configuration.
+    We also provide examples and tutorials to help you get started.
+
+## Query Performance
+
+LAPIS and SILO are designed to process queries as fast as possible.
+One should be able to search for mutations in millions of samples in a matter of seconds.
+
+SILO contains an in-memory database that holds the data.
+The data is stored column-wise in bitmaps,
+since the nature of most queries targets columns.
+
+Example: A common query is to search for a mutation at a certain position in the genome.
+SILO stores each position in the genome as a separate column,
+thus the filter becomes trivial (reading the respective precomputed bitmap).
+The bitmap is interpreted as the filter result (having a `1` in the positions of the samples that match the filter).
+
+### Preprocessing
+
+Precomputing the bitmaps is a time-consuming task.
+SILO does this ahead of time in a separate step, the preprocessing.
+The preprocessing is a separate part of SILO that builds the in-memory database from the input files
+and serializes it to disk.
+At runtime, SILO can then load the serialized database from disk.
+Having the preprocessing as a separate step has major advantages:
+
+-   The preprocessing can be done on a different machine than the one that runs the queries.
+-   The startup time of SILO is reduced, since it only needs to load the database from disk.
+    -   Scalability: Thus, it is possible to quickly launch several instances of SILO from the same preprocessing result.
+
+## Storage Efficiency
+
+SILO uses [Roaring bitmaps](https://roaringbitmap.org/) to store the data,
+since they are designed to be space-efficient.
+Internally, Roaring bitmaps store data in chunks.
+SILO aims to sort sequences such that
+similar sequences (i.e. sequences that have similar mutations) are stored in the same chunk.
+The goal is to have many bitmaps that are either almost completely empty or almost completely full.
+This will result in a very high compression ratio.
+
+## Easy Access To Data
+
+SILO offers a rather complex query language to query the data.
+LAPIS aims to simplify the usage of SILO by providing a simple REST API.
