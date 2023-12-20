@@ -1,0 +1,25 @@
+@startuml
+
+cloud {
+  file "input files" as input
+}
+folder "Folder with serialized states" as files {
+  file "oldstate.silo"
+  file "newstate.silo"
+}
+component "SILO Preprocessing" as siloPreprocessing #lightblue
+package "SILO-LAPIS runtime" {
+  component "SILO Api" as siloApi #lightblue
+  component LAPIS #lightblue
+}
+actor User
+
+User -> LAPIS : simplified query
+User <- LAPIS : data
+LAPIS -> siloApi : SILO query
+LAPIS <- siloApi : data
+siloApi <- files : reads newest serialized state
+siloPreprocessing --> files : serializes state
+input --> siloPreprocessing : reads externally provided input files
+
+@enduml

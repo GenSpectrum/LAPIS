@@ -17,6 +17,9 @@ const pages = [
     'Introduction and Goals',
     'Architecture and Constraints',
     'System Scope and Context',
+    'Solution Strategy',
+    'Building Block View',
+    'Runtime View',
     'Glossary',
 ];
 

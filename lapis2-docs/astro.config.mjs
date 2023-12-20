@@ -88,19 +88,31 @@ export default defineConfig({
                     items: [
                         {
                             label: 'Introduction and Goals',
-                            link: '/architecture-and-dev-docs/introduction',
+                            link: '/architecture-and-dev-docs/01-introduction',
                         },
                         {
                             label: 'Architecture and Constraints',
-                            link: '/architecture-and-dev-docs/architecture-and-constraints',
+                            link: '/architecture-and-dev-docs/02-architecture-and-constraints',
                         },
                         {
                             label: 'System Scope and Context',
-                            link: '/architecture-and-dev-docs/system-scope-and-context',
+                            link: '/architecture-and-dev-docs/03-system-scope-and-context',
+                        },
+                        {
+                            label: 'Solution Strategy',
+                            link: '/architecture-and-dev-docs/04-solution-strategy',
+                        },
+                        {
+                            label: 'Building Block View',
+                            link: '/architecture-and-dev-docs/05-building-block-view',
+                        },
+                        {
+                            label: 'Runtime View',
+                            link: '/architecture-and-dev-docs/06-runtime-view',
                         },
                         {
                             label: 'Glossary',
-                            link: '/architecture-and-dev-docs/glossary',
+                            link: '/architecture-and-dev-docs/99-glossary',
                         },
                     ],
                 },
