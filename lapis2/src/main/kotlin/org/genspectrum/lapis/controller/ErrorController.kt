@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.springframework.boot.autoconfigure.web.ErrorProperties
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
 import org.springframework.boot.web.servlet.error.ErrorAttributes
@@ -16,7 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 private val log = KotlinLogging.logger { }
 
 @Component
-class ErrorController(errorAttributes: ErrorAttributes) :
+class ErrorController(private val databaseConfig: DatabaseConfig, errorAttributes: ErrorAttributes) :
     BasicErrorController(errorAttributes, ErrorProperties()) {
     @RequestMapping(produces = [MediaType.TEXT_HTML_VALUE])
     override fun errorHtml(
@@ -32,7 +33,7 @@ class ErrorController(errorAttributes: ErrorAttributes) :
 
         log.debug { "Generated url $url to Swagger UI in 'not found page'" }
 
-        modelAndView.view = NotFoundView(url)
+        modelAndView.view = NotFoundView(databaseConfig.schema.instanceName, url)
         return modelAndView
     }
 
@@ -42,7 +43,7 @@ class ErrorController(errorAttributes: ErrorAttributes) :
     }
 }
 
-data class NotFoundView(private val url: String?) : View {
+data class NotFoundView(private val instanceName: String, private val url: String?) : View {
     override fun render(
         model: MutableMap<String, *>?,
         request: HttpServletRequest,
@@ -56,7 +57,7 @@ data class NotFoundView(private val url: String?) : View {
                 <title>Error 404</title>
             </head>
             <body>
-                <h1>LAPIS</h1>
+                <h1>LAPIS - $instanceName</h1>
                 <h3>Page not found!</h3>
                 <a href="$url">Visit our swagger-ui</a>
             </body>
