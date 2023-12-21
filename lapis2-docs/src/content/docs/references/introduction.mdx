@@ -1,0 +1,26 @@
+---
+title: Introduction
+description: Introduction to References
+---
+
+This section will cover the basics of how to use LAPIS.
+
+## Endpoints
+
+LAPIS can be accessed by calling different endpoints. Each endpoint has a different purpose and will return different data.
+For example the `GET /sample/aggregated` endpoint will return how many sequences fulfill the provided filter criteria. Each endpoint
+can be called using different HTTP methods, namely `GET` and `POST`. Both methods will return the same data, only the way the filter criteria is
+provided is different.
+
+You can find the different endpoints in the [Open API / Swagger](/references/open-api-definition/), alongside a convenient way to test them out using Swagger-UI.
+
+## Filters
+
+The results of each endpoint can be filtered by different parameters. These parameters are passed as query parameters in the URL for `GET` requests or in the body for `POST` requests.
+For example, if you want to know how many sequences are from Germany, you can call
+`GET /sample/aggregated?country=Germany`. You can find the different possible filters in [Filters](/references/filters/) and try them out at [Open API / Swagger](/references/open-api-definition/).
+
+## Fields
+
+Using fields you can specify how the returned data is grouped. For example, if you want to know how many sequences are from each country,
+you can call `GET /sample/aggregated?fields=country`. You can find the different possible fields in [Fields](/references/fields/) and try them out at [Open API / Swagger](/references/open-api-definition/).

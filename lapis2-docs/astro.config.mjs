@@ -35,8 +35,8 @@ export default defineConfig({
                     label: 'References',
                     items: [
                         {
-                            label: 'Endpoints',
-                            link: '/references/endpoints/',
+                            label: 'Introduction',
+                            link: '/references/introduction/',
                         },
                         {
                             label: 'Fields',

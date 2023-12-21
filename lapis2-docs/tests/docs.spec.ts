@@ -4,7 +4,7 @@ import { baseUrl } from './queryGenerator.page';
 const pages = [
     'Introduction',
     'Generate your request',
-    'Endpoints',
+    'Introduction',
     'Fields',
     'Filters',
     'Open API / Swagger',
@@ -44,8 +44,12 @@ async function clickOnAllNextButtons(page: Page) {
 }
 
 async function clickOnAllLinksInNavigation(page: Page) {
+    const clickedLinks: Record<string, number> = {};
+
     for (const pageName of pages) {
-        await page.getByRole('link', { name: pageName, exact: true }).click();
+        const alreadyClickedTimes = clickedLinks[pageName] || 0;
+        await page.getByRole('link', { name: pageName, exact: true }).nth(alreadyClickedTimes).click();
+        clickedLinks[pageName] = alreadyClickedTimes + 1;
         await expect(page).toHaveTitle(new RegExp(`^${pageName}`));
     }
 }
