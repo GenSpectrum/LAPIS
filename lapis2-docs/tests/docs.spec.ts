@@ -14,6 +14,8 @@ const pages = [
     'Request methods: GET and POST',
     'Response format',
     'Variant query',
+    'Plot the global distribution of all sequences in R',
+    'Start your own instance of LAPIS and SILO',
     'Introduction and Goals',
     'Architecture and Constraints',
     'System Scope and Context',
