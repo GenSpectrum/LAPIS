@@ -1,0 +1,75 @@
+---
+title: Plot the global distribution of all sequences in R
+description: Plot the global distribution of all sequences in R
+---
+
+This tutorial will guide you through the process of plotting the global distribution of all sequences in R by fetching data from the open SARS-CoV-2 LAPIS API of CoV-Spectrum. It is able to aggregate data. You will learn how to query the API, check for errors and deprecation, parse data as a data frame, and create a plot using the ggplot2 package.
+
+## Prerequisites
+
+You should have a basic understanding of R programming and the ggplot2 package.
+
+## Step 1: Query data from the LAPIS API
+
+First, you will use the `fromJSON` function from the jsonlite package to query the LAPIS API:
+
+```r
+library(jsonlite)
+response <- fromJSON("https://lapis.cov-spectrum.org/open/sample/aggregated?fields=region")
+```
+
+The URL used in the query is structured as follows:
+
+-   `https://lapis.cov-spectrum.org/open`: This is the base URL for the LAPIS instance.
+-   `/sample/aggregated`: This endpoint retrieves aggregated data
+-   `?fields=region`: This query parameter specifies that we want to aggregate the data by the `region` field.
+
+By querying this URL, you fetch the aggregated data on sequences stratified by their regions.
+
+## Step 2: Check for errors
+
+Before proceeding, it's important to check if there are any errors in the API response:
+
+```r
+errors <- response$errors
+if (length(errors) > 0) {
+  stop("Errors")
+}
+```
+
+If there are errors, the program will stop with an error message.
+
+## Step 3: Parse data from JSON as a data frame
+
+Now that you have verified the API response, you can parse the data into a data frame:
+
+```r
+data <- response$data
+```
+
+## Step 4: Create a plot using ggplot2
+
+Finally, you will use the ggplot2 package to create a polar bar plot of the global distribution of sequences by region:
+
+```r
+library(ggplot2)
+
+ggplot(
+  data,
+  aes(x = "", y = count, fill = region)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start = 0) +
+  theme_minimal() +
+  theme(
+    panel.grid=element_blank(),
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_blank())
+```
+
+This will generate a polar bar plot displaying the global distribution of all sequences by region.
+
+[//]: # 'TODO #540: Insert image'
+[//]: # 'The output should look as follows:'

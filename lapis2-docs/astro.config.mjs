@@ -84,6 +84,29 @@ export default defineConfig({
                     ]),
                 },
                 {
+                    label: 'Tutorials',
+                    items: [
+                        {
+                            label: 'User tutorials',
+                            items: [
+                                {
+                                    label: 'Plot the global distribution of all sequences in R',
+                                    link: '/tutorials/user-tutorials/plot-global-distribution-of-sequences-in-r',
+                                },
+                            ],
+                        },
+                        {
+                            label: 'Maintainer tutorials',
+                            items: [
+                                {
+                                    label: 'Start your own instance of LAPIS and SILO',
+                                    link: '/tutorials/maintainer-tutorials/start-your-own-instance-of-lapis-and-silo',
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
                     label: 'Architecture and Dev Docs',
                     items: [
                         {
