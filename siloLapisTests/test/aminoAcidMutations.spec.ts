@@ -10,7 +10,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
-    expect(result.data).to.have.length(107);
+    expect(result.data).to.have.length(132);
 
     const rareMutationProportion = result.data.find(
       mutationData => mutationData.mutation === mutationWithLessThan10PercentProportion
@@ -94,7 +94,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       },
     });
 
-    expect(result.data).to.have.length(55);
+    expect(result.data).to.have.length(68);
     expect(result.data[0]).to.deep.equal(expectedFirstResultWithNucleotideInsertion);
   });
 
@@ -111,7 +111,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       },
     });
 
-    expect(result.data).to.have.length(25);
+    expect(result.data).to.have.length(32);
     expect(result.data[0]).to.deep.equal(expectedFirstResultWithAminoAcidInsertion);
   });
 
