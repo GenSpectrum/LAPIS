@@ -1,29 +1,58 @@
 package org.genspectrum.lapis.sqlForChat
-
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import net.sf.jsqlparser.JSQLParserException
-import net.sf.jsqlparser.expression.*
+import net.sf.jsqlparser.expression.DoubleValue
+import net.sf.jsqlparser.expression.Expression
 import net.sf.jsqlparser.expression.Function
+import net.sf.jsqlparser.expression.LongValue
+import net.sf.jsqlparser.expression.NotExpression
+import net.sf.jsqlparser.expression.Parenthesis
+import net.sf.jsqlparser.expression.StringValue
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression
-import net.sf.jsqlparser.expression.operators.relational.*
+import net.sf.jsqlparser.expression.operators.relational.Between
+import net.sf.jsqlparser.expression.operators.relational.ComparisonOperator
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo
+import net.sf.jsqlparser.expression.operators.relational.GeometryDistance
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals
+import net.sf.jsqlparser.expression.operators.relational.MinorThan
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.Column
 import net.sf.jsqlparser.schema.Table
-import net.sf.jsqlparser.statement.select.*
+import net.sf.jsqlparser.statement.select.PlainSelect
+import net.sf.jsqlparser.statement.select.Select
+import net.sf.jsqlparser.statement.select.SelectBody
+import net.sf.jsqlparser.statement.select.SelectExpressionItem
+import net.sf.jsqlparser.statement.select.SelectItem
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.model.NEXTCLADE_PANGO_LINEAGE_COLUMN
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.MutationData
-import org.genspectrum.lapis.silo.*
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
+import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.Not
+import org.genspectrum.lapis.silo.NucleotideSymbolEquals
+import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PangoLineageEquals
+import org.genspectrum.lapis.silo.SiloAction
+import org.genspectrum.lapis.silo.SiloClient
+import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
-import java.util.*
-import java.util.function.Predicate
+import kotlin.Comparator
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+import kotlin.math.min
 
 @Service
 class SqlClient(
@@ -31,7 +60,6 @@ class SqlClient(
     private val siloClient: SiloClient,
     private val objectMapper: ObjectMapper,
 ) {
-
     /**
      * Parses a SQL and checks that only supported SQL constructs are used. There is one limitation: it does not check
      * the content of the WHERE and HAVING clauses. This shall be done by the validate() function.
@@ -50,8 +78,8 @@ class SqlClient(
             val selectBody: SelectBody = statement.selectBody
             if (selectBody !is PlainSelect) throw UnsupportedSqlException()
             if ( // The distinct keyword shall be ignored for now. It shouldn't be a problem in most cases as we
-            // copy over the values in SELECT into GROUP BY
-            //plainSelect.getDistinct() != null ||
+                // copy over the values in SELECT into GROUP BY
+                // plainSelect.getDistinct() != null ||
                 selectBody.intoTables != null ||
                 selectBody.joins != null ||
                 selectBody.fetch != null ||
@@ -201,7 +229,9 @@ class SqlClient(
         }
     }
 
-    private fun extractSelectExpressionsAndAliases(selectItems: List<SelectItem>): Pair<MutableMap<String, String>, MutableList<String>> {
+    private fun extractSelectExpressionsAndAliases(
+        selectItems: List<SelectItem>,
+    ): Pair<MutableMap<String, String>, MutableList<String>> {
         val aliasToExpression = mutableMapOf<String, String>()
         val selectExpressions = mutableListOf<String>()
         for (selectItem in selectItems) {
@@ -272,7 +302,7 @@ class SqlClient(
             var leftName: String = having.leftExpression.toString()
             val right: Expression = having.rightExpression
             if (query.aliasToExpression.containsKey(leftName)) {
-                leftName = query.aliasToExpression.get(leftName)!!
+                leftName = query.aliasToExpression[leftName]!!
             }
             if (leftName != "count(*)") throw UnsupportedSqlException()
             if (!(right is LongValue || right is DoubleValue)) throw UnsupportedSqlException()
@@ -284,7 +314,7 @@ class SqlClient(
         if (orderBy != null) {
             // If an alias is used, it will be resolved and replaced.
             if (query.aliasToExpression.containsKey(orderBy)) {
-                orderBy = query.aliasToExpression.get(orderBy)!!
+                orderBy = query.aliasToExpression[orderBy]!!
                 query.orderByExpression = orderBy
             }
             val metadataField = validateAndRewriteMetadataField(orderBy)
@@ -320,7 +350,7 @@ class SqlClient(
             var leftName = having.leftExpression.toString()
             val right = having.rightExpression
             if (query.aliasToExpression.containsKey(leftName)) {
-                leftName = query.aliasToExpression.get(leftName)!!
+                leftName = query.aliasToExpression[leftName]!!
             }
             if (leftName != "count(*)" && leftName != "proportion()") throw UnsupportedSqlException()
             if (!(right is LongValue || right is DoubleValue)) throw UnsupportedSqlException()
@@ -332,7 +362,7 @@ class SqlClient(
         if (orderBy != null) {
             // If an alias is used, it will be resolved and replaced.
             if (query.aliasToExpression.containsKey(orderBy)) {
-                orderBy = query.aliasToExpression.get(orderBy)
+                orderBy = query.aliasToExpression[orderBy]
                 query.orderByExpression = orderBy
             }
             if (!(orderBy == "mutation" || orderBy == "count(*)" || orderBy == "proportion()")) {
@@ -371,7 +401,7 @@ class SqlClient(
                 // The operator must also make sense.
                 val columnType = metadataColumn.type
                 when (columnType) {
-                    org.genspectrum.lapis.config.MetadataType.STRING, org.genspectrum.lapis.config.MetadataType.PANGO_LINEAGE -> {
+                    MetadataType.STRING, MetadataType.PANGO_LINEAGE -> {
                         if (right !is StringValue) throw UnsupportedSqlException()
                         val expr = if (metadataColumn.name == NEXTCLADE_PANGO_LINEAGE_COLUMN) {
                             PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, right.value, true)
@@ -385,7 +415,7 @@ class SqlClient(
                         }
                     }
 
-                    org.genspectrum.lapis.config.MetadataType.DATE -> {
+                    MetadataType.DATE -> {
                         if (right !is StringValue) throw UnsupportedSqlException()
                         val date = try {
                             LocalDate.parse(right.value)
@@ -496,7 +526,7 @@ class SqlClient(
      * Returns a valid metadata or null
      */
     private fun validateAndRewriteMetadataField(field: String): DatabaseMetadata? {
-        if (field.lowercase(Locale.getDefault()).contains("lineage")) {
+        if (field.lowercase().contains("lineage")) {
             return databaseConfig.schema.metadata.find { it.name == NEXTCLADE_PANGO_LINEAGE_COLUMN }
         }
         val fieldMetadata = databaseConfig.schema.metadata.find { it.name == field }
@@ -524,7 +554,7 @@ class SqlClient(
             var leftName = having.leftExpression.toString()
             val right = having.rightExpression
             if (query.aliasToExpression.containsKey(leftName)) {
-                leftName = query.aliasToExpression.get(leftName)!!
+                leftName = query.aliasToExpression[leftName]!!
             }
             if (leftName != "count(*)") {
                 throwUnexpected()
@@ -602,7 +632,10 @@ class SqlClient(
         return objectMapper.writeValueAsString(result)
     }
 
-    private fun executeMutationsQuery(query: Query, isNucleotide: Boolean): String {
+    private fun executeMutationsQuery(
+        query: Query,
+        isNucleotide: Boolean,
+    ): String {
         val throwUnexpected = fun(): Nothing {
             throw RuntimeException("Unexpected error: The validate function should have checked that already.")
         }
@@ -677,21 +710,23 @@ class SqlClient(
         return objectMapper.writeValueAsString(result)
     }
 
-    private fun <T> limitAndOffset(data: List<T>, query: Query): List<T> {
+    private fun <T> limitAndOffset(
+        data: List<T>,
+        query: Query,
+    ): List<T> {
         // OFFSET
         var d = data
         val offset = query.offset
         if (offset != null) {
-            d = d.subList(Math.min(offset, d.size), d.size)
+            d = d.subList(min(offset, d.size), d.size)
         }
 
         // LIMIT
         val limit = query.limit
         if (limit != null) {
-            d = d.subList(0, Math.min(limit, d.size))
+            d = d.subList(0, min(limit, d.size))
         }
 
         return d
     }
-
 }
