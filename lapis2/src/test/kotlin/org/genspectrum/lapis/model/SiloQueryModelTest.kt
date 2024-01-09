@@ -4,7 +4,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
@@ -32,7 +32,7 @@ class SiloQueryModelTest {
     lateinit var siloClientMock: SiloClient
 
     @MockK
-    lateinit var referenceGenomeMock: ReferenceGenome
+    lateinit var referenceGenomeSchemaMock: ReferenceGenomeSchema
 
     @MockK
     lateinit var siloFilterExpressionMapperMock: SiloFilterExpressionMapper
@@ -42,14 +42,14 @@ class SiloQueryModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeMock)
+        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock)
     }
 
     @Test
     fun `aggregate calls the SILO client with an aggregated action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<AggregationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns true
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.getAggregated(
             SequenceFiltersRequestWithFields(
@@ -73,7 +73,7 @@ class SiloQueryModelTest {
     fun `computeNucleotideMutationProportions calls the SILO client with a mutations action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<List<MutationData>>>()) } returns emptyList()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns true
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.5),
@@ -92,7 +92,7 @@ class SiloQueryModelTest {
             MutationData("A1234B", 1234, 0.1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns true
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result = underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
@@ -107,7 +107,7 @@ class SiloQueryModelTest {
             MutationData("A1234B", 1234, 0.1234, "someSegmentName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns false
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
         val result = underTest.computeNucleotideMutationProportions(
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
@@ -136,7 +136,7 @@ class SiloQueryModelTest {
             InsertionData(42, "ABCD", 1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns true
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result = underTest.getNucleotideInsertions(
             SequenceFiltersRequest(
@@ -158,7 +158,7 @@ class SiloQueryModelTest {
             InsertionData(42, "ABCD", 1234, "someSequenceName"),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { referenceGenomeMock.isSingleSegmented() } returns false
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
         val result = underTest.getNucleotideInsertions(
             SequenceFiltersRequest(

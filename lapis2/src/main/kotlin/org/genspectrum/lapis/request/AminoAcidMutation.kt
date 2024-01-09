@@ -3,7 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
@@ -13,7 +13,7 @@ data class AminoAcidMutation(val gene: String, val position: Int, val symbol: St
     companion object {
         fun fromString(
             aminoAcidMutation: String,
-            referenceGenome: ReferenceGenome,
+            referenceGenomeSchema: ReferenceGenomeSchema,
         ): AminoAcidMutation {
             val match = AMINO_ACID_MUTATION_REGEX.find(aminoAcidMutation)
                 ?: throw BadRequestException("Invalid amino acid mutation: $aminoAcidMutation")
@@ -22,7 +22,7 @@ data class AminoAcidMutation(val gene: String, val position: Int, val symbol: St
 
             val geneLowerCase = matchGroups["gene"]?.value?.lowercase()
                 ?: throw BadRequestException("Invalid amino acid mutation: $aminoAcidMutation: Did not find gene")
-            val geneName = referenceGenome.getGeneFromLowercaseName(geneLowerCase).name
+            val geneName = referenceGenomeSchema.getGeneFromLowercaseName(geneLowerCase).name
 
             val position = matchGroups["position"]?.value?.toInt()
                 ?: throw BadRequestException(
@@ -45,17 +45,17 @@ private val AMINO_ACID_MUTATION_REGEX =
 
 @JsonComponent
 class AminoAcidMutationDeserializer(
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : JsonDeserializer<AminoAcidMutation>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = AminoAcidMutation.fromString(p.valueAsString, referenceGenome)
+    ) = AminoAcidMutation.fromString(p.valueAsString, referenceGenomeSchema)
 }
 
 @Component
 class StringToAminoAcidMutationConverter(
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : Converter<String, AminoAcidMutation> {
-    override fun convert(source: String) = AminoAcidMutation.fromString(source, referenceGenome)
+    override fun convert(source: String) = AminoAcidMutation.fromString(source, referenceGenomeSchema)
 }

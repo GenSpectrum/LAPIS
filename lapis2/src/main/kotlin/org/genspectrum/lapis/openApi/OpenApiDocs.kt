@@ -7,7 +7,7 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.OpennessLevel
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.SequenceFilterFieldName
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
@@ -37,7 +37,7 @@ import org.genspectrum.lapis.response.COUNT_PROPERTY
 fun buildOpenApiSchema(
     sequenceFilterFields: SequenceFilterFields,
     databaseConfig: DatabaseConfig,
-    referenceGenome: ReferenceGenome,
+    referenceGenomeSchema: ReferenceGenomeSchema,
 ): OpenAPI {
     return OpenAPI()
         .components(
@@ -102,7 +102,7 @@ fun buildOpenApiSchema(
                         getSequenceFilters(
                             databaseConfig,
                             sequenceFilterFields,
-                            aminoAcidSequenceFieldsEnum(referenceGenome, databaseConfig),
+                            aminoAcidSequenceFieldsEnum(referenceGenomeSchema, databaseConfig),
                         ),
                     ),
                 )
@@ -112,7 +112,7 @@ fun buildOpenApiSchema(
                         getSequenceFilters(
                             databaseConfig,
                             sequenceFilterFields,
-                            nucleotideSequenceFieldsEnum(referenceGenome, databaseConfig),
+                            nucleotideSequenceFieldsEnum(referenceGenomeSchema, databaseConfig),
                         ),
                     ),
                 )
@@ -202,17 +202,17 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(aminoAcidSequenceFieldsEnum(referenceGenome, databaseConfig)),
+                    arraySchema(aminoAcidSequenceFieldsEnum(referenceGenomeSchema, databaseConfig)),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(nucleotideSequenceFieldsEnum(referenceGenome, databaseConfig)),
+                    arraySchema(nucleotideSequenceFieldsEnum(referenceGenomeSchema, databaseConfig)),
                 )
                 .addSchemas(
                     SEGMENT_SCHEMA,
-                    fieldsEnum(additionalFields = referenceGenome.nucleotideSequences.map { it.name }),
+                    fieldsEnum(additionalFields = referenceGenomeSchema.nucleotideSequences.map { it.name }),
                 )
-                .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenome.genes.map { it.name }))
+                .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenomeSchema.genes.map { it.name }))
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(FORMAT_SCHEMA, formatSchema()),
@@ -505,14 +505,19 @@ private fun mutationsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("mutat
 private fun insertionsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("insertion", "count"))
 
 private fun aminoAcidSequenceFieldsEnum(
-    referenceGenome: ReferenceGenome,
+    referenceGenomeSchema: ReferenceGenomeSchema,
     databaseConfig: DatabaseConfig,
-) = fieldsEnum(emptyList(), referenceGenome.genes.map { it.name } + databaseConfig.schema.primaryKey)
+) = fieldsEnum(emptyList(), referenceGenomeSchema.genes.map { it.name } + databaseConfig.schema.primaryKey)
 
 private fun nucleotideSequenceFieldsEnum(
-    referenceGenome: ReferenceGenome,
+    referenceGenomeSchema: ReferenceGenomeSchema,
     databaseConfig: DatabaseConfig,
-) = fieldsEnum(emptyList(), referenceGenome.nucleotideSequences.map { it.name } + databaseConfig.schema.primaryKey)
+) = fieldsEnum(
+    emptyList(),
+    referenceGenomeSchema.nucleotideSequences.map {
+        it.name
+    } + databaseConfig.schema.primaryKey,
+)
 
 private fun fieldsEnum(
     databaseConfig: List<DatabaseMetadata> = emptyList(),

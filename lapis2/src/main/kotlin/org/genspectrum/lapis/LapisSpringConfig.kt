@@ -4,10 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE
+import org.genspectrum.lapis.config.REFERENCE_GENOME_ENV_VARIABLE_NAME
+import org.genspectrum.lapis.config.REFERENCE_GENOME_FILENAME_ARGS_NAME
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.config.ReferenceSequence
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
@@ -27,8 +31,8 @@ class LapisSpringConfig {
     fun openAPI(
         sequenceFilterFields: SequenceFilterFields,
         databaseConfig: DatabaseConfig,
-        referenceGenome: ReferenceGenome,
-    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenome)
+        referenceGenomeSchema: ReferenceGenomeSchema,
+    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema)
 
     @Bean
     fun databaseConfig(
@@ -70,11 +74,22 @@ class LapisSpringConfig {
     ) = dataOpennessAuthorizationFilterFactory.create()
 
     @Bean
-    fun referenceGenome(
+    fun referenceGenomeSchema(
         @Value("\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
         @Value("\${$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX}") genes: List<String>,
-    ) = ReferenceGenome(
-        nucleotideSegments.map { ReferenceSequence(it) },
-        genes.map { ReferenceSequence(it) },
+    ) = ReferenceGenomeSchema(
+        nucleotideSegments.map { ReferenceSequenceSchema(it) },
+        genes.map { ReferenceSequenceSchema(it) },
     )
+
+    @Bean
+    fun referenceGenome(
+        @Value("\${$REFERENCE_GENOME_FILENAME_ARGS_NAME:#{null}}") referenceGenomeFilename: String?,
+    ): ReferenceGenome {
+        val filename = referenceGenomeFilename
+            ?: System.getenv(REFERENCE_GENOME_ENV_VARIABLE_NAME)
+            ?: throw IllegalArgumentException(NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE)
+
+        return ReferenceGenome.readFromFile(filename)
+    }
 }

@@ -30,4 +30,23 @@ class InfoControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.dataVersion").value("1234"))
     }
+
+    @Test
+    fun `GET databaseConfig`() {
+        mockMvc.perform(getSample(DATABASE_CONFIG_ROUTE))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.schema.instanceName").value("sars_cov-2_minimal_test_config"))
+            .andExpect(jsonPath("\$.schema.metadata[0].name").value("primaryKey"))
+            .andExpect(jsonPath("\$.schema.metadata[0].type").value("string"))
+    }
+
+    @Test
+    fun `GET referenceGenome`() {
+        mockMvc.perform(getSample(REFERENCE_GENOME_ROUTE))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.nucleotideSequences[0].name").value("main"))
+            .andExpect(jsonPath("\$.nucleotideSequences[0].sequence").value("ATTA"))
+            .andExpect(jsonPath("\$.genes[0].name").value("E"))
+            .andExpect(jsonPath("\$.genes[0].sequence").value("MYSFVSEET*"))
+    }
 }

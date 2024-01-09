@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.config.ReferenceSequence
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -20,16 +20,16 @@ import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 
 class VariantQueryFacadeTest {
-    private val dummyReferenceGenome = ReferenceGenome(
+    private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(
         listOf(
-            ReferenceSequence("main"),
+            ReferenceSequenceSchema("main"),
         ),
         listOf(
-            ReferenceSequence("S"),
-            ReferenceSequence("ORF1a"),
+            ReferenceSequenceSchema("S"),
+            ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = VariantQueryFacade(dummyReferenceGenome)
+    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
