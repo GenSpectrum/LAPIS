@@ -70,15 +70,23 @@ export async function compareRequests(requestV1: URL, requestV2: URL) {
   const dataV1 = await getData(resultV1);
   const dataV2 = await getData(resultV2);
 
-  const dataV1Sorted = lodash.sortBy(dataV1, getFieldToSortBy(requestV2));
-  const dataV2Sorted = lodash.sortBy(dataV2, getFieldToSortBy(requestV2));
+  const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual)
+  const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual)
 
-  const isEqual = lodash.isEqual(dataV1Sorted, dataV2Sorted);
-
-  if (!isEqual) {
+  if (notInV1.length > 0 || notInV2.length > 0) {
     // to get the nice difference view
     console.log(requestV1.toString());
     console.log(requestV2.toString());
+
+    const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual)
+    console.log('Not in v1: ', notInV1)
+
+    const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual)
+    console.log('Not in v2: ', notInV2)
+
+    const dataV1Sorted = lodash.sortBy(dataV1, getFieldToSortBy(requestV2));
+    const dataV2Sorted = lodash.sortBy(dataV2, getFieldToSortBy(requestV2));
+
     expect(dataV1Sorted).equals(dataV2Sorted);
   }
 }
@@ -180,13 +188,17 @@ function addSearchParams(url: URL, logLine: LogLine, lapisVersion: LapisVersion)
         return;
       }
 
-      value.forEach((value) => {
-        url.searchParams.append(mapSearchParam(key, lapisVersion), value.toString());
-      })
-    } else {
-      if (key === 'country') {
-        return;
+      switch (lapisVersion) {
+        case 'v1':
+          url.searchParams.append(mapSearchParam(key, lapisVersion), value.join(','));
+          break;
+        case 'v2':
+          value.forEach((value) => {
+            url.searchParams.append(mapSearchParam(key, lapisVersion), value.toString());
+          })
+          break;
       }
+    } else {
       url.searchParams.append(key, value.toString());
     }
   });
