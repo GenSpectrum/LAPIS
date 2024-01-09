@@ -192,9 +192,13 @@ data class AminoAcidInsertionContains(val position: Int, val value: String, val 
 
 data object True : SiloFilterExpression("True")
 
-data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And")
+data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And") {
+    constructor(vararg children: SiloFilterExpression) : this(children.toList())
+}
 
-data class Or(val children: List<SiloFilterExpression>) : SiloFilterExpression("Or")
+data class Or(val children: List<SiloFilterExpression>) : SiloFilterExpression("Or") {
+    constructor(vararg children: SiloFilterExpression) : this(children.toList())
+}
 
 data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")
 

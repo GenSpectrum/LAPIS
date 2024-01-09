@@ -4,6 +4,7 @@ description: Mutation filters
 ---
 
 import AminoAcidMutationExample from '../../../components/MutationFilters/AminoAcidMutationExample.astro';
+import MaybeAminoAcidMutationExample from '../../../components/MutationFilters/MaybeAminoAcidMutationExample.astro';
 import GeneNames from '../../../components/MutationFilters/GeneNames.astro';
 import NucleotideMutations from '../../../components/MutationFilters/NucleotideMutations.astro';
 
@@ -19,3 +20,9 @@ It can also be `-` for deletion and `X` for unknown. **Example:** <AminoAcidMuta
 The `<base>` can be omitted to filter for any mutation.
 You can write a `.` for the `<base>` to filter for sequences for which it is confirmed that no mutation occurred,
 i.e. has the same base as the reference genome at the specified position.
+
+:::note
+Both, nucleotide and amino acid mutation filter, also support `Maybe` queries.
+Read more in [ambiguous symbols](/concepts/ambiguous-symbols).
+**Example:** <MaybeAminoAcidMutationExample/>.
+:::

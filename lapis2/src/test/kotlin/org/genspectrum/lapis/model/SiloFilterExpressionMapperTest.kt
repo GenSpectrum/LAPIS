@@ -66,7 +66,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+            And(Or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
         assertThat(result, equalTo(expected))
     }
 
@@ -77,7 +77,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+            And(Or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
         assertThat(result, equalTo(expected))
     }
 
@@ -286,7 +286,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(NucleotideSymbolEquals(null, 123, "B"), NucleotideSymbolEquals("sequenceName", 999, "A"))
+            And(NucleotideSymbolEquals(null, 123, "B"), NucleotideSymbolEquals("sequenceName", 999, "A"))
         assertThat(result, equalTo(expected))
     }
 
@@ -303,7 +303,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(HasNucleotideMutation(null, 123), HasNucleotideMutation("sequenceName", 999))
+            And(HasNucleotideMutation(null, 123), HasNucleotideMutation("sequenceName", 999))
         assertThat(result, equalTo(expected))
     }
 
@@ -320,7 +320,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(AminoAcidSymbolEquals("geneName1", 123, "B"), AminoAcidSymbolEquals("geneName2", 999, "A"))
+            And(AminoAcidSymbolEquals("geneName1", 123, "B"), AminoAcidSymbolEquals("geneName2", 999, "A"))
         assertThat(result, equalTo(expected))
     }
 
@@ -337,7 +337,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(HasAminoAcidMutation("geneName1", 123), HasAminoAcidMutation("geneName2", 999))
+            And(HasAminoAcidMutation("geneName1", 123), HasAminoAcidMutation("geneName2", 999))
         assertThat(result, equalTo(expected))
     }
 
@@ -354,7 +354,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(NucleotideInsertionContains(123, "ABCD"), NucleotideInsertionContains(999, "DEF"))
+            And(NucleotideInsertionContains(123, "ABCD"), NucleotideInsertionContains(999, "DEF"))
         assertThat(result, equalTo(expected))
     }
 
@@ -371,7 +371,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            and(AminoAcidInsertionContains(123, "ABCD", "gene"), AminoAcidInsertionContains(999, "DEF", "ORF1"))
+            And(AminoAcidInsertionContains(123, "ABCD", "gene"), AminoAcidInsertionContains(999, "DEF", "ORF1"))
         assertThat(result, equalTo(expected))
     }
 
@@ -496,22 +496,22 @@ class SiloFilterExpressionMapperTest {
                         "some_metadata" to listOf("ABC"),
                         "other_metadata" to listOf("def"),
                     ),
-                    and(
-                        or(StringEquals("some_metadata", "ABC")),
-                        or(StringEquals("other_metadata", "def")),
+                    And(
+                        Or(StringEquals("some_metadata", "ABC")),
+                        Or(StringEquals("other_metadata", "def")),
                     ),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3")),
-                    and(or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
+                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3*")),
-                    and(or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3.*")),
-                    and(or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
                 ),
                 Arguments.of(
                     mapOf(
@@ -521,9 +521,9 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         listOf(
-                            or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false)),
-                            or(StringEquals("some_metadata", "ABC")),
-                            or(StringEquals("other_metadata", "DEF")),
+                            Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false)),
+                            Or(StringEquals("some_metadata", "ABC")),
+                            Or(StringEquals("other_metadata", "DEF")),
                         ),
                     ),
                 ),
@@ -531,43 +531,43 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "date" to listOf("2021-06-03"),
                     ),
-                    and(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3))),
+                    And(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3))),
                 ),
                 Arguments.of(
                     mapOf(
                         "dateTo" to listOf("2021-06-03"),
                     ),
-                    and(DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3))),
+                    And(DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3))),
                 ),
                 Arguments.of(
                     mapOf(
                         "dateFrom" to listOf("2021-03-28"),
                     ),
-                    and(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null)),
+                    And(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null)),
                 ),
                 Arguments.of(
                     mapOf(
                         "dateFrom" to listOf("2021-03-28"),
                         "dateTo" to listOf("2021-06-03"),
                     ),
-                    and(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3))),
+                    And(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = LocalDate.of(2021, 6, 3))),
                 ),
                 Arguments.of(
                     mapOf(
                         "dateTo" to listOf("2021-06-03"),
                         "some_metadata" to listOf("ABC"),
                     ),
-                    and(
+                    And(
                         DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
-                        or(StringEquals("some_metadata", "ABC")),
+                        Or(StringEquals("some_metadata", "ABC")),
                     ),
                 ),
                 Arguments.of(
                     mapOf(
                         "variantQuery" to listOf("300G & 400A"),
                     ),
-                    and(
-                        and(
+                    And(
+                        And(
                             NucleotideSymbolEquals(null, 300, "G"),
                             NucleotideSymbolEquals(null, 400, "A"),
                         ),
@@ -578,53 +578,53 @@ class SiloFilterExpressionMapperTest {
                         "variantQuery" to listOf("300G"),
                         "some_metadata" to listOf("ABC"),
                     ),
-                    and(
+                    And(
                         NucleotideSymbolEquals(null, 300, "G"),
-                        or(StringEquals("some_metadata", "ABC")),
+                        Or(StringEquals("some_metadata", "ABC")),
                     ),
                 ),
                 Arguments.of(
                     mapOf(
                         "intField" to listOf("42"),
                     ),
-                    and(IntEquals("intField", 42)),
+                    And(IntEquals("intField", 42)),
                 ),
                 Arguments.of(
                     mapOf(
                         "intFieldFrom" to listOf("42"),
                     ),
-                    and(IntBetween("intField", 42, null)),
+                    And(IntBetween("intField", 42, null)),
                 ),
                 Arguments.of(
                     mapOf(
                         "intFieldTo" to listOf("42"),
                     ),
-                    and(IntBetween("intField", null, 42)),
+                    And(IntBetween("intField", null, 42)),
                 ),
                 Arguments.of(
                     mapOf(
                         "floatField" to listOf("42.45"),
                     ),
-                    and(FloatEquals("floatField", 42.45)),
+                    And(FloatEquals("floatField", 42.45)),
                 ),
                 Arguments.of(
                     mapOf(
                         "floatFieldFrom" to listOf("42.45"),
                     ),
-                    and(FloatBetween("floatField", 42.45, null)),
+                    And(FloatBetween("floatField", 42.45, null)),
                 ),
                 Arguments.of(
                     mapOf(
                         "floatFieldTo" to listOf("42.45"),
                     ),
-                    and(FloatBetween("floatField", null, 42.45)),
+                    And(FloatBetween("floatField", null, 42.45)),
                 ),
                 Arguments.of(
                     mapOf(
                         "some_metadata" to listOf("value1", "value2"),
                     ),
-                    and(
-                        or(
+                    And(
+                        Or(
                             StringEquals("some_metadata", "value1"),
                             StringEquals("some_metadata", "value2"),
                         ),
@@ -634,8 +634,8 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "pangoLineage" to listOf("A.1.2.3", "B.1.2.3"),
                     ),
-                    and(
-                        or(
+                    And(
+                        Or(
                             PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
                             PangoLineageEquals("pangoLineage", "B.1.2.3", includeSublineages = false),
                         ),
@@ -660,7 +660,3 @@ class SiloFilterExpressionMapperTest {
         override val offset: Int? = null,
     ) : CommonSequenceFilters
 }
-
-private fun and(vararg expressions: SiloFilterExpression) = And(expressions.toList())
-
-private fun or(vararg expressions: SiloFilterExpression) = Or(expressions.toList())

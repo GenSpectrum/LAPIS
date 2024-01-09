@@ -1,0 +1,53 @@
+---
+title: Ambiguous symbols
+description: Explanation how ambiguous reads are handled in the data
+---
+
+The underlying sequence files in `.FASTA` format can contain any of the following symbols:
+
+| Symbol | Meaning           |
+| ------ | ----------------- |
+| A      | Adenine           |
+| C      | Cytosine          |
+| G      | Guanine           |
+| T      | Thymine           |
+| -      | Deletion          |
+| N      | failed read / any |
+| R      | A or G            |
+| Y      | C or T            |
+| S      | C or G            |
+| W      | A or T            |
+| K      | G or T            |
+| M      | A or C            |
+| B      | not A             |
+| D      | not C             |
+| H      | not G             |
+| V      | not T             |
+
+The ambiguous symbols arise from imperfect reads in the sequencer.
+
+While one mostly queries for the symbols `A`, `C`, `G`, `T` and `-` to look for specific features and mutations of a sequence,
+or `N` for quality control of the underlying data,
+the ambiguous symbols `R` through `V` are often too cumbersome to consider in analyses.
+
+LAPIS supports the flexible consideration of these ambiguous symbols
+through an extension of the boolean logic syntax in the variant queries.
+
+Here we introduce a new expression `MAYBE` to consider sequences that have an ambiguous code which **maybe** matches the queried value.
+
+#### Example
+
+Consider the following sequences:
+
+```
+12345
+AAACG
+AARCG
+AANCG
+AAGCG
+AAACG
+```
+
+A filter for the mutation `3G` returns only the sequence `AAGCG`, as it is the only sequence with the symbol `G` at position 3.
+The filter `MAYBE(3G)` however also considers that the sequences `AARCG` and `AANCG` **may** have the symbol `G` at position 3,
+because the symbols `R` and `N` can represent Guanine.

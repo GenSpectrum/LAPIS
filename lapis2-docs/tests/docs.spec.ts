@@ -16,6 +16,7 @@ const referencesPages = [
 const conceptsPages = [
     'Data versions',
     'Mutation filters',
+    'Ambiguous symbols',
     'Pango lineage query',
     'Request methods: GET and POST',
     'Response format',
