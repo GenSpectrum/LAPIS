@@ -1,0 +1,245 @@
+---
+title: Start LAPIS and SILO
+description: Tutorial to start LAPIS and SILO with Docker
+---
+
+Every LAPIS instance needs to be backed by a SILO instance, that acts as data source.
+SILO could be operated stand-alone.
+LAPIS is meant as a layer of convenience and abstraction around SILO.
+
+We provide Docker images of SILO and LAPIS that are ready to use.
+We recommend using those Docker images, so in this tutorial, we explain how to use them.
+You will build a Docker Compose file step by step.
+
+### Prerequisites
+
+-   You have [Docker](https://www.docker.com/) installed.
+-   Some knowledge on how to use Docker and Docker Compose.
+-   Make sure you have the latest Docker images:
+
+```shell
+docker pull ghcr.io/genspectrum/lapis-v2
+docker pull ghcr.io/genspectrum/lapis-silo
+```
+
+-   Create a directory for the tutorial:
+
+```shell
+mkdir ~/lapisExample
+cd ~/lapisExample
+```
+
+### Writing Configuration
+
+Both LAPIS and SILO need to know which metadata columns are available in the dataset.
+Furthermore, you need to define which column acts as primary key
+and which column should be used to generate partitions in SILO.
+Also, LAPIS is configured to be an open instance, meaning that the underlying data requires no visibility restrictions.
+
+```yaml
+// ~/lapisExample/config/database_config.yaml
+schema:
+    instanceName: testInstance
+    metadata:
+        - name: primaryKey
+          type: string
+        - name: date
+          type: date
+        - name: region
+          type: string
+          generateIndex: true
+        - name: country
+          type: string
+          generateIndex: true
+        - name: division
+          type: string
+          generateIndex: true
+        - name: pangoLineage
+          type: pango_lineage
+        - name: age
+          type: int
+        - name: qc_value
+          type: float
+    opennessLevel: OPEN
+    primaryKey: primaryKey
+    dateToSortBy: date
+    partitionBy: pangoLineage
+```
+
+:::tip
+See the [config reference](../../references/configuration) for a full specification.
+:::
+
+### Starting SILO Preprocessing
+
+SILO contains an in-memory database.
+Building this database from the raw input data is computation intensive,
+thus this is done before starting SILO.
+This is called "preprocessing".
+The result is a serialized version of the database that can be loaded into SILO in a much shorter time.
+
+Download the example dataset from the [end-to-end tests](https://github.com/GenSpectrum/LAPIS/tree/main/siloLapisTests/testData):
+
+-   pangolineage_alias.json
+-   reference_genomes.json
+-   small_metadata_set.tsv
+-   all fasta files for the sequences
+
+SILO expects fasta files (possibly compressed via zstandard or xz)
+in the same directory with naming scheme `nuc_<sequence_name>.fasta` for nucleotide sequences
+or `gene_<sequence_name>.fasta` for amino acid sequences.
+The `sequence_names`s have to match the names defined in the `reference_genomes.json`.
+
+Put those files into the folder `~/lapisExample/data/`.
+
+Now SILO needs to know where it can find those files.
+You have to provide a "preprocessing config" for that.
+Note that you need to provide the paths where the files will be stored in the Docker container.
+Filenames are relative to the input directory.
+Since you don't provide the input directory explicitly, SILO will fall back to the default `/data`.
+
+```yaml
+// ~/lapisExample/config/preprocessing_config.yaml
+metadataFilename: 'small_metadata_set.tsv'
+pangoLineageDefinitionFilename: 'pangolineage_alias.json'
+referenceGenomeFilename: 'reference_genomes.json'
+```
+
+To start the preprocessing, you have to:
+
+-   start SILO in the `preprocessing` mode
+-   mount the data into the container to the default location
+-   mount the preprocessing config into the container to the default location
+-   mount the database config into the container to the default location
+-   mount the output directory into the container to the default location
+
+Add a corresponding service to the `docker-compose.yaml`:
+
+```yaml
+// ~/lapisExample/docker-compose.yaml
+version: '3.9'
+
+services:
+    silo-preprocessing:
+        image: ghcr.io/genspectrum/lapis-silo
+        command: --preprocessing
+        volumes:
+            - ~/lapisExample/data:/preprocessing/input
+            - ~/lapisExample/config/preprocessing_config.yaml:/app/preprocessing_config.yaml
+            - ~/lapisExample/config/database_config.yaml:/app/database_config.yaml
+            - ~/lapisExample/output:/preprocessing/output
+```
+
+After this has completed, the output directory should contain the result of the preprocessing.
+That result has to be provided to SILO in the next step.
+
+### Starting SILO
+
+To start the SILO api, you have to:
+
+-   start SILO in the `api` mode,
+-   expose port 8081,
+-   mount the preprocessing result into the container,
+-   wait for the preprocessing to complete.
+
+Add a corresponding service to the `docker-compose.yaml`:
+
+```yaml {14-99}
+// ~/lapisExample/docker-compose.yaml
+version: '3.9'
+
+services:
+    silo-preprocessing:
+        image: ghcr.io/genspectrum/lapis-silo
+        command: --preprocessing
+        volumes:
+            - ~/lapisExample/data:/preprocessing/input
+            - ~/lapisExample/config/preprocessing_config.yaml:/app/preprocessing_config.yaml
+            - ~/lapisExample/config/database_config.yaml:/app/database_config.yaml
+            - ~/lapisExample/output:/preprocessing/output
+
+    silo-api:
+        image: ghcr.io/genspectrum/lapis-silo
+        command: --api
+        ports:
+            - '8081:8081'
+        volumes:
+            - ~/lapisExample/output:/data
+        depends_on:
+            silo-preprocessing:
+                condition: service_completed_successfully
+```
+
+Execute
+
+```bash title="Start the services"
+docker compose up
+```
+
+Now SILO should be available at http://localhost:8081
+and http://localhost:8081/info should show that SILO contains sequences.
+
+### Starting LAPIS
+
+Now you can start LAPIS. You have to:
+
+-   expose port 8080 to the host.
+-   mount the database configuration and the reference genomes to the default locations in the Docker container.
+-   provide LAPIS with the SILO URL.
+
+Add a corresponding service to the `docker-compose.yaml`:
+
+```yaml {4-12}
+// ~/lapisExample/docker-compose.yaml
+version: '3.9'
+
+services:
+    lapis:
+        image: ghcr.io/genspectrum/lapis-v2
+        command: --silo.url=http://silo-api:8081
+        ports:
+            - '8080:8080'
+        volumes:
+            - ~/lapisExample/config/database_config.yaml:/workspace/database_config.yaml
+            - ~/lapisExample/data/reference_genomes.json:/workspace/reference_genomes.json
+
+    silo-preprocessing:
+        image: ghcr.io/genspectrum/lapis-silo
+        command: --preprocessing
+        volumes:
+            - ~/lapisExample/data:/preprocessing/input
+            - ~/lapisExample/config/preprocessing_config.yaml:/app/preprocessing_config.yaml
+            - ~/lapisExample/config/database_config.yaml:/app/database_config.yaml
+            - ~/lapisExample/output:/preprocessing/output
+
+    silo-api:
+        image: ghcr.io/genspectrum/lapis-silo
+        command: --api
+        ports:
+            - '8081:8081'
+        volumes:
+            - ~/lapisExample/output:/data
+        depends_on:
+            silo-preprocessing:
+                condition: service_completed_successfully
+```
+
+Execute
+
+```bash title="Start the services"
+docker compose up
+```
+
+again.
+Now LAPIS should be available at http://localhost:8080.
+LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that serves as a good starting point for exploring its functionalities.
+
+:::note
+`--silo.url=http://silo-api:8081` makes use of Docker Compose's internal network.
+:::
+
+## Further Reading
+
+-   Documentation of SILO in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
+-   Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis2/docker-compose.yml) that can also serve as an example.
+    The CI makes sure that it works at any time.

@@ -58,6 +58,10 @@ export default defineConfig({
                             label: 'Database Config',
                             link: '/references/database-config/',
                         },
+                        {
+                            label: 'Configuration',
+                            link: '/references/configuration/',
+                        },
                     ],
                 },
                 {
@@ -107,8 +111,8 @@ export default defineConfig({
                             label: 'Maintainer tutorials',
                             items: [
                                 {
-                                    label: 'Start your own instance of LAPIS and SILO',
-                                    link: '/tutorials/maintainer-tutorials/start-your-own-instance-of-lapis-and-silo',
+                                    label: 'Start LAPIS and SILO',
+                                    link: '/tutorials/maintainer-tutorials/start-lapis-and-silo',
                                 },
                             ],
                         },
