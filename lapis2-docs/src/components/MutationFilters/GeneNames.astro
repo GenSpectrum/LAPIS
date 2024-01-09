@@ -1,0 +1,8 @@
+---
+import { getReferenceGenomes } from '../../reference_genomes';
+
+const referenceGenomes = getReferenceGenomes();
+---
+
+The following genes are available:
+{referenceGenomes.genes.flatMap((gene) => [<code>{gene.name}</code>, ', ']).slice(0, -1)}.

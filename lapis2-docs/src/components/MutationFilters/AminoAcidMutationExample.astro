@@ -1,0 +1,8 @@
+---
+import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
+import SegmentNames from './SegmentNames.astro';
+
+const referenceGenomes = getReferenceGenomes();
+---
+
+<code>{`${referenceGenomes.genes[0].name}`}:57Q</code>
