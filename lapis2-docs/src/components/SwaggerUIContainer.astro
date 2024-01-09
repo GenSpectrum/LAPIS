@@ -20,6 +20,13 @@ const openApiUrl = getLapisUrl() + '/api-docs';
     you to try them out. Just click on the "Try it out" button. You can set the filters, fields to group by and the
     response format.
 </p>
+<p>
+    The Swagger UI also provides the possible responses for each endpoint, sorted by the <a
+        href='https://en.wikipedia.org/wiki/List_of_HTTP_status_codes'>response codes</a
+    >. In general, a response of 200 means that the request was successful and it returns the requested data. For json
+    responses, example data is provided. Additionally, if you want to know more about the response and its fields, you
+    can click on 'Schema', next to 'Example Value', and navigate through the tree of fields.
+</p>
 
 <div class='not-content'>
     <SwaggerUI url={openApiUrl} client:load />

@@ -20,7 +20,7 @@ data class NucleotideMutationResponse(
     @Schema(
         example = "0.54321",
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
-            "given filter criteria",
+            "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
@@ -42,7 +42,7 @@ data class AminoAcidMutationResponse(
     @Schema(
         example = "0.54321",
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
-            "given filter criteria",
+            "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
