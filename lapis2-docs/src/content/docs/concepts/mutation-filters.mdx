@@ -1,0 +1,21 @@
+---
+title: Mutation filters
+description: Mutation filters
+---
+
+import AminoAcidMutationExample from '../../../components/MutationFilters/AminoAcidMutationExample.astro';
+import GeneNames from '../../../components/MutationFilters/GeneNames.astro';
+import NucleotideMutations from '../../../components/MutationFilters/NucleotideMutations.astro';
+
+It is possible to filter for amino acid and nucleotide bases/mutations.
+Multiple mutation filters can be provided in a single request.
+
+<NucleotideMutations />
+
+An amino acid mutation has the format `<gene>:<position><base>`. <GeneNames />
+A `<base>` can be one of the 20 amino acid codes.
+It can also be `-` for deletion and `X` for unknown. **Example:** <AminoAcidMutationExample />
+
+The `<base>` can be omitted to filter for any mutation.
+You can write a `.` for the `<base>` to filter for sequences for which it is confirmed that no mutation occurred,
+i.e. has the same base as the reference genome at the specified position.

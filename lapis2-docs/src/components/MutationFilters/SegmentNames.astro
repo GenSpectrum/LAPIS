@@ -1,0 +1,8 @@
+---
+import { getReferenceGenomes } from '../../reference_genomes';
+
+const referenceGenomes = getReferenceGenomes();
+---
+
+The following segments are available:
+{referenceGenomes.nucleotideSequences.flatMap((segment) => [<code>{segment.name}</code>, ', ']).slice(0, -1)}.
