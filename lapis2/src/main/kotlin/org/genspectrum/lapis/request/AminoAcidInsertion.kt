@@ -3,7 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
@@ -13,7 +13,7 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
     companion object {
         fun fromString(
             aminoAcidInsertion: String,
-            referenceGenome: ReferenceGenome,
+            referenceGenomeSchema: ReferenceGenomeSchema,
         ): AminoAcidInsertion {
             val match = AMINO_ACID_INSERTION_REGEX.find(aminoAcidInsertion)
                 ?: throw BadRequestException("Invalid nucleotide mutation: $aminoAcidInsertion")
@@ -29,7 +29,7 @@ data class AminoAcidInsertion(val position: Int, val gene: String, val insertion
                 ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
-            val geneName = referenceGenome.getGeneFromLowercaseName(geneLowerCase).name
+            val geneName = referenceGenomeSchema.getGeneFromLowercaseName(geneLowerCase).name
 
             val insertions = matchGroups["insertions"]?.value?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
@@ -55,17 +55,17 @@ private val AMINO_ACID_INSERTION_REGEX =
 
 @JsonComponent
 class AminoAcidInsertionDeserializer(
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : JsonDeserializer<AminoAcidInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = AminoAcidInsertion.fromString(p.valueAsString, referenceGenome)
+    ) = AminoAcidInsertion.fromString(p.valueAsString, referenceGenomeSchema)
 }
 
 @Component
 class StringToAminoAcidInsertionConverter(
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : Converter<String, AminoAcidInsertion> {
-    override fun convert(source: String) = AminoAcidInsertion.fromString(source, referenceGenome)
+    override fun convert(source: String) = AminoAcidInsertion.fromString(source, referenceGenomeSchema)
 }

@@ -3,7 +3,7 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
@@ -41,7 +41,7 @@ const val IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION =
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
     @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
@@ -87,7 +87,7 @@ class SingleSegmentedSequenceController(
         return siloQueryModel.getGenomicSequence(
             request,
             SequenceType.ALIGNED,
-            referenceGenome.nucleotideSequences[0].name,
+            referenceGenomeSchema.nucleotideSequences[0].name,
         )
     }
 
@@ -103,7 +103,7 @@ class SingleSegmentedSequenceController(
         return siloQueryModel.getGenomicSequence(
             request,
             SequenceType.ALIGNED,
-            referenceGenome.nucleotideSequences[0].name,
+            referenceGenomeSchema.nucleotideSequences[0].name,
         )
     }
 }

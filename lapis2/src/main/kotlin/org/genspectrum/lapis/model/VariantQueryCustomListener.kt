@@ -16,7 +16,7 @@ import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
@@ -34,7 +34,9 @@ import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 
-class VariantQueryCustomListener(val referenceGenome: ReferenceGenome) : VariantQueryBaseListener(), ParseTreeListener {
+class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchema) :
+    VariantQueryBaseListener(),
+    ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
     fun getVariantQueryExpression(): SiloFilterExpression {
@@ -110,7 +112,7 @@ class VariantQueryCustomListener(val referenceGenome: ReferenceGenome) : Variant
             return
         }
         val position = ctx.position().text.toInt()
-        val gene = referenceGenome.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
+        val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
             null -> HasAminoAcidMutation(gene, position)
@@ -122,7 +124,7 @@ class VariantQueryCustomListener(val referenceGenome: ReferenceGenome) : Variant
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
-        val gene = referenceGenome.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
+        val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
 
         expressionStack.addLast(
             AminoAcidInsertionContains(

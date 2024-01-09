@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
         siloClient.sendQuery(
@@ -51,7 +51,7 @@ class SiloQueryModel(
         )
         return data.map { it ->
             val sequenceName =
-                if (referenceGenome.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
+                if (referenceGenomeSchema.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
 
             NucleotideMutationResponse(
                 sequenceName,
@@ -110,7 +110,7 @@ class SiloQueryModel(
         )
 
         return data.map { it ->
-            val sequenceName = if (referenceGenome.isSingleSegmented()) "" else "${it.sequenceName}:"
+            val sequenceName = if (referenceGenomeSchema.isSingleSegmented()) "" else "${it.sequenceName}:"
 
             NucleotideInsertionResponse(
                 "ins_${sequenceName}${it.position}:${it.insertions}",

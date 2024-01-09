@@ -3,7 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
@@ -13,7 +13,7 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
     companion object {
         fun fromString(
             nucleotideMutation: String,
-            referenceGenome: ReferenceGenome,
+            referenceGenomeSchema: ReferenceGenomeSchema,
         ): NucleotideMutation {
             val match = NUCLEOTIDE_MUTATION_REGEX.find(nucleotideMutation)
                 ?: throw BadRequestException("Invalid nucleotide mutation: $nucleotideMutation")
@@ -26,7 +26,7 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
                 )
 
             val segmentName = matchGroups["sequenceName"]?.value?.lowercase()
-                ?.let { referenceGenome.getNucleotideSequenceFromLowercaseName(it).name }
+                ?.let { referenceGenomeSchema.getNucleotideSequenceFromLowercaseName(it).name }
 
             return NucleotideMutation(
                 segmentName,
@@ -45,16 +45,16 @@ private val NUCLEOTIDE_MUTATION_REGEX =
 
 @JsonComponent
 class NucleotideMutationDeserializer(
-    private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : JsonDeserializer<NucleotideMutation>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = NucleotideMutation.fromString(p.valueAsString, referenceGenome)
+    ) = NucleotideMutation.fromString(p.valueAsString, referenceGenomeSchema)
 }
 
 @Component
-class StringToNucleotideMutationConverter(private val referenceGenome: ReferenceGenome) :
+class StringToNucleotideMutationConverter(private val referenceGenomeSchema: ReferenceGenomeSchema) :
     Converter<String, NucleotideMutation> {
-    override fun convert(source: String) = NucleotideMutation.fromString(source, referenceGenome)
+    override fun convert(source: String) = NucleotideMutation.fromString(source, referenceGenomeSchema)
 }
