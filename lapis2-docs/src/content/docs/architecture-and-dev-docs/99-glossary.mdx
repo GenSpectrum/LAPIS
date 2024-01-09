@@ -5,45 +5,10 @@ description: Explanation of terms used in the context of LAPIS.
 
 | Term     | Definition                                                                                                                                                                                                                                                       |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AA       | amino acid                                                                                                                                                                                                                                                       |
+| AA       | short for amino acid                                                                                                                                                                                                                                             |
 | aligned  | a nucleotide sequence is aligned, if it is arranged such that it has many similarities to a given reference genome. The aligned sequence has the same length as the reference genome. Gaps are marked in the aligned sequence. Insertions are stored separately. |
-| Mutation | a divergence from the reference genome (see below).                                                                                                                                                                                                              |
+| Mutation | a divergence from the reference genome (see [mutation-filters](../concepts/mutation-filters)).                                                                                                                                                                   |
 | Organism | The organism that the genomic data was extracted from. Each LAPIS instance serves data for a single organism.                                                                                                                                                    |
 | QC       | quality control; in our case, it usually refers to the quality checks and metrics of the sequences, targeting how well the nucleotide sequence was determined from the probe.                                                                                    |
 | Segment  | The genome of an organism may consist of multiple nucleotide sequence pieces. We call those pieces "segments".                                                                                                                                                   |
 | Variant  | We follow a very open definition of variants. Every subset of sequences is considered a variant. A variant is specified by lineage/clade names and mutations. A variant does not need to be [monophyletic](https://en.wikipedia.org/wiki/Monophyly).             |
-
-## Mutations
-
-Mutations can occur either on nucleotide level or on amino acid level.
-For the nucleotides a single symbol can produce a mutation, whereas for the amino acids,
-some nucleotide mutations still produce the same amino acid
-([see also](https://en.wikipedia.org/wiki/DNA_and_RNA_codon_tables)).
-
-The following explains the notations for mutations.
-
-### Amino Acid Mutations
-
-The gene has to be provided for the AA mutation, since AAs only make sense within a gene.
-
-**Example ORF_1a\:G1234S**. This translates to
-
--   in Gene: ORF_1a
--   AA mutation from "G" to "S" at position 1234
-
-The origin AA symbol can be omitted, since it is clear from the reference genome.
-**Example: ORF_1a:1234S**
-
-### Nucleotide Mutations
-
-**Example: C1234T**. This translates to
-
--   a nucleotide mutation from nucleotide "C"
--   at position 1234 in the genome
--   to nucleotide "T"
-
-The origin nucleotide symbol can be omitted, since it is clear from the reference genome.
-**Example: 1234T**
-
-If the organism has multiple nucleotide sequence segments, the segment has to be provided.
-**Example: segment_name\:C1234T**

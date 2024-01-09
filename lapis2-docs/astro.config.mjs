@@ -76,6 +76,10 @@ export default defineConfig({
                             link: '/concepts/mutation-filters/',
                         },
                         {
+                            label: 'Ambiguous symbols',
+                            link: '/concepts/ambiguous-symbols/',
+                        },
+                        {
                             label: 'Pango lineage query',
                             link: '/concepts/pango-lineage-query/',
                             onlyIfFeature: 'sarsCoV2VariantQuery',

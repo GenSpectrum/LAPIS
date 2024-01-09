@@ -39,50 +39,36 @@ class VariantQueryFacadeTest {
 
         val expectedResult =
             And(
-                listOf(
+                And(
                     And(
-                        listOf(
+                        And(
                             And(
-                                listOf(
-                                    And(
-                                        listOf(
-                                            And(
-                                                listOf(
-                                                    NucleotideSymbolEquals(null, 300, "G"),
-                                                    Or(
-                                                        listOf(
-                                                            NucleotideSymbolEquals(null, 400, "-"),
-                                                            NucleotideSymbolEquals(null, 500, "B"),
-                                                        ),
-                                                    ),
-                                                ),
-                                            ),
-                                            Not(HasNucleotideMutation(null, 600)),
-                                        ),
-                                    ),
-                                    Maybe(
-                                        Or(
-                                            listOf(
-                                                NucleotideSymbolEquals(null, 700, "B"),
-                                                NucleotideSymbolEquals(null, 800, "-"),
-                                            ),
-                                        ),
-                                    ),
+                                NucleotideSymbolEquals(null, 300, "G"),
+                                Or(
+                                    NucleotideSymbolEquals(null, 400, "-"),
+                                    NucleotideSymbolEquals(null, 500, "B"),
                                 ),
                             ),
-                            NOf(
-                                3,
-                                matchExactly = false,
-                                listOf(
-                                    NucleotideSymbolEquals(null, 123, "A"),
-                                    NucleotideSymbolEquals(null, 234, "T"),
-                                    NucleotideSymbolEquals(null, 345, "G"),
-                                ),
+                            Not(HasNucleotideMutation(null, 600)),
+                        ),
+                        Maybe(
+                            Or(
+                                NucleotideSymbolEquals(null, 700, "B"),
+                                NucleotideSymbolEquals(null, 800, "-"),
                             ),
                         ),
                     ),
-                    PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
+                    NOf(
+                        3,
+                        matchExactly = false,
+                        listOf(
+                            NucleotideSymbolEquals(null, 123, "A"),
+                            NucleotideSymbolEquals(null, 234, "T"),
+                            NucleotideSymbolEquals(null, 345, "G"),
+                        ),
+                    ),
                 ),
+                PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
             )
 
         assertThat(result, equalTo(expectedResult))
@@ -114,10 +100,8 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            listOf(
-                NucleotideSymbolEquals(null, 300, "G"),
-                NucleotideSymbolEquals(null, 400, "-"),
-            ),
+            NucleotideSymbolEquals(null, 300, "G"),
+            NucleotideSymbolEquals(null, 400, "-"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -129,15 +113,11 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            listOf(
-                And(
-                    listOf(
-                        NucleotideSymbolEquals(null, 300, "G"),
-                        NucleotideSymbolEquals(null, 400, "-"),
-                    ),
-                ),
-                NucleotideSymbolEquals(null, 500, "B"),
+            And(
+                NucleotideSymbolEquals(null, 300, "G"),
+                NucleotideSymbolEquals(null, 400, "-"),
             ),
+            NucleotideSymbolEquals(null, 500, "B"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -159,10 +139,8 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = Or(
-            listOf(
-                NucleotideSymbolEquals(null, 300, "G"),
-                NucleotideSymbolEquals(null, 400, "-"),
-            ),
+            NucleotideSymbolEquals(null, 300, "G"),
+            NucleotideSymbolEquals(null, 400, "-"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -174,14 +152,10 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            listOf(
-                NucleotideSymbolEquals(null, 300, "C"),
-                Or(
-                    listOf(
-                        NucleotideSymbolEquals(null, 400, "A"),
-                        NucleotideSymbolEquals(null, 500, "G"),
-                    ),
-                ),
+            NucleotideSymbolEquals(null, 300, "C"),
+            Or(
+                NucleotideSymbolEquals(null, 400, "A"),
+                NucleotideSymbolEquals(null, 500, "G"),
             ),
         )
         assertThat(result, equalTo(expectedResult))

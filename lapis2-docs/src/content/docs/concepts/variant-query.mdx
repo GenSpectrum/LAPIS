@@ -16,8 +16,12 @@ query correctly (in JavaScript, this can be done with the
 function)!
 
 The formal specification of the query language is available
-[here](https://github.com/cevo-public/LAPIS/blob/main/server/src/main/antlr/ch/ethz/lapis/api/parser/VariantQuery.g4) as
-an ANTLR v4 grammar. In following, we provide an informal description and examples.
+[here](https://github.com/GenSpectrum/LAPIS/blob/main/lapis2/src/main/antlr/org/genspectrum/lapis/model/variantqueryparser/VariantQuery.g4)
+as an ANTLR v4 grammar.
+In following, we provide an informal description and examples.
+The respective
+[unit test](https://github.com/GenSpectrum/LAPIS/blob/main/lapis2/src/test/kotlin/org/genspectrum/lapis/model/VariantQueryFacadeTest.kt)
+provides a full list of possible atomic queries.
 
 The query language understands Boolean logic. Expressions can be connected with `&` (and), `|` (or) and `!` (not).
 Parentheses `(` and `)` can be used to define the order of the operations. Further, there is a special syntax to match
@@ -49,6 +53,12 @@ or by Nextclade) and filter by Nextstrain clades:
 
 ```
 BA.5* | nextcladePangoLineage:BA.5* | nextstrainClade:22B
+```
+
+LAPIS supports a ternary logic to query [ambiguous nucleotide symbols](../ambiguous-symbols/).
+
+```
+MAYBE(123W)
 ```
 
 </OnlyIf>
