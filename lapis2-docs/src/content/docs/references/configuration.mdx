@@ -1,0 +1,19 @@
+---
+title: Configuration
+description: Reference for how to configure LAPIS and SILO
+---
+
+TODO https://github.com/GenSpectrum/LAPIS/issues/561
+
+:::caution
+TODO: probably incomplete
+:::
+
+SILO currently supports the following metadata types:
+
+-   `int`
+-   `float`
+-   `string`: String columns support indexing (configured via `generateIndex: true`). SILO internally stores precomputed bitmaps for those columns to speed up queries. Generating an index makes most sense for columns with many equal values.
+-   `pango_lineage`: Systematic classification of lineage with inheritance structure that can be computed for some pathogens. Also see https://github.com/GenSpectrum/LAPIS/wiki/4.6-Pango-lineage-query.
+-   `date`: Values must be valid dates in the form `YYYY-MM-DD`.
+-   `insertion`: A comma separated list of insertions. Each insertion has the form `<position>:<symbols>`. Example value: `123:CCG,501:AAAGGG`.
