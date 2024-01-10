@@ -62,6 +62,10 @@ export default defineConfig({
                             label: 'Configuration',
                             link: '/references/configuration/',
                         },
+                        {
+                            label: 'Authentication',
+                            link: '/references/authentication/',
+                        },
                     ],
                 },
                 {

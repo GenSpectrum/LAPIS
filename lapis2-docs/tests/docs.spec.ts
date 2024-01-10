@@ -11,6 +11,7 @@ const pages = [
     'Reference Genome',
     'Database Config',
     'Configuration',
+    'Authentication',
     'Data versions',
     'Mutation filters',
     'Pango lineage query',

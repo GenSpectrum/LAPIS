@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 
-type Props = {
-    children: ReactNode;
+type Props = PropsWithChildren<{
     condition: boolean;
-};
+}>;
 
 export const OnlyIf = ({ children, condition }: Props) => {
-    return condition ? children : <div>The feature is not available on this instance.</div>;
+    return condition && children;
 };
