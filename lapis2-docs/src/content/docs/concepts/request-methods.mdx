@@ -14,9 +14,11 @@ requests. They are ideal if you want to make requests programmatically.
 ## Example
 
 As an example, let's query the number of sequences per country and date from Africa and receive the data as a CSV file.
-Hereby, we have to use the `/sample/aggregated` [endpoint](../../references/endpoints/) and set the `region` parameter
-to "Africa", the `fields` parameter to "country" and "date", and the `dataFormat` parameter to "csv". With GET, multiple
-values for one parameter are separated by comma. The query URL looks as follows and you can open it in your browser:
+Hereby, we have to use the `/sample/aggregated` and set the `region` parameter to "Africa",
+the `fields` parameter to "country" and "date",
+and the `dataFormat` parameter to "csv".
+With GET, multiple values for one parameter are separated by comma.
+The query URL looks as follows, and you can open it in your browser:
 
 ```
 [URL to LAPIS instance]/sample/aggregated?fields=country,date&region=Africa&dataFormat=tsv

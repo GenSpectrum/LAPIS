@@ -46,22 +46,49 @@ const pages = [
 ];
 
 test.describe('The documentation', () => {
-    test('should show all expected pages', async ({ page }) => {
+    test('should show all expected pages via next buttons and all relative links should work', async ({ page }) => {
         await page.goto(baseUrl);
 
         await page.getByRole('link', { name: 'Introduction' }).click();
         await expect(page).toHaveTitle(/^Introduction/);
 
-        await clickOnAllNextButtons(page);
+        await clickOnAllNextButtonsAndRelativeLinks(page);
+    });
+
+    test('should show all expected pages via link in navigation', async ({ page }) => {
+        await page.goto(baseUrl);
+
+        await page.getByRole('link', { name: 'Introduction' }).click();
+        await expect(page).toHaveTitle(/^Introduction/);
+
         await clickOnAllLinksInNavigation(page);
     });
 });
 
-async function clickOnAllNextButtons(page: Page) {
+async function clickOnAllNextButtonsAndRelativeLinks(page: Page) {
     const pagesAfterIntroduction = pages.slice(1);
     for (const pageName of pagesAfterIntroduction) {
         await page.getByRole('link', { name: `Next ${pageName}` }).click();
         await expect(page).toHaveTitle(new RegExp(`^${pageName}`));
+
+        await clickOnAllRelativeLinksInMainBody(page);
+    }
+}
+
+async function clickOnAllRelativeLinksInMainBody(page: Page) {
+    const currentPageUrl = page.url();
+
+    const relativeLinks = await page
+        .getByRole('main')
+        .locator('a[href]:not([href^="http://"]):not([href^="https://"])')
+        .all();
+    for (const relativeLink of relativeLinks) {
+        await relativeLink.click();
+
+        const errorMessage = `Went to ${page.url()} from ${currentPageUrl}, but did not find target page.`;
+        await expect(page.getByText('Page not found.'), errorMessage).not.toBeVisible();
+
+        await page.goBack();
     }
 }
 
