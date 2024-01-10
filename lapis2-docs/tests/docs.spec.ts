@@ -1,25 +1,30 @@
 import { expect, Page, test } from '@playwright/test';
 import { baseUrl } from './queryGenerator.page';
 
-const pages = [
-    'Introduction',
-    'Generate your request',
+const gettingStartedPages = ['Introduction', 'Generate your request'];
+
+const referencesPages = [
     'Introduction',
     'Fields',
     'Filters',
     'Open API / Swagger',
     'Reference Genome',
     'Database Config',
-    'Configuration',
     'Authentication',
+];
+
+const conceptsPages = [
     'Data versions',
     'Mutation filters',
     'Pango lineage query',
     'Request methods: GET and POST',
     'Response format',
     'Variant query',
-    'Plot the global distribution of all sequences in R',
-    'Start LAPIS and SILO',
+];
+
+const userTutorialPages = ['Plot the global distribution of all sequences in R'];
+
+const architecturePages = [
     'Introduction and Goals',
     'Architecture and Constraints',
     'System Scope and Context',
@@ -27,6 +32,17 @@ const pages = [
     'Building Block View',
     'Runtime View',
     'Glossary',
+];
+
+const maintainerDocsPages = ['Configuration', 'Start LAPIS and SILO'];
+
+const pages = [
+    ...gettingStartedPages,
+    ...referencesPages,
+    ...conceptsPages,
+    ...userTutorialPages,
+    ...architecturePages,
+    ...maintainerDocsPages,
 ];
 
 test.describe('The documentation', () => {
