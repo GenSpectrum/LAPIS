@@ -3,17 +3,78 @@ title: Configuration
 description: Reference for how to configure LAPIS and SILO
 ---
 
-TODO https://github.com/GenSpectrum/LAPIS/issues/561
+import { OnlyIf } from '../../../components/OnlyIf.tsx';
+import MetadataTypesList from '../../../components/Configuration/MetadataTypesList.astro';
+import { hasFeature } from '../../../config.ts';
 
-:::caution
-TODO: probably incomplete
+# Database Configuration
+
+LAPIS and SILO need a `database_config.yaml`.
+It's main purpose is to define the database schema for the sequence metadata.
+See the [tutorial](/tutorials/maintainer-tutorials/start-lapis-and-silo#writing-configuration) for an example.
+More examples can be found in our tests.
+
+## The Schema Object
+
+The `database_config.yaml` must contain a `schema` object.
+It permits the following fields:
+
+| Key           | Type   | Required | Description                                                                                           |
+|---------------|--------|----------|-------------------------------------------------------------------------------------------------------|
+| instanceName  | string | true     | The name assigned to the instance. Only used for diplay purposes.                                     |
+| metadata      | array  | true     | A list of [metadata objects](#the-metadata-object) that is available on the underlying sequence data. |
+| opennessLevel | enum   | true     | `OPEN` or `PROTECTED`. See [authentication](./authentication).                                        |
+| primaryKey    | string | true     | The field that serves as the primary key in SILO for the data.                                        |
+| dateToSortBy  | string | false    | The field used to sort the data by date. Queries on this column will be faster.                       |
+| partitionBy   | string | false    | The field used to partition the data. Used by SILO for overall query optimization.                    |
+| features      | array  | false    | A list of [feature objects](#features).                                                               |
+
+:::tip
+If you have a pango lineage column in your metadata, make use of the `partitionBy` feature.
+SILO will partition the data according to the lineage, which will speed up queries,
+since querying can be parallelized.
 :::
 
-SILO currently supports the following metadata types:
+:::tip
+If you anticipate that users will query for a certain date column more often,
+it will be beneficial to set `dateToSortBy` to that column.
+:::
 
--   `int`
--   `float`
--   `string`: String columns support indexing (configured via `generateIndex: true`). SILO internally stores precomputed bitmaps for those columns to speed up queries. Generating an index makes most sense for columns with many equal values.
--   `pango_lineage`: Systematic classification of lineage with inheritance structure that can be computed for some pathogens. Also see https://github.com/GenSpectrum/LAPIS/wiki/4.6-Pango-lineage-query.
--   `date`: Values must be valid dates in the form `YYYY-MM-DD`.
--   `insertion`: A comma separated list of insertions. Each insertion has the form `<position>:<symbols>`. Example value: `123:CCG,501:AAAGGG`.
+## The Metadata Object
+
+The metadata object permits the following fields:
+
+| Key             | Type    | Required | Description                                                                                                                  |
+|-----------------|---------|----------|------------------------------------------------------------------------------------------------------------------------------|
+| name            | string  | true     | The name of the feature.                                                                                                     |
+| type            | enum    | true     | The [type of the metadata](#metadata-types).                                                                                 |
+| valuesAreUnique | boolean | false    | Whether this column uniquely identifies a row. Important when using the `PROTECTED` [authentication](./authentication) mode. |
+| generateIndex   | boolean | false    | Some [metadata types](#metadata-types) permit generating an index for faster queries on the column.                          |
+
+### Metadata Types
+
+<MetadataTypesList />
+
+##### Generating an Index
+
+Columns of type `string` support generating an index.
+For columns of type `pango_lineage`, an index is always generated.
+SILO internally stores precomputed bitmaps for those columns so that a query on that column becomes a trivial lookup.
+
+:::tip
+Generating an index makes most sense for columns with many equal values,
+since it increases the compression ratio and thus decreases memory consumption of SILO.
+:::
+
+## Features
+
+The features object permits the following fields:
+
+| Key  | Type   | Required | Description              |
+| ---- | ------ | -------- | ------------------------ |
+| name | string | true     | The name of the feature. |
+
+Currently, there is only one available feature: `sarsCoV2VariantQuery`.
+This enables a specialized query language for SARS-CoV-2 instances.
+
+<OnlyIf condition={hasFeature('sarsCoV2VariantQuery')}>See [variant queries](../concepts/variant-query).</OnlyIf>

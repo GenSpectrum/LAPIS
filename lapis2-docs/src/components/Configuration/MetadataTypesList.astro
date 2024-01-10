@@ -1,0 +1,30 @@
+---
+import { OnlyIf } from '../OnlyIf.tsx';
+import { getConfig } from '../../config.ts';
+---
+
+SILO currently supports the following metadata types:
+
+<ul>
+    <li><code>string</code></li>
+    <li><code>int</code></li>
+    <li><code>float</code></li>
+    <li>
+        <code>pango_lineage</code>: Systematic classification of lineage with inheritance structure that can be computed
+        for some pathogens.
+        <OnlyIf condition={!!getConfig().schema.metadata.find((m) => m.type === 'pango_lineage')}>
+            Also see <a href='/concepts/pango-lineage-query'>here</a>.
+        </OnlyIf>
+    </li>
+    <li><code>date</code>: Values must be valid dates in the form <code>YYYY-MM-DD</code>.</li>
+    <li>
+        <code>insertion</code>: A comma separated list of nucleotide insertions. Each insertion has the form
+        <code>{'<segment>:<position>:<symbols>'}</code>. Example value:
+        <code>segment1:123:CCG,segment2:501:AAAGGG</code>. If there is only one segment, the segment name can be
+        omitted: <code>123:CCG,501:AAAGGG</code>.
+    </li>
+    <li>
+        <code>aaInsertion</code>: A comma separated list of amino acid insertions. Each insertion has the form
+        <code>{'<gene>:<position>:<symbols>'}</code>. Example value: <code>S:123:CCG,ORF1A:501:AAAGGG</code>.
+    </li>
+</ul>
