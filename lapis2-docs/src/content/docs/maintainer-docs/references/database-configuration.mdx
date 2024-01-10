@@ -1,5 +1,5 @@
 ---
-title: Configuration
+title: Database Configuration
 description: Reference for how to configure LAPIS and SILO
 ---
 
@@ -7,16 +7,17 @@ import { OnlyIf } from '../../../../components/OnlyIf.tsx';
 import MetadataTypesList from '../../../../components/Configuration/MetadataTypesList.astro';
 import { hasFeature } from '../../../../config.ts';
 
-# Database Configuration
-
 LAPIS and SILO need a `database_config.yaml`.
 It's main purpose is to define the database schema for the sequence metadata.
 See the [tutorial](/maintainer-docs/tutorials/start-lapis-and-silo#writing-configuration) for an example.
 More examples can be found in our tests.
 
+The database config is considered static configuration that doesn't change with data updates.
+This page contains the technical specification of the database config.
+
 ## The Schema Object
 
-The `database_config.yaml` must contain a `schema` object.
+The `database_config.yaml` must contain a `schema` object on top level.
 It permits the following fields:
 
 | Key           | Type   | Required | Description                                                                                           |
@@ -68,7 +69,7 @@ since it increases the compression ratio and thus decreases memory consumption o
 
 ## Features
 
-The features object permits the following fields:
+The feature object permits the following fields:
 
 | Key  | Type   | Required | Description              |
 | ---- | ------ | -------- | ------------------------ |

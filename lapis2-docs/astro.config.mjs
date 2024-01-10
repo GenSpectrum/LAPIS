@@ -144,8 +144,12 @@ export default defineConfig({
                             label: 'References',
                             items: [
                                 {
-                                    label: 'Configuration',
-                                    link: '/maintainer-docs/references/configuration',
+                                    label: 'Database Configuration',
+                                    link: '/maintainer-docs/references/database-configuration',
+                                },
+                                {
+                                    label: 'Reference Genomes',
+                                    link: '/maintainer-docs/references/reference-genomes',
                                 },
                             ],
                         },
