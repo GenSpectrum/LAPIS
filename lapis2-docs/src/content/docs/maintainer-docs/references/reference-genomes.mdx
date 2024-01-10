@@ -1,0 +1,45 @@
+---
+title: Reference Genomes
+description: Reference for how to configure LAPIS and SILO
+---
+
+LAPIS and SILO need a `reference_genomes.json` file.
+It contains the reference sequences of the underlying organism.
+This page contains the technical specification of the reference genomes file.
+
+The reference genomes are considered static configuration that don't change with data updates.
+
+This is a minimal valid example:
+
+```json
+{
+    "nucleotideSequences": [
+        {
+            "name": "segment1",
+            "sequence": "ATCG"
+        }
+    ],
+    "genes": [
+        {
+            "name": "gene1",
+            "sequence": "MYSF*"
+        }
+    ]
+}
+```
+
+The file must contain a JSON object with two keys:
+
+| Key                 | Type  | Required | Description                                            |
+| ------------------- | ----- | -------- | ------------------------------------------------------ |
+| nucleotideSequences | array | true     | An array of [reference sequences](#reference-sequence) |
+| genes               | array | true     | An array of [reference sequences](#reference-sequence) |
+
+## Reference Sequence
+
+A reference sequence is a JSON object that permits the following keys:
+
+| Key      | Type   | Required | Description                               |
+| -------- | ------ | -------- | ----------------------------------------- |
+| name     | string | true     | The name of the sequence. Must be unique. |
+| sequence | string | true     | The sequence.                             |

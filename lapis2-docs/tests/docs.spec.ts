@@ -34,7 +34,7 @@ const architecturePages = [
     'Glossary',
 ];
 
-const maintainerDocsPages = ['Configuration', 'Start LAPIS and SILO'];
+const maintainerDocsPages = ['Database Configuration', 'Reference Genomes', 'Start LAPIS and SILO'];
 
 const pages = [
     ...gettingStartedPages,
