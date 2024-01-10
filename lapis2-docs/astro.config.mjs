@@ -59,10 +59,6 @@ export default defineConfig({
                             link: '/references/database-config/',
                         },
                         {
-                            label: 'Configuration',
-                            link: '/references/configuration/',
-                        },
-                        {
                             label: 'Authentication',
                             link: '/references/authentication/',
                         },
@@ -103,22 +99,8 @@ export default defineConfig({
                     label: 'Tutorials',
                     items: [
                         {
-                            label: 'User tutorials',
-                            items: [
-                                {
-                                    label: 'Plot the global distribution of all sequences in R',
-                                    link: '/tutorials/user-tutorials/plot-global-distribution-of-sequences-in-r',
-                                },
-                            ],
-                        },
-                        {
-                            label: 'Maintainer tutorials',
-                            items: [
-                                {
-                                    label: 'Start LAPIS and SILO',
-                                    link: '/tutorials/maintainer-tutorials/start-lapis-and-silo',
-                                },
-                            ],
+                            label: 'Plot the global distribution of all sequences in R',
+                            link: '/tutorials/plot-global-distribution-of-sequences-in-r',
                         },
                     ],
                 },
@@ -152,6 +134,29 @@ export default defineConfig({
                         {
                             label: 'Glossary',
                             link: '/architecture-and-dev-docs/99-glossary',
+                        },
+                    ],
+                },
+                {
+                    label: 'Maintainer Documentation',
+                    items: [
+                        {
+                            label: 'References',
+                            items: [
+                                {
+                                    label: 'Configuration',
+                                    link: '/maintainer-docs/references/configuration',
+                                },
+                            ],
+                        },
+                        {
+                            label: 'Tutorials',
+                            items: [
+                                {
+                                    label: 'Start LAPIS and SILO',
+                                    link: '/maintainer-docs/tutorials/start-lapis-and-silo',
+                                },
+                            ],
                         },
                     ],
                 },
