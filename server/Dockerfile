@@ -14,11 +14,11 @@ FROM openjdk:17-bullseye AS server
 WORKDIR /app
 
 # Download nextalign
-RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextalign-x86_64-unknown-linux-gnu" -o "nextalign"
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextalign-x86_64-unknown-linux-gnu" -o "nextalign"
 RUN chmod +x nextalign
 
 # Download Nextclade
-RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/latest/download/nextclade-x86_64-unknown-linux-gnu" -o "nextclade"
+RUN curl -fsSL "https://github.com/nextstrain/nextclade/releases/download/2.14.0/nextclade-x86_64-unknown-linux-gnu" -o "nextclade"
 RUN chmod +x nextclade
 RUN ./nextclade dataset get --name 'sars-cov-2' --output-dir 'nextclade-data'
 
