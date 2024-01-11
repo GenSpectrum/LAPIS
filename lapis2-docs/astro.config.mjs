@@ -50,6 +50,14 @@ export default defineConfig({
                             label: 'Open API / Swagger',
                             link: '/references/open-api-definition/',
                         },
+                        {
+                            label: 'Reference Genome',
+                            link: '/references/reference-genome/',
+                        },
+                        {
+                            label: 'Database Config',
+                            link: '/references/database-config/',
+                        },
                     ],
                 },
                 {
