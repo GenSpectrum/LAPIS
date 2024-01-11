@@ -1,0 +1,9 @@
+---
+import { getReferenceGenomes } from '../reference_genomes';
+
+const referenceGenome = getReferenceGenomes();
+---
+
+<div>
+    <pre class='overflow-x-auto'><code>{JSON.stringify(referenceGenome, null, 2)}</code></pre>
+</div>

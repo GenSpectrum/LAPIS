@@ -8,6 +8,8 @@ const pages = [
     'Fields',
     'Filters',
     'Open API / Swagger',
+    'Reference Genome',
+    'Database Config',
     'Data versions',
     'Mutation filters',
     'Pango lineage query',
