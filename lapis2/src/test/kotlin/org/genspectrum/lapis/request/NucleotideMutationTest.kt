@@ -84,6 +84,14 @@ class NucleotideMutationTest {
                     "\"othER_SegmENt:123X\"",
                     NucleotideMutation("other_segment", 123, "X"),
                 ),
+                Arguments.of(
+                    "\"MAYBE(other_segment:123X)\"",
+                    NucleotideMutation("other_segment", 123, "X", maybe = true),
+                ),
+                Arguments.of(
+                    "\"MAYBE(123X)\"",
+                    NucleotideMutation(null, 123, "X", maybe = true),
+                ),
             )
 
         @JvmStatic
@@ -97,6 +105,10 @@ class NucleotideMutationTest {
                 Arguments.of("\":123A\""),
                 Arguments.of("\"sequence\$name&with/invalid)chars:G123A\""),
                 Arguments.of("\"segmentNotInReferenceGenome:G123A\""),
+                Arguments.of("\"MAYBE()\""),
+                Arguments.of("\"MAYBE(notAMutation)\""),
+                Arguments.of("\"MAYBE(123A))\""),
+                Arguments.of("\"MAYBE((123A)\""),
             )
     }
 }

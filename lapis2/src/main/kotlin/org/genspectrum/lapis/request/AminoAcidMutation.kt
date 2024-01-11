@@ -9,9 +9,20 @@ import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
-data class AminoAcidMutation(val gene: String, val position: Int, val symbol: String?) {
+data class AminoAcidMutation(
+    val gene: String,
+    val position: Int,
+    val symbol: String?,
+    override val maybe: Boolean = false,
+) :
+    MaybeMutation<AminoAcidMutation> {
     companion object {
         fun fromString(
+            aminoAcidMutation: String,
+            referenceGenome: ReferenceGenomeSchema,
+        ) = wrapWithMaybeMutationParser(aminoAcidMutation) { parseMutation(it, referenceGenome) }
+
+        private fun parseMutation(
             aminoAcidMutation: String,
             referenceGenomeSchema: ReferenceGenomeSchema,
         ): AminoAcidMutation {
@@ -36,6 +47,8 @@ data class AminoAcidMutation(val gene: String, val position: Int, val symbol: St
             )
         }
     }
+
+    override fun asMaybe() = copy(maybe = true)
 }
 
 private val AMINO_ACID_MUTATION_REGEX =

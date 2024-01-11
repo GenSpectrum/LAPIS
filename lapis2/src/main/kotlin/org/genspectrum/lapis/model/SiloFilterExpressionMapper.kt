@@ -7,6 +7,7 @@ import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.MaybeMutation
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
@@ -19,6 +20,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -326,24 +328,38 @@ class SiloFilterExpressionMapper(
     }
 
     private fun toNucleotideMutationFilter(nucleotideMutation: NucleotideMutation) =
-        when (nucleotideMutation.symbol) {
-            null -> HasNucleotideMutation(nucleotideMutation.sequenceName, nucleotideMutation.position)
-            else -> NucleotideSymbolEquals(
-                nucleotideMutation.sequenceName,
-                nucleotideMutation.position,
-                nucleotideMutation.symbol,
-            )
-        }
+        wrapInMaybe(
+            nucleotideMutation,
+            when (nucleotideMutation.symbol) {
+                null -> HasNucleotideMutation(nucleotideMutation.sequenceName, nucleotideMutation.position)
+                else -> NucleotideSymbolEquals(
+                    nucleotideMutation.sequenceName,
+                    nucleotideMutation.position,
+                    nucleotideMutation.symbol,
+                )
+            },
+        )
 
     private fun toAminoAcidMutationFilter(aaMutation: AminoAcidMutation) =
-        when (aaMutation.symbol) {
-            null -> HasAminoAcidMutation(aaMutation.gene, aaMutation.position)
-            else -> AminoAcidSymbolEquals(
-                aaMutation.gene,
-                aaMutation.position,
-                aaMutation.symbol,
-            )
-        }
+        wrapInMaybe(
+            aaMutation,
+            when (aaMutation.symbol) {
+                null -> HasAminoAcidMutation(aaMutation.gene, aaMutation.position)
+                else -> AminoAcidSymbolEquals(
+                    aaMutation.gene,
+                    aaMutation.position,
+                    aaMutation.symbol,
+                )
+            },
+        )
+
+    private fun wrapInMaybe(
+        maybeMutation: MaybeMutation<*>,
+        expression: SiloFilterExpression,
+    ) = when (maybeMutation.maybe) {
+        true -> Maybe(expression)
+        false -> expression
+    }
 
     private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains {
         return NucleotideInsertionContains(nucleotideInsertion.position, nucleotideInsertion.insertions)

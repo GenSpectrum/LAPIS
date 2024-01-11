@@ -21,7 +21,7 @@ const val INFO_ENDPOINT_DESCRIPTION = "Returns information about LAPIS."
 const val DATABASE_CONFIG_ENDPOINT_DESCRIPTION = "Returns the database configuration."
 const val REFERENCE_GENOME_ENDPOINT_DESCRIPTION = "Returns the reference genome."
 const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formated aligned amino acid sequences. Only sequences matching the specified
+    """Returns a string of fasta formatted aligned amino acid sequences. Only sequences matching the specified
     sequence filters are considered."""
 const val ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of fasta formatted aligned nucleotide sequences. Only sequences matching the 
@@ -46,3 +46,22 @@ const val OFFSET_DESCRIPTION =
 const val FORMAT_DESCRIPTION =
     """The data format of the response. Alternatively, the data format can be specified by setting the 
     \"Accept\"-header. When both are specified, this parameter takes precedence."""
+
+private const val MAYBE_DESCRIPTION = """
+A mutation can be wrapped in a maybe expression "MAYBE(\<mutation\>)"
+to include sequences with ambiguous symbols at the given position.
+"""
+
+const val NUCLEOTIDE_MUTATION_DESCRIPTION = """
+A nucleotide mutation in the format "\<sequenceName\>?:\<fromSymbol\>?\<position\>\<toSymbol\>?".  
+If the sequenceName is not provided, LAPIS will use the default sequence name. 
+The fromSymbol is optional. 
+If the toSymbol is not provided, the statement means "has any mutation at the given position".
+$MAYBE_DESCRIPTION
+"""
+
+const val AMINO_ACID_MUTATION_DESCRIPTION = """
+A amino acid mutation in the format "\<gene\>:\<position\>\<toSymbol\>?".  
+If the toSymbol is not provided, the statement means "has any mutation at the given position". 
+$MAYBE_DESCRIPTION
+"""
