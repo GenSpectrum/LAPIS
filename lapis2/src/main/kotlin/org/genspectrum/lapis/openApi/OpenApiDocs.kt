@@ -14,6 +14,7 @@ import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
@@ -23,6 +24,7 @@ import org.genspectrum.lapis.controller.LIMIT_PROPERTY
 import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_PROPERTY
 import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
@@ -384,18 +386,12 @@ private fun aminoAcidInsertionSchema() =
 private fun nucleotideMutations() =
     Schema<List<NucleotideMutation>>()
         .type("array")
+        .description(NUCLEOTIDE_MUTATION_DESCRIPTION)
         .items(
             Schema<String>()
                 .type("string")
                 .example("sequence1:A123T")
-                .description(
-                    """
-                    |A nucleotide mutation in the format "\<sequenceName\>?:\<fromSymbol\>?\<position\>\<toSymbol\>?".  
-                    |If the sequenceName is not provided, LAPIS will use the default sequence name. 
-                    |The fromSymbol is optional. 
-                    |If the toSymbol is not provided, the statement means "has any mutation at the given position". 
-                    """.trimMargin(),
-                ),
+                .description(NUCLEOTIDE_MUTATION_DESCRIPTION),
         )
 
 private fun aminoAcidMutations() =
@@ -405,12 +401,7 @@ private fun aminoAcidMutations() =
             Schema<String>()
                 .type("string")
                 .example("S:123T")
-                .description(
-                    """
-                    |A amino acid mutation in the format "\<gene\>:\<position\>\<toSymbol\>?".  
-                    |If the toSymbol is not provided, the statement means "has any mutation at the given position". 
-                    """.trimMargin(),
-                ),
+                .description(AMINO_ACID_MUTATION_DESCRIPTION),
         )
 
 private fun nucleotideInsertions() =
@@ -441,12 +432,6 @@ private fun aminoAcidInsertions() =
                     """.trimMargin(),
                 ),
         )
-
-private fun orderByGetSchema(orderByFieldsSchema: Schema<Any>) =
-    Schema<List<String>>()
-        .type("array")
-        .items(orderByFieldsSchema)
-        .description("The fields by which the result is ordered in ascending order.")
 
 private fun orderByPostSchema(orderByFieldsSchema: Schema<Any>) =
     Schema<List<String>>()

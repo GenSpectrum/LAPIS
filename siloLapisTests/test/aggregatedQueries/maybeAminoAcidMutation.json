@@ -1,0 +1,11 @@
+{
+  "testCaseName": "maybe amino acid mutation",
+  "lapisRequest": {
+    "aminoAcidMutations": ["MAYBE(S:22)"]
+  },
+  "expected": [
+    {
+      "count": 3
+    }
+  ]
+}

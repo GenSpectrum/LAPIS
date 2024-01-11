@@ -1,0 +1,11 @@
+{
+  "testCaseName": "maybe nucleotide mutation",
+  "lapisRequest": {
+    "nucleotideMutations": ["MAYBE(122A)"]
+  },
+  "expected": [
+    {
+      "count": 96
+    }
+  ]
+}

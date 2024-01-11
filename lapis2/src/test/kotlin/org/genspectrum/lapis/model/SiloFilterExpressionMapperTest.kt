@@ -22,6 +22,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -277,7 +278,10 @@ class SiloFilterExpressionMapperTest {
     fun `given nucleotide mutation with symbol then is mapped to NucleotideSymbolEquals`() {
         val filterParameter = DummySequenceFilters(
             emptyMap(),
-            listOf(NucleotideMutation(null, 123, "B"), NucleotideMutation("sequenceName", 999, "A")),
+            listOf(
+                NucleotideMutation(null, 123, "B", maybe = true),
+                NucleotideMutation("sequenceName", 999, "A", maybe = false),
+            ),
             emptyList(),
             emptyList(),
             emptyList(),
@@ -285,8 +289,10 @@ class SiloFilterExpressionMapperTest {
 
         val result = underTest.map(filterParameter)
 
-        val expected =
-            And(NucleotideSymbolEquals(null, 123, "B"), NucleotideSymbolEquals("sequenceName", 999, "A"))
+        val expected = And(
+            Maybe(NucleotideSymbolEquals(null, 123, "B")),
+            NucleotideSymbolEquals("sequenceName", 999, "A"),
+        )
         assertThat(result, equalTo(expected))
     }
 
@@ -302,8 +308,10 @@ class SiloFilterExpressionMapperTest {
 
         val result = underTest.map(filterParameter)
 
-        val expected =
-            And(HasNucleotideMutation(null, 123), HasNucleotideMutation("sequenceName", 999))
+        val expected = And(
+            HasNucleotideMutation(null, 123),
+            HasNucleotideMutation("sequenceName", 999),
+        )
         assertThat(result, equalTo(expected))
     }
 
@@ -312,15 +320,20 @@ class SiloFilterExpressionMapperTest {
         val filterParameter = DummySequenceFilters(
             emptyMap(),
             emptyList(),
-            listOf(AminoAcidMutation("geneName1", 123, "B"), AminoAcidMutation("geneName2", 999, "A")),
+            listOf(
+                AminoAcidMutation("geneName1", 123, "B", maybe = true),
+                AminoAcidMutation("geneName2", 999, "A", maybe = false),
+            ),
             emptyList(),
             emptyList(),
         )
 
         val result = underTest.map(filterParameter)
 
-        val expected =
-            And(AminoAcidSymbolEquals("geneName1", 123, "B"), AminoAcidSymbolEquals("geneName2", 999, "A"))
+        val expected = And(
+            Maybe(AminoAcidSymbolEquals("geneName1", 123, "B")),
+            AminoAcidSymbolEquals("geneName2", 999, "A"),
+        )
         assertThat(result, equalTo(expected))
     }
 
@@ -336,8 +349,10 @@ class SiloFilterExpressionMapperTest {
 
         val result = underTest.map(filterParameter)
 
-        val expected =
-            And(HasAminoAcidMutation("geneName1", 123), HasAminoAcidMutation("geneName2", 999))
+        val expected = And(
+            HasAminoAcidMutation("geneName1", 123),
+            HasAminoAcidMutation("geneName2", 999),
+        )
         assertThat(result, equalTo(expected))
     }
 

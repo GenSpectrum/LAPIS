@@ -80,6 +80,14 @@ class AminoAcidMutationTest {
                     "\"gENe1:123A\"",
                     AminoAcidMutation("gene1", 123, "A"),
                 ),
+                Arguments.of(
+                    "\"MAYBE(gene1:123A)\"",
+                    AminoAcidMutation("gene1", 123, "A", maybe = true),
+                ),
+                Arguments.of(
+                    "\"MAYBE(gene1:G123A)\"",
+                    AminoAcidMutation("gene1", 123, "A", maybe = true),
+                ),
             )
 
         @JvmStatic
@@ -95,6 +103,10 @@ class AminoAcidMutationTest {
                 Arguments.of("\":123A\""),
                 Arguments.of("\"gene1\$name&with/invalid)chars:123A\""),
                 Arguments.of("\"geneNotInReferenceGenome:123A\""),
+                Arguments.of("\"MAYBE()\""),
+                Arguments.of("\"MAYBE(notAMutation)\""),
+                Arguments.of("\"MAYBE(gene1:G123A))\""),
+                Arguments.of("\"MAYBE((gene1:G123A)\""),
             )
     }
 }

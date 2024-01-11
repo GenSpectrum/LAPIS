@@ -9,9 +9,19 @@ import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
-data class NucleotideMutation(val sequenceName: String?, val position: Int, val symbol: String?) {
+data class NucleotideMutation(
+    val sequenceName: String?,
+    val position: Int,
+    val symbol: String?,
+    override val maybe: Boolean = false,
+) : MaybeMutation<NucleotideMutation> {
     companion object {
         fun fromString(
+            nucleotideMutation: String,
+            referenceGenome: ReferenceGenomeSchema,
+        ) = wrapWithMaybeMutationParser(nucleotideMutation) { parseMutation(it, referenceGenome) }
+
+        private fun parseMutation(
             nucleotideMutation: String,
             referenceGenomeSchema: ReferenceGenomeSchema,
         ): NucleotideMutation {
@@ -35,6 +45,8 @@ data class NucleotideMutation(val sequenceName: String?, val position: Int, val 
             )
         }
     }
+
+    override fun asMaybe() = copy(maybe = true)
 }
 
 private val NUCLEOTIDE_MUTATION_REGEX =
