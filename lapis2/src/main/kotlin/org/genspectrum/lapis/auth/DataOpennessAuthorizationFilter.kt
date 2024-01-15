@@ -12,10 +12,13 @@ import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
+import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
+import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.controller.LapisErrorResponse
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
+import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -97,7 +100,12 @@ private class ProtectedDataAuthorizationFilter(
 ) :
     DataOpennessAuthorizationFilter(objectMapper) {
     companion object {
-        private val WHITELISTED_PATH_PREFIXES = listOf("/swagger-ui", "/api-docs")
+        private val WHITELISTED_PATH_PREFIXES = listOf(
+            "/swagger-ui",
+            "/api-docs",
+            "/sample$DATABASE_CONFIG_ROUTE",
+            "/sample$REFERENCE_GENOME_ROUTE",
+        )
         private val ENDPOINTS_THAT_SERVE_AGGREGATED_DATA = listOf(
             AGGREGATED_ROUTE,
             NUCLEOTIDE_MUTATIONS_ROUTE,
@@ -129,7 +137,8 @@ private class ProtectedDataAuthorizationFilter(
         }
 
         val endpointServesAggregatedData = ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(path) &&
-            fieldsThatServeNonAggregatedData.intersect(requestFields.keys).isEmpty()
+            fieldsThatServeNonAggregatedData.intersect(requestFields.keys).isEmpty() &&
+            requestFields[FIELDS_PROPERTY]?.intersect(fieldsThatServeNonAggregatedData.toSet())?.isNotEmpty() != false
 
         if (endpointServesAggregatedData && accessKeys.aggregatedDataAccessKey == accessKey) {
             return AuthorizationResult.success()

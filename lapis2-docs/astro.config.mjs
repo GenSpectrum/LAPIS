@@ -58,10 +58,6 @@ export default defineConfig({
                             label: 'Database Config',
                             link: '/references/database-config/',
                         },
-                        {
-                            label: 'Authentication',
-                            link: '/references/authentication/',
-                        },
                     ],
                 },
                 {

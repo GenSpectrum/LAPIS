@@ -24,7 +24,7 @@ It permits the following fields:
 | ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------- |
 | instanceName  | string | true     | The name assigned to the instance. Only used for diplay purposes.                                     |
 | metadata      | array  | true     | A list of [metadata objects](#the-metadata-object) that is available on the underlying sequence data. |
-| opennessLevel | enum   | true     | `OPEN` or `PROTECTED`. See [authentication](/references/authentication).                              |
+| opennessLevel | enum   | true     | Possible values: `OPEN`. To be extended in the future.                                                |
 | primaryKey    | string | true     | The field that serves as the primary key in SILO for the data.                                        |
 | dateToSortBy  | string | false    | The field used to sort the data by date. Queries on this column will be faster.                       |
 | partitionBy   | string | false    | The field used to partition the data. Used by SILO for overall query optimization.                    |
@@ -45,12 +45,11 @@ it will be beneficial to set `dateToSortBy` to that column.
 
 The metadata object permits the following fields:
 
-| Key             | Type    | Required | Description                                                                                                                            |
-| --------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| name            | string  | true     | The name of the feature.                                                                                                               |
-| type            | enum    | true     | The [type of the metadata](#metadata-types).                                                                                           |
-| valuesAreUnique | boolean | false    | Whether this column uniquely identifies a row. Important when using the `PROTECTED` [authentication](/references/authentication) mode. |
-| generateIndex   | boolean | false    | Some [metadata types](#metadata-types) permit generating an index for faster queries on the column.                                    |
+| Key           | Type    | Required | Description                                                                                         |
+| ------------- | ------- | -------- | --------------------------------------------------------------------------------------------------- |
+| name          | string  | true     | The name of the feature.                                                                            |
+| type          | enum    | true     | The [type of the metadata](#metadata-types).                                                        |
+| generateIndex | boolean | false    | Some [metadata types](#metadata-types) permit generating an index for faster queries on the column. |
 
 ### Metadata Types
 

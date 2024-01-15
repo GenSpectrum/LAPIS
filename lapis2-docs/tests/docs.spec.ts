@@ -10,7 +10,6 @@ const referencesPages = [
     'Open API / Swagger',
     'Reference Genome',
     'Database Config',
-    'Authentication',
 ];
 
 const conceptsPages = [
