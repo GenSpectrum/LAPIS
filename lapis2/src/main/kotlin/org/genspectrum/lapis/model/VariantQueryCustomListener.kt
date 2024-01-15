@@ -1,10 +1,10 @@
 package org.genspectrum.lapis.model
 
 import VariantQueryBaseListener
-import VariantQueryParser
 import VariantQueryParser.AaInsertionQueryContext
 import VariantQueryParser.AaMutationQueryContext
 import VariantQueryParser.AndContext
+import VariantQueryParser.GisaidCladeNomenclatureContext
 import VariantQueryParser.MaybeContext
 import VariantQueryParser.NOfQueryContext
 import VariantQueryParser.NextcladePangolineageQueryContext
@@ -14,6 +14,8 @@ import VariantQueryParser.NucleotideInsertionQueryContext
 import VariantQueryParser.NucleotideMutationQueryContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
+import VariantQueryParser.PangolineageWithPossibleSublineagesContext
+import mu.KotlinLogging
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
@@ -34,12 +36,19 @@ import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 
+private val log = KotlinLogging.logger { }
+
 class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchema) :
     VariantQueryBaseListener(),
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
     fun getVariantQueryExpression(): SiloFilterExpression {
+        if (expressionStack.size != 1) {
+            log.error { "Expected exactly one expression on the stack, but got this stack $expressionStack." }
+            throw RuntimeException("Failed to parse variant query.")
+        }
+
         return expressionStack.first()
     }
 
@@ -58,7 +67,7 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
     }
 
     override fun enterPangolineageQuery(ctx: PangolineageQueryContext) {
-        addPangoLineage(ctx, PANGO_LINEAGE_COLUMN)
+        addPangoLineage(ctx.pangolineageWithPossibleSublineages(), PANGO_LINEAGE_COLUMN)
     }
 
     override fun exitAnd(ctx: AndContext?) {
@@ -136,7 +145,7 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
     }
 
     override fun enterNextcladePangolineageQuery(ctx: NextcladePangolineageQueryContext) {
-        addPangoLineage(ctx.pangolineageQuery(), NEXTCLADE_PANGO_LINEAGE_COLUMN)
+        addPangoLineage(ctx.pangolineageWithPossibleSublineages(), NEXTCLADE_PANGO_LINEAGE_COLUMN)
     }
 
     override fun enterNextstrainCladeQuery(ctx: NextstrainCladeQueryContext) {
@@ -147,12 +156,12 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
         expressionStack.addLast(StringEquals(NEXTSTRAIN_CLADE_COLUMN, value))
     }
 
-    override fun enterGisaidCladeNomenclature(ctx: VariantQueryParser.GisaidCladeNomenclatureContext) {
+    override fun enterGisaidCladeNomenclature(ctx: GisaidCladeNomenclatureContext) {
         expressionStack.addLast(StringEquals(GISAID_CLADE_COLUMN, ctx.text.uppercase()))
     }
 
     private fun addPangoLineage(
-        ctx: PangolineageQueryContext,
+        ctx: PangolineageWithPossibleSublineagesContext,
         pangoLineageColumnName: String,
     ) {
         val pangolineage = ctx.pangolineage().text

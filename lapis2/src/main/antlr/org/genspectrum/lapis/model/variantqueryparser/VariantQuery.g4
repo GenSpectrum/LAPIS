@@ -33,7 +33,8 @@ ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | D
 possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
 
 
-pangolineageQuery: pangolineage pangolineageIncludeSublineages?;
+pangolineageQuery: pangolineageWithPossibleSublineages;
+pangolineageWithPossibleSublineages: pangolineage pangolineageIncludeSublineages?;
 pangolineage: pangolineageCharacter pangolineageCharacter? pangolineageCharacter? pangolineageNumberComponent*;
 pangolineageCharacter: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 pangolineageNumberComponent: '.' NUMBER NUMBER? NUMBER?;
@@ -68,7 +69,7 @@ ORF9B: O R F '9' B;
 aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
-nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageQuery;
+nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageWithPossibleSublineages;
 nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
 
 nextstrainCladeLineageQuery: nextstrainCladePrefix nextstrainCladeQuery;
