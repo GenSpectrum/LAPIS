@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.PRIMARY_KEY_FIELD
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
+import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
+import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.getSample
 import org.genspectrum.lapis.controller.postSample
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -149,6 +151,31 @@ class ProtectedDataAuthorizationTest(
     }
 
     @Test
+    fun `GIVEN aggregated access key in GET request but request stratifies too fine-grained THEN access is denied`() {
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=$PRIMARY_KEY_FIELD"),
+        )
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
+    }
+
+    @Test
+    fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`() {
+        mockMvc.perform(
+            postRequestWithBody(
+                """ {
+                    "accessKey": "testAggregatedDataAccessKey",
+                    "fields": ["$PRIMARY_KEY_FIELD"]
+                }""",
+            ),
+        )
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
+    }
+
+    @Test
     fun `given valid access key for full access in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
             getSample("$validRoute?accessKey=testFullAccessKey&field1=value1"),
@@ -186,7 +213,7 @@ class ProtectedDataAuthorizationTest(
         )
 
     @Test
-    fun `the swagger ui and api docs are always accessible`() {
+    fun `whitelisted routes are always accessible`() {
         mockMvc.perform(get("/swagger-ui/index.html"))
             .andExpect(status().isOk)
 
@@ -194,6 +221,12 @@ class ProtectedDataAuthorizationTest(
             .andExpect(status().isOk)
 
         mockMvc.perform(get("/api-docs.yaml"))
+            .andExpect(status().isOk)
+
+        mockMvc.perform(getSample(DATABASE_CONFIG_ROUTE))
+            .andExpect(status().isOk)
+
+        mockMvc.perform(getSample(REFERENCE_GENOME_ROUTE))
             .andExpect(status().isOk)
     }
 
