@@ -51,8 +51,12 @@ export default defineConfig({
                             link: '/references/open-api-definition/',
                         },
                         {
-                            label: 'Reference Genome',
-                            link: '/references/reference-genome/',
+                            label: 'Reference Genomes',
+                            link: '/references/reference-genomes/',
+                        },
+                        {
+                            label: 'Nucleotide And Amino Acid Symbols',
+                            link: '/references/nucleotide-and-amino-acid-symbols/',
                         },
                         {
                             label: 'Database Config',
