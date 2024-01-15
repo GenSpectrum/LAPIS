@@ -3,27 +3,8 @@ title: Ambiguous symbols
 description: Explanation how ambiguous reads are handled in the data
 ---
 
-The underlying sequence files in `.FASTA` format can contain any of the following symbols:
-
-| Symbol | Meaning           |
-| ------ | ----------------- |
-| A      | Adenine           |
-| C      | Cytosine          |
-| G      | Guanine           |
-| T      | Thymine           |
-| -      | Deletion          |
-| N      | failed read / any |
-| R      | A or G            |
-| Y      | C or T            |
-| S      | C or G            |
-| W      | A or T            |
-| K      | G or T            |
-| M      | A or C            |
-| B      | not A             |
-| D      | not C             |
-| H      | not G             |
-| V      | not T             |
-
+[The symbols page](/references/nucleotide-and-amino-acid-symbols)
+lists all symbols that the underlying sequence files in `.FASTA` format can contain.
 The ambiguous symbols arise from imperfect reads in the sequencer.
 
 While one mostly queries for the symbols `A`, `C`, `G`, `T` and `-` to look for specific features and mutations of a sequence,
