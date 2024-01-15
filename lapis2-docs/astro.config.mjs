@@ -155,6 +155,14 @@ export default defineConfig({
                                     label: 'Reference Genomes',
                                     link: '/maintainer-docs/references/reference-genomes',
                                 },
+                                {
+                                    label: 'Starting SILO and LAPIS',
+                                    link: '/maintainer-docs/references/starting-silo-and-lapis',
+                                },
+                                {
+                                    label: 'Preprocessing',
+                                    link: '/maintainer-docs/references/preprocessing',
+                                },
                             ],
                         },
                         {
