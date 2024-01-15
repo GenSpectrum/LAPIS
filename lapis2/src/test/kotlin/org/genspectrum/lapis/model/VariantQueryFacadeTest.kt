@@ -33,7 +33,9 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
-        val variantQuery = "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & A.1.2.3*"
+        val variantQuery =
+            "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
+                "nextcladePangoLineage:jn.1* & A.1.2.3*"
 
         val result = underTest.map(variantQuery)
 
@@ -43,30 +45,33 @@ class VariantQueryFacadeTest {
                     And(
                         And(
                             And(
-                                NucleotideSymbolEquals(null, 300, "G"),
+                                And(
+                                    NucleotideSymbolEquals(null, 300, "G"),
+                                    Or(
+                                        NucleotideSymbolEquals(null, 400, "-"),
+                                        NucleotideSymbolEquals(null, 500, "B"),
+                                    ),
+                                ),
+                                Not(HasNucleotideMutation(null, 600)),
+                            ),
+                            Maybe(
                                 Or(
-                                    NucleotideSymbolEquals(null, 400, "-"),
-                                    NucleotideSymbolEquals(null, 500, "B"),
+                                    NucleotideSymbolEquals(null, 700, "B"),
+                                    NucleotideSymbolEquals(null, 800, "-"),
                                 ),
                             ),
-                            Not(HasNucleotideMutation(null, 600)),
                         ),
-                        Maybe(
-                            Or(
-                                NucleotideSymbolEquals(null, 700, "B"),
-                                NucleotideSymbolEquals(null, 800, "-"),
+                        NOf(
+                            3,
+                            matchExactly = false,
+                            listOf(
+                                NucleotideSymbolEquals(null, 123, "A"),
+                                NucleotideSymbolEquals(null, 234, "T"),
+                                NucleotideSymbolEquals(null, 345, "G"),
                             ),
                         ),
                     ),
-                    NOf(
-                        3,
-                        matchExactly = false,
-                        listOf(
-                            NucleotideSymbolEquals(null, 123, "A"),
-                            NucleotideSymbolEquals(null, 234, "T"),
-                            NucleotideSymbolEquals(null, 345, "G"),
-                        ),
-                    ),
+                    PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
                 ),
                 PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
             )
@@ -459,5 +464,17 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "AB")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
+        val variantQuery = "nextcladePangoLineage:jn.1*"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(
+            result,
+            equalTo(PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
+        )
     }
 }
