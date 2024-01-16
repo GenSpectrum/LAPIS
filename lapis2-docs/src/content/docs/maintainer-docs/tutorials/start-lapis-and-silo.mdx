@@ -72,11 +72,10 @@ See the [config reference](/maintainer-docs/references/database-configuration) f
 
 ### Starting SILO Preprocessing
 
-SILO contains an in-memory database.
-Building this database from the raw input data is computation intensive,
-thus this is done before starting SILO.
-This is called "preprocessing".
-The result is a serialized version of the database that can be loaded into SILO in a much shorter time.
+:::note
+Refer to [Preprocessing](/maintainer-docs/references/preprocessing) for more explanation
+and a full reference of the preprocessing.
+:::
 
 Download the example dataset from the [end-to-end tests](https://github.com/GenSpectrum/LAPIS/tree/main/siloLapisTests/testData):
 
