@@ -3,9 +3,298 @@ title: Preprocessing
 description: Reference on the SILO preprocessing
 ---
 
-TODO #565
+import TsvExample from '../../../../components/TsvExample.astro';
 
--   preprocessing config. Has defaults set in Docker. Only set what you need, leave the rest to the defaults
--   input format of data
+:::tip[Why preprocessing?]
+SILO contains an in-memory database.
+Building this database from the raw input data is computation intensive,
+thus this is done before starting SILO.
+This is called "preprocessing".
+The result is a serialized version of the database that can be loaded into SILO in a much shorter time.
+:::
 
-## Preprocessing config
+The SILO preprocessing accepts input data in two formats:
+
+-   `NDJSON`: a single [NDJSON](https://ndjson.org/) file containing all the data,
+-   `TSV/FASTA`: a directory containing
+-   a TSV file with the metadata
+-   FASTA files with the sequences
+
+The preprocessing configuration file determines which format should be used.
+
+## Preprocessing Configuration
+
+The preprocessing configuration file is a YAML file that allows the keys shown in the table below.
+All keys are optional and have default values.
+Some keys are relevant only for one of the two input file formats.
+
+:::tip
+When using the Docker image, you can adhere to the defaults and mount the files to the correct locations.
+You only need to specify `ndjsonInputFilename` or `pangoLineageDefinitionFilename`
+if you wish to use the corresponding features.
+:::
+
+| Key                              | Input Format | Default                          | Default in Docker Image  |
+| -------------------------------- | ------------ | -------------------------------- | ------------------------ |
+| `inputDirectory`                 | both         | `./` (current working directory) | `/preprocessing/input/`  |
+| `outputDirectory`                | both         | `./output/`                      | `/preprocessing/output/` |
+| `intermediateResultsDirectory`   | both         | `./temp/`                        | `/preprocessing/temp/`   |
+| `preprocessingDatabaseLocation`  | both         | (absent)                         |                          |
+| `ndjsonInputFilename`            | `NDJSON`     | (absent)                         |                          |
+| `metadataFilename`               | `TSV/FASTA`  | `metadata.tsv`                   |                          |
+| `pangoLineageDefinitionFilename` | both         | (absent)                         |                          |
+| `referenceGenomeFilename`        | both         | `reference_genomes.json`         |                          |
+| `nucleotideSequencePrefix`       | `TSV/FASTA`  | `nuc_`                           |                          |
+| `genePrefix`                     | `TSV/FASTA`  | `gene_`                          |                          |
+
+:::note
+All filenames are relative to the `inputDirectory`.
+:::
+
+:::caution
+`ndjsonInputFilename` and `metadataFilename` must not be specified simultaneously as they determine the format.
+:::
+
+### Description of Keys for Both Formats
+
+-   `inputDirectory`:
+    The directory where input files are located.
+-   `outputDirectory`:
+    The directory where output files will be placed.
+-   `intermediateResultsDirectory`:
+    The directory for storing intermediate results not relevant to the end user, mainly for debugging.
+-   `preprocessingDatabaseLocation`:
+    The file for storing internal, intermediate database states for debugging.
+-   `pangoLineageDefinitionFilename`:
+    The file with Pango lineage definitions, relative to the inputDirectory.
+    See the section on the [Pango Lineage Definition File below](#the-pango-lineage-definition-file) for details.
+-   `referenceGenomeFilename`:
+    The file with [reference genomes](/maintainer-docs/references/reference-genomes), relative to the inputDirectory.
+
+## `NDJSON` Format
+
+SILO will initiate preprocessing in the `NDJSON` format
+if `ndjsonInputFilename` is specified in the preprocessing configuration.
+
+Each line in the NDJSON file must be a JSON object with the following keys:
+
+| Key                          | Type     | Description                                                                  |
+| ---------------------------- | -------- | ---------------------------------------------------------------------------- |
+| metadata                     | `object` | An object containing all metadata as key-value pairs.                        |
+| unalignedNucleotideSequences | `object` | A [sequences object](#sequences-object) with unaligned nucleotide sequences. |
+| alignedNucleotideSequences   | `object` | A [sequences object](#sequences-object) with aligned nucleotide sequences.   |
+| alignedAminoAcidSequences    | `object` | A [sequences object](#sequences-object) with aligned amino acid sequences.   |
+| aminoAcidInsertions          | `object` | An [insertions object](#insertions-object) with amino acid insertions.       |
+| nucleotideInsertions         | `object` | An [insertions object](#insertions-object) with nucleotide insertions.       |
+
+:::note
+You must configure two metadata columns for insertions in the
+[database configuration](/maintainer-docs/references/database-configuration)
+with the exact names and types as in this snippet:
+
+```yaml
+schema:
+    metadata:
+        - name: nucleotideInsertions
+          type: insertion
+        - name: aminoAcidInsertions
+          type: aaInsertion
+```
+
+Otherwise, SILO will not recognize insertions in the NDJSON format.
+:::
+
+#### Sequences Object
+
+The sequences object contains sequences for each segment or gene.
+It must include all `nucleotideSequences` (or `genes`, respectively) specified in the
+[reference genomes](/maintainer-docs/references/reference-genomes)
+as keys.
+Its values are the sequences as strings of
+[valid symbols](/references/nucleotide-and-amino-acid-symbols)
+or `null`.
+
+#### Insertions Object
+
+The insertions object contains a list of insertions for each segment or gene.
+It must include all `nucleotideSequences` (or `genes`, respectively) specified in the
+[reference genomes](/maintainer-docs/references/reference-genomes)
+as keys.
+Its values are arrays of strings in the format `<position>:<insertion>`.
+The insertions must consist of [valid symbols](/references/nucleotide-and-amino-acid-symbols).
+
+#### Example of the Schema
+
+```json
+{
+    "metadata": {
+        "primaryKey": "sequence001",
+        "pango_lineage": "B.1.1.7",
+        "region": null,
+        "age": 46,
+        "qc_value": 0.98
+    },
+    "unalignedNucleotideSequences": {
+        "segment1": "CGATA",
+        "segment2": "ACG"
+    },
+    "alignedNucleotideSequences": {
+        "segment1": "CGATAAT",
+        "segment2": "ACGT"
+    },
+    "alignedAminoAcidSequences": {
+        "gene1": "MYSLV*",
+        "gene2": "MADVQ*",
+        "gene3": "MSLYVQ*"
+    },
+    "nucleotideInsertions": {
+        "segment1": ["3:G", "4:A"],
+        "segment2": ["2:GTT"]
+    },
+    "aminoAcidInsertions": {
+        "gene1": ["3:EPE", "4:Q"],
+        "gene2": [],
+        "gene3": []
+    }
+}
+```
+
+:::caution
+For better readability, the example is displayed on multiple lines.
+A real NDJSON file must not contain line breaks and should look as follows:
+
+```
+{"metadata": {"primaryKey": "sequence001", /*...*/ }, "aminoAcidInsertions": /*...*/ }
+{"metadata": {"primaryKey": "sequence002", /*...*/ }, "aminoAcidInsertions": /*...*/ }
+```
+
+:::
+
+## `TSV/FASTA` Format
+
+SILO will initiate preprocessing in the `TSV/FASTA` format
+if `metadataFilename` is specified in the preprocessing configuration.
+
+SILO expects the following files in the `inputDirectory`:
+
+-   a TSV file with the metadata named as configured in `metadataFilename`,
+-   FASTA files with the sequences.
+
+### Metadata File
+
+The metadata file must be a TSV (tab-separated values) file.
+Its columns must correspond to the metadata fields specified in the [database configuration](/maintainer-docs/references/database-configuration).
+Empty values will be interpreted as `null`.
+
+#### Example
+
+Given the following database configuration:
+
+```yaml
+schema:
+    metadata:
+        - name: primaryKey
+          type: string
+        - name: pango_lineage
+          type: pango_lineage
+        - name: region
+          type: string
+        - name: age
+          type: int
+        - name: qc_value
+          type: float
+        - name: insertions
+          type: insertion
+        - name: aaInsertions
+          type: aaInsertion
+    # other configuration keys ...
+```
+
+The metadata file might look as follows:
+
+<TsvExample />
+
+### Sequence Files
+
+In the `TSV/FASTA` format, sequences must be stored in separate FASTA files.
+The filenames must follow this pattern:
+
+-   aligned nucleotide sequences: `nuc_<segmentName>.fasta`.
+    The `nuc_` prefix is configurable in the preprocessing configuration via `nucleotideSequencePrefix`.
+-   unaligned nucleotide sequences:
+    TODO (https://github.com/GenSpectrum/LAPIS/issues/581) when https://github.com/GenSpectrum/LAPIS-SILO/issues/131 is resolved.
+-   aligned amino acid sequences: `gene_<geneName>.fasta`.
+    The `gene_` prefix is configurable in the preprocessing configuration via `genePrefix`.
+
+There must be one corresponding file for every segment and gene defined in the
+[reference genomes](/maintainer-docs/references/reference-genomes).
+
+The header in the FASTA files must match the `primaryKey` column in the metadata file.
+There must be a one-to-one correspondence between entries in the metadata file and sequences in the FASTA files.
+
+#### Example
+
+Given the reference genomes:
+
+```json
+{
+    "segments": [
+        { "name": "segment1", "sequence": "/*...*/" },
+        { "name": "segment2", "sequence": "/*...*/" }
+    ],
+    "genes": [
+        { "name": "gene1", "sequence": "/*...*/" },
+        { "name": "gene2", "sequence": "/*...*/" },
+        { "name": "gene3", "sequence": "/*...*/" }
+    ]
+}
+```
+
+the input directory should contain the following files:
+
+```
+input/
+├── gene_gene1.fasta
+├── gene_gene2.fasta
+├── gene_gene3.fasta
+├── nuc_segment1.fasta
+├── nuc_segment2.fasta
+└── /* other files... */
+```
+
+The file `nuc_segment1.fasta` might look as follows—
+assuming that the metadata file also has two entries with the primary keys `sequence001` and `sequence002`:
+
+```
+>sequence001
+CGATAAT
+>sequence002
+CGATAAT
+```
+
+## The Pango Lineage Definition File
+
+This file is relevant only if your data includes Pango Lineages.
+
+The Pango lineage definition file is a JSON file mapping Pango lineage names to their aliases.
+It is used to reconstruct the lineage tree structure.
+SILO requires this to properly group sequences into partitions to fully benefit from partitioning.
+
+The file contains a JSON object with alias names as keys and:
+
+-   an empty string if the alias is a root node,
+-   the name of the parent node if the alias is a child node,
+-   an array of parent nodes if the alias is a recombinant.
+
+Here is a minimal example:
+
+```json
+{
+    "A": "",
+    "B": "A.1.1.1",
+    "XA": ["B.1.2", "B.1.42"]
+}
+```
+
+A complete example can be found here:
+https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json
