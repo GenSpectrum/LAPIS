@@ -176,6 +176,10 @@ export default defineConfig({
                                     label: 'Start LAPIS and SILO',
                                     link: '/maintainer-docs/tutorials/start-lapis-and-silo',
                                 },
+                                {
+                                    label: 'Generate your config',
+                                    link: '/maintainer-docs/tutorials/generate-your-config',
+                                },
                             ],
                         },
                     ],
