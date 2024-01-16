@@ -21,6 +21,7 @@
         "@types/react": "^18.2.48",
         "@types/react-dom": "^18.2.18",
         "astro": "^4.2.6",
+        "change-case": "^5.4.2",
         "daisyui": "^4.6.1",
         "js-yaml": "^4.1.0",
         "react": "^18.2.0",
@@ -35,6 +36,7 @@
     "devDependencies": {
         "@astrojs/check": "^0.4.1",
         "@playwright/test": "^1.41.1",
+        "@types/js-yaml": "^4.0.9",
         "@types/node": "^20.11.10",
         "@types/swagger-ui": "^3.52.4",
         "prettier": "^3.2.4",

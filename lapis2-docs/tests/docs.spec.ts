@@ -42,6 +42,7 @@ const maintainerDocsPages = [
     'Starting SILO and LAPIS',
     'Preprocessing',
     'Start LAPIS and SILO',
+    'Generate your config',
 ];
 
 const pages = [
