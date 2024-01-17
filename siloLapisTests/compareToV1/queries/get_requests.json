@@ -93,5 +93,11 @@
   },
   {
     "url": "/v1/sample/nuc-mutations?dateFrom=2023-10-16&dateTo=2023-10-22&host=Human&nextcladePangoLineage=eg.5*&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/aa-mutations?dateFrom=2023-10-15&dateTo=2023-10-20&country=USA&host=Human&nextcladePangoLineage=eg.5*&minProportion=0.001"
+  },
+  {
+    "url": "/v1/sample/details?dateFrom=2023-10-15&dateTo=2023-10-20&country=USA&host=Human&nextcladePangoLineage=eg.5*&minProportion=0.001"
   }
 ]
