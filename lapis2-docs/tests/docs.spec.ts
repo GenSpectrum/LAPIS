@@ -8,9 +8,9 @@ const referencesPages = [
     'Fields',
     'Filters',
     'Open API / Swagger',
+    'Database Config',
     'Reference Genomes',
     'Nucleotide And Amino Acid Symbols',
-    'Database Config',
 ];
 
 const conceptsPages = [
