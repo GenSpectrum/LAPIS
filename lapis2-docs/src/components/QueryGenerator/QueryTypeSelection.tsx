@@ -118,7 +118,7 @@ const AggregatedStratified = ({ config, state, onStateChange }: Props) => {
                             label={m.name}
                             key={m.name}
                             type='checkbox'
-                            className='w-40'
+                            className='w-80'
                             disabled={state.selection !== 'aggregatedStratified'}
                             checked={state.aggregatedStratified.fields.has(m.name)}
                             onChange={() => changeAggregatedStratifiedField(m.name)}
@@ -185,7 +185,7 @@ const Details = ({ config, state, onStateChange }: Props) => {
                             label={m.name}
                             key={m.name}
                             type='checkbox'
-                            className='w-40'
+                            className='w-80'
                             disabled={state.selection !== 'details' || state.details.type !== 'selected'}
                             checked={state.details.fields.has(m.name)}
                             onChange={() => changeDetailsField(m.name)}

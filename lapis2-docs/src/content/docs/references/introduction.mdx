@@ -9,7 +9,7 @@ This section covers the basics of using LAPIS.
 
 LAPIS is accessible through various endpoints, each serving a distinct purpose and returning different data.
 For instance, the `GET /sample/aggregated` endpoint returns the count of sequences that meet specified filter criteria.
-These endpoints accept [`GET` and `POST`](/concepts/request-methods) requests.
+Every endpoint accepts [`GET` and `POST`](/concepts/request-methods) requests.
 Both methods yield identical data; however, the manner of providing the filter criteria differs.
 
 The various endpoints are listed in the [Open API / Swagger](/references/open-api-definition/) documentation,
@@ -18,8 +18,6 @@ which also offers a convenient testing interface via Swagger-UI.
 ## Filters
 
 The output from each endpoint can be refined using various parameters.
-For `GET` requests, these parameters are included as query strings in the URL,
-whereas for `POST` requests, they are placed in the request body.
 For instance, to determine the number of sequences originating from Germany,
 you would use `GET /sample/aggregated?country=Germany`.
 The available filters are detailed in [Filters](/references/filters/),
