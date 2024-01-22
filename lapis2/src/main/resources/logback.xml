@@ -1,6 +1,6 @@
 <configuration>
 
-    <property name="PATTERN" value="%date %level [%thread] %class: %message%n"/>
+    <property name="PATTERN" value="%date %level [%thread] [%X{RequestId}] %class: %message%n"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">

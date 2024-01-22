@@ -3,9 +3,11 @@ package org.genspectrum.lapis.request
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.LapisErrorResponse
 import org.genspectrum.lapis.controller.LapisResponse
+import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
 import org.genspectrum.lapis.openApi.LAPIS_INFO_DESCRIPTION
+import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
@@ -21,12 +23,17 @@ data class LapisInfo(
         description = LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION,
         example = LAPIS_DATA_VERSION_EXAMPLE,
     ) var dataVersion: String? = null,
+    @Schema(description = REQUEST_ID_HEADER_DESCRIPTION)
+    var requestId: String? = null,
 )
 
 const val LAPIS_DATA_VERSION_HEADER = "Lapis-Data-Version"
 
 @ControllerAdvice
-class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : ResponseBodyAdvice<Any> {
+class ResponseBodyAdviceDataVersion(
+    private val dataVersion: DataVersion,
+    private val requestIdContext: RequestIdContext,
+) : ResponseBodyAdvice<Any> {
     override fun beforeBodyWrite(
         body: Any?,
         returnType: MethodParameter,
@@ -38,12 +45,14 @@ class ResponseBodyAdviceDataVersion(private val dataVersion: DataVersion) : Resp
         response.headers.add(LAPIS_DATA_VERSION_HEADER, dataVersion.dataVersion)
 
         when (body) {
-            is LapisResponse<*> -> return LapisResponse(body.data, LapisInfo(dataVersion.dataVersion))
-            is LapisErrorResponse -> return LapisErrorResponse(body.error, LapisInfo(dataVersion.dataVersion))
+            is LapisResponse<*> -> return LapisResponse(body.data, getLapisInfo())
+            is LapisErrorResponse -> return LapisErrorResponse(body.error, getLapisInfo())
         }
 
         return body
     }
+
+    private fun getLapisInfo() = LapisInfo(dataVersion.dataVersion, requestIdContext.requestId)
 
     override fun supports(
         returnType: MethodParameter,

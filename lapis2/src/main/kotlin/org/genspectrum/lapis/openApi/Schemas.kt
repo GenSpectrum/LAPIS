@@ -69,6 +69,12 @@ const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTI
 const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
     "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION_HEADER'."
 
+const val REQUEST_ID_HEADER = "X-Request-ID"
+const val REQUEST_ID_HEADER_DESCRIPTION = """
+A UUID that uniquely identifies the request for tracing purposes.
+If none if provided in the request, LAPIS will generate one.
+"""
+
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation
@@ -79,6 +85,11 @@ const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIP
         Header(
             name = LAPIS_DATA_VERSION_HEADER,
             description = LAPIS_DATA_VERSION_HEADER_DESCRIPTION,
+            schema = Schema(type = "string"),
+        ),
+        Header(
+            name = REQUEST_ID_HEADER,
+            description = REQUEST_ID_HEADER_DESCRIPTION,
             schema = Schema(type = "string"),
         ),
     ],

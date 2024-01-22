@@ -21,6 +21,7 @@ const conceptsPages = [
     'Request methods: GET and POST',
     'Response format',
     'Variant query',
+    'Request Id',
 ];
 
 const userTutorialPages = ['Plot the global distribution of all sequences in R'];
