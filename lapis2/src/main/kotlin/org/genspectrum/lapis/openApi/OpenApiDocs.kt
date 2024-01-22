@@ -255,12 +255,14 @@ private fun computePrimitiveFieldFilters(
     }
 
 private fun lapisResponseSchema(dataSchema: Schema<Any>) =
-    Schema<Any>().type("object").properties(
-        mapOf(
-            "data" to Schema<Any>().type("array").items(dataSchema),
-            "info" to infoResponseSchema(),
-        ),
-    ).required(listOf("data", "info"))
+    Schema<Any>().type("object")
+        .properties(
+            mapOf(
+                "data" to Schema<Any>().type("array").items(dataSchema),
+                "info" to infoResponseSchema(),
+            ),
+        )
+        .required(listOf("data", "info"))
 
 private fun infoResponseSchema() =
     Schema<LapisInfo>().type("object")
@@ -270,8 +272,10 @@ private fun infoResponseSchema() =
                 "dataVersion" to Schema<String>().type("string")
                     .description(LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION)
                     .example(LAPIS_DATA_VERSION_EXAMPLE),
+                "requestId" to Schema<String>().type("string").description(REQUEST_ID_HEADER_DESCRIPTION),
             ),
-        ).required(listOf("dataVersion"))
+        )
+        .required(listOf("dataVersion"))
 
 private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }

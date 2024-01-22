@@ -97,6 +97,10 @@ export default defineConfig({
                             link: '/concepts/variant-query/',
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
+                        {
+                            label: 'Request Id',
+                            link: '/concepts/request-id/',
+                        },
                     ]),
                 },
                 {
