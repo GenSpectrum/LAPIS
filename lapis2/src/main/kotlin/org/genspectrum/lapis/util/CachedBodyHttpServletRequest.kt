@@ -9,6 +9,7 @@ import jakarta.servlet.ServletInputStream
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
 import mu.KotlinLogging
+import org.springframework.http.HttpMethod
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -57,15 +58,17 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
         }
 
         if (contentLength == 0) {
-            log.warn { "Could not read from request body, because content length is 0." }
+            log.debug { "Could not read from request body, because content length is 0." }
             return emptyMap()
         }
 
         return try {
             objectMapper.readValue(inputStream)
         } catch (exception: Exception) {
-            log.error { "Failed to read from request body: ${exception.message}" }
-            log.debug { exception.stackTraceToString() }
+            if (method != HttpMethod.GET.name()) {
+                log.warn { "Failed to read from request body: ${exception.message}, contentLength $contentLength" }
+                log.debug { exception.stackTraceToString() }
+            }
             emptyMap()
         }
     }
