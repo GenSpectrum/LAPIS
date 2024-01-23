@@ -51,6 +51,9 @@ data class NucleotideInsertion(val position: Int, val insertions: String, val se
 private val NUCLEOTIDE_INSERTION_REGEX =
     Regex(
         """^ins_((?<segment>[a-zA-Z0-9_-]+)(?=:):)?(?<position>\d+):(?<insertions>(([a-zA-Z?]|(\.\*))+))$""",
+        setOf(
+            RegexOption.IGNORE_CASE,
+        ),
     )
 
 @JsonComponent

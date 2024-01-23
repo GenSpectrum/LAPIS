@@ -96,6 +96,10 @@ class NucleotideInsertionTest {
                     "\"ins_oTher_segmenT:123:ABCD\"",
                     NucleotideInsertion(123, "ABCD", "other_segment"),
                 ),
+                Arguments.of(
+                    "\"INs_123:AcCD\"",
+                    NucleotideInsertion(123, "ACCD", null),
+                ),
             )
 
         @JvmStatic
