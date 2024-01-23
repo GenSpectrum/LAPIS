@@ -150,4 +150,80 @@ class SingleSegmentedSequenceControllerTest(
         mockMvc.perform(request)
             .andExpect(status().isNotFound)
     }
+
+    @Test
+    fun `should GET unalignedNucleotideSequence with empty filter`() {
+        val returnedValue = "TestSequenceContent"
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFiltersRequest(emptyMap()),
+                SequenceType.UNALIGNED,
+                "someSegment",
+            )
+        } returns returnedValue
+
+        mockMvc.perform(getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
+            .andExpect(status().isOk)
+            .andExpect(content().string(returnedValue))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    @Test
+    fun `should GET unalignedNucleotideSequence with filter`() {
+        val returnedValue = "TestSequenceContent"
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                SequenceType.UNALIGNED,
+                "someSegment",
+            )
+        } returns returnedValue
+
+        mockMvc.perform(getSample("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE?country=Switzerland"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(returnedValue))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    @Test
+    fun `should POST unalignedNucleotideSequence with empty filter`() {
+        val returnedValue = "TestSequenceContent"
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFiltersRequest(emptyMap()),
+                SequenceType.UNALIGNED,
+                "someSegment",
+            )
+        } returns returnedValue
+
+        val request = postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+            .content("""{}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(content().string(returnedValue))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
+
+    @Test
+    fun `should POST unalignedNucleotideSequence with filter`() {
+        val returnedValue = "TestSequenceContent"
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                SequenceType.UNALIGNED,
+                "someSegment",
+            )
+        } returns returnedValue
+
+        val request = postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+            .content("""{"country": "Switzerland"}""")
+            .contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(content().string(returnedValue))
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+    }
 }

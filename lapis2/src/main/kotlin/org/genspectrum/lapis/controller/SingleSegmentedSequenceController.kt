@@ -9,6 +9,7 @@ import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
 import org.genspectrum.lapis.openApi.LapisAlignedSingleSegmentedNucleotideSequenceResponse
+import org.genspectrum.lapis.openApi.LapisUnalignedSingleSegmentedNucleotideSequenceResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.NucleotideInsertions
@@ -103,6 +104,70 @@ class SingleSegmentedSequenceController(
         return siloQueryModel.getGenomicSequence(
             request,
             SequenceType.ALIGNED,
+            referenceGenomeSchema.nucleotideSequences[0].name,
+        )
+    }
+
+    @GetMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
+    fun getUnalignedNucleotideSequences(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @NucleotideSequencesOrderByFields
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Limit
+        @RequestParam
+        limit: Int? = null,
+        @Offset
+        @RequestParam
+        offset: Int? = null,
+    ): String {
+        val request = SequenceFiltersRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = request
+
+        return siloQueryModel.getGenomicSequence(
+            request,
+            SequenceType.UNALIGNED,
+            referenceGenomeSchema.nucleotideSequences[0].name,
+        )
+    }
+
+    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
+    fun postUnalignedNucleotideSequence(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequest,
+    ): String {
+        requestContext.filter = request
+
+        return siloQueryModel.getGenomicSequence(
+            request,
+            SequenceType.UNALIGNED,
             referenceGenomeSchema.nucleotideSequences[0].name,
         )
     }

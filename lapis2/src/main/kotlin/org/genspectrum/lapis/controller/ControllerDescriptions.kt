@@ -26,8 +26,14 @@ const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
 const val ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of fasta formatted aligned nucleotide sequences. Only sequences matching the 
     specified sequence filters are considered."""
+const val UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
+    """Returns a string of fasta formatted unaligned nucleotide sequences. Only sequences matching the 
+    specified sequence filters are considered."""
 const val ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of fasta formatted aligned nucleotide sequences of the requested segment.
+    Only sequences matching the specified sequence filters are considered."""
+const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
+    """Returns a string of fasta formatted unaligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered."""
 
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
