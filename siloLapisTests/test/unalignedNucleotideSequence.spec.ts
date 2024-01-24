@@ -103,6 +103,19 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
     expect(primaryKeys[0]).to.equal('>key_3259931');
   });
 
+  it('should return the short sequence', async () => {
+    const result = await lapisSingleSegmentedSequenceController.postUnalignedNucleotideSequence({
+      nucleotideSequenceRequest: { primaryKey: 'key_1749899' },
+    });
+
+    const { primaryKeys, sequences } = sequenceData(result);
+
+    expect(primaryKeys).to.have.length(1);
+    expect(sequences).to.have.length(1);
+    expect(primaryKeys[0]).to.equal('>key_1749899');
+    expect(sequences[0]).to.equal('some_very_short_string');
+  });
+
   it('should return the lapis data version in the response', async () => {
     const result = await fetch(basePath + '/sample/unalignedNucleotideSequences');
 

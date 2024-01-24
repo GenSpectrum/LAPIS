@@ -17,8 +17,8 @@ The SILO preprocessing accepts input data in two formats:
 
 -   `NDJSON`: a single [NDJSON](https://ndjson.org/) file containing all the data,
 -   `TSV/FASTA`: a directory containing
--   a TSV file with the metadata
--   FASTA files with the sequences
+    -   a TSV file with the metadata
+    -   FASTA files with the sequences
 
 The preprocessing configuration file determines which format should be used.
 
@@ -34,18 +34,19 @@ You only need to specify `ndjsonInputFilename` or `pangoLineageDefinitionFilenam
 if you wish to use the corresponding features.
 :::
 
-| Key                              | Input Format | Default                          | Default in Docker Image  |
-| -------------------------------- | ------------ | -------------------------------- | ------------------------ |
-| `inputDirectory`                 | both         | `./` (current working directory) | `/preprocessing/input/`  |
-| `outputDirectory`                | both         | `./output/`                      | `/preprocessing/output/` |
-| `intermediateResultsDirectory`   | both         | `./temp/`                        | `/preprocessing/temp/`   |
-| `preprocessingDatabaseLocation`  | both         | (absent)                         |                          |
-| `ndjsonInputFilename`            | `NDJSON`     | (absent)                         |                          |
-| `metadataFilename`               | `TSV/FASTA`  | `metadata.tsv`                   |                          |
-| `pangoLineageDefinitionFilename` | both         | (absent)                         |                          |
-| `referenceGenomeFilename`        | both         | `reference_genomes.json`         |                          |
-| `nucleotideSequencePrefix`       | `TSV/FASTA`  | `nuc_`                           |                          |
-| `genePrefix`                     | `TSV/FASTA`  | `gene_`                          |                          |
+| Key                                 | Input Format | Default                          | Default in Docker Image  |
+| ----------------------------------- | ------------ | -------------------------------- | ------------------------ |
+| `inputDirectory`                    | both         | `./` (current working directory) | `/preprocessing/input/`  |
+| `outputDirectory`                   | both         | `./output/`                      | `/preprocessing/output/` |
+| `intermediateResultsDirectory`      | both         | `./temp/`                        | `/preprocessing/temp/`   |
+| `preprocessingDatabaseLocation`     | both         | (absent)                         |                          |
+| `ndjsonInputFilename`               | `NDJSON`     | (absent)                         |                          |
+| `metadataFilename`                  | `TSV/FASTA`  | `metadata.tsv`                   |                          |
+| `pangoLineageDefinitionFilename`    | both         | (absent)                         |                          |
+| `referenceGenomeFilename`           | both         | `reference_genomes.json`         |                          |
+| `nucleotideSequencePrefix`          | `TSV/FASTA`  | `nuc_`                           |                          |
+| `genePrefix`                        | `TSV/FASTA`  | `gene_`                          |                          |
+| `unalignedNucleotideSequencePrefix` | `TSV/FASTA`  | `unaligned_`                     |                          |
 
 :::note
 All filenames are relative to the `inputDirectory`.
