@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import { basePath, lapisClient } from './common';
 import fs from 'fs';
-import { AggregatedPostRequest } from './lapisClient';
-import { AggregatedResponse } from './lapisClient';
+import { AggregatedPostRequest, AggregatedResponse } from './lapisClient';
 
 const queriesPath = __dirname + '/aggregatedQueries';
 const aggregatedQueryFiles = fs.readdirSync(queriesPath);
@@ -195,5 +194,13 @@ null	Switzerland	2
 
     expect(result.status).equals(200);
     expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
+  });
+
+  it('should return the data with Content-Disposition when asking for download', async () => {
+    const urlParams = new URLSearchParams({ downloadAsFile: 'true' });
+
+    const response = await getAggregated(urlParams);
+
+    expect(response.headers.get('content-disposition')).equals('attachment; filename=aggregated.json');
   });
 });

@@ -65,16 +65,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val AGGREGATED_ROUTE = "/aggregated"
-const val DETAILS_ROUTE = "/details"
-const val NUCLEOTIDE_MUTATIONS_ROUTE = "/nucleotideMutations"
-const val AMINO_ACID_MUTATIONS_ROUTE = "/aminoAcidMutations"
-const val NUCLEOTIDE_INSERTIONS_ROUTE = "/nucleotideInsertions"
-const val AMINO_ACID_INSERTIONS_ROUTE = "/aminoAcidInsertions"
-const val ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/alignedNucleotideSequences"
-const val ALIGNED_AMINO_ACID_SEQUENCES_ROUTE = "/alignedAminoAcidSequences"
-const val UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/unalignedNucleotideSequences"
-
 @RestController
 @RequestMapping("/sample")
 class LapisController(

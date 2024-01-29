@@ -5,6 +5,15 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.FIELD_WITH_ONLY_LOWERCASE_LETTERS
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
+import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
+import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_INSERTIONS
+import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_MUTATIONS
+import org.genspectrum.lapis.controller.SampleRoute.DETAILS
+import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
+import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
+import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.LapisInfo
@@ -13,6 +22,11 @@ import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.AminoAcidInsertionResponse
+import org.genspectrum.lapis.response.AminoAcidMutationResponse
+import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.NucleotideInsertionResponse
+import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
@@ -23,8 +37,11 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -128,7 +145,7 @@ class LapisControllerCommonFieldsTest(
                 }
                 """.trimIndent(),
             )
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -167,7 +184,7 @@ class LapisControllerCommonFieldsTest(
                 }
                 """.trimIndent(),
             )
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -178,7 +195,7 @@ class LapisControllerCommonFieldsTest(
     fun `POST aggregated with invalid orderBy fields`() {
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"orderBy": [ { "field": ["this is an array, not a string"] } ]}""")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
@@ -232,7 +249,7 @@ class LapisControllerCommonFieldsTest(
 
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"limit": 100}""")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -243,7 +260,7 @@ class LapisControllerCommonFieldsTest(
     fun `POST aggregated with invalid limit`() {
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"limit": "this is not a number"}""")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
@@ -294,7 +311,7 @@ class LapisControllerCommonFieldsTest(
 
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"offset": 5}""")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -305,7 +322,7 @@ class LapisControllerCommonFieldsTest(
     fun `POST aggregated with invalid offset`() {
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"offset": "this is not a number"}""")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(APPLICATION_JSON)
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
@@ -384,25 +401,236 @@ class LapisControllerCommonFieldsTest(
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidInsertions'")))
     }
 
-    private companion object {
-        fun endpointsOfController() =
-            listOf(
-                Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
-                Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
-                Arguments.of(AGGREGATED_ROUTE),
-                Arguments.of(DETAILS_ROUTE),
-                Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
-                Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
-                Arguments.of("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/S"),
+    @ParameterizedTest(name = "GET data from {0} as file")
+    @MethodSource("getDownloadAsFileScenarios")
+    fun `GET data as file`(scenario: DownloadAsFileScenario) {
+        scenario.setupMock(siloQueryModelMock)
+
+        var queryString = "$DOWNLOAD_AS_FILE_PROPERTY=true"
+        if (scenario.requestedDataFormat != null) {
+            queryString += "&$FORMAT_PROPERTY=${scenario.requestedDataFormat}"
+        }
+
+        mockMvc.perform(getSample("${scenario.endpoint}?$queryString"))
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = scenario.expectedFilename,
+                expectedFileContent = scenario.expectedFileContent,
             )
+    }
+
+    @ParameterizedTest(name = "POST data from {0} as file")
+    @MethodSource("getDownloadAsFileScenarios")
+    fun `POST data as file`(scenario: DownloadAsFileScenario) {
+        scenario.setupMock(siloQueryModelMock)
+
+        val maybeDataFormat = when {
+            scenario.requestedDataFormat != null -> """, "$FORMAT_PROPERTY": "${scenario.requestedDataFormat}" """
+            else -> ""
+        }
+        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat }"""
+
+        mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = scenario.expectedFilename,
+                expectedFileContent = scenario.expectedFileContent,
+            )
+    }
+
+    fun ResultActions.andExpectAttachmentWithContent(
+        expectedFilename: String,
+        expectedFileContent: String,
+    ): ResultActions =
+        this.andExpect(header().string("Content-Disposition", "attachment; filename=$expectedFilename"))
+            .andExpect(content().string(expectedFileContent))
+
+    private companion object {
+        val endpointsOfController = SampleRoute.entries
+            .map { it.pathSegment }
+            .map {
+                Arguments.of(
+                    when (it) {
+                        ALIGNED_AMINO_ACID_SEQUENCES_ROUTE -> "$it/gene1"
+                        ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE -> "$it/other_segment"
+                        UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE -> "$it/other_segment"
+                        else -> it
+                    },
+                )
+            }
 
         @JvmStatic
-        fun getEndpointsWithInsertionFilter() = endpointsOfController()
+        fun getEndpointsWithInsertionFilter() = endpointsOfController
 
         @JvmStatic
-        fun getEndpointsWithNucleotideMutationFilter() = endpointsOfController()
+        fun getEndpointsWithNucleotideMutationFilter() = endpointsOfController
 
         @JvmStatic
-        fun getEndpointsWithAminoAcidMutationFilter() = endpointsOfController()
+        fun getEndpointsWithAminoAcidMutationFilter() = endpointsOfController
+
+        @JvmStatic
+        val downloadAsFileScenarios = SampleRoute.entries.flatMap { DownloadAsFileScenario.forEndpoint(it) }
+    }
+}
+
+data class DownloadAsFileScenario(
+    val endpoint: String,
+    val requestedDataFormat: String?,
+    val expectedFilename: String,
+    val expectedFileContent: String,
+    val setupMock: (SiloQueryModel) -> Any,
+) {
+    override fun toString() =
+        when (requestedDataFormat) {
+            null -> endpoint
+            else -> "$endpoint as $requestedDataFormat"
+        }
+
+    companion object {
+        fun forEndpoint(route: SampleRoute) =
+            when (route) {
+                AGGREGATED -> forDataFormats(
+                    endpoint = AGGREGATED_ROUTE,
+                    expectedFilename = "aggregated",
+                    expectedJsonContent = """[{"count":1,"country":"Switzerland"}]""",
+                    expectedCsvContent = "country,count\nSwitzerland,1",
+                    expectedTsvContent = "country\tcount\nSwitzerland\t1",
+                    setupMock = { every { it.getAggregated(any()) } returns aggregationData },
+                )
+
+                DETAILS -> forDataFormats(
+                    endpoint = DETAILS_ROUTE,
+                    expectedFilename = "details",
+                    expectedJsonContent = """[{"country":"Switzerland","age":"42"}]""",
+                    expectedCsvContent = "country,age\nSwitzerland,42",
+                    expectedTsvContent = "country\tage\nSwitzerland\t42",
+                    setupMock = { every { it.getDetails(any()) } returns detailsData },
+                )
+
+                NUCLEOTIDE_MUTATIONS -> forDataFormats(
+                    endpoint = NUCLEOTIDE_MUTATIONS_ROUTE,
+                    expectedFilename = "nucleotideMutations",
+                    expectedJsonContent = """[{"mutation":"5G","count":1,"proportion":0.5}]""",
+                    expectedCsvContent = "mutation,count,proportion\n5G,1,0.5",
+                    expectedTsvContent = "mutation\tcount\tproportion\n5G\t1\t0.5",
+                    setupMock =
+                        { every { it.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData },
+                )
+
+                AMINO_ACID_MUTATIONS -> forDataFormats(
+                    endpoint = AMINO_ACID_MUTATIONS_ROUTE,
+                    expectedFilename = "aminoAcidMutations",
+                    expectedJsonContent = """[{"mutation":"5G","count":1,"proportion":0.5}]""",
+                    expectedCsvContent = "mutation,count,proportion\n5G,1,0.5",
+                    expectedTsvContent = "mutation\tcount\tproportion\n5G\t1\t0.5",
+                    setupMock =
+                        { every { it.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData },
+                )
+
+                NUCLEOTIDE_INSERTIONS -> forDataFormats(
+                    endpoint = NUCLEOTIDE_INSERTIONS_ROUTE,
+                    expectedFilename = "nucleotideInsertions",
+                    expectedJsonContent = """[{"insertion":"123:GGA","count":1}]""",
+                    expectedCsvContent = "insertion,count\n123:GGA,1",
+                    expectedTsvContent = "insertion\tcount\n123:GGA\t1",
+                    setupMock = { every { it.getNucleotideInsertions(any()) } returns nucleotideInsertionData },
+                )
+
+                AMINO_ACID_INSERTIONS -> forDataFormats(
+                    endpoint = AMINO_ACID_INSERTIONS_ROUTE,
+                    expectedFilename = "aminoAcidInsertions",
+                    expectedJsonContent = """[{"insertion":"123:GGA","count":1}]""",
+                    expectedCsvContent = "insertion,count\n123:GGA,1",
+                    expectedTsvContent = "insertion\tcount\n123:GGA\t1",
+                    setupMock = { every { it.getAminoAcidInsertions(any()) } returns aminoAcidInsertionData },
+                )
+
+                ALIGNED_NUCLEOTIDE_SEQUENCES -> listOf(
+                    DownloadAsFileScenario(
+                        endpoint = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/segmentName",
+                        requestedDataFormat = null,
+                        expectedFilename = "alignedNucleotideSequences.fasta",
+                        expectedFileContent = SEQUENCE_DATA,
+                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
+                    ),
+                )
+
+                ALIGNED_AMINO_ACID_SEQUENCES -> listOf(
+                    DownloadAsFileScenario(
+                        endpoint = "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/S",
+                        requestedDataFormat = null,
+                        expectedFilename = "alignedAminoAcidSequences.fasta",
+                        expectedFileContent = SEQUENCE_DATA,
+                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
+                    ),
+                )
+
+                UNALIGNED_NUCLEOTIDE_SEQUENCES -> listOf(
+                    DownloadAsFileScenario(
+                        endpoint = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/segmentName",
+                        requestedDataFormat = null,
+                        expectedFilename = "unalignedNucleotideSequences.fasta",
+                        expectedFileContent = SEQUENCE_DATA,
+                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
+                    ),
+                )
+
+                else -> throw IllegalArgumentException(
+                    "There is no ${DownloadAsFileScenario::class} defined for endpoint $route",
+                )
+            }
+
+        private fun forDataFormats(
+            endpoint: String,
+            expectedFilename: String,
+            expectedJsonContent: String,
+            expectedCsvContent: String,
+            expectedTsvContent: String,
+            setupMock: (SiloQueryModel) -> Any,
+        ) = listOf(
+            DownloadAsFileScenario(
+                endpoint = endpoint,
+                requestedDataFormat = "json",
+                expectedFilename = "$expectedFilename.json",
+                expectedFileContent = expectedJsonContent,
+                setupMock = setupMock,
+            ),
+            DownloadAsFileScenario(
+                endpoint = endpoint,
+                requestedDataFormat = "csv",
+                expectedFilename = "$expectedFilename.csv",
+                expectedFileContent = expectedCsvContent,
+                setupMock = setupMock,
+            ),
+            DownloadAsFileScenario(
+                endpoint = endpoint,
+                requestedDataFormat = "tsv",
+                expectedFilename = "$expectedFilename.tsv",
+                expectedFileContent = expectedTsvContent,
+                setupMock = setupMock,
+            ),
+        )
+
+        private val aggregationData = listOf(
+            AggregationData(
+                1,
+                mapOf("country" to TextNode("Switzerland")),
+            ),
+        )
+
+        private val detailsData = listOf(
+            DetailsData(
+                mapOf(
+                    "country" to TextNode("Switzerland"),
+                    "age" to TextNode("42"),
+                ),
+            ),
+        )
+
+        private val nucleotideMutationData = listOf(NucleotideMutationResponse("5G", 1, 0.5))
+        private val aminoAcidMutationData = listOf(AminoAcidMutationResponse("5G", 1, 0.5))
+        private val nucleotideInsertionData = listOf(NucleotideInsertionResponse("123:GGA", 1))
+        private val aminoAcidInsertionData = listOf(AminoAcidInsertionResponse("123:GGA", 1))
+        private const val SEQUENCE_DATA = ">dummyFastaHeader\ntheSequence\n"
     }
 }

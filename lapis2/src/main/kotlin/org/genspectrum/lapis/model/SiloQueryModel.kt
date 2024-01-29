@@ -109,7 +109,7 @@ class SiloQueryModel(
             ),
         )
 
-        return data.map { it ->
+        return data.map {
             val sequenceName = if (referenceGenomeSchema.isSingleSegmented()) "" else "${it.sequenceName}:"
 
             NucleotideInsertionResponse(
@@ -131,7 +131,7 @@ class SiloQueryModel(
             ),
         )
 
-        return data.map { it ->
+        return data.map {
             AminoAcidInsertionResponse(
                 "ins_${it.sequenceName}:${it.position}:${it.insertions}",
                 it.count,

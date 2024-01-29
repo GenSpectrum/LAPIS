@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.Content

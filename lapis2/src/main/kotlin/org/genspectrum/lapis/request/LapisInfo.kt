@@ -10,6 +10,7 @@ import org.genspectrum.lapis.openApi.LAPIS_INFO_DESCRIPTION
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.core.MethodParameter
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
@@ -44,12 +45,14 @@ class ResponseBodyAdviceDataVersion(
     ): Any? {
         response.headers.add(LAPIS_DATA_VERSION_HEADER, dataVersion.dataVersion)
 
-        when (body) {
-            is LapisResponse<*> -> return LapisResponse(body.data, getLapisInfo())
-            is LapisErrorResponse -> return LapisErrorResponse(body.error, getLapisInfo())
-        }
+        val isDownload = response.headers.getFirst(HttpHeaders.CONTENT_DISPOSITION)?.startsWith("attachment") ?: false
 
-        return body
+        return when {
+            body is LapisResponse<*> && isDownload -> body.data
+            body is LapisResponse<*> -> LapisResponse(body.data, getLapisInfo())
+            body is LapisErrorResponse -> LapisErrorResponse(body.error, getLapisInfo())
+            else -> body
+        }
     }
 
     private fun getLapisInfo() = LapisInfo(dataVersion.dataVersion, requestIdContext.requestId)

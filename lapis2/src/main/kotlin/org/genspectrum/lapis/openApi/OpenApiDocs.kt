@@ -2,7 +2,10 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.media.BooleanSchema
+import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.media.StringSchema
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
@@ -11,11 +14,13 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.SequenceFilterFieldName
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_PROPERTY
@@ -225,15 +230,15 @@ private fun getSequenceFiltersWithFormat(
     databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
     orderByFieldsSchema: Schema<Any>,
-): Map<SequenceFilterFieldName, Schema<Any>> =
+): Map<SequenceFilterFieldName, Schema<*>> =
     getSequenceFilters(databaseConfig, sequenceFilterFields, orderByFieldsSchema) +
         Pair(FORMAT_PROPERTY, formatSchema())
 
 private fun getSequenceFilters(
     databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
-    orderByFieldsSchema: Schema<Any>,
-): Map<SequenceFilterFieldName, Schema<Any>> =
+    orderByFieldsSchema: Schema<*>,
+): Map<SequenceFilterFieldName, Schema<*>> =
     computePrimitiveFieldFilters(databaseConfig, sequenceFilterFields) +
         Pair(NUCLEOTIDE_MUTATIONS_PROPERTY, nucleotideMutations()) +
         Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
@@ -241,7 +246,13 @@ private fun getSequenceFilters(
         Pair(AMINO_ACID_INSERTIONS_PROPERTY, aminoAcidInsertions()) +
         Pair(ORDER_BY_PROPERTY, orderByPostSchema(orderByFieldsSchema)) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
-        Pair(OFFSET_PROPERTY, offsetSchema())
+        Pair(OFFSET_PROPERTY, offsetSchema()) +
+        Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema())
+
+fun downloadAsFileSchema(): Schema<*> =
+    BooleanSchema()
+        ._default(false)
+        .description(DOWNLOAD_AS_FILE_DESCRIPTION)
 
 private fun computePrimitiveFieldFilters(
     databaseConfig: DatabaseConfig,
@@ -249,7 +260,7 @@ private fun computePrimitiveFieldFilters(
 ): Map<SequenceFilterFieldName, Schema<Any>> =
     when (databaseConfig.schema.opennessLevel) {
         OpennessLevel.PROTECTED -> primitiveSequenceFilterFieldSchemas(sequenceFilterFields) +
-            ("accessKey" to accessKeySchema())
+            (ACCESS_KEY_PROPERTY to accessKeySchema())
 
         else -> primitiveSequenceFilterFieldSchemas(sequenceFilterFields)
     }
@@ -339,12 +350,11 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
                 "The response is stratified by this field.",
         )
     } + mapOf(
-        COUNT_PROPERTY to Schema<String>().type("integer").description("The number of sequences matching the filters."),
+        COUNT_PROPERTY to IntegerSchema().description("The number of sequences matching the filters."),
     )
 
 private fun accessKeySchema() =
-    Schema<String>()
-        .type("string")
+    StringSchema()
         .description(
             "An access key that grants access to the protected data that this instance serves. " +
                 "There are two types or access keys: One only grants access to aggregated data, " +
@@ -437,7 +447,7 @@ private fun aminoAcidInsertions() =
                 ),
         )
 
-private fun orderByPostSchema(orderByFieldsSchema: Schema<Any>) =
+private fun orderByPostSchema(orderByFieldsSchema: Schema<*>) =
     Schema<List<String>>()
         .type("array")
         .items(
