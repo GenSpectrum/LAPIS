@@ -77,6 +77,9 @@ A UUID that uniquely identifies the request for tracing purposes.
 If none if provided in the request, LAPIS will generate one.
 """
 
+const val DOWNLOAD_AS_FILE_DESCRIPTION =
+    "Set to true to make your browser trigger a download instead of showing the response content."
+
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation

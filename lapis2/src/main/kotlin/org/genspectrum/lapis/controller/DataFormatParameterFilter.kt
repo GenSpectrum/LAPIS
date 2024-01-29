@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.springframework.core.annotation.Order
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -18,7 +19,10 @@ private val log = KotlinLogging.logger {}
 const val TEXT_CSV_HEADER = "text/csv"
 const val TEXT_TSV_HEADER = "text/tab-separated-values"
 
+const val DATA_FORMAT_FILTER_ORDER = 0
+
 @Component
+@Order(DATA_FORMAT_FILTER_ORDER)
 class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,

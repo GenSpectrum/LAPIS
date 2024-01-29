@@ -11,6 +11,7 @@ const val AMINO_ACID_INSERTIONS_PROPERTY = "aminoAcidInsertions"
 const val ORDER_BY_PROPERTY = "orderBy"
 const val LIMIT_PROPERTY = "limit"
 const val OFFSET_PROPERTY = "offset"
+const val DOWNLOAD_AS_FILE_PROPERTY = "downloadAsFile"
 
 val SPECIAL_REQUEST_PROPERTIES = listOf(
     MIN_PROPORTION_PROPERTY,
@@ -24,4 +25,5 @@ val SPECIAL_REQUEST_PROPERTIES = listOf(
     LIMIT_PROPERTY,
     OFFSET_PROPERTY,
     FORMAT_PROPERTY,
+    DOWNLOAD_AS_FILE_PROPERTY,
 )
