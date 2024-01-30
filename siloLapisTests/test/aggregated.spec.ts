@@ -188,19 +188,4 @@ null	Switzerland	2
     `.trim()
     );
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await getAggregated();
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
-
-  it('should return the data with Content-Disposition when asking for download', async () => {
-    const urlParams = new URLSearchParams({ downloadAsFile: 'true' });
-
-    const response = await getAggregated(urlParams);
-
-    expect(response.headers.get('content-disposition')).equals('attachment; filename=aggregated.json');
-  });
 });

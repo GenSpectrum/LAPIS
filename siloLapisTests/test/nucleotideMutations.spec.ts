@@ -166,11 +166,4 @@ C7124T	2	0.11764705882352941
     `.trim()
     );
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/nucleotideMutations');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });

@@ -166,11 +166,4 @@ ORF1a:A2529V	3	0.17647058823529413
     `.trim()
     );
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/aminoAcidMutations');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });

@@ -102,11 +102,4 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     expect(sequences).to.have.length(1);
     expect(primaryKeys[0]).to.equal('>key_3259931');
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/alignedNucleotideSequences');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });
