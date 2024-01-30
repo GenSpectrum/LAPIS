@@ -145,7 +145,7 @@ Solothurn	B.1	key_1002052
       division: 'Zürich',
       primaryKey: 'key_3578231',
       insertions: '25701:CCC,5959:TAT',
-      pangoLineage: 'B.1.1.28.1',
+      pangoLineage: 'P.1',
       qcValue: 0.93,
       region: 'Europe',
     };
@@ -169,7 +169,7 @@ Solothurn	B.1	key_1002052
       date: '2021-07-04',
       division: 'Vaud',
       primaryKey: 'key_3259931',
-      pangoLineage: 'B.1.617.2.43',
+      pangoLineage: 'AY.43',
       qcValue: 0.98,
       region: 'Europe',
     };
