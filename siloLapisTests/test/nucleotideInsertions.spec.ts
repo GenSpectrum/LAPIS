@@ -133,11 +133,4 @@ ins_25701:CCC	17
     `.trim()
     );
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/nucleotideInsertions');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });

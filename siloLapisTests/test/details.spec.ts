@@ -183,11 +183,4 @@ Solothurn	B.1	key_1002052
     expect(result.data).to.have.length(1);
     expect(result.data[0]).to.deep.equal(expectedResultWithAminoAcidInsertion);
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/details');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });

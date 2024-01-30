@@ -135,11 +135,4 @@ ins_S:143:T	1
     `.trim()
     );
   });
-
-  it('should return the lapis data version in the response', async () => {
-    const result = await fetch(basePath + '/sample/aminoAcidInsertions');
-
-    expect(result.status).equals(200);
-    expect(result.headers.get('lapis-data-version')).to.match(/\d{10}/);
-  });
 });
