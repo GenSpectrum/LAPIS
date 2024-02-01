@@ -105,7 +105,7 @@ export function MetadataEditModal({ index, metadata }: { index: number; metadata
 
     const [metadataType, setMetadataType] = useState<MetadataType>(metadata.type);
     const [metadataName, setMetadataName] = useState(metadata.name);
-    const [generateIndex, setGenerateIndex] = useState(metadata.generateIndex);
+    const [generateIndex, setGenerateIndex] = useState(!!metadata.generateIndex);
 
     const handleUpdateMetadata = () => {
         updateMetadata({ ...metadata, name: metadataName, type: metadataType, generateIndex }, index);

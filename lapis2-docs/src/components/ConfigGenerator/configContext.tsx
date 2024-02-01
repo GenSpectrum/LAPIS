@@ -24,49 +24,37 @@ export type MetadataType = z.infer<typeof metadataTypeSchema>;
 export const metadataSchema = z.object({
     name: z.string(),
     type: metadataTypeSchema,
-    generateIndex: z.boolean(),
+    generateIndex: z.boolean().optional(),
     autocomplete: z.boolean().optional(),
     required: z.boolean().optional(),
     notSearchable: z.boolean().optional(),
 });
 
-export type Metadata = {
-    name: string;
-    type: MetadataType;
-    generateIndex: boolean;
-    autocomplete?: boolean;
-    required?: boolean;
-    notSearchable?: boolean;
-};
+export type Metadata = z.infer<typeof metadataSchema>;
 
 export const featureSchema = z.object({
     name: z.string(),
 });
 export type Feature = z.infer<typeof featureSchema>;
 
-export const ConfigSchema = z.object({
+export const schemaSchema = z.object({
     instanceName: z.string(),
     opennessLevel: opennessLevelSchema,
     metadata: z.array(metadataSchema),
     primaryKey: z.string(),
     dateToSortBy: z.string(),
     partitionBy: z.string(),
-    tableColumns: z.array(z.string()),
+    tableColumns: z.array(z.string()).optional(),
     features: z.array(featureSchema),
 });
 
-export type Config = {
-    instanceName: string;
-    opennessLevel: OpennessLevel;
-    metadata: Metadata[];
-    primaryKey: string;
-    dateToSortBy: string;
-    partitionBy: string;
-    tableColumns: string[];
-    features: Feature[];
-};
+export type Schema = z.infer<typeof schemaSchema>;
 
-export type PartialConfig = Partial<Config> & { metadata: Metadata[] };
+export const configSchema = z.object({
+    schema: schemaSchema,
+});
+
+export type PartialConfig = Partial<Schema> & { metadata: Metadata[] };
 
 export type ConfigContextType = {
     configType: ConfigType;
@@ -78,8 +66,8 @@ export type ConfigContextType = {
     addNewTableColumn: (newColumnName: string) => void;
     updateTableColumn: (columnName: string, index: number) => void;
     deleteTableColumn: (index: number) => void;
-    modifyConfigField: <T extends keyof Config>(field: T, value: Config[T]) => void;
-    removeConfigField: (field: keyof Config) => void;
+    modifyConfigField: <T extends keyof Schema>(field: T, value: Schema[T]) => void;
+    removeConfigField: (field: keyof Schema) => void;
     modifyFeatureFields: (featureName: string, action: 'add' | 'delete') => void;
 };
 
@@ -166,11 +154,11 @@ export const ConfigProvider: FC<PropsWithChildren<{ initialConfig: PartialConfig
         });
     };
 
-    const modifyConfigField = <T extends keyof Config>(field: T, value: Config[T]) => {
+    const modifyConfigField = <T extends keyof Schema>(field: T, value: Schema[T]) => {
         setConfig({ ...config, [field]: value });
     };
 
-    const removeConfigField = (field: keyof Config) => {
+    const removeConfigField = (field: keyof Schema) => {
         delete config[field];
         setConfig({ ...config });
     };
