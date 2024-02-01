@@ -1,5 +1,5 @@
 import { type ChangeEvent, type Dispatch, type DragEvent, type SetStateAction, useState } from 'react';
-import { ConfigSchema, type PartialConfig } from './configContext.tsx';
+import { configSchema, type PartialConfig } from './configContext.tsx';
 import { load } from 'js-yaml';
 
 export type UploadConfigProps = {
@@ -16,9 +16,13 @@ export function UploadConfig({ setConfig }: UploadConfigProps) {
                 return;
             }
             const fileContent = fileReader.result.toString();
-            const config = ConfigSchema.parse(load(fileContent));
+            const config = configSchema.safeParse(load(fileContent));
 
-            setConfig(config);
+            if (config.success) {
+                setConfig(config.data.schema);
+            } else {
+                alert('Invalid config file: ' + config.error.message);
+            }
         };
         fileReader.readAsText(file);
     };
