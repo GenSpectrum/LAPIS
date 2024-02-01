@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FC, useContext, useEffect, useMemo } from 'react';
-import { type Config, ConfigContext, type MetadataType } from './configContext.tsx';
+import { ConfigContext, type MetadataType, type Schema } from './configContext.tsx';
 import { sentenceCase } from 'change-case';
 
 export function AdditionalInformationWizard() {
@@ -21,7 +21,7 @@ const MetadataDropDown: FC<MetadataDropDownProps> = ({ name, filterByType }) => 
     const { config, modifyConfigField, removeConfigField } = useContext(ConfigContext);
 
     useEffect(() => {
-        function setInitialAdditionalInfo(additionalInfoName: keyof Config, additionalInfoType: string) {
+        function setInitialAdditionalInfo(additionalInfoName: keyof Schema, additionalInfoType: string) {
             const currentAdditionalInfo = config[additionalInfoName];
             let metadataOfAdditionalInfo;
 
