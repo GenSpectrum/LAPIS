@@ -2,7 +2,6 @@ package org.genspectrum.lapis.util
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import jakarta.servlet.ReadListener
 import jakarta.servlet.ServletInputStream
@@ -25,6 +24,22 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
 
         inputStream.copyTo(byteArrayOutputStream)
         byteArrayOutputStream.toByteArray()
+    }
+
+    private val parsedBody: Map<String, JsonNode> by lazy {
+        try {
+            objectMapper.readValue(inputStream)
+        } catch (exception: Exception) {
+            if (method != HttpMethod.GET.name()) {
+                log.warn { "Failed to read from request body: ${exception.message}, contentLength $contentLength" }
+                log.debug { exception.stackTraceToString() }
+            } else {
+                log.warn {
+                    "Tried to read request body of GET request: ${exception.message}, contentLength $contentLength"
+                }
+            }
+            emptyMap()
+        }
     }
 
     @Throws(IOException::class)
@@ -60,24 +75,46 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
         }
     }
 
-    fun getRequestFields(): Map<String, JsonNode> {
-        if (parameterNames.hasMoreElements()) {
-            return parameterMap.mapValues { (_, value) -> TextNode(value.joinToString()) }
+    fun getStringField(fieldName: String): String? {
+        if (method == HttpMethod.GET.name()) {
+            return parameterMap[fieldName]?.firstOrNull()
         }
 
-        if (contentLength == 0) {
-            log.debug { "Could not read from request body, because content length is 0." }
-            return emptyMap()
+        val fieldValue = parsedBody[fieldName]
+        if (fieldValue?.isTextual == true) {
+            return fieldValue.asText()
+        }
+        return null
+    }
+
+    fun getBooleanField(fieldName: String): Boolean? {
+        if (method == HttpMethod.GET.name()) {
+            return parameterMap[fieldName]?.firstOrNull()?.toBooleanStrictOrNull()
         }
 
-        return try {
-            objectMapper.readValue(inputStream)
-        } catch (exception: Exception) {
-            if (method != HttpMethod.GET.name()) {
-                log.warn { "Failed to read from request body: ${exception.message}, contentLength $contentLength" }
-                log.debug { exception.stackTraceToString() }
-            }
-            emptyMap()
+        val fieldValue = parsedBody[fieldName]
+        if (fieldValue?.isBoolean == true) {
+            return fieldValue.asBoolean()
+        }
+        return null
+    }
+
+    fun getStringArrayField(fieldName: String): List<String> {
+        if (method == HttpMethod.GET.name()) {
+            return parameterMap[fieldName]?.flatMap { it.split(',') } ?: emptyList()
+        }
+
+        val fieldValue = parsedBody[fieldName]
+        if (fieldValue?.isArray == true) {
+            return fieldValue.map { it.asText() }
+        }
+        return emptyList()
+    }
+
+    fun getRequestFieldNames(): Set<String> {
+        return when (method) {
+            HttpMethod.GET.name() -> parameterMap.keys
+            else -> parsedBody.keys
         }
     }
 }

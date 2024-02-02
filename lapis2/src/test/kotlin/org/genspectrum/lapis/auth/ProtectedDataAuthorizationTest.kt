@@ -15,6 +15,8 @@ import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -150,10 +152,19 @@ class ProtectedDataAuthorizationTest(
             .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
     }
 
-    @Test
-    fun `GIVEN aggregated access key in GET request but request stratifies too fine-grained THEN access is denied`() {
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "fields=$PRIMARY_KEY_FIELD",
+            "fields=$PRIMARY_KEY_FIELD,country",
+            "fields=$PRIMARY_KEY_FIELD&fields=country",
+        ],
+    )
+    fun `GIVEN aggregated access key in GET request but request stratifies too fine-grained THEN access is denied`(
+        fieldsQueryParameter: String,
+    ) {
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=$PRIMARY_KEY_FIELD"),
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&$fieldsQueryParameter"),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -161,12 +172,29 @@ class ProtectedDataAuthorizationTest(
     }
 
     @Test
-    fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`() {
+    fun `GIVEN aggregated access key in GET request that stratifies non-fine-grained THEN access is granted`() {
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=country"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            """["$PRIMARY_KEY_FIELD"]""",
+            """["$PRIMARY_KEY_FIELD", "country"]""",
+        ],
+    )
+    fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`(
+        fieldsJson: String,
+    ) {
         mockMvc.perform(
             postRequestWithBody(
                 """ {
                     "accessKey": "testAggregatedDataAccessKey",
-                    "fields": ["$PRIMARY_KEY_FIELD"]
+                    "fields": $fieldsJson
                 }""",
             ),
         )
