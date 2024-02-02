@@ -20,8 +20,8 @@ class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequ
     ) {
         val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
 
-        val downloadAsFile = reReadableRequest.getRequestFields()[DOWNLOAD_AS_FILE_PROPERTY]?.asBoolean()
-        if (downloadAsFile == true) {
+        val downloadAsFile = reReadableRequest.getBooleanField(DOWNLOAD_AS_FILE_PROPERTY) ?: false
+        if (downloadAsFile) {
             val filename = getFilename(reReadableRequest)
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
         }

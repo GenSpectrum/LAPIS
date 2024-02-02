@@ -123,9 +123,7 @@ private class ProtectedDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        val requestFields = request.getRequestFields()
-
-        val accessKey = requestFields[ACCESS_KEY_PROPERTY]?.textValue()
+        val accessKey = request.getStringField(ACCESS_KEY_PROPERTY)
             ?: return AuthorizationResult.failure("An access key is required to access $path.")
 
         if (accessKeys.fullAccessKey == accessKey) {
@@ -133,8 +131,9 @@ private class ProtectedDataAuthorizationFilter(
         }
 
         val endpointServesAggregatedData = ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(path) &&
-            fieldsThatServeNonAggregatedData.intersect(requestFields.keys).isEmpty() &&
-            requestFields[FIELDS_PROPERTY]?.intersect(fieldsThatServeNonAggregatedData.toSet())?.isNotEmpty() != false
+            fieldsThatServeNonAggregatedData.intersect(request.getRequestFieldNames()).isEmpty() &&
+            request.getStringArrayField(FIELDS_PROPERTY).intersect(fieldsThatServeNonAggregatedData.toSet())
+                .isEmpty()
 
         if (endpointServesAggregatedData && accessKeys.aggregatedDataAccessKey == accessKey) {
             return AuthorizationResult.success()

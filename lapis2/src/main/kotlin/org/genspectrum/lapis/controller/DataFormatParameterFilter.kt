@@ -40,7 +40,7 @@ class AcceptHeaderModifyingRequestWrapper(
 ) : HttpServletRequestWrapper(reReadableRequest) {
     override fun getHeader(name: String): String? {
         if (name.equals("Accept", ignoreCase = true)) {
-            when (reReadableRequest.getRequestFields()[FORMAT_PROPERTY]?.textValue()?.uppercase()) {
+            when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
                 "CSV" -> {
                     log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
                     return TEXT_CSV_HEADER
@@ -67,7 +67,7 @@ class AcceptHeaderModifyingRequestWrapper(
 
     override fun getHeaders(name: String): Enumeration<String>? {
         if (name.equals("Accept", ignoreCase = true)) {
-            when (reReadableRequest.getRequestFields()[FORMAT_PROPERTY]?.textValue()?.uppercase()) {
+            when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
                 "CSV" -> {
                     log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
                     return Collections.enumeration(listOf(TEXT_CSV_HEADER))
