@@ -16,13 +16,13 @@ import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -100,110 +100,37 @@ class LapisControllerCsvTest(
             .andExpect(content().string(""))
     }
 
-    @ParameterizedTest(name = "GET {0} returns as CSV with accept header")
-    @MethodSource("getEndpoints")
-    fun `GET returns as CSV with accept header`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
+    @ParameterizedTest(name = "{0} returns data as CSV")
+    @MethodSource("getCsvRequests")
+    fun `request returns data as CSV`(requestsScenario: RequestScenario) {
+        mockEndpointReturnData(requestsScenario.endpoint)
 
-        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(returnedCsvData(endpoint)))
+            .andExpect(content().string(returnedCsvData(requestsScenario.endpoint)))
     }
 
-    @ParameterizedTest(name = "POST {0} returns as CSV with accept header")
-    @MethodSource("getEndpoints")
-    fun `POST returns as CSV with accept header`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
+    @ParameterizedTest(name = "{0} returns data as CSV without headers")
+    @MethodSource("getCsvWithoutHeadersRequests")
+    fun `request returns data as CSV without headers`(requestsScenario: RequestScenario) {
+        mockEndpointReturnData(requestsScenario.endpoint)
 
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
+        mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(returnedCsvData(endpoint)))
+            .andExpect(header().string("Content-Type", "text/csv;headers=false;charset=UTF-8"))
+            .andExpect(content().string(returnedCsvWithoutHeadersData(requestsScenario.endpoint)))
     }
 
-    @ParameterizedTest(name = "GET {0} returns as CSV with request parameter")
-    @MethodSource("getEndpoints")
-    fun `GET returns as CSV with request parameter`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
+    @ParameterizedTest(name = "{0} returns data as TSV")
+    @MethodSource("getTsvRequests")
+    fun `request returns data as TSV`(requestsScenario: RequestScenario) {
+        mockEndpointReturnData(requestsScenario.endpoint)
 
-        mockMvc.perform(getSample("$endpoint?country=Switzerland&dataFormat=csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(returnedCsvData(endpoint)))
-    }
-
-    @ParameterizedTest(name = "POST {0} returns as CSV with request parameter")
-    @MethodSource("getEndpoints")
-    fun `POST returns as CSV with request parameter`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
-
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland", "dataFormat": "csv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(returnedCsvData(endpoint)))
-    }
-
-    @ParameterizedTest(name = "GET {0} returns as TSV with accept header")
-    @MethodSource("getEndpoints")
-    fun `GET returns as TSV with accept header`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
-
-        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/tab-separated-values"))
+        mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(returnedTsvData(endpoint)))
-    }
-
-    @ParameterizedTest(name = "POST {0} returns as TSV with accept header")
-    @MethodSource("getEndpoints")
-    fun `POST returns as TSV with accept header`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
-
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/tab-separated-values")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(returnedTsvData(endpoint)))
-    }
-
-    @ParameterizedTest(name = "GET {0} returns as TSV with request parameter")
-    @MethodSource("getEndpoints")
-    fun `GET returns as TSV with request parameter`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
-
-        mockMvc.perform(getSample("$endpoint?country=Switzerland&dataFormat=tsv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(returnedTsvData(endpoint)))
-    }
-
-    @ParameterizedTest(name = "POST {0} returns as TSV with request parameter")
-    @MethodSource("getEndpoints")
-    fun `POST returns as TSV with request parameter`(endpoint: String) {
-        mockEndpointReturnData(endpoint)
-
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland", "dataFormat": "tsv"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(returnedTsvData(endpoint)))
+            .andExpect(content().string(returnedTsvData(requestsScenario.endpoint)))
     }
 
     fun mockEndpointReturnEmptyList(endpoint: String) =
@@ -294,6 +221,12 @@ class LapisControllerCsvTest(
             AMINO_ACID_INSERTIONS_ROUTE -> aminoAcidInsertionDataCsv
             else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
         }
+
+    fun returnedCsvWithoutHeadersData(endpoint: String) =
+        returnedCsvData(endpoint)
+            .lines()
+            .drop(1)
+            .joinToString("\n")
 
     fun returnedTsvData(endpoint: String) =
         when (endpoint) {
@@ -414,14 +347,65 @@ class LapisControllerCsvTest(
 
     private companion object {
         @JvmStatic
-        fun getEndpoints() =
-            listOf(
-                Arguments.of(DETAILS_ROUTE),
-                Arguments.of(AGGREGATED_ROUTE),
-                Arguments.of(NUCLEOTIDE_MUTATIONS_ROUTE),
-                Arguments.of(AMINO_ACID_MUTATIONS_ROUTE),
-                Arguments.of(NUCLEOTIDE_INSERTIONS_ROUTE),
-                Arguments.of(AMINO_ACID_INSERTIONS_ROUTE),
-            )
+        val endpoints = SampleRoute.entries.filter { !it.servesFasta }.map { it.pathSegment }
+
+        @JvmStatic
+        fun getRequests(dataFormat: String) =
+            endpoints.flatMap { endpoint ->
+                listOf(
+                    RequestScenario(
+                        "GET $endpoint with request parameter",
+                        endpoint,
+                        getSample("$endpoint?country=Switzerland&dataFormat=$dataFormat"),
+                    ),
+                    RequestScenario(
+                        "GET $endpoint with accept header",
+                        endpoint,
+                        getSample("$endpoint?country=Switzerland")
+                            .header("Accept", getAcceptHeaderFor(dataFormat)),
+                    ),
+                    RequestScenario(
+                        "POST $endpoint with request parameter",
+                        endpoint,
+                        postSample(endpoint)
+                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
+                            .contentType(MediaType.APPLICATION_JSON),
+                    ),
+                    RequestScenario(
+                        "POST $endpoint with accept header",
+                        endpoint,
+                        postSample(endpoint)
+                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Accept", getAcceptHeaderFor(dataFormat)),
+                    ),
+                )
+            }
+
+        private fun getAcceptHeaderFor(dataFormat: String) =
+            when (dataFormat) {
+                "csv" -> TEXT_CSV_HEADER
+                "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS_HEADER
+                "tsv" -> TEXT_TSV_HEADER
+                "json" -> MediaType.APPLICATION_JSON_VALUE
+                else -> throw IllegalArgumentException("Unknown data format: $dataFormat")
+            }
+
+        @JvmStatic
+        fun getCsvRequests() = getRequests("csv")
+
+        @JvmStatic
+        fun getCsvWithoutHeadersRequests() = getRequests("csv-without-headers")
+
+        @JvmStatic
+        fun getTsvRequests() = getRequests("tsv")
+    }
+
+    data class RequestScenario(
+        val description: String,
+        val endpoint: String,
+        val request: MockHttpServletRequestBuilder,
+    ) {
+        override fun toString() = description
     }
 }

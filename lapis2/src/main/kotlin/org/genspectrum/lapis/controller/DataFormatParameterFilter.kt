@@ -16,10 +16,20 @@ import java.util.Enumeration
 
 private val log = KotlinLogging.logger {}
 
+const val HEADERS_ACCEPT_HEADER_PARAMETER = "headers"
+
 const val TEXT_CSV_HEADER = "text/csv"
+const val TEXT_CSV_WITHOUT_HEADERS_HEADER = "text/csv;$HEADERS_ACCEPT_HEADER_PARAMETER=false"
 const val TEXT_TSV_HEADER = "text/tab-separated-values"
 
 const val DATA_FORMAT_FILTER_ORDER = 0
+
+object DataFormat {
+    const val JSON = "JSON"
+    const val CSV = "CSV"
+    const val CSV_WITHOUT_HEADERS = "CSV-WITHOUT-HEADERS"
+    const val TSV = "TSV"
+}
 
 @Component
 @Order(DATA_FORMAT_FILTER_ORDER)
@@ -40,25 +50,9 @@ class AcceptHeaderModifyingRequestWrapper(
 ) : HttpServletRequestWrapper(reReadableRequest) {
     override fun getHeader(name: String): String? {
         if (name.equals("Accept", ignoreCase = true)) {
-            when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
-                "CSV" -> {
-                    log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
-                    return TEXT_CSV_HEADER
-                }
-
-                "TSV" -> {
-                    log.debug { "Overwriting Accept header to $TEXT_TSV_HEADER due to format property" }
-                    return TEXT_TSV_HEADER
-                }
-
-                "JSON" -> {
-                    log.debug {
-                        "Overwriting Accept header to ${MediaType.APPLICATION_JSON_VALUE} due to format property"
-                    }
-                    return MediaType.APPLICATION_JSON_VALUE
-                }
-
-                else -> {}
+            when (val overwrittenValue = findAcceptHeaderOverwriteValue()) {
+                null -> {}
+                else -> return overwriteWith(overwrittenValue)
             }
         }
 
@@ -67,28 +61,32 @@ class AcceptHeaderModifyingRequestWrapper(
 
     override fun getHeaders(name: String): Enumeration<String>? {
         if (name.equals("Accept", ignoreCase = true)) {
-            when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
-                "CSV" -> {
-                    log.debug { "Overwriting Accept header to $TEXT_CSV_HEADER due to format property" }
-                    return Collections.enumeration(listOf(TEXT_CSV_HEADER))
-                }
-
-                "TSV" -> {
-                    log.debug { "Overwriting Accept header to $TEXT_TSV_HEADER due to format property" }
-                    return Collections.enumeration(listOf(TEXT_TSV_HEADER))
-                }
-
-                "JSON" -> {
-                    log.debug {
-                        "Overwriting Accept header to ${MediaType.APPLICATION_JSON_VALUE} due to format property"
-                    }
-                    return Collections.enumeration(listOf(MediaType.APPLICATION_JSON_VALUE))
-                }
-
-                else -> {}
+            when (val overwrittenValue = findAcceptHeaderOverwriteValue()) {
+                null -> {}
+                else -> return Collections.enumeration(listOf(overwriteWith(overwrittenValue)))
             }
         }
 
         return super.getHeaders(name)
+    }
+
+    override fun getHeaderNames(): Enumeration<String> =
+        when (findAcceptHeaderOverwriteValue()) {
+            null -> super.getHeaderNames()
+            else -> Collections.enumeration(super.getHeaderNames().toList() + "Accept")
+        }
+
+    private fun findAcceptHeaderOverwriteValue() =
+        when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
+            DataFormat.CSV -> TEXT_CSV_HEADER
+            DataFormat.CSV_WITHOUT_HEADERS -> TEXT_CSV_WITHOUT_HEADERS_HEADER
+            DataFormat.TSV -> TEXT_TSV_HEADER
+            DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
+            else -> null
+        }
+
+    private fun overwriteWith(value: String): String {
+        log.debug { "Overwriting Accept header to $value due to format property" }
+        return value
     }
 }

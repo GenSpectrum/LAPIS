@@ -50,8 +50,10 @@ const val OFFSET_DESCRIPTION =
     """The offset of the first entry to return in the response. 
     This is useful for pagination in combination with \"limit\"."""
 const val FORMAT_DESCRIPTION =
-    """The data format of the response. Alternatively, the data format can be specified by setting the 
-    \"Accept\"-header. When both are specified, this parameter takes precedence."""
+    """The data format of the response.
+    Alternatively, the data format can be specified by setting the \"Accept\"-header.
+    You can include the parameter to return the CSV/TSV without headers: "$TEXT_CSV_WITHOUT_HEADERS_HEADER". 
+    When both are specified, this parameter takes precedence."""
 
 private const val MAYBE_DESCRIPTION = """
 A mutation can be wrapped in a maybe expression "MAYBE(\<mutation\>)"

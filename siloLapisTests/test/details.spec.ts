@@ -1,7 +1,5 @@
 import { expect } from 'chai';
 import { basePath, lapisClient } from './common';
-import fs from 'fs';
-import { SequenceFilters } from './lapisClient';
 
 describe('The /details endpoint', () => {
   it('should return details with specified fields', async () => {
@@ -182,5 +180,24 @@ Solothurn	B.1	key_1002052
 
     expect(result.data).to.have.length(1);
     expect(result.data[0]).to.deep.equal(expectedResultWithAminoAcidInsertion);
+  });
+
+  it("should provide a way to get a plain list of primary keys for CoV-Spectrum's UShER integration", async () => {
+    const urlParams = new URLSearchParams({
+      dataFormat: 'CSV-WITHOUT-HEADERS',
+      fields: 'primaryKey',
+      limit: '3',
+      orderBy: 'primaryKey',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(await result.text()).to.be.equal(
+      String.raw`
+key_1001493
+key_1001920
+key_1002052
+    `.trim()
+    );
   });
 });
