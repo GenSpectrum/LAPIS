@@ -117,11 +117,7 @@ private class ProtectedDataAuthorizationFilter(
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {
-        val isOperatedBehindAProxy = !request.contextPath.isNullOrBlank()
-        val path = when {
-            isOperatedBehindAProxy -> request.servletPath
-            else -> request.requestURI
-        }
+        val path = request.getProxyAwarePath()
 
         if (path == "/" || WHITELISTED_PATH_PREFIXES.any { path.startsWith(it) }) {
             return AuthorizationResult.success()
