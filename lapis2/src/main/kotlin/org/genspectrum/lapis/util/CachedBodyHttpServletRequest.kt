@@ -52,6 +52,14 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
         }
     }
 
+    fun getProxyAwarePath(): String {
+        val isOperatedBehindAProxy = !contextPath.isNullOrBlank()
+        return when {
+            isOperatedBehindAProxy -> servletPath
+            else -> requestURI
+        }
+    }
+
     fun getRequestFields(): Map<String, JsonNode> {
         if (parameterNames.hasMoreElements()) {
             return parameterMap.mapValues { (_, value) -> TextNode(value.joinToString()) }

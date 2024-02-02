@@ -22,14 +22,15 @@ class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequ
 
         val downloadAsFile = reReadableRequest.getRequestFields()[DOWNLOAD_AS_FILE_PROPERTY]?.asBoolean()
         if (downloadAsFile == true) {
-            val filename = getFilename(request)
+            val filename = getFilename(reReadableRequest)
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
         }
         filterChain.doFilter(reReadableRequest, response)
     }
 
-    private fun getFilename(request: HttpServletRequest): String {
-        val matchingRoute = SampleRoute.entries.find { request.requestURI.startsWith("/sample${it.pathSegment}") }
+    private fun getFilename(request: CachedBodyHttpServletRequest): String {
+        val matchingRoute =
+            SampleRoute.entries.find { request.getProxyAwarePath().startsWith("/sample${it.pathSegment}") }
         val dataName = matchingRoute?.pathSegment?.trim('/') ?: "data"
 
         val fileEnding = when (request.getHeader("Accept")) {
