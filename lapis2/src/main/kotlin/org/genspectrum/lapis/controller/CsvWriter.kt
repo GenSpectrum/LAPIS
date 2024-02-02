@@ -14,7 +14,7 @@ interface CsvRecord {
 @Component
 class CsvWriter {
     fun write(
-        headers: Array<String>,
+        headers: Array<String>?,
         data: List<CsvRecord>,
         delimiter: Delimiter,
     ): String {
@@ -24,7 +24,11 @@ class CsvWriter {
             CSVFormat.DEFAULT.builder()
                 .setRecordSeparator("\n")
                 .setDelimiter(delimiter.value)
-                .setHeader(*headers)
+                .also {
+                    when {
+                        headers != null -> it.setHeader(*headers)
+                    }
+                }
                 .build(),
         ).use {
             for (datum in data) {

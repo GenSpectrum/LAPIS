@@ -21,6 +21,7 @@ import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.controller.DataFormat
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_PROPERTY
@@ -488,8 +489,8 @@ private fun formatSchema() =
         .description(
             FORMAT_DESCRIPTION,
         )
-        ._enum(listOf("csv", "tsv", "json"))
-        ._default("json")
+        ._enum(listOf(DataFormat.JSON, DataFormat.CSV, DataFormat.CSV_WITHOUT_HEADERS, DataFormat.TSV))
+        ._default(DataFormat.JSON)
 
 private fun fieldsArray(
     databaseConfig: List<DatabaseMetadata>,
