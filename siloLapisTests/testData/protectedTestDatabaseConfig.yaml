@@ -1,0 +1,32 @@
+schema:
+  instanceName: sars_cov-2_minimal_test_config
+  opennessLevel: PROTECTED
+  metadata:
+    - name: primaryKey
+      type: string
+    - name: date
+      type: date
+    - name: region
+      type: string
+      generateIndex: true
+    - name: country
+      type: string
+      generateIndex: true
+    - name: pangoLineage
+      type: pango_lineage
+    - name: division
+      type: string
+      generateIndex: true
+    - name: age
+      type: int
+    - name: qc_value
+      type: float
+    - name: insertions
+      type: insertion
+    - name: aaInsertions
+      type: aaInsertion
+  features:
+    - name: sarsCoV2VariantQuery
+  primaryKey: primaryKey
+  dateToSortBy: date
+  partitionBy: pangoLineage
