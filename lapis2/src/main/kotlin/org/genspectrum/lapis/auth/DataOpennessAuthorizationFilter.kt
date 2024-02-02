@@ -38,7 +38,7 @@ class DataOpennessAuthorizationFilterFactory(
             OpennessLevel.PROTECTED -> ProtectedDataAuthorizationFilter(
                 objectMapper,
                 accessKeysReader.read(),
-                databaseConfig.schema.metadata.filter { it.valuesAreUnique }.map { it.name },
+                databaseConfig,
             )
         }
 }
@@ -96,9 +96,14 @@ private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper) :
 private class ProtectedDataAuthorizationFilter(
     objectMapper: ObjectMapper,
     private val accessKeys: AccessKeys,
-    private val fieldsThatServeNonAggregatedData: List<String>,
+    private val databaseConfig: DatabaseConfig,
 ) :
     DataOpennessAuthorizationFilter(objectMapper) {
+    private val fieldsThatServeNonAggregatedData = databaseConfig.schema
+        .metadata
+        .filter { it.valuesAreUnique }
+        .map { it.name }
+
     companion object {
         private val WHITELISTED_PATH_PREFIXES = listOf(
             "/swagger-ui",
@@ -130,15 +135,30 @@ private class ProtectedDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        val endpointServesAggregatedData = ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(path) &&
-            fieldsThatServeNonAggregatedData.intersect(request.getRequestFieldNames()).isEmpty() &&
-            request.getStringArrayField(FIELDS_PROPERTY).intersect(fieldsThatServeNonAggregatedData.toSet())
-                .isEmpty()
-
-        if (endpointServesAggregatedData && accessKeys.aggregatedDataAccessKey == accessKey) {
+        if (accessKeys.aggregatedDataAccessKey == accessKey && endpointServesAggregatedData(request)) {
             return AuthorizationResult.success()
         }
 
         return AuthorizationResult.failure("You are not authorized to access $path.")
     }
+
+    private fun endpointServesAggregatedData(request: CachedBodyHttpServletRequest): Boolean {
+        val fields = request.getStringArrayField(FIELDS_PROPERTY)
+        if (containsOnlyPrimaryKey(fields)) {
+            return true
+        }
+
+        if (!ENDPOINTS_THAT_SERVE_AGGREGATED_DATA.contains(request.getProxyAwarePath())) {
+            return false
+        }
+
+        if (fieldsThatServeNonAggregatedData.intersect(request.getRequestFieldNames()).isNotEmpty()) {
+            return false
+        }
+
+        return fields.intersect(fieldsThatServeNonAggregatedData.toSet()).isEmpty()
+    }
+
+    private fun containsOnlyPrimaryKey(fields: List<String>) =
+        fields.size == 1 && fields.first() == databaseConfig.schema.primaryKey
 }

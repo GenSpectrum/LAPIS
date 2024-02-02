@@ -7,6 +7,7 @@ import io.mockk.verify
 import org.genspectrum.lapis.PRIMARY_KEY_FIELD
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
+import org.genspectrum.lapis.controller.DETAILS_ROUTE
 import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.getSample
 import org.genspectrum.lapis.controller.postSample
@@ -155,7 +156,6 @@ class ProtectedDataAuthorizationTest(
     @ParameterizedTest
     @ValueSource(
         strings = [
-            "fields=$PRIMARY_KEY_FIELD",
             "fields=$PRIMARY_KEY_FIELD,country",
             "fields=$PRIMARY_KEY_FIELD&fields=country",
         ],
@@ -180,27 +180,60 @@ class ProtectedDataAuthorizationTest(
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
     }
 
-    @ParameterizedTest
-    @ValueSource(
-        strings = [
-            """["$PRIMARY_KEY_FIELD"]""",
-            """["$PRIMARY_KEY_FIELD", "country"]""",
-        ],
-    )
-    fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`(
-        fieldsJson: String,
-    ) {
+    @Test
+    fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`() {
         mockMvc.perform(
             postRequestWithBody(
                 """ {
                     "accessKey": "testAggregatedDataAccessKey",
-                    "fields": $fieldsJson
+                    "fields": ["$PRIMARY_KEY_FIELD", "country"]
                 }""",
             ),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
+    }
+
+    @Test
+    fun `GIVEN aggregated access key in GET request where fields only contains primary key THEN access is granted`() {
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=$PRIMARY_KEY_FIELD"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
+    fun `GIVEN aggregated access key in POST request where fields only contains primary key THEN access is granted`() {
+        mockMvc.perform(
+            postRequestWithBody(
+                """ {
+                    "accessKey": "testAggregatedDataAccessKey",
+                    "fields": ["$PRIMARY_KEY_FIELD"]
+                }""",
+            ),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
+    fun `GIVEN aggregated accessKey in details request where fields only contains primaryKey THEN access is granted`() {
+        every { siloQueryModelMock.getDetails(any()) } returns emptyList()
+
+        mockMvc.perform(
+            postSample(DETAILS_ROUTE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """{
+                        "accessKey": "testAggregatedDataAccessKey",
+                        "fields": ["$PRIMARY_KEY_FIELD"]
+                    }""",
+                ),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
     }
 
     @Test
