@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class DownloadAsFileParameterCustomizer : OpenApiCustomizer {
     override fun customise(openApi: OpenAPI) {
         for ((_, path) in openApi.paths.filter { (url, _) -> url.startsWith("/sample") }) {
-            path.get.parameters.add(
+            path.get.addParametersItem(
                 Parameter()
                     .`in`("query")
                     .name(DOWNLOAD_AS_FILE_PROPERTY)
