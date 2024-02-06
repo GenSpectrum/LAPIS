@@ -49,7 +49,7 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
-        return data.map { it ->
+        return data.map {
             val sequenceName =
                 if (referenceGenomeSchema.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
 
@@ -75,7 +75,7 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
-        return data.map { it ->
+        return data.map {
             AminoAcidMutationResponse(
                 "${it.sequenceName}:${it.mutation}",
                 it.count,
