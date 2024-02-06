@@ -375,7 +375,7 @@ class LapisControllerCsvTest(
                         "POST $endpoint with accept header",
                         endpoint,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
+                            .content("""{"country": "Switzerland"}""")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Accept", getAcceptHeaderFor(dataFormat)),
                     ),
