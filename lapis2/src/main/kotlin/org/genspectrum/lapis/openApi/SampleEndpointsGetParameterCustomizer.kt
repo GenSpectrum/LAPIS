@@ -2,13 +2,14 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.parameters.Parameter
+import org.genspectrum.lapis.controller.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component
 
 @Component
-class DownloadAsFileParameterCustomizer : OpenApiCustomizer {
+class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
     companion object {
         private val PATH_WITHOUT_DOWNLOAD_AS_FILE = listOf(
             "/sample$INFO_ROUTE",
@@ -27,6 +28,13 @@ class DownloadAsFileParameterCustomizer : OpenApiCustomizer {
                     .name(DOWNLOAD_AS_FILE_PROPERTY)
                     .description(DOWNLOAD_AS_FILE_DESCRIPTION)
                     .schema(downloadAsFileSchema()),
+            )
+            path.get.addParametersItem(
+                Parameter()
+                    .`in`("query")
+                    .name(COMPRESSION_PROPERTY)
+                    .description(COMPRESSION_DESCRIPTION)
+                    .schema(compressionSchema()),
             )
         }
     }

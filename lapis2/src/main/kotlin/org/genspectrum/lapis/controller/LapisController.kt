@@ -67,6 +67,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+const val TEXT_X_FASTA_HEADER = "text/x-fasta"
+
 @RestController
 @RequestMapping("/sample")
 class LapisController(
@@ -1307,7 +1309,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
+    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedAminoAcidSequenceResponse
     fun getAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)
@@ -1354,7 +1356,7 @@ class LapisController(
         return siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
     }
 
-    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = ["text/x-fasta"])
+    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedAminoAcidSequenceResponse
     fun postAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)

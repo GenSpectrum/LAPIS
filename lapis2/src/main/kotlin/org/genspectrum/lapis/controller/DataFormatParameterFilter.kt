@@ -3,16 +3,15 @@ package org.genspectrum.lapis.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletRequestWrapper
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import java.util.Collections
-import java.util.Enumeration
 
 private val log = KotlinLogging.logger {}
 
@@ -41,42 +40,17 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
     ) {
         val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
 
-        filterChain.doFilter(AcceptHeaderModifyingRequestWrapper(reReadableRequest), response)
-    }
-}
-
-class AcceptHeaderModifyingRequestWrapper(
-    private val reReadableRequest: CachedBodyHttpServletRequest,
-) : HttpServletRequestWrapper(reReadableRequest) {
-    override fun getHeader(name: String): String? {
-        if (name.equals("Accept", ignoreCase = true)) {
-            when (val overwrittenValue = findAcceptHeaderOverwriteValue()) {
-                null -> {}
-                else -> return overwriteWith(overwrittenValue)
-            }
-        }
-
-        return super.getHeader(name)
+        filterChain.doFilter(
+            HeaderModifyingRequestWrapper(
+                reReadableRequest,
+                ACCEPT,
+                ::findAcceptHeaderOverwriteValue,
+            ),
+            response,
+        )
     }
 
-    override fun getHeaders(name: String): Enumeration<String>? {
-        if (name.equals("Accept", ignoreCase = true)) {
-            when (val overwrittenValue = findAcceptHeaderOverwriteValue()) {
-                null -> {}
-                else -> return Collections.enumeration(listOf(overwriteWith(overwrittenValue)))
-            }
-        }
-
-        return super.getHeaders(name)
-    }
-
-    override fun getHeaderNames(): Enumeration<String> =
-        when (findAcceptHeaderOverwriteValue()) {
-            null -> super.getHeaderNames()
-            else -> Collections.enumeration(super.getHeaderNames().toList() + "Accept")
-        }
-
-    private fun findAcceptHeaderOverwriteValue() =
+    private fun findAcceptHeaderOverwriteValue(reReadableRequest: CachedBodyHttpServletRequest) =
         when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
             DataFormat.CSV -> TEXT_CSV_HEADER
             DataFormat.CSV_WITHOUT_HEADERS -> TEXT_CSV_WITHOUT_HEADERS_HEADER
@@ -84,9 +58,4 @@ class AcceptHeaderModifyingRequestWrapper(
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
             else -> null
         }
-
-    private fun overwriteWith(value: String): String {
-        log.debug { "Overwriting Accept header to $value due to format property" }
-        return value
-    }
 }

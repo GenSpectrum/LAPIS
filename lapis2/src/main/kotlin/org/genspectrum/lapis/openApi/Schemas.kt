@@ -28,6 +28,8 @@ import org.genspectrum.lapis.controller.UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQ
 import org.genspectrum.lapis.controller.UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.request.LAPIS_DATA_VERSION_HEADER
 import org.springframework.core.annotation.AliasFor
+import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
+import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 
 const val PRIMITIVE_FIELD_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
@@ -79,7 +81,12 @@ If none if provided in the request, LAPIS will generate one.
 
 const val DOWNLOAD_AS_FILE_DESCRIPTION = """
 Set to true to make your browser trigger a download instead of showing the response content by setting the
-'Content-Disposition' header to 'attachment'.
+'$CONTENT_DISPOSITION' header to 'attachment'.
+"""
+
+const val COMPRESSION_DESCRIPTION = """
+Optionally set this to return the response compressed in the specified format.
+Alternatively, you can set the '$ACCEPT_ENCODING' header to the respective value.
 """
 
 const val ACCESS_KEY_DESCRIPTION = """

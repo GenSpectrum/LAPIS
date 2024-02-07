@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { basePath, lapisSingleSegmentedSequenceController, sequenceData } from './common';
+import {
+  basePath,
+  expectIsZstdEncoded,
+  lapisSingleSegmentedSequenceController,
+  sequenceData,
+} from './common';
 
 describe('The /alignedNucleotideSequence endpoint', () => {
   it('should return aligned nucleotide sequences for Switzerland', async () => {
@@ -101,5 +106,16 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     expect(primaryKeys).to.have.length(1);
     expect(sequences).to.have.length(1);
     expect(primaryKeys[0]).to.equal('>key_3259931');
+  });
+
+  it('should return an empty zstd compressed file', async () => {
+    const urlParams = new URLSearchParams({
+      compression: 'zstd',
+      primaryKey: 'something so that no data will be returned',
+    });
+
+    const response = await fetch(basePath + '/sample/alignedNucleotideSequences?' + urlParams.toString());
+
+    expectIsZstdEncoded(await response.arrayBuffer());
   });
 });

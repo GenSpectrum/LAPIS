@@ -4,6 +4,7 @@ import {
   Middleware,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
+import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8080';
 
@@ -44,4 +45,10 @@ export function sequenceData(serverResponse: string) {
     primaryKeys,
     sequences,
   };
+}
+
+export function expectIsZstdEncoded(arrayBuffer: ArrayBuffer) {
+  const first4Bytes = new Uint8Array(arrayBuffer).slice(0, 4);
+
+  expect([...first4Bytes]).deep.equals([Number('0x28'), Number('0xb5'), Number('0x2f'), Number('0xfd')]);
 }

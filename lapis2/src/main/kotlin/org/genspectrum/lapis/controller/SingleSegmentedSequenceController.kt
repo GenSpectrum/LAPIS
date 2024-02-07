@@ -44,7 +44,7 @@ class SingleSegmentedSequenceController(
     private val requestContext: RequestContext,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
-    @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequences(
         @PrimitiveFieldFilters
@@ -92,7 +92,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
@@ -108,7 +108,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @GetMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @GetMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
     @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
     fun getUnalignedNucleotideSequences(
         @PrimitiveFieldFilters
@@ -156,7 +156,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = ["text/x-fasta"])
+    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
     @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
