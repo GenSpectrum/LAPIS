@@ -19,6 +19,8 @@ import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
+import org.genspectrum.lapis.controller.COMPRESSION_PROPERTY
+import org.genspectrum.lapis.controller.Compression
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.controller.DataFormat
@@ -248,12 +250,18 @@ private fun getSequenceFilters(
         Pair(ORDER_BY_PROPERTY, orderByPostSchema(orderByFieldsSchema)) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
         Pair(OFFSET_PROPERTY, offsetSchema()) +
-        Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema())
+        Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema()) +
+        Pair(COMPRESSION_PROPERTY, compressionSchema())
 
 fun downloadAsFileSchema(): Schema<*> =
     BooleanSchema()
         ._default(false)
         .description(DOWNLOAD_AS_FILE_DESCRIPTION)
+
+fun compressionSchema(): Schema<*> =
+    StringSchema()
+        .description(COMPRESSION_DESCRIPTION)
+        ._enum(Compression.entries.map { it.value })
 
 private fun computePrimitiveFieldFilters(
     databaseConfig: DatabaseConfig,

@@ -44,7 +44,7 @@ class MultiSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
 ) {
-    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
+    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -95,7 +95,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
+    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -114,7 +114,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
+    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun getUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -165,7 +165,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = ["text/x-fasta"])
+    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)

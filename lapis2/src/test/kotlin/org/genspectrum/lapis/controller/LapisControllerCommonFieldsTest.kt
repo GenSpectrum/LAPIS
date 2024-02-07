@@ -22,11 +22,6 @@ import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.response.AminoAcidInsertionResponse
-import org.genspectrum.lapis.response.AminoAcidMutationResponse
-import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.NucleotideInsertionResponse
-import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach
@@ -37,10 +32,12 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -404,7 +401,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
     fun `GET data as file`(scenario: DownloadAsFileScenario) {
-        scenario.setupMock(siloQueryModelMock)
+        scenario.mockData.mockWithData(siloQueryModelMock)
 
         var queryString = "$DOWNLOAD_AS_FILE_PROPERTY=true"
         if (scenario.requestedDataFormat != null) {
@@ -415,14 +412,14 @@ class LapisControllerCommonFieldsTest(
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
                 expectedFilename = scenario.expectedFilename,
-                expectedFileContent = scenario.expectedFileContent,
+                assertFileContentMatches = scenario.mockData.assertDataMatches,
             )
     }
 
     @ParameterizedTest(name = "POST data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
     fun `POST data as file`(scenario: DownloadAsFileScenario) {
-        scenario.setupMock(siloQueryModelMock)
+        scenario.mockData.mockWithData(siloQueryModelMock)
 
         val maybeDataFormat = when {
             scenario.requestedDataFormat != null -> """, "$FORMAT_PROPERTY": "${scenario.requestedDataFormat}" """
@@ -434,16 +431,35 @@ class LapisControllerCommonFieldsTest(
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
                 expectedFilename = scenario.expectedFilename,
-                expectedFileContent = scenario.expectedFileContent,
+                assertFileContentMatches = scenario.mockData.assertDataMatches,
             )
     }
 
-    fun ResultActions.andExpectAttachmentWithContent(
+    @ParameterizedTest(name = "{0} should return compressed file")
+    @MethodSource("getCompressedFileScenarios")
+    fun `WHEN I request compressed files THEN the filenames have a corresponding suffix`(
+        scenario: DownloadCompressedFileScenario,
+    ) {
+        scenario.mockData.mockToReturnEmptyData(siloQueryModelMock)
+
+        mockMvc.perform(scenario.request)
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Disposition", attachmentWithFilename(scenario.expectedFilename)))
+            .andExpect(header().string("Content-Encoding", scenario.compressionFormat))
+    }
+
+    private fun ResultActions.andExpectAttachmentWithContent(
         expectedFilename: String,
-        expectedFileContent: String,
-    ): ResultActions =
-        this.andExpect(header().string("Content-Disposition", "attachment; filename=$expectedFilename"))
-            .andExpect(content().string(expectedFileContent))
+        assertFileContentMatches: (String) -> Unit,
+    ) {
+        this.andExpect(header().string("Content-Disposition", attachmentWithFilename(expectedFilename)))
+            .andReturn()
+            .response
+            .contentAsString
+            .apply(assertFileContentMatches)
+    }
+
+    private fun attachmentWithFilename(filename: String) = "attachment; filename=$filename"
 
     private companion object {
         val endpointsOfController = SampleRoute.entries
@@ -470,15 +486,40 @@ class LapisControllerCommonFieldsTest(
 
         @JvmStatic
         val downloadAsFileScenarios = SampleRoute.entries.flatMap { DownloadAsFileScenario.forEndpoint(it) }
+
+        private val dataFormatsSequence = generateSequence {
+            listOf(
+                MockDataCollection.DataFormat.PLAIN_JSON,
+                MockDataCollection.DataFormat.CSV,
+                MockDataCollection.DataFormat.TSV,
+            )
+        }.flatten()
+
+        @JvmStatic
+        val compressedFileScenarios = dataFormatsSequence.zip(SampleRoute.entries.asSequence())
+            .flatMap { (dataFormat, route) -> DownloadCompressedFileScenario.scenariosFor(dataFormat, route) }
+            .toList()
     }
 }
 
+fun SampleRoute.getExpectedFilename() =
+    when (this) {
+        AGGREGATED -> "aggregated"
+        DETAILS -> "details"
+        NUCLEOTIDE_MUTATIONS -> "nucleotideMutations"
+        AMINO_ACID_MUTATIONS -> "aminoAcidMutations"
+        NUCLEOTIDE_INSERTIONS -> "nucleotideInsertions"
+        AMINO_ACID_INSERTIONS -> "aminoAcidInsertions"
+        ALIGNED_NUCLEOTIDE_SEQUENCES -> "alignedNucleotideSequences"
+        ALIGNED_AMINO_ACID_SEQUENCES -> "alignedAminoAcidSequences"
+        UNALIGNED_NUCLEOTIDE_SEQUENCES -> "unalignedNucleotideSequences"
+    }
+
 data class DownloadAsFileScenario(
     val endpoint: String,
+    val mockData: MockData,
     val requestedDataFormat: String?,
     val expectedFilename: String,
-    val expectedFileContent: String,
-    val setupMock: (SiloQueryModel) -> Any,
 ) {
     override fun toString() =
         when (requestedDataFormat) {
@@ -487,150 +528,119 @@ data class DownloadAsFileScenario(
         }
 
     companion object {
-        fun forEndpoint(route: SampleRoute) =
-            when (route) {
-                AGGREGATED -> forDataFormats(
-                    endpoint = AGGREGATED_ROUTE,
-                    expectedFilename = "aggregated",
-                    expectedJsonContent = """[{"count":1,"country":"Switzerland"}]""",
-                    expectedCsvContent = "country,count\nSwitzerland,1",
-                    expectedTsvContent = "country\tcount\nSwitzerland\t1",
-                    setupMock = { every { it.getAggregated(any()) } returns aggregationData },
-                )
+        fun forEndpoint(route: SampleRoute): List<DownloadAsFileScenario> {
+            val expectedFilename = route.getExpectedFilename()
 
-                DETAILS -> forDataFormats(
-                    endpoint = DETAILS_ROUTE,
-                    expectedFilename = "details",
-                    expectedJsonContent = """[{"country":"Switzerland","age":"42"}]""",
-                    expectedCsvContent = "country,age\nSwitzerland,42",
-                    expectedTsvContent = "country\tage\nSwitzerland\t42",
-                    setupMock = { every { it.getDetails(any()) } returns detailsData },
-                )
-
-                NUCLEOTIDE_MUTATIONS -> forDataFormats(
-                    endpoint = NUCLEOTIDE_MUTATIONS_ROUTE,
-                    expectedFilename = "nucleotideMutations",
-                    expectedJsonContent = """[{"mutation":"5G","count":1,"proportion":0.5}]""",
-                    expectedCsvContent = "mutation,count,proportion\n5G,1,0.5",
-                    expectedTsvContent = "mutation\tcount\tproportion\n5G\t1\t0.5",
-                    setupMock =
-                        { every { it.computeNucleotideMutationProportions(any()) } returns nucleotideMutationData },
-                )
-
-                AMINO_ACID_MUTATIONS -> forDataFormats(
-                    endpoint = AMINO_ACID_MUTATIONS_ROUTE,
-                    expectedFilename = "aminoAcidMutations",
-                    expectedJsonContent = """[{"mutation":"5G","count":1,"proportion":0.5}]""",
-                    expectedCsvContent = "mutation,count,proportion\n5G,1,0.5",
-                    expectedTsvContent = "mutation\tcount\tproportion\n5G\t1\t0.5",
-                    setupMock =
-                        { every { it.computeAminoAcidMutationProportions(any()) } returns aminoAcidMutationData },
-                )
-
-                NUCLEOTIDE_INSERTIONS -> forDataFormats(
-                    endpoint = NUCLEOTIDE_INSERTIONS_ROUTE,
-                    expectedFilename = "nucleotideInsertions",
-                    expectedJsonContent = """[{"insertion":"123:GGA","count":1}]""",
-                    expectedCsvContent = "insertion,count\n123:GGA,1",
-                    expectedTsvContent = "insertion\tcount\n123:GGA\t1",
-                    setupMock = { every { it.getNucleotideInsertions(any()) } returns nucleotideInsertionData },
-                )
-
-                AMINO_ACID_INSERTIONS -> forDataFormats(
-                    endpoint = AMINO_ACID_INSERTIONS_ROUTE,
-                    expectedFilename = "aminoAcidInsertions",
-                    expectedJsonContent = """[{"insertion":"123:GGA","count":1}]""",
-                    expectedCsvContent = "insertion,count\n123:GGA,1",
-                    expectedTsvContent = "insertion\tcount\n123:GGA\t1",
-                    setupMock = { every { it.getAminoAcidInsertions(any()) } returns aminoAcidInsertionData },
-                )
-
-                ALIGNED_NUCLEOTIDE_SEQUENCES -> listOf(
+            if (route.servesFasta) {
+                return listOf(
                     DownloadAsFileScenario(
-                        endpoint = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/segmentName",
+                        endpoint = "${route.pathSegment}/segmentName",
+                        mockData = MockDataForEndpoints.fastaMockData,
                         requestedDataFormat = null,
-                        expectedFilename = "alignedNucleotideSequences.fasta",
-                        expectedFileContent = SEQUENCE_DATA,
-                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
+                        expectedFilename = "$expectedFilename.fasta",
                     ),
-                )
-
-                ALIGNED_AMINO_ACID_SEQUENCES -> listOf(
-                    DownloadAsFileScenario(
-                        endpoint = "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/S",
-                        requestedDataFormat = null,
-                        expectedFilename = "alignedAminoAcidSequences.fasta",
-                        expectedFileContent = SEQUENCE_DATA,
-                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
-                    ),
-                )
-
-                UNALIGNED_NUCLEOTIDE_SEQUENCES -> listOf(
-                    DownloadAsFileScenario(
-                        endpoint = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/segmentName",
-                        requestedDataFormat = null,
-                        expectedFilename = "unalignedNucleotideSequences.fasta",
-                        expectedFileContent = SEQUENCE_DATA,
-                        setupMock = { every { it.getGenomicSequence(any(), any(), any()) } returns SEQUENCE_DATA },
-                    ),
-                )
-
-                else -> throw IllegalArgumentException(
-                    "There is no ${DownloadAsFileScenario::class} defined for endpoint $route",
                 )
             }
+
+            return forDataFormats(route.pathSegment, expectedFilename)
+        }
 
         private fun forDataFormats(
             endpoint: String,
             expectedFilename: String,
-            expectedJsonContent: String,
-            expectedCsvContent: String,
-            expectedTsvContent: String,
-            setupMock: (SiloQueryModel) -> Any,
         ) = listOf(
             DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint)
+                    .expecting(MockDataCollection.DataFormat.PLAIN_JSON),
+                expectedFilename = "$expectedFilename.json",
                 endpoint = endpoint,
                 requestedDataFormat = "json",
-                expectedFilename = "$expectedFilename.json",
-                expectedFileContent = expectedJsonContent,
-                setupMock = setupMock,
             ),
             DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.CSV),
+                expectedFilename = "$expectedFilename.csv",
                 endpoint = endpoint,
                 requestedDataFormat = "csv",
-                expectedFilename = "$expectedFilename.csv",
-                expectedFileContent = expectedCsvContent,
-                setupMock = setupMock,
             ),
             DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.TSV),
+                expectedFilename = "$expectedFilename.tsv",
                 endpoint = endpoint,
                 requestedDataFormat = "tsv",
-                expectedFilename = "$expectedFilename.tsv",
-                expectedFileContent = expectedTsvContent,
-                setupMock = setupMock,
             ),
         )
+    }
+}
 
-        private val aggregationData = listOf(
-            AggregationData(
-                1,
-                mapOf("country" to TextNode("Switzerland")),
-            ),
-        )
+data class DownloadCompressedFileScenario(
+    val description: String,
+    val mockData: MockData,
+    val request: MockHttpServletRequestBuilder,
+    val expectedFilename: String,
+    val compressionFormat: String,
+) {
+    override fun toString() = description
 
-        private val detailsData = listOf(
-            DetailsData(
-                mapOf(
-                    "country" to TextNode("Switzerland"),
-                    "age" to TextNode("42"),
+    companion object {
+        fun scenariosFor(
+            dataFormat: MockDataCollection.DataFormat,
+            route: SampleRoute,
+        ) = scenariosFor(
+            dataFormat = dataFormat,
+            route = route,
+            compressionFormat = "gzip",
+        ) +
+            scenariosFor(
+                dataFormat = dataFormat,
+                route = route,
+                compressionFormat = "zstd",
+            )
+
+        private fun scenariosFor(
+            dataFormat: MockDataCollection.DataFormat,
+            route: SampleRoute,
+            compressionFormat: String,
+        ): List<DownloadCompressedFileScenario> {
+            val (mockData, dataFileFormat) = if (route.servesFasta) {
+                MockDataForEndpoints.fastaMockData to "fasta"
+            } else {
+                MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
+            }
+
+            val endpoint = when (route) {
+                ALIGNED_NUCLEOTIDE_SEQUENCES -> "${route.pathSegment}/main"
+                ALIGNED_AMINO_ACID_SEQUENCES -> "${route.pathSegment}/main"
+                UNALIGNED_NUCLEOTIDE_SEQUENCES -> "${route.pathSegment}/gene1"
+                else -> route.pathSegment
+            }
+            val acceptHeader = when (route.servesFasta) {
+                true -> "*/*"
+                false -> dataFormat.acceptHeader
+            }
+
+            val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$compressionFormat"
+
+            return listOf(
+                DownloadCompressedFileScenario(
+                    description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    mockData = mockData,
+                    request = getSample("$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                        .header(ACCEPT_ENCODING, compressionFormat)
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = expectedFilename,
+                    compressionFormat = compressionFormat,
                 ),
-            ),
-        )
-
-        private val nucleotideMutationData = listOf(NucleotideMutationResponse("5G", 1, 0.5))
-        private val aminoAcidMutationData = listOf(AminoAcidMutationResponse("5G", 1, 0.5))
-        private val nucleotideInsertionData = listOf(NucleotideInsertionResponse("123:GGA", 1))
-        private val aminoAcidInsertionData = listOf(AminoAcidInsertionResponse("123:GGA", 1))
-        private const val SEQUENCE_DATA = ">dummyFastaHeader\ntheSequence\n"
+                DownloadCompressedFileScenario(
+                    description = "POST $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    mockData = mockData,
+                    request = postSample(endpoint).content("""{ "$DOWNLOAD_AS_FILE_PROPERTY": true }""")
+                        .contentType(APPLICATION_JSON)
+                        .header(ACCEPT_ENCODING, compressionFormat)
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = expectedFilename,
+                    compressionFormat = compressionFormat,
+                ),
+            )
+        }
     }
 }

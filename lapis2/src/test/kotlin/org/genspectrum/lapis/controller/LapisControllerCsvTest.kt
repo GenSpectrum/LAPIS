@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
@@ -68,7 +69,7 @@ class LapisControllerCsvTest(
     fun `GET returns empty CSV`(endpoint: String) {
         MockDataForEndpoints.getMockData(endpoint).mockToReturnEmptyData(siloQueryModelMock)
 
-        mockMvc.perform(getSample("$endpoint?country=Switzerland").header("Accept", "text/csv"))
+        mockMvc.perform(getSample("$endpoint?country=Switzerland").header(ACCEPT, "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(""))
@@ -93,38 +94,38 @@ class LapisControllerCsvTest(
     @ParameterizedTest(name = "{0} returns data as CSV")
     @MethodSource("getCsvRequests")
     fun `request returns data as CSV`(requestsScenario: RequestScenario) {
-        requestsScenario.mockData.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(requestsScenario.mockData.expectedCsv))
+            .andExpect(content().string(requestsScenario.mockDataCollection.expectedCsv))
     }
 
     @ParameterizedTest(name = "{0} returns data as CSV without headers")
     @MethodSource("getCsvWithoutHeadersRequests")
     fun `request returns data as CSV without headers`(requestsScenario: RequestScenario) {
-        requestsScenario.mockData.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;headers=false;charset=UTF-8"))
-            .andExpect(content().string(returnedCsvWithoutHeadersData(requestsScenario.mockData)))
+            .andExpect(content().string(returnedCsvWithoutHeadersData(requestsScenario.mockDataCollection)))
     }
 
     @ParameterizedTest(name = "{0} returns data as TSV")
     @MethodSource("getTsvRequests")
     fun `request returns data as TSV`(requestsScenario: RequestScenario) {
-        requestsScenario.mockData.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(requestsScenario.mockData.expectedTsv))
+            .andExpect(content().string(requestsScenario.mockDataCollection.expectedTsv))
     }
 
-    fun returnedCsvWithoutHeadersData(mockData: MockData) =
-        mockData.expectedCsv
+    fun returnedCsvWithoutHeadersData(mockDataCollection: MockDataCollection) =
+        mockDataCollection.expectedCsv
             .lines()
             .drop(1)
             .joinToString("\n")
@@ -146,7 +147,7 @@ class LapisControllerCsvTest(
                         "GET $endpoint with accept header",
                         MockDataForEndpoints.getMockData(endpoint),
                         getSample("$endpoint?country=Switzerland")
-                            .header("Accept", getAcceptHeaderFor(dataFormat)),
+                            .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                     RequestScenario(
                         "POST $endpoint with request parameter",
@@ -161,7 +162,7 @@ class LapisControllerCsvTest(
                         postSample(endpoint)
                             .content("""{"country": "Switzerland"}""")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Accept", getAcceptHeaderFor(dataFormat)),
+                            .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                 )
             }
@@ -187,7 +188,7 @@ class LapisControllerCsvTest(
 
     data class RequestScenario(
         val description: String,
-        val mockData: MockData,
+        val mockDataCollection: MockDataCollection,
         val request: MockHttpServletRequestBuilder,
     ) {
         override fun toString() = description
