@@ -23,16 +23,16 @@ const lapisInstance = 'gisaid';
 const filterDataSchema = z.union([z.string(), z.number()]);
 const filterSchema = z.record(z.string(), z.union([filterDataSchema, z.array(filterDataSchema)]));
 
-const logLineSchema =
-  z.object({
-    endpoint: z.string(),
-    filter: filterSchema.optional(),
-  });
+const logLineSchema = z.object({
+  endpoint: z.string(),
+  filter: filterSchema.optional(),
+});
 type LogLine = z.infer<typeof logLineSchema>;
 
-
-describe('Compare LAPIS v1 and LAPIS v2 GET requests from logs', () => {
+describe('Compare LAPIS v1 and LAPIS v2 GET requests from logs', function () {
   const logLines = readLogFile(filePath);
+
+  this.timeout(10000);
 
   for (const line of logLines) {
     if (line === undefined) {
@@ -55,12 +55,12 @@ export async function compareRequests(requestV1: URL, requestV2: URL) {
   const resultV1 = await fetch(requestV1);
   const resultV2 = await fetch(requestV2);
 
+  console.log(requestV1.toString());
+  console.log(requestV2.toString());
 
-  if ((resultV1.status !== resultV2.status) || (resultV1.status !== 200) || (resultV2.status !== 200)) {
+  if (resultV1.status !== resultV2.status || resultV1.status !== 200 || resultV2.status !== 200) {
     console.log('V1 status: ', resultV1.status);
     console.log('V2 status: ', resultV2.status);
-    console.log(requestV1.toString());
-    console.log(requestV2.toString());
     console.log('Error v1:', await getError(resultV1));
     console.log('Error v2:', await getError(resultV2));
   }
@@ -70,19 +70,19 @@ export async function compareRequests(requestV1: URL, requestV2: URL) {
   const dataV1 = await getData(resultV1);
   const dataV2 = await getData(resultV2);
 
-  const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual)
-  const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual)
+  const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual);
+  const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual);
 
   if (notInV1.length > 0 || notInV2.length > 0) {
     // to get the nice difference view
     console.log(requestV1.toString());
     console.log(requestV2.toString());
 
-    const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual)
-    console.log('Not in v1: ', notInV1)
+    const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual);
+    console.log('Not in v1: ', notInV1);
 
-    const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual)
-    console.log('Not in v2: ', notInV2)
+    const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual);
+    console.log('Not in v2: ', notInV2);
 
     const dataV1Sorted = lodash.sortBy(dataV1, getFieldToSortBy(requestV2));
     const dataV2Sorted = lodash.sortBy(dataV2, getFieldToSortBy(requestV2));
@@ -139,7 +139,6 @@ export function addGisaidFilter(url: URL, dataInstance: DataInstance) {
 
 export function mapToPathV2(url: URL, lapisVersion: LapisVersion) {
   if (lapisVersion === 'v2') {
-
     const replacements = [
       ['/nuc-mutations', '/nucleotideMutations'],
       ['/aa-mutations', '/aminoAcidMutations'],
@@ -165,17 +164,20 @@ export function addAccessKey(url: URL, lapisVersion: LapisVersion) {
   }
 }
 
-
 function readLogFile(filePath: string) {
-  return fs.readFileSync(filePath).toString().split('\n').map((line) => {
-    try {
-      const logObject = JSON.parse(line);
-      return logLineSchema.parse(logObject);
-    } catch (error) {
-      console.log('Error parsing line: ', line);
-      console.log(error);
-    }
-  });
+  return fs
+    .readFileSync(filePath)
+    .toString()
+    .split('\n')
+    .map(line => {
+      try {
+        const logObject = JSON.parse(line);
+        return logLineSchema.parse(logObject);
+      } catch (error) {
+        console.log('Error parsing line: ', line);
+        console.log(error);
+      }
+    });
 }
 
 function addSearchParams(url: URL, logLine: LogLine, lapisVersion: LapisVersion) {
@@ -193,9 +195,9 @@ function addSearchParams(url: URL, logLine: LogLine, lapisVersion: LapisVersion)
           url.searchParams.append(mapSearchParam(key, lapisVersion), value.join(','));
           break;
         case 'v2':
-          value.forEach((value) => {
+          value.forEach(value => {
             url.searchParams.append(mapSearchParam(key, lapisVersion), value.toString());
-          })
+          });
           break;
       }
     } else {
@@ -233,12 +235,15 @@ function getFieldToSortBy(url: URL) {
       return 'insertion';
   }
 
-  const fields = url.searchParams.get('fields')?.split(',').map(field => field.toLowerCase());
+  const fields = url.searchParams
+    .get('fields')
+    ?.split(',')
+    .map(field => field.toLowerCase());
 
   if (fields === undefined) {
     return 'count';
   }
-  return fields
+  return fields;
 }
 
 async function getData(response: Response) {
@@ -246,7 +251,14 @@ async function getData(response: Response) {
   try {
     return JSON.parse(responseText).data;
   } catch (error) {
-    console.log('Error parsing response: ', responseText, 'Response status: ', response.status, 'Response url: ', response.url);
+    console.log(
+      'Error parsing response: ',
+      responseText,
+      'Response status: ',
+      response.status,
+      'Response url: ',
+      response.url
+    );
     throw error;
   }
 }
@@ -256,7 +268,14 @@ async function getError(response: Response) {
   try {
     return JSON.parse(responseText).error;
   } catch (error) {
-    console.log('Error parsing response: ', responseText, 'Response status: ', response.status, 'Response url: ', response.url);
+    console.log(
+      'Error parsing response: ',
+      responseText,
+      'Response status: ',
+      response.status,
+      'Response url: ',
+      response.url
+    );
     throw error;
   }
 }
