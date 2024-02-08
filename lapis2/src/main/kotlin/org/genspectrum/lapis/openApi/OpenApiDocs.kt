@@ -354,13 +354,7 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
         COUNT_PROPERTY to IntegerSchema().description("The number of sequences matching the filters."),
     )
 
-private fun accessKeySchema() =
-    StringSchema()
-        .description(
-            "An access key that grants access to the protected data that this instance serves. " +
-                "There are two types or access keys: One only grants access to aggregated data, " +
-                "the other also grants access to detailed data.",
-        )
+fun accessKeySchema() = StringSchema().description(ACCESS_KEY_DESCRIPTION)
 
 private fun nucleotideMutationProportionSchema() =
     mapOf(

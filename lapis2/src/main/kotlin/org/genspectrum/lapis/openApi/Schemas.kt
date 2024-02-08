@@ -82,6 +82,12 @@ Set to true to make your browser trigger a download instead of showing the respo
 'Content-Disposition' header to 'attachment'.
 """
 
+const val ACCESS_KEY_DESCRIPTION = """
+An access key that grants access to the protected data that this instance serves.
+There are two types or access keys: One only grants access to aggregated data,
+the other also grants access to detailed data.
+"""
+
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation
