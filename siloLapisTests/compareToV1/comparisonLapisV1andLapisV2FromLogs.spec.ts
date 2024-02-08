@@ -10,7 +10,7 @@ config({
 });
 
 const queriesPath = __dirname + '/queries';
-const filePath = `${queriesPath}/logs_200.jsonl`;
+const filePath = `${queriesPath}/logs_10000.jsonl`;
 
 const LAPIS_V1_URL = 'https://lapis.cov-spectrum.org';
 const LAPIS_V2_URL = 'http://s1.int.genspectrum.org';
@@ -74,10 +74,6 @@ export async function compareRequests(requestV1: URL, requestV2: URL) {
   const notInV2 = lodash.differenceWith(dataV1, dataV2, lodash.isEqual);
 
   if (notInV1.length > 0 || notInV2.length > 0) {
-    // to get the nice difference view
-    console.log(requestV1.toString());
-    console.log(requestV2.toString());
-
     const notInV1 = lodash.differenceWith(dataV2, dataV1, lodash.isEqual);
     console.log('Not in v1: ', notInV1);
 

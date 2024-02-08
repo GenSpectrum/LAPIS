@@ -19,10 +19,12 @@ type GetRequest = {
 };
 
 const lapisInstance = 'gisaid';
-describe('Compare LAPIS v1 and LAPIS v2 GET requests', () => {
+describe('Compare LAPIS v1 and LAPIS v2 GET requests', function() {
   const getRequests: GetRequest[] = JSON.parse(
     fs.readFileSync(`${queriesPath}/${getRequestsFilename}`).toString()
   );
+
+  this.timeout(10000);
 
   getRequests.forEach(request => {
     it('should be the same request result: ' + request.url, async () => {
