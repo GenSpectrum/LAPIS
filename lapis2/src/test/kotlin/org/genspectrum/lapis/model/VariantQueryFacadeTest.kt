@@ -221,7 +221,7 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a variantQuery with a 'Nof' expression then map should return the corresponding SiloQuery`() {
-        val variantQuery = "[3-of: 123A, 234T, 345G]"
+        val variantQuery = "[3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(variantQuery)
 
@@ -232,6 +232,7 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 123, "A"),
                 NucleotideSymbolEquals(null, 234, "T"),
                 NucleotideSymbolEquals(null, 345, "G"),
+                NucleotideSymbolEquals(null, 456, "A"),
             ),
         )
         assertThat(result, equalTo(expectedResult))
@@ -239,7 +240,7 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a variantQuery with a exact 'Nof' expression then map should return the corresponding SiloQuery`() {
-        val variantQuery = "[exactly-3-of: 123A, 234T, 345G]"
+        val variantQuery = "[exactly-3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(variantQuery)
 
@@ -250,6 +251,27 @@ class VariantQueryFacadeTest {
                 NucleotideSymbolEquals(null, 123, "A"),
                 NucleotideSymbolEquals(null, 234, "T"),
                 NucleotideSymbolEquals(null, 345, "G"),
+                NucleotideSymbolEquals(null, 456, "A"),
+            ),
+        )
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `given a variantQuery with a nested exact 'Nof' expression then map should return the corresponding SiloQuery`() {
+        val variantQuery = "[exactly-3-of: 123A, !234G, 345G, 456A]"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = NOf(
+            3,
+            true,
+            listOf(
+                NucleotideSymbolEquals(null, 123, "A"),
+                Not(NucleotideSymbolEquals(null, 234, "G")),
+                NucleotideSymbolEquals(null, 345, "G"),
+                NucleotideSymbolEquals(null, 456, "A"),
             ),
         )
         assertThat(result, equalTo(expectedResult))

@@ -97,9 +97,10 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
 
         val n = ctx.nOfNumberOfMatchers().text.toInt()
         val matchExactly = ctx.nOfMatchExactly() != null
+        val nOfExprs = ctx.nOfExprs().expr().size
 
         val children = mutableListOf<SiloFilterExpression>()
-        for (i in 1..n) {
+        for (i in 1..nOfExprs) {
             children += expressionStack.removeLast()
         }
 
