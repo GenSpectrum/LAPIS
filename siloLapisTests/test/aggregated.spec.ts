@@ -104,6 +104,18 @@ describe('The /aggregated endpoint', () => {
     expect(descendingOrderedResult.data[0]).to.have.property('division', 'Zürich');
   });
 
+  it('should return bad request for non existing fields on GET request', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'notAField',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include('Unknown field: notAField, known values are [primaryKey,');
+  });
+
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postAggregated1({
       aggregatedPostRequest: {
