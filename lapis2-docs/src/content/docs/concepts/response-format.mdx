@@ -1,0 +1,34 @@
+---
+title: Response format
+description: Response format
+---
+
+The response format is tailored to each specific endpoint.
+To view the response format for a particular endpoint, please visit our [Swagger UI](/references/open-api-definition/).
+Once there, select the endpoint of interest and scroll down to the "Responses" section.
+A '200' response code indicates a successful request, while any other code signifies an error.
+
+Endpoints typically support returning data in JSON, [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) or
+[TSV](https://en.wikipedia.org/wiki/Tab-separated_values), with JSON being the default.
+Genomic sequences (such as those from `unalignedNucleotideSequences`, `alignedAminoAcidSequences`, etc.) are provided in the
+[FASTA format](https://en.wikipedia.org/wiki/FASTA_format).
+
+## Example
+
+To understand the response from the `nucleotideMutation` endpoint, refer to the relevant section in the Swagger UI:
+
+![Example nucleotide mutation response](/images/docs/concepts/example_nucleotide_mutation_response_200.png)
+
+At the top, you'll find a plain text description of the response.
+The middle section displays a JSON format response example.
+For detailed information about the response data, click on 'Schema'.
+This reveals the response structure and descriptions for each field, accessible by clicking the three dots next to them.
+
+![Example nucleotide mutation response schema](/images/docs/concepts/example_nucleotide_mutation_schema.png)
+
+Fields marked with an asterisk (\*) are always included in the response; unmarked fields may be omitted.
+
+:::note
+Every response, regardless of format, includes the data version as it is crucial information. For more details, visit the
+[data versions page](/concepts/data-versions/).
+:::
