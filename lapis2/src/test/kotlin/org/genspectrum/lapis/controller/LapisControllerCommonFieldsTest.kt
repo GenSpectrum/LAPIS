@@ -459,6 +459,18 @@ class LapisControllerCommonFieldsTest(
             .apply(assertFileContentMatches)
     }
 
+    @ParameterizedTest(name = "GET {0} with non existing field should throw")
+    @MethodSource("getEndpointsWithFields")
+    fun `GET with non existing field should throw`(endpoint: String) {
+        mockMvc.perform(getSample("$endpoint?fields=nonExistingField"))
+            .andExpect(status().isBadRequest)
+            .andExpect(
+                jsonPath(
+                    "\$.error.detail",
+                ).value(Matchers.containsString("Unknown field: nonExistingField, known values are [primaryKey,")),
+            )
+    }
+
     private fun attachmentWithFilename(filename: String) = "attachment; filename=$filename"
 
     private companion object {
@@ -483,6 +495,9 @@ class LapisControllerCommonFieldsTest(
 
         @JvmStatic
         fun getEndpointsWithAminoAcidMutationFilter() = endpointsOfController
+
+        @JvmStatic
+        fun getEndpointsWithFields() = listOf(AGGREGATED, DETAILS).map { it.pathSegment }.map { Arguments.of(it) }
 
         @JvmStatic
         val downloadAsFileScenarios = SampleRoute.entries.flatMap { DownloadAsFileScenario.forEndpoint(it) }

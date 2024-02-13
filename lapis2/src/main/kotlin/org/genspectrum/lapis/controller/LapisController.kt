@@ -41,7 +41,7 @@ import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.Field
+import org.genspectrum.lapis.request.FieldConverter
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -75,6 +75,7 @@ class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
     private val csvWriter: CsvWriter,
+    private val fieldConverter: FieldConverter,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -84,7 +85,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -116,7 +117,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -139,7 +140,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -172,7 +173,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -193,7 +194,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @FieldsToAggregateBy
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -226,7 +227,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -717,7 +718,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -749,7 +750,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -770,7 +771,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -800,7 +801,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -821,7 +822,7 @@ class LapisController(
         sequenceFilters: GetRequestSequenceFilters?,
         @DetailsFields
         @RequestParam
-        fields: List<Field>?,
+        fields: List<String>?,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -851,7 +852,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields ?: emptyList(),
+            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
