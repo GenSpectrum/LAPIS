@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
+import org.springframework.http.HttpHeaders.CONTENT_LENGTH
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.web.servlet.MockMvc
@@ -46,6 +47,7 @@ class LapisControllerCompressionTest(
         val content = mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(content().contentType(requestsScenario.expectedContentType))
+            .andExpect(header().doesNotExist(CONTENT_LENGTH))
             .andExpect(header().string(CONTENT_ENCODING, requestsScenario.compressionFormat))
             .andReturn()
             .response

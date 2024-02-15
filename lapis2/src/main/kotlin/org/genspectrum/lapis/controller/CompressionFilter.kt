@@ -10,13 +10,19 @@ import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
+import org.springframework.boot.context.properties.bind.Binder
+import org.springframework.boot.web.servlet.server.Encoding
 import org.springframework.core.annotation.Order
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
-import org.springframework.http.HttpHeaders.TRANSFER_ENCODING
+import org.springframework.http.MediaType
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.stereotype.Component
+import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.filter.OncePerRequestFilter
 import java.io.OutputStream
+import java.nio.charset.Charset
 import java.util.Enumeration
 import java.util.zip.GZIPOutputStream
 
@@ -51,8 +57,13 @@ fun ZstdOutputStream.commitUnderlyingResponseToPreventContentLengthFromBeingSet(
 }
 
 @Component
+@RequestScope
+class RequestCompression(var compression: Compression? = null)
+
+@Component
 @Order(DOWNLOAD_AS_FILE_FILTER_ORDER - 1)
-class CompressionFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter() {
+class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: RequestCompression) :
+    OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -85,7 +96,10 @@ class CompressionFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter()
         acceptEncodingHeaders: Enumeration<String>?,
     ) = when (val compression = Compression.fromHeaders(acceptEncodingHeaders)) {
         null -> response
-        else -> CompressingResponse(response, compression)
+        else -> {
+            requestCompression.compression = compression
+            CompressingResponse(response, compression)
+        }
     }
 }
 
@@ -103,11 +117,6 @@ class CompressingResponse(
     init {
         log.info { "Compressing using $compression" }
         response.setHeader(CONTENT_ENCODING, compression.value)
-        preventSpringFromSettingTheContentLengthWhichIsUnknownWhenCompressing(response)
-    }
-
-    private fun preventSpringFromSettingTheContentLengthWhichIsUnknownWhenCompressing(response: HttpServletResponse) {
-        response.addHeader(TRANSFER_ENCODING, "chunked")
     }
 
     private val servletOutputStream = CompressingServletOutputStream(response.outputStream, compression)
@@ -137,5 +146,31 @@ class CompressingServletOutputStream(
     override fun flush() {
         super.flush()
         compressingStream.flush()
+    }
+}
+
+@Component
+class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
+    environment: Environment,
+    val requestCompression: RequestCompression,
+) : StringHttpMessageConverter(getCharsetFromEnvironment(environment)) {
+    override fun getContentLength(
+        str: String,
+        contentType: MediaType?,
+    ): Long? {
+        return when (requestCompression.compression) {
+            null -> super.getContentLength(str, contentType)
+            else -> null
+        }
+    }
+
+    companion object {
+        // taken from the initialization in
+        // org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
+        // since this class replaces that one
+        private fun getCharsetFromEnvironment(environment: Environment): Charset =
+            Binder.get(environment)
+                .bindOrCreate("server.servlet.encoding", Encoding::class.java)
+                .charset
     }
 }
