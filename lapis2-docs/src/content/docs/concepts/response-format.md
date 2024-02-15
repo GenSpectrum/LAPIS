@@ -34,5 +34,5 @@ Genomic sequences (`fasta` and `fasta-aligned` endpoints) are returned in the
 <!-- prettier-ignore -->
 :::note
 Every response, independent of the data format, contains the data version as it is a very important information. See the
-[data versions page](../data-versions/) for details.
+[data versions page](/concepts/data-versions/) for details.
 :::

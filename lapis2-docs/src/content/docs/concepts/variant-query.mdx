@@ -48,14 +48,14 @@ Get the sequences that fulfill exactly 2 out of 4 conditions:
 [exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]
 ```
 
-For SARS-CoV-2, it is also possible to use [Pango lineage queries](../pango-lineage-query/) (either called by pangolin
+For SARS-CoV-2, it is also possible to use [Pango lineage queries](/concepts/pango-lineage-query/) (either called by pangolin
 or by Nextclade) and filter by Nextstrain clades:
 
 ```
 BA.5* | nextcladePangoLineage:BA.5* | nextstrainClade:22B
 ```
 
-LAPIS supports a ternary logic to query [ambiguous nucleotide symbols](../ambiguous-symbols/).
+LAPIS supports a ternary logic to query [ambiguous nucleotide symbols](/concepts/ambiguous-symbols/).
 
 ```
 MAYBE(123W)
