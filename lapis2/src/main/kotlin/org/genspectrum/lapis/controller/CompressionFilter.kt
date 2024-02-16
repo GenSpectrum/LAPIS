@@ -16,7 +16,9 @@ import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ProblemDetail
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
@@ -71,6 +73,25 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
     ) {
         val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
 
+        try {
+            validateCompressionProperty(reReadableRequest)
+        } catch (e: UnknownCompressionFormatException) {
+            response.status = HttpStatus.BAD_REQUEST.value()
+            response.contentType = MediaType.APPLICATION_JSON_VALUE
+            response.writer.write(
+                objectMapper.writeValueAsString(
+                    LapisErrorResponse(
+                        ProblemDetail.forStatus(HttpStatus.BAD_REQUEST).apply {
+                            title = HttpStatus.BAD_REQUEST.reasonPhrase
+                            detail = "Unknown compression format: ${e.unknownFormatValue}. " +
+                                "Supported formats are: ${Compression.entries.joinToString { it.value }}"
+                        },
+                    ),
+                ),
+            )
+            return
+        }
+
         val requestWithContentEncoding = HeaderModifyingRequestWrapper(
             reReadableRequest = reReadableRequest,
             headerName = ACCEPT_ENCODING,
@@ -91,6 +112,14 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
         maybeCompressingResponse.outputStream.close()
     }
 
+    private fun validateCompressionProperty(reReadableRequest: CachedBodyHttpServletRequest) {
+        val compressionFormat = reReadableRequest.getStringField(COMPRESSION_PROPERTY) ?: return
+
+        if (Compression.entries.toSet().none { it.value == compressionFormat }) {
+            throw UnknownCompressionFormatException(unknownFormatValue = compressionFormat)
+        }
+    }
+
     private fun createMaybeCompressingResponse(
         response: HttpServletResponse,
         acceptEncodingHeaders: Enumeration<String>?,
@@ -109,6 +138,8 @@ private fun computeAcceptEncodingValueFromRequest(reReadableRequest: CachedBodyH
         Compression.ZSTD.value -> Compression.ZSTD.value
         else -> null
     }
+
+private class UnknownCompressionFormatException(val unknownFormatValue: String) : Exception()
 
 class CompressingResponse(
     response: HttpServletResponse,
