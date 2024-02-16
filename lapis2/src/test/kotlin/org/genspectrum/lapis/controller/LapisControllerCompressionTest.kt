@@ -3,10 +3,16 @@ package org.genspectrum.lapis.controller
 import com.github.luben.zstd.ZstdInputStream
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
+import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -20,8 +26,11 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.zip.GZIPInputStream
+
+private const val INVALID_COMPRESSION_FORMAT = "invalidCompressionFormat"
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,6 +46,19 @@ class LapisControllerCompressionTest(
     @BeforeEach
     fun setup() {
         every { lapisInfo.dataVersion } returns "1234"
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRequestsWithInvalidCompressionFormat")
+    fun `WHEN I send a request with unknown compression format THEN should show an error`(
+        request: MockHttpServletRequestBuilder,
+    ) {
+        mockMvc.perform(request)
+            .andExpect(status().isBadRequest)
+            .andExpect(
+                jsonPath("\$.error.detail")
+                    .value(containsString("Unknown compression format: $INVALID_COMPRESSION_FORMAT")),
+            )
     }
 
     @ParameterizedTest(name = "{0}")
@@ -65,6 +87,16 @@ class LapisControllerCompressionTest(
 
     private companion object {
         @JvmStatic
+        val requestsWithInvalidCompressionFormat = listOf(
+            Arguments.of(getSample("${AGGREGATED.pathSegment}?compression=$INVALID_COMPRESSION_FORMAT")),
+            Arguments.of(
+                postSample(AGGREGATED.pathSegment)
+                    .content("""{"compression": "$INVALID_COMPRESSION_FORMAT"}""")
+                    .contentType(APPLICATION_JSON),
+            ),
+        )
+
+        @JvmStatic
         val scenarios =
             SampleRoute.entries
                 .filter { !it.servesFasta }
@@ -83,21 +115,21 @@ class LapisControllerCompressionTest(
                         )
                 } +
                 getRequests(
-                    SampleRoute.AGGREGATED,
+                    AGGREGATED,
                     dataFormat = MockDataCollection.DataFormat.NESTED_JSON,
                     compressionFormat = "gzip",
                     expectedContentType = APPLICATION_JSON_VALUE,
                 ) +
                 getRequests(
-                    SampleRoute.AGGREGATED,
+                    AGGREGATED,
                     dataFormat = MockDataCollection.DataFormat.TSV,
                     compressionFormat = "zstd",
                     expectedContentType = "$TEXT_TSV_HEADER;charset=UTF-8",
                 ) +
                 listOf(
-                    "${SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
-                    "${SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
-                    "${SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES.pathSegment}/gene1",
+                    "${UNALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
+                    "${ALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
+                    "${ALIGNED_AMINO_ACID_SEQUENCES.pathSegment}/gene1",
                 )
                     .flatMap { getFastaRequests(it, "gzip") + getFastaRequests(it, "zstd") }
     }
