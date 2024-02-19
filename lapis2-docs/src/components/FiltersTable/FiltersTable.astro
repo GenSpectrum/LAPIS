@@ -1,0 +1,79 @@
+---
+import { getConfig, Metadata } from '../../config';
+import BaseAwareLink from '../BaseAwareLink.astro';
+import { getFilters } from './getFilters';
+import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
+
+const config = getConfig();
+const filters = getFilters(config);
+
+const referenceGenomes = getReferenceGenomes();
+const multiSegmented = isMultiSegmented(referenceGenomes);
+---
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {
+            filters.map((filter) => (
+                <tr>
+                    <td>{filter.name}</td>
+                    <td>
+                        {filter.type}
+                        {filter.name === config.schema.primaryKey && <> (primary key)</>}
+                    </td>
+                    <td>
+                        {filter.type === 'pango_lineage' ? (
+                            <>
+                                See
+                                <BaseAwareLink href='/concepts/pango-lineage-query/'>Pango lineage query</BaseAwareLink>
+                            </>
+                        ) : (
+                            filter.description
+                        )}
+                    </td>
+                </tr>
+            ))
+        }
+        <tr>
+            <td>nucleotideMutations</td>
+            <td>list of strings</td>
+            <td>
+                See
+                <BaseAwareLink href='/concepts/mutation-filters/'>mutation filters</BaseAwareLink>
+            </td>
+        </tr>
+        <tr>
+            <td>aminoAcidMutations</td>
+            <td>list of strings</td>
+            <td>
+                See
+                <BaseAwareLink href='/concepts/mutation-filters/'>mutation filters</BaseAwareLink>
+            </td>
+        </tr>
+        <tr>
+            <td>nucleotideInsertions</td>
+            <td>list of strings</td>
+            <td>
+                In the format ins_{multiSegmented && '<sequenceName>:'}{'<position>:<insertion>'}. Example: ins_{
+                    multiSegmented && `${referenceGenomes.nucleotideSequences[0].name}:`
+                }100:AGG
+            </td>
+        </tr>
+        <tr>
+            <td>aminoAcidInsertions</td>
+            <td>list of strings</td>
+            <td>
+                In the format ins_{'<sequenceName>:<position>:<insertion>'}. Example: ins_{
+                    referenceGenomes.genes[0].name
+                }:100:DEF
+            </td>
+        </tr>
+    </tbody>
+</table>
