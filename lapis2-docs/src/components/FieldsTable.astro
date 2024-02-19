@@ -14,15 +14,16 @@ const config = getConfig();
     </thead>
     <tbody>
         {
-            config.schema.metadata.map((m) => (
+            config.schema.metadata.map((metadata) => (
                 <tr>
-                    <td>{m.name}</td>
+                    <td>{metadata.name}</td>
                     <td>
-                        {m.type}
-                        {m.name === config.schema.primaryKey && <> (primary key)</>}
+                        {metadata.type}
+                        {metadata.name === config.schema.primaryKey && <> (primary key)</>}
                     </td>
                     <td>
-                        <i>TODO</i>
+                        {(metadata.type === 'insertion' || metadata.type === 'aaInsertion') &&
+                            'An artificial column that contains insertions'}
                     </td>
                 </tr>
             ))
