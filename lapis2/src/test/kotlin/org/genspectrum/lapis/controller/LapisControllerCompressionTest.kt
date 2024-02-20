@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.controller
 
 import com.github.luben.zstd.ZstdInputStream
+import com.jayway.jsonpath.JsonPath
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
@@ -9,7 +10,9 @@ import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -23,6 +26,7 @@ import org.springframework.http.HttpHeaders.CONTENT_LENGTH
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
@@ -66,23 +70,52 @@ class LapisControllerCompressionTest(
     fun `endpoints return compressed data`(requestsScenario: RequestScenario) {
         requestsScenario.mockData.mockWithData(siloQueryModelMock)
 
-        val content = mockMvc.perform(requestsScenario.request)
+        val response = mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(content().contentType(requestsScenario.expectedContentType))
             .andExpect(header().doesNotExist(CONTENT_LENGTH))
             .andExpect(header().string(CONTENT_ENCODING, requestsScenario.compressionFormat))
             .andReturn()
-            .response
-            .contentAsByteArray
 
-        val decompressedStream = when (requestsScenario.compressionFormat) {
-            Compression.GZIP.value -> GZIPInputStream(content.inputStream())
-            Compression.ZSTD.value -> ZstdInputStream(content.inputStream())
-            else -> throw Exception("Test issue: unknown compression format ${requestsScenario.compressionFormat}")
-        }
-        val decompressedContent = decompressedStream.readAllBytes().decodeToString()
+        val compressionFormat = requestsScenario.compressionFormat
+
+        val decompressedContent = decompressContent(response, compressionFormat)
 
         requestsScenario.mockData.assertDataMatches(decompressedContent)
+    }
+
+    @ParameterizedTest
+    @MethodSource("getCompressionFormats")
+    fun `GIVEN model throws bad request WHEN requesting compressed data THEN it should return compressed error`(
+        compressionFormat: String,
+    ) {
+        val errorMessage = "test message"
+        every { siloQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
+
+        val response = mockMvc.perform(getSample("${AGGREGATED.pathSegment}?compression=$compressionFormat"))
+            .andExpect(status().isBadRequest)
+            .andExpect(header().string(CONTENT_ENCODING, compressionFormat))
+            .andReturn()
+
+        val decompressedContent = decompressContent(response, compressionFormat)
+
+        val errorDetail = JsonPath.read<String>(decompressedContent, "$.error.detail")
+        assertThat(errorDetail, `is`(errorMessage))
+    }
+
+    private fun decompressContent(
+        response: MvcResult,
+        compressionFormat: String,
+    ): String {
+        val content = response.response.contentAsByteArray
+
+        val decompressedStream = when (compressionFormat) {
+            Compression.GZIP.value -> GZIPInputStream(content.inputStream())
+            Compression.ZSTD.value -> ZstdInputStream(content.inputStream())
+            else -> throw Exception("Test issue: unknown compression format $compressionFormat")
+        }
+
+        return decompressedStream.readAllBytes().decodeToString()
     }
 
     private companion object {
@@ -132,6 +165,9 @@ class LapisControllerCompressionTest(
                     "${ALIGNED_AMINO_ACID_SEQUENCES.pathSegment}/gene1",
                 )
                     .flatMap { getFastaRequests(it, "gzip") + getFastaRequests(it, "zstd") }
+
+        @JvmStatic
+        val compressionFormats = listOf("gzip", "zstd")
     }
 }
 
