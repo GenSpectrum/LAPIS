@@ -5,11 +5,25 @@ import { CodeBlock } from '../CodeBlock';
 import { Tab, TabsBox } from '../TabsBox/react/TabsBox';
 import { generateNonFastaQuery } from '../../utils/code-generators/python/generator';
 import type { Config } from '../../config';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { ResultField } from '../../utils/code-generators/types';
-import { ContainerWrapper, LabelWrapper } from './styled-components';
+import { CheckBoxesWrapper, ContainerWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
 import { getResultFields, MULTI_SEGMENTED, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
 import type { OrderByLimitOffset } from './OrderLimitOffsetSelection.tsx';
+
+const compressionOptions = [
+    { value: undefined, label: 'No compression' },
+    { value: 'gzip', label: 'gzip' },
+    { value: 'zstd', label: 'zstd' },
+];
+
+type CompressionValues = (typeof compressionOptions)[number]['value'];
+
+type AdditionalProperties = {
+    downloadAsFile: boolean;
+    tabularOutputFormat: TabularOutputFormat;
+    compression: CompressionValues;
+};
 
 type Props = {
     queryType: QueryTypeSelectionState;
@@ -19,23 +33,60 @@ type Props = {
     lapisUrl: string;
 };
 
+type TabProps = Props & AdditionalProperties;
+
 export const Result = (props: Props) => {
+    const [additionalProperties, setAdditionalProperties] = useState<AdditionalProperties>({
+        downloadAsFile: false,
+        tabularOutputFormat: 'json',
+        compression: undefined,
+    });
+
+    const tabProps = { ...props, ...additionalProperties };
+
     const tabs = [
-        { name: 'Query URL', content: <QueryUrlTab {...props} /> },
-        { name: 'R code', content: <RTab {...props} /> },
-        { name: 'Python code', content: <PythonTab {...props} /> },
+        { name: 'Query URL', content: <QueryUrlTab {...tabProps} /> },
+        { name: 'R code', content: <RTab {...tabProps} /> },
+        { name: 'Python code', content: <PythonTab {...tabProps} /> },
     ];
 
     return (
-        <TabsBox>
-            {tabs.map((tab) => (
-                <Tab label={tab.name}>{tab.content}</Tab>
-            ))}
-        </TabsBox>
+        <>
+            <LabeledCheckBox
+                label='Download as file'
+                type='checkbox'
+                checked={additionalProperties.downloadAsFile}
+                onChange={() => setAdditionalProperties((prev) => ({ ...prev, downloadAsFile: !prev.downloadAsFile }))}
+            />
+            <OutputFormatSelection
+                queryType={props.queryType}
+                format={additionalProperties.tabularOutputFormat}
+                onFormatChange={(value) => setAdditionalProperties((prev) => ({ ...prev, tabularOutputFormat: value }))}
+            />
+            <div className='mt-4'>
+                <LabelWrapper>Do you want to fetch compressed data?</LabelWrapper>
+                <CheckBoxesWrapper>
+                    {compressionOptions.map(({ value, label }) => (
+                        <LabeledCheckBox
+                            label={label}
+                            type='checkbox'
+                            className='w-40'
+                            checked={value === additionalProperties.compression}
+                            onChange={() => setAdditionalProperties((prev) => ({ ...prev, compression: value }))}
+                        />
+                    ))}
+                </CheckBoxesWrapper>
+            </div>
+            <TabsBox>
+                {tabs.map((tab) => (
+                    <Tab label={tab.name}>{tab.content}</Tab>
+                ))}
+            </TabsBox>
+        </>
     );
 };
 
-function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFormat) {
+function constructGetQueryUrl(props: TabProps) {
     const { lapisUrl, endpoint, body } = constructPostQuery(props);
     const params = new URLSearchParams();
     for (let [name, value] of Object.entries(body)) {
@@ -51,25 +102,24 @@ function constructGetQueryUrl(props: Props, tabularOutputFormat: TabularOutputFo
     if (
         queryType.selection !== 'nucleotideSequences' &&
         queryType.selection !== 'aminoAcidSequences' &&
-        tabularOutputFormat !== 'json'
+        props.tabularOutputFormat !== 'json'
     ) {
-        params.set('dataFormat', tabularOutputFormat);
+        params.set('dataFormat', props.tabularOutputFormat);
+    }
+    if (props.downloadAsFile) {
+        params.set('downloadAsFile', 'true');
+    }
+    if (props.compression !== undefined) {
+        params.set('compression', props.compression);
     }
     return `${lapisUrl}${endpoint}?${params}`;
 }
 
-const QueryUrlTab = (props: Props) => {
-    const [tabularOutputFormat, setTabularOutputFormat] = useState<TabularOutputFormat>('json');
-
-    const queryUrl = constructGetQueryUrl(props, tabularOutputFormat);
+const QueryUrlTab = (props: TabProps) => {
+    const queryUrl = constructGetQueryUrl(props);
 
     return (
         <ContainerWrapper>
-            <OutputFormatSelection
-                queryType={props.queryType}
-                format={tabularOutputFormat}
-                onFormatChange={setTabularOutputFormat}
-            />
             <div>
                 <LabelWrapper>Query URL:</LabelWrapper>
                 <input
@@ -87,15 +137,15 @@ const QueryUrlTab = (props: Props) => {
     );
 };
 
-const RTab = (props: Props) => {
+const RTab = (props: TabProps) => {
     return <CodeBlock>TODO R code</CodeBlock>;
 };
 
-const PythonTab = (props: Props) => {
+const PythonTab = (props: TabProps) => {
     if (props.queryType.selection === 'nucleotideSequences' || props.queryType.selection === 'aminoAcidSequences') {
         return <CodeBlock>TODO Code for fetching sequences</CodeBlock>;
     }
-    const propsWithJson: Props = {
+    const propsWithJson: TabProps = {
         ...props,
     };
     const { lapisUrl, endpoint, body, resultFields } = constructPostQuery(propsWithJson);
@@ -103,7 +153,16 @@ const PythonTab = (props: Props) => {
     return <CodeBlock>{code}</CodeBlock>;
 };
 
-function constructPostQuery({ queryType, filters, config, lapisUrl, orderByLimitOffset }: Props): {
+function constructPostQuery({
+    queryType,
+    filters,
+    config,
+    lapisUrl,
+    orderByLimitOffset,
+    downloadAsFile,
+    tabularOutputFormat,
+    compression,
+}: TabProps): {
     lapisUrl: string;
     endpoint: string;
     body: object;
@@ -164,6 +223,15 @@ function constructPostQuery({ queryType, filters, config, lapisUrl, orderByLimit
     }
     if (orderByLimitOffset.offset !== undefined) {
         body.offset = orderByLimitOffset.offset;
+    }
+    if (downloadAsFile) {
+        body.downloadAsFile = true;
+    }
+    if (tabularOutputFormat !== 'json') {
+        body.dataFormat = tabularOutputFormat;
+    }
+    if (compression !== undefined) {
+        body.compression = compression;
     }
     return { lapisUrl, endpoint, body, resultFields };
 }

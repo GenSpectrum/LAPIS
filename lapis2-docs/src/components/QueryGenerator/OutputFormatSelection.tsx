@@ -12,7 +12,7 @@ type Props = {
 
 export const OutputFormatSelection = ({ queryType, format, onFormatChange }: Props) => {
     return (
-        <div>
+        <div className='mt-4'>
             {queryType.selection === 'nucleotideSequences' || queryType.selection === 'aminoAcidSequences' ? (
                 <>
                     For sequences, only <b>FASTA</b> is available as output format.

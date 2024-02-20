@@ -47,6 +47,10 @@ export default defineConfig({
                             link: '/references/filters/',
                         },
                         {
+                            label: 'Additional Request Properties',
+                            link: '/references/additional-request-properties/',
+                        },
+                        {
                             label: 'Open API / Swagger',
                             link: '/references/open-api-definition/',
                         },

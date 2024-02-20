@@ -69,6 +69,14 @@ export class QueryGeneratorPage {
         await this.page.getByLabel(format).check();
     }
 
+    public async selectCompressionFormat(format: 'gzip' | 'zstd') {
+        await this.page.getByLabel(format).check();
+    }
+
+    public async checkDownloadAsFile() {
+        await this.page.getByLabel('Download as file').check();
+    }
+
     public async expectQueryUrlContains(expected: string) {
         await expect(this.page.getByRole('textbox', {})).toHaveValue(
             new RegExp(`^http://localhost:8080/sample.*${expected}`),

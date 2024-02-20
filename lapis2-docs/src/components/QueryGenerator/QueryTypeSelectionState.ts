@@ -125,5 +125,12 @@ function mapMetadataTypeToResultFieldType(type: MetadataType): ResultFieldType {
         case 'date':
         case 'string':
             return 'string';
+        case 'int':
+            return 'integer';
+        case 'float':
+            return 'float';
+        case 'insertion':
+        case 'aaInsertion':
+            throw Error('Insertion and aaInsertion are not supported as result field types');
     }
 }
