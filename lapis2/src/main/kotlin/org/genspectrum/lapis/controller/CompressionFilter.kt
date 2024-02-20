@@ -31,7 +31,7 @@ import java.util.zip.GZIPOutputStream
 private val log = KotlinLogging.logger {}
 
 enum class Compression(val value: String, val compressionOutputStreamFactory: (OutputStream) -> OutputStream) {
-    GZIP("gzip", ::GZIPOutputStream),
+    GZIP("gzip", ::LazyGzipOutputStream),
     ZSTD("zstd", { ZstdOutputStream(it).apply { commitUnderlyingResponseToPreventContentLengthFromBeingSet() } }),
     ;
 
@@ -50,6 +50,24 @@ enum class Compression(val value: String, val compressionOutputStreamFactory: (O
             }
         }
     }
+}
+
+class LazyGzipOutputStream(outputStream: OutputStream) : OutputStream() {
+    private val gzipOutputStream by lazy { GZIPOutputStream(outputStream) }
+
+    override fun write(byte: Int) = gzipOutputStream.write(byte)
+
+    override fun write(bytes: ByteArray) = gzipOutputStream.write(bytes)
+
+    override fun write(
+        bytes: ByteArray,
+        offset: Int,
+        length: Int,
+    ) = gzipOutputStream.write(bytes, offset, length)
+
+    override fun flush() = gzipOutputStream.flush()
+
+    override fun close() = gzipOutputStream.close()
 }
 
 // https://github.com/apache/tomcat/blob/10e3731f344cd0d018d4be2ee767c105d2832283/java/org/apache/catalina/connector/OutputBuffer.java#L223-L229
