@@ -30,6 +30,7 @@ const referencesPages = prependToRelativeUrl(
         { title: 'Introduction', relativeUrl: '/introduction' },
         { title: 'Fields', relativeUrl: '/fields' },
         { title: 'Filters', relativeUrl: '/filters' },
+        { title: 'Additional Request Properties', relativeUrl: '/additional-request-properties' },
         { title: 'Open API / Swagger', relativeUrl: '/open-api-definition' },
         { title: 'Database Config', relativeUrl: '/database-config' },
         { title: 'Reference Genomes', relativeUrl: '/reference-genomes' },

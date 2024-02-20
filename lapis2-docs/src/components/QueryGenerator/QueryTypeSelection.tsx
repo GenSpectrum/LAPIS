@@ -113,17 +113,19 @@ const AggregatedStratified = ({ config, state, onStateChange }: Props) => {
             <div>
                 <LabelWrapper>By which field(s) would you like to stratify?</LabelWrapper>
                 <CheckBoxesWrapper>
-                    {config.schema.metadata.map((m) => (
-                        <LabeledCheckBox
-                            label={m.name}
-                            key={m.name}
-                            type='checkbox'
-                            className='w-80'
-                            disabled={state.selection !== 'aggregatedStratified'}
-                            checked={state.aggregatedStratified.fields.has(m.name)}
-                            onChange={() => changeAggregatedStratifiedField(m.name)}
-                        />
-                    ))}
+                    {config.schema.metadata
+                        .filter((metadata) => metadata.type !== 'insertion' && metadata.type !== 'aaInsertion')
+                        .map((metadata) => (
+                            <LabeledCheckBox
+                                label={metadata.name}
+                                key={metadata.name}
+                                type='checkbox'
+                                className='w-80'
+                                disabled={state.selection !== 'aggregatedStratified'}
+                                checked={state.aggregatedStratified.fields.has(metadata.name)}
+                                onChange={() => changeAggregatedStratifiedField(metadata.name)}
+                            />
+                        ))}
                 </CheckBoxesWrapper>
             </div>
         </ContainerWrapper>

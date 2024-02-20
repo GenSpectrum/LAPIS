@@ -20,6 +20,12 @@ test.describe('The query generator wizard', () => {
         await queryGeneratorPage.selectOutputFormat('CSV');
         await queryGeneratorPage.expectQueryUrlContains('dataFormat=csv');
 
+        await queryGeneratorPage.selectCompressionFormat('zstd');
+        await queryGeneratorPage.expectQueryUrlContains('compression=zstd');
+
+        await queryGeneratorPage.checkDownloadAsFile();
+        await queryGeneratorPage.expectQueryUrlContains('downloadAsFile=true');
+
         await queryGeneratorPage.viewPythonCode();
         await queryGeneratorPage.expectCodeContains(
             '@dataclass class DataEntry: count: int primaryKey: Optional[str] date: Optional[str]',

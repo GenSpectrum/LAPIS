@@ -18,7 +18,7 @@ export const TabsBox = ({ children }: Props) => {
     const [activeTab, setActiveTab] = useState(0);
 
     return (
-        <div>
+        <div className='mt-4'>
             <div className='tabs'>
                 {tabs.map((tab, index) => (
                     <a
