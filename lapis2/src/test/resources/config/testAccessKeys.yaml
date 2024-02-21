@@ -1,2 +1,6 @@
-fullAccessKey: testFullAccessKey
-aggregatedDataAccessKey: testAggregatedDataAccessKey
+fullAccessKeys:
+  - testFullAccessKey
+  - testFullAccessKey2
+aggregatedDataAccessKeys:
+  - testAggregatedDataAccessKey
+  - testAggregatedDataAccessKey2

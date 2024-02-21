@@ -131,11 +131,11 @@ private class ProtectedDataAuthorizationFilter(
         val accessKey = request.getStringField(ACCESS_KEY_PROPERTY)
             ?: return AuthorizationResult.failure("An access key is required to access $path.")
 
-        if (accessKeys.fullAccessKey == accessKey) {
+        if (accessKeys.fullAccessKeys.contains(accessKey)) {
             return AuthorizationResult.success()
         }
 
-        if (accessKeys.aggregatedDataAccessKey == accessKey && endpointServesAggregatedData(request)) {
+        if (accessKeys.aggregatedDataAccessKeys.contains(accessKey) && endpointServesAggregatedData(request)) {
             return AuthorizationResult.success()
         }
 

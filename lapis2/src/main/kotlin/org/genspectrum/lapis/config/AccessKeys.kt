@@ -20,4 +20,4 @@ class AccessKeysReader(
     }
 }
 
-data class AccessKeys(val fullAccessKey: String, val aggregatedDataAccessKey: String)
+data class AccessKeys(val fullAccessKeys: List<String>, val aggregatedDataAccessKeys: List<String>)
