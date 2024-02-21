@@ -50,7 +50,7 @@ When running LAPIS behind a proxy, the proxy needs to set X-Forwarded headers:
 There are end-to-end tests in `siloLapisTests/` that test the integration of SILO and LAPIS.
 
 How to execute the tests
-(Given that you have a running LAPIS instance listening on localhost:8080, e.g. via `docker compose up`):
+(Given that you have a running LAPIS instance listening on localhost:8090, e.g. via `docker compose up`):
 
 * Generate the OpenAPI docs for LAPIS: `cd lapis2 && ./gradlew generateOpenApiDocs`
 * Switch to test directory: `cd ../siloLapisTests/`

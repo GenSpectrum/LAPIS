@@ -1,9 +1,9 @@
 version: "3.9"
 services:
-  lapis:
+  lapisOpen:
     image: ghcr.io/genspectrum/lapis-v2:${LAPIS_TAG}
     ports:
-      - "8080:8080"
+      - "8090:8080"
     command: --silo.url=http://silo:8081
     volumes:
       - type: bind
@@ -18,7 +18,7 @@ services:
   silo:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
-      - "8081:8081"
+      - "8091:8081"
     command: --api
     volumes:
       - ../siloLapisTests/testData/output:/data
@@ -34,3 +34,21 @@ services:
       - ../siloLapisTests/testData/output:/preprocessing/output
       - ../siloLapisTests/testData/preprocessingConfig.yaml:/app/preprocessing_config.yaml
       - ../siloLapisTests/testData/testDatabaseConfig.yaml:/app/database_config.yaml
+
+  lapisProtected:
+    image: ghcr.io/genspectrum/lapis-v2:${LAPIS_TAG}
+    ports:
+      - "8092:8080"
+    command: --silo.url=http://silo:8081 --lapis.accessKeys.path=/workspace/access_keys.yaml
+    volumes:
+      - type: bind
+        source: ../siloLapisTests/testData/protectedTestDatabaseConfig.yaml
+        target: /workspace/database_config.yaml
+        read_only: true
+      - type: bind
+        source: ../siloLapisTests/testData/reference_genomes.json
+        target: /workspace/reference_genomes.json
+        read_only: true
+      - type: bind
+        source: ./src/test/resources/config/testAccessKeys.yaml
+        target: /workspace/access_keys.yaml

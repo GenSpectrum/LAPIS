@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
 import org.springframework.core.annotation.Order
@@ -13,15 +12,11 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-private val log = KotlinLogging.logger {}
-
 const val HEADERS_ACCEPT_HEADER_PARAMETER = "headers"
 
 const val TEXT_CSV_HEADER = "text/csv"
 const val TEXT_CSV_WITHOUT_HEADERS_HEADER = "text/csv;$HEADERS_ACCEPT_HEADER_PARAMETER=false"
 const val TEXT_TSV_HEADER = "text/tab-separated-values"
-
-const val DATA_FORMAT_FILTER_ORDER = 0
 
 object DataFormat {
     const val JSON = "JSON"

@@ -81,7 +81,7 @@ fun ZstdOutputStream.commitUnderlyingResponseToPreventContentLengthFromBeingSet(
 class RequestCompression(var compression: Compression? = null)
 
 @Component
-@Order(DOWNLOAD_AS_FILE_FILTER_ORDER - 1)
+@Order(COMPRESSION_FILTER_ORDER)
 class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: RequestCompression) :
     OncePerRequestFilter() {
     override fun doFilterInternal(

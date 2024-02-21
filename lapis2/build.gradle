@@ -81,13 +81,21 @@ tasks.named('bootBuildImage') {
 
 openApi {
     outputDir.set(file("$rootDir"))
-    outputFileName.set("lapis-v2-openapi.json")
+
+    def opennessLevel = project.hasProperty("opennessLevel") ? project.opennessLevel : "open"
+
+    def customOutputFileName = opennessLevel == "open" ? "lapis-v2-openapi.json" : "lapis-v2-openapi-protected.json"
+    def customLapisConfig = opennessLevel == "open" ? "../siloLapisTests/testData/testDatabaseConfig.yaml" : "../siloLapisTests/testData/protectedTestDatabaseConfig.yaml"
+
+    outputFileName.set(customOutputFileName)
     apiDocsUrl.set("http://localhost:8080/api-docs")
+
     customBootRun {
         args.set([
                 "--silo.url=does.not.matter.here",
-                "--lapis.databaseConfig.path=../siloLapisTests/testData/testDatabaseConfig.yaml",
-                "--referenceGenomeFilename=../siloLapisTests/testData/reference_genomes.json"
+                "--lapis.databaseConfig.path=$customLapisConfig",
+                "--referenceGenomeFilename=../siloLapisTests/testData/reference_genomes.json",
+                "--lapis.accessKeys.path=./src/test/resources/config/testAccessKeys.yaml"
         ])
     }
 }
