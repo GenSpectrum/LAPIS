@@ -113,6 +113,17 @@ class ProtectedDataAuthorizationTest(
     }
 
     @Test
+    fun `given second valid access key for agg data in GET request to protected instance, then access is granted`() {
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=testAggregatedDataAccessKey2&field1=value1"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
+    }
+
+    @Test
     fun `given valid access key for aggregated data in POST request to protected instance, then access is granted`() {
         mockMvc.perform(
             postRequestWithBody(
@@ -240,6 +251,17 @@ class ProtectedDataAuthorizationTest(
     fun `given valid access key for full access in GET request to protected instance, then access is granted`() {
         mockMvc.perform(
             getSample("$validRoute?accessKey=testFullAccessKey&field1=value1"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
+    }
+
+    @Test
+    fun `given second valid access key for full access in GET request to protected instance, then access is granted`() {
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=testFullAccessKey2&field1=value1"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
