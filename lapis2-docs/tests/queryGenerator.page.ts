@@ -79,7 +79,7 @@ export class QueryGeneratorPage {
 
     public async expectQueryUrlContains(expected: string) {
         await expect(this.page.getByRole('textbox', {})).toHaveValue(
-            new RegExp(`^http://localhost:8080/sample.*${expected}`),
+            new RegExp(`^http://localhost:8090/sample.*${expected}`),
         );
     }
 

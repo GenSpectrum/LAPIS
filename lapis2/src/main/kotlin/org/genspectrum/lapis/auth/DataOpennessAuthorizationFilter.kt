@@ -13,6 +13,7 @@ import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
 import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
+import org.genspectrum.lapis.controller.DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER
 import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.controller.LapisErrorResponse
@@ -20,6 +21,7 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
 import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
@@ -43,6 +45,7 @@ class DataOpennessAuthorizationFilterFactory(
         }
 }
 
+@Order(DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER)
 abstract class DataOpennessAuthorizationFilter(protected val objectMapper: ObjectMapper) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,

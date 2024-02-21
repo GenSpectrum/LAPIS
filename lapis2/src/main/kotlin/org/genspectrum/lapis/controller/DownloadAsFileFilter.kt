@@ -12,8 +12,6 @@ import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
-const val DOWNLOAD_AS_FILE_FILTER_ORDER = DATA_FORMAT_FILTER_ORDER + 1
-
 @Component
 @Order(DOWNLOAD_AS_FILE_FILTER_ORDER)
 class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequestFilter() {

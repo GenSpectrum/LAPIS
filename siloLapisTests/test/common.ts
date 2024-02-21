@@ -6,7 +6,13 @@ import {
 } from './lapisClient';
 import { expect } from 'chai';
 
-export const basePath = 'http://localhost:8080';
+import {
+  LapisControllerApi as LapisControllerApiProtected,
+  Configuration as ConfigurationProtected,
+} from './lapisClientProtected';
+
+export const basePath = 'http://localhost:8090';
+export const basePathProtected = 'http://localhost:8092';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -31,6 +37,9 @@ const middleware: Middleware = {
 };
 
 export const lapisClient = new LapisControllerApi(new Configuration({ basePath })).withMiddleware(middleware);
+export const lapisClientProtected = new LapisControllerApiProtected(
+  new ConfigurationProtected({ basePath: basePathProtected })
+).withMiddleware(middleware);
 
 export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenceControllerApi(
   new Configuration({ basePath })

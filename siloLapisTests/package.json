@@ -7,7 +7,11 @@
     "generateLapisClient": "npm run runOpenApiGenerator && npm run copyGeneratedFiles && npm run cleanUpGeneratedFiles",
     "runOpenApiGenerator": "openapi-generator-cli generate -i ../lapis2/lapis-v2-openapi.json -g typescript-fetch -o generated-sources --additional-properties=supportsES6=false",
     "copyGeneratedFiles": "cp generated-sources/index.ts generated-sources/runtime.ts test/lapisClient && cp -r generated-sources/apis generated-sources/models test/lapisClient",
+    "generateLapisClientProtected": "npm run runOpenApiGeneratorProtected && npm run copyGeneratedFilesProtected && npm run cleanUpGeneratedFilesProtected",
+    "runOpenApiGeneratorProtected": "openapi-generator-cli generate -i ../lapis2/lapis-v2-openapi-protected.json -g typescript-fetch -o generated-sources-protected --additional-properties=supportsES6=false",
+    "copyGeneratedFilesProtected": "cp generated-sources-protected/index.ts generated-sources-protected/runtime.ts test/lapisClientProtected && cp -r generated-sources-protected/apis generated-sources-protected/models test/lapisClientProtected",
     "cleanUpGeneratedFiles": "rm -rf generated-sources",
+    "cleanUpGeneratedFilesProtected": "rm -rf generated-sources-protected",
     "check-format": "prettier --check .",
     "format": "prettier --write ."
   },
@@ -21,6 +25,8 @@
     "prettier": "^3.2.5",
     "request": "^2.88.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@types/chai-as-promised": "^7.1.8",
+    "chai-as-promised": "^7.1.1"
   }
 }

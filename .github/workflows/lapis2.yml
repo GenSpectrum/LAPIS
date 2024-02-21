@@ -1,6 +1,6 @@
 name: LAPIS v2
 
-on: [push]
+on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis-v2
@@ -9,22 +9,18 @@ jobs:
   Tests:
     runs-on: ubuntu-latest
     steps:
-      -
-        uses: actions/checkout@v4
-      -
-        name: Set up JDK
+      - uses: actions/checkout@v4
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'adopt'
-      -
-        name: Execute Tests
+      - name: Execute Tests
         uses: gradle/gradle-build-action@v3
         with:
           arguments: test
           build-root-directory: lapis2
-      -
-        name: Check Format And Lint
+      - name: Check Format And Lint
         uses: gradle/gradle-build-action@v3
         with:
           arguments: ktlintCheck
@@ -36,23 +32,19 @@ jobs:
     permissions:
       packages: write
     steps:
-      -
-        uses: actions/checkout@v4
-      -
-        name: Set up JDK
+      - uses: actions/checkout@v4
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'adopt'
-      -
-        name: Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Docker metadata
+      - name: Docker metadata
         id: dockerMetadata
         uses: docker/metadata-action@v5
         with:
@@ -60,8 +52,7 @@ jobs:
           tags: |
             type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-      -
-        name: Build Docker Image For Branch
+      - name: Build Docker Image For Branch
         uses: gradle/gradle-build-action@v3
         env:
           USER: ${{ github.actor }}
@@ -69,18 +60,15 @@ jobs:
         with:
           arguments: bootBuildImage --imageName=${{ steps.dockerMetadata.outputs.tags }}
           build-root-directory: lapis2
-      -
-        name: Push Docker Image For Branch
+      - name: Push Docker Image For Branch
         run: docker push ${{ steps.dockerMetadata.outputs.tags }}
-      -
-        name: Build "public" Docker Image
+      - name: Build "public" Docker Image
         if: ${{ github.ref == 'refs/heads/public' }}
         uses: gradle/gradle-build-action@v3
         with:
           arguments: bootBuildImage --imageName=${{ env.DOCKER_IMAGE_NAME }}:public
           build-root-directory: lapis2
-      -
-        name: Push "public" Docker Image
+      - name: Push "public" Docker Image
         if: ${{ github.ref == 'refs/heads/public' }}
         run: docker push ${{ env.DOCKER_IMAGE_NAME }}:public
 
@@ -106,14 +94,33 @@ jobs:
           arguments: generateOpenApiDocs
           build-root-directory: lapis2
 
+      - name: Build OpenAPI Spec Protected
+        uses: gradle/gradle-build-action@v3
+        with:
+          arguments: generateOpenApiDocs -PopennessLevel=protected
+          build-root-directory: lapis2
+
+      - name: Cache .npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('siloLapisTests/**/package-lock.json') }}
+
       - name: Prepare Tests
-        run: |
-          cd siloLapisTests
-          npm ci
-          npm run generateLapisClient
+        run: npm ci
+        working-directory: siloLapisTests
+
+      - name: Generate Lapis Client
+        run: npm run generateLapisClient
+        working-directory: siloLapisTests
+
+      - name: Generate Lapis Client Protected
+        run: npm run generateLapisClientProtected
+        working-directory: siloLapisTests
 
       - name: Check Format
-        run: cd siloLapisTests && npm run check-format
+        run: npm run check-format
+        working-directory: siloLapisTests
 
       - name: Docker metadata
         id: dockerMetadata
@@ -151,7 +158,8 @@ jobs:
           cd lapis2
           mkdir p e2e-logs
           docker compose logs silo > e2e-logs/silo.log
-          docker compose logs lapis > e2e-logs/lapis.log
+          docker compose logs lapisOpen > e2e-logs/lapisOpen.log
+          docker compose logs lapisProtected > e2e-logs/lapisProtected.log
         env:
           SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
