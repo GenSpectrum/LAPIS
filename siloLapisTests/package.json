@@ -4,6 +4,7 @@
   "description": "End to end tests for LAPIS backed by SILO",
   "scripts": {
     "test": "mocha",
+    "test:compareToV1": "mocha --config .mocharc-lapisv1Comparison.json",
     "generateLapisClient": "npm run runOpenApiGenerator && npm run copyGeneratedFiles && npm run cleanUpGeneratedFiles",
     "runOpenApiGenerator": "openapi-generator-cli generate -i ../lapis2/lapis-v2-openapi.json -g typescript-fetch -o generated-sources --additional-properties=supportsES6=false",
     "copyGeneratedFiles": "cp generated-sources/index.ts generated-sources/runtime.ts test/lapisClient && cp -r generated-sources/apis generated-sources/models test/lapisClient",
@@ -14,13 +15,17 @@
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.9.0",
     "@types/chai": "^4.3.11",
+    "@types/lodash": "^4.14.202",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.19",
     "chai": "^4.3.10",
+    "dotenv": "^16.3.1",
+    "lodash": "^4.17.21",
     "mocha": "^10.3.0",
     "prettier": "^3.2.5",
     "request": "^2.88.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "zod": "^3.22.4"
   }
 }
