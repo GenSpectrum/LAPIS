@@ -41,39 +41,29 @@ class VariantQueryFacadeTest {
 
         val expectedResult =
             And(
-                And(
-                    And(
-                        And(
-                            And(
-                                And(
-                                    NucleotideSymbolEquals(null, 300, "G"),
-                                    Or(
-                                        NucleotideSymbolEquals(null, 400, "-"),
-                                        NucleotideSymbolEquals(null, 500, "B"),
-                                    ),
-                                ),
-                                Not(HasNucleotideMutation(null, 600)),
-                            ),
-                            Maybe(
-                                Or(
-                                    NucleotideSymbolEquals(null, 700, "B"),
-                                    NucleotideSymbolEquals(null, 800, "-"),
-                                ),
-                            ),
-                        ),
-                        NOf(
-                            3,
-                            matchExactly = false,
-                            listOf(
-                                NucleotideSymbolEquals(null, 123, "A"),
-                                NucleotideSymbolEquals(null, 234, "T"),
-                                NucleotideSymbolEquals(null, 345, "G"),
-                            ),
-                        ),
-                    ),
-                    PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
-                ),
                 PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
+                PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
+                NOf(
+                    3,
+                    matchExactly = false,
+                    listOf(
+                        NucleotideSymbolEquals(null, 123, "A"),
+                        NucleotideSymbolEquals(null, 234, "T"),
+                        NucleotideSymbolEquals(null, 345, "G"),
+                    ),
+                ),
+                Maybe(
+                    Or(
+                        NucleotideSymbolEquals(null, 800, "-"),
+                        NucleotideSymbolEquals(null, 700, "B"),
+                    ),
+                ),
+                Not(HasNucleotideMutation(null, 600)),
+                Or(
+                    NucleotideSymbolEquals(null, 500, "B"),
+                    NucleotideSymbolEquals(null, 400, "-"),
+                ),
+                NucleotideSymbolEquals(null, 300, "G"),
             )
 
         assertThat(result, equalTo(expectedResult))
@@ -105,8 +95,8 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            NucleotideSymbolEquals(null, 300, "G"),
             NucleotideSymbolEquals(null, 400, "-"),
+            NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -118,11 +108,9 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            And(
-                NucleotideSymbolEquals(null, 300, "G"),
-                NucleotideSymbolEquals(null, 400, "-"),
-            ),
             NucleotideSymbolEquals(null, 500, "B"),
+            NucleotideSymbolEquals(null, 400, "-"),
+            NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -144,8 +132,8 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = Or(
-            NucleotideSymbolEquals(null, 300, "G"),
             NucleotideSymbolEquals(null, 400, "-"),
+            NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
     }
@@ -157,11 +145,11 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            NucleotideSymbolEquals(null, 300, "C"),
             Or(
-                NucleotideSymbolEquals(null, 400, "A"),
                 NucleotideSymbolEquals(null, 500, "G"),
+                NucleotideSymbolEquals(null, 400, "A"),
             ),
+            NucleotideSymbolEquals(null, 300, "C"),
         )
         assertThat(result, equalTo(expectedResult))
     }

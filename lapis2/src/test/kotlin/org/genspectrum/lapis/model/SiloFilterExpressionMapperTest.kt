@@ -583,8 +583,8 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         And(
-                            NucleotideSymbolEquals(null, 300, "G"),
                             NucleotideSymbolEquals(null, 400, "A"),
+                            NucleotideSymbolEquals(null, 300, "G"),
                         ),
                     ),
                 ),
