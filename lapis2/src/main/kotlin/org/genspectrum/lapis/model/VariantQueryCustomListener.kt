@@ -71,8 +71,17 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
     }
 
     override fun exitAnd(ctx: AndContext?) {
-        val children = listOf(expressionStack.removeLast(), expressionStack.removeLast()).reversed()
-        expressionStack.addLast(And(children))
+        val lastChildren = when (val last = expressionStack.removeLast()) {
+            is And -> last.children
+            else -> listOf(last)
+        }
+
+        val secondLastChildren = when (val secondLast = expressionStack.removeLast()) {
+            is And -> secondLast.children
+            else -> listOf(secondLast)
+        }
+
+        expressionStack.addLast(And(lastChildren + secondLastChildren))
     }
 
     override fun exitNot(ctx: NotContext?) {
@@ -81,8 +90,17 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
     }
 
     override fun exitOr(ctx: OrContext?) {
-        val children = listOf(expressionStack.removeLast(), expressionStack.removeLast()).reversed()
-        expressionStack.addLast(Or(children))
+        val lastChildren = when (val last = expressionStack.removeLast()) {
+            is Or -> last.children
+            else -> listOf(last)
+        }
+
+        val secondLastChildren = when (val secondLast = expressionStack.removeLast()) {
+            is Or -> secondLast.children
+            else -> listOf(secondLast)
+        }
+
+        expressionStack.addLast(Or(lastChildren + secondLastChildren))
     }
 
     override fun exitMaybe(ctx: MaybeContext?) {
