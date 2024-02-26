@@ -5,6 +5,7 @@ import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpHeaders.RETRY_AFTER
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
@@ -85,7 +86,7 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleSiloUnavailableException(e: SiloUnavailableException): ErrorResponse {
         log.warn(e) { "Caught SiloUnavailableException: ${e.message}" }
 
-        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header("Retry-After", e.retryAfter) }
+        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header(RETRY_AFTER, e.retryAfter) }
     }
 
     private fun responseEntity(
