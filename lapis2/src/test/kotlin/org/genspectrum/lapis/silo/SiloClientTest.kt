@@ -12,6 +12,8 @@ import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
+import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +35,8 @@ class SiloClientTest {
 
     @Autowired
     private lateinit var underTest: SiloClient
+
+    private val someQuery = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
 
     @BeforeEach
     fun setupMockServer() {
@@ -257,9 +261,8 @@ class SiloClientTest {
                 .withBody("""{"unexpectedKey":  "some unexpected message"}"""),
         )
 
-        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery) }
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
         assertThat(exception.statusCode, equalTo(500))
         assertThat(
             exception.message,
@@ -276,9 +279,7 @@ class SiloClientTest {
                 .withBody("""{"error":  "Test Error", "message": "test message with details"}"""),
         )
 
-        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
-
-        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery) }
         assertThat(exception.statusCode, equalTo(432))
         assertThat(exception.message, equalTo("Error from SILO: test message with details"))
     }
@@ -292,10 +293,42 @@ class SiloClientTest {
                 .withBody("""{"unexpectedField":  "some message"}"""),
         )
 
-        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
-
-        val exception = assertThrows<RuntimeException> { underTest.sendQuery(query) }
+        val exception = assertThrows<RuntimeException> { underTest.sendQuery(someQuery) }
         assertThat(exception.message, containsString("value failed for JSON property"))
+    }
+
+    @Test
+    fun `GIVEN server returns 503 with Retry-After header THEN throws exception with retryAfter value`() {
+        val retryAfterValue = "60"
+        val errorMessage = "test message with details"
+
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(503)
+                .withHeader("Retry-After", retryAfterValue)
+                .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
+        )
+
+        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery) }
+
+        assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
+        assertThat(exception.retryAfter, `is`(retryAfterValue))
+    }
+
+    @Test
+    fun `GIVEN server returns 503 without Retry-After header THEN throws exception`() {
+        val errorMessage = "test message with details"
+
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(503)
+                .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
+        )
+
+        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery) }
+
+        assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
+        assertThat(exception.retryAfter, `is`(nullValue()))
     }
 
     private fun expectQueryRequestAndRespondWith(httpResponse: HttpResponse?) {

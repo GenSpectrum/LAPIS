@@ -9,6 +9,7 @@ import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SiloException
+import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
@@ -149,5 +152,30 @@ class ExceptionHandlerTest(
                     """,
                 ),
             )
+    }
+
+    @Test
+    fun `GIVEN throws SiloUnavailableException exception with retry-after value THEN sets Retry-After header`() {
+        val retryAfterValue = "60"
+        val detailMessage = "SomeMessage"
+        every { validControllerCall() } throws SiloUnavailableException(detailMessage, retryAfterValue)
+
+        mockMvc.perform(getSample(validRoute))
+            .andExpect(status().isServiceUnavailable)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(header().string("Retry-After", retryAfterValue))
+            .andExpect(jsonPath("$.error.detail").value(detailMessage))
+    }
+
+    @Test
+    fun `GIVEN throws SiloUnavailableException exception without retry-after value THEN does not set header`() {
+        val detailMessage = "SomeMessage"
+        every { validControllerCall() } throws SiloUnavailableException(detailMessage, null)
+
+        mockMvc.perform(getSample(validRoute))
+            .andExpect(status().isServiceUnavailable)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(header().doesNotExist("Retry-After"))
+            .andExpect(jsonPath("$.error.detail").value(detailMessage))
     }
 }

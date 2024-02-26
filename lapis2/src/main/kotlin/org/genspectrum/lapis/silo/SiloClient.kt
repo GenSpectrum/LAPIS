@@ -68,16 +68,24 @@ class SiloClient(
         }
 
         if (response.statusCode() != 200) {
-            val siloErrorResponse = try {
-                objectMapper.readValue<SiloErrorResponse>(response.body())
-            } catch (e: Exception) {
-                log.error { "Failed to deserialize error response from SILO: $e" }
+            val siloErrorResponse = tryToReadSiloError(response)
+
+            if (response.statusCode() == 503) {
+                val message = siloErrorResponse?.message ?: "Unknown reason."
+                throw SiloUnavailableException(
+                    "SILO is currently unavailable: $message",
+                    response.headers().firstValue("retry-after").orElse(null),
+                )
+            }
+
+            if (siloErrorResponse == null) {
                 throw SiloException(
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "Internal Server Error",
                     "Unexpected error from SILO: ${response.body()}",
                 )
             }
+
             throw SiloException(
                 response.statusCode(),
                 siloErrorResponse.error,
@@ -88,6 +96,14 @@ class SiloClient(
         addDataVersionToRequestScope(response)
         return response
     }
+
+    private fun tryToReadSiloError(response: HttpResponse<String>) =
+        try {
+            objectMapper.readValue<SiloErrorResponse>(response.body())
+        } catch (e: Exception) {
+            log.error { "Failed to deserialize error response from SILO: $e" }
+            null
+        }
 
     fun callInfo(): InfoData {
         log.info { "Calling SILO info" }
@@ -110,6 +126,8 @@ class SiloClient(
 }
 
 class SiloException(val statusCode: Int, val title: String, override val message: String) : Exception(message)
+
+class SiloUnavailableException(override val message: String, val retryAfter: String?) : Exception(message)
 
 data class SiloQueryResponse<ResponseType>(
     val queryResult: ResponseType,
