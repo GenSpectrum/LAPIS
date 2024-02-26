@@ -3,12 +3,14 @@ package org.genspectrum.lapis.controller
 import mu.KotlinLogging
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.silo.SiloException
+import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
+import org.springframework.http.ResponseEntity.BodyBuilder
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -78,25 +80,37 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         return responseEntity(HttpStatus.NOT_IMPLEMENTED, e.message)
     }
 
+    @ExceptionHandler(SiloUnavailableException::class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    fun handleSiloUnavailableException(e: SiloUnavailableException): ErrorResponse {
+        log.warn(e) { "Caught SiloUnavailableException: ${e.message}" }
+
+        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header("Retry-After", e.retryAfter) }
+    }
+
     private fun responseEntity(
         httpStatus: HttpStatus,
         detail: String?,
-    ) = responseEntity(httpStatus, httpStatus.reasonPhrase, detail)
+        alsoDoOnBuilder: BodyBuilder.() -> Unit = {},
+    ) = responseEntity(httpStatus, httpStatus.reasonPhrase, detail, alsoDoOnBuilder)
 
     private fun responseEntity(
         httpStatus: HttpStatusCode,
         title: String,
         detail: String?,
-    ) = responseEntity(httpStatus.value(), title, detail)
+        alsoDoOnBuilder: BodyBuilder.() -> Unit = {},
+    ) = responseEntity(httpStatus.value(), title, detail, alsoDoOnBuilder)
 
     private fun responseEntity(
         httpStatus: Int,
         title: String,
         detail: String?,
+        alsoDoOnBuilder: BodyBuilder.() -> Unit = {},
     ): ErrorResponse {
         return ResponseEntity
             .status(httpStatus)
             .contentType(MediaType.APPLICATION_JSON)
+            .also(alsoDoOnBuilder)
             .body(
                 LapisErrorResponse(
                     ProblemDetail.forStatus(httpStatus).also {
