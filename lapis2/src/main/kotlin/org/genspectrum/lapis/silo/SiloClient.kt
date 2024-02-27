@@ -46,6 +46,17 @@ class SiloClient(
         }
     }
 
+    fun callInfo(): InfoData {
+        log.info { "Calling SILO info" }
+
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder(URI("$siloUrl/info")).GET().build()
+
+        val response = send(client, request)
+
+        return InfoData(getDataVersion(response))
+    }
+
     private fun send(
         client: HttpClient,
         request: HttpRequest?,
@@ -104,17 +115,6 @@ class SiloClient(
             log.error { "Failed to deserialize error response from SILO: $e" }
             null
         }
-
-    fun callInfo(): InfoData {
-        log.info { "Calling SILO info" }
-
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder(URI("$siloUrl/info")).GET().build()
-
-        val response = send(client, request)
-
-        return InfoData(getDataVersion(response))
-    }
 
     private fun addDataVersionToRequestScope(response: HttpResponse<String>) {
         dataVersion.dataVersion = getDataVersion(response)
