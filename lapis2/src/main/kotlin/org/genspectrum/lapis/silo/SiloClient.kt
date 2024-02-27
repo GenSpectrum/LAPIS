@@ -3,6 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
+import org.genspectrum.lapis.logging.RequestIdContext
+import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER
 import org.genspectrum.lapis.response.InfoData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -24,19 +26,19 @@ class SiloClient(
     @Value("\${silo.url}") private val siloUrl: String,
     private val objectMapper: ObjectMapper,
     private val dataVersion: DataVersion,
+    private val requestIdContext: RequestIdContext,
 ) {
+    private val httpClient = HttpClient.newHttpClient()
+
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
         val queryJson = objectMapper.writeValueAsString(query)
 
         log.info { "Calling SILO: $queryJson" }
 
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder(URI("$siloUrl/query"))
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .POST(HttpRequest.BodyPublishers.ofString(queryJson))
-            .build()
-
-        val response = send(client, request)
+        val response = send(URI("$siloUrl/query")) {
+            it.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .POST(HttpRequest.BodyPublishers.ofString(queryJson))
+        }
 
         try {
             return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
@@ -49,20 +51,26 @@ class SiloClient(
     fun callInfo(): InfoData {
         log.info { "Calling SILO info" }
 
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder(URI("$siloUrl/info")).GET().build()
-
-        val response = send(client, request)
+        val response = send(URI("$siloUrl/info")) { it.GET() }
 
         return InfoData(getDataVersion(response))
     }
 
     private fun send(
-        client: HttpClient,
-        request: HttpRequest?,
+        uri: URI,
+        buildRequest: (HttpRequest.Builder) -> Unit,
     ): HttpResponse<String> {
+        val request = HttpRequest.newBuilder(uri)
+            .apply(buildRequest)
+            .apply {
+                if (requestIdContext.requestId != null) {
+                    header(REQUEST_ID_HEADER, requestIdContext.requestId)
+                }
+            }
+            .build()
+
         val response = try {
-            client.send(request, BodyHandlers.ofString())
+            httpClient.send(request, BodyHandlers.ofString())
         } catch (exception: Exception) {
             val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
             throw RuntimeException(message, exception)

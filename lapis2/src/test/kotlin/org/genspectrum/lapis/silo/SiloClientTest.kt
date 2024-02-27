@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
+import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
@@ -29,18 +30,21 @@ import org.springframework.boot.test.context.SpringBootTest
 
 private const val MOCK_SERVER_PORT = 1080
 
-@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
-class SiloClientTest {
-    private lateinit var mockServer: ClientAndServer
+private const val REQUEST_ID_VALUE = "someRequestId"
 
-    @Autowired
-    private lateinit var underTest: SiloClient
+@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
+class SiloClientTest(
+    @Autowired private val underTest: SiloClient,
+    @Autowired private val requestIdContext: RequestIdContext,
+) {
+    private lateinit var mockServer: ClientAndServer
 
     private val someQuery = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
 
     @BeforeEach
     fun setupMockServer() {
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
+        requestIdContext.requestId = REQUEST_ID_VALUE
     }
 
     @AfterEach
@@ -337,7 +341,8 @@ class SiloClientTest {
                 request()
                     .withMethod("POST")
                     .withPath("/query")
-                    .withContentType(MediaType.APPLICATION_JSON),
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withHeader("X-Request-Id", REQUEST_ID_VALUE),
             )
             .respond(httpResponse)
     }
