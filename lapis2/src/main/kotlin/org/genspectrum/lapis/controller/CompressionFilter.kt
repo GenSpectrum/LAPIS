@@ -9,17 +9,19 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
-import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
 import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.boot.web.servlet.server.Encoding
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.filter.OncePerRequestFilter
@@ -30,9 +32,23 @@ import java.util.zip.GZIPOutputStream
 
 private val log = KotlinLogging.logger {}
 
-enum class Compression(val value: String, val compressionOutputStreamFactory: (OutputStream) -> OutputStream) {
-    GZIP("gzip", ::LazyGzipOutputStream),
-    ZSTD("zstd", { ZstdOutputStream(it).apply { commitUnderlyingResponseToPreventContentLengthFromBeingSet() } }),
+enum class Compression(
+    val value: String,
+    val contentType: MediaType,
+    val compressionOutputStreamFactory: (OutputStream) -> OutputStream,
+) {
+    GZIP(
+        value = "gzip",
+        contentType = MediaType.parseMediaType("application/gzip"),
+        compressionOutputStreamFactory = ::LazyGzipOutputStream,
+    ),
+    ZSTD(
+        value = "zstd",
+        contentType = MediaType.parseMediaType("application/zstd"),
+        compressionOutputStreamFactory = {
+            ZstdOutputStream(it).apply { commitUnderlyingResponseToPreventContentLengthFromBeingSet() }
+        },
+    ),
     ;
 
     companion object {
@@ -78,7 +94,19 @@ fun ZstdOutputStream.commitUnderlyingResponseToPreventContentLengthFromBeingSet(
 
 @Component
 @RequestScope
-class RequestCompression(var compression: Compression? = null)
+class RequestCompression(var compressionSource: CompressionSource = CompressionSource.None)
+
+sealed interface CompressionSource {
+    data class RequestProperty(override var compression: Compression) : CompressionSource
+
+    data class AcceptEncodingHeader(override var compression: Compression) : CompressionSource
+
+    data object None : CompressionSource {
+        override val compression = null
+    }
+
+    val compression: Compression?
+}
 
 @Component
 @Order(COMPRESSION_FILTER_ORDER)
@@ -91,8 +119,8 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
     ) {
         val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
 
-        try {
-            validateCompressionProperty(reReadableRequest)
+        val compressionPropertyInRequest = try {
+            getValidatedCompressionProperty(reReadableRequest)
         } catch (e: UnknownCompressionFormatException) {
             response.status = HttpStatus.BAD_REQUEST.value()
             response.contentType = MediaType.APPLICATION_JSON_VALUE
@@ -110,19 +138,14 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
             return
         }
 
-        val requestWithContentEncoding = HeaderModifyingRequestWrapper(
-            reReadableRequest = reReadableRequest,
-            headerName = ACCEPT_ENCODING,
-            computeHeaderValueFromRequest = ::computeAcceptEncodingValueFromRequest,
-        )
-
         val maybeCompressingResponse = createMaybeCompressingResponse(
             response,
-            requestWithContentEncoding.getHeaders(ACCEPT_ENCODING),
+            reReadableRequest.getHeaders(ACCEPT_ENCODING),
+            compressionPropertyInRequest,
         )
 
         filterChain.doFilter(
-            requestWithContentEncoding,
+            reReadableRequest,
             maybeCompressingResponse,
         )
 
@@ -130,47 +153,73 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
         maybeCompressingResponse.outputStream.close()
     }
 
-    private fun validateCompressionProperty(reReadableRequest: CachedBodyHttpServletRequest) {
-        val compressionFormat = reReadableRequest.getStringField(COMPRESSION_PROPERTY) ?: return
+    private fun getValidatedCompressionProperty(reReadableRequest: CachedBodyHttpServletRequest): Compression? {
+        val compressionFormat = reReadableRequest.getStringField(COMPRESSION_PROPERTY) ?: return null
 
-        if (Compression.entries.toSet().none { it.value == compressionFormat }) {
-            throw UnknownCompressionFormatException(unknownFormatValue = compressionFormat)
-        }
+        return Compression.entries.toSet().find { it.value == compressionFormat }
+            ?: throw UnknownCompressionFormatException(unknownFormatValue = compressionFormat)
     }
 
     private fun createMaybeCompressingResponse(
         response: HttpServletResponse,
         acceptEncodingHeaders: Enumeration<String>?,
-    ) = when (val compression = Compression.fromHeaders(acceptEncodingHeaders)) {
-        null -> response
-        else -> {
-            requestCompression.compression = compression
-            CompressingResponse(response, compression)
+        compressionPropertyInRequest: Compression?,
+    ): HttpServletResponse {
+        if (compressionPropertyInRequest != null) {
+            log.info { "Compressing using $compressionPropertyInRequest from request property" }
+
+            requestCompression.compressionSource = CompressionSource.RequestProperty(compressionPropertyInRequest)
+            return CompressingResponse(
+                response,
+                compressionPropertyInRequest,
+                compressionPropertyInRequest.contentType.toString(),
+            )
         }
+
+        val compression = Compression.fromHeaders(acceptEncodingHeaders) ?: return response
+
+        log.info { "Compressing using $compression from $ACCEPT_ENCODING header" }
+
+        requestCompression.compressionSource = CompressionSource.AcceptEncodingHeader(compression)
+        return CompressingResponse(response, compression, contentType = null)
+            .apply {
+                setHeader(CONTENT_ENCODING, compression.value)
+            }
     }
 }
-
-private fun computeAcceptEncodingValueFromRequest(reReadableRequest: CachedBodyHttpServletRequest) =
-    when (reReadableRequest.getStringField(COMPRESSION_PROPERTY)) {
-        Compression.GZIP.value -> Compression.GZIP.value
-        Compression.ZSTD.value -> Compression.ZSTD.value
-        else -> null
-    }
 
 private class UnknownCompressionFormatException(val unknownFormatValue: String) : Exception()
 
 class CompressingResponse(
-    response: HttpServletResponse,
+    private val response: HttpServletResponse,
     compression: Compression,
+    private val contentType: String?,
 ) : HttpServletResponse by response {
     init {
-        log.info { "Compressing using $compression" }
-        response.setHeader(CONTENT_ENCODING, compression.value)
+        if (contentType != null) {
+            response.setHeader(CONTENT_TYPE, contentType)
+        }
     }
 
     private val servletOutputStream = CompressingServletOutputStream(response.outputStream, compression)
 
     override fun getOutputStream() = servletOutputStream
+
+    override fun getHeaders(name: String?): MutableCollection<String> {
+        if (name == CONTENT_TYPE && contentType != null) {
+            return mutableListOf(contentType)
+        }
+
+        return response.getHeaders(name)
+    }
+
+    override fun getHeader(name: String): String? {
+        if (name == CONTENT_TYPE && contentType != null) {
+            return contentType
+        }
+
+        return response.getHeader(name)
+    }
 }
 
 class CompressingServletOutputStream(
@@ -199,15 +248,45 @@ class CompressingServletOutputStream(
 }
 
 @Component
+class CompressionAwareMappingJackson2HttpMessageConverter(
+    objectMapper: ObjectMapper,
+    private val requestCompression: RequestCompression,
+) : MappingJackson2HttpMessageConverter(objectMapper) {
+    override fun canWrite(mediaType: MediaType?): Boolean {
+        if (requestCompression.compressionSource.compression?.contentType?.isCompatibleWith(mediaType) == true) {
+            return true
+        }
+
+        return super.canWrite(mediaType)
+    }
+
+    override fun addDefaultHeaders(
+        headers: HttpHeaders,
+        value: Any,
+        contentType: MediaType?,
+    ) {
+        val compressionSource = requestCompression.compressionSource
+        if (
+            compressionSource is CompressionSource.RequestProperty &&
+            compressionSource.compression.contentType != contentType
+        ) {
+            headers.set(CONTENT_ENCODING, compressionSource.compression.value)
+        }
+
+        super.addDefaultHeaders(headers, value, contentType)
+    }
+}
+
+@Component
 class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
     environment: Environment,
-    val requestCompression: RequestCompression,
+    private val requestCompression: RequestCompression,
 ) : StringHttpMessageConverter(getCharsetFromEnvironment(environment)) {
     override fun getContentLength(
         str: String,
         contentType: MediaType?,
     ): Long? {
-        return when (requestCompression.compression) {
+        return when (requestCompression.compressionSource.compression) {
             null -> super.getContentLength(str, contentType)
             else -> null
         }

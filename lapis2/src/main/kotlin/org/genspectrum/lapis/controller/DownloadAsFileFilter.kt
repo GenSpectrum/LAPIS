@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
@@ -42,8 +44,8 @@ class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequ
         }
 
         val fileEnding = when (request.getHeader(ACCEPT)) {
-            TEXT_CSV_HEADER -> "csv"
-            TEXT_TSV_HEADER -> "tsv"
+            TEXT_CSV -> "csv"
+            TEXT_TSV -> "tsv"
             else -> when (matchingRoute?.servesFasta) {
                 true -> "fasta"
                 else -> "json"

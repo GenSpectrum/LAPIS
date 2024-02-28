@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -27,8 +29,8 @@ data class MockDataCollection(
     enum class DataFormat(val fileFormat: String, val acceptHeader: String) {
         PLAIN_JSON("json", APPLICATION_JSON_VALUE),
         NESTED_JSON("json", APPLICATION_JSON_VALUE),
-        CSV("csv", TEXT_CSV_HEADER),
-        TSV("tsv", TEXT_TSV_HEADER),
+        CSV("csv", TEXT_CSV),
+        TSV("tsv", TEXT_TSV),
     }
 
     companion object {

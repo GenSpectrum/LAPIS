@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, expectIsZstdEncoded } from './common';
+import { basePath, expectIsGzipEncoded, expectIsZstdEncoded } from './common';
 
 const routes = [
   { pathSegment: '/aggregated', servesFasta: false, expectedDownloadFilename: 'aggregated.json' },
@@ -45,12 +45,12 @@ describe('All endpoints', () => {
   for (const route of routes) {
     const url = `${basePath}/sample${route.pathSegment}`;
 
-    function get(params?: URLSearchParams) {
+    function get(params?: URLSearchParams, requestInit?: RequestInit) {
       if (params === undefined) {
-        return fetch(url);
+        return fetch(url, requestInit);
       }
 
-      return fetch(url + '?' + params.toString());
+      return fetch(url + '?' + params.toString(), requestInit);
     }
 
     describe(`(${route.pathSegment})`, () => {
@@ -72,22 +72,54 @@ describe('All endpoints', () => {
         expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
       });
 
-      it('should return zstd compressed data', async () => {
+      it('should return zstd compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'zstd' });
 
         const response = await get(urlParams);
 
         expect(response.status).equals(200);
+        expect(response.headers.get('content-type')).equals('application/zstd');
+        expect(response.headers.get('content-encoding')).does.not.exist;
+        expectIsZstdEncoded(await response.arrayBuffer());
+      });
+
+      it('should return zstd compressed data when accepting compression in header', async () => {
+        const urlParams = new URLSearchParams();
+
+        const response = await get(urlParams, { headers: { 'Accept-Encoding': 'zstd' } });
+
+        expect(response.status).equals(200);
+        if (route.servesFasta) {
+          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
+        } else {
+          expect(response.headers.get('content-type')).equals('application/json');
+        }
         expect(response.headers.get('content-encoding')).equals('zstd');
         expectIsZstdEncoded(await response.arrayBuffer());
       });
 
-      it('should return gzip compressed data', async () => {
+      it('should return gzip compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'gzip' });
 
         const response = await get(urlParams);
 
         expect(response.status).equals(200);
+        expect(response.headers.get('content-type')).equals('application/gzip');
+        expect(response.headers.get('content-encoding')).does.not.exist;
+        expectIsGzipEncoded(await response.arrayBuffer());
+      });
+
+      it('should return gzip compressed data when accepting compression in header', async () => {
+        const urlParams = new URLSearchParams();
+
+        const response = await get(urlParams, { headers: { 'Accept-Encoding': 'gzip' } });
+
+        expect(response.status).equals(200);
+        if (route.servesFasta) {
+          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
+        } else {
+          expect(response.headers.get('content-type')).equals('application/json');
+        }
         expect(response.headers.get('content-encoding')).equals('gzip');
 
         if (route.servesFasta) {

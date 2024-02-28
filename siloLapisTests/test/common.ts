@@ -61,3 +61,9 @@ export function expectIsZstdEncoded(arrayBuffer: ArrayBuffer) {
 
   expect([...first4Bytes]).deep.equals([Number('0x28'), Number('0xb5'), Number('0x2f'), Number('0xfd')]);
 }
+
+export function expectIsGzipEncoded(arrayBuffer: ArrayBuffer) {
+  const first2Bytes = new Uint8Array(arrayBuffer).slice(0, 2);
+
+  expect([...first2Bytes]).deep.equals([Number('0x1f'), Number('0x8b')]);
+}

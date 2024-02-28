@@ -2,6 +2,7 @@ package org.genspectrum.lapis.request
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.LapisErrorResponse
+import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisResponse
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
@@ -28,8 +29,6 @@ data class LapisInfo(
     var requestId: String? = null,
 )
 
-const val LAPIS_DATA_VERSION_HEADER = "Lapis-Data-Version"
-
 @ControllerAdvice
 class ResponseBodyAdviceDataVersion(
     private val dataVersion: DataVersion,
@@ -43,7 +42,7 @@ class ResponseBodyAdviceDataVersion(
         request: ServerHttpRequest,
         response: ServerHttpResponse,
     ): Any? {
-        response.headers.add(LAPIS_DATA_VERSION_HEADER, dataVersion.dataVersion)
+        response.headers.add(LAPIS_DATA_VERSION, dataVersion.dataVersion)
 
         val isDownload = response.headers.getFirst(HttpHeaders.CONTENT_DISPOSITION)?.startsWith("attachment") ?: false
 

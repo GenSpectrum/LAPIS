@@ -4,6 +4,9 @@ import com.github.luben.zstd.ZstdInputStream
 import com.jayway.jsonpath.JsonPath
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
@@ -74,7 +77,12 @@ class LapisControllerCompressionTest(
             .andExpect(status().isOk)
             .andExpect(content().contentType(requestsScenario.expectedContentType))
             .andExpect(header().doesNotExist(CONTENT_LENGTH))
-            .andExpect(header().string(CONTENT_ENCODING, requestsScenario.compressionFormat))
+            .andExpect(
+                when (requestsScenario.expectedContentEncoding) {
+                    null -> header().doesNotExist(CONTENT_ENCODING)
+                    else -> header().string(CONTENT_ENCODING, requestsScenario.expectedContentEncoding)
+                },
+            )
             .andReturn()
 
         val compressionFormat = requestsScenario.compressionFormat
@@ -94,6 +102,27 @@ class LapisControllerCompressionTest(
 
         val response = mockMvc.perform(getSample("${AGGREGATED.pathSegment}?compression=$compressionFormat"))
             .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(header().string(CONTENT_ENCODING, compressionFormat))
+            .andReturn()
+
+        val decompressedContent = decompressContent(response, compressionFormat)
+
+        val errorDetail = JsonPath.read<String>(decompressedContent, "$.error.detail")
+        assertThat(errorDetail, `is`(errorMessage))
+    }
+
+    @ParameterizedTest
+    @MethodSource("getCompressionFormats")
+    fun `GIVEN model throws bad request WHEN accepting compressed data THEN it should return compressed error`(
+        compressionFormat: String,
+    ) {
+        val errorMessage = "test message"
+        every { siloQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
+
+        val response = mockMvc.perform(getSample(AGGREGATED.pathSegment).header(ACCEPT_ENCODING, compressionFormat))
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(APPLICATION_JSON))
             .andExpect(header().string(CONTENT_ENCODING, compressionFormat))
             .andReturn()
 
@@ -138,26 +167,22 @@ class LapisControllerCompressionTest(
                         endpoint = it,
                         dataFormat = MockDataCollection.DataFormat.CSV,
                         compressionFormat = "gzip",
-                        expectedContentType = "$TEXT_CSV_HEADER;charset=UTF-8",
                     ) +
                         getRequests(
                             endpoint = it,
                             dataFormat = MockDataCollection.DataFormat.CSV,
                             compressionFormat = "zstd",
-                            expectedContentType = "$TEXT_CSV_HEADER;charset=UTF-8",
                         )
                 } +
                 getRequests(
                     AGGREGATED,
                     dataFormat = MockDataCollection.DataFormat.NESTED_JSON,
                     compressionFormat = "gzip",
-                    expectedContentType = APPLICATION_JSON_VALUE,
                 ) +
                 getRequests(
                     AGGREGATED,
                     dataFormat = MockDataCollection.DataFormat.TSV,
                     compressionFormat = "zstd",
-                    expectedContentType = "$TEXT_TSV_HEADER;charset=UTF-8",
                 ) +
                 listOf(
                     "${UNALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
@@ -177,6 +202,7 @@ data class RequestScenario(
     val request: MockHttpServletRequestBuilder,
     val compressionFormat: String,
     val expectedContentType: String,
+    val expectedContentEncoding: String?,
 ) {
     override fun toString() = "$callDescription returns $compressionFormat compressed data"
 }
@@ -185,14 +211,12 @@ fun getRequests(
     endpoint: SampleRoute,
     dataFormat: MockDataCollection.DataFormat,
     compressionFormat: String,
-    expectedContentType: String,
-) = getRequests(endpoint.pathSegment, dataFormat, compressionFormat, expectedContentType)
+) = getRequests(endpoint.pathSegment, dataFormat, compressionFormat)
 
 fun getRequests(
     endpoint: String,
     dataFormat: MockDataCollection.DataFormat,
     compressionFormat: String,
-    expectedContentType: String,
 ) = listOf(
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with request parameter",
@@ -201,7 +225,8 @@ fun getRequests(
             "$endpoint?country=Switzerland&dataFormat=$dataFormat&compression=$compressionFormat",
         ),
         compressionFormat = compressionFormat,
-        expectedContentType = expectedContentType,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
     ),
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with accept header",
@@ -209,7 +234,8 @@ fun getRequests(
         request = getSample("$endpoint?country=Switzerland&dataFormat=$dataFormat")
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = expectedContentType,
+        expectedContentType = getContentTypeForDataFormat(dataFormat),
+        expectedContentEncoding = compressionFormat,
     ),
     RequestScenario(
         callDescription = "POST $endpoint as $dataFormat with request parameter",
@@ -220,7 +246,8 @@ fun getRequests(
             )
             .contentType(APPLICATION_JSON),
         compressionFormat = compressionFormat,
-        expectedContentType = expectedContentType,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
     ),
     RequestScenario(
         callDescription = "POST $endpoint as $dataFormat with accept header",
@@ -230,7 +257,8 @@ fun getRequests(
             .contentType(APPLICATION_JSON)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = expectedContentType,
+        expectedContentType = getContentTypeForDataFormat(dataFormat),
+        expectedContentEncoding = compressionFormat,
     ),
 )
 
@@ -243,7 +271,8 @@ private fun getFastaRequests(
         mockData = MockDataForEndpoints.fastaMockData,
         request = getSample("$endpoint?country=Switzerland&compression=$compressionFormat"),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA_HEADER;charset=UTF-8",
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
     ),
     RequestScenario(
         callDescription = "GET $endpoint with accept header",
@@ -251,7 +280,8 @@ private fun getFastaRequests(
         request = getSample("$endpoint?country=Switzerland")
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA_HEADER;charset=UTF-8",
+        expectedContentType = "$TEXT_X_FASTA;charset=UTF-8",
+        expectedContentEncoding = compressionFormat,
     ),
     RequestScenario(
         callDescription = "POST $endpoint with request parameter",
@@ -260,7 +290,8 @@ private fun getFastaRequests(
             .content("""{"country": "Switzerland", "compression": "$compressionFormat"}""")
             .contentType(APPLICATION_JSON),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA_HEADER;charset=UTF-8",
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
     ),
     RequestScenario(
         callDescription = "POST $endpoint with accept header",
@@ -270,6 +301,22 @@ private fun getFastaRequests(
             .contentType(APPLICATION_JSON)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA_HEADER;charset=UTF-8",
+        expectedContentType = "$TEXT_X_FASTA;charset=UTF-8",
+        expectedContentEncoding = compressionFormat,
     ),
 )
+
+private fun getContentTypeForCompressionFormat(compressionFormat: String) =
+    when (compressionFormat) {
+        "gzip" -> "application/gzip"
+        "zstd" -> "application/zstd"
+        else -> throw Exception("Test issue: unknown compression format $compressionFormat")
+    }
+
+private fun getContentTypeForDataFormat(dataFormat: MockDataCollection.DataFormat) =
+    when (dataFormat) {
+        MockDataCollection.DataFormat.PLAIN_JSON -> APPLICATION_JSON_VALUE
+        MockDataCollection.DataFormat.NESTED_JSON -> APPLICATION_JSON_VALUE
+        MockDataCollection.DataFormat.CSV -> "$TEXT_CSV;charset=UTF-8"
+        MockDataCollection.DataFormat.TSV -> "$TEXT_TSV;charset=UTF-8"
+    }
