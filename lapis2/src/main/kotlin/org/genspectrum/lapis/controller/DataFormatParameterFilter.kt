@@ -14,10 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 const val HEADERS_ACCEPT_HEADER_PARAMETER = "headers"
 
-const val TEXT_CSV_HEADER = "text/csv"
-const val TEXT_CSV_WITHOUT_HEADERS_HEADER = "text/csv;$HEADERS_ACCEPT_HEADER_PARAMETER=false"
-const val TEXT_TSV_HEADER = "text/tab-separated-values"
-
 object DataFormat {
     const val JSON = "JSON"
     const val CSV = "CSV"
@@ -47,9 +43,9 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
 
     private fun findAcceptHeaderOverwriteValue(reReadableRequest: CachedBodyHttpServletRequest) =
         when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
-            DataFormat.CSV -> TEXT_CSV_HEADER
-            DataFormat.CSV_WITHOUT_HEADERS -> TEXT_CSV_WITHOUT_HEADERS_HEADER
-            DataFormat.TSV -> TEXT_TSV_HEADER
+            DataFormat.CSV -> LapisMediaType.TEXT_CSV
+            DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
+            DataFormat.TSV -> LapisMediaType.TEXT_TSV
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
             else -> null
         }

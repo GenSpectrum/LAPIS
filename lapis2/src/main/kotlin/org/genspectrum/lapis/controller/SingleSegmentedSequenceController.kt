@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
@@ -44,7 +45,7 @@ class SingleSegmentedSequenceController(
     private val requestContext: RequestContext,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
-    @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
+    @GetMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequences(
         @PrimitiveFieldFilters
@@ -92,7 +93,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
+    @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA])
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
@@ -108,7 +109,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @GetMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
+    @GetMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA])
     @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
     fun getUnalignedNucleotideSequences(
         @PrimitiveFieldFilters
@@ -156,7 +157,7 @@ class SingleSegmentedSequenceController(
         )
     }
 
-    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_HEADER])
+    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA])
     @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))

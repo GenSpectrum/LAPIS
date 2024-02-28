@@ -2,6 +2,9 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
 import org.junit.jupiter.api.BeforeEach
@@ -169,9 +172,9 @@ class LapisControllerCsvTest(
 
         private fun getAcceptHeaderFor(dataFormat: String) =
             when (dataFormat) {
-                "csv" -> TEXT_CSV_HEADER
-                "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS_HEADER
-                "tsv" -> TEXT_TSV_HEADER
+                "csv" -> TEXT_CSV
+                "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS
+                "tsv" -> TEXT_TSV
                 "json" -> MediaType.APPLICATION_JSON_VALUE
                 else -> throw IllegalArgumentException("Unknown data format: $dataFormat")
             }

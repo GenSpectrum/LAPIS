@@ -3,7 +3,7 @@ package org.genspectrum.lapis.logging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER
+import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.slf4j.MDC
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -28,11 +28,11 @@ class RequestIdFilter(private val requestIdContext: RequestIdContext) : OncePerR
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val requestId = request.getHeader(REQUEST_ID_HEADER) ?: UUID.randomUUID().toString()
+        val requestId = request.getHeader(REQUEST_ID) ?: UUID.randomUUID().toString()
 
         MDC.put(REQUEST_ID_MDC_KEY, requestId)
         requestIdContext.requestId = requestId
-        response.addHeader(REQUEST_ID_HEADER, requestId)
+        response.addHeader(REQUEST_ID, requestId)
 
         try {
             filterChain.doFilter(request, response)

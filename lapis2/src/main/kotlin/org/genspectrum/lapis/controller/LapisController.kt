@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.controller.Delimiter.COMMA
 import org.genspectrum.lapis.controller.Delimiter.TAB
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
@@ -67,8 +70,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val TEXT_X_FASTA_HEADER = "text/x-fasta"
-
 @RestController
 @RequestMapping("/sample")
 class LapisController(
@@ -128,7 +129,7 @@ class LapisController(
         return LapisResponse(siloQueryModel.getAggregated(request))
     }
 
-    @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "getAggregatedAsCsv",
@@ -182,7 +183,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getAggregated)
     }
 
-    @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "getAggregatedAsTsv",
@@ -251,7 +252,7 @@ class LapisController(
         return LapisResponse(siloQueryModel.getAggregated(request))
     }
 
-    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "postAggregatedAsCsv",
@@ -266,7 +267,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getAggregated)
     }
 
-    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "postAggregatedAsTsv",
@@ -332,7 +333,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "getNucleotideMutationsAsCsv",
@@ -387,7 +388,7 @@ class LapisController(
         )
     }
 
-    @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "getNucleotideMutationsAsTsv",
@@ -453,7 +454,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideMutationsAsCsv",
@@ -473,7 +474,7 @@ class LapisController(
         )
     }
 
-    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideMutationsAsTsv",
@@ -540,7 +541,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "getAminoAcidMutationsAsCsv",
@@ -595,7 +596,7 @@ class LapisController(
         )
     }
 
-    @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "getAminoAcidMutationsAsTsv",
@@ -666,7 +667,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidMutationsAsCsv",
@@ -688,7 +689,7 @@ class LapisController(
         )
     }
 
-    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidMutationsAsCsv",
@@ -760,7 +761,7 @@ class LapisController(
         return LapisResponse(siloQueryModel.getDetails(request))
     }
 
-    @GetMapping(DETAILS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(DETAILS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         operationId = "getDetailsAsCsv",
         responses = [ApiResponse(responseCode = "200")],
@@ -810,7 +811,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getDetails)
     }
 
-    @GetMapping(DETAILS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(DETAILS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "getDetailsAsTsv",
@@ -876,7 +877,7 @@ class LapisController(
         return LapisResponse(siloQueryModel.getDetails(request))
     }
 
-    @PostMapping(DETAILS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(DETAILS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "postDetailsAsCsv",
@@ -891,7 +892,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getDetails)
     }
 
-    @PostMapping(DETAILS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(DETAILS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "postDetailsAsTsv",
@@ -954,7 +955,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "getNucleotideInsertionsAsCsv",
@@ -1006,7 +1007,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getNucleotideInsertions)
     }
 
-    @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "getNucleotideInsertionsAsTsv",
@@ -1074,7 +1075,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideInsertionsAsCsv",
@@ -1091,7 +1092,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getNucleotideInsertions)
     }
 
-    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideInsertionsAsTsv",
@@ -1156,7 +1157,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "getAminoAcidInsertionsAsCsv",
@@ -1208,7 +1209,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "getAminoAcidInsertionsAsTsv",
@@ -1276,7 +1277,7 @@ class LapisController(
         return LapisResponse(result)
     }
 
-    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV_HEADER])
+    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV])
     @Operation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidInsertionsAsCsv",
@@ -1293,7 +1294,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, COMMA, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV_HEADER])
+    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV])
     @Operation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidInsertionsAsTsv",
@@ -1310,7 +1311,7 @@ class LapisController(
         return getResponseAsCsv(request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_HEADER])
+    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA])
     @LapisAlignedAminoAcidSequenceResponse
     fun getAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)
@@ -1357,7 +1358,7 @@ class LapisController(
         return siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
     }
 
-    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_HEADER])
+    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA])
     @LapisAlignedAminoAcidSequenceResponse
     fun postAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)
@@ -1401,8 +1402,8 @@ class LapisController(
     ): String? {
         val targetMediaType = MediaType.valueOf(
             when (delimiter) {
-                COMMA -> TEXT_CSV_HEADER
-                TAB -> TEXT_TSV_HEADER
+                COMMA -> TEXT_CSV
+                TAB -> TEXT_TSV
             },
         )
         return acceptHeader.find { it.includes(targetMediaType) }

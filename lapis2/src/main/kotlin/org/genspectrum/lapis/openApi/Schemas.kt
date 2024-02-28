@@ -21,12 +21,13 @@ import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
+import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
+import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.request.LAPIS_DATA_VERSION_HEADER
 import org.springframework.core.annotation.AliasFor
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
@@ -71,9 +72,8 @@ const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
 const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
     "Same as the value returned in the info object in the response body."
 const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
-    "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION_HEADER'."
+    "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION'."
 
-const val REQUEST_ID_HEADER = "X-Request-ID"
 const val REQUEST_ID_HEADER_DESCRIPTION = """
 A UUID that uniquely identifies the request for tracing purposes.
 If none if provided in the request, LAPIS will generate one.
@@ -103,12 +103,12 @@ the other also grants access to detailed data.
     description = "OK",
     headers = [
         Header(
-            name = LAPIS_DATA_VERSION_HEADER,
+            name = LAPIS_DATA_VERSION,
             description = LAPIS_DATA_VERSION_HEADER_DESCRIPTION,
             schema = Schema(type = "string"),
         ),
         Header(
-            name = REQUEST_ID_HEADER,
+            name = REQUEST_ID,
             description = REQUEST_ID_HEADER_DESCRIPTION,
             schema = Schema(type = "string"),
         ),

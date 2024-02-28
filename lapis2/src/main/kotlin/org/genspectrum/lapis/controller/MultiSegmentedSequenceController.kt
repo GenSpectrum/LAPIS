@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
@@ -44,7 +45,7 @@ class MultiSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
 ) {
-    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
+    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -95,7 +96,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
+    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -114,7 +115,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
+    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun getUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -165,7 +166,7 @@ class MultiSegmentedSequenceController(
         )
     }
 
-    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_HEADER])
+    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
