@@ -3,8 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
+import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.logging.RequestIdContext
-import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER
 import org.genspectrum.lapis.response.InfoData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -64,7 +64,7 @@ class SiloClient(
             .apply(buildRequest)
             .apply {
                 if (requestIdContext.requestId != null) {
-                    header(REQUEST_ID_HEADER, requestIdContext.requestId)
+                    header(REQUEST_ID, requestIdContext.requestId)
                 }
             }
             .build()
