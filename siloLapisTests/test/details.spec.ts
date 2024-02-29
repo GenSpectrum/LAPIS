@@ -192,6 +192,7 @@ Solothurn	B.1	key_1002052
 
     const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
 
+    expect(result.headers.get('content-type')).equals('text/plain');
     expect(await result.text()).to.be.equal(
       String.raw`
 key_1001493
