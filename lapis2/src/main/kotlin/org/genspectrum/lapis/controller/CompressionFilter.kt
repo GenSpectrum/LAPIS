@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.genspectrum.lapis.util.ResponseWithContentType
 import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.boot.web.servlet.server.Encoding
 import org.springframework.core.annotation.Order
@@ -16,7 +17,6 @@ import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
@@ -170,9 +170,8 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
 
             requestCompression.compressionSource = CompressionSource.RequestProperty(compressionPropertyInRequest)
             return CompressingResponse(
-                response,
+                ResponseWithContentType(response, compressionPropertyInRequest.contentType.toString()),
                 compressionPropertyInRequest,
-                compressionPropertyInRequest.contentType.toString(),
             )
         }
 
@@ -181,7 +180,7 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
         log.info { "Compressing using $compression from $ACCEPT_ENCODING header" }
 
         requestCompression.compressionSource = CompressionSource.AcceptEncodingHeader(compression)
-        return CompressingResponse(response, compression, contentType = null)
+        return CompressingResponse(response, compression)
             .apply {
                 setHeader(CONTENT_ENCODING, compression.value)
             }
@@ -193,33 +192,10 @@ private class UnknownCompressionFormatException(val unknownFormatValue: String) 
 class CompressingResponse(
     private val response: HttpServletResponse,
     compression: Compression,
-    private val contentType: String?,
 ) : HttpServletResponse by response {
-    init {
-        if (contentType != null) {
-            response.setHeader(CONTENT_TYPE, contentType)
-        }
-    }
-
     private val servletOutputStream = CompressingServletOutputStream(response.outputStream, compression)
 
     override fun getOutputStream() = servletOutputStream
-
-    override fun getHeaders(name: String?): MutableCollection<String> {
-        if (name == CONTENT_TYPE && contentType != null) {
-            return mutableListOf(contentType)
-        }
-
-        return response.getHeaders(name)
-    }
-
-    override fun getHeader(name: String): String? {
-        if (name == CONTENT_TYPE && contentType != null) {
-            return contentType
-        }
-
-        return response.getHeader(name)
-    }
 }
 
 class CompressingServletOutputStream(

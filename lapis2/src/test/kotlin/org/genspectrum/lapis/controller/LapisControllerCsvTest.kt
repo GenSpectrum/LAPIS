@@ -112,7 +112,7 @@ class LapisControllerCsvTest(
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;headers=false;charset=UTF-8"))
+            .andExpect(header().string("Content-Type", "text/plain"))
             .andExpect(content().string(returnedCsvWithoutHeadersData(requestsScenario.mockDataCollection)))
     }
 
