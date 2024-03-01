@@ -111,6 +111,7 @@ private class ProtectedDataAuthorizationFilter(
         private val WHITELISTED_PATH_PREFIXES = listOf(
             "/swagger-ui",
             "/api-docs",
+            "/actuator",
             "/sample$DATABASE_CONFIG_ROUTE",
             "/sample$REFERENCE_GENOME_ROUTE",
         )

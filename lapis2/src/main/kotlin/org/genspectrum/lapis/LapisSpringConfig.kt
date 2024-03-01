@@ -20,12 +20,16 @@ import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
 
 @Configuration
+@EnableScheduling
+@EnableCaching
 class LapisSpringConfig {
     @Bean
     fun openAPI(

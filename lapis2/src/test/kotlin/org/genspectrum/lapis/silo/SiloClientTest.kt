@@ -8,6 +8,7 @@ import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
+import org.genspectrum.lapis.scheduler.DataVersionCacheInvalidator
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
@@ -19,8 +20,11 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockserver.client.MockServerClient
 import org.mockserver.integration.ClientAndServer
+import org.mockserver.matchers.Times
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpResponse.response
@@ -32,19 +36,30 @@ private const val MOCK_SERVER_PORT = 1080
 
 private const val REQUEST_ID_VALUE = "someRequestId"
 
+private const val DATA_VERSION_HEADER = "data-version"
+
 @SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
 class SiloClientTest(
     @Autowired private val underTest: SiloClient,
     @Autowired private val requestIdContext: RequestIdContext,
+    @Autowired private val dataVersion: DataVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
-    private val someQuery = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+    private lateinit var someQuery: SiloQuery<*>
+
+    private var counter = 0
 
     @BeforeEach
-    fun setupMockServer() {
+    fun setup() {
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
         requestIdContext.requestId = REQUEST_ID_VALUE
+
+        someQuery = SiloQuery(
+            SiloAction.aggregated(),
+            StringEquals("theColumn", "a value that is difference for each test method: $counter"),
+        )
+        counter++
     }
 
     @AfterEach
@@ -335,15 +350,186 @@ class SiloClientTest(
         assertThat(exception.retryAfter, `is`(nullValue()))
     }
 
-    private fun expectQueryRequestAndRespondWith(httpResponse: HttpResponse?) {
-        MockServerClient("localhost", MOCK_SERVER_PORT)
-            .`when`(
-                request()
-                    .withMethod("POST")
-                    .withPath("/query")
-                    .withContentType(MediaType.APPLICATION_JSON)
-                    .withHeader("X-Request-Id", REQUEST_ID_VALUE),
-            )
-            .respond(httpResponse)
+    @ParameterizedTest
+    @MethodSource("getQueriesThatShouldNotBeCached")
+    fun `GIVEN an action that should not be cached WHEN I send the same request twice THEN server is called twice`(
+        query: SiloQuery<*>,
+    ) {
+        val errorMessage = "make this fail so that we see a difference on the second call"
+
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withBody("""{"queryResult": []}"""),
+            Times.exactly(1),
+        )
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(500)
+                .withBody(errorMessage),
+            Times.exactly(1),
+        )
+
+        underTest.sendQuery(query)
+
+        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        assertThat(exception.message, containsString(errorMessage))
     }
+
+    @ParameterizedTest
+    @MethodSource("getQueriesThatShouldBeCached")
+    fun `GIVEN an action that should be cached WHEN I send the same request twice THEN second time is cached`(
+        query: SiloQuery<*>,
+    ) {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withBody("""{"queryResult": []}"""),
+            Times.once(),
+        )
+
+        val result1 = underTest.sendQuery(query)
+        val result2 = underTest.sendQuery(query)
+
+        assertThat(result1, `is`(result2))
+    }
+
+    @Test
+    fun `GIVEN an action that should be cached WHEN I send request twice THEN data version is populated`() {
+        val dataVersionValue = "someDataVersion"
+        expectInfoCallAndReturnDataVersion(dataVersionValue)
+
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withHeader(DATA_VERSION_HEADER, dataVersionValue)
+                .withBody("""{"queryResult": []}"""),
+            Times.once(),
+        )
+
+        val query = queriesThatShouldBeCached[0]
+
+        assertThat(dataVersion.dataVersion, `is`(nullValue()))
+        underTest.sendQuery(query)
+        assertThat(dataVersion.dataVersion, `is`(dataVersionValue))
+
+        dataVersion.dataVersion = null
+        underTest.sendQuery(query)
+        assertThat(dataVersion.dataVersion, `is`(dataVersionValue))
+    }
+
+    companion object {
+        @JvmStatic
+        val queriesThatShouldNotBeCached = listOf(
+            SiloQuery(SiloAction.aggregated(), True),
+            SiloQuery(SiloAction.details(), True),
+            SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, "sequenceName"), True),
+            SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, "sequenceName"), True),
+        )
+
+        @JvmStatic
+        val queriesThatShouldBeCached = listOf(
+            SiloQuery(SiloAction.mutations(), True),
+            SiloQuery(SiloAction.aminoAcidMutations(), True),
+            SiloQuery(SiloAction.nucleotideInsertions(), True),
+            SiloQuery(SiloAction.aminoAcidInsertions(), True),
+        )
+    }
+}
+
+@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
+class SiloClientAndCacheInvalidatorTest(
+    @Autowired private val siloClient: SiloClient,
+    @Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
+    @Autowired private val requestIdContext: RequestIdContext,
+    @Autowired private val dataVersion: DataVersion,
+) {
+    private lateinit var mockServer: ClientAndServer
+
+    val someQuery = SiloQuery(SiloAction.mutations(), True)
+    val anotherQuery = SiloQuery(SiloAction.aminoAcidMutations(), True)
+    val firstDataVersion = "1"
+    val secondDataVersion = "2"
+
+    @BeforeEach
+    fun setup() {
+        mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
+        requestIdContext.requestId = REQUEST_ID_VALUE
+    }
+
+    @AfterEach
+    fun stopServer() {
+        mockServer.stop()
+    }
+
+    @Test
+    fun `GIVEN there is a new data version WHEN the cache invalidator checks THEN the cache should be cleared`() {
+        expectInfoCallAndReturnDataVersion(firstDataVersion, Times.once())
+        dataVersionCacheInvalidator.invalidateSiloCache()
+
+        assertThatResultIsCachedOnSecondRequest()
+
+        expectInfoCallAndReturnDataVersion(secondDataVersion, Times.once())
+        dataVersionCacheInvalidator.invalidateSiloCache()
+
+        assertThatCacheIsNotHit()
+    }
+
+    private fun assertThatResultIsCachedOnSecondRequest() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withHeader(DATA_VERSION_HEADER, firstDataVersion)
+                .withBody("""{"queryResult": []}"""),
+            Times.once(),
+        )
+
+        siloClient.sendQuery(someQuery)
+        siloClient.sendQuery(someQuery)
+        assertThat(dataVersion.dataVersion, `is`(firstDataVersion))
+    }
+
+    private fun assertThatCacheIsNotHit() {
+        val errorMessage = "This error should appear"
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(500)
+                .withHeader(DATA_VERSION_HEADER, secondDataVersion)
+                .withBody(errorMessage),
+            Times.once(),
+        )
+
+        val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery) }
+        assertThat(exception.message, containsString(errorMessage))
+    }
+}
+
+private fun expectQueryRequestAndRespondWith(
+    httpResponse: HttpResponse,
+    times: Times = Times.unlimited(),
+) {
+    MockServerClient("localhost", MOCK_SERVER_PORT)
+        .`when`(
+            request()
+                .withMethod("POST")
+                .withPath("/query")
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withHeader("X-Request-Id", REQUEST_ID_VALUE),
+            times,
+        )
+        .respond(httpResponse)
+}
+
+private fun expectInfoCallAndReturnDataVersion(
+    dataVersion: String,
+    times: Times = Times.unlimited(),
+) {
+    MockServerClient("localhost", MOCK_SERVER_PORT)
+        .`when`(
+            request()
+                .withMethod("GET")
+                .withPath("/info"),
+            times,
+        )
+        .respond(response().withStatusCode(200).withHeader(DATA_VERSION_HEADER, dataVersion))
 }
