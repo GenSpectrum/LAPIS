@@ -7,10 +7,12 @@ import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -23,14 +25,34 @@ const val SILO_RESPONSE_MAX_LOG_LENGTH = 10_000
 
 @Component
 class SiloClient(
+    private val cachedSiloClient: CachedSiloClient,
+    private val dataVersion: DataVersion,
+) {
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
+        val result = cachedSiloClient.sendQuery(query)
+        dataVersion.dataVersion = result.dataVersion
+        return result.queryResult
+    }
+
+    fun callInfo(): InfoData {
+        val info = cachedSiloClient.callInfo()
+        dataVersion.dataVersion = info.dataVersion
+        return info
+    }
+}
+
+const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
+
+@Component
+class CachedSiloClient(
     @Value("\${silo.url}") private val siloUrl: String,
     private val objectMapper: ObjectMapper,
-    private val dataVersion: DataVersion,
     private val requestIdContext: RequestIdContext,
 ) {
     private val httpClient = HttpClient.newHttpClient()
 
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
+    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable")
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<ResponseType> {
         val queryJson = objectMapper.writeValueAsString(query)
 
         log.info { "Calling SILO: $queryJson" }
@@ -41,7 +63,10 @@ class SiloClient(
         }
 
         try {
-            return objectMapper.readValue(response.body(), query.action.typeReference).queryResult
+            return WithDataVersion(
+                queryResult = objectMapper.readValue(response.body(), query.action.typeReference).queryResult,
+                dataVersion = getDataVersion(response),
+            )
         } catch (exception: Exception) {
             val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
             throw RuntimeException(message, exception)
@@ -63,7 +88,7 @@ class SiloClient(
         val request = HttpRequest.newBuilder(uri)
             .apply(buildRequest)
             .apply {
-                if (requestIdContext.requestId != null) {
+                if (RequestContextHolder.getRequestAttributes() != null && requestIdContext.requestId != null) {
                     header(REQUEST_ID, requestIdContext.requestId)
                 }
             }
@@ -112,7 +137,6 @@ class SiloClient(
             )
         }
 
-        addDataVersionToRequestScope(response)
         return response
     }
 
@@ -124,10 +148,6 @@ class SiloClient(
             null
         }
 
-    private fun addDataVersionToRequestScope(response: HttpResponse<String>) {
-        dataVersion.dataVersion = getDataVersion(response)
-    }
-
     private fun getDataVersion(response: HttpResponse<String>): String {
         return response.headers().firstValue("data-version").orElse("")
     }
@@ -138,6 +158,11 @@ class SiloException(val statusCode: Int, val title: String, override val message
 class SiloUnavailableException(override val message: String, val retryAfter: String?) : Exception(message)
 
 data class SiloQueryResponse<ResponseType>(
+    val queryResult: ResponseType,
+)
+
+data class WithDataVersion<ResponseType>(
+    val dataVersion: String,
     val queryResult: ResponseType,
 )
 
