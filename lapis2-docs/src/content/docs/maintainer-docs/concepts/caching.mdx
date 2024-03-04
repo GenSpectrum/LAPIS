@@ -1,0 +1,17 @@
+---
+title: Caching
+description: LAPIS' caching concept
+---
+
+import CacheSizeEndpointLink from '../../../../components/CacheSizeEndpointLink.astro';
+
+LAPIS uses Spring Boot's caching capabilities to cache insertion and mutation queries.
+We decided to cache SILO actions that are relatively expensive to compute,
+but don't return much data (measured in size of the response body).
+
+At the time of writing, we think that aggregated queries are fast enough to not require caching.
+Details and FASTA actions are more expensive, but return potentially large amounts of data.
+
+LAPIS offers an endpoint to check the current cache size (in number of cached entries) at `/actuator/metrics/cache.size`:
+
+<CacheSizeEndpointLink />

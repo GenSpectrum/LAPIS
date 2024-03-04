@@ -87,6 +87,7 @@ const maintainerDocsPages = prependToRelativeUrl(
             ],
             '/references',
         ),
+        ...prependToRelativeUrl([{ title: 'Caching', relativeUrl: '/caching' }], '/concepts'),
         ...prependToRelativeUrl(
             [
                 { title: 'Start LAPIS and SILO', relativeUrl: '/start-lapis-and-silo' },
