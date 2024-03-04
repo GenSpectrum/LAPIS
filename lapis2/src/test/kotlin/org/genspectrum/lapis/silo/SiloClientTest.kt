@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.logging.RequestIdContext
+import org.genspectrum.lapis.request.Order
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.MutationData
@@ -416,6 +418,36 @@ class SiloClientTest(
         dataVersion.dataVersion = null
         underTest.sendQuery(query)
         assertThat(dataVersion.dataVersion, `is`(dataVersionValue))
+    }
+
+    @Test
+    fun `GIVEN a cacheable action with randomize=true THEN is not cached`() {
+        val errorMessage = "This error should appear"
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withBody("""{"queryResult": []}"""),
+            Times.once(),
+        )
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(500)
+                .withBody(errorMessage),
+            Times.exactly(1),
+        )
+
+        val orderByRandom = OrderByField(
+            ORDER_BY_RANDOM_FIELD_NAME,
+            Order.ASCENDING,
+        )
+        val query = SiloQuery(SiloAction.mutations(orderByFields = listOf(orderByRandom)), True)
+        assertThat(query.action.cacheable, `is`(true))
+
+        val result = underTest.sendQuery(query)
+        assertThat(result, hasSize(0))
+
+        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        assertThat(exception.message, containsString(errorMessage))
     }
 
     companion object {

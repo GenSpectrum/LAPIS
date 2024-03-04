@@ -201,4 +201,15 @@ key_1002052
     `.trim()
     );
   });
+
+  it('should order by random', async () => {
+    const result = await lapisClient.postDetails1({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random' }, { field: 'division' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division', undefined);
+  });
 });

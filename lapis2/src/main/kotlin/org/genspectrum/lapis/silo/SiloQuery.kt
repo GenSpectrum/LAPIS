@@ -30,7 +30,10 @@ interface CommonActionFields {
     val orderByFields: List<OrderByField>
     val limit: Int?
     val offset: Int?
+    val randomize: Boolean?
 }
+
+const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 
 sealed class SiloAction<ResponseType>(
     @JsonIgnore val typeReference: TypeReference<SiloQueryResponse<ResponseType>>,
@@ -42,7 +45,14 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<AggregationData>> = AggregatedAction(groupByFields, orderByFields, limit, offset)
+        ): SiloAction<List<AggregationData>> =
+            AggregatedAction(
+                groupByFields = groupByFields,
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
+            )
 
         fun mutations(
             minProportion: Double? = null,
@@ -51,10 +61,11 @@ sealed class SiloAction<ResponseType>(
             offset: Int? = null,
         ): SiloAction<List<MutationData>> =
             MutationsAction(
-                minProportion,
-                orderByFields,
-                limit,
-                offset,
+                minProportion = minProportion,
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
             )
 
         fun aminoAcidMutations(
@@ -64,10 +75,11 @@ sealed class SiloAction<ResponseType>(
             offset: Int? = null,
         ): SiloAction<List<MutationData>> =
             AminoAcidMutationsAction(
-                minProportion,
-                orderByFields,
-                limit,
-                offset,
+                minProportion = minProportion,
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
             )
 
         fun details(
@@ -75,19 +87,38 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<DetailsData>> = DetailsAction(fields, orderByFields, limit, offset)
+        ): SiloAction<List<DetailsData>> =
+            DetailsAction(
+                fields = fields,
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
+            )
 
         fun nucleotideInsertions(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<InsertionData>> = NucleotideInsertionsAction(orderByFields, limit, offset)
+        ): SiloAction<List<InsertionData>> =
+            NucleotideInsertionsAction(
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
+            )
 
         fun aminoAcidInsertions(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<InsertionData>> = AminoAcidInsertionsAction(orderByFields, limit, offset)
+        ): SiloAction<List<InsertionData>> =
+            AminoAcidInsertionsAction(
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
+            )
 
         fun genomicSequence(
             type: SequenceType,
@@ -95,13 +126,28 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<List<SequenceData>> = SequenceAction(orderByFields, limit, offset, type, sequenceName)
+        ): SiloAction<List<SequenceData>> =
+            SequenceAction(
+                type = type,
+                sequenceName = sequenceName,
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                limit = limit,
+                offset = offset,
+                randomize = getRandomize(orderByFields),
+            )
+
+        private fun getRandomize(orderByFields: List<OrderByField>) =
+            orderByFields.any { it.field == ORDER_BY_RANDOM_FIELD_NAME }
+
+        private fun getNonRandomizedOrderByFields(orderByFields: List<OrderByField>) =
+            orderByFields.filter { it.field != ORDER_BY_RANDOM_FIELD_NAME }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class AggregatedAction(
         val groupByFields: List<String>,
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Aggregated",
@@ -111,6 +157,7 @@ sealed class SiloAction<ResponseType>(
     private data class MutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Mutations",
@@ -120,6 +167,7 @@ sealed class SiloAction<ResponseType>(
     private data class AminoAcidMutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "AminoAcidMutations",
@@ -129,6 +177,7 @@ sealed class SiloAction<ResponseType>(
     private data class DetailsAction(
         val fields: List<String> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Details",
@@ -137,6 +186,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class NucleotideInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Insertions",
@@ -145,6 +195,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class AminoAcidInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "AminoAcidInsertions",
@@ -153,6 +204,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class SequenceAction(
         override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: SequenceType,

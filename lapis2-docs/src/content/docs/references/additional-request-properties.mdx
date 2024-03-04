@@ -30,6 +30,11 @@ POST /sample/aggregated
 }
 ```
 
+:::note
+You can also specify `random` as the field name to get the results in a random order.
+It will act as a tiebreaker if it is provided along with other `orderBy` fields.
+:::
+
 :::caution
 LAPIS will throw an error if you try to order by a field that is not in the response.
 :::
