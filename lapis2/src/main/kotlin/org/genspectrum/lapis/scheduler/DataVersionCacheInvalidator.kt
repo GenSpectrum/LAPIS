@@ -22,7 +22,12 @@ class DataVersionCacheInvalidator(
     fun invalidateSiloCache() {
         log.debug { "checking for data version change" }
 
-        val info = cachedSiloClient.callInfo()
+        val info = try {
+            cachedSiloClient.callInfo()
+        } catch (e: Exception) {
+            log.debug { "Failed to call info: $e" }
+            return
+        }
         if (info.dataVersion != currentlyCachedDataVersion) {
             log.info {
                 "Invalidating cache, old data version: $currentlyCachedDataVersion, " +

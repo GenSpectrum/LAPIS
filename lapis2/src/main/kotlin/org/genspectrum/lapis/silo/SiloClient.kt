@@ -51,7 +51,7 @@ class CachedSiloClient(
 ) {
     private val httpClient = HttpClient.newHttpClient()
 
-    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable")
+    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<ResponseType> {
         val queryJson = objectMapper.writeValueAsString(query)
 

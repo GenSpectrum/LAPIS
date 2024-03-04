@@ -2,6 +2,7 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.BooleanSchema
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.media.Schema
@@ -43,6 +44,7 @@ import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.COUNT_PROPERTY
+import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 
 fun buildOpenApiSchema(
     sequenceFilterFields: SequenceFilterFields,
@@ -90,7 +92,7 @@ fun buildOpenApiSchema(
                         getSequenceFiltersWithFormat(
                             databaseConfig,
                             sequenceFilterFields,
-                            fieldsEnum(databaseConfig.schema.metadata),
+                            detailsOrderByFieldsEnum(databaseConfig),
                         ),
                         DETAILS_FIELDS_DESCRIPTION,
                         databaseConfig.schema.metadata,
@@ -112,7 +114,7 @@ fun buildOpenApiSchema(
                         getSequenceFilters(
                             databaseConfig,
                             sequenceFilterFields,
-                            aminoAcidSequenceFieldsEnum(referenceGenomeSchema, databaseConfig),
+                            aminoAcidSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig),
                         ),
                     ),
                 )
@@ -122,7 +124,7 @@ fun buildOpenApiSchema(
                         getSequenceFilters(
                             databaseConfig,
                             sequenceFilterFields,
-                            nucleotideSequenceFieldsEnum(referenceGenomeSchema, databaseConfig),
+                            nucleotideSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig),
                         ),
                     ),
                 )
@@ -201,7 +203,7 @@ fun buildOpenApiSchema(
                     AGGREGATED_ORDER_BY_FIELDS_SCHEMA,
                     arraySchema(aggregatedOrderByFieldsEnum(databaseConfig)),
                 )
-                .addSchemas(DETAILS_ORDER_BY_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
+                .addSchemas(DETAILS_ORDER_BY_FIELDS_SCHEMA, arraySchema(detailsOrderByFieldsEnum(databaseConfig)))
                 .addSchemas(
                     MUTATIONS_ORDER_BY_FIELDS_SCHEMA,
                     arraySchema(mutationsOrderByFieldsEnum()),
@@ -212,11 +214,11 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(aminoAcidSequenceFieldsEnum(referenceGenomeSchema, databaseConfig)),
+                    arraySchema(aminoAcidSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig)),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(nucleotideSequenceFieldsEnum(referenceGenomeSchema, databaseConfig)),
+                    arraySchema(nucleotideSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig)),
                 )
                 .addSchemas(
                     SEGMENT_SCHEMA,
@@ -500,26 +502,33 @@ private fun fieldsArray(
 ) = arraySchema(fieldsEnum(databaseConfig, additionalFields))
 
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
-    fieldsEnum(databaseConfig.schema.metadata, listOf("count"))
+    orderByFieldsEnum(databaseConfig.schema.metadata, listOf("count"))
 
-private fun mutationsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("mutation", "count", "proportion"))
+private fun mutationsOrderByFieldsEnum() = orderByFieldsEnum(emptyList(), listOf("mutation", "count", "proportion"))
 
-private fun insertionsOrderByFieldsEnum() = fieldsEnum(emptyList(), listOf("insertion", "count"))
+private fun insertionsOrderByFieldsEnum() = orderByFieldsEnum(emptyList(), listOf("insertion", "count"))
 
-private fun aminoAcidSequenceFieldsEnum(
+private fun aminoAcidSequenceOrderByFieldsEnum(
     referenceGenomeSchema: ReferenceGenomeSchema,
     databaseConfig: DatabaseConfig,
-) = fieldsEnum(emptyList(), referenceGenomeSchema.genes.map { it.name } + databaseConfig.schema.primaryKey)
+) = orderByFieldsEnum(emptyList(), referenceGenomeSchema.genes.map { it.name } + databaseConfig.schema.primaryKey)
 
-private fun nucleotideSequenceFieldsEnum(
+private fun nucleotideSequenceOrderByFieldsEnum(
     referenceGenomeSchema: ReferenceGenomeSchema,
     databaseConfig: DatabaseConfig,
-) = fieldsEnum(
+) = orderByFieldsEnum(
     emptyList(),
     referenceGenomeSchema.nucleotideSequences.map {
         it.name
     } + databaseConfig.schema.primaryKey,
 )
+
+private fun detailsOrderByFieldsEnum(databaseConfig: DatabaseConfig) = orderByFieldsEnum(databaseConfig.schema.metadata)
+
+private fun orderByFieldsEnum(
+    databaseConfig: List<DatabaseMetadata> = emptyList(),
+    additionalFields: List<String> = emptyList(),
+) = fieldsEnum(databaseConfig, additionalFields + ORDER_BY_RANDOM_FIELD_NAME)
 
 private fun fieldsEnum(
     databaseConfig: List<DatabaseMetadata> = emptyList(),
@@ -529,6 +538,5 @@ private fun fieldsEnum(
     ._enum(databaseConfig.map { it.name } + additionalFields)
 
 private fun arraySchema(schema: Schema<Any>) =
-    Schema<Any>()
-        .type("array")
+    ArraySchema()
         .items(schema)

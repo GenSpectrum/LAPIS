@@ -27,7 +27,8 @@ class SiloQueryTest {
         val expected = """
             {
                 "action": {
-                    "type": "Aggregated"
+                    "type": "Aggregated",
+                    "randomize": false
                 },
                 "filterExpression": {
                     "type": "StringEquals",
@@ -69,14 +70,19 @@ class SiloQueryTest {
                     SiloAction.aggregated(),
                     """
                 {
-                    "type": "Aggregated"
+                    "type": "Aggregated",
+                    "randomize": false
                 }
                 """,
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
                         listOf("field1", "field2"),
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -88,6 +94,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -97,14 +104,19 @@ class SiloQueryTest {
                     SiloAction.mutations(),
                     """
                 {
-                    "type": "Mutations"
+                    "type": "Mutations",
+                    "randomize": false
                 }
                 """,
                 ),
                 Arguments.of(
                     SiloAction.mutations(
                         0.5,
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -116,6 +128,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -125,14 +138,19 @@ class SiloQueryTest {
                     SiloAction.aminoAcidMutations(),
                     """
                 {
-                    "type": "AminoAcidMutations"
+                    "type": "AminoAcidMutations",
+                    "randomize": false
                 }
                 """,
                 ),
                 Arguments.of(
                     SiloAction.aminoAcidMutations(
                         0.5,
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -144,6 +162,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -153,14 +172,19 @@ class SiloQueryTest {
                     SiloAction.details(),
                     """
                 {
-                    "type": "Details"
+                    "type": "Details",
+                    "randomize": false
                 }
                 """,
                 ),
                 Arguments.of(
                     SiloAction.details(
                         listOf("age", "pango_lineage"),
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -172,6 +196,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -181,13 +206,18 @@ class SiloQueryTest {
                     SiloAction.nucleotideInsertions(),
                     """
                 {
-                    "type": "Insertions"
+                    "type": "Insertions",
+                    "randomize": false
                 }
                 """,
                 ),
                 Arguments.of(
                     SiloAction.nucleotideInsertions(
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -198,6 +228,39 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
+                    "limit": 100,
+                    "offset": 50
+                }
+                """,
+                ),
+                Arguments.of(
+                    SiloAction.aminoAcidInsertions(),
+                    """
+                {
+                    "type": "AminoAcidInsertions",
+                    "randomize": false
+                }
+                """,
+                ),
+                Arguments.of(
+                    SiloAction.aminoAcidInsertions(
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
+                        100,
+                        50,
+                    ),
+                    """
+                {
+                    "type": "AminoAcidInsertions",
+                    "orderByFields": [
+                        {"field": "field3", "order": "ascending"},
+                        {"field": "field4", "order": "descending"}
+                    ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -208,7 +271,8 @@ class SiloQueryTest {
                     """
                 {
                     "type": "FastaAligned",
-                    "sequenceName": "someSequenceName"
+                    "sequenceName": "someSequenceName",
+                    "randomize": false
                 }
                 """,
                 ),
@@ -216,7 +280,11 @@ class SiloQueryTest {
                     SiloAction.genomicSequence(
                         SequenceType.ALIGNED,
                         "someSequenceName",
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -228,6 +296,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
@@ -238,7 +307,8 @@ class SiloQueryTest {
                     """
                 {
                     "type": "Fasta",
-                    "sequenceName": "someSequenceName"
+                    "sequenceName": "someSequenceName",
+                    "randomize": false
                 }
                 """,
                 ),
@@ -246,7 +316,11 @@ class SiloQueryTest {
                     SiloAction.genomicSequence(
                         SequenceType.UNALIGNED,
                         "someSequenceName",
-                        listOf(OrderByField("field3", Order.ASCENDING), OrderByField("field4", Order.DESCENDING)),
+                        listOf(
+                            OrderByField("field3", Order.ASCENDING),
+                            OrderByField("field4", Order.DESCENDING),
+                            OrderByField("random", Order.DESCENDING),
+                        ),
                         100,
                         50,
                     ),
@@ -258,6 +332,7 @@ class SiloQueryTest {
                         {"field": "field3", "order": "ascending"},
                         {"field": "field4", "order": "descending"}
                     ],
+                    "randomize": true,
                     "limit": 100,
                     "offset": 50
                 }
