@@ -174,6 +174,15 @@ export default defineConfig({
                             ],
                         },
                         {
+                            label: 'Concepts',
+                            items: [
+                                {
+                                    label: 'Caching',
+                                    link: '/maintainer-docs/concepts/caching',
+                                },
+                            ],
+                        },
+                        {
                             label: 'Tutorials',
                             items: [
                                 {
