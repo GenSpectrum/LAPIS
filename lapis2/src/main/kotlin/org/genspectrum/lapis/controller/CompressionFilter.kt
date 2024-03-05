@@ -36,11 +36,13 @@ enum class Compression(
     val value: String,
     val contentType: MediaType,
     val compressionOutputStreamFactory: (OutputStream) -> OutputStream,
+    val fileEnding: String,
 ) {
     GZIP(
         value = "gzip",
         contentType = MediaType.parseMediaType("application/gzip"),
         compressionOutputStreamFactory = ::LazyGzipOutputStream,
+        fileEnding = ".gz",
     ),
     ZSTD(
         value = "zstd",
@@ -48,6 +50,7 @@ enum class Compression(
         compressionOutputStreamFactory = {
             ZstdOutputStream(it).apply { commitUnderlyingResponseToPreventContentLengthFromBeingSet() }
         },
+        fileEnding = ".zst",
     ),
     ;
 
@@ -58,6 +61,8 @@ enum class Compression(
             }
 
             val headersList = acceptEncodingHeaders.toList()
+                .flatMap { it.split(',') }
+                .map { it.trim() }
 
             return when {
                 headersList.contains(GZIP.value) -> GZIP
@@ -140,7 +145,7 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
 
         val maybeCompressingResponse = createMaybeCompressingResponse(
             response,
-            reReadableRequest.getHeaders(ACCEPT_ENCODING),
+            reReadableRequest,
             compressionPropertyInRequest,
         )
 
@@ -162,7 +167,7 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
 
     private fun createMaybeCompressingResponse(
         response: HttpServletResponse,
-        acceptEncodingHeaders: Enumeration<String>?,
+        reReadableRequest: CachedBodyHttpServletRequest,
         compressionPropertyInRequest: Compression?,
     ): HttpServletResponse {
         if (compressionPropertyInRequest != null) {
@@ -175,6 +180,15 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
             )
         }
 
+        val downloadAsFile = reReadableRequest.getBooleanField(DOWNLOAD_AS_FILE_PROPERTY) ?: false
+        if (downloadAsFile) {
+            return response
+        }
+        if (!reReadableRequest.getProxyAwarePath().startsWith("/sample")) {
+            return response
+        }
+
+        val acceptEncodingHeaders = reReadableRequest.getHeaders(ACCEPT_ENCODING)
         val compression = Compression.fromHeaders(acceptEncodingHeaders) ?: return response
 
         log.info { "Compressing using $compression from $ACCEPT_ENCODING header" }

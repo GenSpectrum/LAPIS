@@ -7,6 +7,10 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.CSV
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.NESTED_JSON
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.PLAIN_JSON
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.TSV
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
@@ -17,6 +21,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -38,6 +43,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.zip.GZIPInputStream
 
 private const val INVALID_COMPRESSION_FORMAT = "invalidCompressionFormat"
+
+const val COMPRESSION_FORMAT_GZIP = "gzip"
+const val COMPRESSION_FORMAT_ZSTD = "zstd"
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -132,6 +140,19 @@ class LapisControllerCompressionTest(
         assertThat(errorDetail, `is`(errorMessage))
     }
 
+    @Test
+    fun `GIVEN multiple values in accept encoding header THEN it should return compressed data`() {
+        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment).expecting(PLAIN_JSON)
+        mockData.mockWithData(siloQueryModelMock)
+
+        val acceptEncodingAsBrowsersSendIt = "$COMPRESSION_FORMAT_GZIP, br, deflate"
+
+        mockMvc.perform(getSample(AGGREGATED.pathSegment).header(ACCEPT_ENCODING, acceptEncodingAsBrowsersSendIt))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(APPLICATION_JSON))
+            .andExpect(header().string(CONTENT_ENCODING, COMPRESSION_FORMAT_GZIP))
+    }
+
     private fun decompressContent(
         response: MvcResult,
         compressionFormat: String,
@@ -165,34 +186,39 @@ class LapisControllerCompressionTest(
                 .flatMap {
                     getRequests(
                         endpoint = it,
-                        dataFormat = MockDataCollection.DataFormat.CSV,
-                        compressionFormat = "gzip",
+                        dataFormat = CSV,
+                        compressionFormat = COMPRESSION_FORMAT_GZIP,
                     ) +
                         getRequests(
                             endpoint = it,
-                            dataFormat = MockDataCollection.DataFormat.CSV,
-                            compressionFormat = "zstd",
+                            dataFormat = CSV,
+                            compressionFormat = COMPRESSION_FORMAT_ZSTD,
                         )
                 } +
                 getRequests(
                     AGGREGATED,
-                    dataFormat = MockDataCollection.DataFormat.NESTED_JSON,
-                    compressionFormat = "gzip",
+                    dataFormat = NESTED_JSON,
+                    compressionFormat = COMPRESSION_FORMAT_GZIP,
                 ) +
                 getRequests(
                     AGGREGATED,
-                    dataFormat = MockDataCollection.DataFormat.TSV,
-                    compressionFormat = "zstd",
+                    dataFormat = TSV,
+                    compressionFormat = COMPRESSION_FORMAT_ZSTD,
                 ) +
                 listOf(
                     "${UNALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
                     "${ALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}/main",
                     "${ALIGNED_AMINO_ACID_SEQUENCES.pathSegment}/gene1",
                 )
-                    .flatMap { getFastaRequests(it, "gzip") + getFastaRequests(it, "zstd") }
+                    .flatMap {
+                        getFastaRequests(it, COMPRESSION_FORMAT_GZIP) + getFastaRequests(
+                            it,
+                            COMPRESSION_FORMAT_ZSTD,
+                        )
+                    }
 
         @JvmStatic
-        val compressionFormats = listOf("gzip", "zstd")
+        val compressionFormats = listOf(COMPRESSION_FORMAT_GZIP, COMPRESSION_FORMAT_ZSTD)
     }
 }
 
@@ -306,17 +332,17 @@ private fun getFastaRequests(
     ),
 )
 
-private fun getContentTypeForCompressionFormat(compressionFormat: String) =
+fun getContentTypeForCompressionFormat(compressionFormat: String) =
     when (compressionFormat) {
-        "gzip" -> "application/gzip"
-        "zstd" -> "application/zstd"
+        COMPRESSION_FORMAT_GZIP -> "application/gzip"
+        COMPRESSION_FORMAT_ZSTD -> "application/zstd"
         else -> throw Exception("Test issue: unknown compression format $compressionFormat")
     }
 
 private fun getContentTypeForDataFormat(dataFormat: MockDataCollection.DataFormat) =
     when (dataFormat) {
-        MockDataCollection.DataFormat.PLAIN_JSON -> APPLICATION_JSON_VALUE
-        MockDataCollection.DataFormat.NESTED_JSON -> APPLICATION_JSON_VALUE
-        MockDataCollection.DataFormat.CSV -> "$TEXT_CSV;charset=UTF-8"
-        MockDataCollection.DataFormat.TSV -> "$TEXT_TSV;charset=UTF-8"
+        PLAIN_JSON -> APPLICATION_JSON_VALUE
+        NESTED_JSON -> APPLICATION_JSON_VALUE
+        CSV -> "$TEXT_CSV;charset=UTF-8"
+        TSV -> "$TEXT_TSV;charset=UTF-8"
     }

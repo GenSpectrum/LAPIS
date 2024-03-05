@@ -92,7 +92,16 @@ GET /sample/aggregated?downloadAsFile=true
 ## Compression
 
 LAPIS supports gzip and Zstd compression.
-You can request compressed data via the `Accept-Encoding` header.
+You can request compressed data by setting the `compression` property in the request.
+Refer to the Swagger UI for allowed values.
+
+```http
+GET /sample/aggregated?compression=gzip
+```
+
+:::note
+
+Alternatively, you can set the `Accept-Encoding` header.
 
 ```http
 GET /sample/aggregated
@@ -106,12 +115,11 @@ Accept-Encoding: zstd
 
 LAPIS will set the `Content-Encoding` header in the response to indicate the compression used.
 
-:::note
-Alternatively, you can use the `compression` property in the request.
-Refer to the Swagger UI for allowed values.
+:::caution
+If you want to download compressed data via the `downloadAsFile` property,
+then you need to specify the compression type via the `compression` property.
 
-```http
-GET /sample/aggregated?compression=gzip
-```
-
+LAPIS will ignore the `Accept-Encoding` header, if `downloadAsFile == true`,
+since browsers always accept GZIP encoding.
+Then, you would not be able to download uncompressed data in a browser.
 :::

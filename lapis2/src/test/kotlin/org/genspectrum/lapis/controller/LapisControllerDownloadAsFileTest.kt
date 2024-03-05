@@ -2,6 +2,7 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.PLAIN_JSON
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
@@ -16,11 +17,14 @@ import org.genspectrum.lapis.request.LapisInfo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
+import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -92,8 +96,27 @@ class LapisControllerDownloadAsFileTest(
 
         mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
-            .andExpect(header().string("Content-Disposition", attachmentWithFilename(scenario.expectedFilename)))
-            .andExpect(header().string("Content-Encoding", scenario.compressionFormat))
+            .andExpect(header().string(CONTENT_DISPOSITION, attachmentWithFilename(scenario.expectedFilename)))
+            .andExpect(header().string(CONTENT_TYPE, scenario.expectedContentType))
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = [COMPRESSION_FORMAT_GZIP, COMPRESSION_FORMAT_ZSTD, "$COMPRESSION_FORMAT_GZIP, br, deflate"])
+    fun `WHEN I request data as file and accept encoding THEN it should return uncompressed file`(
+        acceptEncodingHeader: String,
+    ) {
+        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment).expecting(PLAIN_JSON)
+        mockData.mockWithData(siloQueryModelMock)
+
+        mockMvc.perform(
+            getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                .header(ACCEPT_ENCODING, acceptEncodingHeader),
+        )
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = "aggregated.json",
+                assertFileContentMatches = mockData.assertDataMatches,
+            )
     }
 
     private fun ResultActions.andExpectAttachmentWithContent(
@@ -115,7 +138,7 @@ class LapisControllerDownloadAsFileTest(
 
         private val dataFormatsSequence = generateSequence {
             listOf(
-                MockDataCollection.DataFormat.PLAIN_JSON,
+                PLAIN_JSON,
                 MockDataCollection.DataFormat.CSV,
                 MockDataCollection.DataFormat.TSV,
             )
@@ -177,7 +200,7 @@ data class DownloadAsFileScenario(
         ) = listOf(
             DownloadAsFileScenario(
                 mockData = MockDataForEndpoints.getMockData(endpoint)
-                    .expecting(MockDataCollection.DataFormat.PLAIN_JSON),
+                    .expecting(PLAIN_JSON),
                 expectedFilename = "$expectedFilename.json",
                 endpoint = endpoint,
                 requestedDataFormat = "json",
@@ -203,7 +226,7 @@ data class DownloadCompressedFileScenario(
     val mockData: MockData,
     val request: MockHttpServletRequestBuilder,
     val expectedFilename: String,
-    val compressionFormat: String,
+    val expectedContentType: String,
 ) {
     override fun toString() = description
 
@@ -214,12 +237,12 @@ data class DownloadCompressedFileScenario(
         ) = scenariosFor(
             dataFormat = dataFormat,
             route = route,
-            compressionFormat = "gzip",
+            compressionFormat = COMPRESSION_FORMAT_GZIP,
         ) +
             scenariosFor(
                 dataFormat = dataFormat,
                 route = route,
-                compressionFormat = "zstd",
+                compressionFormat = COMPRESSION_FORMAT_ZSTD,
             )
 
         private fun scenariosFor(
@@ -244,27 +267,35 @@ data class DownloadCompressedFileScenario(
                 false -> dataFormat.acceptHeader
             }
 
-            val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$compressionFormat"
+            val fileEnding = when (compressionFormat) {
+                COMPRESSION_FORMAT_ZSTD -> "zst"
+                COMPRESSION_FORMAT_GZIP -> "gz"
+                else -> throw Exception("Test issue: unknown compression format $compressionFormat")
+            }
+            val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$fileEnding"
+            val expectedContentType = getContentTypeForCompressionFormat(compressionFormat)
 
             return listOf(
                 DownloadCompressedFileScenario(
                     description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
-                    request = getSample("$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true")
-                        .header(ACCEPT_ENCODING, compressionFormat)
+                    request = getSample(
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat",
+                    )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
-                    compressionFormat = compressionFormat,
+                    expectedContentType = expectedContentType,
                 ),
                 DownloadCompressedFileScenario(
                     description = "POST $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
-                    request = postSample(endpoint).content("""{ "$DOWNLOAD_AS_FILE_PROPERTY": true }""")
+                    request = postSample(endpoint).content(
+                        """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" }""",
+                    )
                         .contentType(APPLICATION_JSON)
-                        .header(ACCEPT_ENCODING, compressionFormat)
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
-                    compressionFormat = compressionFormat,
+                    expectedContentType = expectedContentType,
                 ),
             )
         }
