@@ -6,8 +6,9 @@ describe('Error handling: UnknownUrl', () => {
     const result = await fetch(basePath + '/unknownUrl');
 
     expect(result.status).equals(404);
-    expect(result.headers.get('Content-Type')).equals('application/json');
-    expect((await result.json())?.error).equals('Not Found');
+    expect(result.headers.get('Content-Type')).equals('application/problem+json');
+    const body = await result.json();
+    expect(body, JSON.stringify(body)).to.have.nested.property('title', 'Not Found');
   });
 
   it('should return a 404 HTML response when a browser asks for HTML', async () => {
@@ -16,7 +17,7 @@ describe('Error handling: UnknownUrl', () => {
     expect(result.status).equals(404);
     expect(result.headers.get('Content-Type')).equals('text/html');
 
-    let responseBody = await result.text();
+    const responseBody = await result.text();
     expect(responseBody).contains('Page not found');
     expect(responseBody).contains('<a href="http://localhost:8090/swagger-ui/index.html">');
   });

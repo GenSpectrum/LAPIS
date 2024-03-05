@@ -9,14 +9,16 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 @Order(DOWNLOAD_AS_FILE_FILTER_ORDER)
-class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequestFilter() {
+class DownloadAsFileFilter(
+    private val objectMapper: ObjectMapper,
+    private val requestCompression: RequestCompression,
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -37,10 +39,9 @@ class DownloadAsFileFilter(private val objectMapper: ObjectMapper) : OncePerRequ
             SampleRoute.entries.find { request.getProxyAwarePath().startsWith("/sample${it.pathSegment}") }
         val dataName = matchingRoute?.pathSegment?.trim('/') ?: "data"
 
-        val compressionEnding = when (Compression.fromHeaders(request.getHeaders(ACCEPT_ENCODING))) {
-            Compression.GZIP -> ".gzip"
-            Compression.ZSTD -> ".zstd"
-            null -> ""
+        val compressionEnding = when (val compressionSource = requestCompression.compressionSource) {
+            is CompressionSource.RequestProperty -> compressionSource.compression.fileEnding
+            else -> ""
         }
 
         val fileEnding = when (request.getHeader(ACCEPT)) {

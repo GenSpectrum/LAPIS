@@ -1,10 +1,12 @@
 package org.genspectrum.lapis.controller
 
 import mu.KotlinLogging
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException
-import org.springframework.core.annotation.Order
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.RETRY_AFTER
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -12,38 +14,21 @@ import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.BodyBuilder
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 private val log = KotlinLogging.logger {}
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
-/**
- * Taken from https://github.com/spring-projects/spring-framework/issues/31569#issuecomment-1825444419
- * Due to https://github.com/spring-projects/spring-framework/commit/c00508d6cf2408d06a0447ed193ad96466d0d7b4
- *
- * This forwards "404" errors to the ErrorController to allow it to return a view.
- * Thus, browsers get their own error page.
- *
- * Spring reworked handling of "404 not found" errors. This was introduced with the upgrade to Spring boot 3.2.0.
- * This can be removed/reworked once Spring decides on how to return a view from an ExceptionHandler
- * or allows them to respect the Accept header.
- */
 @ControllerAdvice
-@Order(-1)
-internal class ExceptionToErrorControllerBypass {
-    @ExceptionHandler(NoResourceFoundException::class)
-    fun handleResourceNotFound(e: Exception): Nothing {
-        throw e
-    }
-}
-
-@ControllerAdvice
-class ExceptionHandler : ResponseEntityExceptionHandler() {
+class ExceptionHandler(private val notFoundView: NotFoundView) : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleUnexpectedException(e: Throwable): ErrorResponse {
@@ -89,6 +74,23 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header(RETRY_AFTER, e.retryAfter) }
     }
 
+    override fun handleNoResourceFoundException(
+        ex: NoResourceFoundException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val acceptMediaTypes = MediaType.parseMediaTypes(request.getHeaderValues(ACCEPT)?.toList())
+        if (MediaType.TEXT_HTML.isPresentIn(acceptMediaTypes)) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.TEXT_HTML)
+                .body(notFoundView.render())
+        }
+
+        return super.handleNoResourceFoundException(ex, headers, status, request)
+    }
+
     private fun responseEntity(
         httpStatus: HttpStatus,
         detail: String?,
@@ -120,6 +122,32 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
                     },
                 ),
             )
+    }
+}
+
+@Component
+class NotFoundView(private val databaseConfig: DatabaseConfig) {
+    fun render(): String {
+        val uri = ServletUriComponentsBuilder.fromCurrentRequest()
+            .replacePath("/swagger-ui/index.html")
+            .replaceQuery(null)
+            .fragment(null)
+            .toUriString()
+
+        return """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Error 404</title>
+            </head>
+            <body>
+                <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
+                <h3>Page not found!</h3>
+                <a href="$uri">Visit our swagger-ui</a>
+            </body>
+            </html>
+            """.trimIndent()
     }
 }
 
