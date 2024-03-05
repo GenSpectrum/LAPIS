@@ -453,7 +453,6 @@ class SiloClientTest(
     companion object {
         @JvmStatic
         val queriesThatShouldNotBeCached = listOf(
-            SiloQuery(SiloAction.aggregated(), True),
             SiloQuery(SiloAction.details(), True),
             SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, "sequenceName"), True),
             SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, "sequenceName"), True),
@@ -461,6 +460,7 @@ class SiloClientTest(
 
         @JvmStatic
         val queriesThatShouldBeCached = listOf(
+            SiloQuery(SiloAction.aggregated(), True),
             SiloQuery(SiloAction.mutations(), True),
             SiloQuery(SiloAction.aminoAcidMutations(), True),
             SiloQuery(SiloAction.nucleotideInsertions(), True),
@@ -479,7 +479,6 @@ class SiloClientAndCacheInvalidatorTest(
     private lateinit var mockServer: ClientAndServer
 
     val someQuery = SiloQuery(SiloAction.mutations(), True)
-    val anotherQuery = SiloQuery(SiloAction.aminoAcidMutations(), True)
     val firstDataVersion = "1"
     val secondDataVersion = "2"
 

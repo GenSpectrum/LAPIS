@@ -151,7 +151,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: String = "Aggregated",
-    ) : SiloAction<List<AggregationData>>(AggregationDataTypeReference(), cacheable = false)
+    ) : SiloAction<List<AggregationData>>(AggregationDataTypeReference(), cacheable = true)
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private data class MutationsAction(
