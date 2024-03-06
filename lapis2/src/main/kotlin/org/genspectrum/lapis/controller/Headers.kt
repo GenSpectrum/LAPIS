@@ -10,4 +10,5 @@ object LapisMediaType {
     const val TEXT_CSV = "text/csv"
     const val TEXT_CSV_WITHOUT_HEADERS = "text/csv;$HEADERS_ACCEPT_HEADER_PARAMETER=false"
     const val TEXT_TSV = "text/tab-separated-values"
+    const val APPLICATION_YAML = "application/yaml"
 }
