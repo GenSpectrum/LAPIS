@@ -75,13 +75,6 @@ tasks.named('test') {
     }
 }
 
-tasks.named('bootBuildImage') {
-    environment["BP_JVM_VERSION"] = "21"
-    environment["BPE_SPRING_PROFILES_ACTIVE"] = "docker"
-    environment["BPE_LAPIS_REFERENCE_GENOME_FILENAME"] = "./reference_genomes.json"
-    imageName = "ghcr.io/genspectrum/${project.name}"
-}
-
 openApi {
     outputDir.set(file("$rootDir"))
 
