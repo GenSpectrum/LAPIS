@@ -85,7 +85,7 @@ class ExceptionHandler(private val notFoundView: NotFoundView) : ResponseEntityE
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.TEXT_HTML)
-                .body(notFoundView.render())
+                .body(notFoundView.render(request))
         }
 
         return super.handleNoResourceFoundException(ex, headers, status, request)
@@ -127,9 +127,11 @@ class ExceptionHandler(private val notFoundView: NotFoundView) : ResponseEntityE
 
 @Component
 class NotFoundView(private val databaseConfig: DatabaseConfig) {
-    fun render(): String {
+    fun render(request: WebRequest): String {
+        request.contextPath
+
         val uri = ServletUriComponentsBuilder.fromCurrentRequest()
-            .replacePath("/swagger-ui/index.html")
+            .replacePath("/${request.contextPath}/swagger-ui/index.html")
             .replaceQuery(null)
             .fragment(null)
             .toUriString()
