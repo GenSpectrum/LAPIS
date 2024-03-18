@@ -16,10 +16,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@openapitools/openapi-generator-cli": "^2.11.0",
+    "@openapitools/openapi-generator-cli": "^2.12.0",
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.25",
+    "@types/node": "^20.11.29",
     "chai": "^4.3.10",
     "mocha": "^10.3.0",
     "prettier": "^3.2.5",
