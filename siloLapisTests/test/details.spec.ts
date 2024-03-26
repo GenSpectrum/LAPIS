@@ -12,8 +12,6 @@ describe('The /details endpoint', () => {
 
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
-      aaInsertions: undefined,
-      insertions: undefined,
       age: undefined,
       country: undefined,
       date: undefined,
@@ -34,8 +32,6 @@ describe('The /details endpoint', () => {
 
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
-      aaInsertions: undefined,
-      insertions: '25701:CCC',
       age: 54,
       country: 'Switzerland',
       date: '2021-07-19',
@@ -136,13 +132,11 @@ Solothurn	B.1	key_1002052
 
   it('should correctly handle nucleotide insertion requests', async () => {
     const expectedResultWithNucleotideInsertion = {
-      aaInsertions: undefined,
       age: 57,
       country: 'Switzerland',
       date: '2021-05-12',
       division: 'Zürich',
       primaryKey: 'key_3578231',
-      insertions: '25701:CCC,5959:TAT',
       pangoLineage: 'P.1',
       qcValue: 0.93,
       region: 'Europe',
@@ -160,8 +154,6 @@ Solothurn	B.1	key_1002052
 
   it('should correctly handle amino acid insertion requests', async () => {
     const expectedResultWithAminoAcidInsertion = {
-      aaInsertions: 'S:143:T,ORF1a:3602:FEP',
-      insertions: undefined,
       age: 52,
       country: 'Switzerland',
       date: '2021-07-04',

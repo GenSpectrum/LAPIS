@@ -139,7 +139,9 @@ fun buildOpenApiSchema(
                                     "The key 'count' is always present.",
                             )
                             .required(listOf(COUNT_PROPERTY))
-                            .properties(getAggregatedResponseProperties(metadataFieldSchemas(databaseConfig))),
+                            .properties(
+                                getAggregatedResponseProperties(aggregatedMetadataFieldSchemas(databaseConfig)),
+                            ),
                     ),
                 )
                 .addSchemas(
@@ -150,7 +152,7 @@ fun buildOpenApiSchema(
                             .description(
                                 "The response contains the metadata of every sequence matching the sequence filters.",
                             )
-                            .properties(metadataFieldSchemas(databaseConfig)),
+                            .properties(detailsMetadataFieldSchemas(databaseConfig)),
                     ),
                 )
                 .addSchemas(
@@ -299,8 +301,14 @@ private fun infoResponseSchema() =
         )
         .required(listOf("dataVersion"))
 
-private fun metadataFieldSchemas(databaseConfig: DatabaseConfig) =
+private fun aggregatedMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
+
+private fun detailsMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
+    databaseConfig.schema.metadata.filter {
+        it.type != MetadataType.AMINO_ACID_INSERTION && it.type != MetadataType.NUCLEOTIDE_INSERTION
+    }
+        .associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
 
 private fun mapToOpenApiType(type: MetadataType): String =
     when (type) {
