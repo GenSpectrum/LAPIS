@@ -478,13 +478,41 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
-    private fun someNucleotideMutationProportion() = NucleotideMutationResponse("the mutation", 42, 0.5)
+    private fun someNucleotideMutationProportion() = NucleotideMutationResponse(
+        mutation = "the mutation",
+        count = 42,
+        proportion = 0.5,
+        sequenceName = "sequenceName",
+        mutationFrom = "G",
+        mutationTo = "T",
+        position = 29741,
+    )
 
-    private fun someAminoAcidMutationProportion() = AminoAcidMutationResponse("the mutation", 42, 0.5)
+    private fun someAminoAcidMutationProportion() = AminoAcidMutationResponse(
+        mutation = "the mutation",
+        count = 42,
+        proportion = 0.5,
+        sequenceName = "sequenceName",
+        mutationFrom = "G",
+        mutationTo = "T",
+        position = 29741,
+    )
 
-    private fun someNucleotideInsertion() = NucleotideInsertionResponse("the insertion", 42)
+    private fun someNucleotideInsertion() = NucleotideInsertionResponse(
+        insertion = "the insertion",
+        count = 42,
+        insertedSymbols = "CAGAAG",
+        position = 22204,
+        sequenceName = "sequenceName",
+    )
 
-    private fun someAminoAcidInsertion() = AminoAcidInsertionResponse("the insertion", 42)
+    private fun someAminoAcidInsertion() = AminoAcidInsertionResponse(
+        insertion = "the insertion",
+        count = 42,
+        insertedSymbols = "CAGAAG",
+        position = 22204,
+        sequenceName = "sequenceName",
+    )
 }
 
 fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path")

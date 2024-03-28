@@ -50,13 +50,23 @@ class SiloQueryModel(
             ),
         )
         return data.map {
-            val sequenceName =
-                if (referenceGenomeSchema.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
+            val mutation = if (referenceGenomeSchema.isSingleSegmented()) {
+                it.mutation
+            } else {
+                "${it.sequenceName}:${it.mutation}"
+            }
 
             NucleotideMutationResponse(
-                sequenceName,
-                it.count,
-                it.proportion,
+                mutation = mutation,
+                count = it.count,
+                proportion = it.proportion,
+                sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
+                    true -> null
+                    false -> it.sequenceName
+                },
+                mutationFrom = it.mutationFrom,
+                mutationTo = it.mutationTo,
+                position = it.position,
             )
         }
     }

@@ -6,12 +6,12 @@ import org.genspectrum.lapis.controller.CsvRecord
 
 data class NucleotideMutationResponse(
     @Schema(
-        example = "sequenceName:G29741T",
+        example = "main:G29741T",
         description = "If the genome only contains one segment then this is: " +
-            "(nucleotide symbol in reference genome)(position in genome)(mutation's target nucleotide symbol)." +
+            "(mutationFrom)(position)(mutationTo)." +
             "If it has more than one segment (e.g., influenza), then the sequence is contained here: " +
-            "(sequenceName):(nucleotide symbol in reference genome)(position in genome)" +
-            "(mutation's target nucleotide symbol)",
+            "(sequenceName):(mutationFrom)(position)" +
+            "(mutationTo)",
     ) val mutation: String,
     @Schema(
         example = "42",
@@ -22,6 +22,26 @@ data class NucleotideMutationResponse(
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
             "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
+    @Schema(
+        example = "main",
+        description = "The name of the segment in which the mutation occurs. Null if the genome is single-segmented.",
+    )
+    val sequenceName: String?,
+    @Schema(
+        example = "G",
+        description = "The nucleotide symbol in the reference genome at the position of the mutation",
+    )
+    val mutationFrom: String,
+    @Schema(
+        example = "T",
+        description = "The nucleotide symbol that the mutation changes to",
+    )
+    val mutationTo: String,
+    @Schema(
+        example = "29741",
+        description = "The position in the reference genome where the mutation occurs",
+    )
+    val position: Int,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
 
@@ -32,8 +52,7 @@ data class NucleotideMutationResponse(
 data class AminoAcidMutationResponse(
     @Schema(
         example = "ORF1a:G29741T",
-        description = "(Gene):(amino acid symbol in reference genome)(position in genome)" +
-            "(mutation's target nucleotide symbol)",
+        description = "Of the format (sequenceName):(mutationFrom)(position)(mutationTo)",
     ) val mutation: String,
     @Schema(
         example = "42",
@@ -44,6 +63,26 @@ data class AminoAcidMutationResponse(
         description = "Number of sequences with this mutation divided by the total number sequences matching the " +
             "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
+    @Schema(
+        example = "ORF1a",
+        description = "The name of the gene in which the mutation occurs.",
+    )
+    val sequenceName: String,
+    @Schema(
+        example = "G",
+        description = "The amino acid symbol in the reference genome at the position of the mutation",
+    )
+    val mutationFrom: String,
+    @Schema(
+        example = "T",
+        description = "The amino acid symbol that the mutation changes to",
+    )
+    val mutationTo: String,
+    @Schema(
+        example = "29741",
+        description = "The position in the reference genome where the mutation occurs",
+    )
+    val position: Int,
 ) : CsvRecord {
     override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
 
@@ -53,10 +92,10 @@ data class AminoAcidMutationResponse(
 
 data class NucleotideInsertionResponse(
     @Schema(
-        example = "ins_22204:CAGAA",
+        example = "ins_22204:CAGAAG",
         description =
-            "|A nucleotide insertion in the format \"ins_\\<segment\\>?:\\<position\\>:\\<insertion\\>\".  " +
-                "|If the pathogen has only one segment LAPIS will omit the segment name.",
+        "|A nucleotide insertion in the format \"ins_\\<segment\\>?:\\<position\\>:\\<insertedSymbols\\>\".  " +
+            "|If the pathogen has only one segment LAPIS will omit the segment name.",
     )
     val insertion: String,
     @Schema(
@@ -64,6 +103,21 @@ data class NucleotideInsertionResponse(
         description = "Total number of sequences with this insertion matching the given sequence filter criteria",
     )
     val count: Int,
+    @Schema(
+        example = "CAGAAG",
+        description = "The nucleotide symbols that were inserted at the given position",
+    )
+    val insertedSymbols: String,
+    @Schema(
+        example = "22204",
+        description = "The position in the reference genome where the insertion occurs",
+    )
+    val position: Int,
+    @Schema(
+        example = "main",
+        description = "The name of the segment in which the insertion occurs. Null if the genome is single-segmented.",
+    )
+    val sequenceName: String?,
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
 
@@ -73,9 +127,9 @@ data class NucleotideInsertionResponse(
 
 data class AminoAcidInsertionResponse(
     @Schema(
-        example = "ins_ORF1a:22204:CAGAA",
+        example = "ins_ORF1a:22204:CAGAAG",
         description =
-            "|A amino acid insertion in the format \"ins_\\<gene\\>:\\<position\\>:\\<insertion\\>\".",
+        "|A amino acid insertion in the format \"ins_\\<gene\\>:\\<position\\>:\\<insertion\\>\".",
     )
     val insertion: String,
     @Schema(
@@ -83,6 +137,21 @@ data class AminoAcidInsertionResponse(
         description = "Total number of sequences with this insertion matching the given sequence filter criteria",
     )
     val count: Int,
+    @Schema(
+        example = "CAGAAG",
+        description = "The amino acid symbols that were inserted at the given position",
+    )
+    val insertedSymbols: String,
+    @Schema(
+        example = "22204",
+        description = "The position in the reference genome where the insertion occurs",
+    )
+    val position: Int,
+    @Schema(
+        example = "ORF1a",
+        description = "The name of the gene in which the insertion occurs.",
+    )
+    val sequenceName: String,
 ) : CsvRecord {
     override fun asArray() = arrayOf(insertion, count.toString())
 
