@@ -2,7 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    id 'org.springframework.boot' version '3.2.3'
+    id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'org.jetbrains.kotlin.jvm' version '1.9.23'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.23'
@@ -35,12 +35,12 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
     implementation 'io.github.microutils:kotlin-logging-jvm:3.0.5'
     antlr 'org.antlr:antlr4:4.13.1'
     implementation 'org.antlr:antlr4-runtime:4.13.1'
     implementation 'org.apache.commons:commons-csv:1.10.0'
-    implementation 'com.github.luben:zstd-jni:1.5.5-11'
+    implementation 'com.github.luben:zstd-jni:1.5.6-1'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
