@@ -82,11 +82,15 @@ data class MutationData(
     val count: Int,
     val proportion: Double,
     val sequenceName: String,
+    val mutationFrom: String,
+    val mutationTo: String,
+    val position: Int,
 )
 
 data class InsertionData(
     val count: Int,
-    val insertions: String,
+    val insertion: String,
+    val insertedSymbols: String,
     val position: Int,
     val sequenceName: String,
 )

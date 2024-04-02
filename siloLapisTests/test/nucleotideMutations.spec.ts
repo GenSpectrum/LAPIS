@@ -23,6 +23,10 @@ describe('The /nucleotideMutations endpoint', () => {
     );
     expect(commonMutationProportion?.count).to.equal(51);
     expect(commonMutationProportion?.proportion).to.be.approximately(0.5204, 0.0001);
+    expect(commonMutationProportion?.sequenceName).to.be.undefined;
+    expect(commonMutationProportion?.mutationFrom).to.be.equal('G');
+    expect(commonMutationProportion?.mutationTo).to.be.equal('C');
+    expect(commonMutationProportion?.position).to.be.equal(28280);
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
@@ -86,6 +90,10 @@ describe('The /nucleotideMutations endpoint', () => {
       count: 1,
       mutation: 'C241T',
       proportion: 1.0,
+      mutationFrom: 'C',
+      mutationTo: 'T',
+      position: 241,
+      sequenceName: undefined,
     };
 
     const result = await lapisClient.postNucleotideMutations1({
@@ -103,6 +111,10 @@ describe('The /nucleotideMutations endpoint', () => {
       count: 1,
       mutation: 'G210T',
       proportion: 1.0,
+      mutationFrom: 'G',
+      mutationTo: 'T',
+      position: 210,
+      sequenceName: undefined,
     };
 
     const result = await lapisClient.postNucleotideMutations1({
@@ -128,15 +140,15 @@ describe('The /nucleotideMutations endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-mutation,count,proportion
+mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-C7029T,1,0.0625
-C71-,1,0.058823529411764705
-C7124T,2,0.11764705882352941
+C7029T,1,0.0625,,C,T,7029
+C71-,1,0.058823529411764705,,C,-,71
+C7124T,2,0.11764705882352941,,C,T,7124
 `.trim()
     );
   });
@@ -154,15 +166,15 @@ C7124T,2,0.11764705882352941
 
     expect(resultText).to.contain(
       String.raw`
-mutation	count	proportion
+mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-C7029T	1	0.0625
-C71-	1	0.058823529411764705
-C7124T	2	0.11764705882352941
+C7029T	1	0.0625		C	T	7029
+C71-	1	0.058823529411764705		C	-	71
+C7124T	2	0.11764705882352941		C	T	7124
     `.trim()
     );
   });

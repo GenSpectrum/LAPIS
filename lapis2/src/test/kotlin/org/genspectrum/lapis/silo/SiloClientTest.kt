@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.scheduler.DataVersionCacheInvalidator
@@ -104,8 +105,11 @@ class SiloClientTest(
         )
     }
 
-    @Test
-    fun `given server returns amino acid mutations response then response can be deserialized`() {
+    @ParameterizedTest
+    @MethodSource("getMutationActions")
+    fun `given server returns mutations response then response can be deserialized`(
+        action: SiloAction<List<MutationData>>,
+    ) {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -113,69 +117,53 @@ class SiloClientTest(
                     """{
                         "queryResult": [
                             {
-                                "count": 45,
-                                "mutation": "first mutation",
-                                "proportion": 0.9,
-                                "sequenceName": "S"
-                            },
-                            {
-                                "count": 44,
-                                "mutation": "second mutation",
-                                "proportion": 0.7,
-                                "sequenceName": "ORF"
-                            }
-                        ]
-                    }""",
-                ),
-        )
-
-        val query = SiloQuery(SiloAction.aminoAcidMutations(), StringEquals("theColumn", "theValue"))
-        val result = underTest.sendQuery(query)
-
-        assertThat(result, hasSize(2))
-        assertThat(
-            result,
-            containsInAnyOrder(
-                MutationData("first mutation", 45, 0.9, "S"),
-                MutationData("second mutation", 44, 0.7, "ORF"),
-            ),
-        )
-    }
-
-    @Test
-    fun `given server returns nucleotide response then response can be deserialized`() {
-        expectQueryRequestAndRespondWith(
-            response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
-                .withBody(
-                    """{
-                        "queryResult": [
-                            {
-                                "count": 45,
-                                "mutation": "first mutation",
-                                "proportion": 0.9,
+                                "count": 51,
+                                "mutation": "C3037T",
+                                "mutationFrom": "C",
+                                "mutationTo": "T",
+                                "position": 3037,
+                                "proportion": 1,
                                 "sequenceName": "main"
                             },
                             {
-                                "count": 44,
-                                "mutation": "second mutation",
-                                "proportion": 0.7,
-                                "sequenceName": "otherSequence"
+                                "count": 52,
+                                "mutation": "C14408T",
+                                "mutationFrom": "C",
+                                "mutationTo": "T",
+                                "position": 14408,
+                                "proportion": 1,
+                                "sequenceName": "main"
                             }
                         ]
                     }""",
                 ),
         )
 
-        val query = SiloQuery(SiloAction.mutations(), StringEquals("theColumn", "theValue"))
+        val query = SiloQuery(action, StringEquals("theColumn", "theValue"))
         val result = underTest.sendQuery(query)
 
         assertThat(result, hasSize(2))
         assertThat(
             result,
             containsInAnyOrder(
-                MutationData("first mutation", 45, 0.9, "main"),
-                MutationData("second mutation", 44, 0.7, "otherSequence"),
+                MutationData(
+                    mutation = "C3037T",
+                    count = 51,
+                    proportion = 1.0,
+                    sequenceName = "main",
+                    mutationFrom = "C",
+                    mutationTo = "T",
+                    position = 3037,
+                ),
+                MutationData(
+                    mutation = "C14408T",
+                    count = 52,
+                    proportion = 1.0,
+                    sequenceName = "main",
+                    mutationFrom = "C",
+                    mutationTo = "T",
+                    position = 14408,
+                ),
             ),
         )
     }
@@ -268,6 +256,61 @@ class SiloClientTest(
                         "pango_lineage" to TextNode("B.1.1.7"),
                         "qc_value" to DoubleNode(0.94),
                     ),
+                ),
+            ),
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInsertionActions")
+    fun `GIVEN server returns insertions response THEN response can be deserialized`(
+        action: SiloAction<List<InsertionData>>,
+    ) {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """{
+                        "queryResult": [
+                            {
+                                "count": 1,
+                                "insertedSymbols": "SGE",
+                                "position": 143,
+                                "insertion": "ins_S:247:SGE",
+                                "sequenceName": "S"
+                            },
+                            {
+                                "count": 2,
+                                "insertedSymbols": "EPE",
+                                "position": 214,
+                                "insertion": "ins_S:214:EPE",
+                                "sequenceName": "S"
+                            }
+                        ]
+                    }""",
+                ),
+        )
+
+        val query = SiloQuery(action, True)
+        val result = underTest.sendQuery(query)
+
+        assertThat(result, hasSize(2))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                InsertionData(
+                    1,
+                    "ins_S:247:SGE",
+                    "SGE",
+                    143,
+                    "S",
+                ),
+                InsertionData(
+                    2,
+                    "ins_S:214:EPE",
+                    "EPE",
+                    214,
+                    "S",
                 ),
             ),
         )
@@ -451,6 +494,18 @@ class SiloClientTest(
     }
 
     companion object {
+        @JvmStatic
+        val mutationActions = listOf(
+            SiloAction.mutations(),
+            SiloAction.aminoAcidMutations(),
+        )
+
+        @JvmStatic
+        val insertionActions = listOf(
+            SiloAction.nucleotideInsertions(),
+            SiloAction.aminoAcidInsertions(),
+        )
+
         @JvmStatic
         val queriesThatShouldNotBeCached = listOf(
             SiloQuery(SiloAction.details(), True),

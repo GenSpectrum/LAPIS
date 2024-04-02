@@ -137,6 +137,7 @@ jobs:
 
       - name: Start SILO and LAPIS and Run Tests
         run: |
+          docker compose -f lapis2/docker-compose.yml pull
           docker compose -f lapis2/docker-compose.yml up -d --wait
           cd siloLapisTests && npm run test
         env:

@@ -23,6 +23,10 @@ describe('The /aminoAcidMutations endpoint', () => {
     );
     expect(commonMutationProportion?.count).to.equal(69);
     expect(commonMutationProportion?.proportion).to.be.approximately(0.7340425531914894, 0.0001);
+    expect(commonMutationProportion?.sequenceName).to.be.equal('S');
+    expect(commonMutationProportion?.mutationFrom).to.be.equal('T');
+    expect(commonMutationProportion?.mutationTo).to.be.equal('K');
+    expect(commonMutationProportion?.position).to.be.equal(478);
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
@@ -85,7 +89,11 @@ describe('The /aminoAcidMutations endpoint', () => {
     const expectedFirstResultWithNucleotideInsertion = {
       count: 1,
       mutation: 'E:T9I',
-      proportion: 1.0,
+      mutationFrom: 'T',
+      mutationTo: 'I',
+      position: 9,
+      proportion: 1,
+      sequenceName: 'E',
     };
 
     const result = await lapisClient.postAminoAcidMutations1({
@@ -102,7 +110,11 @@ describe('The /aminoAcidMutations endpoint', () => {
     const expectedFirstResultWithAminoAcidInsertion = {
       count: 1,
       mutation: 'N:A220V',
-      proportion: 1.0,
+      mutationFrom: 'A',
+      mutationTo: 'V',
+      position: 220,
+      proportion: 1,
+      sequenceName: 'N',
     };
 
     const result = await lapisClient.postAminoAcidMutations1({
@@ -128,15 +140,15 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-mutation,count,proportion
+mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V,1,0.058823529411764705
-S:A222V,3,0.1875
-ORF1a:A2529V,3,0.17647058823529413
+N:A220V,1,0.058823529411764705,N,A,V,220
+S:A222V,3,0.1875,S,A,V,222
+ORF1a:A2529V,3,0.17647058823529413,ORF1a,A,V,2529
 `.trim()
     );
   });
@@ -154,15 +166,15 @@ ORF1a:A2529V,3,0.17647058823529413
 
     expect(resultText).to.contain(
       String.raw`
-mutation	count	proportion
+mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V	1	0.058823529411764705
-S:A222V	3	0.1875
-ORF1a:A2529V	3	0.17647058823529413
+N:A220V	1	0.058823529411764705	N	A	V	220
+S:A222V	3	0.1875	S	A	V	222
+ORF1a:A2529V	3	0.17647058823529413	ORF1a	A	V	2529
     `.trim()
     );
   });

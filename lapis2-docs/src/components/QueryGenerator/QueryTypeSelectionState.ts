@@ -101,11 +101,18 @@ function getFieldsThatAreAlwaysPresent(selection: Selection): ResultField[] {
                 { name: 'mutation', type: 'string', nullable: false },
                 { name: 'proportion', type: 'string', nullable: false },
                 { name: 'count', type: 'integer', nullable: false },
+                { name: 'sequenceName', type: 'string', nullable: true },
+                { name: 'mutationFrom', type: 'string', nullable: false },
+                { name: 'mutationTo', type: 'string', nullable: false },
+                { name: 'position', type: 'integer', nullable: false },
             ];
         case 'insertions':
             return [
                 { name: 'insertion', type: 'string', nullable: false },
                 { name: 'count', type: 'integer', nullable: false },
+                { name: 'insertedSymbols', type: 'string', nullable: false },
+                { name: 'sequenceName', type: 'string', nullable: false },
+                { name: 'position', type: 'integer', nullable: false },
             ];
         case 'details':
         case 'nucleotideSequences':
