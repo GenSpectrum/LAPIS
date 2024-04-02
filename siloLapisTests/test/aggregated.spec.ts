@@ -153,7 +153,7 @@ describe('The /aggregated endpoint', () => {
     expect(await result.text()).to.be.equal(
       String.raw`
 age,country,count
-null,Switzerland,2
+,Switzerland,2
 4,Switzerland,2
 5,Switzerland,1
 6,Switzerland,1
@@ -183,7 +183,7 @@ null,Switzerland,2
     expect(await result.text()).to.be.equal(
       String.raw`
 age	country	count
-null	Switzerland	2
+	Switzerland	2
 4	Switzerland	2
 5	Switzerland	1
 6	Switzerland	1

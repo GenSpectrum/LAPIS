@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.CsvRecord
@@ -19,16 +20,25 @@ data class AggregationData(
     val count: Int,
     @Schema(hidden = true) val fields: Map<String, JsonNode>,
 ) : CsvRecord {
-    override fun asArray() = fields.values.map { it.asText() }.plus(count.toString()).toTypedArray()
+    override fun getValuesList() =
+        fields.values
+            .map { it.toCsvValue() }
+            .plus(count.toString())
 
     override fun getHeader() = fields.keys.plus(COUNT_PROPERTY).toTypedArray()
 }
 
 data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
-    override fun asArray() = values.map { it.asText() }.toTypedArray()
+    override fun getValuesList() = values.map { it.toCsvValue() }
 
     override fun getHeader() = keys.toTypedArray()
 }
+
+private fun JsonNode.toCsvValue() =
+    when (this) {
+        is NullNode -> null
+        else -> asText()
+    }
 
 @JsonComponent
 class DetailsDataDeserializer : JsonDeserializer<DetailsData>() {
