@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.controller
 
+import com.fasterxml.jackson.databind.node.NullNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
@@ -7,7 +9,10 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
+import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -132,6 +137,49 @@ class LapisControllerCsvTest(
             .lines()
             .drop(1)
             .joinToString("\n")
+
+    @Test
+    fun `GIVEN aggregated endpoint returns result with null values THEN CSV contains empty strings instead`() {
+        every { siloQueryModelMock.getAggregated(any()) } returns listOf(
+            AggregationData(
+                1,
+                mapOf("firstKey" to TextNode("someValue"), "keyWithNullValue" to NullNode.instance),
+            ),
+        )
+
+        val expectedCsv = """
+            firstKey,keyWithNullValue,count
+            someValue,,1
+        """.trimIndent()
+
+        mockMvc.perform(getSample("/aggregated?country=Switzerland").header(ACCEPT, "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(expectedCsv))
+    }
+
+    @Test
+    fun `GIVEN details endpoint returns result with null values THEN CSV contains empty strings instead`() {
+        every { siloQueryModelMock.getDetails(any()) } returns listOf(
+            DetailsData(
+                mapOf(
+                    "firstKey" to TextNode("some first value"),
+                    "keyWithNullValue" to NullNode.instance,
+                    "someOtherKey" to TextNode("someValue"),
+                ),
+            ),
+        )
+
+        val expectedCsv = """
+            firstKey,keyWithNullValue,someOtherKey
+            some first value,,someValue
+        """.trimIndent()
+
+        mockMvc.perform(getSample("/details?country=Switzerland").header(ACCEPT, "text/csv"))
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(expectedCsv))
+    }
 
     private companion object {
         @JvmStatic

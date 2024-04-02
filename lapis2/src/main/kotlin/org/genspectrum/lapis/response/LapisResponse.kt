@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.CsvRecord
 
@@ -23,9 +22,8 @@ data class NucleotideMutationResponse(
             "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
 ) : CsvRecord {
-    override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+    override fun getValuesList() = listOf(mutation, count.toString(), proportion.toString())
 
-    @JsonIgnore
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -45,9 +43,8 @@ data class AminoAcidMutationResponse(
             "given filter criteria with non-ambiguous reads at that position",
     ) val proportion: Double,
 ) : CsvRecord {
-    override fun asArray() = arrayOf(mutation, count.toString(), proportion.toString())
+    override fun getValuesList() = listOf(mutation, count.toString(), proportion.toString())
 
-    @JsonIgnore
     override fun getHeader() = arrayOf("mutation", "count", "proportion")
 }
 
@@ -65,9 +62,8 @@ data class NucleotideInsertionResponse(
     )
     val count: Int,
 ) : CsvRecord {
-    override fun asArray() = arrayOf(insertion, count.toString())
+    override fun getValuesList() = listOf(insertion, count.toString())
 
-    @JsonIgnore
     override fun getHeader() = arrayOf("insertion", "count")
 }
 
@@ -84,8 +80,7 @@ data class AminoAcidInsertionResponse(
     )
     val count: Int,
 ) : CsvRecord {
-    override fun asArray() = arrayOf(insertion, count.toString())
+    override fun getValuesList() = listOf(insertion, count.toString())
 
-    @JsonIgnore
     override fun getHeader() = arrayOf("insertion", "count")
 }

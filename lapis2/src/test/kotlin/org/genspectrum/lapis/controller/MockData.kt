@@ -191,12 +191,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             country,age,floatValue
             Switzerland,42,3.14
-            Switzerland,43,null
+            Switzerland,43,
         """.trimIndent(),
         expectedTsv = """
             country	age	floatValue
             Switzerland	42	3.14
-            Switzerland	43	null
+            Switzerland	43	
         """.trimIndent(),
     )
 

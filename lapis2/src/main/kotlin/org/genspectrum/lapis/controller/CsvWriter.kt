@@ -1,13 +1,16 @@
 package org.genspectrum.lapis.controller
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.springframework.stereotype.Component
 import java.io.StringWriter
 
 interface CsvRecord {
-    fun asArray(): Array<String>
+    @JsonIgnore
+    fun getValuesList(): List<String?>
 
+    @JsonIgnore
     fun getHeader(): Array<String>
 }
 
@@ -24,6 +27,7 @@ class CsvWriter {
             CSVFormat.DEFAULT.builder()
                 .setRecordSeparator("\n")
                 .setDelimiter(delimiter.value)
+                .setNullString("")
                 .also {
                     when {
                         headers != null -> it.setHeader(*headers)
@@ -32,10 +36,10 @@ class CsvWriter {
                 .build(),
         ).use {
             for (datum in data) {
-                it.printRecord(*datum.asArray())
+                it.printRecord(datum.getValuesList())
             }
         }
-        return stringWriter.toString().trim()
+        return stringWriter.toString().trimEnd('\n')
     }
 }
 
