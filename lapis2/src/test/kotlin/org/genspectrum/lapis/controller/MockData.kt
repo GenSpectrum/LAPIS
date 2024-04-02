@@ -204,9 +204,13 @@ object MockDataForEndpoints {
         siloQueryModelMockCall = { it::computeNucleotideMutationProportions },
         modelData = listOf(
             NucleotideMutationResponse(
-                "sequenceName:A1234T",
-                2345,
-                0.987,
+                mutation = "sequenceName:A1234T",
+                count = 2345,
+                proportion = 0.987,
+                sequenceName = "sequenceName",
+                mutationFrom = "A",
+                mutationTo = "T",
+                position = 1234,
             ),
         ),
         expectedJson = """
@@ -214,17 +218,21 @@ object MockDataForEndpoints {
                 {
                     "mutation": "sequenceName:A1234T",
                     "count": 2345,
-                    "proportion": 0.987
+                    "proportion": 0.987,
+                    "sequenceName": "sequenceName",
+                    "mutationFrom": "A",
+                    "mutationTo": "T",
+                    "position": 1234
                 }
             ]
         """.trimIndent(),
         expectedCsv = """
-            mutation,count,proportion
-            sequenceName:A1234T,2345,0.987
+            mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
+            sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
         """.trimIndent(),
         expectedTsv = """
-            mutation	count	proportion
-            sequenceName:A1234T	2345	0.987
+            mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
+            sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
         """.trimIndent(),
     )
 
@@ -232,27 +240,35 @@ object MockDataForEndpoints {
         siloQueryModelMockCall = { it::computeAminoAcidMutationProportions },
         modelData = listOf(
             AminoAcidMutationResponse(
-                "sequenceName:1234",
-                2345,
-                0.987,
+                mutation = "sequenceName:A1234T",
+                count = 2345,
+                proportion = 0.987,
+                sequenceName = "sequenceName",
+                mutationFrom = "A",
+                mutationTo = "T",
+                position = 1234,
             ),
         ),
         expectedJson = """
             [
                 {
-                    "mutation": "sequenceName:1234",
+                    "mutation": "sequenceName:A1234T",
                     "count": 2345,
-                    "proportion": 0.987
+                    "proportion": 0.987,
+                    "sequenceName": "sequenceName",
+                    "mutationFrom": "A",
+                    "mutationTo": "T",
+                    "position": 1234
                 }
             ]
         """.trimIndent(),
         expectedCsv = """
-            mutation,count,proportion
-            sequenceName:1234,2345,0.987
+            mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
+            sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
         """.trimIndent(),
         expectedTsv = """
-            mutation	count	proportion
-            sequenceName:1234	2345	0.987
+            mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
+            sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
         """.trimIndent(),
     )
 
@@ -260,25 +276,31 @@ object MockDataForEndpoints {
         siloQueryModelMockCall = { it::getNucleotideInsertions },
         modelData = listOf(
             NucleotideInsertionResponse(
-                "ins_1234:CAGAA",
-                41,
+                insertion = "ins_1234:CAGAA",
+                count = 41,
+                insertedSymbols = "CAGAA",
+                position = 1234,
+                sequenceName = "sequenceName",
             ),
         ),
         expectedJson = """
             [
                 {
                     "insertion": "ins_1234:CAGAA",
-                    "count": 41
+                    "count": 41,
+                    "insertedSymbols": "CAGAA",
+                    "position": 1234,
+                    "sequenceName": "sequenceName"
                 }
             ]
         """.trimIndent(),
         expectedCsv = """
-            insertion,count
-            ins_1234:CAGAA,41
+            insertion,count,insertedSymbols,position,sequenceName
+            ins_1234:CAGAA,41,CAGAA,1234,sequenceName
         """.trimIndent(),
         expectedTsv = """
-            insertion	count
-            ins_1234:CAGAA	41
+            insertion	count	insertedSymbols	position	sequenceName
+            ins_1234:CAGAA	41	CAGAA	1234	sequenceName
         """.trimIndent(),
     )
 
@@ -286,25 +308,31 @@ object MockDataForEndpoints {
         siloQueryModelMockCall = { it::getAminoAcidInsertions },
         modelData = listOf(
             AminoAcidInsertionResponse(
-                "ins_ORF1a:1234:CAGAA",
-                41,
+                insertion = "ins_ORF1a:1234:CAGAA",
+                count = 41,
+                insertedSymbols = "CAGAA",
+                position = 1234,
+                sequenceName = "ORF1a",
             ),
         ),
         expectedJson = """
             [
                 {
                     "insertion": "ins_ORF1a:1234:CAGAA",
-                    "count": 41
+                    "count": 41,
+                    "insertedSymbols": "CAGAA",
+                    "position": 1234,
+                    "sequenceName": "ORF1a"
                 }
             ]
         """.trimIndent(),
         expectedCsv = """
-            insertion,count
-            ins_ORF1a:1234:CAGAA,41
+            insertion,count,insertedSymbols,position,sequenceName
+            ins_ORF1a:1234:CAGAA,41,CAGAA,1234,ORF1a
         """.trimIndent(),
         expectedTsv = """
-            insertion	count
-            ins_ORF1a:1234:CAGAA	41
+            insertion	count	insertedSymbols	position	sequenceName
+            ins_ORF1a:1234:CAGAA	41	CAGAA	1234	ORF1a
         """.trimIndent(),
     )
 }

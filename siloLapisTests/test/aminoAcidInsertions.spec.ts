@@ -13,6 +13,9 @@ describe('The /aminoAcidInsertions endpoint', () => {
 
     const specificInsertion = result.data.find(insertionData => insertionData.insertion === someInsertion);
     expect(specificInsertion?.count).to.equal(5);
+    expect(specificInsertion?.insertedSymbols).to.equal('EPE');
+    expect(specificInsertion?.position).to.equal(214);
+    expect(specificInsertion?.sequenceName).to.equal('S');
   });
 
   it('should order by specified fields', async () => {
@@ -70,6 +73,9 @@ describe('The /aminoAcidInsertions endpoint', () => {
     const expectedFirstResultWithAminoAcidInsertion = {
       insertion: 'ins_ORF1a:3602:FEP',
       count: 1,
+      insertedSymbols: 'FEP',
+      position: 3602,
+      sequenceName: 'ORF1a',
     };
 
     const result = await lapisClient.postAminoAcidInsertions1({
@@ -86,6 +92,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
     const urlParams = new URLSearchParams({
       country: 'Switzerland',
       dataFormat: 'csv',
+      orderBy: 'position',
     });
 
     const result = await fetch(basePath + '/sample/aminoAcidInsertions?' + urlParams.toString());
@@ -93,18 +100,18 @@ describe('The /aminoAcidInsertions endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-insertion,count
+insertion,count,insertedSymbols,position,sequenceName
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-ins_ORF1a:3602:F,1
-ins_ORF1a:3602:FEP,1
-ins_S:210:IV,1
-ins_S:247:SGE,1
-ins_S:214:EPE,5
-ins_S:143:T,1
+ins_S:143:T,1,T,143,S
+ins_S:210:IV,1,IV,210,S
+ins_S:214:EPE,5,EPE,214,S
+ins_S:247:SGE,1,SGE,247,S
+ins_ORF1a:3602:F,1,F,3602,ORF1a
+ins_ORF1a:3602:FEP,1,FEP,3602,ORF1a
 `.trim()
     );
   });
@@ -113,6 +120,7 @@ ins_S:143:T,1
     const urlParams = new URLSearchParams({
       country: 'Switzerland',
       dataFormat: 'tsv',
+      orderBy: 'position',
     });
 
     const result = await fetch(basePath + '/sample/aminoAcidInsertions?' + urlParams.toString());
@@ -120,18 +128,18 @@ ins_S:143:T,1
 
     expect(resultText).to.contain(
       String.raw`
-insertion	count
+insertion	count	insertedSymbols	position	sequenceName
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-ins_ORF1a:3602:F	1
-ins_ORF1a:3602:FEP	1
-ins_S:210:IV	1
-ins_S:247:SGE	1
-ins_S:214:EPE	5
-ins_S:143:T	1
+ins_S:143:T	1	T	143	S
+ins_S:210:IV	1	IV	210	S
+ins_S:214:EPE	5	EPE	214	S
+ins_S:247:SGE	1	SGE	247	S
+ins_ORF1a:3602:F	1	F	3602	ORF1a
+ins_ORF1a:3602:FEP	1	FEP	3602	ORF1a
     `.trim()
     );
   });

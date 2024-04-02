@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.BooleanSchema
 import io.swagger.v3.oas.models.media.IntegerSchema
+import io.swagger.v3.oas.models.media.NumberSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -163,7 +164,11 @@ fun buildOpenApiSchema(
                             .description(
                                 "The response contains the metadata of every sequence matching the sequence filters.",
                             )
-                            .properties(nucleotideMutationProportionSchema()),
+                            .properties(nucleotideMutationProportionSchema())
+                            .required(
+                                nucleotideMutationProportionSchema().keys
+                                    .filterNot { referenceGenomeSchema.isSingleSegmented() && it == "sequenceName" },
+                            ),
                     ),
                 )
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
@@ -175,7 +180,8 @@ fun buildOpenApiSchema(
                             .description(
                                 "The response contains the metadata of every sequence matching the sequence filters.",
                             )
-                            .properties(aminoAcidMutationProportionSchema()),
+                            .properties(aminoAcidMutationProportionSchema())
+                            .required(aminoAcidMutationProportionSchema().keys.toList()),
                     ),
                 )
                 .addSchemas(
@@ -184,7 +190,11 @@ fun buildOpenApiSchema(
                         Schema<String>()
                             .type("object")
                             .description("Nucleotide Insertion data.")
-                            .properties(nucleotideInsertionSchema()),
+                            .properties(nucleotideInsertionSchema())
+                            .required(
+                                nucleotideInsertionSchema().keys
+                                    .filterNot { referenceGenomeSchema.isSingleSegmented() && it == "sequenceName" },
+                            ),
                     ),
                 )
                 .addSchemas(
@@ -193,7 +203,8 @@ fun buildOpenApiSchema(
                         Schema<String>()
                             .type("object")
                             .description("Amino Acid Insertion data.")
-                            .properties(aminoAcidInsertionSchema()),
+                            .properties(aminoAcidInsertionSchema())
+                            .required(aminoAcidInsertionSchema().keys.toList()),
                     ),
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
@@ -372,42 +383,112 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
         COUNT_PROPERTY to IntegerSchema().description("The number of sequences matching the filters."),
     )
 
-fun accessKeySchema() = StringSchema().description(ACCESS_KEY_DESCRIPTION)
+fun accessKeySchema(): Schema<Any> = StringSchema().description(ACCESS_KEY_DESCRIPTION)
 
 private fun nucleotideMutationProportionSchema() =
     mapOf(
-        "mutation" to Schema<String>().type("string").example("T123C").description("The mutation that was found."),
-        "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
-        "count" to Schema<String>().type("integer")
-            .description("The number of sequences matching having the mutation."),
+        "mutation" to StringSchema()
+            .example("sequence1:G29741T")
+            .description(
+                "If the genome only contains one segment then this is: " +
+                    "(mutationFrom)(position)(mutationTo)." +
+                    "If it has more than one segment (e.g., influenza), then the sequence is contained here: " +
+                    "(sequenceName):(mutationFrom)(position)" +
+                    "(mutationTo)",
+            ),
+        "proportion" to NumberSchema()
+            .example(0.54321)
+            .description(
+                "Number of sequences with this mutation divided by the total number sequences matching the " +
+                    "given filter criteria with non-ambiguous reads at that position",
+            ),
+        "count" to IntegerSchema()
+            .example(1234)
+            .description("Total number of sequences with this mutation matching the given sequence filter criteria"),
+        "sequenceName" to StringSchema()
+            .example("sequence1")
+            .description(
+                "The name of the segment in which the mutation occurs. Null if the genome is single-segmented.",
+            ),
+        "mutationFrom" to StringSchema()
+            .example("G")
+            .description("The nucleotide symbol in the reference genome at the position of the mutation"),
+        "mutationTo" to StringSchema()
+            .example("T")
+            .description("The nucleotide symbol that the mutation changes to or '-' in case of a deletion"),
+        "position" to IntegerSchema()
+            .example(29741)
+            .description("The position in the reference genome where the mutation occurs"),
     )
 
 private fun aminoAcidMutationProportionSchema() =
     mapOf(
-        "mutation" to Schema<String>().type("string").example("ORF1a:123").description(
-            "A amino acid mutation that was found in the format \"\\<gene\\>:\\<position\\>",
-        ),
-        "proportion" to Schema<String>().type("number").description("The proportion of sequences having the mutation."),
-        "count" to Schema<String>().type("integer")
-            .description("The number of sequences matching having the mutation."),
+        "mutation" to StringSchema()
+            .example("ORF1a:G29741T")
+            .description("Of the format (sequenceName):(mutationFrom)(position)(mutationTo)"),
+        "proportion" to NumberSchema()
+            .example(0.54321)
+            .description(
+                "Number of sequences with this mutation divided by the total number sequences matching the " +
+                    "given filter criteria with non-ambiguous reads at that position",
+            ),
+        "count" to IntegerSchema()
+            .example(42)
+            .description("Total number of sequences with this mutation matching the given sequence filter criteria"),
+        "sequenceName" to StringSchema()
+            .example("ORF1a")
+            .description("The name of the gene in which the mutation occurs."),
+        "mutationFrom" to StringSchema()
+            .example("G")
+            .description("The amino acid symbol in the reference genome at the position of the mutation"),
+        "mutationTo" to StringSchema()
+            .example("T")
+            .description("The amino acid symbol that the mutation changes to or '-' in case of a deletion"),
+        "position" to IntegerSchema()
+            .example(29741)
+            .description("The position in the reference genome where the mutation occurs"),
     )
 
 private fun nucleotideInsertionSchema() =
     mapOf(
-        "insertion" to Schema<String>().type("string")
-            .example("ins_segment:123:AAT")
-            .description("The insertion that was found."),
-        "count" to Schema<String>().type("integer")
-            .description("The number of sequences matching having the insertion."),
+        "insertion" to StringSchema()
+            .example("ins_segment1:22204:CAGAAG")
+            .description(
+                "A nucleotide insertion in the format \"ins_(segment):(position):(insertedSymbols)\".  " +
+                    "If the pathogen has only one segment LAPIS will omit the segment name (\"ins_22204:CAGAAG\").",
+            ),
+        "count" to IntegerSchema()
+            .example(42)
+            .description("Total number of sequences with this insertion matching the given sequence filter criteria"),
+        "insertedSymbols" to StringSchema()
+            .example("CAGAAG")
+            .description("The nucleotide symbols that were inserted at the given position"),
+        "position" to IntegerSchema()
+            .example(22204)
+            .description("The position in the reference genome where the insertion occurs"),
+        "sequenceName" to StringSchema()
+            .example("segment1")
+            .description(
+                "The name of the segment in which the insertion occurs. Null if the genome is single-segmented.",
+            ),
     )
 
 private fun aminoAcidInsertionSchema() =
     mapOf(
-        "insertion" to Schema<String>().type("string")
-            .example("ins_gene:123:AAT")
-            .description("The insertion that was found."),
-        "count" to Schema<String>().type("integer")
-            .description("The number of sequences matching having the insertion."),
+        "insertion" to StringSchema()
+            .example("ins_ORF1a:22204:CAGAAG")
+            .description("An amino acid insertion in the format \"ins_(gene):(position):(insertedSymbols)\"."),
+        "count" to IntegerSchema()
+            .description("Total number of sequences with this insertion matching the given sequence filter criteria."),
+        "insertedSymbols" to StringSchema()
+            .example("CAGAAG")
+            .description("The amino acid symbols that were inserted at the given position."),
+        "position" to IntegerSchema()
+            .example(22204)
+            .description("The position in the reference genome where the insertion occurs."),
+        "sequenceName" to StringSchema()
+            .example("ORF1a")
+            .description("The name of the gene in which the insertion occurs."),
     )
 
 private fun nucleotideMutations() =
@@ -512,9 +593,14 @@ private fun fieldsArray(
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
     orderByFieldsEnum(databaseConfig.schema.metadata, listOf("count"))
 
-private fun mutationsOrderByFieldsEnum() = orderByFieldsEnum(emptyList(), listOf("mutation", "count", "proportion"))
+private fun mutationsOrderByFieldsEnum() =
+    orderByFieldsEnum(
+        emptyList(),
+        listOf("mutation", "count", "proportion", "sequenceName", "mutationFrom", "mutationTo", "position"),
+    )
 
-private fun insertionsOrderByFieldsEnum() = orderByFieldsEnum(emptyList(), listOf("insertion", "count"))
+private fun insertionsOrderByFieldsEnum() =
+    orderByFieldsEnum(emptyList(), listOf("insertion", "count", "position", "sequenceName", "insertedSymbols"))
 
 private fun aminoAcidSequenceOrderByFieldsEnum(
     referenceGenomeSchema: ReferenceGenomeSchema,

@@ -50,13 +50,23 @@ class SiloQueryModel(
             ),
         )
         return data.map {
-            val sequenceName =
-                if (referenceGenomeSchema.isSingleSegmented()) it.mutation else "${it.sequenceName}:${it.mutation}"
+            val mutation = if (referenceGenomeSchema.isSingleSegmented()) {
+                it.mutation
+            } else {
+                "${it.sequenceName}:${it.mutation}"
+            }
 
             NucleotideMutationResponse(
-                sequenceName,
-                it.count,
-                it.proportion,
+                mutation = mutation,
+                count = it.count,
+                proportion = it.proportion,
+                sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
+                    true -> null
+                    false -> it.sequenceName
+                },
+                mutationFrom = it.mutationFrom,
+                mutationTo = it.mutationTo,
+                position = it.position,
             )
         }
     }
@@ -77,9 +87,13 @@ class SiloQueryModel(
         )
         return data.map {
             AminoAcidMutationResponse(
-                "${it.sequenceName}:${it.mutation}",
-                it.count,
-                it.proportion,
+                mutation = "${it.sequenceName}:${it.mutation}",
+                count = it.count,
+                proportion = it.proportion,
+                sequenceName = it.sequenceName,
+                mutationFrom = it.mutationFrom,
+                mutationTo = it.mutationTo,
+                position = it.position,
             )
         }
     }
@@ -110,11 +124,15 @@ class SiloQueryModel(
         )
 
         return data.map {
-            val sequenceName = if (referenceGenomeSchema.isSingleSegmented()) "" else "${it.sequenceName}:"
-
             NucleotideInsertionResponse(
-                "ins_${sequenceName}${it.position}:${it.insertions}",
-                it.count,
+                insertion = it.insertion,
+                count = it.count,
+                insertedSymbols = it.insertedSymbols,
+                position = it.position,
+                sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
+                    true -> null
+                    false -> it.sequenceName
+                },
             )
         }
     }
@@ -133,8 +151,11 @@ class SiloQueryModel(
 
         return data.map {
             AminoAcidInsertionResponse(
-                "ins_${it.sequenceName}:${it.position}:${it.insertions}",
-                it.count,
+                insertion = it.insertion,
+                count = it.count,
+                insertedSymbols = it.insertedSymbols,
+                position = it.position,
+                sequenceName = it.sequenceName,
             )
         }
     }

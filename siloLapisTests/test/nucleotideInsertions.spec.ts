@@ -13,6 +13,9 @@ describe('The /nucleotideInsertions endpoint', () => {
 
     const specificInsertion = result.data.find(insertionData => insertionData.insertion === someInsertion);
     expect(specificInsertion?.count).to.equal(17);
+    expect(specificInsertion?.insertedSymbols).to.equal('CCC');
+    expect(specificInsertion?.position).to.equal(25701);
+    expect(specificInsertion?.sequenceName).to.be.undefined;
   });
 
   it('should order by specified fields', async () => {
@@ -66,11 +69,17 @@ describe('The /nucleotideInsertions endpoint', () => {
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.deep.equal({
       count: 1,
+      insertedSymbols: 'CCC',
       insertion: 'ins_25701:CCC',
+      position: 25701,
+      sequenceName: undefined,
     });
     expect(result.data[1]).to.deep.equal({
       count: 1,
+      insertedSymbols: 'TAT',
       insertion: 'ins_5959:TAT',
+      position: 5959,
+      sequenceName: undefined,
     });
   });
 
@@ -88,6 +97,7 @@ describe('The /nucleotideInsertions endpoint', () => {
     const urlParams = new URLSearchParams({
       country: 'Switzerland',
       dataFormat: 'csv',
+      orderBy: 'position',
     });
 
     const result = await fetch(basePath + '/sample/nucleotideInsertions?' + urlParams.toString());
@@ -95,16 +105,16 @@ describe('The /nucleotideInsertions endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-insertion,count
+insertion,count,insertedSymbols,position,sequenceName
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-ins_5959:TAT,2
-ins_22339:GCTGGT,1
-ins_22204:CAGAA,1
-ins_25701:CCC,17
+ins_5959:TAT,2,TAT,5959,
+ins_22204:CAGAA,1,CAGAA,22204,
+ins_22339:GCTGGT,1,GCTGGT,22339,
+ins_25701:CCC,17,CCC,25701,
 `.trim()
     );
   });
@@ -113,6 +123,7 @@ ins_25701:CCC,17
     const urlParams = new URLSearchParams({
       country: 'Switzerland',
       dataFormat: 'tsv',
+      orderBy: 'position',
     });
 
     const result = await fetch(basePath + '/sample/nucleotideInsertions?' + urlParams.toString());
@@ -120,16 +131,16 @@ ins_25701:CCC,17
 
     expect(resultText).to.contain(
       String.raw`
-insertion	count
+insertion	count	insertedSymbols	position	sequenceName
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-ins_5959:TAT	2
-ins_22339:GCTGGT	1
-ins_22204:CAGAA	1
-ins_25701:CCC	17
+ins_5959:TAT	2	TAT	5959	
+ins_22204:CAGAA	1	CAGAA	22204	
+ins_22339:GCTGGT	1	GCTGGT	22339	
+ins_25701:CCC	17	CCC	25701	
     `.trim()
     );
   });

@@ -279,8 +279,19 @@ class LapisControllerTest(
         val data = response["data"] as List<*>
         val firstDataObject = data[0] as Map<*, *>
 
-        assertThat(firstDataObject.keys, hasSize(3))
-        assertThat(firstDataObject.keys, containsInAnyOrder("mutation", "proportion", "count"))
+        assertThat(firstDataObject.keys, hasSize(7))
+        assertThat(
+            firstDataObject.keys,
+            containsInAnyOrder(
+                "mutation",
+                "proportion",
+                "count",
+                "sequenceName",
+                "mutationFrom",
+                "mutationTo",
+                "position",
+            ),
+        )
     }
 
     private fun setupMutationMock(
@@ -354,8 +365,11 @@ class LapisControllerTest(
         val data = response["data"] as List<*>
         val firstDataObject = data[0] as Map<*, *>
 
-        assertThat(firstDataObject.keys, hasSize(2))
-        assertThat(firstDataObject.keys, containsInAnyOrder("insertion", "count"))
+        assertThat(firstDataObject.keys, hasSize(5))
+        assertThat(
+            firstDataObject.keys,
+            containsInAnyOrder("insertion", "count", "position", "sequenceName", "insertedSymbols"),
+        )
     }
 
     private fun setupInsertionMock(endpoint: String) {
@@ -478,13 +492,45 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
     }
 
-    private fun someNucleotideMutationProportion() = NucleotideMutationResponse("the mutation", 42, 0.5)
+    private fun someNucleotideMutationProportion() =
+        NucleotideMutationResponse(
+            mutation = "the mutation",
+            count = 42,
+            proportion = 0.5,
+            sequenceName = "sequenceName",
+            mutationFrom = "G",
+            mutationTo = "T",
+            position = 29741,
+        )
 
-    private fun someAminoAcidMutationProportion() = AminoAcidMutationResponse("the mutation", 42, 0.5)
+    private fun someAminoAcidMutationProportion() =
+        AminoAcidMutationResponse(
+            mutation = "the mutation",
+            count = 42,
+            proportion = 0.5,
+            sequenceName = "sequenceName",
+            mutationFrom = "G",
+            mutationTo = "T",
+            position = 29741,
+        )
 
-    private fun someNucleotideInsertion() = NucleotideInsertionResponse("the insertion", 42)
+    private fun someNucleotideInsertion() =
+        NucleotideInsertionResponse(
+            insertion = "the insertion",
+            count = 42,
+            insertedSymbols = "CAGAAG",
+            position = 22204,
+            sequenceName = "sequenceName",
+        )
 
-    private fun someAminoAcidInsertion() = AminoAcidInsertionResponse("the insertion", 42)
+    private fun someAminoAcidInsertion() =
+        AminoAcidInsertionResponse(
+            insertion = "the insertion",
+            count = 42,
+            insertedSymbols = "CAGAAG",
+            position = 22204,
+            sequenceName = "sequenceName",
+        )
 }
 
 fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path")
