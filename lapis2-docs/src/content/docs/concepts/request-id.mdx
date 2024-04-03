@@ -13,7 +13,7 @@ This will greatly simplify identifying the problem in our log files.
 
 You can provide a request id in the request as an HTTP header `X-Request-Id`.
 This is useful if you want to correlate requests in your own log files with the LAPIS log files
-to track problems across systems.
+to track problems across systems, e.g. if your own API calls LAPIS.
 
 :::caution
 If you use the `X-Request-Id` header, make sure that the value is unique.

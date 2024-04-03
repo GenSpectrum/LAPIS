@@ -1,6 +1,6 @@
 import { expect, Locator, Page, test } from '@playwright/test';
 
-export const baseUrl = 'http://localhost:4321';
+export const baseUrl = 'http://localhost:4321/docs/';
 
 export const queryGeneratorTest = test.extend<{ queryGeneratorPage: QueryGeneratorPage }>({
     queryGeneratorPage: async ({ page }, use) => {

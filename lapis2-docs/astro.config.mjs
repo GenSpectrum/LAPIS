@@ -36,35 +36,35 @@ export default defineConfig({
                     items: [
                         {
                             label: 'Introduction',
-                            link: '/references/introduction/',
+                            link: '/references/introduction',
                         },
                         {
                             label: 'Fields',
-                            link: '/references/fields/',
+                            link: '/references/fields',
                         },
                         {
                             label: 'Filters',
-                            link: '/references/filters/',
+                            link: '/references/filters',
                         },
                         {
                             label: 'Additional Request Properties',
-                            link: '/references/additional-request-properties/',
+                            link: '/references/additional-request-properties',
                         },
                         {
                             label: 'Open API / Swagger',
-                            link: '/references/open-api-definition/',
+                            link: '/references/open-api-definition',
                         },
                         {
                             label: 'Database Config',
-                            link: '/references/database-config/',
+                            link: '/references/database-config',
                         },
                         {
                             label: 'Reference Genomes',
-                            link: '/references/reference-genomes/',
+                            link: '/references/reference-genomes',
                         },
                         {
                             label: 'Nucleotide And Amino Acid Symbols',
-                            link: '/references/nucleotide-and-amino-acid-symbols/',
+                            link: '/references/nucleotide-and-amino-acid-symbols',
                         },
                     ],
                 },
@@ -73,37 +73,37 @@ export default defineConfig({
                     items: filterAvailableConcepts([
                         {
                             label: 'Data versions',
-                            link: '/concepts/data-versions/',
+                            link: '/concepts/data-versions',
                         },
                         {
                             label: 'Mutation filters',
-                            link: '/concepts/mutation-filters/',
+                            link: '/concepts/mutation-filters',
                         },
                         {
                             label: 'Ambiguous symbols',
-                            link: '/concepts/ambiguous-symbols/',
+                            link: '/concepts/ambiguous-symbols',
                         },
                         {
                             label: 'Pango lineage query',
-                            link: '/concepts/pango-lineage-query/',
+                            link: '/concepts/pango-lineage-query',
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
                             label: 'Request methods: GET and POST',
-                            link: '/concepts/request-methods/',
+                            link: '/concepts/request-methods',
                         },
                         {
                             label: 'Response format',
-                            link: '/concepts/response-format/',
+                            link: '/concepts/response-format',
                         },
                         {
                             label: 'Variant query',
-                            link: '/concepts/variant-query/',
+                            link: '/concepts/variant-query',
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
                             label: 'Request Id',
-                            link: '/concepts/request-id/',
+                            link: '/concepts/request-id',
                         },
                     ]),
                 },

@@ -1,6 +1,7 @@
 ---
 import { OnlyIf } from '../OnlyIf.tsx';
 import { getConfig } from '../../config.ts';
+import BaseAwareLink from '../BaseAwareLink.astro';
 ---
 
 SILO currently supports the following metadata types:
@@ -13,7 +14,7 @@ SILO currently supports the following metadata types:
         <code>pango_lineage</code>: Systematic classification of lineage with inheritance structure that can be computed
         for some pathogens.
         <OnlyIf condition={!!getConfig().schema.metadata.find((m) => m.type === 'pango_lineage')}>
-            Also see <a href='/concepts/pango-lineage-query'>here</a>.
+            Also see <BaseAwareLink href='/concepts/pango-lineage-query'>here</BaseAwareLink>.
         </OnlyIf>
     </li>
     <li><code>date</code>: Values must be valid dates in the form <code>YYYY-MM-DD</code>.</li>

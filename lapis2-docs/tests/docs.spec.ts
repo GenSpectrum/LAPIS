@@ -113,7 +113,7 @@ test.describe('The documentation', () => {
         test(`should have working relative links and next button on page ${documentationPage.relativeUrl}`, async ({
             page,
         }) => {
-            await page.goto(baseUrl + documentationPage.relativeUrl);
+            await page.goto(baseUrl.slice(0, -1) + documentationPage.relativeUrl);
 
             await clickOnAllRelativeLinksInMainBody(page);
 
