@@ -75,7 +75,6 @@ class LapisSpringConfig {
         filter.setIncludePayload(true)
         filter.setMaxPayloadLength(10000)
         filter.setIncludeHeaders(false)
-        filter.setAfterMessagePrefix("REQUEST DATA: ")
         return filter
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
+import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
 import org.springframework.beans.factory.annotation.Value
@@ -27,14 +28,22 @@ const val SILO_RESPONSE_MAX_LOG_LENGTH = 10_000
 class SiloClient(
     private val cachedSiloClient: CachedSiloClient,
     private val dataVersion: DataVersion,
+    private val requestContext: RequestContext,
 ) {
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
         val result = cachedSiloClient.sendQuery(query)
         dataVersion.dataVersion = result.dataVersion
+
+        if (RequestContextHolder.getRequestAttributes() != null && requestContext.cached == null) {
+            requestContext.cached = true
+        }
+
         return result.queryResult
     }
 
     fun callInfo(): InfoData {
+        log.info { "Calling SILO info" }
+
         val info = cachedSiloClient.callInfo()
         dataVersion.dataVersion = info.dataVersion
         return info
@@ -48,11 +57,16 @@ class CachedSiloClient(
     @Value("\${silo.url}") private val siloUrl: String,
     private val objectMapper: ObjectMapper,
     private val requestIdContext: RequestIdContext,
+    private val requestContext: RequestContext,
 ) {
     private val httpClient = HttpClient.newHttpClient()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<ResponseType> {
+        if (RequestContextHolder.getRequestAttributes() != null) {
+            requestContext.cached = false
+        }
+
         val queryJson = objectMapper.writeValueAsString(query)
 
         log.info { "Calling SILO: $queryJson" }
@@ -74,8 +88,6 @@ class CachedSiloClient(
     }
 
     fun callInfo(): InfoData {
-        log.info { "Calling SILO info" }
-
         val response = send(URI("$siloUrl/info")) { it.GET() }
 
         return InfoData(getDataVersion(response))
@@ -101,7 +113,9 @@ class CachedSiloClient(
             throw RuntimeException(message, exception)
         }
 
-        log.info { "Response from SILO: ${response.statusCode()}" }
+        if (!uri.toString().endsWith("info")) {
+            log.info { "Response from SILO: ${response.statusCode()}" }
+        }
         log.debug {
             val body = response.body()
             val truncationPostfix = when {
