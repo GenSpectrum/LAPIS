@@ -4,7 +4,7 @@ description: Reference on how to start the SILO and LAPIS applications
 ---
 
 :::note
-The [corresponding tutorial](/maintainer-docs/tutorials/start-lapis-and-silo)
+The [corresponding tutorial](../tutorials/start-lapis-and-silo)
 shows an example step by step.
 This page aims to provide a full reference.
 :::
@@ -28,14 +28,14 @@ and terminate after the result is written to the output directory.
 Optionally, you can specify:
 
 -   `--preprocessingConfig`:
-    The path to the [preprocessing config](/maintainer-docs/references/preprocessing#preprocessing-config) file that SILO should use,
+    The path to the [preprocessing config](../references/preprocessing#preprocessing-config) file that SILO should use,
     e.g. `~/LAPIS/preprocessing_config.yaml`
 -   `--databaseConfig`:
-    The path to the [database config](/maintainer-docs/references/database-configuration) file that SILO should use,
+    The path to the [database config](../references/database-configuration) file that SILO should use,
     e.g. `~/LAPIS/database_config.yaml`.
 
 If those parameters are not provided, SILO will try to read the files from its current working directory.
-See the [preprocessing reference](/maintainer-docs/references/preprocessing#preprocessing-config)
+See the [preprocessing reference](../references/preprocessing#preprocessing-config)
 for how to provide the input files.
 
 #### Starting the SILO preprocessing with Docker
@@ -74,10 +74,10 @@ To start LAPIS you need to provide the following parameters:
 
 -   `--silo.url`: The URL where SILO is running, e.g. `http://localhost:8081`.
 -   `--lapis.databaseConfig.path`:
-    The path to the [database config](/maintainer-docs/references/database-configuration) file that LAPIS should use,
+    The path to the [database config](../references/database-configuration) file that LAPIS should use,
     e.g. `~/LAPIS/database_config.yaml`.
 -   `--referenceGenomeFilename`:
-    The path to the [reference genomes](/maintainer-docs/references/reference-genomes) file that LAPIS should use,
+    The path to the [reference genomes](../references/reference-genomes) file that LAPIS should use,
     e.g. `~/reference_genomes.json`.
     This can alternatively be passed via the environment variable `REFERENCE_GENOME_ENV_VARIABLE_NAME`.
     The parameter takes precedence over the environment variable.

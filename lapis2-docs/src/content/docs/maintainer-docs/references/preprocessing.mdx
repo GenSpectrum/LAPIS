@@ -70,7 +70,7 @@ All filenames are relative to the `inputDirectory`.
     The file with Pango lineage definitions, relative to the inputDirectory.
     See the section on the [Pango Lineage Definition File below](#the-pango-lineage-definition-file) for details.
 -   `referenceGenomeFilename`:
-    The file with [reference genomes](/maintainer-docs/references/reference-genomes), relative to the inputDirectory.
+    The file with [reference genomes](../references/reference-genomes), relative to the inputDirectory.
 
 ## `NDJSON` Format
 
@@ -90,7 +90,7 @@ Each line in the NDJSON file must be a JSON object with the following keys:
 
 :::note
 You must configure two metadata columns for insertions in the
-[database configuration](/maintainer-docs/references/database-configuration)
+[database configuration](../references/database-configuration)
 with the exact names and types as in this snippet:
 
 ```yaml
@@ -109,20 +109,20 @@ Otherwise, SILO will not recognize insertions in the NDJSON format.
 
 The sequences object contains sequences for each segment or gene.
 It must include all `nucleotideSequences` (or `genes`, respectively) specified in the
-[reference genomes](/maintainer-docs/references/reference-genomes)
+[reference genomes](../references/reference-genomes)
 as keys.
 Its values are the sequences as strings of
-[valid symbols](/references/nucleotide-and-amino-acid-symbols)
+[valid symbols](../../references/nucleotide-and-amino-acid-symbols)
 or `null`.
 
 #### Insertions Object
 
 The insertions object contains a list of insertions for each segment or gene.
 It must include all `nucleotideSequences` (or `genes`, respectively) specified in the
-[reference genomes](/maintainer-docs/references/reference-genomes)
+[reference genomes](../references/reference-genomes)
 as keys.
 Its values are arrays of strings in the format `<position>:<insertion>`.
-The insertions must consist of [valid symbols](/references/nucleotide-and-amino-acid-symbols).
+The insertions must consist of [valid symbols](../../references/nucleotide-and-amino-acid-symbols).
 
 #### Example of the Schema
 
@@ -184,7 +184,7 @@ SILO expects the following files in the `inputDirectory`:
 ### Metadata File
 
 The metadata file must be a TSV (tab-separated values) file.
-Its columns must correspond to the metadata fields specified in the [database configuration](/maintainer-docs/references/database-configuration).
+Its columns must correspond to the metadata fields specified in the [database configuration](../references/database-configuration).
 Empty values will be interpreted as `null`.
 
 #### Example
@@ -228,7 +228,7 @@ The filenames must follow this pattern:
     The `gene_` prefix is configurable in the preprocessing configuration via `genePrefix`.
 
 There must be one corresponding file for every segment and gene defined in the
-[reference genomes](/maintainer-docs/references/reference-genomes).
+[reference genomes](../references/reference-genomes).
 
 The header in the FASTA files must match the `primaryKey` column in the metadata file.
 There must be a one-to-one correspondence between entries in the metadata file and sequences in the FASTA files.
