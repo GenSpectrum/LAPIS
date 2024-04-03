@@ -20,6 +20,7 @@ class RequestContext {
     var endpoint: String? = null
     var filter: CommonSequenceFilters? = null
     var responseCode: Int? = null
+    var cached: Boolean? = null
 }
 
 private val log = KotlinLogging.logger {}
