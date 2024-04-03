@@ -222,6 +222,18 @@ class CompressingServletOutputStream(
         compressingStream.write(byte)
     }
 
+    override fun write(bytes: ByteArray) {
+        compressingStream.write(bytes)
+    }
+
+    override fun write(
+        bytes: ByteArray,
+        offset: Int,
+        length: Int,
+    ) {
+        compressingStream.write(bytes, offset, length)
+    }
+
     override fun isReady() = outputStream.isReady
 
     override fun setWriteListener(listener: WriteListener?) = outputStream.setWriteListener(listener)
