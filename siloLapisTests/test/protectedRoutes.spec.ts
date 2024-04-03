@@ -1,9 +1,5 @@
-import chai from 'chai';
+import { expect } from 'chai';
 import { basePathProtected, lapisClientProtected } from './common';
-import chaiAsPromised from 'chai-as-promised';
-
-chai.use(chaiAsPromised);
-const expect = chai.expect;
 
 const aggregatedAccessKey = 'testAggregatedDataAccessKey';
 const fullAccessKey = 'testFullAccessKey';
@@ -72,9 +68,7 @@ describe('Protected mode on POST requests', () => {
   it('should deny access, when no access key is provided', async () => {
     const result = lapisClientProtected.postAggregated1({ aggregatedPostRequest: {} });
 
-    await expect(result)
-      .to.be.eventually.rejected.and.have.property('response')
-      .that.has.property('status', 403);
+    await expectResponseStatusIs(result, 403);
   });
 
   it('should deny access, when wrong access key is provided', async () => {
@@ -83,9 +77,7 @@ describe('Protected mode on POST requests', () => {
       aggregatedPostRequest: { accessKey: invalidAccessKey },
     });
 
-    await expect(result)
-      .to.be.eventually.rejected.and.have.property('response')
-      .that.has.property('status', 403);
+    await expectResponseStatusIs(result, 403);
   });
 
   it('should deny access, when providing aggregated access key on non aggregated route', async () => {
@@ -93,9 +85,7 @@ describe('Protected mode on POST requests', () => {
       detailsPostRequest: { accessKey: aggregatedAccessKey },
     });
 
-    await expect(result)
-      .to.be.eventually.rejected.and.have.property('response')
-      .that.has.property('status', 403);
+    await expectResponseStatusIs(result, 403);
   });
 
   it('should grant access, when providing aggregated access key', async () => {
@@ -103,7 +93,7 @@ describe('Protected mode on POST requests', () => {
       aggregatedPostRequest: { accessKey: aggregatedAccessKey },
     });
 
-    await expect(result).to.be.fulfilled;
+    expect(await result).to.be.ok;
   });
 
   it('should grant access, when providing full access key', async () => {
@@ -111,7 +101,7 @@ describe('Protected mode on POST requests', () => {
       aggregatedPostRequest: { accessKey: fullAccessKey },
     });
 
-    await expect(result).to.be.fulfilled;
+    expect(await result).to.be.ok;
   });
 
   it('should grant access, when providing full access key on non aggregated route', async () => {
@@ -119,6 +109,15 @@ describe('Protected mode on POST requests', () => {
       detailsPostRequest: { accessKey: fullAccessKey },
     });
 
-    await expect(result).to.be.fulfilled;
+    expect(await result).to.be.ok;
   });
+
+  async function expectResponseStatusIs(response: Promise<any>, expectedStatus: number) {
+    try {
+      const success = await response;
+      expect.fail('Expected response to be rejected, but was ' + JSON.stringify(success));
+    } catch (e) {
+      expect(e).to.have.property('response').that.has.property('status', expectedStatus);
+    }
+  }
 });
