@@ -1,4 +1,4 @@
 {
-  "require": "ts-node/register",
+  "require": "tsx",
   "spec": "test/**/*.spec.ts"
 }
