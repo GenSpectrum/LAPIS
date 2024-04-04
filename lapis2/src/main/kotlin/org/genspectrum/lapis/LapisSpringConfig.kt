@@ -71,9 +71,6 @@ class LapisSpringConfig {
     @Bean
     fun logFilter(): CommonsRequestLoggingFilter {
         val filter = CommonsRequestLoggingFilter()
-        filter.setIncludeQueryString(true)
-        filter.setIncludePayload(true)
-        filter.setMaxPayloadLength(10000)
         filter.setIncludeHeaders(false)
         return filter
     }
