@@ -8,4 +8,5 @@ playground/
 
 docker-compose.override.yml
 
-log
+log/
+logs/
