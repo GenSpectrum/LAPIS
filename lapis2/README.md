@@ -57,3 +57,8 @@ How to execute the tests
 * Install NPM dependencies: `npm install`
 * Generate a Typescript client for LAPIS: `npm run generateLapisClient`
 * Execute the tests: `npm run test`
+
+## Logs
+
+LAPIS logs to rotating files in `./logs` and to stdout.
+In the Docker container, log files are stored in `/workspace/logs`

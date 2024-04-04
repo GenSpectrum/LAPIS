@@ -1,6 +1,35 @@
 <configuration>
 
-    <property name="PATTERN" value="%date %level [%thread] [%X{RequestId}] %class: %message%n"/>
+    <property name="LOG_FILE" value="LAPIS"/>
+    <property name="STATISTICS_LOG_FILE" value="statistics"/>
+    <property name="LOG_DIR" value="logs"/>
+    <property name="PATTERN" value="%date %level [%thread] %class: %message%n"/>
+
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_FILE}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${PATTERN}</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/archived/${LOG_FILE}-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>10GB</maxFileSize>
+            <maxHistory>0</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="StatisticsRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${STATISTICS_LOG_FILE}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%message%n</Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/archived/${STATISTICS_LOG_FILE}-%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>10GB</maxFileSize>
+            <maxHistory>0</maxHistory>
+        </rollingPolicy>
+    </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -10,17 +39,17 @@
 
     <root level="info">
         <appender-ref ref="RollingFile"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 
     <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="debug" additivity="false">
         <appender-ref ref="RollingFile"/>
+        <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="info">
-        <appender-ref ref="STDOUT"/>
-    </root>
-
     <logger name="StatisticsLogger" level="info" additivity="false">
+        <appender-ref ref="RollingFile"/>
+        <appender-ref ref="StatisticsRollingFile"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
