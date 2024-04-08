@@ -17,13 +17,13 @@
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.1",
-    "@types/chai": "^4.3.11",
+    "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.12.2",
+    "@types/node": "^20.12.5",
     "chai": "^5.1.0",
     "mocha": "^10.4.0",
     "prettier": "^3.2.5",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.3"
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.4"
   }
 }
