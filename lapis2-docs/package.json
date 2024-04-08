@@ -14,33 +14,33 @@
         "e2e": "playwright test"
     },
     "dependencies": {
-        "@astrojs/react": "^3.1.0",
+        "@astrojs/react": "^3.1.1",
         "@astrojs/starlight": "^0.20.1",
         "@astrojs/starlight-tailwind": "^2.0.1",
         "@astrojs/tailwind": "^5.1.0",
-        "@types/react": "^18.2.73",
-        "@types/react-dom": "^18.2.23",
-        "astro": "^4.5.12",
-        "change-case": "^5.4.3",
-        "daisyui": "^4.9.0",
+        "@types/react": "^18.2.74",
+        "@types/react-dom": "^18.2.24",
+        "astro": "^4.5.16",
+        "change-case": "^5.4.4",
+        "daisyui": "^4.10.1",
         "js-yaml": "^4.1.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "sharp": "^0.33.3",
-        "swagger-ui": "^5.13.0",
-        "swagger-ui-react": "^5.13.0",
+        "swagger-ui": "^5.14.0",
+        "swagger-ui-react": "^5.14.0",
         "tailwindcss": "^3.4.3",
         "yaml": "^2.4.1",
         "zod": "^3.22.4"
     },
     "devDependencies": {
         "@astrojs/check": "^0.5.10",
-        "@playwright/test": "^1.42.1",
+        "@playwright/test": "^1.43.0",
         "@types/js-yaml": "^4.0.9",
-        "@types/node": "^20.12.2",
+        "@types/node": "^20.12.5",
         "@types/swagger-ui": "^3.52.4",
         "prettier": "^3.2.5",
         "prettier-plugin-astro": "^0.13.0",
-        "typescript": "^5.4.3"
+        "typescript": "^5.4.4"
     }
 }
