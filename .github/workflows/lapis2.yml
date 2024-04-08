@@ -129,7 +129,7 @@ jobs:
         run: echo "lapisTag=${TAG##*:}" >> $GITHUB_OUTPUT
 
       - name: Wait for Docker Image
-        uses: lewagon/wait-on-check-action@v1.3.3
+        uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.ref }}
           check-name: Build Docker Image
