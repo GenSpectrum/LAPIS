@@ -65,8 +65,8 @@ enum class Compression(
                 .map { it.trim() }
 
             return when {
-                headersList.contains(GZIP.value) -> GZIP
                 headersList.contains(ZSTD.value) -> ZSTD
+                headersList.contains(GZIP.value) -> GZIP
                 else -> null
             }
         }
