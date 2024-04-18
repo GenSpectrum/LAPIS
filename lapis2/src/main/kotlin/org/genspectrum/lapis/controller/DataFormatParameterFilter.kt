@@ -7,10 +7,8 @@ import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
-import org.genspectrum.lapis.util.ResponseWithContentType
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.InvalidMediaTypeException
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -44,37 +42,16 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
 
         filterChain.doFilter(
             requestWithModifiedAcceptHeader,
-            when (isCsvOrTsvWithoutHeaders(requestWithModifiedAcceptHeader)) {
-                true -> ResponseWithContentType(response, MediaType.TEXT_PLAIN_VALUE)
-                false -> response
-            },
+            response,
         )
     }
 
     private fun findAcceptHeaderOverwriteValue(reReadableRequest: CachedBodyHttpServletRequest) =
         when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
-            DataFormat.CSV -> LapisMediaType.TEXT_CSV
-            DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
-            DataFormat.TSV -> LapisMediaType.TEXT_TSV
+            DataFormat.CSV -> LapisMediaType.TEXT_CSV_VALUE
+            DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
+            DataFormat.TSV -> LapisMediaType.TEXT_TSV_VALUE
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
             else -> null
         }
-
-    private fun isCsvOrTsvWithoutHeaders(requestWithModifiedAcceptHeader: HeaderModifyingRequestWrapper): Boolean {
-        val acceptHeader = requestWithModifiedAcceptHeader.getHeader(ACCEPT) ?: return false
-
-        val acceptMediaType = try {
-            MediaType.parseMediaType(acceptHeader)
-        } catch (e: InvalidMediaTypeException) {
-            log.info { "failed to parse accept header: " + e.message }
-            return false
-        }
-
-        if (acceptMediaType.parameters[HEADERS_ACCEPT_HEADER_PARAMETER] == "false") {
-            log.info { "Setting response content type to plain text due to 'headers=false'" }
-            return true
-        }
-
-        return false
-    }
 }

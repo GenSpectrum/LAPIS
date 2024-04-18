@@ -10,9 +10,16 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.CsvRecord
+import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.boot.jackson.JsonComponent
+import org.springframework.http.MediaType
+import java.nio.charset.Charset
+import java.util.stream.Stream
 
 const val COUNT_PROPERTY = "count"
 
@@ -25,13 +32,13 @@ data class AggregationData(
             .map { it.toCsvValue() }
             .plus(count.toString())
 
-    override fun getHeader() = fields.keys.plus(COUNT_PROPERTY).toTypedArray()
+    override fun getHeader() = fields.keys.plus(COUNT_PROPERTY)
 }
 
 data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
     override fun getValuesList() = values.map { it.toCsvValue() }
 
-    override fun getHeader() = keys.toTypedArray()
+    override fun getHeader() = keys
 }
 
 private fun JsonNode.toCsvValue() =
@@ -98,7 +105,24 @@ data class InsertionData(
 data class SequenceData(
     val sequenceKey: String,
     val sequence: String,
-)
+) {
+    fun writeAsString() = ">$sequenceKey\n$sequence"
+}
+
+fun Stream<SequenceData>.writeFastaTo(
+    response: HttpServletResponse,
+    dataVersion: DataVersion,
+) {
+    response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+    if (response.contentType == null) {
+        response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
+    }
+    response.outputStream.writer().use {
+        for (sequenceData in this) {
+            it.appendLine(sequenceData.writeAsString())
+        }
+    }
+}
 
 data class InfoData(
     val dataVersion: String,

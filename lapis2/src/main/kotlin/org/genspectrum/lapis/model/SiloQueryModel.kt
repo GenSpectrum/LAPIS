@@ -6,7 +6,6 @@ import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
-import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
@@ -15,6 +14,7 @@ import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
 import org.springframework.stereotype.Component
+import java.util.stream.Stream
 
 @Component
 class SiloQueryModel(
@@ -37,7 +37,7 @@ class SiloQueryModel(
 
     fun computeNucleotideMutationProportions(
         sequenceFilters: MutationProportionsRequest,
-    ): List<NucleotideMutationResponse> {
+    ): Stream<NucleotideMutationResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.mutations(
@@ -73,7 +73,7 @@ class SiloQueryModel(
 
     fun computeAminoAcidMutationProportions(
         sequenceFilters: MutationProportionsRequest,
-    ): List<AminoAcidMutationResponse> {
+    ): Stream<AminoAcidMutationResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aminoAcidMutations(
@@ -98,7 +98,7 @@ class SiloQueryModel(
         }
     }
 
-    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields): List<DetailsData> =
+    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
@@ -111,7 +111,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): List<NucleotideInsertionResponse> {
+    fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): Stream<NucleotideInsertionResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.nucleotideInsertions(
@@ -137,7 +137,7 @@ class SiloQueryModel(
         }
     }
 
-    fun getAminoAcidInsertions(sequenceFilters: SequenceFiltersRequest): List<AminoAcidInsertionResponse> {
+    fun getAminoAcidInsertions(sequenceFilters: SequenceFiltersRequest): Stream<AminoAcidInsertionResponse> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aminoAcidInsertions(
@@ -164,20 +164,18 @@ class SiloQueryModel(
         sequenceFilters: SequenceFiltersRequest,
         sequenceType: SequenceType,
         sequenceName: String,
-    ): String {
-        return siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.genomicSequence(
-                    sequenceType,
-                    sequenceName,
-                    sequenceFilters.orderByFields,
-                    sequenceFilters.limit,
-                    sequenceFilters.offset,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+    ) = siloClient.sendQuery(
+        SiloQuery(
+            SiloAction.genomicSequence(
+                sequenceType,
+                sequenceName,
+                sequenceFilters.orderByFields,
+                sequenceFilters.limit,
+                sequenceFilters.offset,
             ),
-        ).joinToString("\n") { ">${it.sequenceKey}\n${it.sequence}" }
-    }
+            siloFilterExpressionMapper.map(sequenceFilters),
+        ),
+    )
 
     fun getInfo(): InfoData = siloClient.callInfo()
 }

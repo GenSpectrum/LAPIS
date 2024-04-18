@@ -9,8 +9,8 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
 
     const { primaryKeys, sequences } = sequenceData(result);
 
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
+    expect(primaryKeys, 'primaryKeys').to.have.length(100);
+    expect(sequences, 'sequences').to.have.length(100);
     expect(primaryKeys[0]).to.equal('>key_3259931');
     expect(sequences[0]).to.have.length(29903);
   });

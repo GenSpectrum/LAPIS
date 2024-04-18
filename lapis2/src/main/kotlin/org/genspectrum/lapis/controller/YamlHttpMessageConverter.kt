@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component
 class YamlHttpMessageConverter(yamlObjectMapper: YamlObjectMapper) :
     AbstractJackson2HttpMessageConverter(
         yamlObjectMapper.objectMapper,
-        MediaType.parseMediaType(LapisMediaType.APPLICATION_YAML),
+        MediaType.parseMediaType(LapisMediaType.APPLICATION_YAML_VALUE),
     )

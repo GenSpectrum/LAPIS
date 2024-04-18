@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -15,9 +15,11 @@ import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import java.util.stream.Stream
 
 data class MockDataCollection(
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
@@ -29,20 +31,20 @@ data class MockDataCollection(
     enum class DataFormat(val fileFormat: String, val acceptHeader: String) {
         PLAIN_JSON("json", APPLICATION_JSON_VALUE),
         NESTED_JSON("json", APPLICATION_JSON_VALUE),
-        CSV("csv", TEXT_CSV),
-        TSV("tsv", TEXT_TSV),
+        CSV("csv", TEXT_CSV_VALUE),
+        TSV("tsv", TEXT_TSV_VALUE),
     }
 
     companion object {
         inline fun <reified Arg, Data> create(
-            crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> List<Data>,
+            crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> Stream<Data>,
             modelData: List<Data>,
             expectedJson: String,
             expectedCsv: String,
             expectedTsv: String,
         ) = MockDataCollection(
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns emptyList() },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
             expectedJson,
             expectedCsv,
             expectedTsv,
@@ -99,12 +101,22 @@ data class MockData(
     )
 
     companion object {
-        fun createForFastaEndpoint(fasta: String) =
-            MockData(
-                { modelMock -> every { modelMock.getGenomicSequence(any(), any(), any()) } returns "" },
-                { modelMock -> every { modelMock.getGenomicSequence(any(), any(), any()) } returns fasta },
-                fasta,
-            )
+        fun createForFastaEndpoint(
+            sequenceData: List<SequenceData>,
+            expectedFasta: String,
+        ) = MockData(
+            { modelMock -> every { modelMock.getGenomicSequence(any(), any(), any()) } returns Stream.empty() },
+            { modelMock ->
+                every {
+                    modelMock.getGenomicSequence(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } returns sequenceData.stream()
+            },
+            expectedFasta,
+        )
     }
 }
 
@@ -121,11 +133,16 @@ object MockDataForEndpoints {
         }
 
     val fastaMockData = MockData.createForFastaEndpoint(
-        """
+        sequenceData = listOf(
+            SequenceData("sequence1", "CAGAA"),
+            SequenceData("sequence2", "CAGAA"),
+        ),
+        expectedFasta = """
             >sequence1
             CAGAA
             >sequence2
             CAGAA
+            
         """.trimIndent(),
     )
 
@@ -149,10 +166,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             country,age,count
             Switzerland,42,0
+            
         """.trimIndent(),
         expectedTsv = """
            country	age	count
            Switzerland	42	0
+           
         """.trimIndent(),
     )
 
@@ -192,11 +211,13 @@ object MockDataForEndpoints {
             country,age,floatValue
             Switzerland,42,3.14
             Switzerland,43,
+            
         """.trimIndent(),
         expectedTsv = """
             country	age	floatValue
             Switzerland	42	3.14
             Switzerland	43	
+            
         """.trimIndent(),
     )
 
@@ -229,10 +250,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
             sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
+            
         """.trimIndent(),
         expectedTsv = """
             mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
             sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
+            
         """.trimIndent(),
     )
 
@@ -265,10 +288,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
             sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
+            
         """.trimIndent(),
         expectedTsv = """
             mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
             sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
+            
         """.trimIndent(),
     )
 
@@ -297,10 +322,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             insertion,count,insertedSymbols,position,sequenceName
             ins_1234:CAGAA,41,CAGAA,1234,sequenceName
+            
         """.trimIndent(),
         expectedTsv = """
             insertion	count	insertedSymbols	position	sequenceName
             ins_1234:CAGAA	41	CAGAA	1234	sequenceName
+            
         """.trimIndent(),
     )
 
@@ -329,10 +356,12 @@ object MockDataForEndpoints {
         expectedCsv = """
             insertion,count,insertedSymbols,position,sequenceName
             ins_ORF1a:1234:CAGAA,41,CAGAA,1234,ORF1a
+            
         """.trimIndent(),
         expectedTsv = """
             insertion	count	insertedSymbols	position	sequenceName
             ins_ORF1a:1234:CAGAA	41	CAGAA	1234	ORF1a
+            
         """.trimIndent(),
     )
 }

@@ -62,7 +62,7 @@ class ResponseBodyAdviceDataVersion(
         request: ServerHttpRequest,
         response: ServerHttpResponse,
     ): Any? {
-        response.headers.add(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        response.headers.set(LAPIS_DATA_VERSION, dataVersion.dataVersion)
 
         val isDownload = response.headers.getFirst(HttpHeaders.CONTENT_DISPOSITION)?.startsWith("attachment") ?: false
 

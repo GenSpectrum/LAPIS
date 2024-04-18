@@ -167,7 +167,7 @@ age,country,count
 57,Switzerland,10
 58,Switzerland,9
 59,Switzerland,9
-    `.trim()
+    `.trim() + '\n'
     );
   });
 
@@ -197,7 +197,7 @@ age	country	count
 57	Switzerland	10
 58	Switzerland	9
 59	Switzerland	9
-    `.trim()
+    `.trim() + '\n'
     );
   });
 });

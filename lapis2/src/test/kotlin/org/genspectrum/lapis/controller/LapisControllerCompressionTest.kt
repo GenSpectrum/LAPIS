@@ -4,9 +4,9 @@ import com.github.luben.zstd.ZstdInputStream
 import com.jayway.jsonpath.JsonPath
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.CSV
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.NESTED_JSON
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.PLAIN_JSON
@@ -306,7 +306,7 @@ private fun getFastaRequests(
         request = getSample("$endpoint?country=Switzerland")
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA;charset=UTF-8",
+        expectedContentType = "$TEXT_X_FASTA_VALUE;charset=UTF-8",
         expectedContentEncoding = compressionFormat,
     ),
     RequestScenario(
@@ -327,7 +327,7 @@ private fun getFastaRequests(
             .contentType(APPLICATION_JSON)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
-        expectedContentType = "$TEXT_X_FASTA;charset=UTF-8",
+        expectedContentType = "$TEXT_X_FASTA_VALUE;charset=UTF-8",
         expectedContentEncoding = compressionFormat,
     ),
 )
@@ -343,6 +343,6 @@ private fun getContentTypeForDataFormat(dataFormat: MockDataCollection.DataForma
     when (dataFormat) {
         PLAIN_JSON -> APPLICATION_JSON_VALUE
         NESTED_JSON -> APPLICATION_JSON_VALUE
-        CSV -> "$TEXT_CSV;charset=UTF-8"
-        TSV -> "$TEXT_TSV;charset=UTF-8"
+        CSV -> "$TEXT_CSV_VALUE;charset=UTF-8"
+        TSV -> "$TEXT_TSV_VALUE;charset=UTF-8"
     }

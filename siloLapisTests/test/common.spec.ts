@@ -65,12 +65,28 @@ describe('All endpoints', () => {
         );
       });
 
-      it('should return the lapis data version in the response', async () => {
+      it('should return the lapis data version header', async () => {
         const response = await get();
 
         expect(response.status).equals(200);
         expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
       });
+
+      if (!route.servesFasta) {
+        it('should return the lapis data version header for CSV data', async () => {
+          const response = await get(new URLSearchParams({ dataFormat: 'csv' }));
+
+          expect(response.status).equals(200);
+          expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
+        });
+
+        it('should return the lapis data version header for TSV data', async () => {
+          const response = await get(new URLSearchParams({ dataFormat: 'tsv' }));
+
+          expect(response.status).equals(200);
+          expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
+        });
+      }
 
       it('should return zstd compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'zstd' });

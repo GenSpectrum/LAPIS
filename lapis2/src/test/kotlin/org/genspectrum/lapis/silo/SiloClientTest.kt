@@ -84,7 +84,7 @@ class SiloClientTest(
         )
 
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
 
         assertThat(
             result,
@@ -112,7 +112,7 @@ class SiloClientTest(
         )
 
         val query = SiloQuery(action, StringEquals("theColumn", "theValue"))
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))
         assertThat(
@@ -157,7 +157,7 @@ class SiloClientTest(
             SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
             StringEquals("theColumn", "theValue"),
         )
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))
         assertThat(
@@ -183,7 +183,7 @@ class SiloClientTest(
         )
 
         val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))
         assertThat(
@@ -214,7 +214,7 @@ class SiloClientTest(
     @ParameterizedTest
     @MethodSource("getInsertionActions")
     fun `GIVEN server returns insertions response THEN response can be deserialized`(
-        action: SiloAction<List<InsertionData>>,
+        action: SiloAction<InsertionData>,
     ) {
         expectQueryRequestAndRespondWith(
             response()
@@ -228,7 +228,7 @@ class SiloClientTest(
         )
 
         val query = SiloQuery(action, True)
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))
         assertThat(
@@ -261,7 +261,7 @@ class SiloClientTest(
                 .withBody("""{"unexpectedKey":  "some unexpected message"}"""),
         )
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery) }
+        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery).toList() }
 
         assertThat(exception.statusCode, equalTo(500))
         assertThat(
@@ -279,7 +279,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "test message with details"}"""),
         )
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery) }
+        val exception = assertThrows<SiloException> { underTest.sendQuery(someQuery).toList() }
         assertThat(exception.statusCode, equalTo(432))
         assertThat(exception.message, equalTo("Error from SILO: test message with details"))
     }
@@ -293,7 +293,7 @@ class SiloClientTest(
                 .withBody("""{"unexpectedField":  "some message"}"""),
         )
 
-        val exception = assertThrows<RuntimeException> { underTest.sendQuery(someQuery) }
+        val exception = assertThrows<RuntimeException> { underTest.sendQuery(someQuery).toList() }
         assertThat(exception.message, containsString("Could not parse response from silo"))
     }
 
@@ -309,7 +309,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
         )
 
-        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery) }
+        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery).toList() }
 
         assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(retryAfterValue))
@@ -325,7 +325,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
         )
 
-        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery) }
+        val exception = assertThrows<SiloUnavailableException> { underTest.sendQuery(someQuery).toList() }
 
         assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(nullValue()))
@@ -351,9 +351,9 @@ class SiloClientTest(
             Times.exactly(1),
         )
 
-        underTest.sendQuery(query)
+        underTest.sendQuery(query).toList()
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        val exception = assertThrows<SiloException> { underTest.sendQuery(query).toList() }
         assertThat(exception.message, containsString(errorMessage))
     }
 
@@ -369,8 +369,8 @@ class SiloClientTest(
             Times.once(),
         )
 
-        val result1 = underTest.sendQuery(query)
-        val result2 = underTest.sendQuery(query)
+        val result1 = underTest.sendQuery(query).toList()
+        val result2 = underTest.sendQuery(query).toList()
 
         assertThat(result1, `is`(result2))
     }
@@ -391,11 +391,11 @@ class SiloClientTest(
         val query = queriesThatShouldBeCached[0]
 
         assertThat(dataVersion.dataVersion, `is`(nullValue()))
-        underTest.sendQuery(query)
+        underTest.sendQuery(query).toList()
         assertThat(dataVersion.dataVersion, `is`(dataVersionValue))
 
         dataVersion.dataVersion = null
-        underTest.sendQuery(query)
+        underTest.sendQuery(query).toList()
         assertThat(dataVersion.dataVersion, `is`(dataVersionValue))
     }
 
@@ -422,10 +422,10 @@ class SiloClientTest(
         val query = SiloQuery(SiloAction.mutations(orderByFields = listOf(orderByRandom)), True)
         assertThat(query.action.cacheable, `is`(true))
 
-        val result = underTest.sendQuery(query)
+        val result = underTest.sendQuery(query).toList()
         assertThat(result, hasSize(0))
 
-        val exception = assertThrows<SiloException> { underTest.sendQuery(query) }
+        val exception = assertThrows<SiloException> { underTest.sendQuery(query).toList() }
         assertThat(exception.message, containsString(errorMessage))
     }
 
@@ -506,8 +506,8 @@ class SiloClientAndCacheInvalidatorTest(
             Times.once(),
         )
 
-        siloClient.sendQuery(someQuery)
-        siloClient.sendQuery(someQuery)
+        siloClient.sendQuery(someQuery).toList()
+        siloClient.sendQuery(someQuery).toList()
         assertThat(dataVersion.dataVersion, `is`(firstDataVersion))
     }
 
@@ -521,7 +521,7 @@ class SiloClientAndCacheInvalidatorTest(
             Times.once(),
         )
 
-        val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery) }
+        val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery).toList() }
         assertThat(exception.message, containsString(errorMessage))
     }
 }

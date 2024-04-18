@@ -2,8 +2,9 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
@@ -25,6 +26,8 @@ import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
+import org.genspectrum.lapis.response.writeFastaTo
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,8 +47,9 @@ const val IS_MULTI_SEGMENT_SEQUENCE_EXPRESSION =
 class MultiSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
+    private val dataVersion: DataVersion,
 ) {
-    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
+    @GetMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun getAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -75,7 +79,8 @@ class MultiSegmentedSequenceController(
         @Offset
         @RequestParam
         offset: Int? = null,
-    ): String {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -94,9 +99,10 @@ class MultiSegmentedSequenceController(
             SequenceType.ALIGNED,
             segment,
         )
+            .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
+    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -105,7 +111,8 @@ class MultiSegmentedSequenceController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
-    ): String {
+        response: HttpServletResponse,
+    ) {
         requestContext.filter = request
 
         return siloQueryModel.getGenomicSequence(
@@ -113,9 +120,10 @@ class MultiSegmentedSequenceController(
             SequenceType.ALIGNED,
             segment,
         )
+            .writeFastaTo(response, dataVersion)
     }
 
-    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
+    @GetMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun getUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -145,7 +153,8 @@ class MultiSegmentedSequenceController(
         @Offset
         @RequestParam
         offset: Int? = null,
-    ): String {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -164,9 +173,10 @@ class MultiSegmentedSequenceController(
             SequenceType.UNALIGNED,
             segment,
         )
+            .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA])
+    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -175,7 +185,8 @@ class MultiSegmentedSequenceController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
-    ): String {
+        response: HttpServletResponse,
+    ) {
         requestContext.filter = request
 
         return siloQueryModel.getGenomicSequence(
@@ -183,5 +194,6 @@ class MultiSegmentedSequenceController(
             SequenceType.UNALIGNED,
             segment,
         )
+            .writeFastaTo(response, dataVersion)
     }
 }

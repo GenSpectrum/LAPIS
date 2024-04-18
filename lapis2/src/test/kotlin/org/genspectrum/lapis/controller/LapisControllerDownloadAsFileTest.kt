@@ -2,6 +2,7 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.awaitility.Awaitility.await
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.PLAIN_JSON
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
@@ -126,6 +127,11 @@ class LapisControllerDownloadAsFileTest(
         this.andExpect(header().string("Content-Disposition", attachmentWithFilename(expectedFilename)))
             .andReturn()
             .response
+            .also { response ->
+                await().until {
+                    response.isCommitted
+                }
+            }
             .contentAsString
             .apply(assertFileContentMatches)
     }

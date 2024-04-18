@@ -23,7 +23,7 @@ data class NucleotideMutationResponse(
         )
 
     override fun getHeader() =
-        arrayOf(
+        listOf(
             "mutation",
             "count",
             "proportion",
@@ -55,7 +55,7 @@ data class AminoAcidMutationResponse(
         )
 
     override fun getHeader() =
-        arrayOf(
+        listOf(
             "mutation",
             "count",
             "proportion",
@@ -83,7 +83,7 @@ data class NucleotideInsertionResponse(
         )
 
     override fun getHeader() =
-        arrayOf(
+        listOf(
             "insertion",
             "count",
             "insertedSymbols",
@@ -109,7 +109,7 @@ data class AminoAcidInsertionResponse(
         )
 
     override fun getHeader() =
-        arrayOf(
+        listOf(
             "insertion",
             "count",
             "insertedSymbols",

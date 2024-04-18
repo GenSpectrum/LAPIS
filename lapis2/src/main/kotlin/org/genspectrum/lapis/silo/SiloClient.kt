@@ -19,6 +19,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
+import java.util.stream.Stream
 
 private val log = KotlinLogging.logger {}
 
@@ -28,15 +29,21 @@ class SiloClient(
     private val dataVersion: DataVersion,
     private val requestContext: RequestContext,
 ) {
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): List<ResponseType> {
-        val result = cachedSiloClient.sendQuery(query)
-        dataVersion.dataVersion = result.dataVersion
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): Stream<ResponseType> {
+        val (currentDataVersion, queryResult) = when (query.action.cacheable) {
+            true -> cachedSiloClient.sendCachedQuery(query)
+                .let { it.dataVersion to it.queryResult.stream() }
+
+            else -> cachedSiloClient.sendQuery(query).let { it.dataVersion to it.queryResult }
+        }
+
+        dataVersion.dataVersion = currentDataVersion
 
         if (RequestContextHolder.getRequestAttributes() != null && requestContext.cached == null) {
             requestContext.cached = true
         }
 
-        return result.queryResult
+        return queryResult
     }
 
     fun callInfo(): InfoData {
@@ -60,7 +67,12 @@ class CachedSiloClient(
     private val httpClient = HttpClient.newHttpClient()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<ResponseType> {
+    fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> {
+        return sendQuery(query)
+            .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
+    }
+
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
         if (RequestContextHolder.getRequestAttributes() != null) {
             requestContext.cached = false
         }
@@ -89,8 +101,7 @@ class CachedSiloClient(
                             exception::class.toString() + " " + exception.message
                         throw RuntimeException(message, exception)
                     }
-                }
-                .toList(),
+                },
             dataVersion = getDataVersion(response),
         )
     }
@@ -172,7 +183,7 @@ class SiloUnavailableException(override val message: String, val retryAfter: Str
 
 data class WithDataVersion<ResponseType>(
     val dataVersion: String,
-    val queryResult: List<ResponseType>,
+    val queryResult: ResponseType,
 )
 
 data class SiloErrorResponse(val error: String, val message: String)

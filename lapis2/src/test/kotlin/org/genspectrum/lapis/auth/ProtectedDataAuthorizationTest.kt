@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.stream.Stream
 
 private const val NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR = """
 {
@@ -60,7 +61,7 @@ class ProtectedDataAuthorizationTest(
 
     @BeforeEach
     fun setUp() {
-        every { siloQueryModelMock.getAggregated(any()) } returns emptyList()
+        every { siloQueryModelMock.getAggregated(any()) } returns Stream.empty()
 
         every {
             lapisInfo.dataVersion
@@ -231,7 +232,7 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `GIVEN aggregated accessKey in details request where fields only contains primaryKey THEN access is granted`() {
-        every { siloQueryModelMock.getDetails(any()) } returns emptyList()
+        every { siloQueryModelMock.getDetails(any()) } returns Stream.empty()
 
         mockMvc.perform(
             postSample(DETAILS_ROUTE)

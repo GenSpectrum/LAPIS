@@ -106,7 +106,7 @@ division,pangoLineage,primaryKey
 Vaud,B.1.177.44,key_1001493
 Bern,B.1.177,key_1001920
 Solothurn,B.1,key_1002052
-    `.trim()
+    `.trim() + '\n'
     );
   });
 
@@ -126,7 +126,7 @@ division	pangoLineage	primaryKey
 Vaud	B.1.177.44	key_1001493
 Bern	B.1.177	key_1001920
 Solothurn	B.1	key_1002052
-    `.trim()
+    `.trim() + '\n'
     );
   });
 
@@ -190,7 +190,7 @@ Solothurn	B.1	key_1002052
 key_1001493
 key_1001920
 key_1002052
-    `.trim()
+    `.trim() + '\n'
     );
   });
 
