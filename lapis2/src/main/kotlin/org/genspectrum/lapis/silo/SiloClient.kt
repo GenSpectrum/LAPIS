@@ -22,15 +22,13 @@ import java.net.http.HttpResponse.BodyHandlers
 
 private val log = KotlinLogging.logger {}
 
-const val SILO_RESPONSE_MAX_LOG_LENGTH = 10_000
-
 @Component
 class SiloClient(
     private val cachedSiloClient: CachedSiloClient,
     private val dataVersion: DataVersion,
     private val requestContext: RequestContext,
 ) {
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): ResponseType {
+    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): List<ResponseType> {
         val result = cachedSiloClient.sendQuery(query)
         dataVersion.dataVersion = result.dataVersion
 
@@ -71,32 +69,44 @@ class CachedSiloClient(
 
         log.info { "Calling SILO: $queryJson" }
 
-        val response = send(URI("$siloUrl/query")) {
+        val response = send(
+            uri = URI("$siloUrl/query"),
+            bodyHandler = BodyHandlers.ofLines(),
+            tryToReadSiloErrorFromBody = { tryToReadSiloErrorFromString(it.findFirst().orElse("")) },
+        ) {
             it.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .POST(HttpRequest.BodyPublishers.ofString(queryJson))
         }
 
-        try {
-            return WithDataVersion(
-                queryResult = objectMapper.readValue(response.body(), query.action.typeReference).queryResult,
-                dataVersion = getDataVersion(response),
-            )
-        } catch (exception: Exception) {
-            val message = "Could not parse response from silo: " + exception::class.toString() + " " + exception.message
-            throw RuntimeException(message, exception)
-        }
+        return WithDataVersion(
+            queryResult = response.body()
+                .filter { it.isNotBlank() }
+                .map {
+                    try {
+                        objectMapper.readValue(it, query.action.typeReference)
+                    } catch (exception: Exception) {
+                        val message = "Could not parse response from silo: " +
+                            exception::class.toString() + " " + exception.message
+                        throw RuntimeException(message, exception)
+                    }
+                }
+                .toList(),
+            dataVersion = getDataVersion(response),
+        )
     }
 
     fun callInfo(): InfoData {
-        val response = send(URI("$siloUrl/info")) { it.GET() }
+        val response = send(URI("$siloUrl/info"), BodyHandlers.ofString(), ::tryToReadSiloErrorFromString) { it.GET() }
 
         return InfoData(getDataVersion(response))
     }
 
-    private fun send(
+    private fun <ResponseBodyType> send(
         uri: URI,
+        bodyHandler: HttpResponse.BodyHandler<ResponseBodyType>,
+        tryToReadSiloErrorFromBody: (ResponseBodyType) -> SiloErrorResponse,
         buildRequest: (HttpRequest.Builder) -> Unit,
-    ): HttpResponse<String> {
+    ): HttpResponse<ResponseBodyType> {
         val request = HttpRequest.newBuilder(uri)
             .apply(buildRequest)
             .apply {
@@ -107,7 +117,7 @@ class CachedSiloClient(
             .build()
 
         val response = try {
-            httpClient.send(request, BodyHandlers.ofString())
+            httpClient.send(request, bodyHandler)
         } catch (exception: Exception) {
             val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
             throw RuntimeException(message, exception)
@@ -116,31 +126,15 @@ class CachedSiloClient(
         if (!uri.toString().endsWith("info")) {
             log.info { "Response from SILO: ${response.statusCode()}" }
         }
-        log.debug {
-            val body = response.body()
-            val truncationPostfix = when {
-                body.length > SILO_RESPONSE_MAX_LOG_LENGTH -> "(...truncated)"
-                else -> ""
-            }
-            "Data from SILO: ${body.take(SILO_RESPONSE_MAX_LOG_LENGTH)}$truncationPostfix"
-        }
 
         if (response.statusCode() != 200) {
-            val siloErrorResponse = tryToReadSiloError(response)
+            val siloErrorResponse = tryToReadSiloErrorFromBody(response.body())
 
             if (response.statusCode() == 503) {
-                val message = siloErrorResponse?.message ?: "Unknown reason."
+                val message = siloErrorResponse.message
                 throw SiloUnavailableException(
                     "SILO is currently unavailable: $message",
                     response.headers().firstValue("retry-after").orElse(null),
-                )
-            }
-
-            if (siloErrorResponse == null) {
-                throw SiloException(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal Server Error",
-                    "Unexpected error from SILO: ${response.body()}",
                 )
             }
 
@@ -154,15 +148,20 @@ class CachedSiloClient(
         return response
     }
 
-    private fun tryToReadSiloError(response: HttpResponse<String>) =
+    private fun tryToReadSiloErrorFromString(responseBody: String) =
         try {
-            objectMapper.readValue<SiloErrorResponse>(response.body())
+            objectMapper.readValue<SiloErrorResponse>(responseBody)
         } catch (e: Exception) {
             log.error { "Failed to deserialize error response from SILO: $e" }
-            null
+
+            throw SiloException(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "Unexpected error from SILO: $responseBody",
+            )
         }
 
-    private fun getDataVersion(response: HttpResponse<String>): String {
+    private fun getDataVersion(response: HttpResponse<*>): String {
         return response.headers().firstValue("data-version").orElse("")
     }
 }
@@ -171,13 +170,9 @@ class SiloException(val statusCode: Int, val title: String, override val message
 
 class SiloUnavailableException(override val message: String, val retryAfter: String?) : Exception(message)
 
-data class SiloQueryResponse<ResponseType>(
-    val queryResult: ResponseType,
-)
-
 data class WithDataVersion<ResponseType>(
     val dataVersion: String,
-    val queryResult: ResponseType,
+    val queryResult: List<ResponseType>,
 )
 
 data class SiloErrorResponse(val error: String, val message: String)
