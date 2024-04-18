@@ -10,3 +10,5 @@ docker-compose.override.yml
 
 log/
 logs/
+
+**/node_modules/
