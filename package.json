@@ -1,0 +1,15 @@
+{
+  "name": "LAPIS",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Utility for the LAPIS repository",
+  "type": "module",
+  "devDependencies": {
+    "@commitlint/cli": "^19.2.2",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/types": "^19.0.3"
+  },
+  "scripts": {
+    "commitlint:last-commit": "commitlint --from=HEAD~1 --verbose"
+  }
+}
