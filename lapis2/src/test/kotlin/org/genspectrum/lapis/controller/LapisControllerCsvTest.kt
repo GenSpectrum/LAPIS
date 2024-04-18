@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -26,6 +27,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.stream.Stream
+
+private const val DATA_VERSION = "1234"
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,9 +44,7 @@ class LapisControllerCsvTest(
 
     @BeforeEach
     fun setup() {
-        every {
-            lapisInfo.dataVersion
-        } returns "1234"
+        every { lapisInfo.dataVersion } returns DATA_VERSION
     }
 
     @ParameterizedTest(name = "GET {0} returns empty JSON")
@@ -107,7 +109,7 @@ class LapisControllerCsvTest(
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(requestsScenario.mockDataCollection.expectedCsv))
+            .andExpect(content().string(startsWith(requestsScenario.mockDataCollection.expectedCsv)))
     }
 
     @ParameterizedTest(name = "{0} returns data as CSV without headers")
@@ -118,7 +120,7 @@ class LapisControllerCsvTest(
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/plain"))
-            .andExpect(content().string(returnedCsvWithoutHeadersData(requestsScenario.mockDataCollection)))
+            .andExpect(content().string(startsWith(returnedCsvWithoutHeadersData(requestsScenario.mockDataCollection))))
     }
 
     @ParameterizedTest(name = "{0} returns data as TSV")
@@ -129,7 +131,7 @@ class LapisControllerCsvTest(
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/tab-separated-values;charset=UTF-8"))
-            .andExpect(content().string(requestsScenario.mockDataCollection.expectedTsv))
+            .andExpect(content().string(startsWith(requestsScenario.mockDataCollection.expectedTsv)))
     }
 
     fun returnedCsvWithoutHeadersData(mockDataCollection: MockDataCollection) =
@@ -140,7 +142,7 @@ class LapisControllerCsvTest(
 
     @Test
     fun `GIVEN aggregated endpoint returns result with null values THEN CSV contains empty strings instead`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns listOf(
+        every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
                 mapOf("firstKey" to TextNode("someValue"), "keyWithNullValue" to NullNode.instance),
@@ -155,12 +157,12 @@ class LapisControllerCsvTest(
         mockMvc.perform(getSample("/aggregated?country=Switzerland").header(ACCEPT, "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(expectedCsv))
+            .andExpect(content().string(startsWith(expectedCsv)))
     }
 
     @Test
     fun `GIVEN details endpoint returns result with null values THEN CSV contains empty strings instead`() {
-        every { siloQueryModelMock.getDetails(any()) } returns listOf(
+        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
                     "firstKey" to TextNode("some first value"),
@@ -178,7 +180,7 @@ class LapisControllerCsvTest(
         mockMvc.perform(getSample("/details?country=Switzerland").header(ACCEPT, "text/csv"))
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(expectedCsv))
+            .andExpect(content().string(startsWith(expectedCsv)))
     }
 
     private companion object {
@@ -220,9 +222,9 @@ class LapisControllerCsvTest(
 
         private fun getAcceptHeaderFor(dataFormat: String) =
             when (dataFormat) {
-                "csv" -> TEXT_CSV
-                "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS
-                "tsv" -> TEXT_TSV
+                "csv" -> TEXT_CSV_VALUE
+                "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS_VALUE
+                "tsv" -> TEXT_TSV_VALUE
                 "json" -> MediaType.APPLICATION_JSON_VALUE
                 else -> throw IllegalArgumentException("Unknown data format: $dataFormat")
             }

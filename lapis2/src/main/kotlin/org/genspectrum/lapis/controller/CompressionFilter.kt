@@ -25,6 +25,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.filter.OncePerRequestFilter
+import java.io.IOException
 import java.io.OutputStream
 import java.nio.charset.Charset
 import java.util.Enumeration
@@ -154,8 +155,12 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
             maybeCompressingResponse,
         )
 
-        maybeCompressingResponse.outputStream.flush()
-        maybeCompressingResponse.outputStream.close()
+        try {
+            maybeCompressingResponse.outputStream.flush()
+            maybeCompressingResponse.outputStream.close()
+        } catch (e: IOException) {
+            log.debug { "Failed to flush and close the compressing output stream: ${e.message}" }
+        }
     }
 
     private fun getValidatedCompressionProperty(reReadableRequest: CachedBodyHttpServletRequest): Compression? {

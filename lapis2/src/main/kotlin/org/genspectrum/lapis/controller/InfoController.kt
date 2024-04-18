@@ -3,7 +3,7 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Operation
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML
+import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.LapisInfo
 import org.springframework.http.MediaType
@@ -29,7 +29,7 @@ class InfoController(
         return LapisInfo(siloInfo.dataVersion)
     }
 
-    @GetMapping(DATABASE_CONFIG_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE, APPLICATION_YAML])
+    @GetMapping(DATABASE_CONFIG_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE, APPLICATION_YAML_VALUE])
     @Operation(description = DATABASE_CONFIG_ENDPOINT_DESCRIPTION)
     fun getDatabaseConfigAsJson(): DatabaseConfig = databaseConfig
 

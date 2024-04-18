@@ -46,7 +46,7 @@ export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenc
 ).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {
-  const lines = serverResponse.split('\n');
+  const lines = serverResponse.split('\n').filter(line => line.length > 0);
   const primaryKeys = lines.filter(line => line.startsWith('>'));
   const sequences = lines.filter(line => !line.startsWith('>'));
 

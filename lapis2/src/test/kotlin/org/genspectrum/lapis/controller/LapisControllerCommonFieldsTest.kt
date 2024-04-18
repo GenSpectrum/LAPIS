@@ -29,6 +29,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.stream.Stream
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,7 +63,7 @@ class LapisControllerCommonFieldsTest(
                     listOf(OrderByField("country", Order.ASCENDING)),
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country"))
             .andExpect(status().isOk)
@@ -88,7 +89,7 @@ class LapisControllerCommonFieldsTest(
                     ),
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         val uppercaseField = FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()
         val lowercaseField = FIELD_WITH_UPPERCASE_LETTER.lowercase()
@@ -116,7 +117,7 @@ class LapisControllerCommonFieldsTest(
                     ),
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         val request = postSample(AGGREGATED_ROUTE)
             .content(
@@ -155,7 +156,7 @@ class LapisControllerCommonFieldsTest(
                     ),
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         val request = postSample(AGGREGATED_ROUTE)
             .content(
@@ -207,7 +208,7 @@ class LapisControllerCommonFieldsTest(
                     100,
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?limit=100"))
             .andExpect(status().isOk)
@@ -230,7 +231,7 @@ class LapisControllerCommonFieldsTest(
                     100,
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"limit": 100}""")
@@ -268,7 +269,7 @@ class LapisControllerCommonFieldsTest(
                     5,
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?offset=5"))
             .andExpect(status().isOk)
@@ -292,7 +293,7 @@ class LapisControllerCommonFieldsTest(
                     5,
                 ),
             )
-        } returns listOf(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
 
         val request = postSample(AGGREGATED_ROUTE)
             .content("""{"offset": 5}""")
@@ -327,7 +328,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                 ),
             )
-        } returns listOf(AggregationData(5, emptyMap()))
+        } returns Stream.of(AggregationData(5, emptyMap()))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideInsertions=ins_123:ABC,ins_other_segment:124:DEF"))
             .andExpect(status().isOk)
@@ -347,7 +348,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                 ),
             )
-        } returns listOf(AggregationData(5, emptyMap()))
+        } returns Stream.of(AggregationData(5, emptyMap()))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?aminoAcidInsertions=ins_gene1:123:ABC,ins_gene2:124:DEF"))
             .andExpect(status().isOk)

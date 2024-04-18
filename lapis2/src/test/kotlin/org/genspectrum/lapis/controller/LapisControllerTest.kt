@@ -36,6 +36,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.stream.Stream
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,7 +60,7 @@ class LapisControllerTest(
     fun `GET aggregated`() {
         every {
             siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(
+        } returns Stream.of(
             AggregationData(
                 0,
                 mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
@@ -79,7 +80,7 @@ class LapisControllerTest(
     fun `POST aggregated`() {
         every {
             siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(
+        } returns Stream.of(
             AggregationData(
                 0,
                 emptyMap(),
@@ -105,7 +106,7 @@ class LapisControllerTest(
                     listOf("country", "date"),
                 ),
             )
-        } returns listOf(
+        } returns Stream.of(
             AggregationData(
                 0,
                 mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date")),
@@ -131,7 +132,7 @@ class LapisControllerTest(
                     mapOf("country" to listOf("Switzerland", "Germany")),
                 ),
             )
-        } returns listOf(
+        } returns Stream.of(
             AggregationData(
                 0,
                 mapOf("country" to TextNode("Switzerland")),
@@ -157,7 +158,7 @@ class LapisControllerTest(
                     emptyList(),
                 ),
             )
-        } returns listOf(AggregationData(5, emptyMap()))
+        } returns Stream.of(AggregationData(5, emptyMap()))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideMutations=123A,124B"))
             .andExpect(status().isOk)
@@ -173,7 +174,7 @@ class LapisControllerTest(
                     listOf("country", "date"),
                 ),
             )
-        } returns listOf(
+        } returns Stream.of(
             AggregationData(
                 0,
                 mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date")),
@@ -306,7 +307,7 @@ class LapisControllerTest(
                         minProportion,
                     ),
                 )
-            } returns listOf(someNucleotideMutationProportion())
+            } returns Stream.of(someNucleotideMutationProportion())
         }
         if (endpoint == "/aminoAcidMutations") {
             every {
@@ -316,7 +317,7 @@ class LapisControllerTest(
                         minProportion,
                     ),
                 )
-            } returns listOf(someAminoAcidMutationProportion())
+            } returns Stream.of(someAminoAcidMutationProportion())
         }
     }
 
@@ -379,13 +380,13 @@ class LapisControllerTest(
                     siloQueryModelMock.getNucleotideInsertions(
                         sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                     )
-                } returns listOf(someNucleotideInsertion())
+                } returns Stream.of(someNucleotideInsertion())
             }
 
             AMINO_ACID_INSERTIONS_ROUTE -> {
                 every {
                     siloQueryModelMock.getAminoAcidInsertions(sequenceFiltersRequest(mapOf("country" to "Switzerland")))
-                } returns listOf(someAminoAcidInsertion())
+                } returns Stream.of(someAminoAcidInsertion())
             }
 
             else -> throw IllegalArgumentException("Unknown endpoint: $endpoint")
@@ -426,7 +427,7 @@ class LapisControllerTest(
     fun `GET details`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland"))
             .andExpect(status().isOk)
@@ -445,7 +446,7 @@ class LapisControllerTest(
                     listOf("country", "date"),
                 ),
             )
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
 
         mockMvc.perform(getSample("$DETAILS_ROUTE?country=Switzerland&fields=country&fields=date"))
             .andExpect(status().isOk)
@@ -457,7 +458,7 @@ class LapisControllerTest(
     fun `POST details`() {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
 
         val request = postSample(DETAILS_ROUTE)
             .content("""{"country": "Switzerland"}""")
@@ -480,7 +481,7 @@ class LapisControllerTest(
                     listOf("country", "date"),
                 ),
             )
-        } returns listOf(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
 
         val request = postSample(DETAILS_ROUTE)
             .content("""{"country": "Switzerland", "fields": ["country", "date"]}""")

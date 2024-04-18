@@ -171,6 +171,7 @@ annotation class LapisAminoAcidInsertionsResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(type = "string"))],
 )
 annotation class LapisAlignedAminoAcidSequenceResponse
 
@@ -178,6 +179,7 @@ annotation class LapisAlignedAminoAcidSequenceResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(type = "string"))],
 )
 annotation class LapisAlignedSingleSegmentedNucleotideSequenceResponse
 
@@ -185,6 +187,7 @@ annotation class LapisAlignedSingleSegmentedNucleotideSequenceResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(type = "string"))],
 )
 annotation class LapisUnalignedSingleSegmentedNucleotideSequenceResponse
 
@@ -192,6 +195,7 @@ annotation class LapisUnalignedSingleSegmentedNucleotideSequenceResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(type = "string"))],
 )
 annotation class LapisAlignedMultiSegmentedNucleotideSequenceResponse
 
@@ -199,8 +203,19 @@ annotation class LapisAlignedMultiSegmentedNucleotideSequenceResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(type = "string"))],
 )
 annotation class LapisUnalignedMultiSegmentedNucleotideSequenceResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@Operation(
+    responses = [ApiResponse(responseCode = "200", content = [Content(schema = Schema(type = "string"))])],
+)
+annotation class StringResponseOperation(
+    @get:AliasFor(annotation = Operation::class, attribute = "description") val description: String = "",
+    @get:AliasFor(annotation = Operation::class, attribute = "operationId") val operationId: String,
+)
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.controller
 
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
 
 const val DETAILS_ENDPOINT_DESCRIPTION = """Returns the specified metadata fields of sequences matching the filter."""
 const val AGGREGATED_ENDPOINT_DESCRIPTION =
@@ -53,7 +53,7 @@ const val OFFSET_DESCRIPTION =
     This is useful for pagination in combination with \"limit\"."""
 const val FORMAT_DESCRIPTION = """The data format of the response.
 Alternatively, the data format can be specified by setting the \"Accept\"-header.
-You can include the parameter to return the CSV/TSV without headers: "$TEXT_CSV_WITHOUT_HEADERS". 
+You can include the parameter to return the CSV/TSV without headers: "$TEXT_CSV_WITHOUT_HEADERS_VALUE". 
 When both are specified, the request parameter takes precedence over the header."""
 
 private const val MAYBE_DESCRIPTION = """

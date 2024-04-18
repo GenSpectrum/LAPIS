@@ -2,7 +2,7 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML
+import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.InfoData
 import org.hamcrest.Matchers.startsWith
@@ -52,9 +52,9 @@ class InfoControllerTest(
               opennessLevel: "OPEN"
         """.trimIndent()
 
-        mockMvc.perform(getSample(DATABASE_CONFIG_ROUTE).accept(APPLICATION_YAML))
+        mockMvc.perform(getSample(DATABASE_CONFIG_ROUTE).accept(APPLICATION_YAML_VALUE))
             .andExpect(status().isOk)
-            .andExpect(content().contentType(APPLICATION_YAML))
+            .andExpect(content().contentType(APPLICATION_YAML_VALUE))
             .andExpect(content().string(startsWith(yamlStart)))
     }
 
