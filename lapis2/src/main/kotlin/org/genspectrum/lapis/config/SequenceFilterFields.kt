@@ -88,6 +88,13 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
             ),
         )
 
+        MetadataType.BOOLEAN -> listOf(
+            SequenceFilterField(
+                name = databaseMetadata.name,
+                type = SequenceFilterFieldType.Boolean,
+            ),
+        )
+
         MetadataType.NUCLEOTIDE_INSERTION -> emptyList()
         MetadataType.AMINO_ACID_INSERTION -> emptyList()
     }
@@ -112,6 +119,8 @@ sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     data object PangoLineage : SequenceFilterFieldType("string")
 
     data object Date : SequenceFilterFieldType("string")
+
+    data object Boolean : SequenceFilterFieldType("boolean")
 
     data object VariantQuery : SequenceFilterFieldType("string")
 

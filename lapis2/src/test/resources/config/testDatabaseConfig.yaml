@@ -12,6 +12,8 @@ schema:
       type: string
     - name: pangoLineage
       type: pango_lineage
+    - name: test_boolean_column
+      type: boolean
     - name: nucInsertion
       type: insertion
     - name: aaInsertion

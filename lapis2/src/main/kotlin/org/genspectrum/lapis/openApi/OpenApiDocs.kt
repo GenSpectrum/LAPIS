@@ -330,6 +330,7 @@ private fun mapToOpenApiType(type: MetadataType): String =
         MetadataType.FLOAT -> "number"
         MetadataType.NUCLEOTIDE_INSERTION -> "string"
         MetadataType.AMINO_ACID_INSERTION -> "string"
+        MetadataType.BOOLEAN -> "boolean"
     }
 
 private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFilterFields) =

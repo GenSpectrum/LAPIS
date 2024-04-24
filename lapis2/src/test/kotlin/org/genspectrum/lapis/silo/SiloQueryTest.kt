@@ -553,24 +553,50 @@ class SiloQueryTest {
                         ),
                     ),
                     """
-                {
-                    "type": "N-Of",
-                    "numberOfMatchers": 2,
-                    "matchExactly": true,
-                    "children": [
                         {
-                        "type": "StringEquals",
-                        "column": "theColumn",
-                        "value": "theValue"
-                        },
-                        {
-                        "type": "StringEquals",
-                        "column": "theOtherColumn",
-                        "value": "theOtherValue"
+                            "type": "N-Of",
+                            "numberOfMatchers": 2,
+                            "matchExactly": true,
+                            "children": [
+                                {
+                                "type": "StringEquals",
+                                "column": "theColumn",
+                                "value": "theValue"
+                                },
+                                {
+                                "type": "StringEquals",
+                                "column": "theOtherColumn",
+                                "value": "theOtherValue"
+                                }
+                            ]
                         }
-                    ]
-                }
-                """,
+                    """,
+                ),
+                Arguments.of(
+                    BooleanEquals(
+                        column = "theColumn",
+                        value = true,
+                    ),
+                    """
+                        {
+                            "type": "BooleanEquals",
+                            "column": "theColumn",
+                            "value": true
+                        }
+                    """,
+                ),
+                Arguments.of(
+                    BooleanEquals(
+                        column = "theColumn",
+                        value = null,
+                    ),
+                    """
+                        {
+                            "type": "BooleanEquals",
+                            "column": "theColumn",
+                            "value": null
+                        }
+                    """,
                 ),
             )
     }

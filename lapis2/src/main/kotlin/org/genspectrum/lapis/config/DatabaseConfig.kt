@@ -33,6 +33,9 @@ enum class MetadataType {
     @JsonProperty("float")
     FLOAT,
 
+    @JsonProperty("boolean")
+    BOOLEAN,
+
     @JsonProperty("insertion")
     NUCLEOTIDE_INSERTION,
 

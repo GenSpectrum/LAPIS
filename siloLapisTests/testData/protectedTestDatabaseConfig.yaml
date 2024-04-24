@@ -21,6 +21,8 @@ schema:
       type: int
     - name: qc_value
       type: float
+    - name: test_boolean_column
+      type: boolean
     - name: insertions
       type: insertion
     - name: aaInsertions

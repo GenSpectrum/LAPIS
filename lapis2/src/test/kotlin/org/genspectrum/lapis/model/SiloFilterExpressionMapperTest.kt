@@ -15,6 +15,7 @@ import org.genspectrum.lapis.request.SequenceFilters
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.BooleanEquals
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.FloatEquals
@@ -448,6 +449,21 @@ class SiloFilterExpressionMapperTest {
         )
     }
 
+    @Test
+    fun `GIVEN a boolean equals with non-boolean value THEN should throw an error`() {
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "test_boolean_column" to "not a boolean",
+            ),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("'not a boolean' is not a valid boolean."),
+        )
+    }
+
     @ParameterizedTest
     @MethodSource("getFilterParametersWithMultipleValues")
     fun `GIVEN multiple value for date field THEN throws an error`(
@@ -653,6 +669,17 @@ class SiloFilterExpressionMapperTest {
                         Or(
                             PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
                             PangoLineageEquals("pangoLineage", "B.1.2.3", includeSublineages = false),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "test_boolean_column" to listOf("true", "false"),
+                    ),
+                    And(
+                        Or(
+                            BooleanEquals("test_boolean_column", true),
+                            BooleanEquals("test_boolean_column", false),
                         ),
                     ),
                 ),
