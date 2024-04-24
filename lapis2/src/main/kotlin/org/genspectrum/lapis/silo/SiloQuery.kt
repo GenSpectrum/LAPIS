@@ -216,6 +216,8 @@ sealed class SiloFilterExpression(val type: String)
 
 data class StringEquals(val column: String, val value: String) : SiloFilterExpression("StringEquals")
 
+data class BooleanEquals(val column: String, val value: Boolean?) : SiloFilterExpression("BooleanEquals")
+
 data class PangoLineageEquals(val column: String, val value: String, val includeSublineages: Boolean) :
     SiloFilterExpression("PangoLineage")
 

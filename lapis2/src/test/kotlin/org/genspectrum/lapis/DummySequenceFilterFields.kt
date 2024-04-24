@@ -31,6 +31,7 @@ val dummySequenceFilterFields = SequenceFilterFields(
         "floatField" to SequenceFilterFieldType.Float,
         "floatFieldTo" to SequenceFilterFieldType.FloatTo("floatField"),
         "floatFieldFrom" to SequenceFilterFieldType.FloatFrom("floatField"),
+        "test_boolean_column" to SequenceFilterFieldType.Boolean,
     )
         .map { (name, type) -> name.lowercase() to SequenceFilterField(name, type) }
         .toMap(),

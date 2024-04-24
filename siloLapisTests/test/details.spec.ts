@@ -20,6 +20,7 @@ describe('The /details endpoint', () => {
       pangoLineage: 'B.1.617.2',
       qcValue: undefined,
       region: undefined,
+      testBooleanColumn: undefined,
     });
   });
 
@@ -40,6 +41,7 @@ describe('The /details endpoint', () => {
       pangoLineage: 'B.1.617.2',
       qcValue: 0.96,
       region: 'Europe',
+      testBooleanColumn: false,
     });
   });
 
@@ -140,6 +142,7 @@ Solothurn	B.1	key_1002052
       pangoLineage: 'P.1',
       qcValue: 0.93,
       region: 'Europe',
+      testBooleanColumn: undefined,
     };
 
     const result = await lapisClient.postDetails1({
@@ -162,6 +165,7 @@ Solothurn	B.1	key_1002052
       pangoLineage: 'AY.43',
       qcValue: 0.98,
       region: 'Europe',
+      testBooleanColumn: true,
     };
 
     const result = await lapisClient.postDetails1({

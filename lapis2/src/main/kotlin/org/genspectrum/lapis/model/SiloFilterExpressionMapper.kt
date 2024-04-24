@@ -13,6 +13,7 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.BooleanEquals
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.FloatEquals
@@ -73,6 +74,7 @@ class SiloFilterExpressionMapper(
                 Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
                 Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
                 Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
+                Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
             }
         }
 
@@ -109,6 +111,7 @@ class SiloFilterExpressionMapper(
             SequenceFilterFieldType.Float -> Pair(field.name, Filter.FloatEquals)
             is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
+            SequenceFilterFieldType.Boolean -> Pair(field.name, Filter.BooleanEquals)
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -168,6 +171,20 @@ class SiloFilterExpressionMapper(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ) = Or(values[0].values.map { StringEquals(siloColumnName, it) })
+
+    private fun mapToBooleanEqualsFilters(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ) = Or(
+        values[0].values.map {
+            val value = try {
+                it.lowercase().toBooleanStrict()
+            } catch (e: IllegalArgumentException) {
+                throw BadRequestException("'$it' is not a valid boolean.")
+            }
+            BooleanEquals(siloColumnName, value)
+        },
+    )
 
     private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
         if (variantQuery.isBlank()) {
@@ -382,6 +399,7 @@ class SiloFilterExpressionMapper(
         IntBetween,
         FloatEquals,
         FloatBetween,
+        BooleanEquals,
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage)

@@ -26,6 +26,7 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
                 DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
+                DatabaseMetadata(name = "test_boolean_column", type = MetadataType.BOOLEAN),
                 DatabaseMetadata(name = "nucInsertion", type = MetadataType.NUCLEOTIDE_INSERTION),
                 DatabaseMetadata(name = "aaInsertion", type = MetadataType.AMINO_ACID_INSERTION),
             ),

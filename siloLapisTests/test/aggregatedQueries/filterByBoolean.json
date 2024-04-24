@@ -1,0 +1,11 @@
+{
+  "testCaseName": "boolean equals",
+  "lapisRequest": {
+    "testBooleanColumn": true
+  },
+  "expected": [
+    {
+      "count": 34
+    }
+  ]
+}
