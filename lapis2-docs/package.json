@@ -14,13 +14,13 @@
         "e2e": "playwright test"
     },
     "dependencies": {
-        "@astrojs/react": "^3.3.0",
+        "@astrojs/react": "^3.3.1",
         "@astrojs/starlight": "^0.20.1",
         "@astrojs/starlight-tailwind": "^2.0.2",
         "@astrojs/tailwind": "^5.1.0",
         "@types/react": "^18.2.79",
         "@types/react-dom": "^18.2.25",
-        "astro": "^4.6.3",
+        "astro": "^4.6.4",
         "change-case": "^5.4.4",
         "daisyui": "^4.10.2",
         "js-yaml": "^4.1.0",
