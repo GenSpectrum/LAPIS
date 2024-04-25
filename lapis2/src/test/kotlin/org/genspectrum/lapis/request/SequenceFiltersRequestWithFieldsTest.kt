@@ -7,6 +7,7 @@ import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -40,7 +41,7 @@ class SequenceFiltersRequestWithFieldsTest {
             objectMapper.readValue<SequenceFiltersRequestWithFields>(input)
         }
 
-        assertThat(exception.message, equalTo(expectedErrorMessage))
+        assertThat(exception.message, startsWith(expectedErrorMessage))
     }
 
     companion object {

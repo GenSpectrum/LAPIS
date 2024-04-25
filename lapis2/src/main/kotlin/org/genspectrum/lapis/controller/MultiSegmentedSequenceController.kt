@@ -30,6 +30,7 @@ import org.genspectrum.lapis.response.writeFastaTo
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -102,7 +103,11 @@ class MultiSegmentedSequenceController(
             .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
+    @PostMapping(
+        "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}",
+        produces = [TEXT_X_FASTA_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAlignedMultiSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)
@@ -176,7 +181,11 @@ class MultiSegmentedSequenceController(
             .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}", produces = [TEXT_X_FASTA_VALUE])
+    @PostMapping(
+        "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}",
+        produces = [TEXT_X_FASTA_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisUnalignedMultiSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @PathVariable(name = "segment", required = true)

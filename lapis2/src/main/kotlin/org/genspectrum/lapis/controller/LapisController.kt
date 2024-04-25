@@ -244,7 +244,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAggregated)
     }
 
-    @PostMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        AGGREGATED_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAggregatedResponse
     @Operation(
         operationId = "postAggregated",
@@ -259,7 +263,11 @@ class LapisController(
         return LapisResponse(siloQueryModel.getAggregated(request).toList())
     }
 
-    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        AGGREGATED_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "postAggregatedAsCsv",
@@ -274,7 +282,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAggregated)
     }
 
-    @PostMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        AGGREGATED_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AGGREGATED_ENDPOINT_DESCRIPTION,
         operationId = "postAggregatedAsTsv",
@@ -452,7 +464,11 @@ class LapisController(
         )
     }
 
-    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_MUTATIONS_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisNucleotideMutationsResponse
     @Operation(
         operationId = "postNucleotideMutations",
@@ -468,7 +484,11 @@ class LapisController(
         return LapisResponse(result.toList())
     }
 
-    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_MUTATIONS_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideMutationsAsCsv",
@@ -489,7 +509,11 @@ class LapisController(
         )
     }
 
-    @PostMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_MUTATIONS_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideMutationsAsTsv",
@@ -669,7 +693,11 @@ class LapisController(
         )
     }
 
-    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        AMINO_ACID_MUTATIONS_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAminoAcidMutationsResponse
     @Operation(
         operationId = "postAminoAcidMutations",
@@ -685,7 +713,11 @@ class LapisController(
         return LapisResponse(result.toList())
     }
 
-    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        AMINO_ACID_MUTATIONS_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidMutationsAsCsv",
@@ -708,7 +740,11 @@ class LapisController(
         )
     }
 
-    @PostMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        AMINO_ACID_MUTATIONS_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidMutationsAsCsv",
@@ -882,7 +918,11 @@ class LapisController(
         return writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getDetails)
     }
 
-    @PostMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        DETAILS_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisDetailsResponse
     @Operation(
         operationId = "postDetails",
@@ -897,7 +937,11 @@ class LapisController(
         return LapisResponse(siloQueryModel.getDetails(request).toList())
     }
 
-    @PostMapping(DETAILS_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        DETAILS_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "postDetailsAsCsv",
@@ -912,7 +956,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getDetails)
     }
 
-    @PostMapping(DETAILS_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        DETAILS_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = DETAILS_ENDPOINT_DESCRIPTION,
         operationId = "postDetailsAsTsv",
@@ -1079,7 +1127,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getNucleotideInsertions)
     }
 
-    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_INSERTIONS_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisNucleotideInsertionsResponse
     @Operation(
         operationId = "postNucleotideInsertions",
@@ -1095,7 +1147,11 @@ class LapisController(
         return LapisResponse(result.toList())
     }
 
-    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_INSERTIONS_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideInsertionsAsCsv",
@@ -1112,7 +1168,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getNucleotideInsertions)
     }
 
-    @PostMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        NUCLEOTIDE_INSERTIONS_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postNucleotideInsertionsAsTsv",
@@ -1279,7 +1339,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        AMINO_ACID_INSERTIONS_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAminoAcidInsertionsResponse
     @Operation(
         operationId = "postAminoAcidInsertions",
@@ -1295,7 +1359,11 @@ class LapisController(
         return LapisResponse(result.toList())
     }
 
-    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV_VALUE])
+    @PostMapping(
+        AMINO_ACID_INSERTIONS_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidInsertionsAsCsv",
@@ -1310,7 +1378,11 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @PostMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV_VALUE])
+    @PostMapping(
+        AMINO_ACID_INSERTIONS_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @StringResponseOperation(
         description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidInsertionsAsTsv",
@@ -1374,7 +1446,11 @@ class LapisController(
             .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_VALUE])
+    @PostMapping(
+        "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}",
+        produces = [TEXT_X_FASTA_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAlignedAminoAcidSequenceResponse
     fun postAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)

@@ -41,7 +41,7 @@ fun parseCommonFields(
         null -> emptyList()
         is ArrayNode -> nucleotideMutationsNode.map { codec.treeToValue(it, NucleotideMutation::class.java) }
         else -> throw BadRequestException(
-            "nucleotideMutations must be an array or null",
+            "nucleotideMutations must be an array or null, ${butWas(nucleotideMutationsNode)}",
         )
     }
 
@@ -49,7 +49,7 @@ fun parseCommonFields(
         null -> emptyList()
         is ArrayNode -> aminoAcidMutationsNode.map { codec.treeToValue(it, AminoAcidMutation::class.java) }
         else -> throw BadRequestException(
-            "aminoAcidMutations must be an array or null",
+            "aminoAcidMutations must be an array or null, ${butWas(aminoAcidMutationsNode)}",
         )
     }
 
@@ -57,7 +57,7 @@ fun parseCommonFields(
         null -> emptyList()
         is ArrayNode -> nucleotideInsertionsNode.map { codec.treeToValue(it, NucleotideInsertion::class.java) }
         else -> throw BadRequestException(
-            "nucleotideInsertions must be an array or null",
+            "nucleotideInsertions must be an array or null, ${butWas(nucleotideInsertionsNode)}",
         )
     }
 
@@ -65,7 +65,7 @@ fun parseCommonFields(
         null -> emptyList()
         is ArrayNode -> aminoAcidInsertionsNode.map { codec.treeToValue(it, AminoAcidInsertion::class.java) }
         else -> throw BadRequestException(
-            "aminoAcidInsertions must be an array or null",
+            "aminoAcidInsertions must be an array or null, ${butWas(aminoAcidInsertionsNode)}",
         )
     }
 
@@ -73,7 +73,7 @@ fun parseCommonFields(
         null -> emptyList()
         is ArrayNode -> orderByNode.map { codec.treeToValue(it, OrderByField::class.java) }
         else -> throw BadRequestException(
-            "orderBy must be an array or null",
+            "orderBy must be an array or null, ${butWas(orderByNode)}",
         )
     }
 
@@ -81,14 +81,14 @@ fun parseCommonFields(
     val limit = when (limitNode?.nodeType) {
         null -> null
         JsonNodeType.NULL, JsonNodeType.NUMBER -> limitNode.asInt()
-        else -> throw BadRequestException("limit must be a number or null")
+        else -> throw BadRequestException("limit must be a number or null, ${butWas(limitNode)}")
     }
 
     val offsetNode = node.get(OFFSET_PROPERTY)
     val offset = when (offsetNode?.nodeType) {
         null -> null
         JsonNodeType.NULL, JsonNodeType.NUMBER -> offsetNode.asInt()
-        else -> throw BadRequestException("offset must be a number or null")
+        else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
     }
 
     val sequenceFilters = node.fields()
@@ -106,6 +106,8 @@ fun parseCommonFields(
         offset = offset,
     )
 }
+
+private fun butWas(jsonNode: JsonNode) = "but was $jsonNode (${jsonNode.nodeType})"
 
 data class ParsedCommonFields(
     val nucleotideMutations: List<NucleotideMutation>,

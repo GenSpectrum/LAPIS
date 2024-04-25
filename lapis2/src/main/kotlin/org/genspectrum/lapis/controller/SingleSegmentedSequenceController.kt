@@ -30,6 +30,7 @@ import org.genspectrum.lapis.response.writeFastaTo
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -99,7 +100,11 @@ class SingleSegmentedSequenceController(
             .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_VALUE])
+    @PostMapping(
+        ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisAlignedSingleSegmentedNucleotideSequenceResponse
     fun postAlignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
@@ -167,7 +172,11 @@ class SingleSegmentedSequenceController(
             .writeFastaTo(response, dataVersion)
     }
 
-    @PostMapping(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, produces = [TEXT_X_FASTA_VALUE])
+    @PostMapping(
+        UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
     @LapisUnalignedSingleSegmentedNucleotideSequenceResponse
     fun postUnalignedNucleotideSequence(
         @Parameter(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
 import mu.KotlinLogging
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -16,8 +17,22 @@ import java.io.InputStream
 
 private val log = KotlinLogging.logger {}
 
-class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper: ObjectMapper) :
-    HttpServletRequestWrapper(request) {
+class CachedBodyHttpServletRequest private constructor(
+    request: HttpServletRequest,
+    val objectMapper: ObjectMapper,
+) : HttpServletRequestWrapper(request) {
+    companion object {
+        fun from(
+            request: HttpServletRequest,
+            objectMapper: ObjectMapper,
+        ): CachedBodyHttpServletRequest {
+            if (request is CachedBodyHttpServletRequest) {
+                return request
+            }
+            return CachedBodyHttpServletRequest(request, objectMapper)
+        }
+    }
+
     private val cachedBody: ByteArray by lazy {
         val inputStream: InputStream = request.inputStream
         val byteArrayOutputStream = ByteArrayOutputStream()
@@ -28,14 +43,21 @@ class CachedBodyHttpServletRequest(request: HttpServletRequest, val objectMapper
 
     private val parsedBody: Map<String, JsonNode> by lazy {
         try {
-            objectMapper.readValue(inputStream)
+            when (contentType) {
+                MediaType.APPLICATION_FORM_URLENCODED_VALUE ->
+                    parameterMap
+                        .mapValues { it.value.toList() }
+                        .mapValues(::tryToGuessTheType)
+
+                else -> objectMapper.readValue(inputStream)
+            }
         } catch (exception: Exception) {
             if (method != HttpMethod.GET.name()) {
-                log.warn { "Failed to read from request body: ${exception.message}, contentLength $contentLength" }
+                log.warn { "Failed to read from request body: ${exception.message}" }
                 log.debug { exception.stackTraceToString() }
             } else {
                 log.warn {
-                    "Tried to read request body of GET request: ${exception.message}, contentLength $contentLength"
+                    "Tried to read request body of GET request: ${exception.message}"
                 }
             }
             emptyMap()

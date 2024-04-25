@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -69,9 +70,9 @@ class LapisControllerDownloadAsFileTest(
             )
     }
 
-    @ParameterizedTest(name = "POST data from {0} as file")
+    @ParameterizedTest(name = "POST JSON data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
-    fun `POST data as file`(scenario: DownloadAsFileScenario) {
+    fun `POST JSON data as file`(scenario: DownloadAsFileScenario) {
         scenario.mockData.mockWithData(siloQueryModelMock)
 
         val maybeDataFormat = when {
@@ -81,6 +82,28 @@ class LapisControllerDownloadAsFileTest(
         val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat }"""
 
         mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = scenario.expectedFilename,
+                assertFileContentMatches = scenario.mockData.assertDataMatches,
+            )
+    }
+
+    @ParameterizedTest(name = "POST form url encoded data from {0} as file")
+    @MethodSource("getDownloadAsFileScenarios")
+    fun `POST form url encoded data as file`(scenario: DownloadAsFileScenario) {
+        scenario.mockData.mockWithData(siloQueryModelMock)
+
+        val request = postSample(scenario.endpoint)
+            .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
+            .also {
+                if (scenario.requestedDataFormat != null) {
+                    it.param(FORMAT_PROPERTY, scenario.requestedDataFormat)
+                }
+            }
+            .contentType(APPLICATION_FORM_URLENCODED)
+
+        mockMvc.perform(request)
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
                 expectedFilename = scenario.expectedFilename,
@@ -293,12 +316,23 @@ data class DownloadCompressedFileScenario(
                     expectedContentType = expectedContentType,
                 ),
                 DownloadCompressedFileScenario(
-                    description = "POST $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    description = "POST JSON $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
                     request = postSample(endpoint).content(
                         """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" }""",
                     )
                         .contentType(APPLICATION_JSON)
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = expectedFilename,
+                    expectedContentType = expectedContentType,
+                ),
+                DownloadCompressedFileScenario(
+                    description = "POST form url encoded $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    mockData = mockData,
+                    request = postSample(endpoint)
+                        .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
+                        .param(COMPRESSION_PROPERTY, compressionFormat)
+                        .contentType(APPLICATION_FORM_URLENCODED)
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
                     expectedContentType = expectedContentType,

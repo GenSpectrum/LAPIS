@@ -31,6 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_LENGTH
+import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.web.servlet.MockMvc
@@ -177,6 +178,11 @@ class LapisControllerCompressionTest(
                     .content("""{"compression": "$INVALID_COMPRESSION_FORMAT"}""")
                     .contentType(APPLICATION_JSON),
             ),
+            Arguments.of(
+                postSample(AGGREGATED.pathSegment)
+                    .param("compression", INVALID_COMPRESSION_FORMAT)
+                    .contentType(APPLICATION_FORM_URLENCODED),
+            ),
         )
 
         @JvmStatic
@@ -264,7 +270,7 @@ fun getRequests(
         expectedContentEncoding = compressionFormat,
     ),
     RequestScenario(
-        callDescription = "POST $endpoint as $dataFormat with request parameter",
+        callDescription = "POST JSON $endpoint as $dataFormat with request parameter",
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
         request = postSample(endpoint)
             .content(
@@ -276,11 +282,35 @@ fun getRequests(
         expectedContentEncoding = null,
     ),
     RequestScenario(
-        callDescription = "POST $endpoint as $dataFormat with accept header",
+        callDescription = "POST JSON $endpoint as $dataFormat with accept header",
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
         request = postSample(endpoint)
             .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
             .contentType(APPLICATION_JSON)
+            .header(ACCEPT_ENCODING, compressionFormat),
+        compressionFormat = compressionFormat,
+        expectedContentType = getContentTypeForDataFormat(dataFormat),
+        expectedContentEncoding = compressionFormat,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
+        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .param("dataFormat", dataFormat.fileFormat)
+            .param("compression", compressionFormat)
+            .contentType(APPLICATION_FORM_URLENCODED),
+        compressionFormat = compressionFormat,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
+        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .param("dataFormat", dataFormat.fileFormat)
+            .contentType(APPLICATION_FORM_URLENCODED)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
         expectedContentType = getContentTypeForDataFormat(dataFormat),
@@ -310,7 +340,7 @@ private fun getFastaRequests(
         expectedContentEncoding = compressionFormat,
     ),
     RequestScenario(
-        callDescription = "POST $endpoint with request parameter",
+        callDescription = "POST JSON $endpoint with request parameter",
         mockData = MockDataForEndpoints.fastaMockData,
         request = postSample(endpoint)
             .content("""{"country": "Switzerland", "compression": "$compressionFormat"}""")
@@ -320,11 +350,33 @@ private fun getFastaRequests(
         expectedContentEncoding = null,
     ),
     RequestScenario(
-        callDescription = "POST $endpoint with accept header",
+        callDescription = "POST JSON $endpoint with accept header",
         mockData = MockDataForEndpoints.fastaMockData,
         request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(APPLICATION_JSON)
+            .header(ACCEPT_ENCODING, compressionFormat),
+        compressionFormat = compressionFormat,
+        expectedContentType = "$TEXT_X_FASTA_VALUE;charset=UTF-8",
+        expectedContentEncoding = compressionFormat,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint with request parameter",
+        mockData = MockDataForEndpoints.fastaMockData,
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .param("compression", compressionFormat)
+            .contentType(APPLICATION_FORM_URLENCODED),
+        compressionFormat = compressionFormat,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint with accept header",
+        mockData = MockDataForEndpoints.fastaMockData,
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .contentType(APPLICATION_FORM_URLENCODED)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
         expectedContentType = "$TEXT_X_FASTA_VALUE;charset=UTF-8",

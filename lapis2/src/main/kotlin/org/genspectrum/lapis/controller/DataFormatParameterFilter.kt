@@ -32,7 +32,7 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
+        val reReadableRequest = CachedBodyHttpServletRequest.from(request, objectMapper)
 
         val requestWithModifiedAcceptHeader = HeaderModifyingRequestWrapper(
             reReadableRequest,

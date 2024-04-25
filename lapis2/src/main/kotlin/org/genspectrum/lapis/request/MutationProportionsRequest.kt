@@ -37,7 +37,7 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
             null, is NullNode -> DEFAULT_MIN_PROPORTION
             is NumericNode -> minProportionNode.doubleValue()
 
-            else -> throw BadRequestException("minProportion must be a number")
+            else -> throw BadRequestException("minProportion must be a number, is $minProportionNode")
         }
 
         val parsedCommonFields = parseCommonFields(node, codec)
