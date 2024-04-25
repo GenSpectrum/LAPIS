@@ -47,55 +47,23 @@ class LapisControllerCsvTest(
         every { lapisInfo.dataVersion } returns DATA_VERSION
     }
 
-    @ParameterizedTest(name = "GET {0} returns empty JSON")
-    @MethodSource("getEndpoints")
-    fun `GET returns empty json`(endpoint: String) {
-        MockDataForEndpoints.getMockData(endpoint).mockToReturnEmptyData(siloQueryModelMock)
+    @ParameterizedTest(name = "{0} returns empty JSON")
+    @MethodSource("getJsonRequests")
+    fun `returns empty json`(requestsScenario: RequestScenario) {
+        requestsScenario.mockDataCollection.mockToReturnEmptyData(siloQueryModelMock)
 
-        mockMvc.perform(getSample("$endpoint?country=Switzerland"))
+        mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "application/json"))
             .andExpect(jsonPath("\$.data").isEmpty())
     }
 
-    @ParameterizedTest(name = "POST {0} returns empty JSON")
-    @MethodSource("getEndpoints")
-    fun `POST returns empty json`(endpoint: String) {
-        MockDataForEndpoints.getMockData(endpoint).mockToReturnEmptyData(siloQueryModelMock)
+    @ParameterizedTest(name = "{0} returns empty CSV")
+    @MethodSource("getCsvRequests")
+    fun `returns empty CSV`(requestsScenario: RequestScenario) {
+        requestsScenario.mockDataCollection.mockToReturnEmptyData(siloQueryModelMock)
 
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("application/json")
-
-        mockMvc.perform(request)
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "application/json"))
-            .andExpect(jsonPath("\$.data").isEmpty())
-    }
-
-    @ParameterizedTest(name = "GET {0} returns empty CSV")
-    @MethodSource("getEndpoints")
-    fun `GET returns empty CSV`(endpoint: String) {
-        MockDataForEndpoints.getMockData(endpoint).mockToReturnEmptyData(siloQueryModelMock)
-
-        mockMvc.perform(getSample("$endpoint?country=Switzerland").header(ACCEPT, "text/csv"))
-            .andExpect(status().isOk)
-            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
-    }
-
-    @ParameterizedTest(name = "POST {0} returns empty CSV")
-    @MethodSource("getEndpoints")
-    fun `POST {0} returns empty CSV`(endpoint: String) {
-        MockDataForEndpoints.getMockData(endpoint).mockToReturnEmptyData(siloQueryModelMock)
-
-        val request = postSample(endpoint)
-            .content("""{"country": "Switzerland"}""")
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept("text/csv")
-
-        mockMvc.perform(request)
+        mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(""))
@@ -203,18 +171,34 @@ class LapisControllerCsvTest(
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                     RequestScenario(
-                        "POST $endpoint with request parameter",
+                        "POST JSON $endpoint with request parameter",
                         MockDataForEndpoints.getMockData(endpoint),
                         postSample(endpoint)
                             .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
                             .contentType(MediaType.APPLICATION_JSON),
                     ),
                     RequestScenario(
-                        "POST $endpoint with accept header",
+                        "POST JSON $endpoint with accept header",
                         MockDataForEndpoints.getMockData(endpoint),
                         postSample(endpoint)
                             .content("""{"country": "Switzerland"}""")
                             .contentType(MediaType.APPLICATION_JSON)
+                            .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
+                    ),
+                    RequestScenario(
+                        "POST form url encoded $endpoint with request parameter",
+                        MockDataForEndpoints.getMockData(endpoint),
+                        postSample(endpoint)
+                            .param("country", "Switzerland")
+                            .param("dataFormat", dataFormat)
+                            .contentType(MediaType.APPLICATION_FORM_URLENCODED),
+                    ),
+                    RequestScenario(
+                        "POST form url encoded $endpoint with accept header",
+                        MockDataForEndpoints.getMockData(endpoint),
+                        postSample(endpoint)
+                            .param("country", "Switzerland")
+                            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                 )
@@ -237,6 +221,9 @@ class LapisControllerCsvTest(
 
         @JvmStatic
         fun getTsvRequests() = getRequests("tsv")
+
+        @JvmStatic
+        fun getJsonRequests() = getRequests("json")
     }
 
     data class RequestScenario(

@@ -145,6 +145,28 @@ describe('All endpoints', () => {
           expect(body.data).is.an('array');
         }
       });
+
+      it('should accept form url encoded requests', async () => {
+        const formUrlEncodedData = new URLSearchParams({
+          pangoLineage: 'B.1.1.7',
+          country: 'Switzerland',
+        });
+
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formUrlEncodedData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
+
+        let body = await response.text();
+        expect(response.status, 'body was ' + body).equals(200);
+        if (route.servesFasta) {
+          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
+        } else {
+          expect(response.headers.get('content-type')).equals('application/json');
+        }
+        expect(body).not.to.be.empty;
+      });
     });
   }
 });

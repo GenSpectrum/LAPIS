@@ -123,7 +123,7 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
+        val reReadableRequest = CachedBodyHttpServletRequest.from(request, objectMapper)
 
         val compressionPropertyInRequest = try {
             getValidatedCompressionProperty(reReadableRequest)

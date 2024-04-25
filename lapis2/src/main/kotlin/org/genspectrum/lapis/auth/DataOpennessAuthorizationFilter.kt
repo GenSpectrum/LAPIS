@@ -74,7 +74,7 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
     }
 
     private fun makeRequestBodyReadableMoreThanOnce(request: HttpServletRequest) =
-        CachedBodyHttpServletRequest(request, objectMapper)
+        CachedBodyHttpServletRequest.from(request, objectMapper)
 
     abstract fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult
 }

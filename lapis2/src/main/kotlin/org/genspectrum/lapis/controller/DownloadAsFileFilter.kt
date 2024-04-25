@@ -24,7 +24,7 @@ class DownloadAsFileFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val reReadableRequest = CachedBodyHttpServletRequest(request, objectMapper)
+        val reReadableRequest = CachedBodyHttpServletRequest.from(request, objectMapper)
 
         val downloadAsFile = reReadableRequest.getBooleanField(DOWNLOAD_AS_FILE_PROPERTY) ?: false
         if (downloadAsFile) {
