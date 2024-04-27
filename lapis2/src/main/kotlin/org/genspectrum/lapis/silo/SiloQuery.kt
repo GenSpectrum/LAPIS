@@ -214,11 +214,11 @@ sealed class SiloAction<ResponseType>(
 
 sealed class SiloFilterExpression(val type: String)
 
-data class StringEquals(val column: String, val value: String) : SiloFilterExpression("StringEquals")
+data class StringEquals(val column: String, val value: String?) : SiloFilterExpression("StringEquals")
 
 data class BooleanEquals(val column: String, val value: Boolean?) : SiloFilterExpression("BooleanEquals")
 
-data class PangoLineageEquals(val column: String, val value: String, val includeSublineages: Boolean) :
+data class PangoLineageEquals(val column: String, val value: String?, val includeSublineages: Boolean) :
     SiloFilterExpression("PangoLineage")
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -262,11 +262,11 @@ data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe"
 data class NOf(val numberOfMatchers: Int, val matchExactly: Boolean, val children: List<SiloFilterExpression>) :
     SiloFilterExpression("N-Of")
 
-data class IntEquals(val column: String, val value: Int) : SiloFilterExpression("IntEquals")
+data class IntEquals(val column: String, val value: Int?) : SiloFilterExpression("IntEquals")
 
 data class IntBetween(val column: String, val from: Int?, val to: Int?) : SiloFilterExpression("IntBetween")
 
-data class FloatEquals(val column: String, val value: Double) : SiloFilterExpression("FloatEquals")
+data class FloatEquals(val column: String, val value: Double?) : SiloFilterExpression("FloatEquals")
 
 data class FloatBetween(val column: String, val from: Double?, val to: Double?) : SiloFilterExpression("FloatBetween")
 

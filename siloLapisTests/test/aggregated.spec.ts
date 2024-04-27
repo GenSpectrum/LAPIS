@@ -46,7 +46,7 @@ describe('The /aggregated endpoint', () => {
       })
     );
 
-  it('should correctly handle mutliple mutation requests in GET requests', async () => {
+  it('should correctly handle multiple mutation requests in GET requests', async () => {
     const urlParams = new URLSearchParams({
       nucleotideMutations: 'T1-,A23062T',
       aminoAcidMutations: 'S:501Y,ORF1b:12',
@@ -199,5 +199,65 @@ age	country	count
 59	Switzerland	9
     `.trim() + '\n'
     );
+  });
+
+  it('should handle null values for boolean filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      test_boolean_column: '',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 33);
+  });
+
+  it('should handle null values for int filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      age: '',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 2);
+  });
+
+  it('should handle null values for float filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      qc_value: '',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 2);
+  });
+
+  it('should handle null values for string filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      region: '',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
+  });
+
+  it('should throw for null values for pango lineage filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      pangoLineage: '',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
   });
 });

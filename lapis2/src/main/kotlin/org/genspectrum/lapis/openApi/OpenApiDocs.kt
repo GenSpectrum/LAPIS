@@ -343,13 +343,17 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
         SequenceFilterFieldType.String, SequenceFilterFieldType.PangoLineage ->
             Schema<String>().anyOf(
                 listOf(
-                    Schema<String>().type(fieldType.openApiType),
-                    arraySchema(Schema<String>().type(fieldType.openApiType)),
+                    nullableStringSchema(fieldType.openApiType),
+                    nullableStringArraySchema(fieldType.openApiType),
                 ),
             )
 
-        else -> Schema<String>().type(fieldType.openApiType)
+        else -> nullableStringSchema(fieldType.openApiType)
     }
+
+private fun nullableStringSchema(type: String) = Schema<String>().type(type).nullable(true)
+
+private fun nullableStringArraySchema(type: String) = arraySchema(nullableStringSchema(type))
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
