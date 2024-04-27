@@ -15,7 +15,7 @@ import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.controller.SPECIAL_REQUEST_PROPERTIES
 import org.springframework.util.MultiValueMap
 
-typealias SequenceFilters = Map<String, List<String>>
+typealias SequenceFilters = Map<String, List<String?>>
 typealias GetRequestSequenceFilters = MultiValueMap<String, String>
 
 interface CommonSequenceFilters {
@@ -124,10 +124,11 @@ private fun getValuesList(
     value: JsonNode,
     key: String,
 ) = when {
-    value.isValueNode -> listOf(value.asText())
+    value.isValueNode -> listOf(getValueNode(value))
+
     value.nodeType == JsonNodeType.ARRAY -> value.map {
         when {
-            it.isValueNode -> it.asText()
+            it.isValueNode -> getValueNode(it)
             else -> throw BadRequestException(
                 "Found unexpected array value $it of type ${it.nodeType} for $key, expected a primitive",
             )
@@ -137,4 +138,11 @@ private fun getValuesList(
     else -> throw BadRequestException(
         "Found unexpected value $value of type ${value.nodeType} for $key, expected primitive or array",
     )
+}
+
+private fun getValueNode(value: JsonNode): String? {
+    if (value.isNull) {
+        return null
+    }
+    return value.asText()
 }

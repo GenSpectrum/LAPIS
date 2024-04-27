@@ -533,8 +533,24 @@ class SiloFilterExpressionMapperTest {
                     ),
                 ),
                 Arguments.of(
+                    mapOf(
+                        "some_metadata" to listOf(null),
+                    ),
+                    And(
+                        Or(StringEquals("some_metadata", null)),
+                    ),
+                ),
+                Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3")),
                     And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage" to listOf("")),
+                    And(Or(PangoLineageEquals("pangoLineage", null, includeSublineages = false))),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage" to listOf(null)),
+                    And(Or(PangoLineageEquals("pangoLineage", null, includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3*")),
@@ -572,9 +588,21 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
+                        "dateTo" to listOf(null),
+                    ),
+                    And(DateBetween("date", from = null, to = null)),
+                ),
+                Arguments.of(
+                    mapOf(
                         "dateFrom" to listOf("2021-03-28"),
                     ),
                     And(DateBetween("date", from = LocalDate.of(2021, 3, 28), to = null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "dateFrom" to listOf(null),
+                    ),
+                    And(DateBetween("date", from = null, to = null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -622,9 +650,33 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
+                        "intField" to listOf(null),
+                    ),
+                    And(IntEquals("intField", null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intField" to listOf(""),
+                    ),
+                    And(IntEquals("intField", null)),
+                ),
+                Arguments.of(
+                    mapOf(
                         "intFieldFrom" to listOf("42"),
                     ),
                     And(IntBetween("intField", 42, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intFieldFrom" to listOf(""),
+                    ),
+                    And(IntBetween("intField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intFieldFrom" to listOf(null),
+                    ),
+                    And(IntBetween("intField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -634,9 +686,27 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
+                        "intFieldTo" to listOf(""),
+                    ),
+                    And(IntBetween("intField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intFieldTo" to listOf(null),
+                    ),
+                    And(IntBetween("intField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
                         "floatField" to listOf("42.45"),
                     ),
                     And(FloatEquals("floatField", 42.45)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatField" to listOf(null),
+                    ),
+                    And(FloatEquals("floatField", null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -646,9 +716,33 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
+                        "floatFieldFrom" to listOf(""),
+                    ),
+                    And(FloatBetween("floatField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatFieldFrom" to listOf(null),
+                    ),
+                    And(FloatBetween("floatField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
                         "floatFieldTo" to listOf("42.45"),
                     ),
                     And(FloatBetween("floatField", null, 42.45)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatFieldTo" to listOf(""),
+                    ),
+                    And(FloatBetween("floatField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatFieldTo" to listOf(null),
+                    ),
+                    And(FloatBetween("floatField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -674,12 +768,13 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
-                        "test_boolean_column" to listOf("true", "false"),
+                        "test_boolean_column" to listOf("true", "false", null),
                     ),
                     And(
                         Or(
                             BooleanEquals("test_boolean_column", true),
                             BooleanEquals("test_boolean_column", false),
+                            BooleanEquals("test_boolean_column", null),
                         ),
                     ),
                 ),

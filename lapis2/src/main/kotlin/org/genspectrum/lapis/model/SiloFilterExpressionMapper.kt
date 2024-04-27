@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-data class SequenceFilterValue(val type: SequenceFilterFieldType, val values: List<String>, val originalKey: String)
+data class SequenceFilterValue(val type: SequenceFilterFieldType, val values: List<String?>, val originalKey: String)
 
 typealias SequenceFilterFieldName = String
 
@@ -177,6 +177,9 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ) = Or(
         values[0].values.map {
+            if (it.isNullOrBlank()) {
+                return@map BooleanEquals(siloColumnName, null)
+            }
             val value = try {
                 it.lowercase().toBooleanStrict()
             } catch (e: IllegalArgumentException) {
@@ -186,8 +189,8 @@ class SiloFilterExpressionMapper(
         },
     )
 
-    private fun mapToVariantQueryFilter(variantQuery: String): SiloFilterExpression {
-        if (variantQuery.isBlank()) {
+    private fun mapToVariantQueryFilter(variantQuery: String?): SiloFilterExpression {
+        if (variantQuery.isNullOrBlank()) {
             throw BadRequestException("variantQuery must not be empty")
         }
 
@@ -236,6 +239,10 @@ class SiloFilterExpressionMapper(
         val (_, values, originalKey) = sequenceFilterValue ?: return null
         val value = extractSingleFilterValue(values, originalKey)
 
+        if (value.isNullOrBlank()) {
+            return null
+        }
+
         try {
             return LocalDate.parse(value)
         } catch (exception: DateTimeParseException) {
@@ -249,6 +256,7 @@ class SiloFilterExpressionMapper(
     ) = Or(
         values[0].values.map {
             when {
+                it.isNullOrBlank() -> PangoLineageEquals(column, null, includeSublineages = false)
                 it.endsWith(".*") -> PangoLineageEquals(column, it.substringBeforeLast(".*"), includeSublineages = true)
                 it.endsWith('*') -> PangoLineageEquals(column, it.substringBeforeLast('*'), includeSublineages = true)
                 it.endsWith('.') -> throw BadRequestException(
@@ -265,6 +273,9 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
         val value = extractSingleFilterValue(values[0])
+        if (value.isNullOrBlank()) {
+            return IntEquals(siloColumnName, null)
+        }
         try {
             return IntEquals(siloColumnName, value.toInt())
         } catch (exception: NumberFormatException) {
@@ -280,6 +291,9 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
         val value = extractSingleFilterValue(values[0])
+        if (value.isNullOrBlank()) {
+            return FloatEquals(siloColumnName, null)
+        }
         try {
             return FloatEquals(siloColumnName, value.toDouble())
         } catch (exception: NumberFormatException) {
@@ -307,6 +321,10 @@ class SiloFilterExpressionMapper(
         val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
         val value = extractSingleFilterValue(values, originalKey)
 
+        if (value.isNullOrBlank()) {
+            return null
+        }
+
         try {
             return value.toInt()
         } catch (exception: NumberFormatException) {
@@ -333,6 +351,10 @@ class SiloFilterExpressionMapper(
     ): Double? {
         val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
         val value = extractSingleFilterValue(values, originalKey)
+
+        if (value.isNullOrBlank()) {
+            return null
+        }
 
         try {
             return value.toDouble()
@@ -408,9 +430,14 @@ class SiloFilterExpressionMapper(
         extractSingleFilterValue(value.values, value.originalKey)
 
     private fun extractSingleFilterValue(
-        values: List<String>,
+        values: List<String?>,
         originalKey: String,
-    ) = values.singleOrNull() ?: throw BadRequestException(
-        "Expected exactly one value for '$originalKey' but got ${values.size} values.",
-    )
+    ): String? {
+        if (values.size > 1) {
+            throw BadRequestException(
+                "Expected exactly one value for '$originalKey' but got ${values.size} values.",
+            )
+        }
+        return values[0]
+    }
 }

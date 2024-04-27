@@ -220,6 +220,21 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                     ),
                 ),
+                Arguments.of(
+                    """
+                    {
+                        "country": null
+                    }
+                    """,
+                    SequenceFiltersRequestWithFields(
+                        mapOf("country" to listOf(null)),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
+                ),
             )
 
         @JvmStatic

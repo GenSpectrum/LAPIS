@@ -1,0 +1,11 @@
+{
+  "testCaseName": "filter by null",
+  "lapisRequest": {
+    "testBooleanColumn": null
+  },
+  "expected": [
+    {
+      "count": 33
+    }
+  ]
+}
