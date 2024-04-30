@@ -5,6 +5,7 @@ description: Request methods
 
 import TabsBox from '../../../components/TabsBox/astro/TabsBox.astro';
 import Tab from '../../../components/TabsBox/astro/Tab.astro';
+import RenderedExampleForm from '../../../components/RenderedExampleForm.astro';
 
 LAPIS supports queries via GET and POST requests. GET requests encode the query in the URL, offering a simple, shareable
 format ideal for direct browser access. Most features are supported with GET requests. POST requests requires formatting
@@ -57,3 +58,19 @@ example code for doing it with curl and from R and Python:
 This is a general example and will only work on instances that have the fields `region`, `country`, and `date`.
 Check out the [fields](../references/fields/) and [filters](../references/filters/) page to see information about this instance.
 :::
+
+## URL Encoded Form Data
+
+LAPIS also supports [URL encoded form data](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) for POST requests.
+The content type must be set to `application/x-www-form-urlencoded` and the query must be encoded as a query string.
+
+:::tip
+This is useful if you want to send the query directly from a HTML form.
+If `<form>` element has the `method` attribute set to `POST`
+and the `enctype` attribute set to `application/x-www-form-urlencoded` (which is the default value),
+then the `<form>` element will send the data as URL encoded form data.
+:::
+
+### Example
+
+<RenderedExampleForm />

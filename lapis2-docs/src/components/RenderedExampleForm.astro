@@ -1,0 +1,26 @@
+---
+import { getConfig } from '../config';
+import { getLapisUrl } from '../lapisUrl';
+
+const firstMetadatum = getConfig().schema.metadata[0];
+const lapisUrl = getLapisUrl();
+
+const html = String.raw`<form action="${lapisUrl}/sample/aggregated" method="POST">
+    <label>
+        Field to aggregate by:
+        <input type="text" name="fields" value="${firstMetadatum.name}" />
+    </label>
+    <input type="hidden" name="downloadAsFile" value="true" />
+    <input type="submit" value="Submit" />
+</form>`;
+---
+
+<p>This is an HTML snippet that yields such a form:</p>
+<pre><code>{html}</code></pre>
+
+<p>This is the rendered HTML snippet. Click on submit send a request to this LAPIS instance:</p>
+<div class='card bg-base-100 border border-2 border-neutral'>
+    <div class='card-body'>
+        <div set:html={html} />
+    </div>
+</div>
