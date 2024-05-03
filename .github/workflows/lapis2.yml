@@ -121,6 +121,7 @@ jobs:
           tags: |
             type=ref,event=branch,enable=${{ github.ref != 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=commit-
 
       - name: Get LAPIS Branch Tag
         id: lapisBranchTag
