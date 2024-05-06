@@ -30,7 +30,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
       - name: Execute tests
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v3
         with:
           arguments: test
           build-root-directory: server
