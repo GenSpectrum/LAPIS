@@ -1,6 +1,7 @@
 name: Release Components
 
 on:
+  push:
   workflow_run:
     workflows: [Build]
     types: [completed]
@@ -18,7 +19,6 @@ jobs:
       pull-requests: write
       packages: write
       checks: read
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository == 'GenSpectrum/LAPIS' }}
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release
