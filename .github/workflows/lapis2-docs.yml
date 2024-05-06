@@ -27,7 +27,7 @@ jobs:
       - run: npm run check-types
 
   dockerImage:
-    name: Build Docker Image And Run E2E Tests
+    name: Build Docs Docker Image And Run E2E Tests
     runs-on: ubuntu-latest
     permissions:
       packages: write
