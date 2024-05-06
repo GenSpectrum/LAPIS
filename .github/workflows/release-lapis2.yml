@@ -3,7 +3,7 @@ name: Release Components
 on:
   push:
   workflow_run:
-    workflows: [Build]
+    workflows: [LAPIS v2]
     types: [completed]
     branches: [main]
 
