@@ -1,9 +1,7 @@
 {
     "include-component-in-tag": true,
     "packages": {
-        "lapis2": {
-            "release-type": "node"
-        },
+        "lapis2": {},
         "lapis2-docs": {
             "release-type": "node"
         }
