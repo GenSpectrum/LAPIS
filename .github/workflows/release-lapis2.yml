@@ -44,7 +44,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Wait for Backend Docker Image
+      - name: Wait for Lapis 2 Docs Docker Image
+        if: ${{ steps.release.outputs.release_created }}
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.sha }}
