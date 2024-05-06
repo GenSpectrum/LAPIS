@@ -62,3 +62,18 @@ How to execute the tests
 
 LAPIS logs to rotating files in `./logs` and to stdout.
 In the Docker container, log files are stored in `/workspace/logs`
+
+## Creating A Release
+
+This project uses [Release Please](https://github.com/google-github-actions/release-please-action) to generate releases.
+On every commit on the `main` branch, it will update a Pull Request with a changelog.
+When the PR is merged, the release will be created.
+Creating a release means:
+
+* A new Git tag is created.
+* The Docker images of lapis2 and lapis2-docs are tagged with the new version.
+    * Suppose the created version is `2.4.5`, then it creates the tags `2`, `2.4` and `2.4.5`.
+
+The changelog and the version number are determined by the commit messages.
+Therefore, commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+Also refer to the Release Please documentation for more information on how to write commit messages.
