@@ -2,7 +2,7 @@
     "include-component-in-tag": true,
     "packages": {
         "lapis2": {
-            "release-type": "java",
+            "release-type": "simple",
             "extra-files": [
                 "build.gradle"
             ]
