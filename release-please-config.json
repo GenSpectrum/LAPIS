@@ -2,15 +2,15 @@
     "include-component-in-tag": true,
     "packages": {
         "lapis2": {
-            "release-type": "java"
+            "release-type": "java",
+            "extra-files": [
+                "build.gradle"
+            ]
         },
         "lapis2-docs": {
             "release-type": "node"
         }
     },
-    "extra-files": [
-        "lapis2/build.gradle"
-    ],
     "bump-minor-pre-major": true,
     "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
 }
