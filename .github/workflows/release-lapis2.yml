@@ -1,10 +1,11 @@
 name: Release LAPIS 2
 
 on:
+  push:
   workflow_run:
     workflows: [LAPIS v2]
     types: [completed]
-    branches: [main]
+    branches: [releaseAsWhole]
 
 env:
   LAPIS_DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis-v2
@@ -27,7 +28,7 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           include-component-in-tag: true
-          target-branch: main
+          target-branch: releaseAsWhole
 
       - name: Inspect Release Outputs
         run: |
