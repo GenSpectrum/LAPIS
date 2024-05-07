@@ -34,14 +34,14 @@ jobs:
           echo '${{ toJson(steps.release.outputs) }}'
 
       - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created }}
 
       - name: Set up Docker Buildx
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created }}
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GitHub Container Registry
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -49,7 +49,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Wait for Lapis 2 Docs Docker Image
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created }}
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.sha }}
@@ -57,11 +57,11 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag Already Built Images With Release Tags
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created }}
         run: |
-          MAJOR=${{ steps.release.outputs.lapis2--major }}
-          MINOR=${{ steps.release.outputs.lapis2--minor }}
-          PATCH=${{ steps.release.outputs.lapis2--patch }}
+          MAJOR=${{ steps.release.outputs.major }}
+          MINOR=${{ steps.release.outputs.minor }}
+          PATCH=${{ steps.release.outputs.patch }}
           TAGS=("$MAJOR.$MINOR" "$MAJOR.$MINOR.$PATCH")
           # TODO (#777) include $MAJOR only for releases >= 1.0
           # TAGS=("$MAJOR" "$MAJOR.$MINOR" "$MAJOR.$MINOR.$PATCH") - don't include major-only for pre-1.0

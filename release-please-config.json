@@ -1,14 +1,26 @@
 {
     "include-component-in-tag": true,
     "packages": {
-        "lapis2": {
+        ".": {
             "release-type": "simple",
             "extra-files": [
-                "build.gradle"
+                "lapis2/build.gradle",
+                {
+                    "type": "json",
+                    "path": "lapis2-docs/package.json",
+                    "jsonpath": "$.version"
+                },
+                {
+                    "type": "json",
+                    "path": "lapis2-docs/package-lock.json",
+                    "jsonpath": "$.version"
+                },
+                {
+                    "type": "json",
+                    "path": "lapis2-docs/package-lock.json",
+                    "jsonpath": "$.packages..version"
+                }
             ]
-        },
-        "lapis2-docs": {
-            "release-type": "node"
         }
     },
     "bump-minor-pre-major": true,
