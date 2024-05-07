@@ -29,6 +29,10 @@ jobs:
           include-component-in-tag: true
           target-branch: main
 
+      - name: Inspect Release Outputs
+        run: |
+          echo "${{ toJson(steps.release.outputs) }}"
+
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.releases_created }}
 
