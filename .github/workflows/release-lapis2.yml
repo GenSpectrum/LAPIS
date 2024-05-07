@@ -32,7 +32,7 @@ jobs:
 
       - name: Inspect Release Outputs
         run: |
-          echo '${{ toJson(steps.release.outputs) }}'
+          echo ${{ toJson(steps.release.outputs) }}
 
       - uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
