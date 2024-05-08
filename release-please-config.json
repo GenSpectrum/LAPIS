@@ -18,7 +18,7 @@
                 {
                     "type": "json",
                     "path": "lapis2-docs/package-lock.json",
-                    "jsonpath": "$.packages..version"
+                    "jsonpath": "$.packages[''].version"
                 }
             ]
         }
