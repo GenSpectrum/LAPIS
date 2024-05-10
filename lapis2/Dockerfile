@@ -21,3 +21,6 @@ ENTRYPOINT [ \
     "--referenceGenomeFilename=./reference_genomes.json", \
     "--spring.profiles.active=docker" \
 ]
+
+LABEL org.opencontainers.image.source="https://github.com/GenSpectrum/LAPIS"
+LABEL org.opencontainers.image.description="Lightweight API for Sequences: An API, a query engine, and a database schema for genomic sequences"
