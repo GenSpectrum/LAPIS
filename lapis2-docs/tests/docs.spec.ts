@@ -154,6 +154,8 @@ async function clickOnNextButton(page: Page, indexOfCurrentPage: number) {
     }
 }
 
+const doesNotEndWithSlashRegex = /[^\/]$/;
+
 async function clickOnAllRelativeLinksInMainBody(page: Page) {
     const currentPageUrl = page.url();
 
@@ -162,6 +164,7 @@ async function clickOnAllRelativeLinksInMainBody(page: Page) {
         .locator('a[href]:not([href^="http://"]):not([href^="https://"])')
         .all();
     for (const relativeLink of relativeLinks) {
+        await expect(relativeLink).toHaveAttribute('href', doesNotEndWithSlashRegex);
         await relativeLink.click();
 
         const errorMessage = `Went to ${page.url()} from ${currentPageUrl}, but did not find target page.`;
