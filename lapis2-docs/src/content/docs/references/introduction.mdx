@@ -12,7 +12,7 @@ For instance, the `GET /sample/aggregated` endpoint returns the count of sequenc
 Every endpoint accepts [`GET` and `POST`](../concepts/request-methods) requests.
 Both methods yield identical data; however, the manner of providing the filter criteria differs.
 
-The various endpoints are listed in the [Open API / Swagger](../references/open-api-definition/) documentation,
+The various endpoints are listed in the [Open API / Swagger](../references/open-api-definition) documentation,
 which also offers a convenient testing interface via Swagger-UI.
 
 ## Filters
@@ -20,12 +20,12 @@ which also offers a convenient testing interface via Swagger-UI.
 The output from each endpoint can be refined using various parameters.
 For instance, to determine the number of sequences originating from Germany,
 you would use `GET /sample/aggregated?country=Germany`.
-The available filters are detailed in [Filters](../references/filters/),
-and you can experiment with them at [Open API / Swagger](../references/open-api-definition/).
+The available filters are detailed in [Filters](../references/filters),
+and you can experiment with them at [Open API / Swagger](../references/open-api-definition).
 
 ## Fields
 
 Fields allow you to dictate the grouping of the returned data.
 For example, to find out the number of sequences from each country,you would use `GET /sample/aggregated?fields=country`.
-The available fields are documented in [Fields](../references/fields/),
-and you can test them at [Open API / Swagger](../references/open-api-definition/).
+The available fields are documented in [Fields](../references/fields),
+and you can test them at [Open API / Swagger](../references/open-api-definition).
