@@ -1,6 +1,10 @@
 package org.genspectrum.lapis
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.MediaType
+import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.parameters.HeaderParameter
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -13,12 +17,15 @@ import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.controller.LapisHeaders
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
+import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
+import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -38,24 +45,22 @@ class LapisSpringConfig {
         referenceGenomeSchema: ReferenceGenomeSchema,
     ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema)
 
-//    TODO(#627) reactivate this when the bug in Swagger UI is fixed
-//    https://github.com/swagger-api/swagger-ui/issues/9550
-//    @Bean
-//    fun headerCustomizer() =
-//        OperationCustomizer { operation, _ ->
-//            val foundRequestIdHeaderParameter = operation.parameters?.any { it.name == REQUEST_ID_HEADER }
-//            if (foundRequestIdHeaderParameter == false || foundRequestIdHeaderParameter == null) {
-//                operation.addParametersItem(
-//                    HeaderParameter().apply {
-//                        name = REQUEST_ID_HEADER
-//                        required = false
-//                        description = REQUEST_ID_HEADER_DESCRIPTION
-//                        content = Content().addMediaType("text/plain", MediaType().schema(Schema<String>()))
-//                    },
-//                )
-//            }
-//            operation
-//        }
+    @Bean
+    fun headerCustomizer() =
+        OperationCustomizer { operation, _ ->
+            val foundRequestIdHeaderParameter = operation.parameters?.any { it.name == LapisHeaders.REQUEST_ID }
+            if (foundRequestIdHeaderParameter == false || foundRequestIdHeaderParameter == null) {
+                operation.addParametersItem(
+                    HeaderParameter().apply {
+                        name = LapisHeaders.REQUEST_ID
+                        required = false
+                        description = REQUEST_ID_HEADER_DESCRIPTION
+                        content = Content().addMediaType("text/plain", MediaType().schema(Schema<String>()))
+                    },
+                )
+            }
+            operation
+        }
 
     @Bean
     fun databaseConfig(
