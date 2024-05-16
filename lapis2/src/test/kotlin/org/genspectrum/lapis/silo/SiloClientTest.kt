@@ -497,6 +497,19 @@ class SiloClientAndCacheInvalidatorTest(
         assertThatCacheIsNotHit()
     }
 
+    @Test
+    fun `GIVEN SILO is restarting WHEN the cache invalidator checks THEN the cache should be cleared`() {
+        expectInfoCallAndReturnDataVersion(firstDataVersion, Times.once())
+        dataVersionCacheInvalidator.invalidateSiloCache()
+
+        assertThatResultIsCachedOnSecondRequest()
+
+        expectInfoCallThatReturnsSiloUnavailable()
+        dataVersionCacheInvalidator.invalidateSiloCache()
+
+        assertThatCacheIsNotHit()
+    }
+
     private fun assertThatResultIsCachedOnSecondRequest() {
         expectQueryRequestAndRespondWith(
             response()
@@ -523,6 +536,21 @@ class SiloClientAndCacheInvalidatorTest(
 
         val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery).toList() }
         assertThat(exception.message, containsString(errorMessage))
+    }
+
+    private fun expectInfoCallThatReturnsSiloUnavailable() {
+        MockServerClient("localhost", MOCK_SERVER_PORT)
+            .`when`(
+                request()
+                    .withMethod("GET")
+                    .withPath("/info"),
+                Times.once(),
+            )
+            .respond(
+                response()
+                    .withStatusCode(503)
+                    .withBody("""{"error":  "Test Error", "message": "currently not available"}"""),
+            )
     }
 }
 

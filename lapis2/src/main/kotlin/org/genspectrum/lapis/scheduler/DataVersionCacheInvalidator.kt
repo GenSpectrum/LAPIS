@@ -1,8 +1,10 @@
 package org.genspectrum.lapis.scheduler
 
 import mu.KotlinLogging
+import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.CachedSiloClient
 import org.genspectrum.lapis.silo.SILO_QUERY_CACHE_NAME
+import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -24,6 +26,11 @@ class DataVersionCacheInvalidator(
 
         val info = try {
             cachedSiloClient.callInfo()
+        } catch (e: SiloUnavailableException) {
+            log.debug { "Caught ${SiloUnavailableException::class.java} $e" }
+            InfoData(
+                dataVersion = "currently unavailable",
+            )
         } catch (e: Exception) {
             log.debug { "Failed to call info: $e" }
             return
