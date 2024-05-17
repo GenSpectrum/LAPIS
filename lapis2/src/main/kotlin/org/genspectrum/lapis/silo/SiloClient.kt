@@ -98,7 +98,7 @@ class CachedSiloClient(
                         objectMapper.readValue(it, query.action.typeReference)
                     } catch (exception: Exception) {
                         val message = "Could not parse response from silo: " +
-                            exception::class.toString() + " " + exception.message
+                            exception::class.toString() + " " + exception.message + " - NDJSON line: " + it
                         throw RuntimeException(message, exception)
                     }
                 },
