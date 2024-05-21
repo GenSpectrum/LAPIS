@@ -23,10 +23,6 @@ schema:
       type: float
     - name: test_boolean_column
       type: boolean
-    - name: insertions
-      type: insertion
-    - name: aaInsertions
-      type: aaInsertion
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: primaryKey

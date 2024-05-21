@@ -21,7 +21,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   it('should order by specified fields', async () => {
     const ascendingOrderedResult = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
+        orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
       },
     });
 
@@ -39,7 +39,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
+        orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
         limit: 2,
       },
     });
@@ -49,7 +49,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
 
     const resultWithLimitAndOffset = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
+        orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
         limit: 2,
         offset: 1,
       },
@@ -81,6 +81,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
     const result = await lapisClient.postAminoAcidInsertions1({
       insertionsRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+        orderBy: [{ field: 'insertion' }],
       },
     });
 

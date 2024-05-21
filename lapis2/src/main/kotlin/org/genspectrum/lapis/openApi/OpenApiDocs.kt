@@ -316,9 +316,8 @@ private fun aggregatedMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
 
 private fun detailsMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
-    databaseConfig.schema.metadata.filter {
-        it.type != MetadataType.AMINO_ACID_INSERTION && it.type != MetadataType.NUCLEOTIDE_INSERTION
-    }
+    databaseConfig.schema
+        .metadata
         .associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
 
 private fun mapToOpenApiType(type: MetadataType): String =
@@ -328,8 +327,6 @@ private fun mapToOpenApiType(type: MetadataType): String =
         MetadataType.DATE -> "string"
         MetadataType.INT -> "integer"
         MetadataType.FLOAT -> "number"
-        MetadataType.NUCLEOTIDE_INSERTION -> "string"
-        MetadataType.AMINO_ACID_INSERTION -> "string"
         MetadataType.BOOLEAN -> "boolean"
     }
 
@@ -538,10 +535,10 @@ private fun aminoAcidInsertions() =
         .items(
             Schema<String>()
                 .type("string")
-                .example("ins_ORF1:123:ATT")
+                .example("ins_ORF1a:123:ATT")
                 .description(
                     """
-                    |A amino acid insertion in the format "ins_\<gene\>:\<position\>:\<insertion\>".  
+                    |An amino acid insertion in the format "ins_\<gene\>:\<position\>:\<insertion\>".  
                     """.trimMargin(),
                 ),
         )
