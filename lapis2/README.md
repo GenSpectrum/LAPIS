@@ -77,3 +77,12 @@ Creating a release means:
 The changelog and the version number are determined by the commit messages.
 Therefore, commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 Also refer to the Release Please documentation for more information on how to write commit messages.
+
+## SILO Compatibility
+
+This table shows which LAPIS version is required for which SILO version:
+
+| LAPIS | SILO  |
+|-------|-------|
+| 0.2.1 | 0.2.0 |
+| 0.1   | 0.1.0 |

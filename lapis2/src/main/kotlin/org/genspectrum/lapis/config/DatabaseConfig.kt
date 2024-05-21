@@ -35,12 +35,6 @@ enum class MetadataType {
 
     @JsonProperty("boolean")
     BOOLEAN,
-
-    @JsonProperty("insertion")
-    NUCLEOTIDE_INSERTION,
-
-    @JsonProperty("aaInsertion")
-    AMINO_ACID_INSERTION,
 }
 
 data class DatabaseFeature(val name: String)

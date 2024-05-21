@@ -94,9 +94,6 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 type = SequenceFilterFieldType.Boolean,
             ),
         )
-
-        MetadataType.NUCLEOTIDE_INSERTION -> emptyList()
-        MetadataType.AMINO_ACID_INSERTION -> emptyList()
     }
 
 private const val VARIANT_QUERY_FIELD = "variantQuery"
