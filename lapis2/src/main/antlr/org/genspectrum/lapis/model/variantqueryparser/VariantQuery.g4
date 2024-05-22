@@ -9,7 +9,7 @@ expr:
   | expr '&' expr    # And
   | expr '|' expr    # Or
   | '(' expr ')'     # Parenthesis
-  | 'MAYBE(' expr ')' # Maybe
+  | M A Y B E '(' expr ')' # Maybe
   ;
 
 single:
