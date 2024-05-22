@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -17,7 +18,9 @@ import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.StringEquals
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class VariantQueryFacadeTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(
@@ -485,6 +488,18 @@ class VariantQueryFacadeTest {
         assertThat(
             result,
             equalTo(PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
+        )
+    }
+
+    @Test
+    fun `GIVEN an invalid variant query THEN throw bad request exception`() {
+        val variantQuery = "nextcladePangoLineage:jn.1* thisIsInvalid"
+
+        val exception = assertThrows<BadRequestException> { underTest.map(variantQuery) }
+
+        assertThat(
+            exception.message,
+            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '&', '|'}."),
         )
     }
 }
