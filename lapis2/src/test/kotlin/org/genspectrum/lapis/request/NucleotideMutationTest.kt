@@ -92,6 +92,14 @@ class NucleotideMutationTest {
                     "\"MAYBE(123X)\"",
                     NucleotideMutation(null, 123, "X", maybe = true),
                 ),
+                Arguments.of(
+                    "\"maybe(123X)\"",
+                    NucleotideMutation(null, 123, "X", maybe = true),
+                ),
+                Arguments.of(
+                    "\"maYbE(123X)\"",
+                    NucleotideMutation(null, 123, "X", maybe = true),
+                ),
             )
 
         @JvmStatic

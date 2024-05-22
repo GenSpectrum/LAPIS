@@ -168,6 +168,16 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `GIVEN a variantQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' SiloQuery`() {
+        val variantQuery = "maYbE(T12C)"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = Maybe(NucleotideSymbolEquals(null, 12, "C"))
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
     fun `given a variantQuery with a 'Pangolineage' expression then map should return the corresponding SiloQuery`() {
         val variantQuery = "A.1.2.3"
 

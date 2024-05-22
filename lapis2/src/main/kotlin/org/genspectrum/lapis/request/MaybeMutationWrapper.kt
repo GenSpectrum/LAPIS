@@ -6,7 +6,7 @@ interface MaybeMutation<Self : MaybeMutation<Self>> {
     fun asMaybe(): Self
 }
 
-val MAYBE_REGEX = Regex("""^MAYBE\((?<mutationCandidate>.+)\)$""")
+val MAYBE_REGEX = Regex("""^MAYBE\((?<mutationCandidate>.+)\)$""", RegexOption.IGNORE_CASE)
 
 inline fun <reified T : MaybeMutation<T>> wrapWithMaybeMutationParser(
     mutationCandidate: String,

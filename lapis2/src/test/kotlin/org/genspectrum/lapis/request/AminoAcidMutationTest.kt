@@ -89,6 +89,14 @@ class AminoAcidMutationTest {
                     AminoAcidMutation("gene1", 123, "A", maybe = true),
                 ),
                 Arguments.of(
+                    "\"maybe(gene1:G123A)\"",
+                    AminoAcidMutation("gene1", 123, "A", maybe = true),
+                ),
+                Arguments.of(
+                    "\"MayBe(gene1:G123A)\"",
+                    AminoAcidMutation("gene1", 123, "A", maybe = true),
+                ),
+                Arguments.of(
                     "\"gene1:*123A\"",
                     AminoAcidMutation("gene1", 123, "A", maybe = false),
                 ),
