@@ -69,7 +69,7 @@ class SiloFilterExpressionMapper(
                 Filter.StringEquals -> mapToStringEqualsFilters(siloColumnName, values)
                 Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values)
                 Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
-                Filter.VariantQuery -> mapToVariantQueryFilter(values[0].values[0])
+                Filter.VariantQuery -> mapToVariantQueryFilter(values)
                 Filter.IntEquals -> mapToIntEqualsFilter(siloColumnName, values)
                 Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
                 Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
@@ -189,9 +189,17 @@ class SiloFilterExpressionMapper(
         },
     )
 
-    private fun mapToVariantQueryFilter(variantQuery: String?): SiloFilterExpression {
+    private fun mapToVariantQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
+        if (values[0].values.size != 1) {
+            throw BadRequestException(
+                "variantQuery must have exactly one value, found ${values[0].values.size} values.",
+            )
+        }
+
+        val variantQuery = values[0].values.single()
+
         if (variantQuery.isNullOrBlank()) {
-            throw BadRequestException("variantQuery must not be empty")
+            throw BadRequestException("variantQuery must not be empty, got '$variantQuery'")
         }
 
         return variantQueryFacade.map(variantQuery)

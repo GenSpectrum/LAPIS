@@ -128,6 +128,18 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.error.detail).to.include('Failed to parse variant query');
   });
 
+  it('should return bad request when sending multiple values for variant query', async () => {
+    const urlParams = new URLSearchParams();
+    urlParams.append('variantQuery', '123A');
+    urlParams.append('variantQuery', '123G');
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include('variantQuery must have exactly one value');
+  });
+
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postAggregated1({
       aggregatedPostRequest: {
