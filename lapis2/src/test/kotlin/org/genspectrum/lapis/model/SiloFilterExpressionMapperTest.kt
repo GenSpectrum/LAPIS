@@ -400,6 +400,26 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
+    fun `GIVEN a query with empty variantQueries array THEN it should throw a bad request error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("variantQuery" to emptyList()),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery must have exactly one value, found 0 values."))
+    }
+
+    @Test
+    fun `GIVEN a query with multiple variantQueries THEN it should throw a bad request error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("variantQuery" to listOf("A123T", "C123T")),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(exception.message, containsString("variantQuery must have exactly one value, found 2 values."))
+    }
+
+    @Test
     fun `given a query with a variantQuery alongside nucleotide mutations then it should throw an error`() {
         val filterParameter = DummySequenceFilters(
             mapOf("variantQuery" to listOf("A123T")),
