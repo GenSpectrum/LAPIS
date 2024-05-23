@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.2.0](https://github.com/GenSpectrum/LAPIS/compare/v0.1.1...v0.2.0) (2024-05-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis2:** throw exception on invalid variant query #797
+
+### Features
+
+* **lapis2:** clear cache when SILO is restarting ([6100bff](https://github.com/GenSpectrum/LAPIS/commit/6100bff487f6f0a9d3012414b66584019924e355))
+* **lapis2:** make "maybe" mutation queries case-insensitive [#797](https://github.com/GenSpectrum/LAPIS/issues/797) ([0af9c7f](https://github.com/GenSpectrum/LAPIS/commit/0af9c7f01740d39768135d4fd4e1112c87a75af1))
+
+
+### Bug Fixes
+
+* **lapis2-docs:** relative links must not end with a `/` ([992210d](https://github.com/GenSpectrum/LAPIS/commit/992210d8cb0441de289fa71e1108bd3c1b35eecf))
+* **lapis2:** also log which line of the SILO response failed to parse ([d1badea](https://github.com/GenSpectrum/LAPIS/commit/d1badea53d501435c0a26048d6ff0e874659ce39))
+* **lapis2:** bring back request id header in OpenAPI docs ([eb75391](https://github.com/GenSpectrum/LAPIS/commit/eb7539164962f814d60e4920818d3f13c76c67e1)), closes [#627](https://github.com/GenSpectrum/LAPIS/issues/627)
+* **lapis2:** log request id again ([26f83c9](https://github.com/GenSpectrum/LAPIS/commit/26f83c91eb51a0ccf0a30dd471480ac752d1dacb))
+* **lapis2:** only accept a single variant query in a request [#798](https://github.com/GenSpectrum/LAPIS/issues/798) ([54df8e5](https://github.com/GenSpectrum/LAPIS/commit/54df8e5bfa432ea8c3ffdf00ea47a5fd3af29633))
+* **lapis2:** throw exception on invalid variant query [#797](https://github.com/GenSpectrum/LAPIS/issues/797) ([980806a](https://github.com/GenSpectrum/LAPIS/commit/980806ac762e7186546edff3ea338569683dcc90))
+
 ## [0.1.1](https://github.com/GenSpectrum/LAPIS/compare/v0.1.0...v0.1.1) (2024-05-08)
 
 
