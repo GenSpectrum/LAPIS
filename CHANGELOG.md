@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/GenSpectrum/LAPIS/compare/v0.2.0...v0.2.1) (2024-05-27)
+
+
+### Features
+
+* **lapis2:** delete insertions metadata types [#804](https://github.com/GenSpectrum/LAPIS/issues/804) ([dd0ecd1](https://github.com/GenSpectrum/LAPIS/commit/dd0ecd12ad80f1e61b217d2f60d7247aff3ac2d9))
+
 ## [0.2.0](https://github.com/GenSpectrum/LAPIS/compare/v0.1.1...v0.2.0) (2024-05-23)
 
 

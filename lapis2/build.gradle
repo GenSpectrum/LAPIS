@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'org.genspectrum'
-version = '0.2.0' // x-release-please-version - this is a marker comment for Release Please to update this version
+version = '0.2.1' // x-release-please-version - this is a marker comment for Release Please to update this version
 
 java {
     sourceCompatibility = '21'
