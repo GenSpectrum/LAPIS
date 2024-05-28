@@ -6,8 +6,6 @@
 # Personal preference
 playground/
 
-docker-compose.override.yml
-
 log/
 logs/
 

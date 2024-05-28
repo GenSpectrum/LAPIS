@@ -7,7 +7,7 @@ updates:
     commit-message:
       prefix: "chore(github-actions)"
   - package-ecosystem: gradle
-    directory: lapis2/
+    directory: lapis/
     schedule:
       interval: weekly
     groups:
@@ -16,9 +16,9 @@ updates:
           - "minor"
           - "patch"
     commit-message:
-      prefix: "chore(lapis2)"
+      prefix: "chore(lapis)"
   - package-ecosystem: npm
-    directory: siloLapisTests/
+    directory: lapis-e2e/
     schedule:
       interval: weekly
     groups:
@@ -27,9 +27,9 @@ updates:
           - "minor"
           - "patch"
     commit-message:
-      prefix: "chore(siloLapisTests)"
+      prefix: "chore(lapis-e2e)"
   - package-ecosystem: npm
-    directory: lapis2-docs/
+    directory: lapis-docs/
     schedule:
       interval: weekly
     groups:
@@ -38,7 +38,7 @@ updates:
           - "minor"
           - "patch"
     commit-message:
-      prefix: "chore(lapis2-docs)"
+      prefix: "chore(lapis-docs)"
   - package-ecosystem: npm
     directory: /
     schedule:

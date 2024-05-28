@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="lapis-docs" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/lapis-docs/package.json" />
+    <command value="run" />
+    <scripts>
+      <script value="dev" />
+    </scripts>
+    <node-interpreter value="project" />
+    <envs>
+      <env name="ASTRO_SITE" value="http://localhost:8001/docs/" />
+      <env name="BASE_URL" value="/docs/" />
+      <env name="CONFIG_FILE" value="../lapis-e2e/testData/testDatabaseConfig.yaml" />
+      <env name="LAPIS_URL" value="http://localhost:8090" />
+      <env name="REFERENCE_GENOMES_FILE" value="../lapis-e2e/testData/reference_genomes.json" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

@@ -11,9 +11,9 @@ const Configuration = {
             RuleConfigSeverity.Error,
             "always",
             [
-                "lapis2",
-                "lapis2-docs",
-                "siloLapisTests",
+                "lapis",
+                "lapis-docs",
+                "lapis-e2e",
                 "github-actions",
                 "root", // used by dependabot to update the root package.json
             ]

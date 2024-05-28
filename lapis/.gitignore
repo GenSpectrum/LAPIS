@@ -1,0 +1,9 @@
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+/lapis-openapi.json
+/lapis-openapi-protected.json
+log/
+logs/
