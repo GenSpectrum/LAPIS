@@ -1,9 +1,0 @@
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-/lapis-v2-openapi.json
-/lapis-v2-openapi-protected.json
-log/
-logs/

@@ -1,0 +1,29 @@
+{
+  "name": "lapis-e2e",
+  "version": "1.0.0",
+  "description": "End to end tests for LAPIS backed by SILO",
+  "scripts": {
+    "test": "mocha --exit",
+    "generateLapisClient": "npm run runOpenApiGenerator && npm run copyGeneratedFiles && npm run cleanUpGeneratedFiles",
+    "runOpenApiGenerator": "openapi-generator-cli generate -i ../lapis/lapis-openapi.json -g typescript-fetch -o generated-sources",
+    "copyGeneratedFiles": "mkdir -p test/lapisClient && cp generated-sources/index.ts generated-sources/runtime.ts test/lapisClient && cp -r generated-sources/apis generated-sources/models test/lapisClient",
+    "generateLapisClientProtected": "npm run runOpenApiGeneratorProtected && npm run copyGeneratedFilesProtected && npm run cleanUpGeneratedFilesProtected",
+    "runOpenApiGeneratorProtected": "openapi-generator-cli generate -i ../lapis/lapis-openapi-protected.json -g typescript-fetch -o generated-sources-protected",
+    "copyGeneratedFilesProtected": "mkdir -p test/lapisClientProtected && cp generated-sources-protected/index.ts generated-sources-protected/runtime.ts test/lapisClientProtected && cp -r generated-sources-protected/apis generated-sources-protected/models test/lapisClientProtected",
+    "cleanUpGeneratedFiles": "rm -rf generated-sources",
+    "cleanUpGeneratedFilesProtected": "rm -rf generated-sources-protected",
+    "check-format": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.12.12",
+    "chai": "^5.1.1",
+    "mocha": "^10.4.0",
+    "prettier": "^3.2.5",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  }
+}

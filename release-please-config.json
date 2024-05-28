@@ -4,20 +4,20 @@
         ".": {
             "release-type": "simple",
             "extra-files": [
-                "lapis2/build.gradle",
+                "lapis/build.gradle",
                 {
                     "type": "json",
-                    "path": "lapis2-docs/package.json",
+                    "path": "lapis-docs/package.json",
                     "jsonpath": "$.version"
                 },
                 {
                     "type": "json",
-                    "path": "lapis2-docs/package-lock.json",
+                    "path": "lapis-docs/package-lock.json",
                     "jsonpath": "$.version"
                 },
                 {
                     "type": "json",
-                    "path": "lapis2-docs/package-lock.json",
+                    "path": "lapis-docs/package-lock.json",
                     "jsonpath": "$.packages[''].version"
                 }
             ]
