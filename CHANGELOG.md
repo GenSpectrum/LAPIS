@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/GenSpectrum/LAPIS/compare/v0.2.1...v0.2.2) (2024-05-29)
+
+
+### Features
+
+* **lapis2:** use entrypoint.sh to allow passing JVM_OPTS through env variable ([#823](https://github.com/GenSpectrum/LAPIS/issues/823)) ([9b35b8a](https://github.com/GenSpectrum/LAPIS/commit/9b35b8aa1c76ab487fc775db42946bcac52a6b7f)), closes [#821](https://github.com/GenSpectrum/LAPIS/issues/821)
+
 ## [0.2.1](https://github.com/GenSpectrum/LAPIS/compare/v0.2.0...v0.2.1) (2024-05-27)
 
 
