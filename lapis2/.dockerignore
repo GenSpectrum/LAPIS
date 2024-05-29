@@ -4,3 +4,4 @@
 !gradlew
 !build.gradle
 !settings.gradle
+!entrypoint.sh
