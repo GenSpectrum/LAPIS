@@ -10,7 +10,7 @@
         "astro": "astro",
         "check-format": "prettier --check \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
         "format": "prettier --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
-        "check-types": "CONFIG_FILE=../lapis-e2e/testData/testDatabaseConfig.yaml astro sync && tsc --noEmit",
+        "check-types": "CONFIG_FILE=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml astro sync && tsc --noEmit",
         "e2e": "playwright test"
     },
     "dependencies": {

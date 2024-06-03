@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient, sequenceData } from './common';
+import { lapisClient, sequenceData } from './common';
 
 describe('The /alignedAminoAcidSequence endpoint', () => {
   it('should return amino acid sequences for Switzerland', async () => {

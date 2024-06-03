@@ -370,7 +370,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            And(NucleotideInsertionContains(123, "ABCD"), NucleotideInsertionContains(999, "DEF"))
+            And(NucleotideInsertionContains(123, "ABCD", "segment"), NucleotideInsertionContains(999, "DEF", null))
         assertThat(result, equalTo(expected))
     }
 

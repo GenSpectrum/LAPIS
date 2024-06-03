@@ -131,6 +131,7 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
             NucleotideInsertionContains(
                 ctx.position().text.toInt(),
                 value.uppercase(),
+                null,
             ),
         )
     }

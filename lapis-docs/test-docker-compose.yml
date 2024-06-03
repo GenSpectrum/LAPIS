@@ -5,8 +5,8 @@ services:
     ports:
       - "4321:3000"
     volumes:
-      - ../lapis-e2e/testData/testDatabaseConfig.yaml:/config/database_config.yaml
-      - ../lapis-e2e/testData/reference_genomes.json:/config/reference_genomes.json
+      - ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml:/config/database_config.yaml
+      - ../lapis-e2e/testData/singleSegmented/reference_genomes.json:/config/reference_genomes.json
     environment:
       LAPIS_URL: http://localhost:8090
       BASE_URL: /docs/

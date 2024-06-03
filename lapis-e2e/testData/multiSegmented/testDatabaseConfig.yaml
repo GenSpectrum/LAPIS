@@ -1,0 +1,13 @@
+schema:
+  instanceName: crimean-congo-hemorrhagic-fever-virus-multi-segmented-test
+  opennessLevel: OPEN
+  metadata:
+    - name: primaryKey
+      type: string
+    - name: date
+      type: date
+    - name: country
+      type: string
+      generateIndex: true
+  primaryKey: primaryKey
+  dateToSortBy: date

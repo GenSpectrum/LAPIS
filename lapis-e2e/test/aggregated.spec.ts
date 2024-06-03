@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient } from './common';
+import { basePath, lapisClient, lapisClientMultiSegmented } from './common';
 import fs from 'fs';
 import { AggregatedPostRequest, AggregatedResponse } from './lapisClient';
 
@@ -45,6 +45,17 @@ describe('The /aggregated endpoint', () => {
         expect(resultWithoutUndefined).to.have.deep.members(testCase.expected);
       })
     );
+
+  it('should correcty handle aggregated request with multiple segments', async () => {
+    const result = await lapisClientMultiSegmented.postAggregated1({
+      aggregatedPostRequest: {
+        nucleotideMutations: ['L:T1A', 'M:T1C'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.have.property('count', 1);
+  });
 
   it('should correctly handle multiple mutation requests in GET requests', async () => {
     const urlParams = new URLSearchParams({

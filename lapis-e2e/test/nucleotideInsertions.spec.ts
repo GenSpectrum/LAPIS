@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient } from './common';
+import { basePath, lapisClient, lapisClientMultiSegmented } from './common';
 
 describe('The /nucleotideInsertions endpoint', () => {
   let someInsertion = 'ins_25701:CCC';
@@ -16,6 +16,20 @@ describe('The /nucleotideInsertions endpoint', () => {
     expect(specificInsertion?.insertedSymbols).to.equal('CCC');
     expect(specificInsertion?.position).to.equal(25701);
     expect(specificInsertion?.sequenceName).to.be.undefined;
+  });
+
+  it('should return nucleotide insertions for multi segmented sequences', async () => {
+    const result = await lapisClientMultiSegmented.postNucleotideInsertions1({
+      insertionsRequest: { country: 'Switzerland' },
+    });
+
+    expect(result.data).to.have.length(2);
+
+    const insertionsFirstSegment = result.data.find(mutationData => mutationData.insertion === 'ins_L:1:AB');
+    expect(insertionsFirstSegment?.count).to.equal(2);
+
+    const insertionsSecondSegment = result.data.find(mutationData => mutationData.insertion === 'ins_M:2:BC');
+    expect(insertionsSecondSegment?.count).to.equal(1);
   });
 
   it('should order by specified fields', async () => {
