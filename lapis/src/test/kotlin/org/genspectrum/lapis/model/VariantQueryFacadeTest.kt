@@ -303,7 +303,15 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG")))
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
+    }
+
+    @Test
+    fun `given a variantQuery with a 'Insertion' expression with sequenceName throws`() {
+        //  COVID variant queries do not support segment name in insertion queries
+        val variantQuery = "ins_sequence:1234:GAG"
+
+        assertThrows<BadRequestException> { underTest.map(variantQuery) }
     }
 
     @Test
@@ -312,7 +320,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG")))
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
     }
 
     @Test
@@ -321,7 +329,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG")))
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
     }
 
     @Test
@@ -330,7 +338,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "G.*A.*G")))
+        assertThat(result, equalTo(NucleotideInsertionContains(1234, "G.*A.*G", null)))
     }
 
     @Test

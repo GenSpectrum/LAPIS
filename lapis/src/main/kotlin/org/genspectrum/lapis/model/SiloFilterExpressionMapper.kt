@@ -409,7 +409,11 @@ class SiloFilterExpressionMapper(
     }
 
     private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains {
-        return NucleotideInsertionContains(nucleotideInsertion.position, nucleotideInsertion.insertions)
+        return NucleotideInsertionContains(
+            nucleotideInsertion.position,
+            nucleotideInsertion.insertions,
+            nucleotideInsertion.segment,
+        )
     }
 
     private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient } from './common';
+import { basePath, lapisClient, lapisClientMultiSegmented } from './common';
 
 describe('The /nucleotideMutations endpoint', () => {
   let mutationWithLessThan10PercentProportion = 'C19220T';
@@ -27,6 +27,24 @@ describe('The /nucleotideMutations endpoint', () => {
     expect(commonMutationProportion?.mutationFrom).to.be.equal('G');
     expect(commonMutationProportion?.mutationTo).to.be.equal('C');
     expect(commonMutationProportion?.position).to.be.equal(28280);
+  });
+
+  it('should return mutations proportions for multi segmented', async () => {
+    const result = await lapisClientMultiSegmented.postNucleotideMutations1({
+      sequenceFiltersWithMinProportion: { country: 'Switzerland' },
+    });
+
+    expect(result.data).to.have.length(2);
+
+    const mutationProportionOnFirstSegment = result.data.find(
+      mutationData => mutationData.mutation === 'L:T1A'
+    );
+    expect(mutationProportionOnFirstSegment?.count).to.equal(2);
+
+    const mutationProportionOnSecondSegment = result.data.find(
+      mutationData => mutationData.mutation === 'M:T1C'
+    );
+    expect(mutationProportionOnSecondSegment?.count).to.equal(1);
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {

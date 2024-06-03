@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import {
   basePath,
   expectIsZstdEncoded,
+  lapisMultiSegmentedSequenceController,
   lapisSingleSegmentedSequenceController,
   sequenceData,
 } from './common';
@@ -18,6 +19,20 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     expect(sequences).to.have.length(100);
     expect(primaryKeys[0]).to.equal('>key_3259931');
     expect(sequences[0]).to.have.length(29903);
+  });
+
+  it('should return aligned nucleotide sequences for multi segmented sequences', async () => {
+    const result = await lapisMultiSegmentedSequenceController.postAlignedNucleotideSequence({
+      nucleotideSequenceRequest: { country: 'Switzerland' },
+      segment: 'M',
+    });
+
+    const { primaryKeys, sequences } = sequenceData(result);
+
+    expect(primaryKeys).to.have.length(6);
+    expect(sequences).to.have.length(6);
+    expect(primaryKeys[0]).to.equal('>key_5');
+    expect(sequences[0]).to.equal('TGGG');
   });
 
   it('should order ascending by specified fields', async () => {

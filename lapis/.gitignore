@@ -7,3 +7,5 @@ build/
 /lapis-openapi-protected.json
 log/
 logs/
+/lapis-openapi-multi-segmented.json
+/lapis-openapi-single-segmented.json

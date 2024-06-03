@@ -1,0 +1,30 @@
+{
+  "nucleotideSequences": [
+    {
+      "name": "L",
+      "sequence": "TCTCT"
+    },
+    {
+      "name": "M",
+      "sequence": "TGGG"
+    },
+    {
+      "name": "S",
+      "sequence": "AAA"
+    }
+  ],
+  "genes": [
+    {
+      "name": "RdRp",
+      "sequence": "MDFL*"
+    },
+    {
+      "name": "GPC",
+      "sequence": "MS*"
+    },
+    {
+      "name": "NP",
+      "sequence": "MEN*"
+    }
+  ]
+}

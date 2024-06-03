@@ -91,6 +91,12 @@ jobs:
           arguments: generateOpenApiDocs -PopennessLevel=protected
           build-root-directory: lapis
 
+      - name: Build OpenAPI Spec Multi segmented
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          arguments: generateOpenApiDocs -Psegmented=true
+          build-root-directory: lapis
+
       - name: Cache .npm
         uses: actions/cache@v4
         with:
@@ -107,6 +113,10 @@ jobs:
 
       - name: Generate Lapis Client Protected
         run: npm run generateLapisClientProtected
+        working-directory: lapis-e2e
+
+      - name: Generate Lapis Client Multi Segmented
+        run: npm run generateLapisClientMultiSegmented
         working-directory: lapis-e2e
 
       - name: Check Format
@@ -150,8 +160,12 @@ jobs:
           cd lapis
           mkdir p e2e-logs
           docker compose logs silo > e2e-logs/silo.log
+          docker compose logs siloPreprocessing > e2e-logs/siloPreprocessing.log
+          docker compose logs siloMultisegmented > e2e-logs/siloMultisegmented.log
+          docker compose logs siloPreprocessingMultisegmented > e2e-logs/siloPreprocessingMultisegmented.log
           docker compose logs lapisOpen > e2e-logs/lapisOpen.log
           docker compose logs lapisProtected > e2e-logs/lapisProtected.log
+          docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
         env:
           SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}

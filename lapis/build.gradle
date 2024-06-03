@@ -80,9 +80,35 @@ openApi {
     outputDir.set(file("$rootDir"))
 
     def opennessLevel = project.hasProperty("opennessLevel") ? project.opennessLevel : "open"
+    def segmented = project.hasProperty("segmented") ? project.segmented : "false"
 
-    def customOutputFileName = opennessLevel == "open" ? "lapis-openapi.json" : "lapis-openapi-protected.json"
-    def customLapisConfig = opennessLevel == "open" ? "../lapis-e2e/testData/testDatabaseConfig.yaml" : "../lapis-e2e/testData/protectedTestDatabaseConfig.yaml"
+    def getCustomOutputFileName = { opennessLevel_, segmented_ ->
+        if (segmented_ == "true") {
+            return "lapis-openapi-multi-segmented.json"
+        } else {
+            return opennessLevel_ == "open" ? "lapis-openapi-single-segmented.json" : "lapis-openapi-single-segmented-protected.json"
+        }
+    }
+
+    def getCustomLapisConfig = { opennessLevel_, segmented_ ->
+        if (segmented_ == "true") {
+            return "../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml"
+        } else {
+            return opennessLevel_ == "open" ? "../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml" : "../lapis-e2e/testData/singleSegmented/protectedTestDatabaseConfig.yaml"
+        }
+    }
+
+    def getReferenceGenomeFilename = { segmented_ ->
+        if (segmented_ == "true") {
+            return "../lapis-e2e/testData/multiSegmented/reference_genomes.json"
+        } else {
+            return "../lapis-e2e/testData/singleSegmented/reference_genomes.json"
+        }
+    }
+
+    def customOutputFileName = getCustomOutputFileName(opennessLevel, segmented)
+    def customLapisConfig = getCustomLapisConfig(opennessLevel, segmented)
+    def referenceGenomeFilename = getReferenceGenomeFilename(segmented)
 
     outputFileName.set(customOutputFileName)
     apiDocsUrl.set("http://localhost:8080/api-docs")
@@ -91,7 +117,7 @@ openApi {
         args.set([
                 "--silo.url=does.not.matter.here",
                 "--lapis.databaseConfig.path=$customLapisConfig",
-                "--referenceGenomeFilename=../lapis-e2e/testData/reference_genomes.json",
+                "--referenceGenomeFilename=$referenceGenomeFilename",
                 "--lapis.accessKeys.path=./src/test/resources/config/testAccessKeys.yaml"
         ])
     }

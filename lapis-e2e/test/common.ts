@@ -4,15 +4,18 @@ import {
   Middleware,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
+import { LapisControllerApi as LapisControllerApiMultiSegmented } from './lapisClientMultiSegmented';
 import { expect } from 'chai';
 
 import {
   LapisControllerApi as LapisControllerApiProtected,
   Configuration as ConfigurationProtected,
 } from './lapisClientProtected';
+import { MultiSegmentedSequenceControllerApi } from './lapisClientMultiSegmented';
 
 export const basePath = 'http://localhost:8090';
 export const basePathProtected = 'http://localhost:8092';
+export const basePathMultiSegmented = 'http://localhost:8094';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -40,9 +43,16 @@ export const lapisClient = new LapisControllerApi(new Configuration({ basePath }
 export const lapisClientProtected = new LapisControllerApiProtected(
   new ConfigurationProtected({ basePath: basePathProtected })
 ).withMiddleware(middleware);
+export const lapisClientMultiSegmented = new LapisControllerApiMultiSegmented(
+  new Configuration({ basePath: basePathMultiSegmented })
+).withMiddleware(middleware);
 
 export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenceControllerApi(
   new Configuration({ basePath })
+).withMiddleware(middleware);
+
+export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceControllerApi(
+  new Configuration({ basePath: basePathMultiSegmented })
 ).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {

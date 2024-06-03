@@ -7,11 +7,11 @@ services:
     command: --silo.url=http://silo:8081
     volumes:
       - type: bind
-        source: ../lapis-e2e/testData/testDatabaseConfig.yaml
+        source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
         target: /workspace/database_config.yaml
         read_only: true
       - type: bind
-        source: ../lapis-e2e/testData/reference_genomes.json
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
         target: /workspace/reference_genomes.json
         read_only: true
 
@@ -21,7 +21,7 @@ services:
       - "8091:8081"
     command: --api
     volumes:
-      - ../lapis-e2e/testData/output:/data
+      - ../lapis-e2e/testData/singleSegmented/output:/data
     depends_on:
       siloPreprocessing:
         condition: service_completed_successfully
@@ -30,10 +30,45 @@ services:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     command: --preprocessing
     volumes:
-      - ../lapis-e2e/testData:/preprocessing/input
-      - ../lapis-e2e/testData/output:/preprocessing/output
-      - ../lapis-e2e/testData/preprocessingConfig.yaml:/app/preprocessing_config.yaml
-      - ../lapis-e2e/testData/testDatabaseConfig.yaml:/app/database_config.yaml
+      - ../lapis-e2e/testData/singleSegmented:/preprocessing/input
+      - ../lapis-e2e/testData/singleSegmented/output:/preprocessing/output
+      - ../lapis-e2e/testData/singleSegmented/preprocessingConfig.yaml:/app/preprocessing_config.yaml
+      - ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml:/app/database_config.yaml
+
+  siloMultisegmented:
+    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    ports:
+      - "8093:8081"
+    command: --api
+    volumes:
+      - ../lapis-e2e/testData/multiSegmented/output:/data
+    depends_on:
+      siloPreprocessingMultisegmented:
+        condition: service_completed_successfully
+
+  siloPreprocessingMultisegmented:
+    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    command: --preprocessing
+    volumes:
+      - ../lapis-e2e/testData/multiSegmented:/preprocessing/input
+      - ../lapis-e2e/testData/multiSegmented/output:/preprocessing/output
+      - ../lapis-e2e/testData/multiSegmented/preprocessingConfig.yaml:/app/preprocessing_config.yaml
+      - ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml:/app/database_config.yaml
+
+  lapisMultiSegmented:
+    image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+    ports:
+      - "8094:8080"
+    command: --silo.url=http://siloMultisegmented:8081
+    volumes:
+      - type: bind
+        source: ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml
+        target: /workspace/database_config.yaml
+        read_only: true
+      - type: bind
+        source: ../lapis-e2e/testData/multiSegmented/reference_genomes.json
+        target: /workspace/reference_genomes.json
+        read_only: true
 
   lapisProtected:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
@@ -42,11 +77,11 @@ services:
     command: --silo.url=http://silo:8081 --lapis.accessKeys.path=/workspace/access_keys.yaml
     volumes:
       - type: bind
-        source: ../lapis-e2e/testData/protectedTestDatabaseConfig.yaml
+        source: ../lapis-e2e/testData/singleSegmented/protectedTestDatabaseConfig.yaml
         target: /workspace/database_config.yaml
         read_only: true
       - type: bind
-        source: ../lapis-e2e/testData/reference_genomes.json
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
         target: /workspace/reference_genomes.json
         read_only: true
       - type: bind

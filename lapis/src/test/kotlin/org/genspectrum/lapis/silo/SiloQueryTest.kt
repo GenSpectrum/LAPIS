@@ -486,6 +486,38 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
+                    NucleotideInsertionContains(1234, "A", "segment"),
+                    """
+                        {
+                            "type": "InsertionContains",
+                            "position": 1234,
+                            "value": "A",
+                            "sequenceName":"segment"
+                        }
+                    """,
+                ),
+                Arguments.of(
+                    NucleotideInsertionContains(1234, "A", null),
+                    """
+                        {
+                            "type": "InsertionContains",
+                            "position": 1234,
+                            "value": "A"
+                        }
+                    """,
+                ),
+                Arguments.of(
+                    AminoAcidInsertionContains(1234, "A", "someGene"),
+                    """
+                        {
+                            "type": "AminoAcidInsertionContains",
+                            "position": 1234,
+                            "value": "A",
+                            "sequenceName":"someGene"
+                        }
+                    """,
+                ),
+                Arguments.of(
                     DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
                     """
                         {

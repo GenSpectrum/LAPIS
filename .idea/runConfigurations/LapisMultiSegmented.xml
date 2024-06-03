@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LapisMultiSegmented" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="lapis.main" />
+    <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8093 --lapis.databaseConfig.path=lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=lapis-e2e/testData/multiSegmented/reference_genomes.json --server.port=8094" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="org.genspectrum.lapis.LapisApplicationKt" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
