@@ -1,6 +1,7 @@
 package org.genspectrum.lapis
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
@@ -28,11 +29,13 @@ import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableScheduling
@@ -115,5 +118,25 @@ class LapisSpringConfig {
             ?: throw IllegalArgumentException(NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE)
 
         return ReferenceGenome.readFromFile(filename)
+    }
+
+    @Bean
+    fun caffeineCacheManager(): CaffeineCacheManager {
+        val cacheManager = CaffeineCacheManager()
+        cacheManager.setCaffeine(caffeineCacheBuilder())
+        return cacheManager
+    }
+
+    fun caffeineCacheBuilder(): Caffeine<Any, Any> {
+        return Caffeine.newBuilder()
+            .maximumWeight(50 * 1024 * 1024) // 50 MB
+            .weigher { key, value ->
+                // Define the weight function here
+                // For example, if value is a String, you can use its length
+                if (value is String) {
+                    return@weigher (value as String).length
+                }
+                1
+            }
     }
 }
