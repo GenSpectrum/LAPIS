@@ -7,9 +7,15 @@ import CacheSizeEndpointLink from '../../../../components/CacheSizeEndpointLink.
 
 LAPIS uses Spring Boot's caching capabilities to cache aggregated, insertion and mutation queries.
 We decided to cache SILO actions that are relatively expensive to compute,
-but don't return much data (measured in size of the response body).
+but don't return much data (measured in size of the response body). Details and FASTA actions are expensive, but return
+potentially large amounts of data and are therefore not cached.
 
-Details and FASTA actions are expensive, but return potentially large amounts of data.
+Internally, we use soft references to allow the JVM garbage collector to remove entries from the cache if the memory is needed.
+However, per default the cache is not guaranteed to have a fixed memory size, increasing with each stored entry.
+The maintainer must ensure that enough memory is available to store the cache entries, or provide a limit to the
+heap size of the JVM (eg. `-Xmx4g`, or `-XX:+UseContainerSupport` when running LAPIS in docker )
+
+You can turn off caching by providing the command line argument `--spring.cache.type=none` to the execution.
 
 LAPIS offers an endpoint to check the current cache size (in number of cached entries) at `/actuator/metrics/cache.size`:
 

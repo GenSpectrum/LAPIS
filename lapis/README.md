@@ -2,7 +2,7 @@
 
 Run tests:
 
-```
+```bash
 ./gradlew test
 ```
 
@@ -14,7 +14,7 @@ When running LAPIS, you need to pass the following arguments:
   
 e.g. when running via gradle:
 
-```
+```bash
 ./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>
 ```
 
@@ -28,7 +28,7 @@ Check the [Docker compose file](docker-compose.yml) for an example on how to run
 
 Use Docker Compose to run SILO and LAPIS:
 
-```
+```bash
 LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up
 ```
 
@@ -40,8 +40,40 @@ When running LAPIS behind a proxy, the proxy needs to set X-Forwarded headers:
 * X-Forwarded-Proto
 * X-Forwarded-Prefix
 
-
 ## Logs
 
 LAPIS logs to rotating files in `./logs` and to stdout.
 In the Docker container, log files are stored in `/workspace/logs`
+
+## Cache
+
+By default, LAPIS uses an in-memory cache to store the results of the last queries for the endpoints
+aggregated, nucleotideMutation, aminoAcidMutation, nucleotideInsertions and aminoAcidInsertions.
+
+The default cache provider is Caffeine, with soft references for the values and a maximum size of 50000 entries.
+This configuration can be changed in the `application.properties` file
+```
+spring.cache.caffeine.spec=maximumSize=50000,softValues
+```
+or by providing command line arguments to the execution:
+```bash
+--spring.cache.caffeine.spec=maximumSize=50000,softValues
+```
+
+We use soft references to allow the garbage collector to remove entries from the cache if the memory is needed.
+However, per default the cache is not guaranteed to have a fixed memory size, increasing with each stored entry. 
+The maintainer must ensure that enough memory is available to store the cache entries, or provide a limit to the 
+heap size of the JVM.
+
+If the cache is full, the least recently used entry is removed from the cache.
+The cache is cleared when the server is restarted, or SILO provides a new data version.
+
+The cache can be turned off by providing the `spring.cache.type` attribute in the 
+`application.properties` file, for example: 
+```
+spring.cache.type=none
+```
+or by providing the command line argument:
+```bash
+--spring.cache.type=none
+```
