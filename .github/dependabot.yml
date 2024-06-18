@@ -6,6 +6,7 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore(github-actions)"
+    breakIt: Yes
   - package-ecosystem: gradle
     directory: lapis/
     schedule:
