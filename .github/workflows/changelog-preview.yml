@@ -1,0 +1,51 @@
+name: Changelog Preview
+
+on:
+  pull_request:
+
+jobs:
+  previewChangelog:
+    name: Preview Changelog
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install npm packages
+        run: npm ci
+
+      - name: Generate Changelog Preview
+        id: changelog-preview
+        run: |
+          changelog=$(npm run --silent release-please-changelog-preview -- --token=${{ secrets.GITHUB_TOKEN }} --target-branch=${{ github.head_ref || github.ref_name }})
+          
+          echo "changelog<<EOF
+          $changelog
+          EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ steps.changelog-preview.outputs.changelog != '' }}
+        with:
+          skip_unchanged: true
+          header: changelogPreview
+          message: |
+            This is a preview of the changelog of the next release:
+            
+            ${{ steps.changelog-preview.outputs.changelog }}
+
+      - name: Delete PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ steps.changelog-preview.outputs.changelog == '' }}
+        with:
+          header: changelogPreview
+          delete: true
