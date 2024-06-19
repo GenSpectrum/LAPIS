@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/GenSpectrum/LAPIS/compare/v0.2.2...v0.2.3) (2024-06-19)
+
+
+### Bug Fixes
+
+* **lapis:** nucleotideInsertionContains correctly handles segment ([4776a3e](https://github.com/GenSpectrum/LAPIS/commit/4776a3e9f48ed834ed64f24af28b05535e98d917))
+
 ## [0.2.2](https://github.com/GenSpectrum/LAPIS/compare/v0.2.1...v0.2.2) (2024-05-29)
 
 
