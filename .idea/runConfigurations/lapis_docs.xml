@@ -9,9 +9,9 @@
     <envs>
       <env name="ASTRO_SITE" value="http://localhost:8001/docs/" />
       <env name="BASE_URL" value="/docs/" />
-      <env name="CONFIG_FILE" value="../lapis-e2e/testData/testDatabaseConfig.yaml" />
+      <env name="CONFIG_FILE" value="../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml" />
       <env name="LAPIS_URL" value="http://localhost:8090" />
-      <env name="REFERENCE_GENOMES_FILE" value="../lapis-e2e/testData/reference_genomes.json" />
+      <env name="REFERENCE_GENOMES_FILE" value="../lapis-e2e/testData/singleSegmented/reference_genomes.json" />
     </envs>
     <method v="2" />
   </configuration>

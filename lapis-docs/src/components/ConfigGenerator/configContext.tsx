@@ -42,10 +42,10 @@ export const schemaSchema = z.object({
     opennessLevel: opennessLevelSchema,
     metadata: z.array(metadataSchema),
     primaryKey: z.string(),
-    dateToSortBy: z.string(),
-    partitionBy: z.string(),
+    dateToSortBy: z.string().optional(),
+    partitionBy: z.string().optional(),
     tableColumns: z.array(z.string()).optional(),
-    features: z.array(featureSchema),
+    features: z.array(featureSchema).optional(),
 });
 
 export type Schema = z.infer<typeof schemaSchema>;
