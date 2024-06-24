@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/GenSpectrum/LAPIS/compare/v0.2.3...v0.2.4) (2024-06-24)
+
+
+### Bug Fixes
+
+* **lapis-docs:** config generator: dateToSortBy, partitionBy and features is optional ([4e905e8](https://github.com/GenSpectrum/LAPIS/commit/4e905e8178eaebfe937764fc2fc95911db58dbe4))
+
 ## [0.2.3](https://github.com/GenSpectrum/LAPIS/compare/v0.2.2...v0.2.3) (2024-06-19)
 
 
