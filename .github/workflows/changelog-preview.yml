@@ -8,6 +8,8 @@ jobs:
     name: Preview Changelog
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
