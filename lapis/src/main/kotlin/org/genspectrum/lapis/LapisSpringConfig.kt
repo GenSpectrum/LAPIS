@@ -121,22 +121,21 @@ class LapisSpringConfig {
     }
 
     @Bean
-    fun caffeineCacheManager(): CaffeineCacheManager {
+    fun caffeineCacheManager(@Value("\${spring.cache.caffeine.maxSizeMb}") maxSizeMb: Long): CaffeineCacheManager {
         val cacheManager = CaffeineCacheManager()
-        cacheManager.setCaffeine(caffeineCacheBuilder())
+        cacheManager.setCaffeine(caffeineCacheBuilder(maxSizeMb))
         return cacheManager
     }
 
-    fun caffeineCacheBuilder(): Caffeine<Any, Any> {
+    fun caffeineCacheBuilder(
+        maxSizeMb: Long,
+    ): Caffeine<Any, Any> {
         return Caffeine.newBuilder()
-            .maximumWeight(50 * 1024 * 1024) // 50 MB
+            .maximumWeight(mbToByte(maxSizeMb))
             .weigher { key, value ->
-                // Define the weight function here
-                // For example, if value is a String, you can use its length
-                if (value is String) {
-                    return@weigher (value as String).length
-                }
-                1
+                key.toString().toByteArray().size + value.toString().toByteArray().size
             }
     }
 }
+
+fun mbToByte(mb: Long) = mb * 1024 * 1024
