@@ -22,12 +22,12 @@
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.4",
     "@types/chai": "^4.3.16",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20.14.2",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^20.14.9",
     "chai": "^5.1.1",
-    "mocha": "^10.4.0",
+    "mocha": "^10.5.2",
     "prettier": "^3.3.2",
-    "tsx": "^4.15.6",
-    "typescript": "^5.4.5"
+    "tsx": "^4.15.7",
+    "typescript": "^5.5.2"
   }
 }
