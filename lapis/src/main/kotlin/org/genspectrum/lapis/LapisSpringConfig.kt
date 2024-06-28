@@ -1,6 +1,7 @@
 package org.genspectrum.lapis
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.benmanes.caffeine.cache.Caffeine
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
@@ -28,6 +29,7 @@ import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -116,4 +118,23 @@ class LapisSpringConfig {
 
         return ReferenceGenome.readFromFile(filename)
     }
+
+    @Bean
+    fun caffeineCacheManager(
+        @Value("\${spring.cache.caffeine.maxSizeMb}") maxSizeMb: Long,
+    ): CaffeineCacheManager {
+        val cacheManager = CaffeineCacheManager()
+        cacheManager.setCaffeine(caffeineCacheBuilder(maxSizeMb))
+        return cacheManager
+    }
+
+    fun caffeineCacheBuilder(maxSizeMb: Long): Caffeine<Any, Any> {
+        return Caffeine.newBuilder()
+            .maximumWeight(mbToByte(maxSizeMb))
+            .weigher { key, value ->
+                key.toString().toByteArray().size + value.toString().toByteArray().size
+            }
+    }
 }
+
+private fun mbToByte(mb: Long) = mb * 1024 * 1024
