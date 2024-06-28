@@ -7,11 +7,11 @@ services:
     command: --silo.url=http://silo:8081
     volumes:
       - type: bind
-        source: ../../loculus/tmp/database_config.yaml
+        source: ../lapis-e2e/testData/testDatabaseConfig.yaml
         target: /workspace/database_config.yaml
         read_only: true
       - type: bind
-        source: ../../loculus/tmp/reference_genomes.json
+        source: ../lapis-e2e/testData/reference_genomes.json
         target: /workspace/reference_genomes.json
         read_only: true
     environment:
@@ -27,10 +27,10 @@ services:
       - "8091:8081"
     command: --api --estimatedStartupTimeInMinutes 1 --maxQueuedHttpConnections 10000 --threadsForHttpConnections 8
     volumes:
-      - ../../loculus/tmp/output:/data
-#    depends_on:
-#      siloPreprocessing:
-#        condition: service_completed_successfully
+      - ../lapis-e2e/testData/output:/data
+    depends_on:
+      siloPreprocessing:
+        condition: service_completed_successfully
 
   siloPreprocessing:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}

@@ -35,7 +35,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
-import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableScheduling
@@ -121,15 +120,15 @@ class LapisSpringConfig {
     }
 
     @Bean
-    fun caffeineCacheManager(@Value("\${spring.cache.caffeine.maxSizeMb}") maxSizeMb: Long): CaffeineCacheManager {
+    fun caffeineCacheManager(
+        @Value("\${spring.cache.caffeine.maxSizeMb}") maxSizeMb: Long,
+    ): CaffeineCacheManager {
         val cacheManager = CaffeineCacheManager()
         cacheManager.setCaffeine(caffeineCacheBuilder(maxSizeMb))
         return cacheManager
     }
 
-    fun caffeineCacheBuilder(
-        maxSizeMb: Long,
-    ): Caffeine<Any, Any> {
+    fun caffeineCacheBuilder(maxSizeMb: Long): Caffeine<Any, Any> {
         return Caffeine.newBuilder()
             .maximumWeight(mbToByte(maxSizeMb))
             .weigher { key, value ->
