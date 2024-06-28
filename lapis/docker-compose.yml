@@ -14,18 +14,12 @@ services:
         source: ../lapis-e2e/testData/reference_genomes.json
         target: /workspace/reference_genomes.json
         read_only: true
-    environment:
-      - JVM_OPTS=-XX:+UseContainerSupport -XX:+UseG1GC -XX:MaxHeapFreeRatio=5 -XX:MinHeapFreeRatio=2 -XX:MaxGCPauseMillis=100 -Xmx100M
-    deploy:
-        resources:
-          limits:
-            memory: 400M
 
   silo:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
       - "8091:8081"
-    command: --api --estimatedStartupTimeInMinutes 1 --maxQueuedHttpConnections 10000 --threadsForHttpConnections 8
+    command: --api
     volumes:
       - ../lapis-e2e/testData/output:/data
     depends_on:

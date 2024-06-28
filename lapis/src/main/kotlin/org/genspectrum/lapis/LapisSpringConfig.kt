@@ -137,4 +137,4 @@ class LapisSpringConfig {
     }
 }
 
-fun mbToByte(mb: Long) = mb * 1024 * 1024
+private fun mbToByte(mb: Long) = mb * 1024 * 1024
