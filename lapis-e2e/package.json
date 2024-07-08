@@ -23,11 +23,11 @@
     "@openapitools/openapi-generator-cli": "^2.13.4",
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.7",
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.10",
     "chai": "^5.1.1",
-    "mocha": "^10.5.2",
+    "mocha": "^10.6.0",
     "prettier": "^3.3.2",
-    "tsx": "^4.16.0",
+    "tsx": "^4.16.2",
     "typescript": "^5.5.3"
   }
 }
