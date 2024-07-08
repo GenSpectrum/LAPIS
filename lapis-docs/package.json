@@ -15,12 +15,12 @@
     },
     "dependencies": {
         "@astrojs/react": "^3.6.0",
-        "@astrojs/starlight": "^0.24.5",
+        "@astrojs/starlight": "^0.25.0",
         "@astrojs/starlight-tailwind": "^2.0.3",
         "@astrojs/tailwind": "^5.1.0",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
-        "astro": "^4.11.3",
+        "astro": "^4.11.5",
         "change-case": "^5.4.4",
         "daisyui": "^4.12.10",
         "js-yaml": "^4.1.0",
@@ -34,10 +34,10 @@
         "zod": "^3.23.0"
     },
     "devDependencies": {
-        "@astrojs/check": "^0.7.0",
-        "@playwright/test": "^1.45.0",
+        "@astrojs/check": "^0.8.0",
+        "@playwright/test": "^1.45.1",
         "@types/js-yaml": "^4.0.9",
-        "@types/node": "^20.14.9",
+        "@types/node": "^20.14.10",
         "@types/swagger-ui": "^3.52.4",
         "prettier": "^3.3.2",
         "prettier-plugin-astro": "^0.14.0",
