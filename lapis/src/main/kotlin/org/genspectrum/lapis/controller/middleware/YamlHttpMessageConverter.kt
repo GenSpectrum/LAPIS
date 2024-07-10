@@ -1,5 +1,6 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
+import org.genspectrum.lapis.controller.LapisMediaType
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.http.MediaType
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter

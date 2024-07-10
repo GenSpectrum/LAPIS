@@ -1,10 +1,11 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
+import org.genspectrum.lapis.controller.LapisMediaType
+import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
 import org.springframework.core.annotation.Order
@@ -21,8 +22,6 @@ object DataFormat {
     const val CSV_WITHOUT_HEADERS = "CSV-WITHOUT-HEADERS"
     const val TSV = "TSV"
 }
-
-private val log = KotlinLogging.logger {}
 
 @Component
 @Order(DATA_FORMAT_FILTER_ORDER)

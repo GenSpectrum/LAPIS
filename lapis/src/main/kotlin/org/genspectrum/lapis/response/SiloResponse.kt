@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.controller.CsvRecord
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.silo.DataVersion

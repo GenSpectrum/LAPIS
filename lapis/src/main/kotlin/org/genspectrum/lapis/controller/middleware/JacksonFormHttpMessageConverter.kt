@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.genspectrum.lapis.util.tryToGuessTheType

@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
 const val DATA_FORMAT_FILTER_ORDER = 0
 const val DOWNLOAD_AS_FILE_FILTER_ORDER = DATA_FORMAT_FILTER_ORDER + 1

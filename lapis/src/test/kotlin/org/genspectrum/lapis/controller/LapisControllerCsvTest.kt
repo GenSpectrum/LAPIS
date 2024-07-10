@@ -8,9 +8,9 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

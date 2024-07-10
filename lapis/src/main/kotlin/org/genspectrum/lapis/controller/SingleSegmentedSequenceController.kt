@@ -25,6 +25,7 @@ import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.response.writeFastaTo
 import org.genspectrum.lapis.silo.DataVersion

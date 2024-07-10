@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.controller.FIELDS_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
 data class SequenceFiltersRequestWithFields(

@@ -10,13 +10,13 @@ import org.genspectrum.lapis.controller.SampleRoute.DETAILS
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.BeforeEach

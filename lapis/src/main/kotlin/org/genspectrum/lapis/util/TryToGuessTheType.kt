@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType.NUMBER
 import com.fasterxml.jackson.databind.node.JsonNodeType.STRING
 import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.TextNode
-import org.genspectrum.lapis.controller.SPECIAL_REQUEST_PROPERTY_TYPES
+import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTY_TYPES
 
 /**
  * Try conversion of special request properties to their correct types of form url encoded requests

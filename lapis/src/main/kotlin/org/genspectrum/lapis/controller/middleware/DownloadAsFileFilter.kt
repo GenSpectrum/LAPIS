@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
+import org.genspectrum.lapis.controller.SampleRoute
+import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
