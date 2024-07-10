@@ -9,3 +9,4 @@ log/
 logs/
 /lapis-openapi-multi-segmented.json
 /lapis-openapi-single-segmented.json
+/lapis-openapi-single-segmented-protected.json
