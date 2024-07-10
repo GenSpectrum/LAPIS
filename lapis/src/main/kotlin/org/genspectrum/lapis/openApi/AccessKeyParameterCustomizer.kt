@@ -4,8 +4,8 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.parameters.Parameter
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.OpennessLevel
-import org.genspectrum.lapis.controller.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.controller.INFO_ROUTE
+import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component
 

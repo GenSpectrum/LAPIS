@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.controller.middleware
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.luben.zstd.ZstdOutputStream
@@ -8,6 +8,9 @@ import jakarta.servlet.WriteListener
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.ResponseWithContentType
 import org.springframework.boot.context.properties.bind.Binder

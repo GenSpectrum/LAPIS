@@ -4,15 +4,7 @@ import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
-import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_PROPERTY
-import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.controller.LIMIT_PROPERTY
-import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_PROPERTY
-import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
-import org.genspectrum.lapis.controller.OFFSET_PROPERTY
-import org.genspectrum.lapis.controller.ORDER_BY_PROPERTY
-import org.genspectrum.lapis.controller.SPECIAL_REQUEST_PROPERTIES
 import org.springframework.util.MultiValueMap
 
 typealias SequenceFilters = Map<String, List<String?>>

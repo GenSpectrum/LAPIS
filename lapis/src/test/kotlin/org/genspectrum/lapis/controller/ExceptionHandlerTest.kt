@@ -5,8 +5,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloNotImplementedError
-import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.LapisInfo
+import org.genspectrum.lapis.response.LapisResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException

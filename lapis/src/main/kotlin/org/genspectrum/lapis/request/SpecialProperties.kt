@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.databind.node.JsonNodeType
 

@@ -12,8 +12,8 @@ import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.getSample
 import org.genspectrum.lapis.controller.postSample
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.LapisInfo
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.LapisInfo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.controller
+package org.genspectrum.lapis.response
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.apache.commons.csv.CSVFormat

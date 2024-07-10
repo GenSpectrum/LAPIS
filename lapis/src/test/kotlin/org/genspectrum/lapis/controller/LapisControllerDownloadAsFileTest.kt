@@ -14,7 +14,10 @@ import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.LapisInfo
+import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.FORMAT_PROPERTY
+import org.genspectrum.lapis.response.LapisInfo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.LongNode
 import com.fasterxml.jackson.databind.node.TextNode
-import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
-import org.genspectrum.lapis.controller.LIMIT_PROPERTY
-import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.LIMIT_PROPERTY
+import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.params.ParameterizedTest

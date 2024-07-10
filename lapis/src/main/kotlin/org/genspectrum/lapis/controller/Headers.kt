@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.controller
 
+import org.genspectrum.lapis.controller.middleware.HEADERS_ACCEPT_HEADER_PARAMETER
 import org.springframework.http.MediaType
 
 object LapisHeaders {

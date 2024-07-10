@@ -15,8 +15,9 @@ import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
+import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.LapisInfo
+import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.`is`

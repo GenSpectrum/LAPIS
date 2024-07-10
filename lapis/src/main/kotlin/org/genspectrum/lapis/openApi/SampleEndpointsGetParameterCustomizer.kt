@@ -2,9 +2,9 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.parameters.Parameter
-import org.genspectrum.lapis.controller.COMPRESSION_PROPERTY
-import org.genspectrum.lapis.controller.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.controller.INFO_ROUTE
+import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component
 

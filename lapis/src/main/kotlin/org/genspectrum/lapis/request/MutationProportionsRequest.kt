@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.NumericNode
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.controller.MIN_PROPORTION_PROPERTY
 import org.springframework.boot.jackson.JsonComponent
 
 const val DEFAULT_MIN_PROPORTION = 0.05

@@ -5,7 +5,7 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.request.LapisInfo
+import org.genspectrum.lapis.response.LapisInfo
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

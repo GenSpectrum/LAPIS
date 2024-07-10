@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import mu.KotlinLogging
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.model.SiloNotImplementedError
+import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.http.HttpHeaders
