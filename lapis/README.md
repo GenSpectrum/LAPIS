@@ -10,11 +10,17 @@ When running LAPIS, you need to pass the following arguments:
 
 * the SILO url `--silo.url=http://<url>:<port>`,
 * the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
-  e.g. when running via gradle:
+* the path to the reference genome `--referenceGenomeFilename=<path/to/referenceGenome>`
+  
+e.g. when running via gradle:
 
 ```
 ./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>
 ```
+
+Optionally, you can pass:
+* `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
+  If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
 
 ## Running the Docker image
 

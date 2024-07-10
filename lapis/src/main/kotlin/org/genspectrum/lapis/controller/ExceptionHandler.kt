@@ -131,10 +131,14 @@ class NotFoundView(private val databaseConfig: DatabaseConfig) {
     fun render(request: WebRequest): String {
         request.contextPath
 
-        val uri = ServletUriComponentsBuilder.fromCurrentRequest()
-            .replacePath("/${request.contextPath}/swagger-ui/index.html")
+        val helloUriBuilder = ServletUriComponentsBuilder.fromCurrentRequest()
+            .replacePath("/${request.contextPath}")
             .replaceQuery(null)
             .fragment(null)
+        val helloUri = helloUriBuilder.toUriString()
+
+        val swaggerUri = helloUriBuilder
+            .replacePath("/${request.contextPath}/swagger-ui/index.html")
             .toUriString()
 
         return """
@@ -142,12 +146,17 @@ class NotFoundView(private val databaseConfig: DatabaseConfig) {
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
-                <title>Error 404</title>
+                <title>LAPIS - Error 404</title>
             </head>
             <body>
                 <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
                 <h3>Page not found!</h3>
-                <a href="$uri">Visit our swagger-ui</a>
+                <div>
+                    <a href="$helloUri">Back to landing page</a>
+                </div>
+                <div>
+                    <a href="$swaggerUri">Visit our swagger-ui</a>
+                </div>
             </body>
             </html>
             """.trimIndent()
