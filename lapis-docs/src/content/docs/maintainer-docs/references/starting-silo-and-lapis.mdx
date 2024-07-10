@@ -82,7 +82,14 @@ To start LAPIS you need to provide the following parameters:
     This can alternatively be passed via the environment variable `REFERENCE_GENOME_ENV_VARIABLE_NAME`.
     The parameter takes precedence over the environment variable.
 
-LAPIS listens to port 8080.
+LAPIS listens on port 8080.
+
+LAPIS provides the following optional parameters:
+
+-   `--lapis.docs.url`:
+    If set, the landing page (`/`) will show a "Documentation" link to the provided value.
+    It is meant to point to your self-hosted version of this LAPIS documentation.
+    If not set, the "Documentation" link on the landing page (`/`) will not be shown.
 
 #### Starting LAPIS with Docker
 
