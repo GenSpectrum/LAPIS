@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/GenSpectrum/LAPIS/compare/v0.2.4...v0.2.5) (2024-07-11)
+
+
+### Features
+
+* **lapis:** implement landing page when calling `/` [#856](https://github.com/GenSpectrum/LAPIS/issues/856) ([b886b7d](https://github.com/GenSpectrum/LAPIS/commit/b886b7d7b8e4d2a6bd939ceee2914a371c871b85))
+
 ## [0.2.4](https://github.com/GenSpectrum/LAPIS/compare/v0.2.3...v0.2.4) (2024-06-24)
 
 
