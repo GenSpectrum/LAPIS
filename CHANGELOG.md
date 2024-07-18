@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/GenSpectrum/LAPIS/compare/v0.2.5...v0.2.6) (2024-07-18)
+
+
+### Features
+
+* **lapis:** auto remove entries from cache when heap limit is reached ([f804004](https://github.com/GenSpectrum/LAPIS/commit/f8040047450371191273086e9b159add3d5d2cb0))
+
 ## [0.2.5](https://github.com/GenSpectrum/LAPIS/compare/v0.2.4...v0.2.5) (2024-07-11)
 
 
