@@ -32,6 +32,7 @@ import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.request.LIMIT_PROPERTY
@@ -266,12 +267,17 @@ private fun getSequenceFilters(
         Pair(LIMIT_PROPERTY, limitSchema()) +
         Pair(OFFSET_PROPERTY, offsetSchema()) +
         Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema()) +
+        Pair(DOWNLOAD_FILE_BASENAME_PROPERTY, downloadFileBasenameSchema()) +
         Pair(COMPRESSION_PROPERTY, compressionSchema())
 
 fun downloadAsFileSchema(): Schema<*> =
     BooleanSchema()
         ._default(false)
         .description(DOWNLOAD_AS_FILE_DESCRIPTION)
+
+fun downloadFileBasenameSchema(): Schema<*> =
+    StringSchema()
+        .description(DOWNLOAD_FILE_BASENAME_DESCRIPTION)
 
 fun compressionSchema(): Schema<*> =
     StringSchema()

@@ -65,6 +65,17 @@ describe('All endpoints', () => {
         );
       });
 
+      it('should return the data with Content-Disposition with custom file name', async () => {
+        const urlParams = new URLSearchParams({ downloadAsFile: 'true', downloadFileBasename: 'custom' });
+
+        const response = await get(urlParams);
+
+        expect(response.status).equals(200);
+        expect(response.headers.get('content-disposition')).equals(
+          `attachment; filename=custom.${route.servesFasta ? 'fasta' : 'json'}`
+        );
+      });
+
       it('should return the lapis data version header', async () => {
         const response = await get();
 

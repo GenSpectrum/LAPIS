@@ -8,6 +8,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
@@ -39,7 +40,9 @@ class DownloadAsFileFilter(
     private fun getFilename(request: CachedBodyHttpServletRequest): String {
         val matchingRoute =
             SampleRoute.entries.find { request.getProxyAwarePath().startsWith("/sample${it.pathSegment}") }
-        val dataName = matchingRoute?.pathSegment?.trim('/') ?: "data"
+        val dataName = request.getStringField(DOWNLOAD_FILE_BASENAME_PROPERTY)
+            ?: matchingRoute?.pathSegment?.trim('/')
+            ?: "data"
 
         val compressionEnding = when (val compressionSource = requestCompression.compressionSource) {
             is CompressionSource.RequestProperty -> compressionSource.compression.fileEnding

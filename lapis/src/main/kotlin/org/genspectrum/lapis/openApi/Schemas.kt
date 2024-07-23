@@ -69,27 +69,40 @@ const val SEGMENT_SCHEMA = "Segment"
 const val LAPIS_INFO_DESCRIPTION = "Information about LAPIS."
 const val LAPIS_DATA_VERSION_EXAMPLE = "1702305399"
 const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
-const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
-    "Same as the value returned in the info object in the response body."
-const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION = "$LAPIS_DATA_VERSION_DESCRIPTION " +
-    "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION'."
+const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION =
+    "$LAPIS_DATA_VERSION_DESCRIPTION " +
+        "Same as the value returned in the info object in the response body."
+const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION =
+    "$LAPIS_DATA_VERSION_DESCRIPTION " +
+        "Same as the value returned in the info object in the header '$LAPIS_DATA_VERSION'."
 
-const val REQUEST_ID_HEADER_DESCRIPTION = """
+const val REQUEST_ID_HEADER_DESCRIPTION =
+    """
 A UUID that uniquely identifies the request for tracing purposes.
 If none if provided in the request, LAPIS will generate one.
 """
 
-const val DOWNLOAD_AS_FILE_DESCRIPTION = """
+const val DOWNLOAD_AS_FILE_DESCRIPTION =
+    """
 Set to true to make your browser trigger a download instead of showing the response content by setting the
 '$CONTENT_DISPOSITION' header to 'attachment'.
 """
 
-const val COMPRESSION_DESCRIPTION = """
+const val DOWNLOAD_FILE_BASENAME_DESCRIPTION =
+    """
+Specify the download file basename, for example, specifying 'myFile' will result in a file named 'myFile.json' 
+(when no compression is selected). 
+This parameter only takes effect when 'downloadAsFile' is set to true.
+"""
+
+const val COMPRESSION_DESCRIPTION =
+    """
 Optionally set this to return the response compressed in the specified format.
 Alternatively, you can set the '$ACCEPT_ENCODING' header to the respective value.
 """
 
-const val ACCESS_KEY_DESCRIPTION = """
+const val ACCESS_KEY_DESCRIPTION =
+    """
 An access key that grants access to the protected data that this instance serves.
 There are two types or access keys: One only grants access to aggregated data,
 the other also grants access to detailed data.
@@ -115,15 +128,23 @@ the other also grants access to detailed data.
     ],
 )
 annotation class LapisResponseAnnotation(
-    @get:AliasFor(annotation = Operation::class, attribute = "description") val description: String,
-    @get:AliasFor(annotation = ApiResponse::class, attribute = "content") val content: Array<Content> = [],
+    @get:AliasFor(annotation = Operation::class, attribute = "description")
+    val description: String,
+    @get:AliasFor(annotation = ApiResponse::class, attribute = "content")
+    val content: Array<Content> = [],
 )
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = AGGREGATED_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$AGGREGATED_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisAggregatedResponse
 
@@ -131,7 +152,13 @@ annotation class LapisAggregatedResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisNucleotideMutationsResponse
 
@@ -139,7 +166,13 @@ annotation class LapisNucleotideMutationsResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisAminoAcidMutationsResponse
 
@@ -155,7 +188,13 @@ annotation class LapisDetailsResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisNucleotideInsertionsResponse
 
@@ -163,7 +202,13 @@ annotation class LapisNucleotideInsertionsResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisAminoAcidInsertionsResponse
 
@@ -210,11 +255,18 @@ annotation class LapisUnalignedMultiSegmentedNucleotideSequenceResponse
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation(
-    responses = [ApiResponse(responseCode = "200", content = [Content(schema = Schema(type = "string"))])],
+    responses = [
+        ApiResponse(
+            responseCode = "200",
+            content = [Content(schema = Schema(type = "string"))],
+        ),
+    ],
 )
 annotation class StringResponseOperation(
-    @get:AliasFor(annotation = Operation::class, attribute = "description") val description: String = "",
-    @get:AliasFor(annotation = Operation::class, attribute = "operationId") val operationId: String,
+    @get:AliasFor(annotation = Operation::class, attribute = "description")
+    val description: String = "",
+    @get:AliasFor(annotation = Operation::class, attribute = "operationId")
+    val operationId: String,
 )
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
