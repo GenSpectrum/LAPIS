@@ -14,6 +14,7 @@ const val ORDER_BY_PROPERTY = "orderBy"
 const val LIMIT_PROPERTY = "limit"
 const val OFFSET_PROPERTY = "offset"
 const val DOWNLOAD_AS_FILE_PROPERTY = "downloadAsFile"
+const val DOWNLOAD_FILE_BASENAME_PROPERTY = "downloadFileBasename"
 const val COMPRESSION_PROPERTY = "compression"
 
 val SPECIAL_REQUEST_PROPERTY_TYPES = mapOf(
@@ -29,6 +30,7 @@ val SPECIAL_REQUEST_PROPERTY_TYPES = mapOf(
     LIMIT_PROPERTY to JsonNodeType.NUMBER,
     OFFSET_PROPERTY to JsonNodeType.NUMBER,
     DOWNLOAD_AS_FILE_PROPERTY to JsonNodeType.BOOLEAN,
+    DOWNLOAD_FILE_BASENAME_PROPERTY to JsonNodeType.STRING,
     COMPRESSION_PROPERTY to JsonNodeType.STRING,
 )
 

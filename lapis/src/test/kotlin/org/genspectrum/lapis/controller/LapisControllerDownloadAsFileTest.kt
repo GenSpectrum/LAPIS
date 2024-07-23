@@ -16,6 +16,7 @@ import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENC
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
 import org.junit.jupiter.api.BeforeEach
@@ -64,6 +65,9 @@ class LapisControllerDownloadAsFileTest(
         if (scenario.requestedDataFormat != null) {
             queryString += "&$FORMAT_PROPERTY=${scenario.requestedDataFormat}"
         }
+        if (scenario.downloadFileBasename != null) {
+            queryString += "&$DOWNLOAD_FILE_BASENAME_PROPERTY=${scenario.downloadFileBasename}"
+        }
 
         mockMvc.perform(getSample("${scenario.endpoint}?$queryString"))
             .andExpect(status().isOk)
@@ -82,7 +86,13 @@ class LapisControllerDownloadAsFileTest(
             scenario.requestedDataFormat != null -> """, "$FORMAT_PROPERTY": "${scenario.requestedDataFormat}" """
             else -> ""
         }
-        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat }"""
+        val maybeFileBasename = when {
+            scenario.downloadFileBasename != null ->
+                """, "$DOWNLOAD_FILE_BASENAME_PROPERTY": "${scenario.downloadFileBasename}" """
+
+            else -> ""
+        }
+        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat $maybeFileBasename }"""
 
         mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -102,6 +112,9 @@ class LapisControllerDownloadAsFileTest(
             .also {
                 if (scenario.requestedDataFormat != null) {
                     it.param(FORMAT_PROPERTY, scenario.requestedDataFormat)
+                }
+                if (scenario.downloadFileBasename != null) {
+                    it.param(DOWNLOAD_FILE_BASENAME_PROPERTY, scenario.downloadFileBasename)
                 }
             }
             .contentType(APPLICATION_FORM_URLENCODED)
@@ -201,12 +214,21 @@ data class DownloadAsFileScenario(
     val mockData: MockData,
     val requestedDataFormat: String?,
     val expectedFilename: String,
+    val downloadFileBasename: String?,
 ) {
-    override fun toString() =
-        when (requestedDataFormat) {
-            null -> endpoint
-            else -> "$endpoint as $requestedDataFormat"
+    override fun toString(): String {
+        val fileBasename = when (downloadFileBasename) {
+            null -> ""
+            else -> " with basename $downloadFileBasename"
         }
+
+        val dataFormat = when (requestedDataFormat) {
+            null -> ""
+            else -> " as $requestedDataFormat"
+        }
+
+        return "$endpoint$dataFormat$fileBasename"
+    }
 
     companion object {
         fun forEndpoint(route: SampleRoute): List<DownloadAsFileScenario> {
@@ -219,6 +241,14 @@ data class DownloadAsFileScenario(
                         mockData = MockDataForEndpoints.fastaMockData,
                         requestedDataFormat = null,
                         expectedFilename = "$expectedFilename.fasta",
+                        downloadFileBasename = null,
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = "${route.pathSegment}/segmentName",
+                        mockData = MockDataForEndpoints.fastaMockData,
+                        requestedDataFormat = null,
+                        expectedFilename = "my_sequence.fasta",
+                        downloadFileBasename = "my_sequence",
                     ),
                 )
             }
@@ -236,18 +266,43 @@ data class DownloadAsFileScenario(
                 expectedFilename = "$expectedFilename.json",
                 endpoint = endpoint,
                 requestedDataFormat = "json",
+                downloadFileBasename = null,
             ),
             DownloadAsFileScenario(
                 mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.CSV),
                 expectedFilename = "$expectedFilename.csv",
                 endpoint = endpoint,
                 requestedDataFormat = "csv",
+                downloadFileBasename = null,
             ),
             DownloadAsFileScenario(
                 mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.TSV),
                 expectedFilename = "$expectedFilename.tsv",
                 endpoint = endpoint,
                 requestedDataFormat = "tsv",
+                downloadFileBasename = null,
+            ),
+            DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint)
+                    .expecting(PLAIN_JSON),
+                expectedFilename = "my_file.json",
+                endpoint = endpoint,
+                requestedDataFormat = "json",
+                downloadFileBasename = "my_file",
+            ),
+            DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.CSV),
+                expectedFilename = "my_file.csv",
+                endpoint = endpoint,
+                requestedDataFormat = "csv",
+                downloadFileBasename = "my_file",
+            ),
+            DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.TSV),
+                expectedFilename = "my_file.tsv",
+                endpoint = endpoint,
+                requestedDataFormat = "tsv",
+                downloadFileBasename = "my_file",
             ),
         )
     }
@@ -316,6 +371,17 @@ data class DownloadCompressedFileScenario(
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
+                    expectedContentType = expectedContentType,
+                ),
+                DownloadCompressedFileScenario(
+                    description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat} with basename",
+                    mockData = mockData,
+                    request = getSample(
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
+                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file",
+                    )
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = "my_file.$dataFileFormat.$fileEnding",
                     expectedContentType = expectedContentType,
                 ),
                 DownloadCompressedFileScenario(

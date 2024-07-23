@@ -89,6 +89,14 @@ This will prompt browsers to download the data as file.
 GET /sample/aggregated?downloadAsFile=true
 ```
 
+You can also specify the file's basename by setting the `downloadFileBasename` property.
+
+```http
+GET /sample/aggregated?downloadAsFile=true&downloadFileBasename=my_file_basename
+```
+
+This will set the header `Content-Disposition: attachment; filename=my_file_basename.<data.format>`.
+
 ## Compression
 
 LAPIS supports gzip and Zstd compression.

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.parameters.Parameter
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
+import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component
 
@@ -28,6 +29,13 @@ class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
                     .name(DOWNLOAD_AS_FILE_PROPERTY)
                     .description(DOWNLOAD_AS_FILE_DESCRIPTION)
                     .schema(downloadAsFileSchema()),
+            )
+            path.get.addParametersItem(
+                Parameter()
+                    .`in`("query")
+                    .name(DOWNLOAD_FILE_BASENAME_PROPERTY)
+                    .description(DOWNLOAD_FILE_BASENAME_DESCRIPTION)
+                    .schema(downloadFileBasenameSchema()),
             )
             path.get.addParametersItem(
                 Parameter()
