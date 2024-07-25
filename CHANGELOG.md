@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/GenSpectrum/LAPIS/compare/v0.2.6...v0.2.7) (2024-07-25)
+
+
+### Features
+
+* **lapis:** allow customizable filename for file downloads ([817d3f4](https://github.com/GenSpectrum/LAPIS/commit/817d3f45741e42c863aeee485c6a54a0b86aef99)), closes [#869](https://github.com/GenSpectrum/LAPIS/issues/869)
+
 ## [0.2.6](https://github.com/GenSpectrum/LAPIS/compare/v0.2.5...v0.2.6) (2024-07-18)
 
 
