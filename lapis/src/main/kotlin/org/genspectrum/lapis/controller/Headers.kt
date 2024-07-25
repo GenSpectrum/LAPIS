@@ -10,9 +10,11 @@ object LapisHeaders {
 
 object LapisMediaType {
     const val TEXT_X_FASTA_VALUE = "text/x-fasta"
-    val TEXT_X_FASTA = MediaType.parseMediaType(TEXT_X_FASTA_VALUE)
+    val TEXT_X_FASTA: MediaType = MediaType.parseMediaType(TEXT_X_FASTA_VALUE)
     const val TEXT_CSV_VALUE = "text/csv"
     const val TEXT_CSV_WITHOUT_HEADERS_VALUE = "text/csv;$HEADERS_ACCEPT_HEADER_PARAMETER=false"
+    val TEXT_CSV: MediaType = MediaType.parseMediaType(TEXT_CSV_VALUE)
     const val TEXT_TSV_VALUE = "text/tab-separated-values"
+    val TEXT_TSV: MediaType = MediaType.parseMediaType(TEXT_TSV_VALUE)
     const val APPLICATION_YAML_VALUE = "application/yaml"
 }

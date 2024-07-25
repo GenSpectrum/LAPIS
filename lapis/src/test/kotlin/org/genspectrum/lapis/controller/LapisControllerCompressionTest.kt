@@ -8,6 +8,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.CSV
+import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.CSV_WITHOUT_HEADERS
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.NESTED_JSON
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.PLAIN_JSON
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.TSV
@@ -397,5 +398,6 @@ private fun getContentTypeForDataFormat(dataFormat: MockDataCollection.DataForma
         PLAIN_JSON -> APPLICATION_JSON_VALUE
         NESTED_JSON -> APPLICATION_JSON_VALUE
         CSV -> "$TEXT_CSV_VALUE;charset=UTF-8"
+        CSV_WITHOUT_HEADERS -> "$TEXT_CSV_VALUE;charset=UTF-8"
         TSV -> "$TEXT_TSV_VALUE;charset=UTF-8"
     }

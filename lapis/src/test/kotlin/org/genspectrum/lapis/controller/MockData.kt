@@ -32,6 +32,7 @@ data class MockDataCollection(
         PLAIN_JSON("json", APPLICATION_JSON_VALUE),
         NESTED_JSON("json", APPLICATION_JSON_VALUE),
         CSV("csv", TEXT_CSV_VALUE),
+        CSV_WITHOUT_HEADERS("csv", TEXT_CSV_VALUE),
         TSV("tsv", TEXT_TSV_VALUE),
     }
 
@@ -76,6 +77,10 @@ data class MockDataCollection(
 
                 DataFormat.CSV -> {
                     { assertThat(it, `is`(expectedCsv)) }
+                }
+
+                DataFormat.CSV_WITHOUT_HEADERS -> {
+                    { assertThat(it, `is`(expectedCsv.lines().drop(1).joinToString("\n"))) }
                 }
 
                 DataFormat.TSV -> {

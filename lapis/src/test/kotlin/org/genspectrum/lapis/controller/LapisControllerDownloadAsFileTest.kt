@@ -276,6 +276,14 @@ data class DownloadAsFileScenario(
                 downloadFileBasename = null,
             ),
             DownloadAsFileScenario(
+                mockData = MockDataForEndpoints.getMockData(endpoint)
+                    .expecting(MockDataCollection.DataFormat.CSV_WITHOUT_HEADERS),
+                expectedFilename = "$expectedFilename.csv",
+                endpoint = endpoint,
+                requestedDataFormat = "csv-without-headers",
+                downloadFileBasename = null,
+            ),
+            DownloadAsFileScenario(
                 mockData = MockDataForEndpoints.getMockData(endpoint).expecting(MockDataCollection.DataFormat.TSV),
                 expectedFilename = "$expectedFilename.tsv",
                 endpoint = endpoint,
