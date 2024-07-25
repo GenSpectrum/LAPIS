@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
@@ -13,6 +13,7 @@ import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -49,14 +50,17 @@ class DownloadAsFileFilter(
             else -> ""
         }
 
-        val fileEnding = when (request.getHeader(ACCEPT)) {
-            TEXT_CSV_VALUE -> "csv"
-            TEXT_TSV_VALUE -> "tsv"
-            else -> when (matchingRoute?.servesFasta) {
-                true -> "fasta"
-                else -> "json"
-            }
+        val acceptHeader = request.getHeader(ACCEPT)?.let { MediaType.parseMediaType(it) }
+        val fileEnding = if (matchingRoute?.servesFasta == true) {
+            ".fasta"
+        } else if (acceptHeader?.equalsTypeAndSubtype(TEXT_TSV) == true) {
+            ".tsv"
+        } else if (acceptHeader?.equalsTypeAndSubtype(TEXT_CSV) == true) {
+            ".csv"
+        } else {
+            ".json"
         }
-        return "$dataName.$fileEnding$compressionEnding"
+
+        return "$dataName$fileEnding$compressionEnding"
     }
 }
