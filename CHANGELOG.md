@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.8](https://github.com/GenSpectrum/LAPIS/compare/v0.2.7...v0.2.8) (2024-07-30)
+
+
+### Bug Fixes
+
+* **lapis:** fix download file ending for csv-without-headers data format ([65afba0](https://github.com/GenSpectrum/LAPIS/commit/65afba063d6258f0d8efe7dc398d996da5f3881c)), closes [#871](https://github.com/GenSpectrum/LAPIS/issues/871)
+
 ## [0.2.7](https://github.com/GenSpectrum/LAPIS/compare/v0.2.6...v0.2.7) (2024-07-25)
 
 
