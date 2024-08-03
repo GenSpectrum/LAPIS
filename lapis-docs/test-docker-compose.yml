@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   lapis-docs:
     image: ${IMAGE}

@@ -1,9 +1,30 @@
 # LAPIS Documentation
 
-This documentation is a website built with
-[Starlight](https://starlight.astro.build/) and [Astro](https://docs.astro.build).
+A documentation website tailored to your LAPIS instance.
+
+## Features
+
+* **Customizable**: The documentation will generate content based on your LAPIS configuration.
+* **Request Generator**: An interactive wizard to help users getting started using your LAPIS instance.
+* **User documentation**: Detailed information on how to use the LAPIS API, explaining concepts and providing examples.
+* **Maintainer documentation**: Information on how to deploy and maintain your own LAPIS instance.
+  If you want to get started setting up your own LAPIS instance,
+  we recommend setting up this documentation first and iterating from there.
+* **Config Generator**: An interactive wizard to help you generate and modify the configuration of your LAPIS instance.
+* **Architecture Overview**: An overview of the LAPIS architecture and how it interacts with SILO.
+
+## Quickstart
+
+```shell
+IMAGE=ghcr.io/genspectrum/lapis-docs docker compose -f test-docker-compose.yml up
+```
+
+Visit http://localhost:4321/docs/ in your browser.
 
 ## Commands
+
+This documentation is a website built with
+[Starlight](https://starlight.astro.build/) and [Astro](https://docs.astro.build).
 
 | Command                   | Action                                           |
 |:--------------------------|:-------------------------------------------------|
@@ -29,11 +50,13 @@ Thus, the documentation can only be built at deployment time (i.e. when the conf
 We provide Docker images that can be used to build the documentation, and then serve it.
 
 See [the Docker compose file](./test-docker-compose.yml) for an example of how to use the Docker image:
+
 * The database config must be mounted to `/config/database_config.yaml`.
-* The environment variable `LAPIS_URL` must be set to the URL of the backing LAPIS instance. 
-This is used to generate links to that instance.
-* Astro recommends to set the [`site` config option](https://docs.astro.build/en/reference/configuration-reference/#site).
-This can be done via the environment variable `ASTRO_SITE`.
+* The environment variable `LAPIS_URL` must be set to the URL of the backing LAPIS instance.
+  This is used to generate links to that instance.
+* Astro recommends to set
+  the [`site` config option](https://docs.astro.build/en/reference/configuration-reference/#site).
+  This can be done via the environment variable `ASTRO_SITE`.
 
 ```shell
 IMAGE=ghcr.io/genspectrum/lapis-docs docker compose -f test-docker-compose.yml up
