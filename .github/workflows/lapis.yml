@@ -16,12 +16,12 @@ jobs:
           java-version: '21'
           distribution: 'adopt'
       - name: Execute Tests
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: test
           build-root-directory: lapis
       - name: Check Format And Lint
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: ktlintCheck
           build-root-directory: lapis
@@ -80,19 +80,19 @@ jobs:
           node-version: lts/*
 
       - name: Build OpenAPI Spec
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: generateOpenApiDocs
           build-root-directory: lapis
 
       - name: Build OpenAPI Spec Protected
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: generateOpenApiDocs -PopennessLevel=protected
           build-root-directory: lapis
 
       - name: Build OpenAPI Spec Multi segmented
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           arguments: generateOpenApiDocs -Psegmented=true
           build-root-directory: lapis
