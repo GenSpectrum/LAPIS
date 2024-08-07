@@ -60,7 +60,7 @@ class SiloClientTest(
 
         someQuery = SiloQuery(
             SiloAction.aggregated(),
-            StringEquals("theColumn", "a value that is difference for each test method: $counter"),
+            StringSearch("theColumn", "a value that is different for each test method: $counter"),
         )
         counter++
     }
@@ -83,7 +83,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+        val query = SiloQuery(SiloAction.aggregated(), StringSearch("theColumn", "theValue"))
         val result = underTest.sendQuery(query).toList()
 
         assertThat(
@@ -111,7 +111,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(action, StringEquals("theColumn", "theValue"))
+        val query = SiloQuery(action, StringSearch("theColumn", "theValue"))
         val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))
@@ -155,7 +155,7 @@ class SiloClientTest(
 
         val query = SiloQuery(
             SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
-            StringEquals("theColumn", "theValue"),
+            StringSearch("theColumn", "theValue"),
         )
         val result = underTest.sendQuery(query).toList()
 
@@ -182,7 +182,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val query = SiloQuery(SiloAction.details(), StringSearch("theColumn", "theValue"))
         val result = underTest.sendQuery(query).toList()
 
         assertThat(result, hasSize(2))

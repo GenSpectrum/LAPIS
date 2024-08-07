@@ -15,7 +15,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
-import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
@@ -437,7 +437,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "22B")))
+        assertThat(result, equalTo(StringSearch(NEXTSTRAIN_CLADE_COLUMN, "22B")))
     }
 
     @Test
@@ -447,7 +447,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "22B")))
+        assertThat(result, equalTo(StringSearch(NEXTSTRAIN_CLADE_COLUMN, "22B")))
     }
 
     @Test
@@ -456,7 +456,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "recombinant")))
+        assertThat(result, equalTo(StringSearch(NEXTSTRAIN_CLADE_COLUMN, "recombinant")))
     }
 
     @Test
@@ -466,7 +466,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(NEXTSTRAIN_CLADE_COLUMN, "recombinant")))
+        assertThat(result, equalTo(StringSearch(NEXTSTRAIN_CLADE_COLUMN, "recombinant")))
     }
 
     @Test
@@ -475,7 +475,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "X")))
+        assertThat(result, equalTo(StringSearch(GISAID_CLADE_COLUMN, "X")))
     }
 
     @Test
@@ -485,7 +485,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "X")))
+        assertThat(result, equalTo(StringSearch(GISAID_CLADE_COLUMN, "X")))
     }
 
     @Test
@@ -494,7 +494,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "AB")))
+        assertThat(result, equalTo(StringSearch(GISAID_CLADE_COLUMN, "AB")))
     }
 
     @Test
