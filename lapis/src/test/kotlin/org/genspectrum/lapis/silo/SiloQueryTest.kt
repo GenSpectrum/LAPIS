@@ -20,7 +20,7 @@ class SiloQueryTest {
 
     @Test
     fun `Query is correctly serialized to JSON`() {
-        val underTest = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+        val underTest = SiloQuery(SiloAction.aggregated(), StringSearch("theColumn", "theValue"))
 
         val result = objectMapper.writeValueAsString(underTest)
 
@@ -31,9 +31,9 @@ class SiloQueryTest {
                     "randomize": false
                 },
                 "filterExpression": {
-                    "type": "StringEquals",
+                    "type": "StringSearch",
                     "column": "theColumn",
-                    "value": "theValue"
+                    "searchExpression": "theValue"
                 }
             }
         """
@@ -352,22 +352,22 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    StringEquals("theColumn", "theValue"),
+                    StringSearch("theColumn", "theValue"),
                     """
                         {
-                            "type": "StringEquals",
+                            "type": "StringSearch",
                             "column": "theColumn",
-                            "value": "theValue"
+                            "searchExpression": "theValue"
                         }
                     """,
                 ),
                 Arguments.of(
-                    StringEquals("theColumn", null),
+                    StringSearch("theColumn", null),
                     """
                         {
-                            "type": "StringEquals",
+                            "type": "StringSearch",
                             "column": "theColumn",
-                            "value": null
+                            "searchExpression": null
                         }
                     """,
                 ),
@@ -405,20 +405,20 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    And(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                    And(listOf(StringSearch("theColumn", "theValue"), StringSearch("theOtherColumn", "theOtherValue"))),
                     """
                         {
                             "type": "And",
                             "children": [
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theColumn",
-                                "value": "theValue"
+                                "searchExpression": "theValue"
                                 },
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theOtherColumn",
-                                "value": "theOtherValue"
+                                "searchExpression": "theOtherValue"
                                 }
                             ]
                         }
@@ -551,47 +551,47 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    Not(StringEquals("theColumn", "theValue")),
+                    Not(StringSearch("theColumn", "theValue")),
                     """
                         {
                             "type": "Not",
                             "child": {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theColumn",
-                                "value": "theValue"
+                                "searchExpression": "theValue"
                             }
                         }
                     """,
                 ),
                 Arguments.of(
-                    Or(listOf(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue"))),
+                    Or(listOf(StringSearch("theColumn", "theValue"), StringSearch("theOtherColumn", "theOtherValue"))),
                     """
                         {
                             "type": "Or",
                             "children": [
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theColumn",
-                                "value": "theValue"
+                                "searchExpression": "theValue"
                                 },
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theOtherColumn",
-                                "value": "theOtherValue"
+                                "searchExpression": "theOtherValue"
                                 }
                             ]
                         }
                     """,
                 ),
                 Arguments.of(
-                    Maybe(StringEquals("theColumn", "theValue")),
+                    Maybe(StringSearch("theColumn", "theValue")),
                     """
                         {
                             "type": "Maybe",
                             "child": {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theColumn",
-                                "value": "theValue"
+                                "searchExpression": "theValue"
                             }
                         }
                     """,
@@ -601,8 +601,8 @@ class SiloQueryTest {
                         2,
                         true,
                         listOf(
-                            StringEquals("theColumn", "theValue"),
-                            StringEquals("theOtherColumn", "theOtherValue"),
+                            StringSearch("theColumn", "theValue"),
+                            StringSearch("theOtherColumn", "theOtherValue"),
                         ),
                     ),
                     """
@@ -612,14 +612,14 @@ class SiloQueryTest {
                             "matchExactly": true,
                             "children": [
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theColumn",
-                                "value": "theValue"
+                                "searchExpression": "theValue"
                                 },
                                 {
-                                "type": "StringEquals",
+                                "type": "StringSearch",
                                 "column": "theOtherColumn",
-                                "value": "theOtherValue"
+                                "searchExpression": "theOtherValue"
                                 }
                             ]
                         }

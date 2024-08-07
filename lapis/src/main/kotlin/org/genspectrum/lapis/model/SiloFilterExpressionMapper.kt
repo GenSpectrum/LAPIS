@@ -27,7 +27,7 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -66,7 +66,7 @@ class SiloFilterExpressionMapper(
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
             val (siloColumnName, filter) = key
             when (filter) {
-                Filter.StringEquals -> mapToStringEqualsFilters(siloColumnName, values)
+                Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
                 Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values)
                 Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
                 Filter.VariantQuery -> mapToVariantQueryFilter(values)
@@ -103,7 +103,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, Filter.DateBetween)
             SequenceFilterFieldType.Date -> Pair(field.name, Filter.DateBetween)
             SequenceFilterFieldType.PangoLineage -> Pair(field.name, Filter.PangoLineage)
-            SequenceFilterFieldType.String -> Pair(field.name, Filter.StringEquals)
+            SequenceFilterFieldType.String -> Pair(field.name, Filter.StringSearch)
             SequenceFilterFieldType.VariantQuery -> Pair(field.name, Filter.VariantQuery)
             SequenceFilterFieldType.Int -> Pair(field.name, Filter.IntEquals)
             is SequenceFilterFieldType.IntFrom -> Pair(type.associatedField, Filter.IntBetween)
@@ -167,10 +167,10 @@ class SiloFilterExpressionMapper(
         }
     }
 
-    private fun mapToStringEqualsFilters(
+    private fun mapToStringSearchFilters(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ) = Or(values[0].values.map { StringEquals(siloColumnName, it) })
+    ) = Or(values[0].values.map { StringSearch(siloColumnName, it) })
 
     private fun mapToBooleanEqualsFilters(
         siloColumnName: SequenceFilterFieldName,
@@ -425,7 +425,7 @@ class SiloFilterExpressionMapper(
     }
 
     private enum class Filter {
-        StringEquals,
+        StringSearch,
         PangoLineage,
         DateBetween,
         VariantQuery,

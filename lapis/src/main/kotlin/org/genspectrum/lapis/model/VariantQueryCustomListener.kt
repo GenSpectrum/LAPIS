@@ -34,7 +34,7 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 
 private val log = KotlinLogging.logger { }
 
@@ -173,11 +173,11 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
             NEXTSTRAIN_CLADE_RECOMBINANT -> ctx.text.lowercase()
             else -> ctx.text.uppercase()
         }
-        expressionStack.addLast(StringEquals(NEXTSTRAIN_CLADE_COLUMN, value))
+        expressionStack.addLast(StringSearch(NEXTSTRAIN_CLADE_COLUMN, value))
     }
 
     override fun enterGisaidCladeNomenclature(ctx: GisaidCladeNomenclatureContext) {
-        expressionStack.addLast(StringEquals(GISAID_CLADE_COLUMN, ctx.text.uppercase()))
+        expressionStack.addLast(StringSearch(GISAID_CLADE_COLUMN, ctx.text.uppercase()))
     }
 
     private fun addPangoLineage(

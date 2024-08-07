@@ -29,7 +29,7 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -548,8 +548,8 @@ class SiloFilterExpressionMapperTest {
                         "other_metadata" to listOf("def"),
                     ),
                     And(
-                        Or(StringEquals("some_metadata", "ABC")),
-                        Or(StringEquals("other_metadata", "def")),
+                        Or(StringSearch("some_metadata", "ABC")),
+                        Or(StringSearch("other_metadata", "def")),
                     ),
                 ),
                 Arguments.of(
@@ -557,7 +557,7 @@ class SiloFilterExpressionMapperTest {
                         "some_metadata" to listOf(null),
                     ),
                     And(
-                        Or(StringEquals("some_metadata", null)),
+                        Or(StringSearch("some_metadata", null)),
                     ),
                 ),
                 Arguments.of(
@@ -589,8 +589,8 @@ class SiloFilterExpressionMapperTest {
                     And(
                         listOf(
                             Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false)),
-                            Or(StringEquals("some_metadata", "ABC")),
-                            Or(StringEquals("other_metadata", "DEF")),
+                            Or(StringSearch("some_metadata", "ABC")),
+                            Or(StringSearch("other_metadata", "DEF")),
                         ),
                     ),
                 ),
@@ -638,7 +638,7 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
-                        Or(StringEquals("some_metadata", "ABC")),
+                        Or(StringSearch("some_metadata", "ABC")),
                     ),
                 ),
                 Arguments.of(
@@ -659,7 +659,7 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         NucleotideSymbolEquals(null, 300, "G"),
-                        Or(StringEquals("some_metadata", "ABC")),
+                        Or(StringSearch("some_metadata", "ABC")),
                     ),
                 ),
                 Arguments.of(
@@ -770,8 +770,8 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         Or(
-                            StringEquals("some_metadata", "value1"),
-                            StringEquals("some_metadata", "value2"),
+                            StringSearch("some_metadata", "value1"),
+                            StringSearch("some_metadata", "value2"),
                         ),
                     ),
                 ),

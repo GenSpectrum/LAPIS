@@ -214,7 +214,7 @@ sealed class SiloAction<ResponseType>(
 
 sealed class SiloFilterExpression(val type: String)
 
-data class StringEquals(val column: String, val value: String?) : SiloFilterExpression("StringEquals")
+data class StringSearch(val column: String, val searchExpression: String) : SiloFilterExpression("StringSearch")
 
 data class BooleanEquals(val column: String, val value: Boolean?) : SiloFilterExpression("BooleanEquals")
 
