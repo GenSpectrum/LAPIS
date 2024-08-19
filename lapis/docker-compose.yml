@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   lapisOpen:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
