@@ -20,6 +20,7 @@ import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
@@ -155,6 +156,40 @@ class LapisControllerDownloadAsFileTest(
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
                 expectedFilename = "aggregated.json",
+                assertFileContentMatches = mockData.assertDataMatches,
+            )
+    }
+
+    @Test
+    fun `GIVEN accept header contains several media types THEN picks the first one that matches`() {
+        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
+            .expecting(MockDataCollection.DataFormat.CSV)
+        mockData.mockWithData(siloQueryModelMock)
+
+        mockMvc.perform(
+            getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                .header(ACCEPT, "text/plain,text/csv,application/json"),
+        )
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = "aggregated.csv",
+                assertFileContentMatches = mockData.assertDataMatches,
+            )
+    }
+
+    @Test
+    fun `GIVEN accept headers with quality values THEN picks the matching one with the highest quality`() {
+        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
+            .expecting(MockDataCollection.DataFormat.TSV)
+        mockData.mockWithData(siloQueryModelMock)
+
+        mockMvc.perform(
+            getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                .header(ACCEPT, "text/plain;q=1,text/csv;q=0.8,text/tab-separated-values;q=0.9"),
+        )
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = "aggregated.tsv",
                 assertFileContentMatches = mockData.assertDataMatches,
             )
     }
