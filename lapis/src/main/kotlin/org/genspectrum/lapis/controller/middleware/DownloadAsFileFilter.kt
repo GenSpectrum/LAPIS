@@ -50,17 +50,32 @@ class DownloadAsFileFilter(
             else -> ""
         }
 
-        val acceptHeader = request.getHeader(ACCEPT)?.let { MediaType.parseMediaType(it) }
-        val fileEnding = if (matchingRoute?.servesFasta == true) {
-            ".fasta"
-        } else if (acceptHeader?.equalsTypeAndSubtype(TEXT_TSV) == true) {
-            ".tsv"
-        } else if (acceptHeader?.equalsTypeAndSubtype(TEXT_CSV) == true) {
-            ".csv"
-        } else {
-            ".json"
-        }
+        val fileEnding = findFileEnding(request, matchingRoute)
 
         return "$dataName$fileEnding$compressionEnding"
+    }
+
+    private fun findFileEnding(
+        request: CachedBodyHttpServletRequest,
+        matchingRoute: SampleRoute?,
+    ): String {
+        if (matchingRoute?.servesFasta == true) {
+            return ".fasta"
+        }
+
+        val acceptHeaders = request.getHeader(ACCEPT)
+            ?.let { MediaType.parseMediaTypes(it) }
+            ?.sortedByDescending { it.qualityValue }
+            ?: emptyList()
+        for (acceptHeader in acceptHeaders) {
+            if (acceptHeader.equalsTypeAndSubtype(TEXT_TSV)) {
+                return ".tsv"
+            } else if (acceptHeader.equalsTypeAndSubtype(TEXT_CSV)) {
+                return ".csv"
+            } else if (acceptHeader.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)) {
+                return ".json"
+            }
+        }
+        return ".json"
     }
 }
