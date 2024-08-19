@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.9](https://github.com/GenSpectrum/LAPIS/compare/v0.2.8...v0.2.9) (2024-08-19)
+
+
+### Bug Fixes
+
+* **lapis:** fix computation of downloaded file ending with multiple accept headers ([3b679a8](https://github.com/GenSpectrum/LAPIS/commit/3b679a86faec8b90f52c295d2d7ec659027ba4fb)), closes [#890](https://github.com/GenSpectrum/LAPIS/issues/890)
+* **lapis:** never show whitelabel error page ([eb03345](https://github.com/GenSpectrum/LAPIS/commit/eb0334551dcf6c3a3972e4b95a887ffd056d8d07)), closes [#890](https://github.com/GenSpectrum/LAPIS/issues/890)
+
 ## [0.2.8](https://github.com/GenSpectrum/LAPIS/compare/v0.2.7...v0.2.8) (2024-07-30)
 
 
