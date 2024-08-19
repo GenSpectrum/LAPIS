@@ -1,11 +1,16 @@
 package org.genspectrum.lapis.controller
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException
+import org.springframework.boot.autoconfigure.web.ServerProperties
+import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
+import org.springframework.boot.web.servlet.error.ErrorAttributes
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.RETRY_AFTER
@@ -20,6 +25,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.View
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
@@ -160,6 +167,41 @@ class NotFoundView(private val databaseConfig: DatabaseConfig) {
             </body>
             </html>
             """.trimIndent()
+    }
+}
+
+@Component
+class ErrorController(
+    private val databaseConfig: DatabaseConfig,
+    errorAttributes: ErrorAttributes,
+    serverProperties: ServerProperties,
+) :
+    BasicErrorController(errorAttributes, serverProperties.error) {
+    override fun errorHtml(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ModelAndView {
+        val modelAndView = super.errorHtml(request, response)
+
+        val attributes = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
+        modelAndView.view = View { _, _, viewResponse ->
+            val html = """
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>LAPIS - Error</title>
+                </head>
+                <body>
+                    <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
+                    <p>An error occurred: ${attributes["error"]}</p>
+                    <p>Status code: ${attributes["status"]}</p>
+                    <p>Error message: ${attributes["message"]}</p>
+                </body>
+                </html>
+            """.trimIndent()
+            viewResponse.outputStream.write(html.toByteArray())
+        }
+        return modelAndView
     }
 }
 
