@@ -15,16 +15,14 @@ jobs:
         with:
           java-version: '21'
           distribution: 'adopt'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Execute Tests
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: test
-          build-root-directory: lapis
+        working-directory: lapis
+        run: ./gradlew test
       - name: Check Format And Lint
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: ktlintCheck
-          build-root-directory: lapis
+        working-directory: lapis
+        run: ./gradlew ktlintCheck
 
   dockerImage:
     name: Build Docker Image
@@ -79,23 +77,20 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Build OpenAPI Spec
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: generateOpenApiDocs
-          build-root-directory: lapis
+
+      - name: Build OpenAPI Spec
+        working-directory: lapis
+        run: ./gradlew generateOpenApiDocs
 
       - name: Build OpenAPI Spec Protected
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: generateOpenApiDocs -PopennessLevel=protected
-          build-root-directory: lapis
+        working-directory: lapis
+        run: ./gradlew generateOpenApiDocs -PopennessLevel=protected
 
       - name: Build OpenAPI Spec Multi segmented
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          arguments: generateOpenApiDocs -Psegmented=true
-          build-root-directory: lapis
+        working-directory: lapis
+        run: ./gradlew generateOpenApiDocs -Psegmented=true
 
       - name: Cache .npm
         uses: actions/cache@v4
