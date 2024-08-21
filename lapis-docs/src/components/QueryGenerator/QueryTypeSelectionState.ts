@@ -132,6 +132,8 @@ function mapMetadataTypeToResultFieldType(type: MetadataType): ResultFieldType {
         case 'date':
         case 'string':
             return 'string';
+        case 'boolean':
+            return 'boolean';
         case 'int':
             return 'integer';
         case 'float':

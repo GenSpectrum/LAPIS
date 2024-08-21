@@ -102,6 +102,10 @@ export default defineConfig({
                             onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
+                            label: 'String search',
+                            link: '/concepts/string-search',
+                        },
+                        {
                             label: 'Request Id',
                             link: '/concepts/request-id',
                         },

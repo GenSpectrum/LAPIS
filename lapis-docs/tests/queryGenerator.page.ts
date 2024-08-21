@@ -44,7 +44,7 @@ export class QueryGeneratorPage {
     }
 
     public async fillFilterField(name: string, value: string) {
-        await this.page.getByText(name).getByRole('textbox').fill(value);
+        await this.page.getByText(`${name}:`, { exact: true }).getByRole('textbox').fill(value);
     }
 
     public async addOrderByField(name?: string) {

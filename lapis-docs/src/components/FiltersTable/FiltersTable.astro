@@ -1,14 +1,13 @@
 ---
-import { getConfig, Metadata } from '../../config';
+import { getConfig } from '../../config';
 import BaseAwareLink from '../BaseAwareLink.astro';
-import { getFilters } from './getFilters';
+import { getFilters, getCommonFilterDescription } from './getFilters';
 import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
 
 const config = getConfig();
 const filters = getFilters(config);
 
-const referenceGenomes = getReferenceGenomes();
-const multiSegmented = isMultiSegmented(referenceGenomes);
+const commonFilters = getCommonFilterDescription(getReferenceGenomes());
 ---
 
 <table>
@@ -21,7 +20,7 @@ const multiSegmented = isMultiSegmented(referenceGenomes);
     </thead>
     <tbody>
         {
-            filters.map((filter) => (
+            [...filters, ...commonFilters].map((filter) => (
                 <tr>
                     <td>{filter.name}</td>
                     <td>
@@ -29,51 +28,16 @@ const multiSegmented = isMultiSegmented(referenceGenomes);
                         {filter.name === config.schema.primaryKey && <> (primary key)</>}
                     </td>
                     <td>
-                        {filter.type === 'pango_lineage' ? (
+                        {filter.description}
+                        {filter.link !== undefined && (
                             <>
-                                See
-                                <BaseAwareLink href='/concepts/pango-lineage-query'>Pango lineage query</BaseAwareLink>
+                                see
+                                <BaseAwareLink href={filter.link.href}>{filter.link.text}</BaseAwareLink>
                             </>
-                        ) : (
-                            filter.description
                         )}
                     </td>
                 </tr>
             ))
         }
-        <tr>
-            <td>nucleotideMutations</td>
-            <td>list of strings</td>
-            <td>
-                See
-                <BaseAwareLink href='/concepts/mutation-filters'>mutation filters</BaseAwareLink>
-            </td>
-        </tr>
-        <tr>
-            <td>aminoAcidMutations</td>
-            <td>list of strings</td>
-            <td>
-                See
-                <BaseAwareLink href='/concepts/mutation-filters'>mutation filters</BaseAwareLink>
-            </td>
-        </tr>
-        <tr>
-            <td>nucleotideInsertions</td>
-            <td>list of strings</td>
-            <td>
-                In the format ins_{multiSegmented && '<sequenceName>:'}{'<position>:<insertion>'}. Example: ins_{
-                    multiSegmented && `${referenceGenomes.nucleotideSequences[0].name}:`
-                }100:AGG
-            </td>
-        </tr>
-        <tr>
-            <td>aminoAcidInsertions</td>
-            <td>list of strings</td>
-            <td>
-                In the format ins_{'<sequenceName>:<position>:<insertion>'}. Example: ins_{
-                    referenceGenomes.genes[0].name
-                }:100:DEF
-            </td>
-        </tr>
     </tbody>
 </table>
