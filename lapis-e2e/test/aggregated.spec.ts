@@ -151,6 +151,17 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.error.detail).to.include('variantQuery must have exactly one value');
   });
 
+  it('should return bad request when sending regex filter for field that does not allow it', async () => {
+    const urlParams = new URLSearchParams();
+    urlParams.append('region$regex', 'Euro');
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include("'region$regex' is not a valid sequence filter");
+  });
+
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postAggregated1({
       aggregatedPostRequest: {

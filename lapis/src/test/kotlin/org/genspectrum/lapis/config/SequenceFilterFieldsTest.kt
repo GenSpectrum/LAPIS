@@ -16,8 +16,16 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with a string field then contains a string field and string search field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", MetadataType.STRING)))
+    fun `given database config with a string field allowing regex then contains a string and string search field`() {
+        val input = databaseConfigWithFields(
+            listOf(
+                DatabaseMetadata(
+                    name = "fieldName",
+                    type = MetadataType.STRING,
+                    lapisAllowsRegexSearch = true,
+                ),
+            ),
+        )
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
@@ -32,6 +40,19 @@ class SequenceFilterFieldsTest {
                 "fieldname\$regex",
                 SequenceFilterField("fieldName\$regex", SequenceFilterFieldType.StringSearch("fieldName")),
             ),
+        )
+    }
+
+    @Test
+    fun `given database config with a string field forbidding regex then only contains a string field`() {
+        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", MetadataType.STRING)))
+
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(1))
+        assertThat(
+            underTest.fields,
+            hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
         )
     }
 

@@ -4,6 +4,7 @@ schema:
   metadata:
     - name: primaryKey
       type: string
+      lapisAllowsRegexSearch: true
     - name: date
       type: date
     - name: region
@@ -11,11 +12,13 @@ schema:
       generateIndex: true
     - name: country
       type: string
+      lapisAllowsRegexSearch: true
       generateIndex: true
     - name: pangoLineage
       type: pango_lineage
     - name: division
       type: string
+      lapisAllowsRegexSearch: true
       generateIndex: true
     - name: age
       type: int

@@ -43,11 +43,16 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = databaseMetadata.name,
                 type = SequenceFilterFieldType.String,
             ),
-            SequenceFilterField(
-                name = "${databaseMetadata.name}\$regex",
-                type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
-            ),
-        )
+        ).let {
+            when (databaseMetadata.lapisAllowsRegexSearch) {
+                true -> it + SequenceFilterField(
+                    name = "${databaseMetadata.name}\$regex",
+                    type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
+                )
+
+                false -> it
+            }
+        }
 
         MetadataType.PANGO_LINEAGE -> listOf(
             SequenceFilterField(
