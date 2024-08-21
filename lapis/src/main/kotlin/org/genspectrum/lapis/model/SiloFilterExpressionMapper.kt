@@ -168,6 +168,20 @@ class SiloFilterExpressionMapper(
                 )
             }
         }
+
+        val stringSearchFilters = allowedSequenceFiltersWithType.keys.filter { it.second == Filter.StringEquals }
+        for ((stringSearchColumnName) in stringSearchFilters) {
+            val stringEqualsFilterForSameColumn = allowedSequenceFiltersWithType[
+                Pair(stringSearchColumnName, Filter.StringSearch),
+            ]
+
+            if (stringEqualsFilterForSameColumn != null) {
+                throw BadRequestException(
+                    "Cannot filter for string regex '${stringEqualsFilterForSameColumn[0].originalKey}' " +
+                        "and string equals '$stringSearchColumnName' for the same field.",
+                )
+            }
+        }
     }
 
     private fun mapToStringEqualsFilters(
