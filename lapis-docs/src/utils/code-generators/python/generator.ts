@@ -61,7 +61,7 @@ function wrapOptional(inner: string, wrap: boolean) {
     return inner;
 }
 
-function mapResultFieldType(type: ResultFieldType): 'str' | 'int' | 'float' {
+function mapResultFieldType(type: ResultFieldType): 'str' | 'int' | 'float' | 'bool' {
     switch (type) {
         case 'string':
             return 'str';
@@ -69,5 +69,7 @@ function mapResultFieldType(type: ResultFieldType): 'str' | 'int' | 'float' {
             return 'float';
         case 'integer':
             return 'int';
+        case 'boolean':
+            return 'bool';
     }
 }

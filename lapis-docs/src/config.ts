@@ -1,11 +1,20 @@
 import fs from 'fs';
 import { parse } from 'yaml';
 
-export type MetadataType = 'string' | 'date' | 'pango_lineage' | 'float' | 'int' | 'insertion' | 'aaInsertion';
+export type MetadataType =
+    | 'string'
+    | 'date'
+    | 'pango_lineage'
+    | 'float'
+    | 'int'
+    | 'insertion'
+    | 'aaInsertion'
+    | 'boolean';
 
 export type Metadata = {
     name: string;
     type: MetadataType;
+    lapisAllowsRegexSearch?: boolean;
 };
 
 export type Feature = {

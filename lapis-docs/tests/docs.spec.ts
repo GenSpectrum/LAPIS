@@ -48,6 +48,7 @@ const conceptsPages = prependToRelativeUrl(
         { title: 'Request methods: GET and POST', relativeUrl: '/request-methods' },
         { title: 'Response format', relativeUrl: '/response-format' },
         { title: 'Variant query', relativeUrl: '/variant-query' },
+        { title: 'String search', relativeUrl: '/string-search' },
         { title: 'Request Id', relativeUrl: '/request-id' },
     ],
     '/concepts',
