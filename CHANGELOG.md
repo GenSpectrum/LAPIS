@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.10](https://github.com/GenSpectrum/LAPIS/compare/v0.2.9...v0.2.10) (2024-08-21)
+
+
+### Features
+
+* **lapis:** only allow regex search for fields that have `lapisAllowsRegexSearch: true` configured ([d146717](https://github.com/GenSpectrum/LAPIS/commit/d146717f9f39cc7d6fa786142b1389a125a55c0b)), closes [#898](https://github.com/GenSpectrum/LAPIS/issues/898)
+* **lapis:** regex filtering for string columns [#898](https://github.com/GenSpectrum/LAPIS/issues/898) ([b3e7775](https://github.com/GenSpectrum/LAPIS/commit/b3e777554fde05e6ee9e6b789560468f947237e6))
+* **lapis:** throw error when filtering by "equals" and "regex" for the same string field ([540d63a](https://github.com/GenSpectrum/LAPIS/commit/540d63a5e41c2693f93a39f6331736206e511416)), closes [#899](https://github.com/GenSpectrum/LAPIS/issues/899)
+
 ## [0.2.9](https://github.com/GenSpectrum/LAPIS/compare/v0.2.8...v0.2.9) (2024-08-19)
 
 
