@@ -703,6 +703,16 @@ class SiloQueryTest {
                         }
                     """,
                 ),
+                Arguments.of(
+                    StringSearch("theColumn", "theValue"),
+                    """
+                        {
+                            "type": "StringSearch",
+                            "column": "theColumn",
+                            "searchExpression": "theValue"
+                        }
+                    """,
+                ),
             )
     }
 }

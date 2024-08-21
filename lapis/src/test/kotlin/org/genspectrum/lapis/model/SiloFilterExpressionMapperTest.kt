@@ -30,6 +30,7 @@ import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -795,6 +796,18 @@ class SiloFilterExpressionMapperTest {
                             BooleanEquals("test_boolean_column", true),
                             BooleanEquals("test_boolean_column", false),
                             BooleanEquals("test_boolean_column", null),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "some_metadata\$regex" to listOf("someRegex", null, "otherRegex"),
+                    ),
+                    And(
+                        Or(
+                            StringSearch("some_metadata", searchExpression = "someRegex"),
+                            StringSearch("some_metadata", searchExpression = null),
+                            StringSearch("some_metadata", searchExpression = "otherRegex"),
                         ),
                     ),
                 ),

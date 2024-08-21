@@ -16,15 +16,22 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with a string field then contains a string field`() {
+    fun `given database config with a string field then contains a string field and string search field`() {
         val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", MetadataType.STRING)))
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(1))
+        assertThat(underTest.fields, aMapWithSize(2))
         assertThat(
             underTest.fields,
             hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "fieldname\$regex",
+                SequenceFilterField("fieldName\$regex", SequenceFilterFieldType.StringSearch("fieldName")),
+            ),
         )
     }
 

@@ -23,6 +23,7 @@ val dummySequenceFilterFields = SequenceFilterFields(
         "dateFrom" to SequenceFilterFieldType.DateFrom(DATE_FIELD),
         PANGO_LINEAGE_FIELD to SequenceFilterFieldType.PangoLineage,
         "some_metadata" to SequenceFilterFieldType.String,
+        "some_metadata\$regex" to SequenceFilterFieldType.StringSearch("some_metadata"),
         "other_metadata" to SequenceFilterFieldType.String,
         "variantQuery" to SequenceFilterFieldType.VariantQuery,
         "intField" to SequenceFilterFieldType.Int,
