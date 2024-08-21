@@ -43,6 +43,10 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = databaseMetadata.name,
                 type = SequenceFilterFieldType.String,
             ),
+            SequenceFilterField(
+                name = "${databaseMetadata.name}\$regex",
+                type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
+            ),
         )
 
         MetadataType.PANGO_LINEAGE -> listOf(
@@ -136,4 +140,6 @@ sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     data class FloatFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("number")
 
     data class FloatTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("number")
+
+    data class StringSearch(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
 }

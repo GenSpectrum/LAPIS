@@ -272,6 +272,8 @@ data class FloatEquals(val column: String, val value: Double?) : SiloFilterExpre
 
 data class FloatBetween(val column: String, val from: Double?, val to: Double?) : SiloFilterExpression("FloatBetween")
 
+data class StringSearch(val column: String, val searchExpression: String?) : SiloFilterExpression("StringSearch")
+
 enum class SequenceType {
     @JsonProperty("Fasta")
     UNALIGNED,

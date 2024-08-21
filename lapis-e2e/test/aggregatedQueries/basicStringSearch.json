@@ -1,0 +1,11 @@
+{
+  "testCaseName": "basic string search",
+  "lapisRequest": {
+    "division$regex": "Basel-(Land|Stadt)"
+  },
+  "expected": [
+    {
+      "count": 20
+    }
+  ]
+}

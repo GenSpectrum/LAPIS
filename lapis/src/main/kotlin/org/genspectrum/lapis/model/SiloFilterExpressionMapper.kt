@@ -28,6 +28,7 @@ import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -75,6 +76,7 @@ class SiloFilterExpressionMapper(
                 Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
                 Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
                 Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
+                Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
             }
         }
 
@@ -103,6 +105,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, Filter.DateBetween)
             SequenceFilterFieldType.Date -> Pair(field.name, Filter.DateBetween)
             SequenceFilterFieldType.PangoLineage -> Pair(field.name, Filter.PangoLineage)
+            is SequenceFilterFieldType.StringSearch -> Pair(type.associatedField, Filter.StringSearch)
             SequenceFilterFieldType.String -> Pair(field.name, Filter.StringEquals)
             SequenceFilterFieldType.VariantQuery -> Pair(field.name, Filter.VariantQuery)
             SequenceFilterFieldType.Int -> Pair(field.name, Filter.IntEquals)
@@ -354,6 +357,11 @@ class SiloFilterExpressionMapper(
         )
     }
 
+    private fun mapToStringSearchFilters(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ) = Or(values[0].values.map { StringSearch(siloColumnName, it) })
+
     private inline fun <reified T : SequenceFilterFieldType> findFloatOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Double? {
@@ -434,6 +442,7 @@ class SiloFilterExpressionMapper(
         FloatEquals,
         FloatBetween,
         BooleanEquals,
+        StringSearch,
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage)
