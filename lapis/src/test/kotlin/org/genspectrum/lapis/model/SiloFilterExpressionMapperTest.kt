@@ -499,6 +499,25 @@ class SiloFilterExpressionMapperTest {
         )
     }
 
+    @Test
+    fun `GIVEN value for string field and its corresponding regex field THEN throws error`() {
+        val filterParameter = getSequenceFilters(
+            mapOf(
+                "some_metadata" to "some value",
+                "some_metadata\$regex" to "some other value",
+            ),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString(
+                "Cannot filter for string regex 'some_metadata\$regex' " +
+                    "and string equals 'some_metadata' for the same field.",
+            ),
+        )
+    }
+
     companion object {
         @JvmStatic
         val filterParametersWithMultipleValues = listOf(
