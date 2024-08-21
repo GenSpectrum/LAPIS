@@ -15,7 +15,12 @@ data class DatabaseSchema(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DatabaseMetadata(val name: String, val type: MetadataType, val valuesAreUnique: Boolean = false)
+data class DatabaseMetadata(
+    val name: String,
+    val type: MetadataType,
+    val valuesAreUnique: Boolean = false,
+    val lapisAllowsRegexSearch: Boolean = false,
+)
 
 enum class MetadataType {
     @JsonProperty("string")
