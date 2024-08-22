@@ -347,16 +347,29 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
             Schema<String>().anyOf(
                 listOf(
                     nullableStringSchema(fieldType.openApiType),
-                    nullableStringArraySchema(fieldType.openApiType),
+                    logicalOrArraySchema(nullableStringSchema(fieldType.openApiType)),
+                ),
+            )
+
+        is SequenceFilterFieldType.StringSearch ->
+            Schema<String>().anyOf(
+                listOf(
+                    nullableStringRegexSchema(fieldType.associatedField),
+                    logicalOrArraySchema(nullableStringRegexSchema(fieldType.associatedField)),
                 ),
             )
 
         else -> nullableStringSchema(fieldType.openApiType)
     }
 
-private fun nullableStringSchema(type: String) = Schema<String>().type(type).nullable(true)
+private fun nullableStringRegexSchema(associatedField: SequenceFilterFieldName) =
+    nullableStringSchema("string")
+        .description(
+            "A regex pattern (subset of PCRE) for filtering '$associatedField'. " +
+                "For details on the syntax, see https://github.com/google/re2/wiki/Syntax.",
+        )
 
-private fun nullableStringArraySchema(type: String) = arraySchema(nullableStringSchema(type))
+private fun nullableStringSchema(type: String) = Schema<String>().type(type).nullable(true)
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
@@ -502,7 +515,7 @@ private fun aminoAcidInsertionSchema() =
 private fun nucleotideMutations() =
     Schema<List<NucleotideMutation>>()
         .type("array")
-        .description(NUCLEOTIDE_MUTATION_DESCRIPTION)
+        .description("Logical \"and\" concatenation of a list of mutations.")
         .items(
             Schema<String>()
                 .type("string")
@@ -513,6 +526,7 @@ private fun nucleotideMutations() =
 private fun aminoAcidMutations() =
     Schema<List<AminoAcidMutation>>()
         .type("array")
+        .description("Logical \"and\" concatenation of a list of mutations.")
         .items(
             Schema<String>()
                 .type("string")
@@ -523,6 +537,7 @@ private fun aminoAcidMutations() =
 private fun nucleotideInsertions() =
     Schema<List<NucleotideInsertion>>()
         .type("array")
+        .description("Logical \"and\" concatenation of a list of insertions.")
         .items(
             Schema<String>()
                 .type("string")
@@ -538,6 +553,7 @@ private fun nucleotideInsertions() =
 private fun aminoAcidInsertions() =
     Schema<List<AminoAcidInsertion>>()
         .type("array")
+        .description("Logical \"and\" concatenation of a list of insertions.")
         .items(
             Schema<String>()
                 .type("string")
@@ -638,6 +654,10 @@ private fun fieldsEnum(
 ) = Schema<String>()
     .type("string")
     ._enum(databaseConfig.map { it.name } + additionalFields)
+
+private fun logicalOrArraySchema(schema: Schema<Any>) =
+    arraySchema(schema)
+        .description("Logical \"or\" concatenation of a list of values.")
 
 private fun arraySchema(schema: Schema<Any>) =
     ArraySchema()
