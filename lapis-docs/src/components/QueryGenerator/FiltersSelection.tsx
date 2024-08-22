@@ -32,8 +32,8 @@ export const FiltersSelection = (props: Props) => {
                             <>
                                 <FilterField key={metadata.name} name={metadata.name} {...props} />
                                 <FilterField
-                                    key={metadata.name + '$regex'}
-                                    name={metadata.name + '$regex'}
+                                    key={metadata.name + '.regex'}
+                                    name={metadata.name + '.regex'}
                                     {...props}
                                 />
                             </>
