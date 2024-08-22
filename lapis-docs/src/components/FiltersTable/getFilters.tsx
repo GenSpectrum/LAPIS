@@ -41,7 +41,7 @@ export function getFilters(config: Config) {
 
             if (metadata.lapisAllowsRegexSearch) {
                 const allowRegexSearchDescription = {
-                    name: `${metadata.name}$regex`,
+                    name: `${metadata.name}.regex`,
                     type: metadata.type,
                     description: `Filters the "${metadata.name}" column using a regular expression,`,
                     link: {

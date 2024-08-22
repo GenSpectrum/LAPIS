@@ -17,11 +17,11 @@ Under the hood, we use the [RE2](https://github.com/google/re2) library to evalu
 Get the number of sequences with the `division` field containing the string `Basel`:
 
 ```
-GET /sample/aggregated?division$regex=Basel
+GET /sample/aggregated?division.regex=Basel
 ```
 
 Get the number of sequences with the `division` field starting with the string `Basel`:
 
 ```
-GET /sample/aggregated?division$regex=^Basel
+GET /sample/aggregated?division.regex=^Basel
 ```

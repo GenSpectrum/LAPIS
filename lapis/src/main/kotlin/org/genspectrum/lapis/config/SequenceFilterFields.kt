@@ -46,7 +46,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
         ).let {
             when (databaseMetadata.lapisAllowsRegexSearch) {
                 true -> it + SequenceFilterField(
-                    name = "${databaseMetadata.name}\$regex",
+                    name = "${databaseMetadata.name}.regex",
                     type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
                 )
 

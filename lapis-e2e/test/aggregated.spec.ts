@@ -46,7 +46,7 @@ describe('The /aggregated endpoint', () => {
       })
     );
 
-  it('should correcty handle aggregated request with multiple segments', async () => {
+  it('should correctly handle aggregated request with multiple segments', async () => {
     const result = await lapisClientMultiSegmented.postAggregated1({
       aggregatedPostRequest: {
         nucleotideMutations: ['L:T1A', 'M:T1C'],
@@ -153,13 +153,13 @@ describe('The /aggregated endpoint', () => {
 
   it('should return bad request when sending regex filter for field that does not allow it', async () => {
     const urlParams = new URLSearchParams();
-    urlParams.append('region$regex', 'Euro');
+    urlParams.append('region.regex', 'Euro');
 
     const result = await getAggregated(urlParams);
 
     expect(result.status).equals(400);
     const resultJson = await result.json();
-    expect(resultJson.error.detail).to.include("'region$regex' is not a valid sequence filter");
+    expect(resultJson.error.detail).to.include("'region.regex' is not a valid sequence filter");
   });
 
   it('should apply limit and offset', async () => {
@@ -305,5 +305,17 @@ age	country	count
     expect(result.status).equals(200);
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 1);
+  });
+
+  it('should correctly handle string search filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      'division.regex': 'Basel-(Land|Stadt)',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 20);
   });
 });

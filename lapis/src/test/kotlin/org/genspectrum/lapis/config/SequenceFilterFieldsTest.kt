@@ -37,8 +37,8 @@ class SequenceFilterFieldsTest {
         assertThat(
             underTest.fields,
             hasEntry(
-                "fieldname\$regex",
-                SequenceFilterField("fieldName\$regex", SequenceFilterFieldType.StringSearch("fieldName")),
+                "fieldname.regex",
+                SequenceFilterField("fieldName.regex", SequenceFilterFieldType.StringSearch("fieldName")),
             ),
         )
     }

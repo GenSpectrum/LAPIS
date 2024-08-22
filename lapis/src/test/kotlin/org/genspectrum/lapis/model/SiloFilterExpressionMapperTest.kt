@@ -504,7 +504,7 @@ class SiloFilterExpressionMapperTest {
         val filterParameter = getSequenceFilters(
             mapOf(
                 "some_metadata" to "some value",
-                "some_metadata\$regex" to "some other value",
+                "some_metadata.regex" to "some other value",
             ),
         )
 
@@ -512,7 +512,7 @@ class SiloFilterExpressionMapperTest {
         assertThat(
             exception.message,
             containsString(
-                "Cannot filter for string regex 'some_metadata\$regex' " +
+                "Cannot filter for string regex 'some_metadata.regex' " +
                     "and string equals 'some_metadata' for the same field.",
             ),
         )
@@ -820,7 +820,7 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
-                        "some_metadata\$regex" to listOf("someRegex", null, "otherRegex"),
+                        "some_metadata.regex" to listOf("someRegex", null, "otherRegex"),
                     ),
                     And(
                         Or(
