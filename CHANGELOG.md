@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.11](https://github.com/GenSpectrum/LAPIS/compare/v0.2.10...v0.2.11) (2024-08-22)
+
+
+### Features
+
+* **lapis-docs:** document string search feature ([ae098a9](https://github.com/GenSpectrum/LAPIS/commit/ae098a91692ecafb1c96d8a2a10b0c197475f36b))
+* **lapis:** hint to which regex syntax is used in Swagger docs ([ca4fcdc](https://github.com/GenSpectrum/LAPIS/commit/ca4fcdc7550240bd448a8a3960c5e206096bd80f)), closes [#903](https://github.com/GenSpectrum/LAPIS/issues/903)
+
 ## [0.2.10](https://github.com/GenSpectrum/LAPIS/compare/v0.2.9...v0.2.10) (2024-08-21)
 
 
