@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
@@ -103,7 +104,7 @@ data class InsertionData(
 
 data class SequenceData(
     val sequenceKey: String,
-    val sequence: String,
+    val sequence: String?,
 ) {
     fun writeAsString() = ">$sequenceKey\n$sequence"
 }
@@ -116,10 +117,9 @@ fun Stream<SequenceData>.writeFastaTo(
     if (response.contentType == null) {
         response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
     }
-    response.outputStream.writer().use {
-        for (sequenceData in this) {
-            it.appendLine(sequenceData.writeAsString())
-        }
+    response.outputStream.writer().use { stream ->
+        this.filter { it.sequence != null }
+            .forEach { stream.appendLine(it.writeAsString()) }
     }
 }
 
@@ -135,8 +135,19 @@ class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeseria
     ): SequenceData {
         val node = p.readValueAsTree<JsonNode>()
         val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
-        val sequence =
-            node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }.value.asText()
-        return SequenceData(sequenceKey, sequence)
+
+        val value = node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }.value
+        val sequence = when (value.nodeType) {
+            JsonNodeType.NULL -> null
+            JsonNodeType.STRING -> value.asText()
+            else -> throw RuntimeException(
+                "Error deserializing sequence data: got unexpected value $value of type ${value.nodeType}",
+            )
+        }
+
+        return SequenceData(
+            sequenceKey = sequenceKey,
+            sequence = sequence,
+        )
     }
 }

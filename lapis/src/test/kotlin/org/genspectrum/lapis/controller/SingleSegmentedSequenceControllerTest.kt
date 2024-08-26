@@ -31,7 +31,11 @@ import java.util.stream.Stream
 class SingleSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = Stream.of(SequenceData("sequenceKey", "theSequence"))
+    val returnedValue: Stream<SequenceData> = Stream.of(
+        SequenceData("sequenceKey", "theSequence"),
+        SequenceData("sequenceKeyWithNullValue", null),
+    )
+
     val expectedFasta = """
         >sequenceKey
         theSequence

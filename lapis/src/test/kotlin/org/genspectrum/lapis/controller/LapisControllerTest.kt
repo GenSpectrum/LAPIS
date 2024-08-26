@@ -256,7 +256,11 @@ class LapisControllerTest(
                 SequenceType.ALIGNED,
                 "geneName",
             )
-        } returns Stream.of(SequenceData("key1", "the sequence"), SequenceData("key2", "the other sequence"))
+        } returns Stream.of(
+            SequenceData("key1", "the sequence"),
+            SequenceData("key2", "the other sequence"),
+            SequenceData("key3", null),
+        )
 
         mockMvc.perform(request("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/geneName"))
             .andExpect(status().isOk)
