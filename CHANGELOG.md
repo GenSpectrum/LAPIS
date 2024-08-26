@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/GenSpectrum/LAPIS/compare/v0.3.0...v0.3.1) (2024-08-26)
+
+
+### Features
+
+* **lapis:** omit sequences with `null` values in unaligned fasta downloads ([f1931a6](https://github.com/GenSpectrum/LAPIS/commit/f1931a686d0046e88016b18c90adb3502ea1575f)), closes [#912](https://github.com/GenSpectrum/LAPIS/issues/912)
+
 ## [0.3.0](https://github.com/GenSpectrum/LAPIS/compare/v0.2.11...v0.3.0) (2024-08-26)
 
 
