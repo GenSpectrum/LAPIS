@@ -33,7 +33,11 @@ import java.util.stream.Stream
 class MultiSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = Stream.of(SequenceData("sequenceKey", "theSequence"))
+    val returnedValue: Stream<SequenceData> = Stream.of(
+        SequenceData("sequenceKey", "theSequence"),
+        SequenceData("sequenceKeyWithNullValue", null),
+    )
+
     val expectedFasta = """
         >sequenceKey
         theSequence

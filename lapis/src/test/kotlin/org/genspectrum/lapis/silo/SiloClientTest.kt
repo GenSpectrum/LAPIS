@@ -149,6 +149,7 @@ class SiloClientTest(
                     """
                         {"primaryKey": "key1","someSequenceName": "ABCD"}
                         {"primaryKey": "key2","someSequenceName": "DEFG"}
+                        {"primaryKey": "key3","someSequenceName": null}
                     """,
                 ),
         )
@@ -159,12 +160,13 @@ class SiloClientTest(
         )
         val result = underTest.sendQuery(query).toList()
 
-        assertThat(result, hasSize(2))
+        assertThat(result, hasSize(3))
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData("key1", "ABCD"),
-                SequenceData("key2", "DEFG"),
+                SequenceData(sequenceKey = "key1", sequence = "ABCD"),
+                SequenceData(sequenceKey = "key2", sequence = "DEFG"),
+                SequenceData(sequenceKey = "key3", sequence = null),
             ),
         )
     }
