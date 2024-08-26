@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/GenSpectrum/LAPIS/compare/v0.2.11...v0.3.0) (2024-08-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** use dot symbol as string search regex separator
+
+### Features
+
+* **lapis:** use dot symbol as regex separator [#908](https://github.com/GenSpectrum/LAPIS/issues/908) ([3728c7e](https://github.com/GenSpectrum/LAPIS/commit/3728c7efccdc06a36915e563490d9a5e9c2345e0))
+
 ## [0.2.11](https://github.com/GenSpectrum/LAPIS/compare/v0.2.10...v0.2.11) (2024-08-22)
 
 
