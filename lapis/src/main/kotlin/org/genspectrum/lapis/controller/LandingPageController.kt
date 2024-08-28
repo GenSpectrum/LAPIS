@@ -45,7 +45,7 @@ class LandingPageController(
         """.trimIndent()
 
     @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun helloJson() = links
+    fun helloJson() = links + ("Instance name" to databaseConfig.schema.instanceName)
 
     private fun getHtmlLinkItems() =
         links
