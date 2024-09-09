@@ -17,6 +17,8 @@ RUN chmod +x entrypoint.sh
 
 EXPOSE 8080
 
+HEALTHCHECK --interval=30s --start-period=30s --start-interval=5s --timeout=3s --retries=3 CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+
 ENTRYPOINT ["./entrypoint.sh"]
 
 LABEL org.opencontainers.image.source="https://github.com/GenSpectrum/LAPIS/lapis"
