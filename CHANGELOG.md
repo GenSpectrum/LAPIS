@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/GenSpectrum/LAPIS/compare/v0.3.1...v0.3.2) (2024-09-10)
+
+
+### Features
+
+* **lapis:** add healthcheck to Docker containers ([0944990](https://github.com/GenSpectrum/LAPIS/commit/0944990e1aa97e47bfee43d8356571b23b190c58)), closes [#813](https://github.com/GenSpectrum/LAPIS/issues/813)
+* **lapis:** add instance name to landing page json ([6c5f81b](https://github.com/GenSpectrum/LAPIS/commit/6c5f81b1eb445f15813d2166c195331effd5495e))
+
 ## [0.3.1](https://github.com/GenSpectrum/LAPIS/compare/v0.3.0...v0.3.1) (2024-08-26)
 
 
