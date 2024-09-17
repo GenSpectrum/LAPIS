@@ -7,7 +7,6 @@ import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -58,8 +57,8 @@ class SiloClient(
 const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
 
 @Component
-class CachedSiloClient(
-    @Value("\${silo.url}") private val siloUrl: String,
+open class CachedSiloClient(
+    private val siloUris: SiloUris,
     private val objectMapper: ObjectMapper,
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
@@ -67,7 +66,7 @@ class CachedSiloClient(
     private val httpClient = HttpClient.newHttpClient()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
-    fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> {
+    open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> {
         return sendQuery(query)
             .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
     }
@@ -82,7 +81,7 @@ class CachedSiloClient(
         log.info { "Calling SILO: $queryJson" }
 
         val response = send(
-            uri = URI("$siloUrl/query"),
+            uri = siloUris.query,
             bodyHandler = BodyHandlers.ofLines(),
             tryToReadSiloErrorFromBody = { tryToReadSiloErrorFromString(it.findFirst().orElse("")) },
         ) {
@@ -107,7 +106,7 @@ class CachedSiloClient(
     }
 
     fun callInfo(): InfoData {
-        val response = send(URI("$siloUrl/info"), BodyHandlers.ofString(), ::tryToReadSiloErrorFromString) { it.GET() }
+        val response = send(siloUris.info, BodyHandlers.ofString(), ::tryToReadSiloErrorFromString) { it.GET() }
 
         return InfoData(getDataVersion(response))
     }
