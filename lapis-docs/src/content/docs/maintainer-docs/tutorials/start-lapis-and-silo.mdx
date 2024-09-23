@@ -85,9 +85,9 @@ Download the example dataset from the [end-to-end tests](https://github.com/GenS
 -   all fasta files for the sequences
 
 SILO expects fasta files (possibly compressed via zstandard or xz)
-in the same directory with naming scheme `nuc_<sequence_name>.fasta` for nucleotide sequences
-or `gene_<sequence_name>.fasta` for amino acid sequences.
-The `sequence_names`s have to match the names defined in the `reference_genomes.json`.
+in the same directory with naming scheme `nuc_<sequence_index>.fasta` for nucleotide sequences
+or `gene_<sequence_index>.fasta` for amino acid sequences.
+The `sequence_index`s have to match the indexes of the arrays defined in the `reference_genomes.json`.
 
 Put those files into the folder `~/lapisExample/data/`.
 
