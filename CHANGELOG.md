@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.3](https://github.com/GenSpectrum/LAPIS/compare/v0.3.2...v0.3.3) (2024-09-25)
+
+
+### Features
+
+* **lapis:** abort on startup when silo url has invalid syntax ([373d662](https://github.com/GenSpectrum/LAPIS/commit/373d6625abfb74c46b0ec65f020126c7c87089c4)), closes [#939](https://github.com/GenSpectrum/LAPIS/issues/939)
+
+
+### Bug Fixes
+
+* **lapis-docs:** Sequence file naming scheme uses indexes now not names ([1e7cd60](https://github.com/GenSpectrum/LAPIS/commit/1e7cd604a3c9ecbd8c5d21e0fa07903ad1aebbe9))
+
 ## [0.3.2](https://github.com/GenSpectrum/LAPIS/compare/v0.3.1...v0.3.2) (2024-09-10)
 
 
