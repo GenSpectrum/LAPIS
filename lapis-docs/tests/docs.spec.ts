@@ -131,6 +131,11 @@ test.describe('The documentation', () => {
 
         await clickOnAllLinksInNavigation(page);
     });
+
+    test('should recognize the "not found" page', async ({ page }) => {
+        await page.goto(baseUrl + '/this/page/does/not/exist');
+        await expect(getNotFoundPageIdentifier(page)).toBeVisible();
+    });
 });
 
 function findNeighbouringPages(indexOfCurrentPage: number) {
@@ -170,10 +175,14 @@ async function clickOnAllRelativeLinksInMainBody(page: Page) {
         await relativeLink.click();
 
         const errorMessage = `Went to ${page.url()} from ${currentPageUrl}, but did not find target page.`;
-        await expect(page.getByText('Page not found.'), errorMessage).not.toBeVisible();
+        await expect(getNotFoundPageIdentifier(page), errorMessage).not.toBeVisible();
 
         await page.goBack();
     }
+}
+
+function getNotFoundPageIdentifier(page: Page) {
+    return page.getByText('Page not found.');
 }
 
 async function clickOnAllLinksInNavigation(page: Page) {
