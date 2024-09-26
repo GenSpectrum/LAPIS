@@ -127,6 +127,7 @@ test.describe('The documentation', () => {
 
         await page.getByRole('link', { name: 'Introduction' }).click();
         await expect(page).toHaveTitle(/^Introduction/);
+        await expect(page).toHaveURL(thatDoesNotEndWithSlash);
 
         await clickOnAllLinksInNavigation(page);
     });
@@ -183,5 +184,14 @@ async function clickOnAllLinksInNavigation(page: Page) {
         await page.getByRole('link', { name: pageName.title, exact: true }).nth(alreadyClickedTimes).click();
         clickedLinks[pageName.relativeUrl] = alreadyClickedTimes + 1;
         await expect(page).toHaveTitle(new RegExp(`^${pageName.title}`));
+        await expect(page).toHaveURL(thatDoesNotEndWithSlash);
     }
 }
+
+/**
+ * This regex matches any URL that does not end with a slash.
+ * This is important to make relative links work, because they rely on using `..` to go up one level.
+ * - `..` on /foo/bar would be /foo
+ * - `..` on /foo/bar/ would be /foo/bar
+ */
+const thatDoesNotEndWithSlash = /[^\/]$/;
