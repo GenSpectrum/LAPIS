@@ -189,7 +189,7 @@ describe('The /aggregated endpoint', () => {
 
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'country,age',
+      fields: 'age,country',
       orderBy: 'age',
       dataFormat: 'csv',
     });
@@ -219,7 +219,7 @@ age,country,count
 
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'country,age',
+      fields: 'age,country',
       orderBy: 'age',
       dataFormat: 'tsv',
     });

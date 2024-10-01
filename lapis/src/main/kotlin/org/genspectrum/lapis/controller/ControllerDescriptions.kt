@@ -40,12 +40,17 @@ const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     Sequences that don't have an unaligned sequence for this segment are omitted."""
 
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
-    """The fields to stratify by. If empty, only the overall count is returned"""
+    """The fields to stratify by.
+If empty, only the overall count is returned.
+If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
     Fields specified here must either be \"count\" or also be present in \"fields\"."""
 const val DETAILS_FIELDS_DESCRIPTION =
-    """The fields that the response items should contain. If empty, all fields are returned"""
+    """The fields that the response items should contain.
+If empty, all fields are returned.
+If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
+"""
 const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. Fields specified here must also be present in \"fields\"."""
 const val LIMIT_DESCRIPTION = """The maximum number of entries to return in the response"""
