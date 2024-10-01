@@ -45,7 +45,7 @@ data class NucleotideMutationResponse(
     val mutationTo: String,
     val position: Int,
 ) : CsvRecord {
-    override fun getValuesList() =
+    override fun getValuesList(comparator: Comparator<String>) =
         listOf(
             mutation,
             count.toString(),
@@ -56,7 +56,7 @@ data class NucleotideMutationResponse(
             position.toString(),
         )
 
-    override fun getHeader() =
+    override fun getHeader(comparator: Comparator<String>) =
         listOf(
             "mutation",
             "count",
@@ -77,7 +77,7 @@ data class AminoAcidMutationResponse(
     val mutationTo: String,
     val position: Int,
 ) : CsvRecord {
-    override fun getValuesList() =
+    override fun getValuesList(comparator: Comparator<String>) =
         listOf(
             mutation,
             count.toString(),
@@ -88,7 +88,7 @@ data class AminoAcidMutationResponse(
             position.toString(),
         )
 
-    override fun getHeader() =
+    override fun getHeader(comparator: Comparator<String>) =
         listOf(
             "mutation",
             "count",
@@ -107,7 +107,7 @@ data class NucleotideInsertionResponse(
     val position: Int,
     val sequenceName: String?,
 ) : CsvRecord {
-    override fun getValuesList() =
+    override fun getValuesList(comparator: Comparator<String>) =
         listOf(
             insertion,
             count.toString(),
@@ -116,7 +116,7 @@ data class NucleotideInsertionResponse(
             sequenceName ?: "",
         )
 
-    override fun getHeader() =
+    override fun getHeader(comparator: Comparator<String>) =
         listOf(
             "insertion",
             "count",
@@ -133,7 +133,7 @@ data class AminoAcidInsertionResponse(
     val position: Int,
     val sequenceName: String,
 ) : CsvRecord {
-    override fun getValuesList() =
+    override fun getValuesList(comparator: Comparator<String>) =
         listOf(
             insertion,
             count.toString(),
@@ -142,7 +142,7 @@ data class AminoAcidInsertionResponse(
             sequenceName,
         )
 
-    override fun getHeader() =
+    override fun getHeader(comparator: Comparator<String>) =
         listOf(
             "insertion",
             "count",

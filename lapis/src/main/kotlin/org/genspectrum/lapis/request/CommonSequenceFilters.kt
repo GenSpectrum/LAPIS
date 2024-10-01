@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.response.CsvColumnOrder
 import org.springframework.util.MultiValueMap
 
 typealias SequenceFilters = Map<String, List<String?>>
@@ -23,6 +24,8 @@ interface CommonSequenceFilters {
     fun isEmpty() =
         sequenceFilters.isEmpty() && nucleotideMutations.isEmpty() &&
             aaMutations.isEmpty() && nucleotideInsertions.isEmpty() && aminoAcidInsertions.isEmpty()
+
+    fun getCsvColumnOrder(): CsvColumnOrder = CsvColumnOrder.Undefined
 }
 
 fun parseCommonFields(

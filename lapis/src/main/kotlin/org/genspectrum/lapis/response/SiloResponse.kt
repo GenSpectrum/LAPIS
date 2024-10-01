@@ -27,18 +27,22 @@ data class AggregationData(
     val count: Int,
     @Schema(hidden = true) val fields: Map<String, JsonNode>,
 ) : CsvRecord {
-    override fun getValuesList() =
-        fields.values
-            .map { it.toCsvValue() }
+    override fun getValuesList(comparator: Comparator<String>) =
+        fields.entries
+            .sortedWith { a, b -> comparator.compare(a.key, b.key) }
+            .map { (_, value) -> value.toCsvValue() }
             .plus(count.toString())
 
-    override fun getHeader() = fields.keys.plus(COUNT_PROPERTY)
+    override fun getHeader(comparator: Comparator<String>) = fields.keys.sortedWith(comparator) + COUNT_PROPERTY
 }
 
 data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
-    override fun getValuesList() = values.map { it.toCsvValue() }
+    override fun getValuesList(comparator: Comparator<String>) =
+        entries
+            .sortedWith { a, b -> comparator.compare(a.key, b.key) }
+            .map { (_, value) -> value.toCsvValue() }
 
-    override fun getHeader() = keys
+    override fun getHeader(comparator: Comparator<String>) = keys.sortedWith(comparator)
 }
 
 private fun JsonNode.toCsvValue() =

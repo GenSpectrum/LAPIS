@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
@@ -34,7 +35,8 @@ private const val DATA_VERSION = "1234"
 @SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerCsvTest(
-    @Autowired val mockMvc: MockMvc,
+    @Autowired private val mockMvc: MockMvc,
+    @Autowired private val objectMapper: ObjectMapper,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
@@ -151,6 +153,54 @@ class LapisControllerCsvTest(
             .andExpect(content().string(startsWith(expectedCsv)))
     }
 
+    @ParameterizedTest(name = "Aggregated data: {0}")
+    @MethodSource("getColumnOrderRequests")
+    fun `returns aggregated csv columns in correct order`(scenario: ColumnOrderScenario) {
+        every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
+            AggregationData(
+                1,
+                mapOf("date" to TextNode("date1"), "primaryKey" to TextNode("key1"), "region" to TextNode("region1")),
+            ),
+            AggregationData(
+                2,
+                mapOf("date" to TextNode("date2"), "primaryKey" to TextNode("key2"), "region" to TextNode("region2")),
+            ),
+        )
+
+        mockMvc.perform(
+            postSample("/aggregated")
+                .content("""{"fields": ${(objectMapper.writeValueAsString(scenario.fields))}}""")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(ACCEPT, "text/csv"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(startsWith(scenario.expectedAggregatedCsv)))
+    }
+
+    @ParameterizedTest(name = "Details data: {0}")
+    @MethodSource("getColumnOrderRequests")
+    fun `returns details csv columns in correct order`(scenario: ColumnOrderScenario) {
+        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
+            DetailsData(
+                mapOf("date" to TextNode("date1"), "primaryKey" to TextNode("key1"), "region" to TextNode("region1")),
+            ),
+            DetailsData(
+                mapOf("date" to TextNode("date2"), "primaryKey" to TextNode("key2"), "region" to TextNode("region2")),
+            ),
+        )
+
+        mockMvc.perform(
+            postSample("/details")
+                .content("""{"fields": ${(objectMapper.writeValueAsString(scenario.fields))}}""")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(ACCEPT, "text/csv"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(content().string(startsWith(scenario.expectedDetailsCsv)))
+    }
+
     private companion object {
         @JvmStatic
         val endpoints = SampleRoute.entries.filter { !it.servesFasta }.map { it.pathSegment }
@@ -224,12 +274,83 @@ class LapisControllerCsvTest(
 
         @JvmStatic
         fun getJsonRequests() = getRequests("json")
+
+        @JvmStatic
+        fun getColumnOrderRequests() =
+            listOf(
+                ColumnOrderScenario(
+                    description = "GIVEN no fields in request THEN columns are ordered as in database config",
+                    fields = emptyList(),
+                    expectedAggregatedCsv = """
+                        primaryKey,date,region,count
+                        key1,date1,region1,1
+                        key2,date2,region2,2
+                    """.trimIndent(),
+                    expectedDetailsCsv = """
+                        primaryKey,date,region
+                        key1,date1,region1
+                        key2,date2,region2
+                    """.trimIndent(),
+                ),
+                ColumnOrderScenario(
+                    description = "GIVEN fields in request THEN columns are ordered as in request",
+                    fields = listOf("region", "date", "primaryKey"),
+                    expectedAggregatedCsv = """
+                        region,date,primaryKey,count
+                        region1,date1,key1,1
+                        region2,date2,key2,2
+                    """.trimIndent(),
+                    expectedDetailsCsv = """
+                        region,date,primaryKey
+                        region1,date1,key1
+                        region2,date2,key2
+                    """.trimIndent(),
+                ),
+                ColumnOrderScenario(
+                    description = "GIVEN fields in request in different order THEN columns are ordered as in request",
+                    fields = listOf("date", "region", "primaryKey"),
+                    expectedAggregatedCsv = """
+                        date,region,primaryKey,count
+                        date1,region1,key1,1
+                        date2,region2,key2,2
+                    """.trimIndent(),
+                    expectedDetailsCsv = """
+                        date,region,primaryKey
+                        date1,region1,key1
+                        date2,region2,key2
+                    """.trimIndent(),
+                ),
+                ColumnOrderScenario(
+                    description = "GIVEN fields in request with missing column WHEN lapis still returns that column " +
+                        "THEN missing columns are last",
+                    fields = listOf("region", "date"),
+                    expectedAggregatedCsv = """
+                        region,date,primaryKey,count
+                        region1,date1,key1,1
+                        region2,date2,key2,2
+                    """.trimIndent(),
+                    expectedDetailsCsv = """
+                        region,date,primaryKey
+                        region1,date1,key1
+                        region2,date2,key2
+                    """.trimIndent(),
+                ),
+            )
     }
 
     data class RequestScenario(
         val description: String,
         val mockDataCollection: MockDataCollection,
         val request: MockHttpServletRequestBuilder,
+    ) {
+        override fun toString() = description
+    }
+
+    data class ColumnOrderScenario(
+        val description: String,
+        val fields: List<String>,
+        val expectedAggregatedCsv: String,
+        val expectedDetailsCsv: String,
     ) {
         override fun toString() = description
     }

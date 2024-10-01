@@ -1508,6 +1508,7 @@ class LapisController(
                 includeHeaders = includeHeaders,
                 data = data,
                 delimiter = delimiter,
+                csvColumnOrder = request.getCsvColumnOrder(),
             )
         }
     }

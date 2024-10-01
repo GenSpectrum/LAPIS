@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.response.CsvColumnOrder
 import org.springframework.boot.jackson.JsonComponent
 
 data class SequenceFiltersRequestWithFields(
@@ -18,7 +19,13 @@ data class SequenceFiltersRequestWithFields(
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
-) : CommonSequenceFilters
+) : CommonSequenceFilters {
+    override fun getCsvColumnOrder() =
+        when (fields.isEmpty()) {
+            true -> CsvColumnOrder.AsInConfig
+            false -> CsvColumnOrder.AsFieldsInRequest(fields.map { it.fieldName })
+        }
+}
 
 @JsonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(private val fieldConverter: FieldConverter) :

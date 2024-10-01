@@ -94,7 +94,7 @@ describe('The /details endpoint', () => {
 
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'primaryKey,pangoLineage,division',
+      fields: 'division,pangoLineage,primaryKey',
       orderBy: 'primaryKey',
       limit: '3',
       dataFormat: 'csv',
@@ -114,7 +114,7 @@ Solothurn,B.1,key_1002052
 
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'primaryKey,pangoLineage,division',
+      fields: 'division,pangoLineage,primaryKey',
       orderBy: 'primaryKey',
       limit: '3',
       dataFormat: 'tsv',
