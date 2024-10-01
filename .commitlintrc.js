@@ -18,6 +18,7 @@ const Configuration = {
                 "root", // used by dependabot to update the root package.json
             ]
         ],
+        "header-max-length": [RuleConfigSeverity.Disabled],
         "body-max-line-length": [RuleConfigSeverity.Disabled],
     }
 };
