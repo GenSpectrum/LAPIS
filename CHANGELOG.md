@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.4](https://github.com/GenSpectrum/LAPIS/compare/v0.3.3...v0.3.4) (2024-10-02)
+
+
+### Features
+
+* **lapis:** order CSV/TSV columns of aggregated/details data as specified in the request fields or as in the database config ([6cf8704](https://github.com/GenSpectrum/LAPIS/commit/6cf8704e61c9435b37e3846d210496bcad00a977)), closes [#910](https://github.com/GenSpectrum/LAPIS/issues/910)
+
+
+### Bug Fixes
+
+* **lapis-docs:** fix link on landing page ([d4137b3](https://github.com/GenSpectrum/LAPIS/commit/d4137b3e3de8daf6a9001f1beaff17ef7d9b53df))
+
 ## [0.3.3](https://github.com/GenSpectrum/LAPIS/compare/v0.3.2...v0.3.3) (2024-09-25)
 
 
