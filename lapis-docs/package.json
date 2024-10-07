@@ -18,11 +18,11 @@
         "@astrojs/starlight": "^0.28.2",
         "@astrojs/starlight-tailwind": "^2.0.3",
         "@astrojs/tailwind": "^5.1.1",
-        "@types/react": "^18.3.10",
+        "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.0",
-        "astro": "^4.15.9",
+        "astro": "^4.15.12",
         "change-case": "^5.4.4",
-        "daisyui": "^4.12.10",
+        "daisyui": "^4.12.12",
         "js-yaml": "^4.1.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
@@ -34,7 +34,7 @@
         "zod": "^3.23.0"
     },
     "devDependencies": {
-        "@astrojs/check": "^0.9.3",
+        "@astrojs/check": "^0.9.4",
         "@playwright/test": "^1.47.2",
         "@types/js-yaml": "^4.0.9",
         "@types/node": "^22.7.4",
