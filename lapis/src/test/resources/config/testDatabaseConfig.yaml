@@ -11,7 +11,8 @@ schema:
     - name: country
       type: string
     - name: pangoLineage
-      type: pango_lineage
+      type: string
+      generateLineageIndex: true
     - name: test_boolean_column
       type: boolean
   features:

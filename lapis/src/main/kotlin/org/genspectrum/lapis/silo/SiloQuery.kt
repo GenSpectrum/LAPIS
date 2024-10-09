@@ -218,8 +218,8 @@ data class StringEquals(val column: String, val value: String?) : SiloFilterExpr
 
 data class BooleanEquals(val column: String, val value: Boolean?) : SiloFilterExpression("BooleanEquals")
 
-data class PangoLineageEquals(val column: String, val value: String?, val includeSublineages: Boolean) :
-    SiloFilterExpression("PangoLineage")
+data class LineageEquals(val column: String, val value: String?, val includeSublineages: Boolean) :
+    SiloFilterExpression("Lineage")
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class NucleotideSymbolEquals(val sequenceName: String?, val position: Int, val symbol: String) :

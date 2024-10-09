@@ -25,7 +25,7 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "date", type = MetadataType.DATE),
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
-                DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
+                DatabaseMetadata(name = "pangoLineage", type = MetadataType.STRING, generateLineageIndex = true),
                 DatabaseMetadata(name = "test_boolean_column", type = MetadataType.BOOLEAN),
             ),
         )
@@ -56,7 +56,7 @@ class DatabaseConfigWithoutFeaturesTest {
                 DatabaseMetadata(name = "date", type = MetadataType.DATE),
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
-                DatabaseMetadata(name = "pangoLineage", type = MetadataType.PANGO_LINEAGE),
+                DatabaseMetadata(name = "pangoLineage", type = MetadataType.STRING, generateLineageIndex = true),
             ),
         )
         assertThat(underTest.schema.features, `is`(emptyList()))
