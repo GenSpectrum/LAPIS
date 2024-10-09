@@ -26,13 +26,13 @@ import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
+import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 
@@ -187,7 +187,7 @@ class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchem
         val pangolineage = ctx.pangolineage().text
         val includeSublineages = ctx.pangolineageIncludeSublineages() != null
 
-        val expr = PangoLineageEquals(pangoLineageColumnName, pangolineage, includeSublineages)
+        val expr = LineageEquals(pangoLineageColumnName, pangolineage, includeSublineages)
         expressionStack.addLast(expr)
     }
 }

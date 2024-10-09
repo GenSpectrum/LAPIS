@@ -23,11 +23,11 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
@@ -69,7 +69,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            And(Or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+            And(Or(LineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
         assertThat(result, equalTo(expected))
     }
 
@@ -80,7 +80,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            And(Or(PangoLineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
+            And(Or(LineageEquals(FIELD_WITH_UPPERCASE_LETTER, SOME_VALUE, includeSublineages = false)))
         assertThat(result, equalTo(expected))
     }
 
@@ -582,23 +582,23 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3")),
-                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
+                    And(Or(LineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("")),
-                    And(Or(PangoLineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf(null)),
-                    And(Or(PangoLineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3*")),
-                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                    And(Or(LineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3.*")),
-                    And(Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
+                    And(Or(LineageEquals("pangoLineage", "A.1.2.3", includeSublineages = true))),
                 ),
                 Arguments.of(
                     mapOf(
@@ -608,7 +608,7 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         listOf(
-                            Or(PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false)),
+                            Or(LineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false)),
                             Or(StringEquals("some_metadata", "ABC")),
                             Or(StringEquals("other_metadata", "DEF")),
                         ),
@@ -801,8 +801,8 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         Or(
-                            PangoLineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
-                            PangoLineageEquals("pangoLineage", "B.1.2.3", includeSublineages = false),
+                            LineageEquals("pangoLineage", "A.1.2.3", includeSublineages = false),
+                            LineageEquals("pangoLineage", "B.1.2.3", includeSublineages = false),
                         ),
                     ),
                 ),
