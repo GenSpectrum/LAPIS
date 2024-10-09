@@ -372,10 +372,10 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    PangoLineageEquals("fieldName", "ABC", includeSublineages = false),
+                    LineageEquals("fieldName", "ABC", includeSublineages = false),
                     """
                         {
-                            "type": "PangoLineage",
+                            "type": "Lineage",
                             "column": "fieldName",
                             "value": "ABC",
                             "includeSublineages": false
@@ -383,10 +383,10 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    PangoLineageEquals("fieldName", "ABC", includeSublineages = true),
+                    LineageEquals("fieldName", "ABC", includeSublineages = true),
                     """
                         {
-                            "type": "PangoLineage",
+                            "type": "Lineage",
                             "column": "fieldName",
                             "value": "ABC",
                             "includeSublineages": true
@@ -394,10 +394,10 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    PangoLineageEquals("fieldName", null, includeSublineages = false),
+                    LineageEquals("fieldName", null, includeSublineages = false),
                     """
                         {
-                            "type": "PangoLineage",
+                            "type": "Lineage",
                             "column": "fieldName",
                             "value": null,
                             "includeSublineages": false
