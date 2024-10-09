@@ -57,15 +57,52 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with a pango_lineage field then contains a pango_lineage field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("pangoLineage", MetadataType.PANGO_LINEAGE)))
+    fun `GIVEN database config with a field with lineage index THEN contains a lineage field`() {
+        val input = databaseConfigWithFields(
+            listOf(
+                DatabaseMetadata(
+                    name = "pangoLineage",
+                    type = MetadataType.STRING,
+                    generateLineageIndex = true,
+                ),
+            ),
+        )
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
         assertThat(underTest.fields, aMapWithSize(1))
         assertThat(
             underTest.fields,
-            hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.PangoLineage)),
+            hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.Lineage)),
+        )
+    }
+
+    @Test
+    fun `GIVEN config with a field with lineage index and regex search THEN contains a lineage and regex field`() {
+        val input = databaseConfigWithFields(
+            listOf(
+                DatabaseMetadata(
+                    name = "pangoLineage",
+                    type = MetadataType.STRING,
+                    generateLineageIndex = true,
+                    lapisAllowsRegexSearch = true,
+                ),
+            ),
+        )
+
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(
+            underTest.fields,
+            hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.Lineage)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "pangolineage.regex",
+                SequenceFilterField("pangoLineage.regex", SequenceFilterFieldType.StringSearch("pangoLineage")),
+            ),
         )
     }
 

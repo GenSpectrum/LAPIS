@@ -38,28 +38,31 @@ data class SequenceFilterField(
 
 private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
     when (databaseMetadata.type) {
-        MetadataType.STRING -> listOf(
-            SequenceFilterField(
-                name = databaseMetadata.name,
-                type = SequenceFilterFieldType.String,
-            ),
-        ).let {
-            when (databaseMetadata.lapisAllowsRegexSearch) {
-                true -> it + SequenceFilterField(
-                    name = "${databaseMetadata.name}.regex",
-                    type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
+        MetadataType.STRING -> {
+            val baseField = when (databaseMetadata.generateLineageIndex) {
+                true -> SequenceFilterField(
+                    name = databaseMetadata.name,
+                    type = SequenceFilterFieldType.Lineage,
                 )
 
-                false -> it
+                false -> SequenceFilterField(
+                    name = databaseMetadata.name,
+                    type = SequenceFilterFieldType.String,
+                )
+            }
+
+            when (databaseMetadata.lapisAllowsRegexSearch) {
+                true -> listOf(
+                    baseField,
+                    SequenceFilterField(
+                        name = "${databaseMetadata.name}.regex",
+                        type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
+                    ),
+                )
+
+                false -> listOf(baseField)
             }
         }
-
-        MetadataType.PANGO_LINEAGE -> listOf(
-            SequenceFilterField(
-                name = databaseMetadata.name,
-                type = SequenceFilterFieldType.PangoLineage,
-            ),
-        )
 
         MetadataType.DATE -> listOf(
             SequenceFilterField(name = databaseMetadata.name, type = SequenceFilterFieldType.Date),
@@ -122,7 +125,7 @@ private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeatu
 sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
     data object String : SequenceFilterFieldType("string")
 
-    data object PangoLineage : SequenceFilterFieldType("string")
+    data object Lineage : SequenceFilterFieldType("string")
 
     data object Date : SequenceFilterFieldType("string")
 

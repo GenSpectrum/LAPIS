@@ -15,7 +15,10 @@ schema:
       lapisAllowsRegexSearch: true
       generateIndex: true
     - name: pangoLineage
-      type: pango_lineage
+      type: string
+      generateIndex: true
+      generateLineageIndex: true
+      lapisAllowsRegexSearch: true
     - name: division
       type: string
       lapisAllowsRegexSearch: true

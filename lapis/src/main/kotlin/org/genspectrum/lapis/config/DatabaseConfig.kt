@@ -20,14 +20,12 @@ data class DatabaseMetadata(
     val type: MetadataType,
     val valuesAreUnique: Boolean = false,
     val lapisAllowsRegexSearch: Boolean = false,
+    val generateLineageIndex: Boolean = false,
 )
 
 enum class MetadataType {
     @JsonProperty("string")
     STRING,
-
-    @JsonProperty("pango_lineage")
-    PANGO_LINEAGE,
 
     @JsonProperty("date")
     DATE,

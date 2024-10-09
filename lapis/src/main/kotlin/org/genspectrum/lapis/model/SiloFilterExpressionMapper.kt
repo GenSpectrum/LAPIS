@@ -21,11 +21,11 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
@@ -104,7 +104,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, Filter.DateBetween)
             is SequenceFilterFieldType.DateTo -> Pair(type.associatedField, Filter.DateBetween)
             SequenceFilterFieldType.Date -> Pair(field.name, Filter.DateBetween)
-            SequenceFilterFieldType.PangoLineage -> Pair(field.name, Filter.PangoLineage)
+            SequenceFilterFieldType.Lineage -> Pair(field.name, Filter.PangoLineage)
             is SequenceFilterFieldType.StringSearch -> Pair(type.associatedField, Filter.StringSearch)
             SequenceFilterFieldType.String -> Pair(field.name, Filter.StringEquals)
             SequenceFilterFieldType.VariantQuery -> Pair(field.name, Filter.VariantQuery)
@@ -281,14 +281,14 @@ class SiloFilterExpressionMapper(
     ) = Or(
         values[0].values.map {
             when {
-                it.isNullOrBlank() -> PangoLineageEquals(column, null, includeSublineages = false)
-                it.endsWith(".*") -> PangoLineageEquals(column, it.substringBeforeLast(".*"), includeSublineages = true)
-                it.endsWith('*') -> PangoLineageEquals(column, it.substringBeforeLast('*'), includeSublineages = true)
+                it.isNullOrBlank() -> LineageEquals(column, null, includeSublineages = false)
+                it.endsWith(".*") -> LineageEquals(column, it.substringBeforeLast(".*"), includeSublineages = true)
+                it.endsWith('*') -> LineageEquals(column, it.substringBeforeLast('*'), includeSublineages = true)
                 it.endsWith('.') -> throw BadRequestException(
                     "Invalid pango lineage: $it must not end with a dot. Did you mean '$it*'?",
                 )
 
-                else -> PangoLineageEquals(column, it, includeSublineages = false)
+                else -> LineageEquals(column, it, includeSublineages = false)
             }
         },
     )
