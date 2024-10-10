@@ -1,7 +1,7 @@
 {
   "testCaseName": "complex variant query",
   "lapisRequest": {
-    "variantQuery": "300G & (400-|500B) & !600&MAYBE(700B|800-) & [3-of:123A,234T,345G] & A.1.2.3*"
+    "variantQuery": "300G & (400-|500B) & !600&MAYBE(700B|800-) & [3-of:123A,234T,345G] & B.1.1.7*"
   },
   "expected": [
     {
