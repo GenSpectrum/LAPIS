@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.DatabaseConfigValidator
 import org.genspectrum.lapis.config.NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE
 import org.genspectrum.lapis.config.REFERENCE_GENOME_ENV_VARIABLE_NAME
 import org.genspectrum.lapis.config.REFERENCE_GENOME_FILENAME_ARGS_NAME
@@ -66,8 +67,10 @@ class LapisSpringConfig {
     fun databaseConfig(
         @Value("\${lapis.databaseConfig.path}") configPath: String,
         yamlObjectMapper: YamlObjectMapper,
+        databaseConfigValidator: DatabaseConfigValidator,
     ): DatabaseConfig {
-        return yamlObjectMapper.objectMapper.readValue(File(configPath))
+        return yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(File(configPath))
+            .let { databaseConfigValidator.validate(it) }
     }
 
     @Bean

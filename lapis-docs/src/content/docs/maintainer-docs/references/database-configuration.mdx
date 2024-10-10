@@ -46,11 +46,19 @@ it will be beneficial to set `dateToSortBy` to that column.
 
 The metadata object permits the following fields:
 
-| Key           | Type    | Required | Description                                           |
-| ------------- | ------- | -------- | ----------------------------------------------------- |
-| name          | string  | true     | The name of the feature.                              |
-| type          | enum    | true     | The [type of the metadata](#metadata-types).          |
-| generateIndex | boolean | false    | See [Generating an index](#generating-an-index) below |
+| Key                    | Type    | Required | Description                                                                                                   |
+| ---------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| name                   | string  | true     | The name of the metadata field.                                                                               |
+| type                   | enum    | true     | The [type of the metadata](#metadata-types).                                                                  |
+| generateIndex          | boolean | false    | See [Generating an index](#generating-an-index) below                                                         |
+| lapisAllowsRegexSearch | boolean | false    | If true, LAPIS will autogenerate a filter `${name}.regex`. See [String search](../../concepts/string-search). |
+
+:::caution
+The `name` must not contain the reserved character `.`.
+
+LAPIS uses `.` internally to generate new filters, such as the `$name.regex` filter.
+To avoid conflicts, the `name` must not contain reserved characters.
+:::
 
 ### Metadata Types
 
