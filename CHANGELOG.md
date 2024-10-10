@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.5](https://github.com/GenSpectrum/LAPIS/compare/v0.3.4...v0.3.5) (2024-10-10)
+
+
+### Features
+
+* **lapis:** validate that `lapisAllowsRegexSearch`-fields are of type string ([97b3ce9](https://github.com/GenSpectrum/LAPIS/commit/97b3ce912c7b28304aec823fd6c794c9d9a99525))
+* **lapis:** validate that metadata fields do not contain the reserved character `.` ([97b3ce9](https://github.com/GenSpectrum/LAPIS/commit/97b3ce912c7b28304aec823fd6c794c9d9a99525)), closes [#976](https://github.com/GenSpectrum/LAPIS/issues/976)
+
 ## [0.3.4](https://github.com/GenSpectrum/LAPIS/compare/v0.3.3...v0.3.4) (2024-10-02)
 
 
