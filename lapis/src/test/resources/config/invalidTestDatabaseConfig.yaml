@@ -1,0 +1,9 @@
+schema:
+  instanceName: "invalid because . is reserved for regex separators"
+  opennessLevel: OPEN
+  metadata:
+    - name: primaryKey
+      type: string
+    - name: key.with.reserved.character
+      type: string
+  primaryKey: primaryKey
