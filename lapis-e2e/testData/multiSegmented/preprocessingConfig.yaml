@@ -1,2 +1,2 @@
-metadataFilename: multi_segmented_metadata.tsv
+ndjsonInputFilename: 'input_file.ndjson'
 referenceGenomeFilename: reference_genomes.json
