@@ -39,20 +39,26 @@ jobs:
           $changelog
           EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Comment on PR
+      - name: Write changelog comment on PR
         uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ steps.changelog-preview.outputs.changelog != '' }}
         with:
           skip_unchanged: true
           header: changelogPreview
           message: |
-            This is a preview of the changelog of the next release:
+            This is a preview of the changelog of the next release. If this branch is not up-to-date with the current main branch, the changelog may not be accurate. Rebase your branch on the main branch to get the most accurate changelog.
+            
+            Note that this might contain changes that are on main, but not yet released.
+            
+            Changelog:
             
             ${{ steps.changelog-preview.outputs.changelog }}
 
-      - name: Delete PR Comment
+      - name: Write "no change" Comment on PR
         uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ steps.changelog-preview.outputs.changelog == '' }}
         with:
+          skip_unchanged: true
           header: changelogPreview
-          delete: true
+          message: |
+            There is no change in the changelog. This PR will not produce a new releasable version.
