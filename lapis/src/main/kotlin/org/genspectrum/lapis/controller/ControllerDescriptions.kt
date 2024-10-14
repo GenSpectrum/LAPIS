@@ -23,19 +23,19 @@ const val INFO_ENDPOINT_DESCRIPTION = "Returns information about LAPIS."
 const val DATABASE_CONFIG_ENDPOINT_DESCRIPTION = "Returns the database configuration."
 const val REFERENCE_GENOME_ENDPOINT_DESCRIPTION = "Returns the reference genome."
 const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formatted aligned amino acid sequences. Only sequences matching the specified
+    """Returns a string of aligned amino acid sequences. Only sequences matching the specified
     sequence filters are considered."""
 const val ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formatted aligned nucleotide sequences. Only sequences matching the 
+    """Returns a string of aligned nucleotide sequences. Only sequences matching the 
     specified sequence filters are considered."""
 const val UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formatted unaligned nucleotide sequences. Only sequences matching the 
+    """Returns a string of unaligned nucleotide sequences. Only sequences matching the 
     specified sequence filters are considered."""
 const val ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formatted aligned nucleotide sequences of the requested segment.
+    """Returns a string of aligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered."""
 const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """Returns a string of fasta formatted unaligned nucleotide sequences of the requested segment.
+    """Returns a string of unaligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered.
     Sequences that don't have an unaligned sequence for this segment are omitted."""
 
@@ -57,10 +57,15 @@ const val LIMIT_DESCRIPTION = """The maximum number of entries to return in the 
 const val OFFSET_DESCRIPTION =
     """The offset of the first entry to return in the response. 
     This is useful for pagination in combination with \"limit\"."""
-const val FORMAT_DESCRIPTION = """The data format of the response.
+const val DATA_FORMAT_DESCRIPTION = """The data format of the response.
 Alternatively, the data format can be specified by setting the \"Accept\"-header.
 You can include the parameter to return the CSV/TSV without headers: "$TEXT_CSV_WITHOUT_HEADERS_VALUE". 
 When both are specified, the request parameter takes precedence over the header."""
+
+const val SEQUENCES_DATA_FORMAT_DESCRIPTION = """The format of the sequences in the response.
+Alternatively, the data format can be specified by setting the \"Accept\"-header.
+When both are specified, the request parameter takes precedence over the header.
+"""
 
 private const val MAYBE_DESCRIPTION = """
 A mutation can be wrapped in a maybe expression "MAYBE(\<mutation\>)"

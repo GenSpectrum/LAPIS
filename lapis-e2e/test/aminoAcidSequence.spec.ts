@@ -1,47 +1,41 @@
 import { expect } from 'chai';
-import { lapisClient, sequenceData } from './common';
+import { lapisClient } from './common';
 
 describe('The /alignedAminoAcidSequence endpoint', () => {
   it('should return amino acid sequences for Switzerland', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
-      aminoAcidSequenceRequest: { country: 'Switzerland' },
+      aminoAcidSequenceRequest: { country: 'Switzerland', dataFormat: 'JSON' },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_3259931');
-    expect(sequences[0]).to.have.length(1274);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_3259931');
+    expect(result[0].s).to.have.length(1274);
   });
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
-      aminoAcidSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'ascending' }] },
+      aminoAcidSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'ascending' }], dataFormat: 'JSON' },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_1001493');
-    expect(sequences[0]).to.have.length(1274);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_1001493');
+    expect(result[0].s).to.have.length(1274);
   });
 
   it('should order descending by specified fields', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
-      aminoAcidSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'descending' }] },
+      aminoAcidSequenceRequest: {
+        orderBy: [{ field: 'primaryKey', type: 'descending' }],
+        dataFormat: 'JSON',
+      },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_931279');
-    expect(sequences[0]).to.have.length(1274);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_931279');
+    expect(result[0].s).to.have.length(1274);
   });
 
   it('should apply limit and offset', async () => {
@@ -50,16 +44,13 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       aminoAcidSequenceRequest: {
         orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         limit: 2,
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys: primaryKeysWithLimit, sequences: sequencesWithLimit } =
-      sequenceData(resultWithLimit);
-
-    expect(primaryKeysWithLimit).to.have.length(2);
-    expect(sequencesWithLimit).to.have.length(2);
-    expect(primaryKeysWithLimit[0]).to.equal('>key_1001493');
-    expect(sequencesWithLimit[0]).to.have.length(1274);
+    expect(resultWithLimit).to.have.length(2);
+    expect(resultWithLimit[0].primaryKey).to.equal('key_1001493');
+    expect(resultWithLimit[0].s).to.have.length(1274);
 
     const resultWithLimitAndOffset = await lapisClient.postAlignedAminoAcidSequence({
       gene: 'S',
@@ -67,16 +58,12 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
         orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         limit: 2,
         offset: 1,
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys: primaryKeysWithLimitAndOffset, sequences: sequencesWithLimitAndOffset } =
-      sequenceData(resultWithLimitAndOffset);
-
-    expect(primaryKeysWithLimitAndOffset).to.have.length(2);
-    expect(sequencesWithLimitAndOffset).to.have.length(2);
-    expect(primaryKeysWithLimitAndOffset[0]).to.equal(primaryKeysWithLimit[1]);
-    expect(sequencesWithLimitAndOffset[0]).to.equal(sequencesWithLimit[1]);
+    expect(resultWithLimitAndOffset).to.have.length(2);
+    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
@@ -84,15 +71,13 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       gene: 'S',
       aminoAcidSequenceRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(1);
-    expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>key_3578231');
-    expect(sequences[0]).to.have.length(1274);
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_3578231');
+    expect(result[0].s).to.have.length(1274);
   });
 
   it('should correctly handle amino acid insertion requests', async () => {
@@ -100,13 +85,11 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       gene: 'S',
       aminoAcidSequenceRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(1);
-    expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>key_3259931');
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_3259931');
   });
 });

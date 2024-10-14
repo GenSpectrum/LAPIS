@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.response
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.type.TypeReference
@@ -11,15 +12,8 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
-import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
-import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.boot.jackson.JsonComponent
-import org.springframework.http.MediaType
-import java.nio.charset.Charset
-import java.util.stream.Stream
 
 const val COUNT_PROPERTY = "count"
 
@@ -109,22 +103,10 @@ data class InsertionData(
 data class SequenceData(
     val sequenceKey: String,
     val sequence: String?,
+    @JsonIgnore
+    val sequenceName: String,
 ) {
-    fun writeAsString() = ">$sequenceKey\n$sequence"
-}
-
-fun Stream<SequenceData>.writeFastaTo(
-    response: HttpServletResponse,
-    dataVersion: DataVersion,
-) {
-    response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
-    if (response.contentType == null) {
-        response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
-    }
-    response.outputStream.writer().use { stream ->
-        this.filter { it.sequence != null }
-            .forEach { stream.appendLine(it.writeAsString()) }
-    }
+    fun writeAsFasta() = ">$sequenceKey\n$sequence"
 }
 
 data class InfoData(
@@ -140,7 +122,7 @@ class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeseria
         val node = p.readValueAsTree<JsonNode>()
         val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
 
-        val value = node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }.value
+        val (key, value) = node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }
         val sequence = when (value.nodeType) {
             JsonNodeType.NULL -> null
             JsonNodeType.STRING -> value.asText()
@@ -152,6 +134,21 @@ class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeseria
         return SequenceData(
             sequenceKey = sequenceKey,
             sequence = sequence,
+            sequenceName = key,
         )
+    }
+}
+
+@JsonComponent
+class SequenceDataSerializer(val databaseConfig: DatabaseConfig) : JsonSerializer<SequenceData>() {
+    override fun serialize(
+        value: SequenceData,
+        gen: JsonGenerator,
+        serializers: SerializerProvider,
+    ) {
+        gen.writeStartObject()
+        gen.writeStringField(databaseConfig.schema.primaryKey, value.sequenceKey)
+        gen.writeStringField(value.sequenceName, value.sequence)
+        gen.writeEndObject()
     }
 }

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, expectIsGzipEncoded, expectIsZstdEncoded } from './common';
+import { basePath, expectIsGzipEncoded, expectIsZstdEncoded, sequenceData } from './common';
 
 const routes = [
   { pathSegment: '/aggregated', servesFasta: false, expectedDownloadFilename: 'aggregated.json' },
@@ -83,7 +83,25 @@ describe('All endpoints', () => {
         expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
       });
 
-      if (!route.servesFasta) {
+      if (route.servesFasta) {
+        it('should return sequences in fasta format', async () => {
+          const response = await get(new URLSearchParams({ dataFormat: 'fasta' }));
+
+          const { primaryKeys, sequences } = sequenceData(await response.text());
+
+          expect(primaryKeys).to.have.length(100);
+          expect(sequences).to.have.length(100);
+        });
+
+        it('should return sequences in ndjson format', async () => {
+          const response = await get(new URLSearchParams({ dataFormat: 'ndjson' }));
+
+          const lines = (await response.text()).split('\n').filter(line => line.length > 0);
+
+          expect(lines).to.have.length(100);
+          expect(JSON.parse(lines[0])).to.have.property('primaryKey');
+        });
+      } else {
         it('should return the lapis data version header for CSV data', async () => {
           const response = await get(new URLSearchParams({ dataFormat: 'csv' }));
 

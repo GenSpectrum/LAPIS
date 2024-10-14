@@ -270,26 +270,71 @@ data class DownloadAsFileScenario(
             val expectedFilename = route.getExpectedFilename()
 
             if (route.servesFasta) {
-                return listOf(
-                    DownloadAsFileScenario(
-                        endpoint = "${route.pathSegment}/segmentName",
-                        mockData = MockDataForEndpoints.fastaMockData,
-                        requestedDataFormat = null,
-                        expectedFilename = "$expectedFilename.fasta",
-                        downloadFileBasename = null,
-                    ),
-                    DownloadAsFileScenario(
-                        endpoint = "${route.pathSegment}/segmentName",
-                        mockData = MockDataForEndpoints.fastaMockData,
-                        requestedDataFormat = null,
-                        expectedFilename = "my_sequence.fasta",
-                        downloadFileBasename = "my_sequence",
-                    ),
-                )
+                return forSequenceEndpointDataFormats(route, expectedFilename)
             }
 
             return forDataFormats(route.pathSegment, expectedFilename)
         }
+
+        private fun forSequenceEndpointDataFormats(
+            route: SampleRoute,
+            expectedFilename: String,
+        ) = listOf(
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                ),
+                requestedDataFormat = null,
+                expectedFilename = "$expectedFilename.fasta",
+                downloadFileBasename = null,
+            ),
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.JSON,
+                ),
+                requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.JSON.fileFormat,
+                expectedFilename = "$expectedFilename.json",
+                downloadFileBasename = null,
+            ),
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.NDJSON,
+                ),
+                requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.NDJSON.fileFormat,
+                expectedFilename = "$expectedFilename.ndjson",
+                downloadFileBasename = null,
+            ),
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                ),
+                requestedDataFormat = null,
+                expectedFilename = "my_sequence.fasta",
+                downloadFileBasename = "my_sequence",
+            ),
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.JSON,
+                ),
+                requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.JSON.fileFormat,
+                expectedFilename = "my_sequence.json",
+                downloadFileBasename = "my_sequence",
+            ),
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}/segmentName",
+                mockData = MockDataForEndpoints.sequenceEndpointMockData().expecting(
+                    SequenceEndpointMockDataCollection.DataFormat.NDJSON,
+                ),
+                requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.NDJSON.fileFormat,
+                expectedFilename = "my_sequence.ndjson",
+                downloadFileBasename = "my_sequence",
+            ),
+        )
 
         private fun forDataFormats(
             endpoint: String,
@@ -381,7 +426,8 @@ data class DownloadCompressedFileScenario(
             compressionFormat: String,
         ): List<DownloadCompressedFileScenario> {
             val (mockData, dataFileFormat) = if (route.servesFasta) {
-                MockDataForEndpoints.fastaMockData to "fasta"
+                MockDataForEndpoints.sequenceEndpointMockData()
+                    .expecting(SequenceEndpointMockDataCollection.DataFormat.FASTA) to "fasta"
             } else {
                 MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
             }

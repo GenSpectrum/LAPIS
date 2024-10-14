@@ -40,6 +40,7 @@ import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
+import org.genspectrum.lapis.openApi.SequencesDataFormat
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -66,7 +67,7 @@ import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.LapisResponse
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
-import org.genspectrum.lapis.response.writeFastaTo
+import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.http.HttpHeaders
@@ -90,6 +91,7 @@ class LapisController(
     private val csvWriter: CsvWriter,
     private val fieldConverter: FieldConverter,
     private val dataVersion: DataVersion,
+    private val sequencesStreamer: SequencesStreamer,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -1403,7 +1405,10 @@ class LapisController(
         writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
     }
 
-    @GetMapping("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}", produces = [TEXT_X_FASTA_VALUE])
+    @GetMapping(
+        "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}",
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+    )
     @LapisAlignedAminoAcidSequenceResponse
     fun getAlignedAminoAcidSequence(
         @PathVariable(name = "gene", required = true)
@@ -1433,6 +1438,10 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
+        @SequencesDataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val request = SequenceFiltersRequest(
@@ -1448,13 +1457,19 @@ class LapisController(
 
         requestContext.filter = request
 
-        return siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
-            .writeFastaTo(response, dataVersion)
+        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                )
+            }
     }
 
     @PostMapping(
         "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}",
-        produces = [TEXT_X_FASTA_VALUE],
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
     @LapisAlignedAminoAcidSequenceResponse
@@ -1465,12 +1480,19 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
+        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         requestContext.filter = request
 
-        return siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
-            .writeFastaTo(response, dataVersion)
+        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                )
+            }
     }
 
     private fun <Request : CommonSequenceFilters> writeCsvToResponse(

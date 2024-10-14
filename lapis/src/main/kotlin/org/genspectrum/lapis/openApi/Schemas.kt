@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.headers.Header
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -12,25 +13,24 @@ import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.controller.ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.controller.ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
-import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
+import org.genspectrum.lapis.controller.LapisMediaType
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
-import org.genspectrum.lapis.controller.UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.controller.UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.springframework.core.annotation.AliasFor
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import org.springframework.http.MediaType
 
 const val PRIMITIVE_FIELD_FILTERS_SCHEMA = "SequenceFilters"
 const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion"
@@ -46,6 +46,8 @@ const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
 const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
+const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
+const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -61,6 +63,7 @@ const val NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA = "NucleotideSequencesOrde
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
+const val SEQUENCES_FORMAT_SCHEMA = "SequencesDataFormat"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 const val GENE_SCHEMA = "Gene"
@@ -132,7 +135,7 @@ the other also grants access to detailed data.
 )
 annotation class LapisResponseAnnotation(
     @get:AliasFor(annotation = Operation::class, attribute = "description")
-    val description: String,
+    val description: String = "",
     @get:AliasFor(annotation = ApiResponse::class, attribute = "content")
     val content: Array<Content> = [],
 )
@@ -219,41 +222,45 @@ annotation class LapisAminoAcidInsertionsResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(type = "string"))],
+    content = [
+        Content(mediaType = LapisMediaType.TEXT_X_FASTA_VALUE, schema = Schema(type = "string")),
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            array = ArraySchema(schema = Schema(ref = "#/components/schemas/$AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA")),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_NDJSON_VALUE,
+            schema = Schema(
+                description = "An NDJSON stream of nucleotide sequences. The schema is to be understood per line",
+                ref = "#/components/schemas/$AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
 annotation class LapisAlignedAminoAcidSequenceResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
-    description = ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(type = "string"))],
+    content = [
+        Content(mediaType = LapisMediaType.TEXT_X_FASTA_VALUE, schema = Schema(type = "string")),
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            array = ArraySchema(schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA")),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_NDJSON_VALUE,
+            schema = Schema(
+                description = "An NDJSON stream of nucleotide sequences. The schema is to be understood per line",
+                ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
 )
-annotation class LapisAlignedSingleSegmentedNucleotideSequenceResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@LapisResponseAnnotation(
-    description = UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(type = "string"))],
+annotation class LapisNucleotideSequenceResponse(
+    @get:AliasFor(annotation = LapisResponseAnnotation::class, attribute = "description")
+    val description: String = "",
 )
-annotation class LapisUnalignedSingleSegmentedNucleotideSequenceResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@LapisResponseAnnotation(
-    description = ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(type = "string"))],
-)
-annotation class LapisAlignedMultiSegmentedNucleotideSequenceResponse
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@LapisResponseAnnotation(
-    description = UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
-    content = [Content(schema = Schema(type = "string"))],
-)
-annotation class LapisUnalignedMultiSegmentedNucleotideSequenceResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
@@ -374,9 +381,17 @@ annotation class Offset
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$FORMAT_SCHEMA"),
-    description = FORMAT_DESCRIPTION,
+    description = DATA_FORMAT_DESCRIPTION,
 )
 annotation class DataFormat
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$SEQUENCES_FORMAT_SCHEMA"),
+    description = SEQUENCES_DATA_FORMAT_DESCRIPTION,
+)
+annotation class SequencesDataFormat
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

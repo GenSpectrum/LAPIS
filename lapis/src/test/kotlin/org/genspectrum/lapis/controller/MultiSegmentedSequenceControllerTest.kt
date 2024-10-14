@@ -23,9 +23,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
+private const val SEGMENT_NAME = "otherSegment"
+
 @SpringBootTest(
     properties = [
-        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=someSegment,otherSegment",
+        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=someSegment,$SEGMENT_NAME",
         "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=gene1,gene2",
     ],
 )
@@ -33,16 +35,14 @@ import java.util.stream.Stream
 class MultiSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = Stream.of(
-        SequenceData("sequenceKey", "theSequence"),
-        SequenceData("sequenceKeyWithNullValue", null),
-    )
+    val returnedValue: Stream<SequenceData> = MockDataForEndpoints
+        .sequenceEndpointMockData(SEGMENT_NAME)
+        .sequenceData
+        .stream()
 
-    val expectedFasta = """
-        >sequenceKey
-        theSequence
-        
-    """.trimIndent()
+    val expectedFasta = MockDataForEndpoints
+        .sequenceEndpointMockData(SEGMENT_NAME)
+        .expectedFasta
 
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
@@ -67,34 +67,35 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(emptyMap()),
                 SequenceType.ALIGNED,
-                "otherSegment",
+                SEGMENT_NAME,
             )
         } returns returnedValue
 
-        mockMvc.perform(request("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
+        mockMvc.perform(request("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME"))
             .andExpect(status().isOk)
             .andExpect(content().string(expectedFasta))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
-    @ParameterizedTest(name = "should {0} alignedNucleotideSequences with filter")
-    @MethodSource("getRequestsWithFilter")
-    fun `should call alignedNucleotideSequences with filter`(
-        description: String,
-        request: (String) -> MockHttpServletRequestBuilder,
-    ) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getAlignedRequestsWithFilter")
+    fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.ALIGNED,
-                "otherSegment",
+                SEGMENT_NAME,
             )
         } returns returnedValue
 
-        mockMvc.perform(request("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
+        val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
-            .andExpect(content().string(expectedFasta))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
     }
 
     @ParameterizedTest(name = "should not {0} alignedNucleotideSequence without segment")
@@ -125,34 +126,35 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(emptyMap()),
                 SequenceType.UNALIGNED,
-                "otherSegment",
+                SEGMENT_NAME,
             )
         } returns returnedValue
 
-        mockMvc.perform(request("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
+        mockMvc.perform(request("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME"))
             .andExpect(status().isOk)
             .andExpect(content().string(expectedFasta))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
     }
 
-    @ParameterizedTest(name = "should {0} unalignedNucleotideSequences with filter")
-    @MethodSource("getRequestsWithFilter")
-    fun `should call unalignedNucleotideSequences with filter`(
-        description: String,
-        request: (String) -> MockHttpServletRequestBuilder,
-    ) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getUnalignedRequestsWithFilter")
+    fun `should call unalignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.UNALIGNED,
-                "otherSegment",
+                SEGMENT_NAME,
             )
         } returns returnedValue
 
-        mockMvc.perform(request("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/otherSegment"))
+        val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
-            .andExpect(content().string(expectedFasta))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
     }
 
     @ParameterizedTest(name = "should not {0} unalignedNucleotideSequences without segment")
@@ -175,30 +177,15 @@ class MultiSegmentedSequenceControllerTest(
 
     companion object {
         @JvmStatic
-        val requestsWithFilter = listOf(
-            Arguments.of(
-                "GET",
-                { route: String ->
-                    getSample(route)
-                        .queryParam("country", "Switzerland")
-                },
-            ),
-            Arguments.of(
-                "POST JSON",
-                { route: String ->
-                    postSample(route)
-                        .content("""{"country": "Switzerland"}""")
-                        .contentType(MediaType.APPLICATION_JSON)
-                },
-            ),
-            Arguments.of(
-                "POST form encoded",
-                { route: String ->
-                    postSample(route)
-                        .param("country", "Switzerland")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                },
-            ),
+        val alignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
+            route = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME",
+            sequenceName = SEGMENT_NAME,
+        )
+
+        @JvmStatic
+        val unalignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
+            route = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME",
+            sequenceName = SEGMENT_NAME,
         )
 
         @JvmStatic
