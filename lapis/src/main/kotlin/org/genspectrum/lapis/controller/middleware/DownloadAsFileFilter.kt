@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
@@ -59,14 +60,23 @@ class DownloadAsFileFilter(
         request: CachedBodyHttpServletRequest,
         matchingRoute: SampleRoute?,
     ): String {
-        if (matchingRoute?.servesFasta == true) {
-            return ".fasta"
-        }
-
         val acceptHeaders = request.getHeader(ACCEPT)
             ?.let { MediaType.parseMediaTypes(it) }
             ?.sortedByDescending { it.qualityValue }
             ?: emptyList()
+
+        if (matchingRoute?.servesFasta == true) {
+            for (acceptHeader in acceptHeaders) {
+                if (acceptHeader.equalsTypeAndSubtype(TEXT_X_FASTA)) {
+                    return ".fasta"
+                } else if (acceptHeader.equalsTypeAndSubtype(MediaType.APPLICATION_NDJSON)) {
+                    return ".ndjson"
+                } else if (acceptHeader.equalsTypeAndSubtype(MediaType.APPLICATION_JSON)) {
+                    return ".json"
+                }
+            }
+            return ".fasta"
+        }
         for (acceptHeader in acceptHeaders) {
             if (acceptHeader.equalsTypeAndSubtype(TEXT_TSV)) {
                 return ".tsv"

@@ -164,9 +164,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(sequenceKey = "key1", sequence = "ABCD"),
-                SequenceData(sequenceKey = "key2", sequence = "DEFG"),
-                SequenceData(sequenceKey = "key3", sequence = null),
+                SequenceData(sequenceKey = "key1", sequence = "ABCD", sequenceName = "someSequenceName"),
+                SequenceData(sequenceKey = "key2", sequence = "DEFG", sequenceName = "someSequenceName"),
+                SequenceData(sequenceKey = "key3", sequence = null, sequenceName = "someSequenceName"),
             ),
         )
     }

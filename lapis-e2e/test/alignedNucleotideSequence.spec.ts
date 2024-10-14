@@ -10,55 +10,49 @@ import {
 describe('The /alignedNucleotideSequence endpoint', () => {
   it('should return aligned nucleotide sequences for Switzerland', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      nucleotideSequenceRequest: { country: 'Switzerland' },
+      nucleotideSequenceRequest: { country: 'Switzerland', dataFormat: 'JSON' },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_3259931');
-    expect(sequences[0]).to.have.length(29903);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_3259931');
+    expect(result[0].main).to.have.length(29903);
   });
 
   it('should return aligned nucleotide sequences for multi segmented sequences', async () => {
     const result = await lapisMultiSegmentedSequenceController.postAlignedNucleotideSequence({
-      nucleotideSequenceRequest: { country: 'Switzerland' },
+      nucleotideSequenceRequest: { country: 'Switzerland', dataFormat: 'JSON' },
       segment: 'M',
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(6);
-    expect(sequences).to.have.length(6);
-    expect(primaryKeys[0]).to.equal('>key_5');
-    expect(sequences[0]).to.equal('TGGG');
+    expect(result).to.have.length(6);
+    expect(result[0].primaryKey).to.equal('key_5');
+    expect(result[0].m).to.equal('TGGG');
   });
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      nucleotideSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'ascending' }] },
+      nucleotideSequenceRequest: {
+        orderBy: [{ field: 'primaryKey', type: 'ascending' }],
+        dataFormat: 'JSON',
+      },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_1001493');
-    expect(sequences[0]).to.have.length(29903);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_1001493');
+    expect(result[0].main).to.have.length(29903);
   });
 
   it('should order descending by specified fields', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-      nucleotideSequenceRequest: { orderBy: [{ field: 'primaryKey', type: 'descending' }] },
+      nucleotideSequenceRequest: {
+        orderBy: [{ field: 'primaryKey', type: 'descending' }],
+        dataFormat: 'JSON',
+      },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(100);
-    expect(sequences).to.have.length(100);
-    expect(primaryKeys[0]).to.equal('>key_931279');
-    expect(sequences[0]).to.have.length(29903);
+    expect(result).to.have.length(100);
+    expect(result[0].primaryKey).to.equal('key_931279');
+    expect(result[0].main).to.have.length(29903);
   });
 
   it('should apply limit and offset', async () => {
@@ -66,16 +60,13 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       nucleotideSequenceRequest: {
         orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         limit: 2,
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys: primaryKeysWithLimit, sequences: sequencesWithLimit } =
-      sequenceData(resultWithLimit);
-
-    expect(primaryKeysWithLimit).to.have.length(2);
-    expect(sequencesWithLimit).to.have.length(2);
-    expect(primaryKeysWithLimit[0]).to.equal('>key_1001493');
-    expect(sequencesWithLimit[0]).to.have.length(29903);
+    expect(resultWithLimit).to.have.length(2);
+    expect(resultWithLimit[0].primaryKey).to.equal('key_1001493');
+    expect(resultWithLimit[0].main).to.have.length(29903);
 
     const resultWithLimitAndOffset =
       await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
@@ -83,44 +74,36 @@ describe('The /alignedNucleotideSequence endpoint', () => {
           orderBy: [{ field: 'primaryKey', type: 'ascending' }],
           limit: 2,
           offset: 1,
+          dataFormat: 'JSON',
         },
       });
 
-    const { primaryKeys: primaryKeysWithLimitAndOffset, sequences: sequencesWithLimitAndOffset } =
-      sequenceData(resultWithLimitAndOffset);
-
-    expect(primaryKeysWithLimitAndOffset).to.have.length(2);
-    expect(sequencesWithLimitAndOffset).to.have.length(2);
-    expect(primaryKeysWithLimitAndOffset[0]).to.equal(primaryKeysWithLimit[1]);
-    expect(sequencesWithLimitAndOffset[0]).to.equal(sequencesWithLimit[1]);
+    expect(resultWithLimitAndOffset).to.have.length(2);
+    expect(resultWithLimitAndOffset[0]).to.deep.equal(resultWithLimit[1]);
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
       nucleotideSequenceRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(1);
-    expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>key_3578231');
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_3578231');
   });
 
   it('should correctly handle amino acid insertion requests', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
       nucleotideSequenceRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
+        dataFormat: 'JSON',
       },
     });
 
-    const { primaryKeys, sequences } = sequenceData(result);
-
-    expect(primaryKeys).to.have.length(1);
-    expect(sequences).to.have.length(1);
-    expect(primaryKeys[0]).to.equal('>key_3259931');
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_3259931');
   });
 
   it('should return an empty zstd compressed file', async () => {

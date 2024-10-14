@@ -12,7 +12,6 @@ import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
-import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -244,38 +242,28 @@ class LapisControllerTest(
             )
     }
 
-    @ParameterizedTest(name = "{0} alignedAminoAcidSequences")
-    @MethodSource("getRequests")
-    fun alignedAminoAcidSequences(
-        testName: String,
-        request: (String) -> MockHttpServletRequestBuilder,
-    ) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getAlignedAminoAcidSequencesScenarios")
+    fun alignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.ALIGNED,
                 "geneName",
             )
-        } returns Stream.of(
-            SequenceData("key1", "the sequence"),
-            SequenceData("key2", "the other sequence"),
-            SequenceData("key3", null),
-        )
+        } returns MockDataForEndpoints
+            .sequenceEndpointMockData("geneName")
+            .sequenceData
+            .stream()
 
-        mockMvc.perform(request("$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/geneName"))
+        val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
-            .andExpect(
-                content().string(
-                    """
-                        >key1
-                        the sequence
-                        >key2
-                        the other sequence
-                        
-                    """.trimIndent(),
-                ),
-            )
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
     }
 
     private companion object {
@@ -416,6 +404,12 @@ class LapisControllerTest(
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 },
             ),
+        )
+
+        @JvmStatic
+        val alignedAminoAcidSequencesScenarios = SequenceEndpointTestScenario.createScenarios(
+            route = "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/geneName",
+            sequenceName = "geneName",
         )
     }
 

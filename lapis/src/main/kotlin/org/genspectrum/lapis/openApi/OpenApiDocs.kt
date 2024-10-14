@@ -10,21 +10,25 @@ import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
+import org.genspectrum.lapis.config.DatabaseSchema
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFieldName
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
+import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
-import org.genspectrum.lapis.controller.FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
+import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
@@ -70,9 +74,10 @@ fun buildOpenApiSchema(
                         .description("valid filters for sequence data")
                         .properties(
                             getSequenceFiltersWithFormat(
-                                databaseConfig,
-                                sequenceFilterFields,
-                                mutationsOrderByFieldsEnum(),
+                                databaseConfig = databaseConfig,
+                                sequenceFilterFields = sequenceFilterFields,
+                                orderByFieldsSchema = mutationsOrderByFieldsEnum(),
+                                dataFormatSchema = dataFormatSchema(),
                             ) + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number")),
                         ),
                 )
@@ -80,9 +85,10 @@ fun buildOpenApiSchema(
                     AGGREGATED_REQUEST_SCHEMA,
                     requestSchemaWithFields(
                         getSequenceFiltersWithFormat(
-                            databaseConfig,
-                            sequenceFilterFields,
-                            aggregatedOrderByFieldsEnum(databaseConfig),
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = aggregatedOrderByFieldsEnum(databaseConfig),
+                            dataFormatSchema = dataFormatSchema(),
                         ),
                         AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
                         databaseConfig.schema.metadata,
@@ -92,9 +98,10 @@ fun buildOpenApiSchema(
                     DETAILS_REQUEST_SCHEMA,
                     requestSchemaWithFields(
                         getSequenceFiltersWithFormat(
-                            databaseConfig,
-                            sequenceFilterFields,
-                            detailsOrderByFieldsEnum(databaseConfig),
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
+                            dataFormatSchema = dataFormatSchema(),
                         ),
                         DETAILS_FIELDS_DESCRIPTION,
                         databaseConfig.schema.metadata,
@@ -104,29 +111,38 @@ fun buildOpenApiSchema(
                     INSERTIONS_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
                         getSequenceFiltersWithFormat(
-                            databaseConfig,
-                            sequenceFilterFields,
-                            insertionsOrderByFieldsEnum(),
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = insertionsOrderByFieldsEnum(),
+                            dataFormatSchema = dataFormatSchema(),
                         ),
                     ),
                 )
                 .addSchemas(
                     ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
-                        getSequenceFilters(
-                            databaseConfig,
-                            sequenceFilterFields,
-                            aminoAcidSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig),
+                        getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(
+                                referenceGenomeSchema,
+                                databaseConfig,
+                            ),
+                            dataFormatSchema = sequencesFormatSchema(),
                         ),
                     ),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
-                        getSequenceFilters(
-                            databaseConfig,
-                            sequenceFilterFields,
-                            nucleotideSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig),
+                        getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(
+                                referenceGenomeSchema,
+                                databaseConfig,
+                            ),
+                            dataFormatSchema = sequencesFormatSchema(),
                         ),
                     ),
                 )
@@ -208,6 +224,20 @@ fun buildOpenApiSchema(
                             .required(aminoAcidInsertionSchema().keys.toList()),
                     ),
                 )
+                .addSchemas(
+                    NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA,
+                    sequencesResponse(
+                        databaseConfig.schema,
+                        referenceGenomeSchema.nucleotideSequences,
+                    ),
+                )
+                .addSchemas(
+                    AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA,
+                    sequencesResponse(
+                        databaseConfig.schema,
+                        referenceGenomeSchema.genes,
+                    ),
+                )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
@@ -241,7 +271,8 @@ fun buildOpenApiSchema(
                 .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenomeSchema.genes.map { it.name }))
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
-                .addSchemas(FORMAT_SCHEMA, formatSchema()),
+                .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
+                .addSchemas(FORMAT_SCHEMA, dataFormatSchema()),
         )
 }
 
@@ -249,9 +280,10 @@ private fun getSequenceFiltersWithFormat(
     databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
     orderByFieldsSchema: Schema<Any>,
+    dataFormatSchema: Schema<*>,
 ): Map<SequenceFilterFieldName, Schema<*>> =
     getSequenceFilters(databaseConfig, sequenceFilterFields, orderByFieldsSchema) +
-        Pair(FORMAT_PROPERTY, formatSchema())
+        Pair(FORMAT_PROPERTY, dataFormatSchema)
 
 private fun getSequenceFilters(
     databaseConfig: DatabaseConfig,
@@ -602,14 +634,20 @@ private fun offsetSchema() =
         .type("integer")
         .description(OFFSET_DESCRIPTION)
 
-private fun formatSchema() =
+private fun dataFormatSchema() =
     Schema<String>()
         .type("string")
         .description(
-            FORMAT_DESCRIPTION,
+            DATA_FORMAT_DESCRIPTION,
         )
         ._enum(listOf(DataFormat.JSON, DataFormat.CSV, DataFormat.CSV_WITHOUT_HEADERS, DataFormat.TSV))
         ._default(DataFormat.JSON)
+
+private fun sequencesFormatSchema() =
+    Schema<String>()
+        .type("string")
+        .description(SEQUENCES_DATA_FORMAT_DESCRIPTION)
+        ._enum(listOf(SequencesDataFormat.FASTA, SequencesDataFormat.JSON, SequencesDataFormat.NDJSON))
 
 private fun fieldsArray(
     databaseConfig: List<DatabaseMetadata>,
@@ -664,3 +702,38 @@ private fun logicalOrArraySchema(schema: Schema<Any>) =
 private fun arraySchema(schema: Schema<Any>) =
     ArraySchema()
         .items(schema)
+
+private fun sequencesResponse(
+    schema: DatabaseSchema,
+    referenceSequenceSchemas: List<ReferenceSequenceSchema>,
+): Schema<*> {
+    val baseSchema = Schema<Any>()
+        .type("object")
+        .addProperty(schema.primaryKey, Schema<String>().type("string"))
+        .addRequiredItem(schema.primaryKey)
+
+    return when (referenceSequenceSchemas.size == 1) {
+        true ->
+            baseSchema
+                .addProperty(
+                    referenceSequenceSchemas[0].name,
+                    Schema<String>()
+                        .type("string")
+                        .description("The sequence data."),
+                )
+                .addRequiredItem(referenceSequenceSchemas[0].name)
+                .description("An object containing the primary key and the requested sequence of a sample.")
+
+        false -> {
+            for (nucleotideSequence in referenceSequenceSchemas) {
+                baseSchema.addProperty(nucleotideSequence.name, Schema<String>().type("string"))
+            }
+            baseSchema
+                .description(
+                    "An object containing the primary key and the requested sequence of a sample. " +
+                        "This object always contains two exactly keys. " +
+                        "Only the requested sequence is contained in the response, the others are omitted.",
+                )
+        }
+    }
+}

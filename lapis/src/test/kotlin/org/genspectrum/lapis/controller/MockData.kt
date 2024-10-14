@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
@@ -17,8 +18,10 @@ import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
 import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE
 import java.util.stream.Stream
 
 data class MockDataCollection(
@@ -90,28 +93,38 @@ data class MockDataCollection(
         )
 }
 
-data class MockData(
+data class SequenceEndpointMockDataCollection(
+    val sequenceData: List<SequenceData>,
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,
-    val assertDataMatches: (String) -> Unit,
+    val expectedFasta: String,
+    val expectedJson: String,
+    val expectedNdjson: String,
 ) {
-    constructor(
-        mockToReturnEmptyData: (SiloQueryModel) -> Unit,
-        mockWithData: (SiloQueryModel) -> Unit,
-        expectedStringContent: String,
-    ) : this(
-        mockToReturnEmptyData,
-        mockWithData,
-        { assertThat(it, `is`(expectedStringContent)) },
-    )
+    enum class DataFormat(val fileFormat: String, val acceptHeader: String) {
+        JSON("json", APPLICATION_JSON_VALUE),
+        NDJSON("ndjson", APPLICATION_NDJSON_VALUE),
+        FASTA("fasta", TEXT_X_FASTA_VALUE),
+    }
 
     companion object {
-        fun createForFastaEndpoint(
+        fun create(
             sequenceData: List<SequenceData>,
             expectedFasta: String,
-        ) = MockData(
-            { modelMock -> every { modelMock.getGenomicSequence(any(), any(), any()) } returns Stream.empty() },
-            { modelMock ->
+            expectedJson: String,
+            expectedNdjson: String,
+        ) = SequenceEndpointMockDataCollection(
+            sequenceData = sequenceData,
+            mockToReturnEmptyData = { modelMock ->
+                every {
+                    modelMock.getGenomicSequence(
+                        any(),
+                        any(),
+                        any(),
+                    )
+                } returns Stream.empty()
+            },
+            mockWithData = { modelMock ->
                 every {
                     modelMock.getGenomicSequence(
                         any(),
@@ -120,10 +133,56 @@ data class MockData(
                     )
                 } returns sequenceData.stream()
             },
-            expectedFasta,
+            expectedFasta = expectedFasta,
+            expectedJson = expectedJson,
+            expectedNdjson = expectedNdjson,
         )
     }
+
+    fun expecting(dataFormat: DataFormat) =
+        MockData(
+            mockToReturnEmptyData = mockToReturnEmptyData,
+            mockWithData = mockWithData,
+            assertDataMatches = when (dataFormat) {
+                DataFormat.JSON -> {
+                    {
+                        val objectMapper = jacksonObjectMapper()
+                        val actual = objectMapper.readTree(it)
+                        val expectedData = objectMapper.readTree(expectedJson)
+                        assertThat(actual, `is`(expectedData))
+                    }
+                }
+
+                DataFormat.NDJSON -> {
+                    { actual ->
+                        val objectMapper = jacksonObjectMapper()
+                        val actualLines = actual.lines().filter { it.isNotBlank() }
+                        val expectedLines = expectedNdjson.lines().filter { it.isNotBlank() }
+
+                        assertThat(actualLines, hasSize(expectedLines.size))
+
+                        actualLines.zip(expectedLines).forEachIndexed { index, (actualLine, expectedLine) ->
+                            assertThat(
+                                "Line ${index + 1} of $actual was not as expected:",
+                                objectMapper.readTree(actualLine),
+                                `is`(objectMapper.readTree(expectedLine)),
+                            )
+                        }
+                    }
+                }
+
+                DataFormat.FASTA -> {
+                    { assertThat(it, `is`(expectedFasta)) }
+                }
+            },
+        )
 }
+
+data class MockData(
+    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
+    val mockWithData: (SiloQueryModel) -> Unit,
+    val assertDataMatches: (String) -> Unit,
+)
 
 object MockDataForEndpoints {
     fun getMockData(endpoint: String) =
@@ -137,19 +196,31 @@ object MockDataForEndpoints {
             else -> throw IllegalArgumentException("Test issue: no mock data for endpoint $endpoint")
         }
 
-    val fastaMockData = MockData.createForFastaEndpoint(
-        sequenceData = listOf(
-            SequenceData("sequence1", "CAGAA"),
-            SequenceData("sequence2", "CAGAA"),
-        ),
-        expectedFasta = """
-            >sequence1
-            CAGAA
-            >sequence2
-            CAGAA
+    fun sequenceEndpointMockData(sequenceName: String = "main") =
+        SequenceEndpointMockDataCollection.create(
+            sequenceData = listOf(
+                SequenceData(sequenceKey = "sequence1", sequence = "CAGAA", sequenceName = sequenceName),
+                SequenceData(sequenceKey = "sequence2", sequence = "CAGAT", sequenceName = sequenceName),
+                SequenceData(sequenceKey = "sequence3", sequence = null, sequenceName = sequenceName),
+            ),
+            expectedFasta = """
+                >sequence1
+                CAGAA
+                >sequence2
+                CAGAT
             
-        """.trimIndent(),
-    )
+            """.trimIndent(),
+            expectedJson = """
+                [
+                    { "primaryKey": "sequence1", "$sequenceName": "CAGAA" },
+                    { "primaryKey": "sequence2", "$sequenceName": "CAGAT" }
+                ]
+            """.trimIndent(),
+            expectedNdjson = """
+                { "primaryKey": "sequence1", "$sequenceName": "CAGAA" }
+                { "primaryKey": "sequence2", "$sequenceName": "CAGAT" }
+            """.trimIndent(),
+        )
 
     private val aggregated = MockDataCollection.create(
         siloQueryModelMockCall = { it::getAggregated },
