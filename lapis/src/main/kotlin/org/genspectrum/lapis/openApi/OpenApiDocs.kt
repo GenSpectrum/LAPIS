@@ -314,9 +314,11 @@ private fun infoResponseSchema() =
                     .description(LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION)
                     .example(LAPIS_DATA_VERSION_EXAMPLE),
                 "requestId" to Schema<String>().type("string").description(REQUEST_ID_HEADER_DESCRIPTION),
+                "requestInfo" to Schema<String>().type("string").description(REQUEST_INFO_STRING_DESCRIPTION),
+                "reportTo" to Schema<String>().type("string"),
             ),
         )
-        .required(listOf("dataVersion"))
+        .required(listOf("reportTo"))
 
 private fun aggregatedMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }

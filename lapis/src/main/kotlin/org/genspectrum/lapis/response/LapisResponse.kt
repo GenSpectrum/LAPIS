@@ -5,6 +5,7 @@ import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
 import org.genspectrum.lapis.openApi.LAPIS_INFO_DESCRIPTION
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
+import org.genspectrum.lapis.openApi.REQUEST_INFO_STRING_DESCRIPTION
 import org.springframework.http.ProblemDetail
 
 data class LapisResponse<Data>(val data: Data, val info: LapisInfo = LapisInfo())
@@ -28,7 +29,7 @@ data class LapisInfo(
     )
     var requestId: String? = null,
     @Schema(
-        description = "Some information about the request in human readable form. Intended for debugging.",
+        description = REQUEST_INFO_STRING_DESCRIPTION,
         example = "my_instance on my.server.com at 2024-01-01T12:00:00.0000",
     )
     var requestInfo: String? = null,
