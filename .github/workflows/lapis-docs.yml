@@ -66,27 +66,11 @@ jobs:
         env:
           IMAGE: ${{ steps.dockerMetadata.outputs.tags }}
 
-      - name: Get Installed Playwright Version
-        id: playwright-version
-        run: echo "PLAYWRIGHT_VERSION=$(node -e "console.log(require('./package-lock.json').packages['node_modules/@playwright/test'].version)")" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
-
       - name: Install Dependencies
         run: npm ci
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - name: Install only System Dependencies
-        run: npx playwright install-deps
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Run E2E test
         run: npm run e2e
