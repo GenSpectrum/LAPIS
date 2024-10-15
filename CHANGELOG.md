@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/GenSpectrum/LAPIS/compare/v0.3.5...v0.3.6) (2024-10-15)
+
+
+### Features
+
+* **lapis:** make it possible to fetch sequences in JSON and NDJSON format ([ba18956](https://github.com/GenSpectrum/LAPIS/commit/ba189565d7c40ea5b0c43e4f11a8a64b688f5de4)), closes [#971](https://github.com/GenSpectrum/LAPIS/issues/971)
+
 ## [0.3.5](https://github.com/GenSpectrum/LAPIS/compare/v0.3.4...v0.3.5) (2024-10-10)
 
 
