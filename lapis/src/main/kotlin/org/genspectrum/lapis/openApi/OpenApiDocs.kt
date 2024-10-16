@@ -363,7 +363,6 @@ private fun detailsMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
 private fun mapToOpenApiType(type: MetadataType): String =
     when (type) {
         MetadataType.STRING -> "string"
-        MetadataType.PANGO_LINEAGE -> "string"
         MetadataType.DATE -> "string"
         MetadataType.INT -> "integer"
         MetadataType.FLOAT -> "number"
@@ -377,13 +376,27 @@ private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFi
 
 private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
     when (fieldType) {
-        SequenceFilterFieldType.String, SequenceFilterFieldType.PangoLineage ->
+        SequenceFilterFieldType.String ->
             Schema<String>().anyOf(
                 listOf(
                     nullableStringSchema(fieldType.openApiType),
                     logicalOrArraySchema(nullableStringSchema(fieldType.openApiType)),
                 ),
             )
+
+        SequenceFilterFieldType.Lineage -> {
+            val fieldSchema = nullableStringSchema(fieldType.openApiType)
+                .description(
+                    "Filter sequences by this lineage. " +
+                        "You can suffix the filter value with '*' to include sublineages.",
+                )
+            Schema<String>().anyOf(
+                listOf(
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
+                ),
+            )
+        }
 
         is SequenceFilterFieldType.StringSearch ->
             Schema<String>().anyOf(

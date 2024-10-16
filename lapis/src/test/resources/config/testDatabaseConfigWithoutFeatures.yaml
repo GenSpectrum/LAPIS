@@ -11,5 +11,6 @@ schema:
     - name: country
       type: string
     - name: pangoLineage
-      type: pango_lineage
+      type: string
+      lineageIndex: true
   primaryKey: primaryKey

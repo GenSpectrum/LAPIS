@@ -8,13 +8,13 @@ import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
+import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.PangoLineageEquals
 import org.genspectrum.lapis.silo.StringEquals
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -44,8 +44,8 @@ class VariantQueryFacadeTest {
 
         val expectedResult =
             And(
-                PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
-                PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
+                LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
+                LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
                 NOf(
                     3,
                     matchExactly = false,
@@ -183,7 +183,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", false)
+        val expectedResult = LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", false)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -194,7 +194,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
+        val expectedResult = LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -205,7 +205,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
+        val expectedResult = LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -216,7 +216,7 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
+        val expectedResult = LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
         assertThat(result, equalTo(expectedResult))
     }
 
@@ -505,7 +505,7 @@ class VariantQueryFacadeTest {
 
         assertThat(
             result,
-            equalTo(PangoLineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
+            equalTo(LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
         )
     }
 
