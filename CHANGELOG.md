@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7](https://github.com/GenSpectrum/LAPIS/compare/v0.3.6...v0.3.7) (2024-10-21)
+
+
+### Features
+
+* **lapis:** adapt to new generalized lineage system ([508bc8e](https://github.com/GenSpectrum/LAPIS/commit/508bc8ec52579724f33d50767b6bcd8d47264f0d)), closes [#961](https://github.com/GenSpectrum/LAPIS/issues/961)
+
 ## [0.3.6](https://github.com/GenSpectrum/LAPIS/compare/v0.3.5...v0.3.6) (2024-10-15)
 
 
