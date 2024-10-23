@@ -18,6 +18,14 @@ Main features include:
   and, therefore, capable to process millions of sequences efficiently.
   It uses [SILO](https://github.com/GenSpectrum/LAPIS-SILO) as its data query engine.
 
+## Documentation
+
+We host LAPIS instances ourselves.
+Note that the documentation and the Swagger UI are tailored to the specific instance.
+You can find documentation of one of our LAPIS instances here:
+* Documentation: https://lapis.cov-spectrum.org/open/v2/docs/
+* Swagger UI: https://lapis.cov-spectrum.org/open/v2/swagger-ui/index.html
+
 ### Hosting LAPIS yourself
 
 LAPIS is designed to be configurable to make analysis of genomic data available to a wide range of users.
