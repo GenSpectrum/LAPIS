@@ -32,9 +32,9 @@
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>${PATTERN}</Pattern>
-        </layout>
+        </encoder>
     </appender>
 
     <root level="info">
