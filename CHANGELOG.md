@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.8](https://github.com/GenSpectrum/LAPIS/compare/v0.3.7...v0.3.8) (2024-10-23)
+
+
+### Bug Fixes
+
+* **lapis:** get rid of logger config deprecation warnings in the log ([e7c3908](https://github.com/GenSpectrum/LAPIS/commit/e7c39082c4ac34e5ce086584b17427df6a5d6ee8)), closes [#972](https://github.com/GenSpectrum/LAPIS/issues/972)
+
 ## [0.3.7](https://github.com/GenSpectrum/LAPIS/compare/v0.3.6...v0.3.7) (2024-10-21)
 
 
