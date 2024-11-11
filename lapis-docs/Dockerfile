@@ -13,4 +13,6 @@ VOLUME /config
 
 HEALTHCHECK --start-period=60s CMD curl --fail --silent localhost:3000$BASE_URL | grep "Welcome to LAPIS" || exit 1
 
-CMD npm ci && npm run build && npm run preview -- --host 0.0.0.0 --port 3000
+RUN npm ci
+
+CMD npm run build && npm run preview -- --host 0.0.0.0 --port 3000
