@@ -15,6 +15,7 @@ export type Metadata = {
     name: string;
     type: MetadataType;
     lapisAllowsRegexSearch?: boolean;
+    generateLineageIndex?: boolean;
 };
 
 export type Feature = {
@@ -50,4 +51,16 @@ export function hasFeature(feature: string): boolean {
         getConfig();
     }
     return _featuresNames!.has(feature);
+}
+
+export function hasPangoLineage(config: Config): boolean {
+    return config.schema.metadata.some(
+        (m) =>
+            m.generateLineageIndex === true &&
+            (m.name.toLowerCase().includes('pangolineage') || m.name.toLowerCase().includes('pango_lineage')),
+    );
+}
+
+export function hasRegexSearchFields(config: Config): boolean {
+    return config.schema.metadata.some((m) => m.lapisAllowsRegexSearch === true);
 }

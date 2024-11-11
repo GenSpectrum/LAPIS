@@ -8,4 +8,9 @@ import { getLapisUrl } from '../../../lapisUrl.js';
 import { getReferenceGenomes } from '../../../reference_genomes.js';
 import { QueryGenerator } from '../../../components/QueryGenerator/QueryGenerator.tsx';
 
+:::note
+This generator is tailored to the configuration of the underlying LAPIS instance.
+Available fields may differ between instances.
+:::
+
 <QueryGenerator client:load config={getConfig()} referenceGenomes={getReferenceGenomes()} lapisUrl={getLapisUrl()} />

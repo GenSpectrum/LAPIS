@@ -4,9 +4,14 @@ description: Pango lineage query
 ---
 
 import { OnlyIf } from '../../../components/OnlyIf.tsx';
-import { getConfig, hasFeature } from '../../../config.ts';
+import { getConfig, hasPangoLineage, hasFeature } from '../../../config.ts';
 
-<OnlyIf condition={!!getConfig().schema.metadata.find(m => m.type === 'pango_lineage')}>
+{/* prettier-ignore */}
+<OnlyIf condition={!hasPangoLineage(getConfig())}>
+:::note
+This feature is not available in this LAPIS instance, because none of the fields seems to be a Pango lineage field.
+:::
+</OnlyIf>
 
 Pango lineage names inherit the hierarchical nature of genetic lineages. For example, B.1.1 is a sub-lineage of B.1.
 More information about the pango nomenclature can be found on the website of the
@@ -24,5 +29,3 @@ maximal-length name (e.g., B.1.617.2) will get an alias. A list of aliases can b
 the alias AY so that AY.1 would be a sub-lineage of B.1.617.2. LAPIS is aware of aliases. Filtering B.1.617.2\* will
 include every lineage that starts with AY. It is further possible to search for B.1.617.2.1 which will then return the
 same results as AY.1.
-
-</OnlyIf>
