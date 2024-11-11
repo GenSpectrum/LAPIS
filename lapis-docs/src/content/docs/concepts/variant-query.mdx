@@ -6,7 +6,13 @@ description: Variant query
 import { OnlyIf } from '../../../components/OnlyIf.tsx';
 import { hasFeature } from '../../../config.ts';
 
+{/* prettier-ignore */}
 <OnlyIf condition={hasFeature('sarsCoV2VariantQuery')}>
+:::note
+This feature is not enabled for this LAPIS instance.
+It must be enabled in the `features` section of the database configuration by the maintainer of the instance.
+:::
+</OnlyIf>
 
 LAPIS offers a special query language to specify variants. A variant query can be used to filter sequences and be passed
 to the server through the query parameter `variantQuery`. It is not allowed to use the `variantQuery` parameter
@@ -60,5 +66,3 @@ LAPIS supports a ternary logic to query [ambiguous nucleotide symbols](../concep
 ```
 MAYBE(123W)
 ```
-
-</OnlyIf>

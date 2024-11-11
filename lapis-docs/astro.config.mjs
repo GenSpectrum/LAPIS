@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
-import { hasFeature } from './src/config.ts';
 
 import tailwind from '@astrojs/tailwind';
 
@@ -70,7 +69,7 @@ export default defineConfig({
                 },
                 {
                     label: 'Concepts',
-                    items: filterAvailableConcepts([
+                    items: [
                         {
                             label: 'Data versions',
                             link: '/concepts/data-versions',
@@ -86,7 +85,6 @@ export default defineConfig({
                         {
                             label: 'Pango lineage query',
                             link: '/concepts/pango-lineage-query',
-                            onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
                             label: 'Request methods: GET and POST',
@@ -99,7 +97,6 @@ export default defineConfig({
                         {
                             label: 'Variant query',
                             link: '/concepts/variant-query',
-                            onlyIfFeature: 'sarsCoV2VariantQuery',
                         },
                         {
                             label: 'String search',
@@ -109,7 +106,7 @@ export default defineConfig({
                             label: 'Request Id',
                             link: '/concepts/request-id',
                         },
-                    ]),
+                    ],
                 },
                 {
                     label: 'Tutorials',
@@ -215,16 +212,3 @@ export default defineConfig({
     base: process.env.BASE_URL,
     site: process.env.ASTRO_SITE,
 });
-
-/**
- * TODO Not sure if this is actually a good solution. The filtering now happens at compile time but ideally, it happens
- *   at runtime (so that the user/maintainer does not need to re-compile for their own config).
- */
-function filterAvailableConcepts(pages) {
-    return pages
-        .filter((p) => !p.onlyIfFeature || hasFeature(p.onlyIfFeature))
-        .map(({ label, link }) => ({
-            label,
-            link,
-        }));
-}
