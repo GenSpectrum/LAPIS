@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.9](https://github.com/GenSpectrum/LAPIS/compare/v0.3.8...v0.3.9) (2024-11-14)
+
+
+### Features
+
+* **lapis-docs:** mark sections of the docs that are generated from the config ([b2009eb](https://github.com/GenSpectrum/LAPIS/commit/b2009eb4674fe1f9d790a5f64e80d4c7f0bb2808)), closes [#928](https://github.com/GenSpectrum/LAPIS/issues/928)
+
 ## [0.3.8](https://github.com/GenSpectrum/LAPIS/compare/v0.3.7...v0.3.8) (2024-10-23)
 
 
