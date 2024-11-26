@@ -6,7 +6,7 @@ describe('The /nucleotideMutations endpoint', () => {
   let mutationWithMoreThan50PercentProportion = 'G28280C';
 
   it('should return mutation proportions for Switzerland', async () => {
-    const result = await lapisClient.postNucleotideMutations1({
+    const result = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
@@ -30,7 +30,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should return mutations proportions for multi segmented', async () => {
-    const result = await lapisClientMultiSegmented.postNucleotideMutations1({
+    const result = await lapisClientMultiSegmented.postNucleotideMutations({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
@@ -48,7 +48,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
-    const result = await lapisClient.postNucleotideMutations1({
+    const result = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         country: 'Switzerland',
         minProportion: 0.5,
@@ -63,7 +63,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postNucleotideMutations1({
+    const ascendingOrderedResult = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
       },
@@ -71,7 +71,7 @@ describe('The /nucleotideMutations endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'A1-');
 
-    const descendingOrderedResult = await lapisClient.postNucleotideMutations1({
+    const descendingOrderedResult = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'descending' }],
       },
@@ -81,7 +81,7 @@ describe('The /nucleotideMutations endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postNucleotideMutations1({
+    const resultWithLimit = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -91,7 +91,7 @@ describe('The /nucleotideMutations endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('mutation', 'A11201G');
 
-    const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations1({
+    const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -114,7 +114,7 @@ describe('The /nucleotideMutations endpoint', () => {
       sequenceName: undefined,
     };
 
-    const result = await lapisClient.postNucleotideMutations1({
+    const result = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
@@ -135,7 +135,7 @@ describe('The /nucleotideMutations endpoint', () => {
       sequenceName: undefined,
     };
 
-    const result = await lapisClient.postNucleotideMutations1({
+    const result = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
       },

@@ -26,7 +26,7 @@ describe('The /aggregated endpoint', () => {
     .map(file => JSON.parse(fs.readFileSync(`${queriesPath}/${file}`).toString()))
     .forEach((testCase: TestCase) =>
       it('should return data for the test case ' + testCase.testCaseName, async () => {
-        const result = await lapisClient.postAggregated1({
+        const result = await lapisClient.postAggregated({
           aggregatedPostRequest: testCase.lapisRequest,
         });
 
@@ -47,7 +47,7 @@ describe('The /aggregated endpoint', () => {
     );
 
   it('should correctly handle aggregated request with multiple segments', async () => {
-    const result = await lapisClientMultiSegmented.postAggregated1({
+    const result = await lapisClientMultiSegmented.postAggregated({
       aggregatedPostRequest: {
         nucleotideMutations: ['L:T1A', 'M:T1C'],
       },
@@ -95,7 +95,7 @@ describe('The /aggregated endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postAggregated1({
+    const ascendingOrderedResult = await lapisClient.postAggregated({
       aggregatedPostRequest: {
         orderBy: [{ field: 'division', type: 'ascending' }],
         fields: ['division'],
@@ -105,7 +105,7 @@ describe('The /aggregated endpoint', () => {
     expect(ascendingOrderedResult.data[0].division).to.be.undefined;
     expect(ascendingOrderedResult.data[1]).to.have.property('division', 'Aargau');
 
-    const descendingOrderedResult = await lapisClient.postAggregated1({
+    const descendingOrderedResult = await lapisClient.postAggregated({
       aggregatedPostRequest: {
         orderBy: [{ field: 'division', type: 'descending' }],
         fields: ['division'],
@@ -163,7 +163,7 @@ describe('The /aggregated endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postAggregated1({
+    const resultWithLimit = await lapisClient.postAggregated({
       aggregatedPostRequest: {
         orderBy: [{ field: 'division', type: 'ascending' }],
         fields: ['division'],
@@ -174,7 +174,7 @@ describe('The /aggregated endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('division', 'Aargau');
 
-    const resultWithLimitAndOffset = await lapisClient.postAggregated1({
+    const resultWithLimitAndOffset = await lapisClient.postAggregated({
       aggregatedPostRequest: {
         orderBy: [{ field: 'division', type: 'ascending' }],
         fields: ['division'],

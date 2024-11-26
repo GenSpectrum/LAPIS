@@ -5,7 +5,7 @@ describe('The request id', () => {
   it('should be returned when explicitly specified', async () => {
     const requestID = 'hardcodedRequestIdInTheTest';
 
-    const result = await lapisClient.postAggregated1({
+    const result = await lapisClient.postAggregated({
       aggregatedPostRequest: {},
       xRequestID: requestID,
     });
@@ -14,7 +14,7 @@ describe('The request id', () => {
   });
 
   it('should be generated when none is specified', async () => {
-    const result = await lapisClient.postAggregated1({
+    const result = await lapisClient.postAggregated({
       aggregatedPostRequest: {},
     });
 

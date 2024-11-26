@@ -3,7 +3,7 @@ import { basePath, lapisClient } from './common';
 
 describe('The /details endpoint', () => {
   it('should return details with specified fields', async () => {
-    const result = await lapisClient.postDetails1({
+    const result = await lapisClient.postDetails({
       detailsPostRequest: {
         pangoLineage: 'B.1.617.2',
         fields: ['pangoLineage', 'division'],
@@ -25,7 +25,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should return details with all fields when no explicit fields were specified', async () => {
-    const result = await lapisClient.postDetails1({
+    const result = await lapisClient.postDetails({
       detailsPostRequest: {
         pangoLineage: 'B.1.617.2',
       },
@@ -46,7 +46,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postDetails1({
+    const ascendingOrderedResult = await lapisClient.postDetails({
       detailsPostRequest: {
         orderBy: [{ field: 'division', type: 'ascending' }],
         fields: ['division'],
@@ -57,7 +57,7 @@ describe('The /details endpoint', () => {
     expect(ascendingOrderedResult.data[1].division).to.be.undefined;
     expect(ascendingOrderedResult.data[2]).to.have.property('division', 'Aargau');
 
-    const descendingOrderedResult = await lapisClient.postDetails1({
+    const descendingOrderedResult = await lapisClient.postDetails({
       detailsPostRequest: {
         orderBy: [{ field: 'division', type: 'descending' }],
         fields: ['division'],
@@ -68,7 +68,7 @@ describe('The /details endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postDetails1({
+    const resultWithLimit = await lapisClient.postDetails({
       detailsPostRequest: {
         orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         fields: ['primaryKey'],
@@ -79,7 +79,7 @@ describe('The /details endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('primaryKey', 'key_1001920');
 
-    const resultWithLimitAndOffset = await lapisClient.postDetails1({
+    const resultWithLimitAndOffset = await lapisClient.postDetails({
       detailsPostRequest: {
         orderBy: [{ field: 'primaryKey', type: 'ascending' }],
         fields: ['primaryKey'],
@@ -145,7 +145,7 @@ Solothurn	B.1	key_1002052
       testBooleanColumn: undefined,
     };
 
-    const result = await lapisClient.postDetails1({
+    const result = await lapisClient.postDetails({
       detailsPostRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
@@ -168,7 +168,7 @@ Solothurn	B.1	key_1002052
       testBooleanColumn: true,
     };
 
-    const result = await lapisClient.postDetails1({
+    const result = await lapisClient.postDetails({
       detailsPostRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
       },
@@ -199,7 +199,7 @@ key_1002052
   });
 
   it('should order by random', async () => {
-    const result = await lapisClient.postDetails1({
+    const result = await lapisClient.postDetails({
       detailsPostRequest: {
         orderBy: [{ field: 'random' }, { field: 'division' }],
         fields: ['primaryKey', 'division'],

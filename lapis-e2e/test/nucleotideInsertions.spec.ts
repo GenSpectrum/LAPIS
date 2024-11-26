@@ -5,7 +5,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   let someInsertion = 'ins_25701:CCC';
 
   it('should return nucleotide insertions for Switzerland', async () => {
-    const result = await lapisClient.postNucleotideInsertions1({
+    const result = await lapisClient.postNucleotideInsertions({
       insertionsRequest: { country: 'Switzerland' },
     });
 
@@ -19,7 +19,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('should return nucleotide insertions for multi segmented sequences', async () => {
-    const result = await lapisClientMultiSegmented.postNucleotideInsertions1({
+    const result = await lapisClientMultiSegmented.postNucleotideInsertions({
       insertionsRequest: { country: 'Switzerland' },
     });
 
@@ -33,7 +33,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postNucleotideInsertions1({
+    const ascendingOrderedResult = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
       },
@@ -41,7 +41,7 @@ describe('The /nucleotideInsertions endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_22339:GCTGGT');
 
-    const descendingOrderedResult = await lapisClient.postNucleotideInsertions1({
+    const descendingOrderedResult = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'descending' }],
       },
@@ -51,7 +51,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postNucleotideInsertions1({
+    const resultWithLimit = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
         limit: 2,
@@ -61,7 +61,7 @@ describe('The /nucleotideInsertions endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_22339:GCTGGT');
 
-    const resultWithLimitAndOffset = await lapisClient.postNucleotideInsertions1({
+    const resultWithLimitAndOffset = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
         limit: 2,
@@ -74,7 +74,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
-    const result = await lapisClient.postNucleotideInsertions1({
+    const result = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
@@ -98,7 +98,7 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('should correctly handle amino acid insertion requests', async () => {
-    const result = await lapisClient.postNucleotideInsertions1({
+    const result = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         aminoAcidInsertions: ['ins_S:214:E?E'],
       },

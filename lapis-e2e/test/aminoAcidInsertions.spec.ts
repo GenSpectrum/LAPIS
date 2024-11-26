@@ -5,7 +5,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   let someInsertion = 'ins_S:214:EPE';
 
   it('should return amino acid insertions for Switzerland', async () => {
-    const result = await lapisClient.postAminoAcidInsertions1({
+    const result = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: { country: 'Switzerland' },
     });
 
@@ -19,7 +19,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postAminoAcidInsertions1({
+    const ascendingOrderedResult = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
       },
@@ -27,7 +27,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_ORF1a:3602:F');
 
-    const descendingOrderedResult = await lapisClient.postAminoAcidInsertions1({
+    const descendingOrderedResult = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'descending' }],
       },
@@ -37,7 +37,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postAminoAcidInsertions1({
+    const resultWithLimit = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
         limit: 2,
@@ -47,7 +47,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_ORF1a:3602:FEP');
 
-    const resultWithLimitAndOffset = await lapisClient.postAminoAcidInsertions1({
+    const resultWithLimitAndOffset = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }, { field: 'insertion' }],
         limit: 2,
@@ -60,7 +60,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
-    const result = await lapisClient.postAminoAcidInsertions1({
+    const result = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
@@ -78,7 +78,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
       sequenceName: 'ORF1a',
     };
 
-    const result = await lapisClient.postAminoAcidInsertions1({
+    const result = await lapisClient.postAminoAcidInsertions({
       insertionsRequest: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
         orderBy: [{ field: 'insertion' }],
