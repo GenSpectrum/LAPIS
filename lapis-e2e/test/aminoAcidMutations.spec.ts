@@ -6,7 +6,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   let mutationWithMoreThan50PercentProportion = 'S:T478K';
 
   it('should return mutation proportions for Switzerland', async () => {
-    const result = await lapisClient.postAminoAcidMutations1({
+    const result = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },
     });
 
@@ -30,7 +30,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
-    const result = await lapisClient.postAminoAcidMutations1({
+    const result = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         country: 'Switzerland',
         minProportion: 0.5,
@@ -45,7 +45,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should order by specified fields', async () => {
-    const ascendingOrderedResult = await lapisClient.postAminoAcidMutations1({
+    const ascendingOrderedResult = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
       },
@@ -53,7 +53,7 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'ORF1a:A1306S');
 
-    const descendingOrderedResult = await lapisClient.postAminoAcidMutations1({
+    const descendingOrderedResult = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'descending' }],
       },
@@ -63,7 +63,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   });
 
   it('should apply limit and offset', async () => {
-    const resultWithLimit = await lapisClient.postAminoAcidMutations1({
+    const resultWithLimit = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -73,7 +73,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(resultWithLimit.data).to.have.length(2);
     expect(resultWithLimit.data[1]).to.have.property('mutation', 'ORF1a:A1708D');
 
-    const resultWithLimitAndOffset = await lapisClient.postAminoAcidMutations1({
+    const resultWithLimitAndOffset = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         orderBy: [{ field: 'mutation', type: 'ascending' }],
         limit: 2,
@@ -96,7 +96,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       sequenceName: 'E',
     };
 
-    const result = await lapisClient.postAminoAcidMutations1({
+    const result = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         nucleotideInsertions: ['ins_25701:CC?', 'ins_5959:?AT'],
       },
@@ -117,7 +117,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       sequenceName: 'N',
     };
 
-    const result = await lapisClient.postAminoAcidMutations1({
+    const result = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
         aminoAcidInsertions: ['ins_S:143:T', 'ins_ORF1a:3602:F?P'],
       },

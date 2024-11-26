@@ -66,14 +66,14 @@ describe('Protected mode on GET requests', () => {
 
 describe('Protected mode on POST requests', () => {
   it('should deny access, when no access key is provided', async () => {
-    const result = lapisClientProtected.postAggregated1({ aggregatedPostRequest: {} });
+    const result = lapisClientProtected.postAggregated({ aggregatedPostRequest: {} });
 
     await expectResponseStatusIs(result, 403);
   });
 
   it('should deny access, when wrong access key is provided', async () => {
     const invalidAccessKey = 'invalidKey';
-    const result = lapisClientProtected.postAggregated1({
+    const result = lapisClientProtected.postAggregated({
       aggregatedPostRequest: { accessKey: invalidAccessKey },
     });
 
@@ -81,7 +81,7 @@ describe('Protected mode on POST requests', () => {
   });
 
   it('should deny access, when providing aggregated access key on non aggregated route', async () => {
-    const result = lapisClientProtected.postDetails1({
+    const result = lapisClientProtected.postDetails({
       detailsPostRequest: { accessKey: aggregatedAccessKey },
     });
 
@@ -89,7 +89,7 @@ describe('Protected mode on POST requests', () => {
   });
 
   it('should grant access, when providing aggregated access key', async () => {
-    const result = lapisClientProtected.postAggregated1({
+    const result = lapisClientProtected.postAggregated({
       aggregatedPostRequest: { accessKey: aggregatedAccessKey },
     });
 
@@ -97,7 +97,7 @@ describe('Protected mode on POST requests', () => {
   });
 
   it('should grant access, when providing full access key', async () => {
-    const result = lapisClientProtected.postAggregated1({
+    const result = lapisClientProtected.postAggregated({
       aggregatedPostRequest: { accessKey: fullAccessKey },
     });
 
@@ -105,7 +105,7 @@ describe('Protected mode on POST requests', () => {
   });
 
   it('should grant access, when providing full access key on non aggregated route', async () => {
-    const result = lapisClientProtected.postDetails1({
+    const result = lapisClientProtected.postDetails({
       detailsPostRequest: { accessKey: fullAccessKey },
     });
 
