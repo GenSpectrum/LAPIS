@@ -6,6 +6,7 @@ import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
 import org.genspectrum.lapis.openApi.LAPIS_INFO_DESCRIPTION
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.REQUEST_INFO_STRING_DESCRIPTION
+import org.genspectrum.lapis.openApi.VERSION_DESCRIPTION
 import org.springframework.http.ProblemDetail
 
 data class LapisResponse<Data>(val data: Data, val info: LapisInfo = LapisInfo())
@@ -35,6 +36,11 @@ data class LapisInfo(
     var requestInfo: String? = null,
     @Schema(example = REPORT_TO)
     val reportTo: String = REPORT_TO,
+    @Schema(
+        description = VERSION_DESCRIPTION,
+        example = "1.2.3",
+    )
+    val lapisVersion: String? = null,
 )
 
 data class NucleotideMutationResponse(

@@ -196,6 +196,20 @@ describe('All endpoints', () => {
         }
         expect(body).not.to.be.empty;
       });
+
+      if (!route.servesFasta) {
+        it('should return info', async () => {
+          const response = await get();
+
+          const info = (await response.json()).info;
+
+          expect(info).to.have.property('dataVersion').and.to.match(/\d+/);
+          expect(info).to.have.property('lapisVersion').and.to.be.not.empty;
+          expect(info).to.have.property('requestId').and.to.be.not.empty;
+          expect(info).to.have.property('requestInfo').and.to.be.not.empty;
+          expect(info).to.have.property('reportTo').and.to.be.not.empty;
+        });
+      }
     });
   }
 });

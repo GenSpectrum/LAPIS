@@ -88,6 +88,8 @@ If none if provided in the request, LAPIS will generate one.
 const val REQUEST_INFO_STRING_DESCRIPTION =
     "Some information about the request in human readable form. Intended for debugging."
 
+const val VERSION_DESCRIPTION = "The version of LAPIS that processed the request."
+
 const val DOWNLOAD_AS_FILE_DESCRIPTION =
     """
 Set to true to make your browser trigger a download instead of showing the response content by setting the

@@ -60,6 +60,8 @@ jobs:
           cache-to: type=gha,mode=max,scope=lapis-${{ github.ref }}
           platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           push: true
+          build-args: |
+            VERSION=${{ github.sha }}
 
   endToEndTests:
     runs-on: ubuntu-latest

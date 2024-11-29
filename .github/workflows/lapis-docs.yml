@@ -59,6 +59,10 @@ jobs:
           context: ./lapis-docs
           push: true
           tags: ${{ steps.dockerMetadata.outputs.tags }}
+          cache-from: type=gha,scope=lapis-docs-${{ github.ref }}
+          cache-to: type=gha,mode=max,scope=lapis-docs-${{ github.ref }}
+          build-args: |
+            VERSION=${{ github.sha }}
 
       - name: Start Docker container and check that it responds
         run: |

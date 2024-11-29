@@ -5,6 +5,7 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.InfoData
+import org.hamcrest.Matchers.matchesPattern
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +33,7 @@ class InfoControllerTest(
         mockMvc.perform(getSample(INFO_ROUTE))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.dataVersion").value("1234"))
+            .andExpect(jsonPath("\$.lapisVersion").value(matchesPattern(".+")))
     }
 
     @Test
