@@ -13,16 +13,16 @@ You will build a Docker Compose file step by step.
 
 ### Prerequisites
 
--   You have [Docker](https://www.docker.com/) installed.
--   Some knowledge on how to use Docker and Docker Compose.
--   Make sure you have the latest Docker images:
+- You have [Docker](https://www.docker.com/) installed.
+- Some knowledge on how to use Docker and Docker Compose.
+- Make sure you have the latest Docker images:
 
 ```shell
 docker pull ghcr.io/genspectrum/lapis
 docker pull ghcr.io/genspectrum/lapis-silo
 ```
 
--   Create a directory for the tutorial:
+- Create a directory for the tutorial:
 
 ```shell
 mkdir ~/lapisExample
@@ -79,10 +79,10 @@ and a full reference of the preprocessing.
 
 Download the example dataset from the [end-to-end tests](https://github.com/GenSpectrum/LAPIS/tree/main/lapis-e2e/testData):
 
--   pangolineage_alias.json
--   reference_genomes.json
--   small_metadata_set.tsv
--   all fasta files for the sequences
+- pangolineage_alias.json
+- reference_genomes.json
+- small_metadata_set.tsv
+- all fasta files for the sequences
 
 SILO expects fasta files (possibly compressed via zstandard or xz)
 in the same directory with naming scheme `nuc_<sequence_index>.fasta` for nucleotide sequences
@@ -106,11 +106,11 @@ referenceGenomeFilename: 'reference_genomes.json'
 
 To start the preprocessing, you have to:
 
--   start SILO in the `preprocessing` mode
--   mount the data into the container to the default location
--   mount the preprocessing config into the container to the default location
--   mount the database config into the container to the default location
--   mount the output directory into the container to the default location
+- start SILO in the `preprocessing` mode
+- mount the data into the container to the default location
+- mount the preprocessing config into the container to the default location
+- mount the database config into the container to the default location
+- mount the output directory into the container to the default location
 
 Add a corresponding service to the `docker-compose.yaml`:
 
@@ -136,10 +136,10 @@ That result has to be provided to SILO in the next step.
 
 To start the SILO api, you have to:
 
--   start SILO in the `api` mode,
--   expose port 8081,
--   mount the preprocessing result into the container,
--   wait for the preprocessing to complete.
+- start SILO in the `api` mode,
+- expose port 8081,
+- mount the preprocessing result into the container,
+- wait for the preprocessing to complete.
 
 Add a corresponding service to the `docker-compose.yaml`:
 
@@ -182,9 +182,9 @@ and http://localhost:8081/info should show that SILO contains sequences.
 
 Now you can start LAPIS. You have to:
 
--   expose port 8080 to the host.
--   mount the database configuration and the reference genomes to the default locations in the Docker container.
--   provide LAPIS with the SILO URL.
+- expose port 8080 to the host.
+- mount the database configuration and the reference genomes to the default locations in the Docker container.
+- provide LAPIS with the SILO URL.
 
 Add a corresponding service to the `docker-compose.yaml`:
 
@@ -239,6 +239,6 @@ LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that se
 
 ## Further Reading
 
--   Documentation of SILO in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
--   Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/docker-compose.yml) that can also serve as an example.
-    The CI makes sure that it works at any time.
+- Documentation of SILO in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
+- Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/docker-compose.yml) that can also serve as an example.
+  The CI makes sure that it works at any time.

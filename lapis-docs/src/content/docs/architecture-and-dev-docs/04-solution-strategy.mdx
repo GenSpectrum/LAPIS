@@ -9,11 +9,11 @@ We want to make it as easy as possible for you to set up your own instance of SI
 choice.
 We solve this in two aspects:
 
--   **Configuration:** LAPIS and SILO are highly configurable regarding the data that they process.
-    The available data and the reference genome can be configured to fit your needs.
--   **Deployment:** We provide Docker containers for LAPIS and SILO that are ready to use.
-    You only need to provide the data and the configuration.
-    We also provide examples and tutorials to help you get started.
+- **Configuration:** LAPIS and SILO are highly configurable regarding the data that they process.
+  The available data and the reference genome can be configured to fit your needs.
+- **Deployment:** We provide Docker containers for LAPIS and SILO that are ready to use.
+  You only need to provide the data and the configuration.
+  We also provide examples and tutorials to help you get started.
 
 ## Query Performance
 
@@ -38,9 +38,9 @@ and serializes it to disk.
 At runtime, SILO can then load the serialized database from disk.
 Having the preprocessing as a separate step has major advantages:
 
--   The preprocessing can be done on a different machine than the one that runs the queries.
--   The startup time of SILO is reduced, since it only needs to load the database from disk.
-    -   Scalability: Thus, it is possible to quickly launch several instances of SILO from the same preprocessing result.
+- The preprocessing can be done on a different machine than the one that runs the queries.
+- The startup time of SILO is reduced, since it only needs to load the database from disk.
+    - Scalability: Thus, it is possible to quickly launch several instances of SILO from the same preprocessing result.
 
 ## Storage Efficiency
 

@@ -15,10 +15,10 @@ The result is a serialized version of the database that can be loaded into SILO 
 
 The SILO preprocessing accepts input data in two formats:
 
--   `NDJSON`: a single [NDJSON](https://ndjson.org/) file containing all the data,
--   `TSV/FASTA`: a directory containing
-    -   a TSV file with the metadata
-    -   FASTA files with the sequences
+- `NDJSON`: a single [NDJSON](https://ndjson.org/) file containing all the data,
+- `TSV/FASTA`: a directory containing
+    - a TSV file with the metadata
+    - FASTA files with the sequences
 
 The preprocessing configuration file determines which format should be used.
 
@@ -58,19 +58,19 @@ All filenames are relative to the `inputDirectory`.
 
 ### Description of Keys for Both Formats
 
--   `inputDirectory`:
-    The directory where input files are located.
--   `outputDirectory`:
-    The directory where output files will be placed.
--   `intermediateResultsDirectory`:
-    The directory for storing intermediate results not relevant to the end user, mainly for debugging.
--   `preprocessingDatabaseLocation`:
-    The file for storing internal, intermediate database states for debugging.
--   `pangoLineageDefinitionFilename`:
-    The file with Pango lineage definitions, relative to the inputDirectory.
-    See the section on the [Pango Lineage Definition File below](#the-pango-lineage-definition-file) for details.
--   `referenceGenomeFilename`:
-    The file with [reference genomes](../references/reference-genomes), relative to the inputDirectory.
+- `inputDirectory`:
+  The directory where input files are located.
+- `outputDirectory`:
+  The directory where output files will be placed.
+- `intermediateResultsDirectory`:
+  The directory for storing intermediate results not relevant to the end user, mainly for debugging.
+- `preprocessingDatabaseLocation`:
+  The file for storing internal, intermediate database states for debugging.
+- `pangoLineageDefinitionFilename`:
+  The file with Pango lineage definitions, relative to the inputDirectory.
+  See the section on the [Pango Lineage Definition File below](#the-pango-lineage-definition-file) for details.
+- `referenceGenomeFilename`:
+  The file with [reference genomes](../references/reference-genomes), relative to the inputDirectory.
 
 ## `NDJSON` Format
 
@@ -178,8 +178,8 @@ if `metadataFilename` is specified in the preprocessing configuration.
 
 SILO expects the following files in the `inputDirectory`:
 
--   a TSV file with the metadata named as configured in `metadataFilename`,
--   FASTA files with the sequences.
+- a TSV file with the metadata named as configured in `metadataFilename`,
+- FASTA files with the sequences.
 
 ### Metadata File
 
@@ -220,12 +220,12 @@ The metadata file might look as follows:
 In the `TSV/FASTA` format, sequences must be stored in separate FASTA files.
 The filenames must follow this pattern:
 
--   aligned nucleotide sequences: `nuc_<segmentName>.fasta`.
-    The `nuc_` prefix is configurable in the preprocessing configuration via `nucleotideSequencePrefix`.
--   unaligned nucleotide sequences:
-    TODO (https://github.com/GenSpectrum/LAPIS/issues/581) when https://github.com/GenSpectrum/LAPIS-SILO/issues/131 is resolved.
--   aligned amino acid sequences: `gene_<geneName>.fasta`.
-    The `gene_` prefix is configurable in the preprocessing configuration via `genePrefix`.
+- aligned nucleotide sequences: `nuc_<segmentName>.fasta`.
+  The `nuc_` prefix is configurable in the preprocessing configuration via `nucleotideSequencePrefix`.
+- unaligned nucleotide sequences:
+  TODO (https://github.com/GenSpectrum/LAPIS/issues/581) when https://github.com/GenSpectrum/LAPIS-SILO/issues/131 is resolved.
+- aligned amino acid sequences: `gene_<geneName>.fasta`.
+  The `gene_` prefix is configurable in the preprocessing configuration via `genePrefix`.
 
 There must be one corresponding file for every segment and gene defined in the
 [reference genomes](../references/reference-genomes).
@@ -283,9 +283,9 @@ SILO requires this to properly group sequences into partitions to fully benefit 
 
 The file contains a JSON object with alias names as keys and:
 
--   an empty string if the alias is a root node,
--   the name of the parent node if the alias is a child node,
--   an array of parent nodes if the alias is a recombinant.
+- an empty string if the alias is a root node,
+- the name of the parent node if the alias is a child node,
+- an array of parent nodes if the alias is a recombinant.
 
 Here is a minimal example:
 
