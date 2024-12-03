@@ -7,6 +7,7 @@ COPY . ./
 RUN ./gradlew bootJar
 
 FROM eclipse-temurin:21-alpine
+ARG VERSION="unspecified"
 
 WORKDIR /workspace
 
@@ -14,6 +15,7 @@ COPY --from=build /workspace/build/libs/*.jar app.jar
 
 COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
+RUN echo ${VERSION} > version.txt
 
 EXPOSE 8080
 

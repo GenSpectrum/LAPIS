@@ -9,6 +9,7 @@ import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseConfigValidator
+import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.config.NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE
 import org.genspectrum.lapis.config.REFERENCE_GENOME_ENV_VARIABLE_NAME
 import org.genspectrum.lapis.config.REFERENCE_GENOME_FILENAME_ARGS_NAME
@@ -34,6 +35,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
+
+private const val VERSION_FILE = "version.txt"
 
 @Configuration
 @EnableScheduling
@@ -119,4 +122,13 @@ class LapisSpringConfig {
 
         return ReferenceGenome.readFromFile(filename)
     }
+
+    @Bean
+    fun lapisVersion() =
+        try {
+            LapisVersion(File(VERSION_FILE).readText().trim())
+        } catch (e: Exception) {
+            log.info { "Failed to read $VERSION_FILE, assuming local version: ${e.message}" }
+            LapisVersion("local")
+        }
 }

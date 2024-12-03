@@ -348,6 +348,7 @@ private fun infoResponseSchema() =
                 "requestId" to Schema<String>().type("string").description(REQUEST_ID_HEADER_DESCRIPTION),
                 "requestInfo" to Schema<String>().type("string").description(REQUEST_INFO_STRING_DESCRIPTION),
                 "reportTo" to Schema<String>().type("string"),
+                "lapisVersion" to StringSchema().description(VERSION_DESCRIPTION),
             ),
         )
         .required(listOf("reportTo"))

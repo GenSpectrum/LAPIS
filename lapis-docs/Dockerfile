@@ -1,4 +1,5 @@
 FROM node:lts-alpine as build-deps
+ARG VERSION="unspecified"
 
 WORKDIR /app
 
@@ -14,5 +15,6 @@ VOLUME /config
 HEALTHCHECK --start-period=60s CMD curl --fail --silent localhost:3000$BASE_URL | grep "Welcome to LAPIS" || exit 1
 
 RUN npm ci
+RUN echo ${VERSION} > version.txt
 
 CMD npm run build && npm run preview -- --host 0.0.0.0 --port 3000

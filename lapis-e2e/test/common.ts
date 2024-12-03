@@ -1,5 +1,6 @@
 import {
   Configuration,
+  InfoControllerApi,
   LapisControllerApi,
   Middleware,
   SingleSegmentedSequenceControllerApi,
@@ -40,6 +41,9 @@ const middleware: Middleware = {
 };
 
 export const lapisClient = new LapisControllerApi(new Configuration({ basePath })).withMiddleware(middleware);
+export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePath })).withMiddleware(
+  middleware
+);
 export const lapisClientProtected = new LapisControllerApiProtected(
   new ConfigurationProtected({ basePath: basePathProtected })
 ).withMiddleware(middleware);

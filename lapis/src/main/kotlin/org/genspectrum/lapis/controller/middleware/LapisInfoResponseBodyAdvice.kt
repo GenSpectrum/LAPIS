@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.LapisErrorResponse
@@ -18,12 +19,14 @@ import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
+import java.net.URI
 
 @ControllerAdvice
 class LapisInfoResponseBodyAdvice(
     private val dataVersion: DataVersion,
     private val requestIdContext: RequestIdContext,
     private val databaseConfig: DatabaseConfig,
+    private val lapisVersion: LapisVersion,
 ) : ResponseBodyAdvice<Any> {
     override fun beforeBodyWrite(
         body: Any?,
@@ -51,12 +54,9 @@ class LapisInfoResponseBodyAdvice(
         LapisInfo(
             dataVersion = dataVersion.dataVersion,
             requestId = requestIdContext.requestId,
-            requestInfo = "${databaseConfig.schema.instanceName} on ${request.uri.host} at ${now()}",
+            requestInfo = getRequestInfo(databaseConfig, request.uri),
+            lapisVersion = lapisVersion.version,
         )
-
-    private fun now(): String {
-        return Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
-    }
 
     override fun supports(
         returnType: MethodParameter,
@@ -64,4 +64,13 @@ class LapisInfoResponseBodyAdvice(
     ): Boolean {
         return true
     }
+}
+
+fun getRequestInfo(
+    databaseConfig: DatabaseConfig,
+    uri: URI,
+) = "${databaseConfig.schema.instanceName} on ${uri.host} at ${now()}"
+
+private fun now(): String {
+    return Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
 }

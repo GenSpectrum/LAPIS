@@ -3,12 +3,21 @@ import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 
 import tailwind from '@astrojs/tailwind';
+import fs from 'fs';
+
+function getVersion() {
+    try {
+        return `(version ${fs.readFileSync('version.txt').toString().trim().substring(0, 7)})`;
+    } catch (e) {
+        return '';
+    }
+}
 
 // https://astro.build/config
 export default defineConfig({
     integrations: [
         starlight({
-            title: 'LAPIS',
+            title: `LAPIS ${getVersion()}`,
             social: {
                 github: 'https://github.com/GenSpectrum/LAPIS',
             },

@@ -58,19 +58,47 @@ jobs:
           check-name: Build Docs Docker Image And Run E2E Tests
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Tag Already Built Images With Release Tags
+      - name: Docker metadata
         if: ${{ steps.release.outputs.release_created }}
-        run: |
-          MAJOR=${{ steps.release.outputs.major }}
-          MINOR=${{ steps.release.outputs.minor }}
-          PATCH=${{ steps.release.outputs.patch }}
-          TAGS=("$MAJOR.$MINOR" "$MAJOR.$MINOR.$PATCH")
-          # TODO (#777) include $MAJOR only for releases >= 1.0
-          # TAGS=("$MAJOR" "$MAJOR.$MINOR" "$MAJOR.$MINOR.$PATCH") - don't include major-only for pre-1.0
-          IMAGES=("${{ env.LAPIS_DOCKER_IMAGE_NAME }}" "${{ env.DOCS_DOCKER_IMAGE_NAME }}")
-          
-          for IMAGE in "${IMAGES[@]}"; do
-            for TAG in "${TAGS[@]}"; do
-              docker buildx imagetools create --tag $IMAGE:$TAG $IMAGE:latest
-            done
-          done
+        id: dockerMetadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.LAPIS_DOCKER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
+            type=raw,value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+
+      - name: Build and push LAPIS image
+        if: ${{ steps.release.outputs.release_created }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lapis
+          tags: ${{ steps.dockerMetadata.outputs.tags }}
+          cache-from: type=gha,scope=lapis-${{ github.ref }}
+          cache-to: type=gha,mode=max,scope=lapis-${{ github.ref }}
+          platforms: ${{ github.ref == 'refs/heads/main' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: true
+          build-args: |
+            VERSION=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+
+      - name: Docs Docker metadata
+        if: ${{ steps.release.outputs.release_created }}
+        id: docsDockerMetadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCS_DOCKER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
+            type=raw,value=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+
+      - name: Build and push LAPIS Docs image
+        if: ${{ steps.release.outputs.release_created }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lapis-docs
+          push: true
+          tags: ${{ steps.docsDockerMetadata.outputs.tags }}
+          cache-from: type=gha,scope=lapis-docs-${{ github.ref }}
+          cache-to: type=gha,mode=max,scope=lapis-docs-${{ github.ref }}
+          build-args: |
+            VERSION=${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
