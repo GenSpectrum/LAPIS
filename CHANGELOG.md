@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.10](https://github.com/GenSpectrum/LAPIS/compare/v0.3.9...v0.3.10) (2024-12-03)
+
+
+### Features
+
+* **lapis:** add LAPIS version to info response ([#1019](https://github.com/GenSpectrum/LAPIS/issues/1019)) ([7d8d713](https://github.com/GenSpectrum/LAPIS/commit/7d8d7132150896b85244dbd240b15005b2aa47ec))
+
 ## [0.3.9](https://github.com/GenSpectrum/LAPIS/compare/v0.3.8...v0.3.9) (2024-11-14)
 
 
