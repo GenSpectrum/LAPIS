@@ -5,22 +5,22 @@ description: Putting LAPIS in the context of its surroundings
 
 This chapter specifies the boundaries of SILO-LAPIS and describes the interfaces to other systems and users.
 
--   **Configuration and operation**:
-    LAPIS is provisioned by the maintainer, who provides a configuration file and operates the instance.
--   **Data updates**:
-    The maintainer can trigger an update upon which SILO reads data from the disc and stores it internally.
-    -   Raw data might for example be downloaded from Genbank.
-    -   Providing correct data will most likely involve some preprocessing (e.g. using Nextstrain)
-        to compute e.g. aligned sequences and insertions.
-    -   The maintainer needs to make sure that the data is in the correct format.
--   LAPIS can be accessed by the end-user through a **REST interface**
-    -   LAPIS has endpoints to fetch the following types of data:
-        -   **Aggregated data**: returns how many sequences fulfill the provided filter criteria
-        -   Amino acid and nucleotide **mutations**
-            -   returns a list of mutations (with their proportion and count) which fulfill the provided filter criteria
-            -   the proportion is relative to all sequences which fulfill the provided criteria
-        -   **Details**: returns a list of metadata of the sequences which fulfill the provided criteria
-        -   Amino acid, aligned and unaligned nucleotide **sequences**:
-            returns the corresponding sequences which fulfill the provided criteria
-    -   the provided filter criteria can be a compilation of metadata fields, mutations and insertions.
-    -   LAPIS offers an OpenAPI specification and a [Swagger UI](../references/open-api-definition) that documents the API.
+- **Configuration and operation**:
+  LAPIS is provisioned by the maintainer, who provides a configuration file and operates the instance.
+- **Data updates**:
+  The maintainer can trigger an update upon which SILO reads data from the disc and stores it internally.
+    - Raw data might for example be downloaded from Genbank.
+    - Providing correct data will most likely involve some preprocessing (e.g. using Nextstrain)
+      to compute e.g. aligned sequences and insertions.
+    - The maintainer needs to make sure that the data is in the correct format.
+- LAPIS can be accessed by the end-user through a **REST interface**
+    - LAPIS has endpoints to fetch the following types of data:
+        - **Aggregated data**: returns how many sequences fulfill the provided filter criteria
+        - Amino acid and nucleotide **mutations**
+            - returns a list of mutations (with their proportion and count) which fulfill the provided filter criteria
+            - the proportion is relative to all sequences which fulfill the provided criteria
+        - **Details**: returns a list of metadata of the sequences which fulfill the provided criteria
+        - Amino acid, aligned and unaligned nucleotide **sequences**:
+          returns the corresponding sequences which fulfill the provided criteria
+    - the provided filter criteria can be a compilation of metadata fields, mutations and insertions.
+    - LAPIS offers an OpenAPI specification and a [Swagger UI](../references/open-api-definition) that documents the API.
