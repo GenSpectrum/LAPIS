@@ -18,7 +18,7 @@ services:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
       - "8091:8081"
-    command: --api
+    command: api
     volumes:
       - ../lapis-e2e/testData/singleSegmented/output:/data
     depends_on:
@@ -27,18 +27,18 @@ services:
 
   siloPreprocessing:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    command: --preprocessing
+    command: preprocessing
     volumes:
       - ../lapis-e2e/testData/singleSegmented:/preprocessing/input
       - ../lapis-e2e/testData/singleSegmented/output:/preprocessing/output
       - ../lapis-e2e/testData/singleSegmented/preprocessingConfig.yaml:/app/preprocessing_config.yaml
-      - ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml:/app/database_config.yaml
+      - ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml:/preprocessing/input/database_config.yaml
 
   siloMultisegmented:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
     ports:
       - "8093:8081"
-    command: --api
+    command: api
     volumes:
       - ../lapis-e2e/testData/multiSegmented/output:/data
     depends_on:
@@ -47,12 +47,12 @@ services:
 
   siloPreprocessingMultisegmented:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    command: --preprocessing
+    command: preprocessing
     volumes:
       - ../lapis-e2e/testData/multiSegmented:/preprocessing/input
       - ../lapis-e2e/testData/multiSegmented/output:/preprocessing/output
       - ../lapis-e2e/testData/multiSegmented/preprocessingConfig.yaml:/app/preprocessing_config.yaml
-      - ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml:/app/database_config.yaml
+      - ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml:/preprocessing/input/database_config.yaml
 
   lapisMultiSegmented:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
