@@ -1,4 +1,4 @@
-import { expect, Locator, Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import { baseUrl } from './queryGenerator.page';
 
 export const configGeneratorTest = test.extend<{ configGeneratorPage: ConfigGeneratorPage }>({
