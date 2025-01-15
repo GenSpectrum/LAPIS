@@ -178,9 +178,7 @@ fun buildOpenApiSchema(
                     lapisResponseSchema(
                         Schema<String>()
                             .type("object")
-                            .description(
-                                "The response contains the metadata of every sequence matching the sequence filters.",
-                            )
+                            .description("The count and proportion of a mutation.")
                             .properties(nucleotideMutationProportionSchema())
                             .required(
                                 nucleotideMutationProportionSchema().keys
@@ -194,9 +192,7 @@ fun buildOpenApiSchema(
                     lapisResponseSchema(
                         Schema<String>()
                             .type("object")
-                            .description(
-                                "The response contains the metadata of every sequence matching the sequence filters.",
-                            )
+                            .description("The count and proportion of a mutation.")
                             .properties(aminoAcidMutationProportionSchema())
                             .required(aminoAcidMutationProportionSchema().keys.toList()),
                     ),
