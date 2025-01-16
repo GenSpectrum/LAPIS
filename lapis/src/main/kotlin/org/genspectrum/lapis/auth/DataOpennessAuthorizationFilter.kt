@@ -20,6 +20,7 @@ import org.genspectrum.lapis.controller.middleware.DATA_OPENNESS_AUTHORIZATION_F
 import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.response.LapisErrorResponse
+import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
@@ -33,20 +34,29 @@ class DataOpennessAuthorizationFilterFactory(
     private val databaseConfig: DatabaseConfig,
     private val objectMapper: ObjectMapper,
     private val accessKeysReader: AccessKeysReader,
+    private val lapisInfoFactory: LapisInfoFactory,
 ) {
     fun create() =
         when (databaseConfig.schema.opennessLevel) {
-            OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(objectMapper)
+            OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(
+                objectMapper = objectMapper,
+                lapisInfoFactory = lapisInfoFactory,
+            )
+
             OpennessLevel.PROTECTED -> ProtectedDataAuthorizationFilter(
-                objectMapper,
-                accessKeysReader.read(),
-                databaseConfig,
+                objectMapper = objectMapper,
+                lapisInfoFactory = lapisInfoFactory,
+                accessKeys = accessKeysReader.read(),
+                databaseConfig = databaseConfig,
             )
         }
 }
 
 @Order(DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER)
-abstract class DataOpennessAuthorizationFilter(protected val objectMapper: ObjectMapper) : OncePerRequestFilter() {
+abstract class DataOpennessAuthorizationFilter(
+    protected val objectMapper: ObjectMapper,
+    private val lapisInfoFactory: LapisInfoFactory,
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -62,10 +72,11 @@ abstract class DataOpennessAuthorizationFilter(protected val objectMapper: Objec
                 response.writer.write(
                     objectMapper.writeValueAsString(
                         LapisErrorResponse(
-                            ProblemDetail.forStatus(HttpStatus.FORBIDDEN).also {
+                            error = ProblemDetail.forStatus(HttpStatus.FORBIDDEN).also {
                                 it.title = HttpStatus.FORBIDDEN.reasonPhrase
                                 it.detail = result.message
                             },
+                            info = lapisInfoFactory.create(),
                         ),
                     ),
                 )
@@ -91,17 +102,18 @@ sealed interface AuthorizationResult {
     class Failure(val message: String) : AuthorizationResult
 }
 
-private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper) :
-    DataOpennessAuthorizationFilter(objectMapper) {
+private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper, lapisInfoFactory: LapisInfoFactory) :
+    DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest) = AuthorizationResult.success()
 }
 
 private class ProtectedDataAuthorizationFilter(
     objectMapper: ObjectMapper,
+    lapisInfoFactory: LapisInfoFactory,
     private val accessKeys: AccessKeys,
     private val databaseConfig: DatabaseConfig,
 ) :
-    DataOpennessAuthorizationFilter(objectMapper) {
+    DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
     private val fieldsThatServeNonAggregatedData = databaseConfig.schema
         .metadata
         .filter { it.valuesAreUnique }

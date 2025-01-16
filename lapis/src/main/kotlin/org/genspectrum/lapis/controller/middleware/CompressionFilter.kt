@@ -11,6 +11,7 @@ import mu.KotlinLogging
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.response.LapisErrorResponse
+import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.ResponseWithContentType
 import org.springframework.boot.context.properties.bind.Binder
@@ -119,7 +120,11 @@ sealed interface CompressionSource {
 
 @Component
 @Order(COMPRESSION_FILTER_ORDER)
-class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: RequestCompression) :
+class CompressionFilter(
+    private val objectMapper: ObjectMapper,
+    private val requestCompression: RequestCompression,
+    private val lapisInfoFactory: LapisInfoFactory,
+) :
     OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -136,11 +141,12 @@ class CompressionFilter(val objectMapper: ObjectMapper, val requestCompression: 
             response.writer.write(
                 objectMapper.writeValueAsString(
                     LapisErrorResponse(
-                        ProblemDetail.forStatus(HttpStatus.BAD_REQUEST).apply {
+                        error = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST).apply {
                             title = HttpStatus.BAD_REQUEST.reasonPhrase
                             detail = "Unknown compression format: ${e.unknownFormatValue}. " +
                                 "Supported formats are: ${Compression.entries.joinToString { it.value }}"
                         },
+                        info = lapisInfoFactory.create(),
                     ),
                 ),
             )

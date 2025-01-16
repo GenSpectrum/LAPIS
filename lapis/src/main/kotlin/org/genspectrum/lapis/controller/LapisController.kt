@@ -5,11 +5,9 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
-import org.genspectrum.lapis.controller.middleware.HEADERS_ACCEPT_HEADER_PARAMETER
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
@@ -44,7 +42,6 @@ import org.genspectrum.lapis.openApi.SequencesDataFormat
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.FieldConverter
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
@@ -55,20 +52,11 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
-import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.response.AminoAcidInsertionResponse
-import org.genspectrum.lapis.response.AminoAcidMutationResponse
-import org.genspectrum.lapis.response.CsvRecord
-import org.genspectrum.lapis.response.CsvWriter
-import org.genspectrum.lapis.response.Delimiter
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
-import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.LapisResponse
-import org.genspectrum.lapis.response.NucleotideInsertionResponse
-import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.LapisResponseStreamer
+import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
-import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -80,18 +68,15 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.nio.charset.Charset
-import java.util.stream.Stream
 
 @RestController
 @RequestMapping("/sample")
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val csvWriter: CsvWriter,
     private val fieldConverter: FieldConverter,
-    private val dataVersion: DataVersion,
     private val sequencesStreamer: SequencesStreamer,
+    private val lapisResponseStreamer: LapisResponseStreamer,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -126,7 +111,8 @@ class LapisController(
         @DataFormat
         @RequestParam
         dataFormat: String? = null,
-    ): LapisResponse<List<AggregationData>> {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -139,9 +125,12 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        return LapisResponse(siloQueryModel.getAggregated(request).toList())
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -195,7 +184,15 @@ class LapisController(
             offset,
         )
 
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAggregated)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(AGGREGATED_ROUTE, produces = [TEXT_TSV_VALUE])
@@ -249,7 +246,15 @@ class LapisController(
             offset,
         )
 
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAggregated)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -265,10 +270,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
-    ): LapisResponse<List<AggregationData>> {
-        requestContext.filter = request
-
-        return LapisResponse(siloQueryModel.getAggregated(request).toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -287,7 +296,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAggregated)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -306,7 +323,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAggregated)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAggregated,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -341,7 +366,8 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-    ): LapisResponse<List<NucleotideMutationResponse>> {
+        response: HttpServletResponse,
+    ) {
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -354,10 +380,12 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = mutationProportionsRequest
-
-        val result = siloQueryModel.computeNucleotideMutationProportions(mutationProportionsRequest)
-        return LapisResponse(result.toList())
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -405,14 +433,15 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = request
 
-        writeCsvToResponse(
-            response,
-            request,
-            httpHeaders.accept,
-            COMMA,
-            siloQueryModel::computeNucleotideMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -461,14 +490,15 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = request
 
-        writeCsvToResponse(
-            response,
-            request,
-            httpHeaders.accept,
-            TAB,
-            siloQueryModel::computeNucleotideMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -485,11 +515,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
         mutationProportionsRequest: MutationProportionsRequest,
-    ): LapisResponse<List<NucleotideMutationResponse>> {
-        requestContext.filter = mutationProportionsRequest
-
-        val result = siloQueryModel.computeNucleotideMutationProportions(mutationProportionsRequest)
-        return LapisResponse(result.toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -508,12 +541,14 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            COMMA,
-            siloQueryModel::computeNucleotideMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -533,12 +568,14 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            TAB,
-            siloQueryModel::computeNucleotideMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeNucleotideMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -570,7 +607,8 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-    ): LapisResponse<List<AminoAcidMutationResponse>> {
+        response: HttpServletResponse,
+    ) {
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -583,10 +621,12 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = mutationProportionsRequest
-
-        val result = siloQueryModel.computeAminoAcidMutationProportions(mutationProportionsRequest)
-        return LapisResponse(result.toList())
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -634,14 +674,15 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = mutationProportionsRequest
 
-        writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            COMMA,
-            siloQueryModel::computeAminoAcidMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -690,14 +731,15 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = mutationProportionsRequest
 
-        writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            TAB,
-            siloQueryModel::computeAminoAcidMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -714,11 +756,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$REQUEST_SCHEMA_WITH_MIN_PROPORTION"))
         @RequestBody
         mutationProportionsRequest: MutationProportionsRequest,
-    ): LapisResponse<List<AminoAcidMutationResponse>> {
-        requestContext.filter = mutationProportionsRequest
-
-        val result = siloQueryModel.computeAminoAcidMutationProportions(mutationProportionsRequest)
-        return LapisResponse(result.toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -737,14 +782,14 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        requestContext.filter = mutationProportionsRequest
-
-        return writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            COMMA,
-            siloQueryModel::computeAminoAcidMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -764,14 +809,14 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        requestContext.filter = mutationProportionsRequest
-
-        return writeCsvToResponse(
-            response,
-            mutationProportionsRequest,
-            httpHeaders.accept,
-            TAB,
-            siloQueryModel::computeAminoAcidMutationProportions,
+        lapisResponseStreamer.streamData(
+            request = mutationProportionsRequest,
+            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
         )
     }
 
@@ -808,7 +853,8 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-    ): LapisResponse<List<DetailsData>> {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequestWithFields(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -820,9 +866,13 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = request
 
-        return LapisResponse(siloQueryModel.getDetails(request).toList())
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -871,8 +921,16 @@ class LapisController(
             limit,
             offset,
         )
-        requestContext.filter = request
-        return writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getDetails)
+
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [TEXT_TSV_VALUE])
@@ -923,7 +981,15 @@ class LapisController(
             offset,
         )
 
-        return writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getDetails)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -939,10 +1005,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequestWithFields,
-    ): LapisResponse<List<DetailsData>> {
-        requestContext.filter = request
-
-        return LapisResponse(siloQueryModel.getDetails(request).toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -961,7 +1031,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getDetails)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -980,7 +1058,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getDetails)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getDetails,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -1013,7 +1099,8 @@ class LapisController(
         @DataFormat
         @RequestParam
         dataFormat: String? = null,
-    ): LapisResponse<List<NucleotideInsertionResponse>> {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -1025,10 +1112,12 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        val result = siloQueryModel.getNucleotideInsertions(request)
-        return LapisResponse(result.toList())
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -1078,9 +1167,15 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getNucleotideInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(NUCLEOTIDE_INSERTIONS_ROUTE, produces = [TEXT_TSV_VALUE])
@@ -1130,9 +1225,15 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getNucleotideInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -1148,11 +1249,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$INSERTIONS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
-    ): LapisResponse<List<NucleotideInsertionResponse>> {
-        requestContext.filter = request
-
-        val result = siloQueryModel.getNucleotideInsertions(request)
-        return LapisResponse(result.toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -1171,9 +1275,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        requestContext.filter = request
-
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getNucleotideInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -1192,9 +1302,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        requestContext.filter = request
-
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getNucleotideInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getNucleotideInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -1227,7 +1343,8 @@ class LapisController(
         @DataFormat
         @RequestParam
         dataFormat: String? = null,
-    ): LapisResponse<List<AminoAcidInsertionResponse>> {
+        response: HttpServletResponse,
+    ) {
         val request = SequenceFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -1239,10 +1356,12 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        val result = siloQueryModel.getAminoAcidInsertions(request)
-        return LapisResponse(result.toList())
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_CSV_VALUE])
@@ -1292,9 +1411,15 @@ class LapisController(
             offset,
         )
 
-        requestContext.filter = request
-
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAminoAcidInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [TEXT_TSV_VALUE])
@@ -1344,7 +1469,15 @@ class LapisController(
             offset,
         )
 
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -1360,11 +1493,14 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$INSERTIONS_REQUEST_SCHEMA"))
         @RequestBody
         request: SequenceFiltersRequest,
-    ): LapisResponse<List<AminoAcidInsertionResponse>> {
-        requestContext.filter = request
-
-        val result = siloQueryModel.getAminoAcidInsertions(request)
-        return LapisResponse(result.toList())
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
     }
 
     @PostMapping(
@@ -1383,7 +1519,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, COMMA, siloQueryModel::getAminoAcidInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @PostMapping(
@@ -1402,7 +1546,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        writeCsvToResponse(response, request, httpHeaders.accept, TAB, siloQueryModel::getAminoAcidInsertions)
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = siloQueryModel::getAminoAcidInsertions,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
     }
 
     @GetMapping(
@@ -1493,54 +1645,5 @@ class LapisController(
                     acceptHeaders = httpHeaders.accept,
                 )
             }
-    }
-
-    private fun <Request : CommonSequenceFilters> writeCsvToResponse(
-        response: HttpServletResponse,
-        request: Request,
-        acceptHeader: List<MediaType>,
-        delimiter: Delimiter,
-        getData: (request: Request) -> Stream<out CsvRecord>,
-    ) {
-        requestContext.filter = request
-        val data = getData(request)
-
-        val targetMediaType = MediaType.valueOf(
-            when (delimiter) {
-                COMMA -> TEXT_CSV_VALUE
-                TAB -> TEXT_TSV_VALUE
-            },
-        )
-        val headersParameter = getHeadersParameter(targetMediaType, acceptHeader)
-        val includeHeaders = headersParameter != "false"
-
-        val contentType = when {
-            !includeHeaders -> MediaType.TEXT_PLAIN
-            else -> MediaType(targetMediaType, Charset.defaultCharset())
-        }
-
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
-        if (response.contentType == null) {
-            response.contentType = contentType.toString()
-        }
-
-        response.outputStream.use {
-            csvWriter.write(
-                appendable = it.writer(),
-                includeHeaders = includeHeaders,
-                data = data,
-                delimiter = delimiter,
-                csvColumnOrder = request.getCsvColumnOrder(),
-            )
-        }
-    }
-
-    private fun getHeadersParameter(
-        targetMediaType: MediaType,
-        acceptHeader: List<MediaType>,
-    ): String? {
-        return acceptHeader.find { it.includes(targetMediaType) }
-            ?.parameters
-            ?.get(HEADERS_ACCEPT_HEADER_PARAMETER)
     }
 }

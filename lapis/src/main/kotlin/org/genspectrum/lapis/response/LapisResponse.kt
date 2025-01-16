@@ -9,9 +9,7 @@ import org.genspectrum.lapis.openApi.REQUEST_INFO_STRING_DESCRIPTION
 import org.genspectrum.lapis.openApi.VERSION_DESCRIPTION
 import org.springframework.http.ProblemDetail
 
-data class LapisResponse<Data>(val data: Data, val info: LapisInfo = LapisInfo())
-
-data class LapisErrorResponse(val error: ProblemDetail, val info: LapisInfo = LapisInfo())
+data class LapisErrorResponse(val error: ProblemDetail, val info: LapisInfo)
 
 private const val REPORT_TO =
     "Please report to https://github.com/GenSpectrum/LAPIS/issues in case you encounter any unexpected issues. " +
