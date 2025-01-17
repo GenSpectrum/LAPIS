@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.response.LapisErrorResponse
+import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.boot.autoconfigure.web.ServerProperties
@@ -36,7 +37,10 @@ private val log = KotlinLogging.logger {}
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
 @ControllerAdvice
-class ExceptionHandler(private val notFoundView: NotFoundView) : ResponseEntityExceptionHandler() {
+class ExceptionHandler(
+    private val notFoundView: NotFoundView,
+    private val lapisInfoFactory: LapisInfoFactory,
+) : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleUnexpectedException(e: Throwable): ErrorResponse {
@@ -124,10 +128,11 @@ class ExceptionHandler(private val notFoundView: NotFoundView) : ResponseEntityE
             .also(alsoDoOnBuilder)
             .body(
                 LapisErrorResponse(
-                    ProblemDetail.forStatus(httpStatus).also {
+                    error = ProblemDetail.forStatus(httpStatus).also {
                         it.title = title
                         it.detail = detail
                     },
+                    info = lapisInfoFactory.create(),
                 ),
             )
     }
