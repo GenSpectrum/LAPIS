@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.11](https://github.com/GenSpectrum/LAPIS/compare/v0.3.10...v0.3.11) (2025-01-17)
+
+
+### Features
+
+* **lapis:** stream JSON responses ([#1053](https://github.com/GenSpectrum/LAPIS/issues/1053)) ([bfb5f99](https://github.com/GenSpectrum/LAPIS/commit/bfb5f994c6e0adfeb4380f436a12d4179039974a)), closes [#1047](https://github.com/GenSpectrum/LAPIS/issues/1047)
+
+
+### Bug Fixes
+
+* **lapis:** fix description of mutation objects in OpenApi spec ([#1051](https://github.com/GenSpectrum/LAPIS/issues/1051)) ([c6f625e](https://github.com/GenSpectrum/LAPIS/commit/c6f625e22074731e12f6cdbcb68344350e65503e))
+
 ## [0.3.10](https://github.com/GenSpectrum/LAPIS/compare/v0.3.9...v0.3.10) (2024-12-03)
 
 
