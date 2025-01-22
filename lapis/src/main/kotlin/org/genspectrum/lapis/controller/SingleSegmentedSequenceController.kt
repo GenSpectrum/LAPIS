@@ -40,11 +40,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION =
-    "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length == 1}"
+const val SHOW_SINGLE_SEGMENTED_CONTROLLER =
+    "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length == 1 &&" +
+        "'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}' > ''}"
 
 @RestController
-@ConditionalOnExpression(IS_SINGLE_SEGMENT_SEQUENCE_EXPRESSION)
+@ConditionalOnExpression(SHOW_SINGLE_SEGMENTED_CONTROLLER)
 @RequestMapping("/sample")
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
