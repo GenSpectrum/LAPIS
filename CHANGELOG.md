@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.12](https://github.com/GenSpectrum/LAPIS/compare/v0.3.11...v0.3.12) (2025-01-22)
+
+
+### Bug Fixes
+
+* **lapis:** don't show the single segmented sequence download when there are no nucleotide sequences ([#1054](https://github.com/GenSpectrum/LAPIS/issues/1054)) ([f27f94b](https://github.com/GenSpectrum/LAPIS/commit/f27f94b6fee8ea79e5feee076394e8a171db977b))
+
 ## [0.3.11](https://github.com/GenSpectrum/LAPIS/compare/v0.3.10...v0.3.11) (2025-01-17)
 
 
