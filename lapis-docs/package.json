@@ -14,13 +14,13 @@
         "e2e": "playwright test"
     },
     "dependencies": {
-        "@astrojs/react": "^4.1.6",
+        "@astrojs/react": "^4.2.0",
         "@astrojs/starlight": "^0.31.1",
         "@astrojs/starlight-tailwind": "^3.0.0",
         "@astrojs/tailwind": "^5.1.5",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
-        "astro": "^5.1.8",
+        "astro": "^5.1.10",
         "change-case": "^5.4.4",
         "daisyui": "^4.12.23",
         "js-yaml": "^4.1.0",
@@ -35,9 +35,9 @@
     },
     "devDependencies": {
         "@astrojs/check": "^0.9.4",
-        "@playwright/test": "^1.49.1",
+        "@playwright/test": "^1.50.0",
         "@types/js-yaml": "^4.0.9",
-        "@types/node": "^22.10.7",
+        "@types/node": "^22.10.10",
         "@types/swagger-ui": "^3.52.4",
         "prettier": "^3.4.2",
         "prettier-plugin-astro": "^0.14.1",
