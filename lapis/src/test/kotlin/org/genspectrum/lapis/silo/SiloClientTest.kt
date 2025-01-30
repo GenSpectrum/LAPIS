@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
+import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
@@ -380,7 +381,10 @@ class SiloClientTest(
     @Test
     fun `GIVEN an action that should be cached WHEN I send request twice THEN data version is populated`() {
         val dataVersionValue = "someDataVersion"
-        expectInfoCallAndReturnDataVersion(dataVersionValue)
+        expectInfoCallAndReturnDataVersion(
+            dataVersion = dataVersionValue,
+            siloVersion = "1.2.3",
+        )
 
         expectQueryRequestAndRespondWith(
             response()
@@ -468,6 +472,7 @@ class SiloClientAndCacheInvalidatorTest(
     @Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
     @Autowired private val requestIdContext: RequestIdContext,
     @Autowired private val dataVersion: DataVersion,
+    @Autowired private val siloVersion: SiloVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
@@ -488,20 +493,34 @@ class SiloClientAndCacheInvalidatorTest(
 
     @Test
     fun `GIVEN there is a new data version WHEN the cache invalidator checks THEN the cache should be cleared`() {
-        expectInfoCallAndReturnDataVersion(firstDataVersion, Times.once())
+        expectInfoCallAndReturnDataVersion(
+            dataVersion = firstDataVersion,
+            siloVersion = "1.2.3",
+            times = Times.once(),
+        )
         dataVersionCacheInvalidator.invalidateSiloCache()
 
         assertThatResultIsCachedOnSecondRequest()
+        assertThat(siloVersion.version, `is`("1.2.3"))
 
-        expectInfoCallAndReturnDataVersion(secondDataVersion, Times.once())
+        expectInfoCallAndReturnDataVersion(
+            dataVersion = secondDataVersion,
+            siloVersion = "2.3.4",
+            times = Times.once(),
+        )
         dataVersionCacheInvalidator.invalidateSiloCache()
 
         assertThatCacheIsNotHit()
+        assertThat(siloVersion.version, `is`("2.3.4"))
     }
 
     @Test
     fun `GIVEN SILO is restarting WHEN the cache invalidator checks THEN the cache should be cleared`() {
-        expectInfoCallAndReturnDataVersion(firstDataVersion, Times.once())
+        expectInfoCallAndReturnDataVersion(
+            dataVersion = firstDataVersion,
+            siloVersion = "1.2.3",
+            times = Times.once(),
+        )
         dataVersionCacheInvalidator.invalidateSiloCache()
 
         assertThatResultIsCachedOnSecondRequest()
@@ -510,6 +529,7 @@ class SiloClientAndCacheInvalidatorTest(
         dataVersionCacheInvalidator.invalidateSiloCache()
 
         assertThatCacheIsNotHit()
+        assertThat(siloVersion.version, `is`(nullValue()))
     }
 
     private fun assertThatResultIsCachedOnSecondRequest() {
@@ -574,6 +594,7 @@ private fun expectQueryRequestAndRespondWith(
 
 private fun expectInfoCallAndReturnDataVersion(
     dataVersion: String,
+    siloVersion: String,
     times: Times = Times.unlimited(),
 ) {
     MockServerClient("localhost", MOCK_SERVER_PORT)
@@ -583,5 +604,16 @@ private fun expectInfoCallAndReturnDataVersion(
                 .withPath("/info"),
             times,
         )
-        .respond(response().withStatusCode(200).withHeader(DATA_VERSION_HEADER, dataVersion))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withHeader(DATA_VERSION_HEADER, dataVersion)
+                .withBody(
+                    """
+                        {
+                            "version": "$siloVersion"
+                        }
+                    """.trimIndent(),
+                ),
+        )
 }

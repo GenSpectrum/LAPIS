@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.scheduler
 
 import mu.KotlinLogging
+import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.CachedSiloClient
 import org.genspectrum.lapis.silo.SILO_QUERY_CACHE_NAME
@@ -16,6 +17,7 @@ private val log = KotlinLogging.logger {}
 class DataVersionCacheInvalidator(
     private val cachedSiloClient: CachedSiloClient,
     private val cacheClearer: CacheClearer,
+    private val siloVersion: SiloVersion,
 ) {
     private var currentlyCachedDataVersion = "uninitialized"
 
@@ -30,6 +32,7 @@ class DataVersionCacheInvalidator(
             log.debug { "Caught ${SiloUnavailableException::class.java} $e" }
             InfoData(
                 dataVersion = "currently unavailable",
+                siloVersion = null,
             )
         } catch (e: Exception) {
             log.debug { "Failed to call info: $e" }
@@ -42,6 +45,7 @@ class DataVersionCacheInvalidator(
             }
             cacheClearer.clearCache()
             currentlyCachedDataVersion = info.dataVersion
+            siloVersion.version = info.siloVersion
         }
     }
 }

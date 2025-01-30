@@ -37,6 +37,7 @@ class InfoController(
             lapisVersion = lapisVersion.version,
             requestId = requestIdContext.requestId,
             requestInfo = lapisInfoFactory.getRequestInfo(),
+            siloVersion = siloInfo.siloVersion,
         )
     }
 

@@ -345,6 +345,7 @@ private fun infoResponseSchema() =
                 "requestInfo" to Schema<String>().type("string").description(REQUEST_INFO_STRING_DESCRIPTION),
                 "reportTo" to Schema<String>().type("string"),
                 "lapisVersion" to StringSchema().description(VERSION_DESCRIPTION),
+                "siloVersion" to StringSchema().description(SILO_VERSION_DESCRIPTION),
             ),
         )
         .required(listOf("reportTo"))

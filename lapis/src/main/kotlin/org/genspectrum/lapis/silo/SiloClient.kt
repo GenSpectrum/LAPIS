@@ -108,7 +108,10 @@ open class CachedSiloClient(
     fun callInfo(): InfoData {
         val response = send(siloUris.info, BodyHandlers.ofString(), ::tryToReadSiloErrorFromString) { it.GET() }
 
-        return InfoData(getDataVersion(response))
+        return InfoData(
+            dataVersion = getDataVersion(response),
+            siloVersion = objectMapper.readValue<SiloInfo>(response.body()).version,
+        )
     }
 
     private fun <ResponseBodyType> send(
@@ -186,3 +189,7 @@ data class WithDataVersion<ResponseType>(
 )
 
 data class SiloErrorResponse(val error: String, val message: String)
+
+data class SiloInfo(
+    val version: String,
+)
