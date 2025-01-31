@@ -111,6 +111,7 @@ data class SequenceData(
 
 data class InfoData(
     val dataVersion: String,
+    val siloVersion: String?,
 )
 
 @JsonComponent

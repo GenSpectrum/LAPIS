@@ -28,12 +28,16 @@ class InfoControllerTest(
     fun `GET info`() {
         every {
             siloQueryModelMock.getInfo()
-        } returns InfoData("1234")
+        } returns InfoData(
+            dataVersion = "1234",
+            siloVersion = "1.2.3",
+        )
 
         mockMvc.perform(getSample(INFO_ROUTE))
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.dataVersion").value("1234"))
             .andExpect(jsonPath("\$.lapisVersion").value(matchesPattern(".+")))
+            .andExpect(jsonPath("\$.siloVersion").value(matchesPattern("1.2.3")))
     }
 
     @Test
