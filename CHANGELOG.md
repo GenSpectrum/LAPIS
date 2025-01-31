@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.13](https://github.com/GenSpectrum/LAPIS/compare/v0.3.12...v0.3.13) (2025-01-31)
+
+
+### Features
+
+* **lapis:** add `siloVersion` to response info ([#1066](https://github.com/GenSpectrum/LAPIS/issues/1066)) ([c1edcf3](https://github.com/GenSpectrum/LAPIS/commit/c1edcf3867d9744920c82ac20c07b55b79b88e06))
+
 ## [0.3.12](https://github.com/GenSpectrum/LAPIS/compare/v0.3.11...v0.3.12) (2025-01-22)
 
 
