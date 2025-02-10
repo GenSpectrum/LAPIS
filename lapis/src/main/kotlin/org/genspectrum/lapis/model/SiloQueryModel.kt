@@ -178,4 +178,6 @@ class SiloQueryModel(
     )
 
     fun getInfo(): InfoData = siloClient.callInfo()
+
+    fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
 }

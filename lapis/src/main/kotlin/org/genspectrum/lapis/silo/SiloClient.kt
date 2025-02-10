@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.silo
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KotlinLogging
@@ -7,6 +8,7 @@ import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
+import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -52,6 +54,12 @@ class SiloClient(
         dataVersion.dataVersion = info.dataVersion
         return info
     }
+
+    fun getLineageDefinition(column: String): LineageDefinition {
+        log.info { "Calling SILO lineageDefinition for column '$column'" }
+
+        return cachedSiloClient.getLineageDefinition(column)
+    }
 }
 
 const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
@@ -60,6 +68,7 @@ const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
 open class CachedSiloClient(
     private val siloUris: SiloUris,
     private val objectMapper: ObjectMapper,
+    private val yamlObjectMapper: YamlObjectMapper,
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
 ) {
@@ -112,6 +121,16 @@ open class CachedSiloClient(
             dataVersion = getDataVersion(response),
             siloVersion = objectMapper.readValue<SiloInfo>(response.body()).version,
         )
+    }
+
+    fun getLineageDefinition(column: String): LineageDefinition {
+        val response = send(
+            uri = siloUris.lineageDefinition(column),
+            bodyHandler = BodyHandlers.ofString(),
+            tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
+        ) { it.GET() }
+
+        return yamlObjectMapper.objectMapper.readValue(response.body())
     }
 
     private fun <ResponseBodyType> send(
@@ -192,4 +211,12 @@ data class SiloErrorResponse(val error: String, val message: String)
 
 data class SiloInfo(
     val version: String,
+)
+
+typealias LineageDefinition = Map<String, LineageNode>
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+data class LineageNode(
+    val parents: List<String>?,
+    val aliases: List<String>?,
 )

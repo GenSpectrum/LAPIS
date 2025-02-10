@@ -21,6 +21,9 @@ const val AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION =
     considered."""
 const val INFO_ENDPOINT_DESCRIPTION = "Returns information about LAPIS."
 const val DATABASE_CONFIG_ENDPOINT_DESCRIPTION = "Returns the database configuration."
+const val LINEAGE_DEFINITION_ENDPOINT_DESCRIPTION = """Download the lineage definition file used for a certain column.
+This can be used to reconstruct the lineage tree. 
+"""
 const val REFERENCE_GENOME_ENDPOINT_DESCRIPTION = "Returns the reference genome."
 const val ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of aligned amino acid sequences. Only sequences matching the specified

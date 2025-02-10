@@ -435,6 +435,48 @@ class SiloClientTest(
         assertThat(exception.message, containsString(errorMessage))
     }
 
+    @Test
+    fun `get lineage definition`() {
+        val columnName = "test_column"
+        MockServerClient("localhost", MOCK_SERVER_PORT)
+            .`when`(
+                request()
+                    .withMethod("GET")
+                    .withPath("/lineageDefinition/$columnName")
+                    .withHeader("X-Request-Id", REQUEST_ID_VALUE),
+            )
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody(
+                        """
+                            A: {}
+                            A.1:
+                              parents:
+                              - A
+                            B:
+                              aliases:
+                              - A.1.1
+                              parents:
+                              - A.1
+                        """.trimIndent(),
+                    ),
+            )
+
+        val actual = underTest.getLineageDefinition(columnName)
+
+        assertThat(
+            actual,
+            equalTo(
+                mapOf(
+                    "A" to LineageNode(parents = null, aliases = null),
+                    "A.1" to LineageNode(parents = listOf("A"), aliases = null),
+                    "B" to LineageNode(parents = listOf("A.1"), aliases = listOf("A.1.1")),
+                ),
+            ),
+        )
+    }
+
     companion object {
         @JvmStatic
         val mutationActions = listOf(

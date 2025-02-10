@@ -9,13 +9,16 @@ import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.response.LapisInfoFactory
+import org.genspectrum.lapis.silo.LineageDefinition
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 const val INFO_ROUTE = "/info"
 const val DATABASE_CONFIG_ROUTE = "/databaseConfig"
+const val LINEAGE_DEFINITION_ROUTE = "/lineageDefinition"
 const val REFERENCE_GENOME_ROUTE = "/referenceGenome"
 
 @RestController
@@ -44,6 +47,15 @@ class InfoController(
     @GetMapping(DATABASE_CONFIG_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE, APPLICATION_YAML_VALUE])
     @Operation(description = DATABASE_CONFIG_ENDPOINT_DESCRIPTION)
     fun getDatabaseConfigAsJson(): DatabaseConfig = databaseConfig
+
+    @GetMapping(
+        "$LINEAGE_DEFINITION_ROUTE/{column}",
+        produces = [MediaType.APPLICATION_JSON_VALUE, APPLICATION_YAML_VALUE],
+    )
+    @Operation(description = LINEAGE_DEFINITION_ENDPOINT_DESCRIPTION)
+    fun getLineageDefinition(
+        @PathVariable("column") column: String,
+    ): LineageDefinition = siloQueryModel.getLineageDefinition(column)
 
     @GetMapping(REFERENCE_GENOME_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(description = REFERENCE_GENOME_ENDPOINT_DESCRIPTION)

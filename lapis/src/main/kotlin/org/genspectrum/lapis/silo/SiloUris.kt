@@ -6,8 +6,10 @@ import java.net.URI
 
 @Component
 class SiloUris(
-    @Value("\${silo.url}") siloUrl: String,
+    @Value("\${silo.url}") private val siloUrl: String,
 ) {
     val query = URI("$siloUrl/query")
     val info = URI("$siloUrl/info")
+
+    fun lineageDefinition(column: String): URI = URI("$siloUrl/lineageDefinition/").resolve(column)
 }
