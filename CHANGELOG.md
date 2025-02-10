@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.14](https://github.com/GenSpectrum/LAPIS/compare/v0.3.13...v0.3.14) (2025-02-10)
+
+
+### Features
+
+* **lapis:** expose the lineage definition files used by SILO ([#1073](https://github.com/GenSpectrum/LAPIS/issues/1073)) ([2ac977c](https://github.com/GenSpectrum/LAPIS/commit/2ac977ceab23a6479a343bcee2234c289f88fd4f)), closes [#1034](https://github.com/GenSpectrum/LAPIS/issues/1034)
+
 ## [0.3.13](https://github.com/GenSpectrum/LAPIS/compare/v0.3.12...v0.3.13) (2025-01-31)
 
 
