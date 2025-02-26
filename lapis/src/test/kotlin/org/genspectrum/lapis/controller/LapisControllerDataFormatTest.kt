@@ -34,7 +34,7 @@ private const val DATA_VERSION = "1234"
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LapisControllerCsvTest(
+class LapisControllerDataFormatTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired private val objectMapper: ObjectMapper,
 ) {
