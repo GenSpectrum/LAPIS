@@ -50,6 +50,7 @@ data class LapisInfo(
 data class NucleotideMutationResponse(
     val mutation: String,
     val count: Int,
+    val coverage: Int,
     val proportion: Double,
     val sequenceName: String?,
     val mutationFrom: String,
@@ -60,6 +61,7 @@ data class NucleotideMutationResponse(
         listOf(
             mutation,
             count.toString(),
+            coverage.toString(),
             proportion.toString(),
             sequenceName ?: "",
             mutationFrom,
@@ -71,6 +73,7 @@ data class NucleotideMutationResponse(
         listOf(
             "mutation",
             "count",
+            "coverage",
             "proportion",
             "sequenceName",
             "mutationFrom",
@@ -82,6 +85,7 @@ data class NucleotideMutationResponse(
 data class AminoAcidMutationResponse(
     val mutation: String,
     val count: Int,
+    val coverage: Int,
     val proportion: Double,
     val sequenceName: String,
     val mutationFrom: String,
@@ -92,6 +96,7 @@ data class AminoAcidMutationResponse(
         listOf(
             mutation,
             count.toString(),
+            coverage.toString(),
             proportion.toString(),
             sequenceName,
             mutationFrom,
@@ -103,6 +108,7 @@ data class AminoAcidMutationResponse(
         listOf(
             "mutation",
             "count",
+            "coverage",
             "proportion",
             "sequenceName",
             "mutationFrom",

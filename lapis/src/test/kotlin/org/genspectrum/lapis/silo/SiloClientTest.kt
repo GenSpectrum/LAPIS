@@ -106,8 +106,8 @@ class SiloClientTest(
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
                 .withBody(
                     """
-{"count": 51,"mutation": "C3037T","mutationFrom": "C","mutationTo": "T","position": 3037,"proportion": 1,"sequenceName": "main"}
-{"count": 52,"mutation": "C14408T","mutationFrom": "C","mutationTo": "T","position": 14408,"proportion": 1,"sequenceName": "main"}
+{"count": 51,"mutation": "C3037T","mutationFrom": "C","mutationTo": "T","position": 3037,"proportion": 1,"sequenceName": "main","coverage":100}
+{"count": 52,"mutation": "C14408T","mutationFrom": "C","mutationTo": "T","position": 14408,"proportion": 1,"sequenceName": "main","coverage":101}
                     """,
                 ),
         )
@@ -127,6 +127,7 @@ class SiloClientTest(
                     mutationFrom = "C",
                     mutationTo = "T",
                     position = 3037,
+                    coverage = 100,
                 ),
                 MutationData(
                     mutation = "C14408T",
@@ -136,6 +137,7 @@ class SiloClientTest(
                     mutationFrom = "C",
                     mutationTo = "T",
                     position = 14408,
+                    coverage = 101,
                 ),
             ),
         )

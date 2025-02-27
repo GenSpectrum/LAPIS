@@ -90,6 +90,7 @@ data class MutationData(
     val mutationFrom: String,
     val mutationTo: String,
     val position: Int,
+    val coverage: Int,
 )
 
 data class InsertionData(

@@ -466,11 +466,16 @@ private fun nucleotideMutationProportionSchema() =
             .example(0.54321)
             .description(
                 "Number of sequences with this mutation divided by the total number sequences matching the " +
-                    "given filter criteria with non-ambiguous reads at that position",
+                    "given filter criteria with non-ambiguous reads at that position (i.e. count/coverage).",
             ),
         "count" to IntegerSchema()
             .example(1234)
             .description("Total number of sequences with this mutation matching the given sequence filter criteria"),
+        "coverage" to IntegerSchema()
+            .example(2345)
+            .description(
+                "Total number of sequences with non-ambiguous reads matching the given sequence filter criteria",
+            ),
         "sequenceName" to StringSchema()
             .example("sequence1")
             .description(
@@ -496,11 +501,16 @@ private fun aminoAcidMutationProportionSchema() =
             .example(0.54321)
             .description(
                 "Number of sequences with this mutation divided by the total number sequences matching the " +
-                    "given filter criteria with non-ambiguous reads at that position",
+                    "given filter criteria with non-ambiguous reads at that position (i.e. count/coverage).",
             ),
         "count" to IntegerSchema()
             .example(42)
             .description("Total number of sequences with this mutation matching the given sequence filter criteria"),
+        "coverage" to IntegerSchema()
+            .example(2345)
+            .description(
+                "Total number of sequences with non-ambiguous reads matching the given sequence filter criteria",
+            ),
         "sequenceName" to StringSchema()
             .example("ORF1a")
             .description("The name of the gene in which the mutation occurs."),

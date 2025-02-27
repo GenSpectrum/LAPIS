@@ -31,6 +31,7 @@ import java.util.stream.Stream
 private val someMutationData = MutationData(
     mutation = "A1234B",
     count = 1234,
+    coverage = 2345,
     proportion = 0.1234,
     sequenceName = "sequenceName",
     mutationFrom = "A",
@@ -118,6 +119,7 @@ class SiloQueryModelTest {
         val expectedMutation = NucleotideMutationResponse(
             mutation = "A1234B",
             count = 1234,
+            coverage = 2345,
             proportion = 0.1234,
             sequenceName = null,
             mutationFrom = "A",
@@ -140,6 +142,7 @@ class SiloQueryModelTest {
         val expectedMutation = NucleotideMutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
+            coverage = 2345,
             proportion = 0.1234,
             sequenceName = "sequenceName",
             mutationFrom = "A",
@@ -161,6 +164,7 @@ class SiloQueryModelTest {
         val expectedMutation = AminoAcidMutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
+            coverage = 2345,
             proportion = 0.1234,
             sequenceName = "sequenceName",
             mutationFrom = "A",

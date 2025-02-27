@@ -106,6 +106,7 @@ describe('The /nucleotideMutations endpoint', () => {
   it('should correctly handle nucleotide insertion requests', async () => {
     const expectedFirstResultWithNucleotideInsertion = {
       count: 1,
+      coverage: 1,
       mutation: 'C241T',
       proportion: 1.0,
       mutationFrom: 'C',
@@ -127,6 +128,7 @@ describe('The /nucleotideMutations endpoint', () => {
   it('should correctly handle amino acid insertion requests', async () => {
     const expectedFirstResultWithAminoAcidInsertion = {
       count: 1,
+      coverage: 1,
       mutation: 'G210T',
       proportion: 1.0,
       mutationFrom: 'G',
@@ -158,15 +160,15 @@ describe('The /nucleotideMutations endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
+mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-C7029T,1,0.0625,,C,T,7029
-C71-,1,0.058823529411764705,,C,-,71
-C7124T,2,0.11764705882352941,,C,T,7124
+C7029T,1,16,0.0625,,C,T,7029
+C71-,1,17,0.058823529411764705,,C,-,71
+C7124T,2,17,0.11764705882352941,,C,T,7124
 `.trim()
     );
   });
@@ -184,15 +186,15 @@ C7124T,2,0.11764705882352941,,C,T,7124
 
     expect(resultText).to.contain(
       String.raw`
-mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
+mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-C7029T	1	0.0625		C	T	7029
-C71-	1	0.058823529411764705		C	-	71
-C7124T	2	0.11764705882352941		C	T	7124
+C7029T	1	16	0.0625		C	T	7029
+C71-	1	17	0.058823529411764705		C	-	71
+C7124T	2	17	0.11764705882352941		C	T	7124
     `.trim()
     );
   });

@@ -59,6 +59,7 @@ class SiloQueryModel(
             NucleotideMutationResponse(
                 mutation = mutation,
                 count = it.count,
+                coverage = it.coverage,
                 proportion = it.proportion,
                 sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
                     true -> null
@@ -89,6 +90,7 @@ class SiloQueryModel(
             AminoAcidMutationResponse(
                 mutation = "${it.sequenceName}:${it.mutation}",
                 count = it.count,
+                coverage = it.coverage,
                 proportion = it.proportion,
                 sequenceName = it.sequenceName,
                 mutationFrom = it.mutationFrom,
