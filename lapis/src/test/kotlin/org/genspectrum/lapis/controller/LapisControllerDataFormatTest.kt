@@ -49,6 +49,31 @@ class LapisControllerDataFormatTest(
         every { lapisInfo.dataVersion } returns DATA_VERSION
     }
 
+    @ParameterizedTest(name = "{0} returns bad request")
+    @MethodSource("getRequestsWithInvalidDataFormat")
+    fun `GIVEN unknown data format THEN returns not acceptable`(requestsScenario: RequestScenario) {
+        mockMvc.perform(requestsScenario.request)
+            .andExpect(status().isNotAcceptable)
+            .andExpect(header().string("Content-Type", "application/problem+json"))
+            .andExpect(jsonPath("\$.detail", startsWith("Acceptable representations:")))
+    }
+
+    @Test
+    fun `GIVEN aggregated request with dataFormat fasta THEN returns not acceptable`() {
+        mockMvc.perform(getSample("/${SampleRoute.AGGREGATED.pathSegment}?dataFormat=fasta"))
+            .andExpect(status().isNotAcceptable)
+            .andExpect(header().string("Content-Type", "application/problem+json"))
+            .andExpect(jsonPath("\$.detail", startsWith("Acceptable representations:")))
+    }
+
+    @Test
+    fun `GIVEN amino acid sequences request with dataFormat csv THEN returns not acceptable`() {
+        mockMvc.perform(getSample("/${SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES.pathSegment}/S?dataFormat=csv"))
+            .andExpect(status().isNotAcceptable)
+            .andExpect(header().string("Content-Type", "application/problem+json"))
+            .andExpect(jsonPath("\$.detail", startsWith("Acceptable representations:")))
+    }
+
     @ParameterizedTest(name = "{0} returns empty JSON")
     @MethodSource("getJsonRequests")
     fun `returns empty json`(requestsScenario: RequestScenario) {
@@ -260,6 +285,7 @@ class LapisControllerDataFormatTest(
                 "csv-without-headers" -> TEXT_CSV_WITHOUT_HEADERS_VALUE
                 "tsv" -> TEXT_TSV_VALUE
                 "json" -> MediaType.APPLICATION_JSON_VALUE
+                "invalid" -> "invalid/invalid"
                 else -> throw IllegalArgumentException("Unknown data format: $dataFormat")
             }
 
@@ -274,6 +300,9 @@ class LapisControllerDataFormatTest(
 
         @JvmStatic
         fun getJsonRequests() = getRequests("json")
+
+        @JvmStatic
+        fun getRequestsWithInvalidDataFormat() = getRequests("invalid")
 
         @JvmStatic
         fun getColumnOrderRequests() =

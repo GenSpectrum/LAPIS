@@ -269,7 +269,7 @@ fun getRequests(
         callDescription = "GET $endpoint as $dataFormat with request parameter",
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
         request = getSample(
-            "$endpoint?country=Switzerland&dataFormat=$dataFormat&compression=$compressionFormat",
+            "$endpoint?country=Switzerland&dataFormat=${dataFormat.fileFormat}&compression=$compressionFormat",
         ),
         compressionFormat = compressionFormat,
         expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
@@ -278,7 +278,7 @@ fun getRequests(
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with accept header",
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = getSample("$endpoint?country=Switzerland&dataFormat=$dataFormat")
+        request = getSample("$endpoint?country=Switzerland&dataFormat=${dataFormat.fileFormat}")
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,
         expectedContentType = getContentTypeForDataFormat(dataFormat),
@@ -289,7 +289,11 @@ fun getRequests(
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
         request = postSample(endpoint)
             .content(
-                """{"country": "Switzerland", "dataFormat": "$dataFormat", "compression": "$compressionFormat"}""",
+                """{
+                    "country": "Switzerland",
+                    "dataFormat": "${dataFormat.fileFormat}",
+                    "compression": "$compressionFormat"}
+                """.trimMargin(),
             )
             .contentType(APPLICATION_JSON),
         compressionFormat = compressionFormat,
@@ -300,7 +304,7 @@ fun getRequests(
         callDescription = "POST JSON $endpoint as $dataFormat with accept header",
         mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
         request = postSample(endpoint)
-            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
+            .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}"}""")
             .contentType(APPLICATION_JSON)
             .header(ACCEPT_ENCODING, compressionFormat),
         compressionFormat = compressionFormat,

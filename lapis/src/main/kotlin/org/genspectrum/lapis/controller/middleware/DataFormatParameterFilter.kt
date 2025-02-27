@@ -53,6 +53,7 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
 
     private fun findAcceptHeaderOverwriteValue(reReadableRequest: CachedBodyHttpServletRequest) =
         when (reReadableRequest.getStringField(FORMAT_PROPERTY)?.uppercase()) {
+            null -> null
             DataFormat.CSV -> LapisMediaType.TEXT_CSV_VALUE
             DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
             DataFormat.TSV -> LapisMediaType.TEXT_TSV_VALUE
@@ -60,6 +61,6 @@ class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequest
             SequencesDataFormat.FASTA -> LapisMediaType.TEXT_X_FASTA_VALUE
             SequencesDataFormat.NDJSON -> MediaType.APPLICATION_NDJSON_VALUE
 
-            else -> null
+            else -> "unknown/unknown"
         }
 }
