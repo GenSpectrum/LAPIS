@@ -8,7 +8,9 @@ import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
+import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
@@ -53,6 +56,15 @@ class SingleSegmentedSequenceControllerTest(
         every {
             dataVersion.dataVersion
         } returns "1234"
+    }
+
+    @Test
+    fun `GIVEN nucleotide sequences request with dataFormat csv THEN returns not acceptable`() {
+        mockMvc
+            .perform(getSample("/${SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES.pathSegment}?dataFormat=csv"))
+            .andExpect(status().isNotAcceptable)
+            .andExpect(header().string("Content-Type", "application/problem+json"))
+            .andExpect(jsonPath("\$.detail", startsWith("Acceptable representations:")))
     }
 
     @ParameterizedTest(name = "should {0} alignedNucleotideSequences with empty filter")
