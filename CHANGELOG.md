@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.15](https://github.com/GenSpectrum/LAPIS/compare/v0.3.14...v0.3.15) (2025-03-03)
+
+
+### Features
+
+* **lapis:** pass through `coverage` from SILO in mutation endpoints ([#1094](https://github.com/GenSpectrum/LAPIS/issues/1094)) ([ed90514](https://github.com/GenSpectrum/LAPIS/commit/ed9051476990ccde16c50a94cba1327f04186282)), closes [#1091](https://github.com/GenSpectrum/LAPIS/issues/1091)
+
+
+### Bug Fixes
+
+* **lapis:** reject unknown data formats ([#1093](https://github.com/GenSpectrum/LAPIS/issues/1093)) ([b1cc7fd](https://github.com/GenSpectrum/LAPIS/commit/b1cc7fdbe4244c79736223e2620d3a810bfc6c76)), closes [#1078](https://github.com/GenSpectrum/LAPIS/issues/1078)
+
 ## [0.3.14](https://github.com/GenSpectrum/LAPIS/compare/v0.3.13...v0.3.14) (2025-02-10)
 
 
