@@ -141,6 +141,7 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].mutation").value("the mutation"))
             .andExpect(jsonPath("\$.data[0].proportion").value(0.5))
             .andExpect(jsonPath("\$.data[0].count").value(42))
+            .andExpect(jsonPath("\$.data[0].coverage").value(52))
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
             .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
@@ -196,6 +197,7 @@ class LapisControllerTest(
                     containsInAnyOrder(
                         "mutation",
                         "proportion",
+                        "coverage",
                         "count",
                         "sequenceName",
                         "mutationFrom",
@@ -499,6 +501,7 @@ private fun someNucleotideMutationProportion() =
     NucleotideMutationResponse(
         mutation = "the mutation",
         count = 42,
+        coverage = 52,
         proportion = 0.5,
         sequenceName = "sequenceName",
         mutationFrom = "G",
@@ -510,6 +513,7 @@ private fun someAminoAcidMutationProportion() =
     AminoAcidMutationResponse(
         mutation = "the mutation",
         count = 42,
+        coverage = 52,
         proportion = 0.5,
         sequenceName = "sequenceName",
         mutationFrom = "G",

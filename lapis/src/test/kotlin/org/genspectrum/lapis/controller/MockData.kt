@@ -303,6 +303,7 @@ object MockDataForEndpoints {
             NucleotideMutationResponse(
                 mutation = "sequenceName:A1234T",
                 count = 2345,
+                coverage = 3456,
                 proportion = 0.987,
                 sequenceName = "sequenceName",
                 mutationFrom = "A",
@@ -315,6 +316,7 @@ object MockDataForEndpoints {
                 {
                     "mutation": "sequenceName:A1234T",
                     "count": 2345,
+                    "coverage": 3456,
                     "proportion": 0.987,
                     "sequenceName": "sequenceName",
                     "mutationFrom": "A",
@@ -324,13 +326,13 @@ object MockDataForEndpoints {
             ]
         """.trimIndent(),
         expectedCsv = """
-            mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
-            sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
+            mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
+            sequenceName:A1234T,2345,3456,0.987,sequenceName,A,T,1234
             
         """.trimIndent(),
         expectedTsv = """
-            mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
-            sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
+            mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
+            sequenceName:A1234T	2345	3456	0.987	sequenceName	A	T	1234
             
         """.trimIndent(),
     )
@@ -341,6 +343,7 @@ object MockDataForEndpoints {
             AminoAcidMutationResponse(
                 mutation = "sequenceName:A1234T",
                 count = 2345,
+                coverage = 3456,
                 proportion = 0.987,
                 sequenceName = "sequenceName",
                 mutationFrom = "A",
@@ -353,6 +356,7 @@ object MockDataForEndpoints {
                 {
                     "mutation": "sequenceName:A1234T",
                     "count": 2345,
+                    "coverage": 3456,
                     "proportion": 0.987,
                     "sequenceName": "sequenceName",
                     "mutationFrom": "A",
@@ -362,13 +366,13 @@ object MockDataForEndpoints {
             ]
         """.trimIndent(),
         expectedCsv = """
-            mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
-            sequenceName:A1234T,2345,0.987,sequenceName,A,T,1234
+            mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
+            sequenceName:A1234T,2345,3456,0.987,sequenceName,A,T,1234
             
         """.trimIndent(),
         expectedTsv = """
-            mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
-            sequenceName:A1234T	2345	0.987	sequenceName	A	T	1234
+            mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
+            sequenceName:A1234T	2345	3456	0.987	sequenceName	A	T	1234
             
         """.trimIndent(),
     )

@@ -88,6 +88,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   it('should correctly handle nucleotide insertion requests', async () => {
     const expectedFirstResultWithNucleotideInsertion = {
       count: 1,
+      coverage: 1,
       mutation: 'E:T9I',
       mutationFrom: 'T',
       mutationTo: 'I',
@@ -109,6 +110,7 @@ describe('The /aminoAcidMutations endpoint', () => {
   it('should correctly handle amino acid insertion requests', async () => {
     const expectedFirstResultWithAminoAcidInsertion = {
       count: 1,
+      coverage: 1,
       mutation: 'N:A220V',
       mutationFrom: 'A',
       mutationTo: 'V',
@@ -140,15 +142,15 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     expect(resultText).to.contain(
       String.raw`
-mutation,count,proportion,sequenceName,mutationFrom,mutationTo,position
+mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V,1,0.058823529411764705,N,A,V,220
-S:A222V,3,0.1875,S,A,V,222
-ORF1a:A2529V,3,0.17647058823529413,ORF1a,A,V,2529
+N:A220V,1,17,0.058823529411764705,N,A,V,220
+S:A222V,3,16,0.1875,S,A,V,222
+ORF1a:A2529V,3,17,0.17647058823529413,ORF1a,A,V,2529
 `.trim()
     );
   });
@@ -166,15 +168,15 @@ ORF1a:A2529V,3,0.17647058823529413,ORF1a,A,V,2529
 
     expect(resultText).to.contain(
       String.raw`
-mutation	count	proportion	sequenceName	mutationFrom	mutationTo	position
+mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
     `.trim()
     );
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V	1	0.058823529411764705	N	A	V	220
-S:A222V	3	0.1875	S	A	V	222
-ORF1a:A2529V	3	0.17647058823529413	ORF1a	A	V	2529
+N:A220V	1	17	0.058823529411764705	N	A	V	220
+S:A222V	3	16	0.1875	S	A	V	222
+ORF1a:A2529V	3	17	0.17647058823529413	ORF1a	A	V	2529
     `.trim()
     );
   });
