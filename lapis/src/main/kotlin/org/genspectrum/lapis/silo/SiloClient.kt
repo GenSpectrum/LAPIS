@@ -75,10 +75,9 @@ open class CachedSiloClient(
     private val httpClient = HttpClient.newHttpClient()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
-    open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> {
-        return sendQuery(query)
+    open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
+        sendQuery(query)
             .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
-    }
 
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
         if (RequestContextHolder.getRequestAttributes() != null) {
@@ -193,21 +192,30 @@ open class CachedSiloClient(
             )
         }
 
-    private fun getDataVersion(response: HttpResponse<*>): String {
-        return response.headers().firstValue("data-version").orElse("")
-    }
+    private fun getDataVersion(response: HttpResponse<*>): String =
+        response.headers().firstValue("data-version").orElse("")
 }
 
-class SiloException(val statusCode: Int, val title: String, override val message: String) : Exception(message)
+class SiloException(
+    val statusCode: Int,
+    val title: String,
+    override val message: String,
+) : Exception(message)
 
-class SiloUnavailableException(override val message: String, val retryAfter: String?) : Exception(message)
+class SiloUnavailableException(
+    override val message: String,
+    val retryAfter: String?,
+) : Exception(message)
 
 data class WithDataVersion<ResponseType>(
     val dataVersion: String,
     val queryResult: ResponseType,
 )
 
-data class SiloErrorResponse(val error: String, val message: String)
+data class SiloErrorResponse(
+    val error: String,
+    val message: String,
+)
 
 data class SiloInfo(
     val version: String,

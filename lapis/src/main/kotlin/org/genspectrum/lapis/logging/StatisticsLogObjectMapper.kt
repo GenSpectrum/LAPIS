@@ -9,7 +9,9 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.stereotype.Component
 
 @Component
-class StatisticsLogObjectMapper(objectMapperBuilder: Jackson2ObjectMapperBuilder) {
+class StatisticsLogObjectMapper(
+    objectMapperBuilder: Jackson2ObjectMapperBuilder,
+) {
     private val mapper = objectMapperBuilder.build<ObjectMapper>().apply {
         registerModule(JavaTimeModule())
         registerModule(kotlinModule())
@@ -18,7 +20,6 @@ class StatisticsLogObjectMapper(objectMapperBuilder: Jackson2ObjectMapperBuilder
         setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
 
-    fun writeValueAsString(requestContext: RequestContext): String {
-        return mapper.writerFor(RequestContext::class.java).writeValueAsString(requestContext)
-    }
+    fun writeValueAsString(requestContext: RequestContext): String =
+        mapper.writerFor(RequestContext::class.java).writeValueAsString(requestContext)
 }

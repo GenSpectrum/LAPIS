@@ -35,7 +35,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-data class SequenceFilterValue(val type: SequenceFilterFieldType, val values: List<String?>, val originalKey: String)
+data class SequenceFilterValue(
+    val type: SequenceFilterFieldType,
+    val values: List<String?>,
+    val originalKey: String,
+)
 
 typealias SequenceFilterFieldName = String
 
@@ -332,13 +336,12 @@ class SiloFilterExpressionMapper(
     private fun mapToIntBetweenFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
-        return IntBetween(
+    ): SiloFilterExpression =
+        IntBetween(
             siloColumnName,
             from = findIntOfFilterType<SequenceFilterFieldType.IntFrom>(values),
             to = findIntOfFilterType<SequenceFilterFieldType.IntTo>(values),
         )
-    }
 
     private inline fun <reified T : SequenceFilterFieldType> findIntOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
@@ -363,13 +366,12 @@ class SiloFilterExpressionMapper(
     private fun mapToFloatBetweenFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
-        return FloatBetween(
+    ): SiloFilterExpression =
+        FloatBetween(
             siloColumnName,
             from = findFloatOfFilterType<SequenceFilterFieldType.FloatFrom>(values),
             to = findFloatOfFilterType<SequenceFilterFieldType.FloatTo>(values),
         )
-    }
 
     private fun mapToStringSearchFilters(
         siloColumnName: SequenceFilterFieldName,
@@ -430,21 +432,19 @@ class SiloFilterExpressionMapper(
         false -> expression
     }
 
-    private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains {
-        return NucleotideInsertionContains(
+    private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains =
+        NucleotideInsertionContains(
             nucleotideInsertion.position,
             nucleotideInsertion.insertions,
             nucleotideInsertion.segment,
         )
-    }
 
-    private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains {
-        return AminoAcidInsertionContains(
+    private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains =
+        AminoAcidInsertionContains(
             aminoAcidInsertion.position,
             aminoAcidInsertion.insertions,
             aminoAcidInsertion.gene,
         )
-    }
 
     private enum class Filter {
         StringEquals,

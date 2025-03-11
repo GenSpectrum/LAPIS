@@ -30,7 +30,10 @@ data class AggregationData(
     override fun getHeader(comparator: Comparator<String>) = fields.keys.sortedWith(comparator) + COUNT_PROPERTY
 }
 
-data class DetailsData(val map: Map<String, JsonNode>) : Map<String, JsonNode> by map, CsvRecord {
+data class DetailsData(
+    val map: Map<String, JsonNode>,
+) : Map<String, JsonNode> by map,
+    CsvRecord {
     override fun getValuesList(comparator: Comparator<String>) =
         entries
             .sortedWith { a, b -> comparator.compare(a.key, b.key) }
@@ -50,9 +53,7 @@ class DetailsDataDeserializer : JsonDeserializer<DetailsData>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ): DetailsData {
-        return DetailsData(p.readValueAs(object : TypeReference<Map<String, JsonNode>>() {}))
-    }
+    ): DetailsData = DetailsData(p.readValueAs(object : TypeReference<Map<String, JsonNode>>() {}))
 }
 
 @JsonComponent
@@ -116,7 +117,9 @@ data class InfoData(
 )
 
 @JsonComponent
-class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeserializer<SequenceData>() {
+class SequenceDataDeserializer(
+    val databaseConfig: DatabaseConfig,
+) : JsonDeserializer<SequenceData>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
@@ -142,7 +145,9 @@ class SequenceDataDeserializer(val databaseConfig: DatabaseConfig) : JsonDeseria
 }
 
 @JsonComponent
-class SequenceDataSerializer(val databaseConfig: DatabaseConfig) : JsonSerializer<SequenceData>() {
+class SequenceDataSerializer(
+    val databaseConfig: DatabaseConfig,
+) : JsonSerializer<SequenceData>() {
     override fun serialize(
         value: SequenceData,
         gen: JsonGenerator,

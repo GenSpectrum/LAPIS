@@ -56,7 +56,9 @@ class CsvWriter(
         }
 }
 
-enum class Delimiter(val value: Char) {
+enum class Delimiter(
+    val value: Char,
+) {
     COMMA(','),
     TAB('\t'),
 }
@@ -66,10 +68,14 @@ sealed interface CsvColumnOrder {
 
     data object Undefined : CsvColumnOrder
 
-    data class AsFieldsInRequest(val fields: List<String>) : CsvColumnOrder
+    data class AsFieldsInRequest(
+        val fields: List<String>,
+    ) : CsvColumnOrder
 }
 
-private class SameOrderAsListComparator<T>(list: List<T>) : Comparator<T> {
+private class SameOrderAsListComparator<T>(
+    list: List<T>,
+) : Comparator<T> {
     private val indexMap = list.withIndex().associate { it.value to it.index }
 
     override fun compare(

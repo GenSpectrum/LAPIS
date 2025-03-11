@@ -10,7 +10,10 @@ import org.genspectrum.lapis.openApi.SILO_VERSION_DESCRIPTION
 import org.genspectrum.lapis.openApi.VERSION_DESCRIPTION
 import org.springframework.http.ProblemDetail
 
-data class LapisErrorResponse(val error: ProblemDetail, val info: LapisInfo)
+data class LapisErrorResponse(
+    val error: ProblemDetail,
+    val info: LapisInfo,
+)
 
 private const val REPORT_TO =
     "Please report to https://github.com/GenSpectrum/LAPIS/issues in case you encounter any unexpected issues. " +

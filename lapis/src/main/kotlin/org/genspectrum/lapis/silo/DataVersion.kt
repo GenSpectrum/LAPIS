@@ -5,4 +5,6 @@ import org.springframework.web.context.annotation.RequestScope
 
 @Component
 @RequestScope
-data class DataVersion(var dataVersion: String? = null)
+data class DataVersion(
+    var dataVersion: String? = null,
+)

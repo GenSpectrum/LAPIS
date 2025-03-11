@@ -18,20 +18,14 @@ class JacksonFormHttpMessageConverter(
     override fun canWrite(
         clazz: Class<*>,
         mediaType: MediaType?,
-    ): Boolean {
-        return false
-    }
+    ): Boolean = false
 
-    override fun supports(clazz: Class<*>): Boolean {
-        return true
-    }
+    override fun supports(clazz: Class<*>): Boolean = true
 
     override fun writeInternal(
         t: Any,
         outputMessage: HttpOutputMessage,
-    ) {
-        throw NotImplementedError("This class should never need to write.")
-    }
+    ): Unit = throw NotImplementedError("This class should never need to write.")
 
     override fun readInternal(
         clazz: Class<out Any>,

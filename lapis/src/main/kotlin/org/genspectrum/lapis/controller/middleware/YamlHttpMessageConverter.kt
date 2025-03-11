@@ -7,8 +7,9 @@ import org.springframework.http.converter.json.AbstractJackson2HttpMessageConver
 import org.springframework.stereotype.Component
 
 @Component
-class YamlHttpMessageConverter(yamlObjectMapper: YamlObjectMapper) :
-    AbstractJackson2HttpMessageConverter(
+class YamlHttpMessageConverter(
+    yamlObjectMapper: YamlObjectMapper,
+) : AbstractJackson2HttpMessageConverter(
         yamlObjectMapper.objectMapper,
         MediaType.parseMediaType(LapisMediaType.APPLICATION_YAML_VALUE),
     )

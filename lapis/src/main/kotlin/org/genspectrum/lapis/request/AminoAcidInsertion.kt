@@ -9,7 +9,11 @@ import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
-data class AminoAcidInsertion(val position: Int, val gene: String, val insertions: String) {
+data class AminoAcidInsertion(
+    val position: Int,
+    val gene: String,
+    val insertions: String,
+) {
     companion object {
         fun fromString(
             aminoAcidInsertion: String,

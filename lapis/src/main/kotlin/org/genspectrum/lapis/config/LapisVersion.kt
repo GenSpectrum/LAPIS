@@ -1,3 +1,5 @@
 package org.genspectrum.lapis.config
 
-data class LapisVersion(val version: String)
+data class LapisVersion(
+    val version: String,
+)

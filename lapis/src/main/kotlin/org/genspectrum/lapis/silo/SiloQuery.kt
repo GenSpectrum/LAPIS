@@ -12,7 +12,10 @@ import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
 import java.time.LocalDate
 
-data class SiloQuery<ResponseType>(val action: SiloAction<ResponseType>, val filterExpression: SiloFilterExpression)
+data class SiloQuery<ResponseType>(
+    val action: SiloAction<ResponseType>,
+    val filterExpression: SiloFilterExpression,
+)
 
 class AggregationDataTypeReference : TypeReference<AggregationData>()
 
@@ -212,67 +215,125 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<SequenceData>(SequenceDataTypeReference(), cacheable = false)
 }
 
-sealed class SiloFilterExpression(val type: String)
+sealed class SiloFilterExpression(
+    val type: String,
+)
 
-data class StringEquals(val column: String, val value: String?) : SiloFilterExpression("StringEquals")
+data class StringEquals(
+    val column: String,
+    val value: String?,
+) : SiloFilterExpression("StringEquals")
 
-data class BooleanEquals(val column: String, val value: Boolean?) : SiloFilterExpression("BooleanEquals")
+data class BooleanEquals(
+    val column: String,
+    val value: Boolean?,
+) : SiloFilterExpression("BooleanEquals")
 
-data class LineageEquals(val column: String, val value: String?, val includeSublineages: Boolean) :
-    SiloFilterExpression("Lineage")
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class NucleotideSymbolEquals(val sequenceName: String?, val position: Int, val symbol: String) :
-    SiloFilterExpression("NucleotideEquals")
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class HasNucleotideMutation(val sequenceName: String?, val position: Int) :
-    SiloFilterExpression("HasNucleotideMutation")
-
-data class AminoAcidSymbolEquals(val sequenceName: String, val position: Int, val symbol: String) :
-    SiloFilterExpression("AminoAcidEquals")
-
-data class HasAminoAcidMutation(val sequenceName: String, val position: Int) :
-    SiloFilterExpression("HasAminoAcidMutation")
-
-data class DateBetween(val column: String, val from: LocalDate?, val to: LocalDate?) :
-    SiloFilterExpression("DateBetween")
+data class LineageEquals(
+    val column: String,
+    val value: String?,
+    val includeSublineages: Boolean,
+) : SiloFilterExpression("Lineage")
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class NucleotideInsertionContains(val position: Int, val value: String, val sequenceName: String?) :
-    SiloFilterExpression("InsertionContains")
+data class NucleotideSymbolEquals(
+    val sequenceName: String?,
+    val position: Int,
+    val symbol: String,
+) : SiloFilterExpression("NucleotideEquals")
 
-data class AminoAcidInsertionContains(val position: Int, val value: String, val sequenceName: String) :
-    SiloFilterExpression(
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class HasNucleotideMutation(
+    val sequenceName: String?,
+    val position: Int,
+) : SiloFilterExpression("HasNucleotideMutation")
+
+data class AminoAcidSymbolEquals(
+    val sequenceName: String,
+    val position: Int,
+    val symbol: String,
+) : SiloFilterExpression("AminoAcidEquals")
+
+data class HasAminoAcidMutation(
+    val sequenceName: String,
+    val position: Int,
+) : SiloFilterExpression("HasAminoAcidMutation")
+
+data class DateBetween(
+    val column: String,
+    val from: LocalDate?,
+    val to: LocalDate?,
+) : SiloFilterExpression("DateBetween")
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class NucleotideInsertionContains(
+    val position: Int,
+    val value: String,
+    val sequenceName: String?,
+) : SiloFilterExpression("InsertionContains")
+
+data class AminoAcidInsertionContains(
+    val position: Int,
+    val value: String,
+    val sequenceName: String,
+) : SiloFilterExpression(
         "AminoAcidInsertionContains",
     )
 
 data object True : SiloFilterExpression("True")
 
-data class And(val children: List<SiloFilterExpression>) : SiloFilterExpression("And") {
+data class And(
+    val children: List<SiloFilterExpression>,
+) : SiloFilterExpression("And") {
     constructor(vararg children: SiloFilterExpression) : this(children.toList())
 }
 
-data class Or(val children: List<SiloFilterExpression>) : SiloFilterExpression("Or") {
+data class Or(
+    val children: List<SiloFilterExpression>,
+) : SiloFilterExpression("Or") {
     constructor(vararg children: SiloFilterExpression) : this(children.toList())
 }
 
-data class Not(val child: SiloFilterExpression) : SiloFilterExpression("Not")
+data class Not(
+    val child: SiloFilterExpression,
+) : SiloFilterExpression("Not")
 
-data class Maybe(val child: SiloFilterExpression) : SiloFilterExpression("Maybe")
+data class Maybe(
+    val child: SiloFilterExpression,
+) : SiloFilterExpression("Maybe")
 
-data class NOf(val numberOfMatchers: Int, val matchExactly: Boolean, val children: List<SiloFilterExpression>) :
-    SiloFilterExpression("N-Of")
+data class NOf(
+    val numberOfMatchers: Int,
+    val matchExactly: Boolean,
+    val children: List<SiloFilterExpression>,
+) : SiloFilterExpression("N-Of")
 
-data class IntEquals(val column: String, val value: Int?) : SiloFilterExpression("IntEquals")
+data class IntEquals(
+    val column: String,
+    val value: Int?,
+) : SiloFilterExpression("IntEquals")
 
-data class IntBetween(val column: String, val from: Int?, val to: Int?) : SiloFilterExpression("IntBetween")
+data class IntBetween(
+    val column: String,
+    val from: Int?,
+    val to: Int?,
+) : SiloFilterExpression("IntBetween")
 
-data class FloatEquals(val column: String, val value: Double?) : SiloFilterExpression("FloatEquals")
+data class FloatEquals(
+    val column: String,
+    val value: Double?,
+) : SiloFilterExpression("FloatEquals")
 
-data class FloatBetween(val column: String, val from: Double?, val to: Double?) : SiloFilterExpression("FloatBetween")
+data class FloatBetween(
+    val column: String,
+    val from: Double?,
+    val to: Double?,
+) : SiloFilterExpression("FloatBetween")
 
-data class StringSearch(val column: String, val searchExpression: String?) : SiloFilterExpression("StringSearch")
+data class StringSearch(
+    val column: String,
+    val searchExpression: String?,
+) : SiloFilterExpression("StringSearch")
 
 enum class SequenceType {
     @JsonProperty("Fasta")

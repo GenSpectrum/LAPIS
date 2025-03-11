@@ -22,7 +22,9 @@ private const val HIGH_PRECEDENCE_BUT_LOW_ENOUGH_TO_HAVE_REQUEST_SCOPE_AVAILABLE
 
 @Component
 @Order(HIGH_PRECEDENCE_BUT_LOW_ENOUGH_TO_HAVE_REQUEST_SCOPE_AVAILABLE)
-class RequestIdFilter(private val requestIdContext: RequestIdContext) : OncePerRequestFilter() {
+class RequestIdFilter(
+    private val requestIdContext: RequestIdContext,
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

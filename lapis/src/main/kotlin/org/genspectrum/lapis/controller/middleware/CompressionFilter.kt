@@ -78,7 +78,9 @@ enum class Compression(
     }
 }
 
-class LazyGzipOutputStream(outputStream: OutputStream) : OutputStream() {
+class LazyGzipOutputStream(
+    outputStream: OutputStream,
+) : OutputStream() {
     private val gzipOutputStream by lazy { GZIPOutputStream(outputStream) }
 
     override fun write(byte: Int) = gzipOutputStream.write(byte)
@@ -104,12 +106,18 @@ fun ZstdOutputStream.commitUnderlyingResponseToPreventContentLengthFromBeingSet(
 
 @Component
 @RequestScope
-class RequestCompression(var compressionSource: CompressionSource = CompressionSource.None)
+class RequestCompression(
+    var compressionSource: CompressionSource = CompressionSource.None,
+)
 
 sealed interface CompressionSource {
-    data class RequestProperty(override var compression: Compression) : CompressionSource
+    data class RequestProperty(
+        override var compression: Compression,
+    ) : CompressionSource
 
-    data class AcceptEncodingHeader(override var compression: Compression) : CompressionSource
+    data class AcceptEncodingHeader(
+        override var compression: Compression,
+    ) : CompressionSource
 
     data object None : CompressionSource {
         override val compression = null
@@ -124,8 +132,7 @@ class CompressionFilter(
     private val objectMapper: ObjectMapper,
     private val requestCompression: RequestCompression,
     private val lapisInfoFactory: LapisInfoFactory,
-) :
-    OncePerRequestFilter() {
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -215,7 +222,9 @@ class CompressionFilter(
     }
 }
 
-private class UnknownCompressionFormatException(val unknownFormatValue: String) : Exception()
+private class UnknownCompressionFormatException(
+    val unknownFormatValue: String,
+) : Exception()
 
 class CompressingResponse(
     private val response: HttpServletResponse,
@@ -301,12 +310,11 @@ class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
     override fun getContentLength(
         str: String,
         contentType: MediaType?,
-    ): Long? {
-        return when (requestCompression.compressionSource.compression) {
+    ): Long? =
+        when (requestCompression.compressionSource.compression) {
             null -> super.getContentLength(str, contentType)
             else -> null
         }
-    }
 
     companion object {
         // taken from the initialization in

@@ -3,7 +3,9 @@ package org.genspectrum.lapis.config
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class DatabaseConfig(val schema: DatabaseSchema)
+data class DatabaseConfig(
+    val schema: DatabaseSchema,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class DatabaseSchema(
@@ -40,7 +42,9 @@ enum class MetadataType {
     BOOLEAN,
 }
 
-data class DatabaseFeature(val name: String)
+data class DatabaseFeature(
+    val name: String,
+)
 
 enum class OpennessLevel {
     /**

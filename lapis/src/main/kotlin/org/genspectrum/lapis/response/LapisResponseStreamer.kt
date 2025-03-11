@@ -148,9 +148,8 @@ class LapisResponseStreamer(
     private fun getHeadersParameter(
         targetMediaType: MediaType,
         acceptHeader: List<MediaType>,
-    ): String? {
-        return acceptHeader.find { it.includes(targetMediaType) }
+    ): String? =
+        acceptHeader.find { it.includes(targetMediaType) }
             ?.parameters
             ?.get(HEADERS_ACCEPT_HEADER_PARAMETER)
-    }
 }

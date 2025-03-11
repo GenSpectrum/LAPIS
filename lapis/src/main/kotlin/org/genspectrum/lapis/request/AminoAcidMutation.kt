@@ -14,8 +14,7 @@ data class AminoAcidMutation(
     val position: Int,
     val symbol: String?,
     override val maybe: Boolean = false,
-) :
-    MaybeMutation<AminoAcidMutation> {
+) : MaybeMutation<AminoAcidMutation> {
     companion object {
         fun fromString(
             aminoAcidMutation: String,

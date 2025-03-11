@@ -27,19 +27,15 @@ class ReferenceGenomeSchema(
     private val geneNames: Map<LowercaseName, ReferenceSequenceSchema> = genes
         .associateBy { it.name.lowercase() }
 
-    fun getNucleotideSequenceFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema {
-        return nucleotideSequenceNames[lowercaseName]
+    fun getNucleotideSequenceFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema =
+        nucleotideSequenceNames[lowercaseName]
             ?: throw BadRequestException("Unknown nucleotide sequence from lower case: $lowercaseName")
-    }
 
-    fun getGeneFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema {
-        return geneNames[lowercaseName]
+    fun getGeneFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema =
+        geneNames[lowercaseName]
             ?: throw BadRequestException("Unknown gene from lower case: $lowercaseName")
-    }
 
-    fun isSingleSegmented(): Boolean {
-        return nucleotideSequences.size == 1
-    }
+    fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1
 
     companion object {
         fun readFromFileFromProgramArgsOrEnv(args: Array<String>): ReferenceGenomeSchema {
@@ -50,9 +46,7 @@ class ReferenceGenomeSchema(
             return readFromFile(filename)
         }
 
-        fun readFromFile(filename: String): ReferenceGenomeSchema {
-            return jacksonObjectMapper().readValue(File(filename))
-        }
+        fun readFromFile(filename: String): ReferenceGenomeSchema = jacksonObjectMapper().readValue(File(filename))
 
         private fun readFilenameFromProgramArgs(args: Array<String>): String? {
             val referenceGenomeArg = args.find { it.startsWith("--$REFERENCE_GENOME_FILENAME_ARGS_NAME=") }
@@ -80,9 +74,7 @@ data class ReferenceGenome(
     val genes: List<ReferenceSequence>,
 ) {
     companion object {
-        fun readFromFile(filename: String): ReferenceGenome {
-            return jacksonObjectMapper().readValue(File(filename))
-        }
+        fun readFromFile(filename: String): ReferenceGenome = jacksonObjectMapper().readValue(File(filename))
     }
 }
 

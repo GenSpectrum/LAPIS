@@ -99,11 +99,15 @@ sealed interface AuthorizationResult {
 
     data object Success : AuthorizationResult
 
-    class Failure(val message: String) : AuthorizationResult
+    class Failure(
+        val message: String,
+    ) : AuthorizationResult
 }
 
-private class AlwaysAuthorizedAuthorizationFilter(objectMapper: ObjectMapper, lapisInfoFactory: LapisInfoFactory) :
-    DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
+private class AlwaysAuthorizedAuthorizationFilter(
+    objectMapper: ObjectMapper,
+    lapisInfoFactory: LapisInfoFactory,
+) : DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest) = AuthorizationResult.success()
 }
 
@@ -112,8 +116,7 @@ private class ProtectedDataAuthorizationFilter(
     lapisInfoFactory: LapisInfoFactory,
     private val accessKeys: AccessKeys,
     private val databaseConfig: DatabaseConfig,
-) :
-    DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
+) : DataOpennessAuthorizationFilter(objectMapper, lapisInfoFactory) {
     private val fieldsThatServeNonAggregatedData = databaseConfig.schema
         .metadata
         .filter { it.valuesAreUnique }

@@ -14,8 +14,8 @@ data class SequenceEndpointTestScenario(
         fun createScenarios(
             route: String,
             sequenceName: String,
-        ): List<SequenceEndpointTestScenario> {
-            return listOf(
+        ): List<SequenceEndpointTestScenario> =
+            listOf(
                 null,
                 SequenceEndpointMockDataCollection.DataFormat.FASTA,
                 SequenceEndpointMockDataCollection.DataFormat.JSON,
@@ -95,6 +95,5 @@ data class SequenceEndpointTestScenario(
                         ),
                     )
                 }
-        }
     }
 }

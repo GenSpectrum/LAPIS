@@ -65,28 +65,20 @@ class CachedBodyHttpServletRequest private constructor(
     }
 
     @Throws(IOException::class)
-    override fun getInputStream(): ServletInputStream {
-        return CachedBodyServletInputStream(ByteArrayInputStream(cachedBody))
-    }
+    override fun getInputStream(): ServletInputStream = CachedBodyServletInputStream(ByteArrayInputStream(cachedBody))
 
-    private inner class CachedBodyServletInputStream(private val cachedInputStream: ByteArrayInputStream) :
-        ServletInputStream() {
-        override fun isFinished(): Boolean {
-            return cachedInputStream.available() == 0
-        }
+    private inner class CachedBodyServletInputStream(
+        private val cachedInputStream: ByteArrayInputStream,
+    ) : ServletInputStream() {
+        override fun isFinished(): Boolean = cachedInputStream.available() == 0
 
-        override fun isReady(): Boolean {
-            return true
-        }
+        override fun isReady(): Boolean = true
 
-        override fun setReadListener(listener: ReadListener) {
+        override fun setReadListener(listener: ReadListener): Unit =
             throw UnsupportedOperationException("setReadListener is not supported")
-        }
 
         @Throws(IOException::class)
-        override fun read(): Int {
-            return cachedInputStream.read()
-        }
+        override fun read(): Int = cachedInputStream.read()
     }
 
     fun getProxyAwarePath(): String {
@@ -133,10 +125,9 @@ class CachedBodyHttpServletRequest private constructor(
         return emptyList()
     }
 
-    fun getRequestFieldNames(): Set<String> {
-        return when (method) {
+    fun getRequestFieldNames(): Set<String> =
+        when (method) {
             HttpMethod.GET.name() -> parameterMap.keys
             else -> parsedBody.keys
         }
-    }
 }
