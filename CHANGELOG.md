@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.16](https://github.com/GenSpectrum/LAPIS/compare/v0.3.15...v0.3.16) (2025-03-11)
+
+
+### Bug Fixes
+
+* **lapis:** only keep old log files for 30 days ([#1111](https://github.com/GenSpectrum/LAPIS/issues/1111)) ([66952c5](https://github.com/GenSpectrum/LAPIS/commit/66952c573b218cb47e98246708ccbeb1c7618681))
+
 ## [0.3.15](https://github.com/GenSpectrum/LAPIS/compare/v0.3.14...v0.3.15) (2025-03-03)
 
 
