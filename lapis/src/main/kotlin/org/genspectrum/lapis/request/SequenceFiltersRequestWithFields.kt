@@ -28,8 +28,9 @@ data class SequenceFiltersRequestWithFields(
 }
 
 @JsonComponent
-class SequenceFiltersRequestWithFieldsDeserializer(private val fieldConverter: FieldConverter) :
-    JsonDeserializer<SequenceFiltersRequestWithFields>() {
+class SequenceFiltersRequestWithFieldsDeserializer(
+    private val fieldConverter: FieldConverter,
+) : JsonDeserializer<SequenceFiltersRequestWithFields>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,

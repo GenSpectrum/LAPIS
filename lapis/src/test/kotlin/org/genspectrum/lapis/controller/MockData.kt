@@ -31,7 +31,10 @@ data class MockDataCollection(
     val expectedCsv: String,
     val expectedTsv: String,
 ) {
-    enum class DataFormat(val fileFormat: String, val acceptHeader: String) {
+    enum class DataFormat(
+        val fileFormat: String,
+        val acceptHeader: String,
+    ) {
         PLAIN_JSON("json", APPLICATION_JSON_VALUE),
         NESTED_JSON("json", APPLICATION_JSON_VALUE),
         CSV("csv", TEXT_CSV_VALUE),
@@ -101,7 +104,10 @@ data class SequenceEndpointMockDataCollection(
     val expectedJson: String,
     val expectedNdjson: String,
 ) {
-    enum class DataFormat(val fileFormat: String, val acceptHeader: String) {
+    enum class DataFormat(
+        val fileFormat: String,
+        val acceptHeader: String,
+    ) {
         JSON("json", APPLICATION_JSON_VALUE),
         NDJSON("ndjson", APPLICATION_NDJSON_VALUE),
         FASTA("fasta", TEXT_X_FASTA_VALUE),

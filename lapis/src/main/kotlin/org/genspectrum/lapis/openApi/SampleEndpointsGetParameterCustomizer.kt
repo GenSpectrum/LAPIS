@@ -19,9 +19,10 @@ class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
 
     override fun customise(openApi: OpenAPI) {
         for ((_, path) in openApi.paths.filter { (url, _) ->
-            url.startsWith("/sample") && !PATH_WITHOUT_DOWNLOAD_AS_FILE.any {
-                url.startsWith(it)
-            }
+            url.startsWith("/sample") &&
+                !PATH_WITHOUT_DOWNLOAD_AS_FILE.any {
+                    url.startsWith(it)
+                }
         }) {
             path.get.addParametersItem(
                 Parameter()

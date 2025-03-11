@@ -76,6 +76,12 @@ tasks.named('test') {
     }
 }
 
+// taken from https://github.com/JLLeitschuh/ktlint-gradle/issues/809#issuecomment-2515514826
+// this can probably be removed once https://github.com/JLLeitschuh/ktlint-gradle/pull/818 is merged and released
+ktlint {
+    version.set("1.4.1")
+}
+
 openApi {
     outputDir.set(file("$rootDir"))
 

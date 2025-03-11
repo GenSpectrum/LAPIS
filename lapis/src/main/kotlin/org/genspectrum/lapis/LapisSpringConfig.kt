@@ -71,10 +71,9 @@ class LapisSpringConfig {
         @Value("\${lapis.databaseConfig.path}") configPath: String,
         yamlObjectMapper: YamlObjectMapper,
         databaseConfigValidator: DatabaseConfigValidator,
-    ): DatabaseConfig {
-        return yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(File(configPath))
+    ): DatabaseConfig =
+        yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(File(configPath))
             .let { databaseConfigValidator.validate(it) }
-    }
 
     @Bean
     fun sequenceFilterFields(databaseConfig: DatabaseConfig) = SequenceFilterFields.fromDatabaseConfig(databaseConfig)

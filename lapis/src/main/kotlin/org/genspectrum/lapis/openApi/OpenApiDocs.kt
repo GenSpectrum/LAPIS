@@ -56,8 +56,8 @@ fun buildOpenApiSchema(
     sequenceFilterFields: SequenceFilterFields,
     databaseConfig: DatabaseConfig,
     referenceGenomeSchema: ReferenceGenomeSchema,
-): OpenAPI {
-    return OpenAPI()
+): OpenAPI =
+    OpenAPI()
         .components(
             Components()
                 .addSchemas(
@@ -270,7 +270,6 @@ fun buildOpenApiSchema(
                 .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
                 .addSchemas(FORMAT_SCHEMA, dataFormatSchema()),
         )
-}
 
 private fun getSequenceFiltersWithFormat(
     databaseConfig: DatabaseConfig,

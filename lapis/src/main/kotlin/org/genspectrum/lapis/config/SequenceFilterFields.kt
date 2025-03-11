@@ -11,7 +11,9 @@ val FEATURES_FOR_SEQUENCE_FILTERS = listOf(
     SARS_COV2_VARIANT_QUERY_FEATURE,
 )
 
-data class SequenceFilterFields(val fields: Map<LowercaseName, SequenceFilterField>) {
+data class SequenceFilterFields(
+    val fields: Map<LowercaseName, SequenceFilterField>,
+) {
     companion object {
         fun fromDatabaseConfig(databaseConfig: DatabaseConfig): SequenceFilterFields {
             val metadataFields = databaseConfig.schema.metadata
@@ -122,7 +124,9 @@ private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeatu
         )
     }
 
-sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
+sealed class SequenceFilterFieldType(
+    val openApiType: kotlin.String,
+) {
     data object String : SequenceFilterFieldType("string")
 
     data object Lineage : SequenceFilterFieldType("string")
@@ -133,21 +137,35 @@ sealed class SequenceFilterFieldType(val openApiType: kotlin.String) {
 
     data object VariantQuery : SequenceFilterFieldType("string")
 
-    data class DateFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
+    data class DateFrom(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("string")
 
-    data class DateTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
+    data class DateTo(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("string")
 
     data object Int : SequenceFilterFieldType("integer")
 
-    data class IntFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("integer")
+    data class IntFrom(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("integer")
 
-    data class IntTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("integer")
+    data class IntTo(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("integer")
 
     data object Float : SequenceFilterFieldType("number")
 
-    data class FloatFrom(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("number")
+    data class FloatFrom(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("number")
 
-    data class FloatTo(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("number")
+    data class FloatTo(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("number")
 
-    data class StringSearch(val associatedField: SequenceFilterFieldName) : SequenceFilterFieldType("string")
+    data class StringSearch(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("string")
 }

@@ -10,7 +10,10 @@ const val ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/alignedNucleotideSequences"
 const val ALIGNED_AMINO_ACID_SEQUENCES_ROUTE = "/alignedAminoAcidSequences"
 const val UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/unalignedNucleotideSequences"
 
-enum class SampleRoute(val pathSegment: String, val servesFasta: Boolean = false) {
+enum class SampleRoute(
+    val pathSegment: String,
+    val servesFasta: Boolean = false,
+) {
     AGGREGATED(AGGREGATED_ROUTE),
     DETAILS(DETAILS_ROUTE),
     NUCLEOTIDE_MUTATIONS(NUCLEOTIDE_MUTATIONS_ROUTE),

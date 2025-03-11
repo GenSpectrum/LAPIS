@@ -66,7 +66,8 @@ class NucleotideMutationDeserializer(
 }
 
 @Component
-class StringToNucleotideMutationConverter(private val referenceGenomeSchema: ReferenceGenomeSchema) :
-    Converter<String, NucleotideMutation> {
+class StringToNucleotideMutationConverter(
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
+) : Converter<String, NucleotideMutation> {
     override fun convert(source: String) = NucleotideMutation.fromString(source, referenceGenomeSchema)
 }

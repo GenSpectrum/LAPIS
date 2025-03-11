@@ -31,7 +31,9 @@ object SequencesDataFormat {
 
 @Component
 @Order(DATA_FORMAT_FILTER_ORDER)
-class DataFormatParameterFilter(val objectMapper: ObjectMapper) : OncePerRequestFilter() {
+class DataFormatParameterFilter(
+    val objectMapper: ObjectMapper,
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

@@ -26,8 +26,9 @@ class RequestContext {
 private val log = KotlinLogging.logger {}
 
 @Component
-class RequestContextLoggerFilterAdapter(private val requestContextLogger: RequestContextLogger) :
-    OncePerRequestFilter() {
+class RequestContextLoggerFilterAdapter(
+    private val requestContextLogger: RequestContextLogger,
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

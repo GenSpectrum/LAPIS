@@ -35,7 +35,5 @@ class LapisInfoFactory(
             request.requestURL.toString(),
         ).host} at ${now()}"
 
-    private fun now(): String {
-        return Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
-    }
+    private fun now(): String = Clock.System.now().toLocalDateTime(TimeZone.UTC).toString()
 }

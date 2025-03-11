@@ -59,9 +59,8 @@ class ExceptionHandler(
 
     @ExceptionHandler(AddForbiddenToOpenApiDocsHelper::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleForbiddenException(e: AddForbiddenToOpenApiDocsHelper): ErrorResponse {
-        return responseEntity(HttpStatus.FORBIDDEN, e.message)
-    }
+    fun handleForbiddenException(e: AddForbiddenToOpenApiDocsHelper): ErrorResponse =
+        responseEntity(HttpStatus.FORBIDDEN, e.message)
 
     @ExceptionHandler(SiloException::class)
     fun handleSiloException(e: SiloException): ErrorResponse {
@@ -121,8 +120,8 @@ class ExceptionHandler(
         title: String,
         detail: String?,
         alsoDoOnBuilder: BodyBuilder.() -> Unit = {},
-    ): ErrorResponse {
-        return ResponseEntity
+    ): ErrorResponse =
+        ResponseEntity
             .status(httpStatus)
             .contentType(MediaType.APPLICATION_JSON)
             .also(alsoDoOnBuilder)
@@ -135,11 +134,12 @@ class ExceptionHandler(
                     info = lapisInfoFactory.create(),
                 ),
             )
-    }
 }
 
 @Component
-class NotFoundView(private val databaseConfig: DatabaseConfig) {
+class NotFoundView(
+    private val databaseConfig: DatabaseConfig,
+) {
     fun render(request: WebRequest): String {
         request.contextPath
 
@@ -180,8 +180,7 @@ class ErrorController(
     private val databaseConfig: DatabaseConfig,
     errorAttributes: ErrorAttributes,
     serverProperties: ServerProperties,
-) :
-    BasicErrorController(errorAttributes, serverProperties.error) {
+) : BasicErrorController(errorAttributes, serverProperties.error) {
     override fun errorHtml(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -211,6 +210,11 @@ class ErrorController(
 }
 
 /** This is not yet actually thrown, but makes "403 Forbidden" appear in OpenAPI docs. */
-class AddForbiddenToOpenApiDocsHelper(message: String) : Exception(message)
+class AddForbiddenToOpenApiDocsHelper(
+    message: String,
+) : Exception(message)
 
-class BadRequestException(message: String, cause: Throwable? = null) : Exception(message, cause)
+class BadRequestException(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause)

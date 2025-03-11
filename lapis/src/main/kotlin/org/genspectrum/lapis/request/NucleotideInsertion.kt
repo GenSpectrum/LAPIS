@@ -12,7 +12,11 @@ import org.springframework.stereotype.Component
 const val LAPIS_INSERTION_AMBIGUITY_SYMBOL = "?"
 const val SILO_INSERTION_AMBIGUITY_SYMBOL = ".*"
 
-data class NucleotideInsertion(val position: Int, val insertions: String, val segment: String?) {
+data class NucleotideInsertion(
+    val position: Int,
+    val insertions: String,
+    val segment: String?,
+) {
     companion object {
         fun fromString(
             nucleotideInsertion: String,
@@ -57,8 +61,9 @@ private val NUCLEOTIDE_INSERTION_REGEX =
     )
 
 @JsonComponent
-class NucleotideInsertionDeserializer(private val referenceGenomeSchema: ReferenceGenomeSchema) :
-    JsonDeserializer<NucleotideInsertion>() {
+class NucleotideInsertionDeserializer(
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
+) : JsonDeserializer<NucleotideInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,

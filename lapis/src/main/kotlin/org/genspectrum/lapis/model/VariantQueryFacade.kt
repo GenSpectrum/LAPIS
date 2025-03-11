@@ -14,7 +14,9 @@ import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.springframework.stereotype.Component
 
 @Component
-class VariantQueryFacade(val referenceGenomeSchema: ReferenceGenomeSchema) {
+class VariantQueryFacade(
+    val referenceGenomeSchema: ReferenceGenomeSchema,
+) {
     fun map(variantQuery: String): SiloFilterExpression {
         val lexer = VariantQueryLexer(CharStreams.fromString(variantQuery))
         val tokens = CommonTokenStream(lexer)
@@ -39,7 +41,5 @@ class ThrowingErrorListener : BaseErrorListener() {
         charPositionInLine: Int,
         message: String?,
         exception: RecognitionException?,
-    ) {
-        throw BadRequestException("Failed to parse variant query (line $line:$charPositionInLine): $message.")
-    }
+    ): Unit = throw BadRequestException("Failed to parse variant query (line $line:$charPositionInLine): $message.")
 }

@@ -38,8 +38,9 @@ import org.genspectrum.lapis.silo.StringEquals
 
 private val log = KotlinLogging.logger { }
 
-class VariantQueryCustomListener(val referenceGenomeSchema: ReferenceGenomeSchema) :
-    VariantQueryBaseListener(),
+class VariantQueryCustomListener(
+    val referenceGenomeSchema: ReferenceGenomeSchema,
+) : VariantQueryBaseListener(),
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
@@ -198,4 +199,7 @@ fun mapInsertionSymbol(ctx: RuleContext): String =
         else -> ctx.text
     }
 
-class SiloNotImplementedError(message: String?, cause: Throwable?) : Exception(message, cause)
+class SiloNotImplementedError(
+    message: String?,
+    cause: Throwable?,
+) : Exception(message, cause)

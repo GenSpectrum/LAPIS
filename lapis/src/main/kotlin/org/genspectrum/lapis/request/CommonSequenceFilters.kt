@@ -22,8 +22,11 @@ interface CommonSequenceFilters {
     val offset: Int?
 
     fun isEmpty() =
-        sequenceFilters.isEmpty() && nucleotideMutations.isEmpty() &&
-            aaMutations.isEmpty() && nucleotideInsertions.isEmpty() && aminoAcidInsertions.isEmpty()
+        sequenceFilters.isEmpty() &&
+            nucleotideMutations.isEmpty() &&
+            aaMutations.isEmpty() &&
+            nucleotideInsertions.isEmpty() &&
+            aminoAcidInsertions.isEmpty()
 
     fun getCsvColumnOrder(): CsvColumnOrder = CsvColumnOrder.Undefined
 }
