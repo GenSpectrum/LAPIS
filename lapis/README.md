@@ -88,5 +88,5 @@ e.g. when running via gradle:
 ```
 For example:
 ```
-./gradlew bootRun --args='--silo.url=localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
+./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
 ```
