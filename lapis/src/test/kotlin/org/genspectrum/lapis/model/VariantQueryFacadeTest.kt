@@ -405,6 +405,15 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a valid variantQuery with a stop codon expression then returns SILO query`() {
+        val variantQuery = "ins_S:501:A*C"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidInsertionContains(501, "A\\*C", "S")))
+    }
+
+    @Test
     fun `given a valid variantQuery with a 'AA insertion' expression with lower case then returns SILO query`() {
         val variantQuery = "ins_ORF1a:501:ePe"
 
@@ -429,6 +438,15 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*E.*", "S")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with a 'AA insertion' with stop codon and wildcard then returns SILO query`() {
+        val variantQuery = "ins_S:501:E?*E"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*\\*E", "S")))
     }
 
     @Test

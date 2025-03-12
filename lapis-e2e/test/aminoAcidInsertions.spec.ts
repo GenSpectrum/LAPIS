@@ -9,7 +9,7 @@ describe('The /aminoAcidInsertions endpoint', () => {
       insertionsRequest: { country: 'Switzerland' },
     });
 
-    expect(result.data).to.have.length(6);
+    expect(result.data).to.have.length(11);
 
     const specificInsertion = result.data.find(insertionData => insertionData.insertion === someInsertion);
     expect(specificInsertion?.count).to.equal(5);

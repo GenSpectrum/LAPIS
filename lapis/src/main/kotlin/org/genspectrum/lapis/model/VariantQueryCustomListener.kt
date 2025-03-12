@@ -19,8 +19,10 @@ import mu.KotlinLogging
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
+import org.genspectrum.lapis.request.STOP_CODON
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -131,7 +133,7 @@ class VariantQueryCustomListener(
         expressionStack.addLast(
             NucleotideInsertionContains(
                 ctx.position().text.toInt(),
-                value.uppercase(),
+                value,
                 null,
             ),
         )
@@ -159,7 +161,7 @@ class VariantQueryCustomListener(
         expressionStack.addLast(
             AminoAcidInsertionContains(
                 ctx.position().text.toInt(),
-                value.uppercase(),
+                value,
                 gene,
             ),
         )
@@ -195,9 +197,10 @@ class VariantQueryCustomListener(
 
 fun mapInsertionSymbol(ctx: RuleContext): String =
     when (ctx.text) {
+        STOP_CODON -> ESCAPED_STOP_CODON
         LAPIS_INSERTION_AMBIGUITY_SYMBOL -> SILO_INSERTION_AMBIGUITY_SYMBOL
         else -> ctx.text
-    }
+    }.uppercase()
 
 class SiloNotImplementedError(
     message: String?,

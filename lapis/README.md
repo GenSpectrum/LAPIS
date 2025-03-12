@@ -90,3 +90,21 @@ For example:
 ```
 ./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
 ```
+
+## OpenApi Docs
+
+To generate the OpenApi docs run
+```bash
+./gradlew generateOpenApiDocs
+```
+
+To generate the OpenApi docs for an instance with multi-segmented reference genome run
+```bash
+./gradlew generateOpenApiDocs -Psegmented=true
+```
+
+To generate the OpenApi docs for a protected instance run
+```bash
+./gradlew generateOpenApiDocs -PopennessLevel=protected
+```
+
