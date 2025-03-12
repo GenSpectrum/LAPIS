@@ -84,5 +84,9 @@ Run tests:
 e.g. when running via gradle:
 
 ```bash
-./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>
+./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>'
+```
+For example:
+```
+./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
 ```
