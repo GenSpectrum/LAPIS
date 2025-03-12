@@ -9,6 +9,9 @@ import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
+const val STOP_CODON = "*"
+const val ESCAPED_STOP_CODON = "\\*"
+
 data class AminoAcidInsertion(
     val position: Int,
     val gene: String,
@@ -35,7 +38,7 @@ data class AminoAcidInsertion(
                 )
             val geneName = referenceGenomeSchema.getGeneFromLowercaseName(geneLowerCase).name
 
-            val insertions = matchGroups["insertions"]?.value?.replace(
+            val insertions = matchGroups["insertions"]?.value?.replace(STOP_CODON, ESCAPED_STOP_CODON)?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
                 SILO_INSERTION_AMBIGUITY_SYMBOL,
             )?.uppercase()
@@ -54,7 +57,7 @@ data class AminoAcidInsertion(
 
 private val AMINO_ACID_INSERTION_REGEX =
     Regex(
-        """^ins_(?<gene>[a-zA-Z0-9_-]+):(?<position>\d+):(?<insertions>(([a-zA-Z?]|(\.\*))+))$""",
+        """^ins_(?<gene>[a-zA-Z0-9_-]+):(?<position>\d+):(?<insertions>(([a-zA-Z?]|(\*))+))$""",
         setOf(
             RegexOption.IGNORE_CASE,
         ),

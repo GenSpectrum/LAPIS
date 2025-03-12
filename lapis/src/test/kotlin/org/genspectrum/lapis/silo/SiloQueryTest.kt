@@ -518,6 +518,17 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
+                    AminoAcidInsertionContains(1234, "A\\*B", "someGene"),
+                    """
+                        {
+                            "type": "AminoAcidInsertionContains",
+                            "position": 1234,
+                            "value": "A\\*B",
+                            "sequenceName":"someGene"
+                        }
+                    """,
+                ),
+                Arguments.of(
                     DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
                     """
                         {
