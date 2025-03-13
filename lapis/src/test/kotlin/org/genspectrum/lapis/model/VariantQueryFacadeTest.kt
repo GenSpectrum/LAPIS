@@ -423,6 +423,15 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given an invalid variantQuery with an invalid gene return error`() {
+        val variantQuery = "ins_invalidGene:501:EPE"
+
+        val exception = assertThrows<BadRequestException> { underTest.map(variantQuery) }
+
+        assertThat(exception.message, `is`("Unknown gene from lower case: invalidgene"))
+    }
+
+    @Test
     fun `given a valid variantQuery with a 'AA insertion' expression with lower case gene then returns SILO query`() {
         val variantQuery = "ins_orF1a:501:EPE"
 
