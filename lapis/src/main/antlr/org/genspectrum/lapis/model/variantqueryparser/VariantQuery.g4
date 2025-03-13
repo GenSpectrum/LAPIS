@@ -5,11 +5,11 @@ grammar VariantQuery;
 start: expr EOF;
 expr:
   single             # Uni
-  | '!' expr         # Not
-  | expr '&' expr    # And
-  | expr '|' expr    # Or
+  | NOT expr         # Not
+  | expr AND expr    # And
+  | expr OR expr    # Or
   | '(' expr ')'     # Parenthesis
-  | M A Y B E '(' expr ')' # Maybe
+  | MAYBE '(' expr ')' # Maybe
   ;
 
 single:
@@ -76,6 +76,10 @@ gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | 
 
 
 // lexer rules
+MAYBE: 'MAYBE' | 'maybe';
+NOT: 'NOT' | 'not' | '!';
+AND: 'AND' | 'and' | '&';
+OR: 'OR' | 'or' | '|';
 
 A: 'A' | 'a';
 B: 'B' | 'b';
