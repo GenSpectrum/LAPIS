@@ -5,11 +5,11 @@ grammar VariantQuery;
 start: expr EOF;
 expr:
   single             # Uni
-  | NOT expr         # Not
-  | expr AND expr    # And
-  | expr OR expr    # Or
+  | not_ expr         # Not
+  | expr and_ expr    # And
+  | expr or_ expr    # Or
   | '(' expr ')'     # Parenthesis
-  | MAYBE '(' expr ')' # Maybe
+  | maybe_ '(' expr ')' # Maybe
   ;
 
 single:
@@ -24,10 +24,15 @@ single:
   | gisaidCladeLineageQuery
   ;
 
+or_: O R | '|';
+maybe_: M A Y B E;
+not_: N O T | '!';
+and_: A N D | '&';
+position: NUMBER+;
+
 nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
 nucleotideMutationQueryFirstSymbol: nucleotideSymbol;
 nucleotideMutationQuerySecondSymbol: possibleAmbiguousNucleotideSymbol;
-position: NUMBER+;
 nucleotideSymbol: A | C | G | T;
 ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
 possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
@@ -76,11 +81,6 @@ gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | 
 
 
 // lexer rules
-MAYBE: 'MAYBE' | 'maybe';
-NOT: 'NOT' | 'not' | '!';
-AND: 'AND' | 'and' | '&';
-OR: 'OR' | 'or' | '|';
-
 A: 'A' | 'a';
 B: 'B' | 'b';
 C: 'C' | 'c';

@@ -58,11 +58,11 @@ class VariantQueryCustomListener(
     }
 
     override fun enterGene(ctx: VariantQueryParser.GeneContext) {
-       try {
-           referenceGenomeSchema.getGeneFromLowercaseName(ctx.text.lowercase()).name
-       } catch (e: RecognitionException) {
-           throw BadRequestException("Gene not implemented", e)
-       }
+        try {
+            referenceGenomeSchema.getGeneFromLowercaseName(ctx.text.lowercase()).name
+        } catch (e: RecognitionException) {
+            throw BadRequestException("Gene not implemented", e)
+        }
     }
 
     override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
