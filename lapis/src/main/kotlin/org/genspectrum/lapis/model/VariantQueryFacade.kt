@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.springframework.stereotype.Component
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 @Component
 class VariantQueryFacade(
     val referenceGenomeSchema: ReferenceGenomeSchema,
+    val allowedSequenceFilterFields: SequenceFilterFields,
 ) {
     fun map(variantQuery: String): SiloFilterExpression {
         val lexer = VariantQueryLexer(CharStreams.fromString(variantQuery))
@@ -24,7 +26,7 @@ class VariantQueryFacade(
         parser.removeErrorListeners()
         parser.addErrorListener(ThrowingErrorListener())
 
-        val listener = VariantQueryCustomListener(referenceGenomeSchema)
+        val listener = VariantQueryCustomListener(referenceGenomeSchema, allowedSequenceFilterFields)
 
         val walker = ParseTreeWalker()
         walker.walk(listener, parser.start())
