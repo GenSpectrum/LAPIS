@@ -526,7 +526,7 @@ class VariantQueryFacadeTest {
 
         assertThat(
             exception.message,
-            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '&', '|'}."),
+            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', A, O}."),
         )
     }
 }
