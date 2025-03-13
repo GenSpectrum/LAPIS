@@ -54,17 +54,9 @@ aaMutationQuery: gene ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
-gene: covidGene;
-covidGene : E | M | N | S | ORF;
-ORF: ORF1A | ORF1B | ORF3A | ORF6 | ORF7A | ORF7B | ORF8 | ORF9B;
-ORF1A: O R F '1' A;
-ORF1B: O R F '1' B;
-ORF3A: O R F '3' A;
-ORF6: O R F '6';
-ORF7A: O R F '7' A;
-ORF7B: O R F '7' B;
-ORF8: O R F '8';
-ORF9B: O R F '9' B;
+gene: gene_char+;
+gene_char: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER;
+
 
 aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
