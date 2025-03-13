@@ -22,6 +22,7 @@ single:
   | nextcladePangolineageQuery
   | nextstrainCladeLineageQuery
   | gisaidCladeLineageQuery
+  | metadataQuery
   ;
 
 or_: O R | '|';
@@ -55,16 +56,17 @@ nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbo
 nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
-aaMutationQuery: gene ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
+aaMutationQuery: geneOrName ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
-gene: gene_char+;
-gene_char: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER;
-
-
-aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
+aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
+
+metadataQuery: geneOrName '=' geneOrName;
+
+geneOrName: charOrNumber+;
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE;
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageWithPossibleSublineages;
 nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
@@ -108,6 +110,7 @@ X: 'X' | 'x';
 Y: 'Y' | 'y';
 Z: 'Z' | 'z';
 MINUS: '-';
+UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 
