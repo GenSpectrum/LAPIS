@@ -16,9 +16,11 @@ import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import VariantQueryParser.PangolineageWithPossibleSublineagesContext
 import mu.KotlinLogging
+import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
@@ -56,7 +58,18 @@ class VariantQueryCustomListener(
         return expressionStack.first()
     }
 
-    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext) {
+    override fun enterGene(ctx: VariantQueryParser.GeneContext) {
+       try {
+           referenceGenomeSchema.getGeneFromLowercaseName(ctx.text.lowercase()).name
+       } catch (e: RecognitionException) {
+           throw BadRequestException("Gene not implemented", e)
+       }
+    }
+
+    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
+        if (ctx == null) {
+            return
+        }
         val position = ctx.position().text.toInt()
 
         val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
