@@ -20,7 +20,7 @@ import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
@@ -40,11 +40,14 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import java.util.Locale
+import kotlin.collections.ArrayDeque
 
 private val log = KotlinLogging.logger { }
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
+    val allowedSequenceFilterFields: SequenceFilterFields,
 ) : VariantQueryBaseListener(),
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
@@ -58,12 +61,15 @@ class VariantQueryCustomListener(
         return expressionStack.first()
     }
 
-    override fun enterGene(ctx: VariantQueryParser.GeneContext) {
-        try {
-            referenceGenomeSchema.getGeneFromLowercaseName(ctx.text.lowercase()).name
-        } catch (e: RecognitionException) {
-            throw BadRequestException("Gene not implemented", e)
+    override fun enterMetadataQuery(ctx: VariantQueryParser.MetadataQueryContext) {
+        val metadataName = ctx.geneOrName(0).text
+        val metadataValue = ctx.geneOrName(1).text
+
+        if (allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)] == null) {
+            throw SiloNotImplementedError("Metadata field $metadataName is not implemented", null)
         }
+
+        expressionStack.addLast(StringEquals(metadataName, metadataValue))
     }
 
     override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
@@ -146,7 +152,15 @@ class VariantQueryCustomListener(
         )
     }
 
-    override fun enterAaMutationQuery(ctx: AaMutationQueryContext) {
+    override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
+        if (ctx == null) {
+            return
+        }
+        try {
+            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
+        } catch (e: RecognitionException) {
+            throw BadRequestException("Gene not implemented", e)
+        }
         val position = ctx.position().text.toInt()
         val geneName = ctx.gene().text
         val gene = referenceGenomeSchema.getGene(geneName)?.name
@@ -161,6 +175,11 @@ class VariantQueryCustomListener(
     }
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
+        try {
+            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
+        } catch (e: RecognitionException) {
+            throw BadRequestException("Gene not implemented", e)
+        }
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val geneName = ctx.gene().text
         val gene = referenceGenomeSchema.getGene(geneName)?.name

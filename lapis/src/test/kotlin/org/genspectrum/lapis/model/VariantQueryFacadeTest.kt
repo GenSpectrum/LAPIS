@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -32,7 +33,7 @@ class VariantQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema, dummySequenceFilterFields)
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
@@ -522,6 +523,15 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(StringEquals(GISAID_CLADE_COLUMN, "AB")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with metadata expression then returns SILO query`() {
+        val variantQuery = "some_metadata=AB"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals("some_metadata", "AB")))
     }
 
     @Test
