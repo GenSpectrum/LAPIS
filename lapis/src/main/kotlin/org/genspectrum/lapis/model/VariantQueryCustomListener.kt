@@ -72,6 +72,82 @@ class VariantQueryCustomListener(
         return expressionStack.first()
     }
 
+    override fun enterMetadataLessThanEqualQuery(ctx: VariantQueryParser.MetadataLessThanEqualQueryContext) {
+        val metadataName = ctx.geneOrName().text
+        val metadataValue = ctx.dateOrNumber().text
+
+        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        when (field.type) {
+            SequenceFilterFieldType.Date -> {
+                try {
+                    val date = LocalDate.parse(metadataValue)
+                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
+                } catch (exception: DateTimeParseException) {
+                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
+                }
+            }
+
+            is SequenceFilterFieldType.Float -> {
+                try {
+                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid float", e)
+                }
+            }
+
+            is SequenceFilterFieldType.Int -> {
+                try {
+                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
+                }
+            }
+
+            else -> {
+                throw BadRequestException("expression <= can not be used for ${field.type}", null)
+            }
+        }
+    }
+
+    override fun enterMetadataGreaterThanEqualQuery(ctx: VariantQueryParser.MetadataGreaterThanEqualQueryContext) {
+        val metadataName = ctx.geneOrName().text
+        val metadataValue = ctx.dateOrNumber().text
+
+        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        when (field.type) {
+            SequenceFilterFieldType.Date -> {
+                try {
+                    val date = LocalDate.parse(metadataValue)
+                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
+                } catch (exception: DateTimeParseException) {
+                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
+                }
+            }
+
+            is SequenceFilterFieldType.Float -> {
+                try {
+                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid float", e)
+                }
+            }
+
+            is SequenceFilterFieldType.Int -> {
+                try {
+                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
+                }
+            }
+
+            else -> {
+                throw BadRequestException("expression >= can not be used for ${field.type}", null)
+            }
+        }
+    }
+
     override fun enterMetadataQuery(ctx: VariantQueryParser.MetadataQueryContext) {
         val metadataName = ctx.geneOrName().text
         val metadataValue = ctx.value().text
@@ -174,6 +250,7 @@ class VariantQueryCustomListener(
             is SequenceFilterFieldType.StringSearch -> {
                 expressionStack.addLast(StringSearch(metadataName, metadataValue))
             }
+
             SequenceFilterFieldType.VariantQuery -> {
                 throw BadRequestException("VariantQuery cannot be recursive", null)
             }
