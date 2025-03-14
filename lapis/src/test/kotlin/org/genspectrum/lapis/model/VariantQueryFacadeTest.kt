@@ -537,6 +537,15 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a valid variantQuery with string (with whitespace) metadata expression then returns SILO query`() {
+        val variantQuery = "some_metadata='Democratic Republic of the Congo'"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringEquals("some_metadata", "'Democratic Republic of the Congo'")))
+    }
+
+    @Test
     fun `given a valid variantQuery with date metadata expression then returns SILO query`() {
         val variantQuery = "date=2020-01-01"
 

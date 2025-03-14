@@ -72,8 +72,8 @@ class VariantQueryCustomListener(
     }
 
     override fun enterMetadataQuery(ctx: VariantQueryParser.MetadataQueryContext) {
-        val metadataName = ctx.geneOrName(0).text
-        val metadataValue = ctx.geneOrName(1).text
+        val metadataName = ctx.geneOrName().text
+        val metadataValue = ctx.value().text
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
