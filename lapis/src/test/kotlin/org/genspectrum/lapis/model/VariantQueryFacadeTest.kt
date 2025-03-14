@@ -7,6 +7,7 @@ import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.LineageEquals
@@ -22,6 +23,7 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class VariantQueryFacadeTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(
@@ -526,12 +528,21 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with metadata expression then returns SILO query`() {
+    fun `given a valid variantQuery with string metadata expression then returns SILO query`() {
         val variantQuery = "some_metadata=AB"
 
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(StringEquals("some_metadata", "AB")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with date metadata expression then returns SILO query`() {
+        val variantQuery = "date=2020-01-01"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
     }
 
     @Test
