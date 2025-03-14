@@ -25,10 +25,10 @@ single:
   | metadataQuery
   ;
 
-or_: O R | '|';
+or_: OR | '|';
 maybe_: M A Y B E;
-not_: N O T | '!';
-and_: A N D | '&';
+not_: NOT | '!';
+and_: AND | '&';
 position: NUMBER+;
 
 nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
@@ -115,6 +115,9 @@ UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 STRING: '\'' (~['\r\n])* '\'';
+AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
+OR: ' OR ';
+NOT: 'NOT ';
 
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;

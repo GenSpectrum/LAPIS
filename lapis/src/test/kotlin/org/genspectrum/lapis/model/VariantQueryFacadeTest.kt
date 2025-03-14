@@ -46,32 +46,31 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult =
-            And(
-                LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
-                LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
-                NOf(
-                    3,
-                    matchExactly = false,
-                    listOf(
-                        NucleotideSymbolEquals(null, 123, "A"),
-                        NucleotideSymbolEquals(null, 234, "T"),
-                        NucleotideSymbolEquals(null, 345, "G"),
-                    ),
+        val expectedResult = And(
+            LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
+            LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
+            NOf(
+                3,
+                matchExactly = false,
+                listOf(
+                    NucleotideSymbolEquals(null, 123, "A"),
+                    NucleotideSymbolEquals(null, 234, "T"),
+                    NucleotideSymbolEquals(null, 345, "G"),
                 ),
-                Maybe(
-                    Or(
-                        NucleotideSymbolEquals(null, 800, "-"),
-                        NucleotideSymbolEquals(null, 700, "B"),
-                    ),
-                ),
-                Not(HasNucleotideMutation(null, 600)),
+            ),
+            Maybe(
                 Or(
-                    NucleotideSymbolEquals(null, 500, "B"),
-                    NucleotideSymbolEquals(null, 400, "-"),
+                    NucleotideSymbolEquals(null, 800, "-"),
+                    NucleotideSymbolEquals(null, 700, "B"),
                 ),
-                NucleotideSymbolEquals(null, 300, "G"),
-            )
+            ),
+            Not(HasNucleotideMutation(null, 600)),
+            Or(
+                NucleotideSymbolEquals(null, 500, "B"),
+                NucleotideSymbolEquals(null, 400, "-"),
+            ),
+            NucleotideSymbolEquals(null, 300, "G"),
+        )
 
         assertThat(result, equalTo(expectedResult))
     }
@@ -538,6 +537,35 @@ class VariantQueryFacadeTest {
     }
 
     @Test
+    fun `given a valid variantQuery with mutation and metadata expression then returns SILO query`() {
+        val variantQuery = "(NOT some_metadata=AB) & 300G"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = And(
+            NucleotideSymbolEquals(null, 300, "G"),
+            Not(StringEquals("some_metadata", "AB")),
+        )
+
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
+    fun `given a valid variantQuery with mutation and regex metadata expression then returns SILO query`() {
+        val variantQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR')"
+
+        val result = underTest.map(variantQuery)
+
+        val expectedResult = And(
+            StringSearch("some_metadata.regex", "'BANGALOR'"),
+            NucleotideSymbolEquals(null, 300, "G"),
+            StringEquals("some_metadata", "BANGALOR"),
+        )
+
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
     fun `given a valid variantQuery with string (with whitespace) metadata expression then returns SILO query`() {
         val variantQuery = "some_metadata='Democratic Republic of the Congo'"
 
@@ -548,11 +576,11 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a valid variantQuery with string (with regex) metadata expression then returns SILO query`() {
-        val variantQuery = "some_metadata.regex='Democratic.*'"
+        val variantQuery = "some_metadata.regex='(Democratic.*'"
 
         val result = underTest.map(variantQuery)
 
-        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'Democratic.*'")))
+        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*'")))
     }
 
     @Test
@@ -584,7 +612,7 @@ class VariantQueryFacadeTest {
 
         assertThat(
             exception.message,
-            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', A, O}."),
+            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', ' AND ', ' OR '}."),
         )
     }
 }
