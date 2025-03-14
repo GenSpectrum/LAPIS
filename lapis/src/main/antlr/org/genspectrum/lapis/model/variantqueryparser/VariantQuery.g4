@@ -5,11 +5,11 @@ grammar VariantQuery;
 start: expr EOF;
 expr:
   single             # Uni
-  | '!' expr         # Not
-  | expr '&' expr    # And
-  | expr '|' expr    # Or
+  | not_ expr         # Not
+  | expr and_ expr    # And
+  | expr or_ expr    # Or
   | '(' expr ')'     # Parenthesis
-  | M A Y B E '(' expr ')' # Maybe
+  | maybe_ '(' expr ')' # Maybe
   ;
 
 single:
@@ -22,12 +22,18 @@ single:
   | nextcladePangolineageQuery
   | nextstrainCladeLineageQuery
   | gisaidCladeLineageQuery
+  | metadataQuery
   ;
+
+or_: OR | '|';
+maybe_: M A Y B E;
+not_: NOT | '!';
+and_: AND | '&';
+position: NUMBER+;
 
 nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
 nucleotideMutationQueryFirstSymbol: nucleotideSymbol;
 nucleotideMutationQuerySecondSymbol: possibleAmbiguousNucleotideSymbol;
-position: NUMBER+;
 nucleotideSymbol: A | C | G | T;
 ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
 possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
@@ -50,24 +56,21 @@ nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbo
 nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
-aaMutationQuery: gene ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
+aaMutationQuery: geneOrName ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
-gene: covidGene;
-covidGene : E | M | N | S | ORF;
-ORF: ORF1A | ORF1B | ORF3A | ORF6 | ORF7A | ORF7B | ORF8 | ORF9B;
-ORF1A: O R F '1' A;
-ORF1B: O R F '1' B;
-ORF3A: O R F '3' A;
-ORF6: O R F '6';
-ORF7A: O R F '7' A;
-ORF7B: O R F '7' B;
-ORF8: O R F '8';
-ORF9B: O R F '9' B;
-
-aaInsertionQuery: insertionKeyword gene ':' position ':' aaInsertionSymbol+;
+aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
+
+metadataQuery: geneOrName '=' value;
+value: geneOrName | STRING;
+metadataGreaterThanEqualQuery: geneOrName '>=' dateOrNumber;
+metadataLessThanEqualQuery: geneOrName '<=' dateOrNumber;
+
+geneOrName: charOrNumber+;
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT;
+dateOrNumber: NUMBER | MINUS | DOT;
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageWithPossibleSublineages;
 nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
@@ -84,7 +87,6 @@ gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | 
 
 
 // lexer rules
-
 A: 'A' | 'a';
 B: 'B' | 'b';
 C: 'C' | 'c';
@@ -112,8 +114,13 @@ X: 'X' | 'x';
 Y: 'Y' | 'y';
 Z: 'Z' | 'z';
 MINUS: '-';
+UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
+STRING: '\'' (~['\r\n])* '\'';
+AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
+OR: ' OR ';
+NOT: 'NOT ';
 
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;
