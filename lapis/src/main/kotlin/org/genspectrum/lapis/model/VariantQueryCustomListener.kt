@@ -20,6 +20,8 @@ import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.SequenceFilterField
+import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
@@ -29,8 +31,14 @@ import org.genspectrum.lapis.request.STOP_CODON
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.BooleanEquals
+import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.FloatBetween
+import org.genspectrum.lapis.silo.FloatEquals
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
+import org.genspectrum.lapis.silo.IntBetween
+import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
@@ -40,6 +48,8 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
 
@@ -47,7 +57,7 @@ private val log = KotlinLogging.logger { }
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
-    val allowedSequenceFilterFields: SequenceFilterFields,
+    private val allowedSequenceFilterFields: SequenceFilterFields,
 ) : VariantQueryBaseListener(),
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
@@ -65,11 +75,106 @@ class VariantQueryCustomListener(
         val metadataName = ctx.geneOrName(0).text
         val metadataValue = ctx.geneOrName(1).text
 
-        if (allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)] == null) {
-            throw SiloNotImplementedError("Metadata field $metadataName is not implemented", null)
-        }
+        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        when (field.type) {
+            SequenceFilterFieldType.String -> {
+                expressionStack.addLast(StringEquals(metadataName, metadataValue))
+            }
 
-        expressionStack.addLast(StringEquals(metadataName, metadataValue))
+            SequenceFilterFieldType.Lineage -> {
+                val lineage = LineageEquals(metadataName, metadataValue, false)
+                expressionStack.addLast(lineage)
+            }
+
+            SequenceFilterFieldType.Boolean -> {
+                try {
+                    expressionStack.addLast(BooleanEquals(metadataName, metadataValue.toBoolean()))
+                } catch (e: IllegalArgumentException) {
+                    throw BadRequestException("'$metadataValue' is not a valid boolean", e)
+                }
+            }
+
+            SequenceFilterFieldType.Date -> {
+                try {
+                    val date = LocalDate.parse(metadataValue)
+                    expressionStack.addLast(DateBetween(metadataName, to = date, from = date))
+                } catch (exception: DateTimeParseException) {
+                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
+                }
+            }
+
+            is SequenceFilterFieldType.DateFrom -> {
+                try {
+                    val date = LocalDate.parse(metadataValue)
+                    expressionStack.addLast(DateBetween(metadataName, to = null, from = date))
+                } catch (exception: DateTimeParseException) {
+                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
+                }
+            }
+
+            is SequenceFilterFieldType.DateTo -> {
+                try {
+                    val date = LocalDate.parse(metadataValue)
+                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
+                } catch (exception: DateTimeParseException) {
+                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
+                }
+            }
+
+            SequenceFilterFieldType.Float -> {
+                try {
+                    expressionStack.addLast(FloatEquals(metadataName, metadataValue.toDouble()))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid float", e)
+                }
+            }
+
+            is SequenceFilterFieldType.FloatFrom -> {
+                try {
+                    expressionStack.addLast(FloatBetween(metadataName, from = metadataValue.toDouble(), to = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid float", e)
+                }
+            }
+
+            is SequenceFilterFieldType.FloatTo -> {
+                try {
+                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid float", e)
+                }
+            }
+
+            SequenceFilterFieldType.Int -> {
+                try {
+                    expressionStack.addLast(IntEquals(metadataName, metadataValue.toInt()))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
+                }
+            }
+
+            is SequenceFilterFieldType.IntFrom -> {
+                try {
+                    expressionStack.addLast(IntBetween(metadataName, from = metadataValue.toInt(), to = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
+                }
+            }
+
+            is SequenceFilterFieldType.IntTo -> {
+                try {
+                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
+                } catch (e: NumberFormatException) {
+                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
+                }
+            }
+
+            is SequenceFilterFieldType.StringSearch -> TODO()
+            SequenceFilterFieldType.VariantQuery -> {
+                throw BadRequestException("VariantQuery cannot be recursive", null)
+            }
+        }
     }
 
     override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
