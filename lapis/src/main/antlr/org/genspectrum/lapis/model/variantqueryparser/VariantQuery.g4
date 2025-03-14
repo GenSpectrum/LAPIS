@@ -67,7 +67,7 @@ metadataQuery: geneOrName '=' value;
 value: geneOrName | STRING;
 
 geneOrName: charOrNumber+;
-charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE;
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT;
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageWithPossibleSublineages;
 nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
