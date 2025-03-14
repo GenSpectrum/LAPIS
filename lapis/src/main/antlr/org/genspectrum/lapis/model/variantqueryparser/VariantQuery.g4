@@ -63,7 +63,8 @@ possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
-metadataQuery: geneOrName '=' geneOrName;
+metadataQuery: geneOrName '=' value;
+value: geneOrName | STRING;
 
 geneOrName: charOrNumber+;
 charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE;
@@ -113,6 +114,7 @@ MINUS: '-';
 UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
+STRING: '\'' (~['\r\n])* '\'';
 
 NUMBER: [0-9];
 WHITESPACE: [ \r\n\t] -> skip;
