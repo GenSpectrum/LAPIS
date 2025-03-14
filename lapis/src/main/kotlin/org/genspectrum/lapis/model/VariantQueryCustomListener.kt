@@ -48,6 +48,7 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
@@ -170,7 +171,9 @@ class VariantQueryCustomListener(
                 }
             }
 
-            is SequenceFilterFieldType.StringSearch -> TODO()
+            is SequenceFilterFieldType.StringSearch -> {
+                expressionStack.addLast(StringSearch(metadataName, metadataValue))
+            }
             SequenceFilterFieldType.VariantQuery -> {
                 throw BadRequestException("VariantQuery cannot be recursive", null)
             }

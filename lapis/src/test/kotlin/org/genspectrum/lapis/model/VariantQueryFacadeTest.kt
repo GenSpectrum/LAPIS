@@ -18,6 +18,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
@@ -543,6 +544,15 @@ class VariantQueryFacadeTest {
         val result = underTest.map(variantQuery)
 
         assertThat(result, equalTo(StringEquals("some_metadata", "'Democratic Republic of the Congo'")))
+    }
+
+    @Test
+    fun `given a valid variantQuery with string (with regex) metadata expression then returns SILO query`() {
+        val variantQuery = "some_metadata.regex='Democratic.*'"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'Democratic.*'")))
     }
 
     @Test
