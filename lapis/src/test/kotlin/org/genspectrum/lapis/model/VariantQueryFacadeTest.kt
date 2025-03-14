@@ -552,12 +552,15 @@ class VariantQueryFacadeTest {
 
     @Test
     fun `given a valid variantQuery with mutation and regex metadata expression then returns SILO query`() {
-        val variantQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR')"
+        val variantQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
 
         val result = underTest.map(variantQuery)
 
         val expectedResult = And(
-            StringSearch("some_metadata.regex", "'BANGALOR'"),
+            Or(
+                Not(AminoAcidSymbolEquals("S", 501, "Y")),
+                StringSearch("some_metadata.regex", "'BANGALOR'"),
+            ),
             NucleotideSymbolEquals(null, 300, "G"),
             StringEquals("some_metadata", "BANGALOR"),
         )
@@ -612,7 +615,9 @@ class VariantQueryFacadeTest {
 
         assertThat(
             exception.message,
-            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', ' AND ', ' OR '}."),
+            `is`(
+                "Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', ' AND ', ' OR '}.",
+            ),
         )
     }
 }
