@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.17](https://github.com/GenSpectrum/LAPIS/compare/v0.3.16...v0.3.17) (2025-03-17)
+
+
+### Bug Fixes
+
+* **lapis:** return proper error message when lineage definition from SILO is invalid YAML ([#1117](https://github.com/GenSpectrum/LAPIS/issues/1117)) ([cdf9b63](https://github.com/GenSpectrum/LAPIS/commit/cdf9b6342fce6647518d57f1c2a3021070465d0e)), closes [#1104](https://github.com/GenSpectrum/LAPIS/issues/1104)
+
 ## [0.3.16](https://github.com/GenSpectrum/LAPIS/compare/v0.3.15...v0.3.16) (2025-03-11)
 
 
