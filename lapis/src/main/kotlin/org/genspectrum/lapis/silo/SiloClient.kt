@@ -3,8 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import mu.KotlinLogging
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
@@ -21,8 +21,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
 import java.util.stream.Stream
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class SiloClient(
@@ -129,7 +127,20 @@ open class CachedSiloClient(
             tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
         ) { it.GET() }
 
-        return yamlObjectMapper.objectMapper.readValue(response.body())
+        val body = response.body()
+        try {
+            return yamlObjectMapper.objectMapper.readValue(body)
+        } catch (e: Exception) {
+            log.error {
+                val truncateLength = 1000
+                val bodyToLog = when {
+                    body.length > truncateLength -> body.substring(0, truncateLength) + "... (truncated)"
+                    else -> body
+                }
+                "Failed to parse lineage definition from SILO, it was: '$bodyToLog'"
+            }
+            throw RuntimeException("Failed to parse lineage definition from SILO: ${e.message}", e)
+        }
     }
 
     private fun <ResponseBodyType> send(
