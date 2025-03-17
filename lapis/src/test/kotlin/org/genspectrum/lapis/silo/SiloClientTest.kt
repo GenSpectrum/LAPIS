@@ -479,6 +479,26 @@ class SiloClientTest(
         )
     }
 
+    @Test
+    fun `GIVEN silo returns invalid lineage definition file THEN returns appropriate error`() {
+        val columnName = "test_column"
+        MockServerClient("localhost", MOCK_SERVER_PORT)
+            .`when`(
+                request()
+                    .withMethod("GET")
+                    .withPath("/lineageDefinition/$columnName")
+                    .withHeader("X-Request-Id", REQUEST_ID_VALUE),
+            )
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody(""),
+            )
+
+        val exception = assertThrows<RuntimeException> { underTest.getLineageDefinition(columnName) }
+        assertThat(exception.message, containsString("Failed to parse lineage definition from SILO: "))
+    }
+
     companion object {
         @JvmStatic
         val mutationActions = listOf(
