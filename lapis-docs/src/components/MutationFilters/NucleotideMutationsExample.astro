@@ -1,8 +1,9 @@
 ---
 import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
+import SegmentNames from './SegmentNames.astro';
 
 const referenceGenomes = getReferenceGenomes();
 const multiSegmented = isMultiSegmented(referenceGenomes);
 ---
 
-<code>{multiSegmented && '<segment>:'}{'<position><base>'}</code>.
+<code>{multiSegmented && `${referenceGenomes.nucleotideSequences[0].name}:`}123T</code>

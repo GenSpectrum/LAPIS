@@ -43,6 +43,7 @@ const conceptsPages = prependToRelativeUrl(
     [
         { title: 'Data versions', relativeUrl: '/data-versions' },
         { title: 'Mutation filters', relativeUrl: '/mutation-filters' },
+        { title: 'Insertion filters', relativeUrl: '/insertion-filters' },
         { title: 'Ambiguous symbols', relativeUrl: '/ambiguous-symbols' },
         { title: 'Pango lineage query', relativeUrl: '/pango-lineage-query' },
         { title: 'Request methods: GET and POST', relativeUrl: '/request-methods' },

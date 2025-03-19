@@ -2,7 +2,6 @@
 import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
 
 const referenceGenomes = getReferenceGenomes();
-const multiSegmented = isMultiSegmented(referenceGenomes);
 ---
 
-<code>{multiSegmented && '<segment>:'}{'<position><base>'}</code>.
+<code>ins_{`${referenceGenomes.genes[0].name}`}:123:QE</code>
