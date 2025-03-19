@@ -88,6 +88,10 @@ export default defineConfig({
                             link: '/concepts/mutation-filters',
                         },
                         {
+                            label: 'Insertion filters',
+                            link: '/concepts/insertion-filters',
+                        },
+                        {
                             label: 'Ambiguous symbols',
                             link: '/concepts/ambiguous-symbols',
                         },

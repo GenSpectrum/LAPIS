@@ -5,4 +5,4 @@ const referenceGenomes = getReferenceGenomes();
 const multiSegmented = isMultiSegmented(referenceGenomes);
 ---
 
-<code>{multiSegmented && '<segment>:'}{'<position><base>'}</code>.
+<code>ins_{multiSegmented && '<segment>:'}{'<position>:<insertion>'}</code>.

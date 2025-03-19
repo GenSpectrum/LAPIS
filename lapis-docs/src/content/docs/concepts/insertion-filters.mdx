@@ -1,0 +1,31 @@
+---
+title: Insertion filters
+description: Insertion filters
+---
+
+import GeneNames from '../../../components/MutationFilters/GeneNames.astro';
+import NucleotideInsertionExample from '../../../components/MutationFilters/NucleotideInsertionExample.astro';
+import NucleotideInsertion from '../../../components/MutationFilters/NucleotideInsertion.astro';
+import AminoAcidInsertionExample from '../../../components/MutationFilters/AminoAcidInsertionExample.astro';
+import SegmentNames from '../../../components/MutationFilters/SegmentNames.astro';
+
+It is possible to filter for amino acid and nucleotide insertions.
+Multiple insertion filters can be provided in a single request.
+
+A nucleotide insertion has the format <NucleotideInsertion /> <SegmentNames/>
+A `<insertion>` can be a string of one or more of the four nucleotides `A`, `T`, `C`, `G` or the [ambiguous symbols](../concepts/ambiguous-symbols).
+**Example:** <NucleotideInsertionExample/>
+
+An amino acid insertion has the format `ins_<gene>:<position>:<insertions>`. <GeneNames />
+A `<insertions>` can be a string of one or more of the 20 amino acid codes, or [ambiguous symbols](../concepts/ambiguous-symbols).
+**Example:** <AminoAcidInsertionExample/>
+
+#### Wildcard
+
+Both insertion filters support a search if the insertion is not known (entirely).
+In the insertion you can add `?` at a position, where you expect any or multiple insertions.
+
+**Examples:**
+
+- `ins_S:123:?TA?` will match any insertion, at position 123 on gene S that has an insertion that contains the symbols `TA`.
+- `ins_S:123:?` will match any insertion, at position 123 on gene S

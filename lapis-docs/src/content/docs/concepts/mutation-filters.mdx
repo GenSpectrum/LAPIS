@@ -7,11 +7,15 @@ import AminoAcidMutationExample from '../../../components/MutationFilters/AminoA
 import MaybeAminoAcidMutationExample from '../../../components/MutationFilters/MaybeAminoAcidMutationExample.astro';
 import GeneNames from '../../../components/MutationFilters/GeneNames.astro';
 import NucleotideMutations from '../../../components/MutationFilters/NucleotideMutations.astro';
+import NucleotideMutationsExample from '../../../components/MutationFilters/NucleotideMutationsExample.astro';
+import SegmentNames from '../../../components/MutationFilters/SegmentNames.astro';
 
 It is possible to filter for amino acid and nucleotide bases/mutations.
 Multiple mutation filters can be provided in a single request.
 
-<NucleotideMutations />
+A nucleotide mutation has the format <NucleotideMutations /> <SegmentNames />
+A `<base>` can be one of the four nucleotides `A`, `T`, `C`, and `G`. It can also be `-` for deletion and `N` for unknown.
+**Example:** <NucleotideMutationsExample />
 
 An amino acid mutation has the format `<gene>:<position><base>`. <GeneNames />
 A `<base>` can be one of the 20 amino acid codes.
