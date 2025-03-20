@@ -220,4 +220,7 @@ export default defineConfig({
     },
     base: process.env.BASE_URL,
     site: process.env.ASTRO_SITE,
+    server: {
+        allowedHosts: true,
+    },
 });
