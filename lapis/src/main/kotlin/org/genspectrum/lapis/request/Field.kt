@@ -14,7 +14,7 @@ class FieldConverter(
     fun convert(source: String): Field {
         val cleaned = caseInsensitiveFieldsCleaner.clean(source)
             ?: throw BadRequestException(
-                "Unknown field: $source, known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
+                "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
             )
 
         return Field(cleaned)
