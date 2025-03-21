@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/GenSpectrum/LAPIS/compare/v0.4.0...v0.4.1) (2025-03-21)
+
+
+### Bug Fixes
+
+* **lapis-docs:** allow all hosts ([#1129](https://github.com/GenSpectrum/LAPIS/issues/1129)) ([d0ea4e2](https://github.com/GenSpectrum/LAPIS/commit/d0ea4e2bb14239ed5209d28bb9f7c77a3e920264)), closes [#1124](https://github.com/GenSpectrum/LAPIS/issues/1124)
+
 ## [0.4.0](https://github.com/GenSpectrum/LAPIS/compare/v0.3.17...v0.4.0) (2025-03-21)
 
 
