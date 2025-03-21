@@ -54,6 +54,8 @@ class SiloClientTest(
 
     private var counter = 0
 
+    private val columnName = "test_column"
+
     @BeforeEach
     fun setup() {
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
@@ -439,31 +441,19 @@ class SiloClientTest(
 
     @Test
     fun `get lineage definition`() {
-        val columnName = "test_column"
-        MockServerClient("localhost", MOCK_SERVER_PORT)
-            .`when`(
-                request()
-                    .withMethod("GET")
-                    .withPath("/lineageDefinition/$columnName")
-                    .withHeader("X-Request-Id", REQUEST_ID_VALUE),
-            )
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(
-                        """
-                            A: {}
-                            A.1:
-                              parents:
-                              - A
-                            B:
-                              aliases:
-                              - A.1.1
-                              parents:
-                              - A.1
-                        """.trimIndent(),
-                    ),
-            )
+        expectLineageDefinitionRequestAndRespondWith(
+            """
+                A: {}
+                A.1:
+                  parents:
+                  - A
+                B:
+                  aliases:
+                  - A.1.1
+                  parents:
+                  - A.1
+            """.trimIndent(),
+        )
 
         val actual = underTest.getLineageDefinition(columnName)
 
@@ -480,8 +470,23 @@ class SiloClientTest(
     }
 
     @Test
+    fun `GIVEN silo returns empty lineage definition file THEN returns empty object`() {
+        expectLineageDefinitionRequestAndRespondWith("")
+
+        val actual = underTest.getLineageDefinition(columnName)
+
+        assertThat(actual, equalTo(emptyMap()))
+    }
+
+    @Test
     fun `GIVEN silo returns invalid lineage definition file THEN returns appropriate error`() {
-        val columnName = "test_column"
+        expectLineageDefinitionRequestAndRespondWith("not an object")
+
+        val exception = assertThrows<RuntimeException> { underTest.getLineageDefinition(columnName) }
+        assertThat(exception.message, containsString("Failed to parse lineage definition from SILO: "))
+    }
+
+    private fun expectLineageDefinitionRequestAndRespondWith(lineageDefinition: String) {
         MockServerClient("localhost", MOCK_SERVER_PORT)
             .`when`(
                 request()
@@ -492,11 +497,8 @@ class SiloClientTest(
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(""),
+                    .withBody(lineageDefinition),
             )
-
-        val exception = assertThrows<RuntimeException> { underTest.getLineageDefinition(columnName) }
-        assertThat(exception.message, containsString("Failed to parse lineage definition from SILO: "))
     }
 
     companion object {

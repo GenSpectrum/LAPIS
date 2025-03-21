@@ -128,6 +128,11 @@ open class CachedSiloClient(
         ) { it.GET() }
 
         val body = response.body()
+
+        if (body.isBlank()) {
+            return emptyMap()
+        }
+
         try {
             return yamlObjectMapper.objectMapper.readValue(body)
         } catch (e: Exception) {
