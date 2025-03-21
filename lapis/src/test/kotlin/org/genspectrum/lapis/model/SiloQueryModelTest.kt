@@ -10,12 +10,10 @@ import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.response.AminoAcidInsertionResponse
-import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.InsertionData
+import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationData
-import org.genspectrum.lapis.response.NucleotideInsertionResponse
-import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
@@ -116,16 +114,17 @@ class SiloQueryModelTest {
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         ).toList()
 
-        val expectedMutation = NucleotideMutationResponse(
-            mutation = "A1234B",
-            count = 1234,
-            coverage = 2345,
-            proportion = 0.1234,
-            sequenceName = null,
-            mutationFrom = "A",
-            mutationTo = "B",
-            position = 1234,
-        )
+        val expectedMutation =
+            MutationResponse(
+                mutation = "A1234B",
+                count = 1234,
+                coverage = 2345,
+                proportion = 0.1234,
+                sequenceName = null,
+                mutationFrom = "A",
+                mutationTo = "B",
+                position = 1234,
+            )
         assertThat(result, equalTo(listOf(expectedMutation)))
     }
 
@@ -139,7 +138,7 @@ class SiloQueryModelTest {
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         ).toList()
 
-        val expectedMutation = NucleotideMutationResponse(
+        val expectedMutation = MutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
             coverage = 2345,
@@ -161,7 +160,7 @@ class SiloQueryModelTest {
             MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
         ).toList()
 
-        val expectedMutation = AminoAcidMutationResponse(
+        val expectedMutation = MutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
             coverage = 2345,
@@ -191,7 +190,7 @@ class SiloQueryModelTest {
             ),
         ).toList()
 
-        val expectedInsertion = NucleotideInsertionResponse(
+        val expectedInsertion = InsertionResponse(
             insertion = "ins_sequenceName:1234:ABCD",
             count = 42,
             insertedSymbols = "ABCD",
@@ -217,7 +216,7 @@ class SiloQueryModelTest {
             ),
         ).toList()
 
-        val expectedInsertion = AminoAcidInsertionResponse(
+        val expectedInsertion = InsertionResponse(
             insertion = "ins_sequenceName:1234:ABCD",
             count = 42,
             insertedSymbols = "ABCD",

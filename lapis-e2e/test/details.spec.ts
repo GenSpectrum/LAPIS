@@ -112,6 +112,19 @@ Solothurn,B.1,key_1002052
     );
   });
 
+  it('should return only CSV header when no data', async () => {
+    const urlParams = new URLSearchParams({
+      country: 'this country does not exist',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(await result.text()).to.be.equal(
+      'primaryKey,date,region,country,pangoLineage,division,age,qc_value,test_boolean_column\n'
+    );
+  });
+
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
       fields: 'division,pangoLineage,primaryKey',

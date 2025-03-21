@@ -50,7 +50,7 @@ data class LapisInfo(
     val siloVersion: String? = null,
 )
 
-data class NucleotideMutationResponse(
+data class MutationResponse(
     val mutation: String,
     val count: Int,
     val coverage: Int,
@@ -59,115 +59,12 @@ data class NucleotideMutationResponse(
     val mutationFrom: String,
     val mutationTo: String,
     val position: Int,
-) : CsvRecord {
-    override fun getValuesList(comparator: Comparator<String>) =
-        listOf(
-            mutation,
-            count.toString(),
-            coverage.toString(),
-            proportion.toString(),
-            sequenceName ?: "",
-            mutationFrom,
-            mutationTo,
-            position.toString(),
-        )
+)
 
-    override fun getHeader(comparator: Comparator<String>) =
-        listOf(
-            "mutation",
-            "count",
-            "coverage",
-            "proportion",
-            "sequenceName",
-            "mutationFrom",
-            "mutationTo",
-            "position",
-        )
-}
-
-data class AminoAcidMutationResponse(
-    val mutation: String,
-    val count: Int,
-    val coverage: Int,
-    val proportion: Double,
-    val sequenceName: String,
-    val mutationFrom: String,
-    val mutationTo: String,
-    val position: Int,
-) : CsvRecord {
-    override fun getValuesList(comparator: Comparator<String>) =
-        listOf(
-            mutation,
-            count.toString(),
-            coverage.toString(),
-            proportion.toString(),
-            sequenceName,
-            mutationFrom,
-            mutationTo,
-            position.toString(),
-        )
-
-    override fun getHeader(comparator: Comparator<String>) =
-        listOf(
-            "mutation",
-            "count",
-            "coverage",
-            "proportion",
-            "sequenceName",
-            "mutationFrom",
-            "mutationTo",
-            "position",
-        )
-}
-
-data class NucleotideInsertionResponse(
+data class InsertionResponse(
     val insertion: String,
     val count: Int,
     val insertedSymbols: String,
     val position: Int,
     val sequenceName: String?,
-) : CsvRecord {
-    override fun getValuesList(comparator: Comparator<String>) =
-        listOf(
-            insertion,
-            count.toString(),
-            insertedSymbols,
-            position.toString(),
-            sequenceName ?: "",
-        )
-
-    override fun getHeader(comparator: Comparator<String>) =
-        listOf(
-            "insertion",
-            "count",
-            "insertedSymbols",
-            "position",
-            "sequenceName",
-        )
-}
-
-data class AminoAcidInsertionResponse(
-    val insertion: String,
-    val count: Int,
-    val insertedSymbols: String,
-    val position: Int,
-    val sequenceName: String,
-) : CsvRecord {
-    override fun getValuesList(comparator: Comparator<String>) =
-        listOf(
-            insertion,
-            count.toString(),
-            insertedSymbols,
-            position.toString(),
-            sequenceName,
-        )
-
-    override fun getHeader(comparator: Comparator<String>) =
-        listOf(
-            "insertion",
-            "count",
-            "insertedSymbols",
-            "position",
-            "sequenceName",
-        )
-}
+)
