@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/GenSpectrum/LAPIS/compare/v0.3.17...v0.4.0) (2025-03-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** No longer support .* wildcard in advanced queries. Use ? syntax instead.
+
+### Bug Fixes
+
+* **lapis:** pass correctly escaped stop codon to SILO ([be1bb87](https://github.com/GenSpectrum/LAPIS/commit/be1bb873aa0358f4d74eb69be3e08c913d445302)), closes [#1105](https://github.com/GenSpectrum/LAPIS/issues/1105)
+
 ## [0.3.17](https://github.com/GenSpectrum/LAPIS/compare/v0.3.16...v0.3.17) (2025-03-17)
 
 
