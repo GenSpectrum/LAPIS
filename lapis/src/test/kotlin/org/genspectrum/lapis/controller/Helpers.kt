@@ -4,6 +4,7 @@ import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 
 fun sequenceFiltersRequest(sequenceFilters: Map<String, String>) =
     SequenceFiltersRequest(
@@ -53,3 +54,15 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     fields.map { Field(it) },
     emptyList(),
 )
+
+fun MockHttpServletRequestBuilder.withFieldsQuery(fields: List<String>?) =
+    fields?.fold(this) { request, field -> request.queryParam("fields", field) } ?: this
+
+fun MockHttpServletRequestBuilder.withFieldsParam(fields: List<String>?) =
+    fields?.fold(this) { request, field -> request.param("fields", field) } ?: this
+
+fun getFieldsAsJsonPart(fields: List<String>?) =
+    fields
+        ?.joinToString { "\"$it\"" }
+        ?.let { ", \"fields\": [$it]" }
+        ?: ""

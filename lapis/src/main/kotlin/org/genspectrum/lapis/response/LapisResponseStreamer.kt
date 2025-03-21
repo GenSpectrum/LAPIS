@@ -36,7 +36,7 @@ class LapisResponseStreamer(
 ) {
     fun <Request : CommonSequenceFilters> streamData(
         request: Request,
-        getData: (request: Request) -> Stream<out CsvRecord>,
+        getData: (request: Request) -> RecordCollection<*>,
         response: HttpServletResponse,
         responseFormat: ResponseFormat,
     ) {
@@ -50,14 +50,14 @@ class LapisResponseStreamer(
                 val isDownload = response.getHeader(HttpHeaders.CONTENT_DISPOSITION)?.startsWith("attachment") ?: false
 
                 if (isDownload) {
-                    streamPlainJson(response, data)
+                    streamPlainJson(response, data.records)
                     return
                 }
 
-                streamLapisResponseJson(response, data)
+                streamLapisResponseJson(response, data.records)
             }
 
-            is ResponseFormat.Csv -> streamCsv(response, data, responseFormat, request.getCsvColumnOrder())
+            is ResponseFormat.Csv -> streamCsv(response, data, responseFormat)
         }
     }
 
@@ -111,9 +111,8 @@ class LapisResponseStreamer(
 
     private fun streamCsv(
         response: HttpServletResponse,
-        data: Stream<out CsvRecord>,
+        data: RecordCollection<*>,
         responseFormat: ResponseFormat.Csv,
-        csvColumnOrder: CsvColumnOrder,
     ) {
         val targetMediaType = MediaType.valueOf(
             when (responseFormat.delimiter) {
@@ -140,7 +139,6 @@ class LapisResponseStreamer(
                 includeHeaders = includeHeaders,
                 data = data,
                 delimiter = responseFormat.delimiter,
-                csvColumnOrder = csvColumnOrder,
             )
         }
     }

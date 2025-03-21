@@ -90,10 +90,11 @@ class LapisControllerDataFormatTest(
     fun `returns empty CSV`(requestsScenario: RequestScenario) {
         requestsScenario.mockDataCollection.mockToReturnEmptyData(siloQueryModelMock)
 
+        val expectedResult = "${requestsScenario.mockDataCollection.expectedCsv.lines().first()}\n"
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(""))
+            .andExpect(content().string(expectedResult))
     }
 
     @ParameterizedTest(name = "{0} returns data as CSV")
@@ -140,16 +141,21 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
-                mapOf("firstKey" to TextNode("someValue"), "keyWithNullValue" to NullNode.instance),
+                mapOf("primaryKey" to TextNode("someValue"), "date" to NullNode.instance),
             ),
         )
 
         val expectedCsv = """
-            firstKey,keyWithNullValue,count
+            primaryKey,date,count
             someValue,,1
         """.trimIndent()
 
-        mockMvc.perform(getSample("/aggregated?country=Switzerland").header(ACCEPT, "text/csv"))
+        mockMvc.perform(
+            getSample("/aggregated?country=Switzerland&fields=primaryKey&fields=date").header(
+                ACCEPT,
+                "text/csv",
+            ),
+        )
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(startsWith(expectedCsv)))
@@ -160,27 +166,31 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
-                    "firstKey" to TextNode("some first value"),
-                    "keyWithNullValue" to NullNode.instance,
-                    "someOtherKey" to TextNode("someValue"),
+                    "primaryKey" to TextNode("some first value"),
+                    "date" to NullNode.instance,
+                    "country" to TextNode("someValue"),
                 ),
             ),
         )
 
         val expectedCsv = """
-            firstKey,keyWithNullValue,someOtherKey
+            primaryKey,date,country
             some first value,,someValue
         """.trimIndent()
 
-        mockMvc.perform(getSample("/details?country=Switzerland").header(ACCEPT, "text/csv"))
+        mockMvc.perform(
+            getSample("/details?country=Switzerland&fields=primaryKey&fields=date&fields=country").header(
+                ACCEPT,
+                "text/csv",
+            ),
+        )
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(startsWith(expectedCsv)))
     }
 
-    @ParameterizedTest(name = "Aggregated data: {0}")
-    @MethodSource("getColumnOrderRequests")
-    fun `returns aggregated csv columns in correct order`(scenario: ColumnOrderScenario) {
+    @Test
+    fun `GIVEN fields in request WHEN getting aggregated csv THEN fiels are ordered as in request`() {
         every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
@@ -194,13 +204,23 @@ class LapisControllerDataFormatTest(
 
         mockMvc.perform(
             postSample("/aggregated")
-                .content("""{"fields": ${(objectMapper.writeValueAsString(scenario.fields))}}""")
+                .content("""{"fields": ["primaryKey", "date", "region"]}""")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(ACCEPT, "text/csv"),
         )
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
-            .andExpect(content().string(startsWith(scenario.expectedAggregatedCsv)))
+            .andExpect(
+                content().string(
+                    startsWith(
+                        """
+                        primaryKey,date,region,count
+                        key1,date1,region1,1
+                        key2,date2,region2,2
+                        """.trimIndent(),
+                    ),
+                ),
+            )
     }
 
     @ParameterizedTest(name = "Details data: {0}")
@@ -233,46 +253,56 @@ class LapisControllerDataFormatTest(
         @JvmStatic
         fun getRequests(dataFormat: String) =
             endpoints.flatMap { endpoint ->
+                val mockDataCollection = MockDataForEndpoints.getMockData(endpoint)
+                val fieldsJsonPart = getFieldsAsJsonPart(mockDataCollection.fields)
+
                 listOf(
                     RequestScenario(
                         "GET $endpoint with request parameter",
-                        MockDataForEndpoints.getMockData(endpoint),
-                        getSample("$endpoint?country=Switzerland&dataFormat=$dataFormat"),
+                        mockDataCollection,
+                        getSample(endpoint)
+                            .queryParam("country", "Switzerland")
+                            .queryParam("dataFormat", dataFormat)
+                            .withFieldsQuery(mockDataCollection.fields),
                     ),
                     RequestScenario(
                         "GET $endpoint with accept header",
-                        MockDataForEndpoints.getMockData(endpoint),
-                        getSample("$endpoint?country=Switzerland")
+                        mockDataCollection,
+                        getSample(endpoint)
+                            .queryParam("country", "Switzerland")
+                            .withFieldsQuery(mockDataCollection.fields)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                     RequestScenario(
                         "POST JSON $endpoint with request parameter",
-                        MockDataForEndpoints.getMockData(endpoint),
+                        mockDataCollection,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat"}""")
+                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat" $fieldsJsonPart}""")
                             .contentType(MediaType.APPLICATION_JSON),
                     ),
                     RequestScenario(
                         "POST JSON $endpoint with accept header",
-                        MockDataForEndpoints.getMockData(endpoint),
+                        mockDataCollection,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland"}""")
+                            .content("""{"country": "Switzerland" $fieldsJsonPart}""")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                     RequestScenario(
                         "POST form url encoded $endpoint with request parameter",
-                        MockDataForEndpoints.getMockData(endpoint),
+                        mockDataCollection,
                         postSample(endpoint)
                             .param("country", "Switzerland")
                             .param("dataFormat", dataFormat)
+                            .withFieldsParam(mockDataCollection.fields)
                             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
                     ),
                     RequestScenario(
                         "POST form url encoded $endpoint with accept header",
-                        MockDataForEndpoints.getMockData(endpoint),
+                        mockDataCollection,
                         postSample(endpoint)
                             .param("country", "Switzerland")
+                            .withFieldsParam(mockDataCollection.fields)
                             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
@@ -310,54 +340,15 @@ class LapisControllerDataFormatTest(
                 ColumnOrderScenario(
                     description = "GIVEN no fields in request THEN columns are ordered as in database config",
                     fields = emptyList(),
-                    expectedAggregatedCsv = """
-                        primaryKey,date,region,count
-                        key1,date1,region1,1
-                        key2,date2,region2,2
-                    """.trimIndent(),
                     expectedDetailsCsv = """
-                        primaryKey,date,region
-                        key1,date1,region1
-                        key2,date2,region2
+                        primaryKey,date,region,country,pangoLineage,test_boolean_column,age,floatValue
+                        key1,date1,region1,,,,,
+                        key2,date2,region2,,,,,
                     """.trimIndent(),
                 ),
                 ColumnOrderScenario(
                     description = "GIVEN fields in request THEN columns are ordered as in request",
                     fields = listOf("region", "date", "primaryKey"),
-                    expectedAggregatedCsv = """
-                        region,date,primaryKey,count
-                        region1,date1,key1,1
-                        region2,date2,key2,2
-                    """.trimIndent(),
-                    expectedDetailsCsv = """
-                        region,date,primaryKey
-                        region1,date1,key1
-                        region2,date2,key2
-                    """.trimIndent(),
-                ),
-                ColumnOrderScenario(
-                    description = "GIVEN fields in request in different order THEN columns are ordered as in request",
-                    fields = listOf("date", "region", "primaryKey"),
-                    expectedAggregatedCsv = """
-                        date,region,primaryKey,count
-                        date1,region1,key1,1
-                        date2,region2,key2,2
-                    """.trimIndent(),
-                    expectedDetailsCsv = """
-                        date,region,primaryKey
-                        date1,region1,key1
-                        date2,region2,key2
-                    """.trimIndent(),
-                ),
-                ColumnOrderScenario(
-                    description = "GIVEN fields in request with missing column WHEN lapis still returns that column " +
-                        "THEN missing columns are last",
-                    fields = listOf("region", "date"),
-                    expectedAggregatedCsv = """
-                        region,date,primaryKey,count
-                        region1,date1,key1,1
-                        region2,date2,key2,2
-                    """.trimIndent(),
                     expectedDetailsCsv = """
                         region,date,primaryKey
                         region1,date1,key1
@@ -378,7 +369,6 @@ class LapisControllerDataFormatTest(
     data class ColumnOrderScenario(
         val description: String,
         val fields: List<String>,
-        val expectedAggregatedCsv: String,
         val expectedDetailsCsv: String,
     ) {
         override fun toString() = description

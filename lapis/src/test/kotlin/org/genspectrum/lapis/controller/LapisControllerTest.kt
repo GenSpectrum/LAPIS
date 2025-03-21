@@ -7,11 +7,9 @@ import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.response.AminoAcidInsertionResponse
-import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.NucleotideInsertionResponse
-import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -498,7 +496,7 @@ private fun mutationRequestsForMinProportion(
     )
 
 private fun someNucleotideMutationProportion() =
-    NucleotideMutationResponse(
+    MutationResponse(
         mutation = "the mutation",
         count = 42,
         coverage = 52,
@@ -510,7 +508,7 @@ private fun someNucleotideMutationProportion() =
     )
 
 private fun someAminoAcidMutationProportion() =
-    AminoAcidMutationResponse(
+    MutationResponse(
         mutation = "the mutation",
         count = 42,
         coverage = 52,
@@ -522,7 +520,7 @@ private fun someAminoAcidMutationProportion() =
     )
 
 private fun someNucleotideInsertion() =
-    NucleotideInsertionResponse(
+    InsertionResponse(
         insertion = "the insertion",
         count = 42,
         insertedSymbols = "CAGAAG",
@@ -531,7 +529,7 @@ private fun someNucleotideInsertion() =
     )
 
 private fun someAminoAcidInsertion() =
-    AminoAcidInsertionResponse(
+    InsertionResponse(
         insertion = "the insertion",
         count = 42,
         insertedSymbols = "CAGAAG",
