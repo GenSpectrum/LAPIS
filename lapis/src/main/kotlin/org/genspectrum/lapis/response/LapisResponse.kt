@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.response
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
@@ -9,6 +11,7 @@ import org.genspectrum.lapis.openApi.REQUEST_INFO_STRING_DESCRIPTION
 import org.genspectrum.lapis.openApi.SILO_VERSION_DESCRIPTION
 import org.genspectrum.lapis.openApi.VERSION_DESCRIPTION
 import org.springframework.http.ProblemDetail
+import java.util.stream.Stream
 
 data class LapisErrorResponse(
     val error: ProblemDetail,
@@ -171,3 +174,38 @@ data class AminoAcidInsertionResponse(
             "sequenceName",
         )
 }
+
+class AggregatedCollection(
+    override val records: Stream<AggregationData>,
+    private val fields: List<String>,
+) : CsvRecordCollection<AggregationData> {
+    private val csvColumnSorter = SameOrderAsListComparator(fields)
+
+    override fun getHeader() = fields + COUNT_PROPERTY
+
+    override fun mapToCsvValuesList(value: AggregationData): List<String?> =
+        value.fields.entries
+            .sortedWith { a, b -> csvColumnSorter.compare(a.key, b.key) }
+            .map { (_, it) -> it.toCsvValue() }
+            .plus(value.count.toString())
+}
+
+class DetailsCollection(
+    override val records: Stream<DetailsData>,
+    private val fields: List<String>,
+) : CsvRecordCollection<DetailsData> {
+    private val csvColumnSorter = SameOrderAsListComparator(fields)
+
+    override fun getHeader() = fields
+
+    override fun mapToCsvValuesList(value: DetailsData): List<String?> =
+        value.entries
+            .sortedWith { a, b -> csvColumnSorter.compare(a.key, b.key) }
+            .map { (_, it) -> it.toCsvValue() }
+}
+
+private fun JsonNode.toCsvValue() =
+    when (this) {
+        is NullNode -> null
+        else -> asText()
+    }

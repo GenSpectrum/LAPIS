@@ -1,18 +1,19 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
 
-interface CsvRecord {
-    @JsonIgnore
-    fun getValuesList(comparator: Comparator<String>): List<String?>
+interface CsvRecordCollection<T> {
+    val records: Stream<T>
 
-    @JsonIgnore
-    fun getHeader(comparator: Comparator<String>): List<String>
+    fun getHeader(): List<String>
+
+    fun getCsvRecords(): Stream<List<String?>> = records.map { mapToCsvValuesList(it) }
+
+    fun mapToCsvValuesList(value: T): List<String?>
 }
 
 @Component
@@ -22,14 +23,9 @@ class CsvWriter(
     fun write(
         appendable: Appendable,
         includeHeaders: Boolean,
-        data: Stream<out CsvRecord>,
+        data: CsvRecordCollection<*>,
         delimiter: Delimiter,
-        csvColumnOrder: CsvColumnOrder,
     ) {
-        var shouldWriteHeaders = includeHeaders
-
-        val columnComparator = getColumnComparator(csvColumnOrder)
-
         CSVPrinter(
             appendable,
             CSVFormat.DEFAULT.builder()
@@ -38,22 +34,14 @@ class CsvWriter(
                 .setNullString("")
                 .get(),
         ).use {
-            for (datum in data) {
-                if (shouldWriteHeaders) {
-                    it.printRecord(datum.getHeader(columnComparator))
-                    shouldWriteHeaders = false
-                }
-                it.printRecord(datum.getValuesList(columnComparator))
+            if (includeHeaders) {
+                it.printRecord(data.getHeader())
+            }
+            for (csvRecord in data.getCsvRecords()) {
+                it.printRecord(csvRecord)
             }
         }
     }
-
-    private fun getColumnComparator(csvColumnOrder: CsvColumnOrder) =
-        when (csvColumnOrder) {
-            CsvColumnOrder.Undefined -> Comparator { _, _ -> 0 }
-            CsvColumnOrder.AsInConfig -> SameOrderAsListComparator(databaseConfig.schema.metadata.map { it.name })
-            is CsvColumnOrder.AsFieldsInRequest -> SameOrderAsListComparator(csvColumnOrder.fields)
-        }
 }
 
 enum class Delimiter(
@@ -66,14 +54,12 @@ enum class Delimiter(
 sealed interface CsvColumnOrder {
     data object AsInConfig : CsvColumnOrder
 
-    data object Undefined : CsvColumnOrder
-
     data class AsFieldsInRequest(
         val fields: List<String>,
     ) : CsvColumnOrder
 }
 
-private class SameOrderAsListComparator<T>(
+class SameOrderAsListComparator<T>(
     list: List<T>,
 ) : Comparator<T> {
     private val indexMap = list.withIndex().associate { it.value to it.index }

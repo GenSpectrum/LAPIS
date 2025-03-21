@@ -1,14 +1,19 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.AminoAcidInsertionResponse
 import org.genspectrum.lapis.response.AminoAcidMutationResponse
+import org.genspectrum.lapis.response.CsvColumnOrder
+import org.genspectrum.lapis.response.DetailsCollection
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.NucleotideInsertionResponse
 import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.SameOrderAsListComparator
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
@@ -21,12 +26,15 @@ class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val databaseConfig: DatabaseConfig,
 ) {
-    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
-        siloClient.sendQuery(
+    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields): AggregatedCollection {
+        val groupByFields = sequenceFilters.fields.map { it.fieldName }
+
+        val recordStream = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    sequenceFilters.fields.map { it.fieldName },
+                    groupByFields,
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,
@@ -34,6 +42,12 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+
+        return AggregatedCollection(
+            records = recordStream,
+            fields = groupByFields,
+        )
+    }
 
     fun computeNucleotideMutationProportions(
         sequenceFilters: MutationProportionsRequest,
@@ -100,11 +114,13 @@ class SiloQueryModel(
         }
     }
 
-    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) =
-        siloClient.sendQuery(
+    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields): DetailsCollection {
+        val fields = sequenceFilters.fields.map { it.fieldName }
+
+        val recordStream = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
-                    sequenceFilters.fields.map { it.fieldName },
+                    fields,
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,
@@ -112,6 +128,15 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+
+        return DetailsCollection(
+            records = recordStream,
+            fields = when (fields.isEmpty()) {
+                true -> databaseConfig.schema.metadata.map { it.name }
+                false -> fields
+            },
+        )
+    }
 
     fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): Stream<NucleotideInsertionResponse> {
         val data = siloClient.sendQuery(
@@ -182,4 +207,10 @@ class SiloQueryModel(
     fun getInfo(): InfoData = siloClient.callInfo()
 
     fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
+
+    private fun getColumnComparator(csvColumnOrder: CsvColumnOrder) =
+        when (csvColumnOrder) {
+            CsvColumnOrder.AsInConfig -> SameOrderAsListComparator(databaseConfig.schema.metadata.map { it.name })
+            is CsvColumnOrder.AsFieldsInRequest -> SameOrderAsListComparator(csvColumnOrder.fields)
+        }
 }
