@@ -36,7 +36,7 @@ class CsvWriter(
                 .setRecordSeparator("\n")
                 .setDelimiter(delimiter.value)
                 .setNullString("")
-                .build(),
+                .get(),
         ).use {
             for (datum in data) {
                 if (shouldWriteHeaders) {
