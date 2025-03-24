@@ -445,7 +445,7 @@ class LapisControllerCommonFieldsTest(
             .andExpect(
                 jsonPath(
                     "\$.error.detail",
-                ).value(Matchers.containsString("Unknown field: nonExistingField, known values are [primaryKey,")),
+                ).value(Matchers.containsString("Unknown field: 'nonExistingField', known values are [primaryKey,")),
             )
     }
 

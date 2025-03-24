@@ -124,7 +124,7 @@ describe('The /aggregated endpoint', () => {
 
     expect(result.status).equals(400);
     const resultJson = await result.json();
-    expect(resultJson.error.detail).to.include('Unknown field: notAField, known values are [primaryKey,');
+    expect(resultJson.error.detail).to.include("Unknown field: 'notAField', known values are [primaryKey,");
   });
 
   it('should return bad request for invalid variant query', async () => {

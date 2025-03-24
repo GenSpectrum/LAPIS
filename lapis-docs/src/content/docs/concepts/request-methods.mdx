@@ -64,6 +64,8 @@ Check out the [fields](../references/fields) and [filters](../references/filters
 LAPIS also supports [URL encoded form data](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) for POST requests.
 The content type must be set to `application/x-www-form-urlencoded` and the query must be encoded as a query string.
 
+Note that arrays must be passed as repeated keys, e.g. `fields=country&fields=date`.
+
 :::tip
 This is useful if you want to send the query directly from a HTML form.
 If `<form>` element has the `method` attribute set to `POST`

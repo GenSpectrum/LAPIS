@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="LapisOpen" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <option name="ALTERNATIVE_JRE_PATH" value="corretto-21" />
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <module name="lapis.main" />
     <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8091 --lapis.databaseConfig.path=lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=lapis-e2e/testData/singleSegmented/reference_genomes.json --server.port=8090" />
