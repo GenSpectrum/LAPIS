@@ -36,6 +36,9 @@ Parentheses `(` and `)` can be used to define the order of the operations. Furth
 sequences for which at least or exactly `n` out of a list of expressions are fulfilled. For variants we additionally add
 the `MAYBE` operator to query [ambiguous nucleotide symbols](../concepts/ambiguous-symbols).
 
+For metadata fields we also add custom queries to allow for regex substring search, is null queries (to search for fields
+which are empty or `null`) as well as range queries for dates and numbers.
+
 ## Examples
 
 Get the sequences with the nucleotide mutation 300G, without a deletion at position 400 and either the AA change S:123T
@@ -84,6 +87,12 @@ To use the regex substring search on a metadata field you must append `.regex` t
 
 ```
 host.regex='.*bos.*'
+```
+
+To search for empty fields (fields that are `null` or empty) use the `IS NULL` operator:
+
+```
+IsNull(host)
 ```
 
 For dates and numbers (int or float) we allow queries for ranges, using the `>=` and `<=` operators:
