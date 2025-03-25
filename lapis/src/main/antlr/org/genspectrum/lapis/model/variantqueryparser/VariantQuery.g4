@@ -23,6 +23,7 @@ single:
   | nextstrainCladeLineageQuery
   | gisaidCladeLineageQuery
   | metadataQuery
+  | isNullQuery
   ;
 
 or_: OR | '|';
@@ -71,6 +72,9 @@ metadataLessThanEqualQuery: geneOrName '<=' dateOrNumber;
 geneOrName: charOrNumber+;
 charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT;
 dateOrNumber: NUMBER | MINUS | DOT;
+
+isNullQuery: isnull_ '(' geneOrName ')';
+isnull_: I S N U L L ;
 
 nextcladePangolineageQuery: nextcladePangoLineagePrefix pangolineageWithPossibleSublineages;
 nextcladePangoLineagePrefix: N E X T C L A D E P A N G O L I N E A G E ':';
