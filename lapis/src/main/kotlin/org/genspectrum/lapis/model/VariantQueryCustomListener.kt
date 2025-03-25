@@ -257,6 +257,78 @@ class VariantQueryCustomListener(
         }
     }
 
+    override fun enterIsNullQuery(ctx: VariantQueryParser.IsNullQueryContext) {
+        val metadataName = ctx.geneOrName().text
+
+        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        when (field.type) {
+            SequenceFilterFieldType.String -> {
+                expressionStack.addLast(StringEquals(metadataName, null))
+            }
+
+            SequenceFilterFieldType.Lineage -> {
+                val lineage = LineageEquals(metadataName, null, false)
+                expressionStack.addLast(lineage)
+            }
+
+            SequenceFilterFieldType.Boolean -> {
+                expressionStack.addLast(BooleanEquals(metadataName, null))
+            }
+
+            SequenceFilterFieldType.Date -> {
+                expressionStack.addLast(Not(DateBetween(metadataName, to = null, from = null)))
+            }
+
+            is SequenceFilterFieldType.DateFrom -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            is SequenceFilterFieldType.DateTo -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            SequenceFilterFieldType.Float -> {
+                expressionStack.addLast(FloatEquals(metadataName, null))
+            }
+
+            is SequenceFilterFieldType.FloatFrom -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            is SequenceFilterFieldType.FloatTo -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            SequenceFilterFieldType.Int -> {
+                expressionStack.addLast(IntEquals(metadataName, null))
+            }
+
+            is SequenceFilterFieldType.IntFrom -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            is SequenceFilterFieldType.IntTo -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            is SequenceFilterFieldType.StringSearch -> {
+                val fieldName = metadataName.split(".").first()
+                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
+            }
+
+            SequenceFilterFieldType.VariantQuery -> {
+                throw BadRequestException("VariantQuery cannot be recursive", null)
+            }
+        }
+    }
+
     override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
         if (ctx == null) {
             return
