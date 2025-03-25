@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.2](https://github.com/GenSpectrum/LAPIS/compare/v0.4.1...v0.4.2) (2025-03-25)
+
+
+### Features
+
+* **lapis:** return empty lineage definitions when SILO returns an empty file ([#1126](https://github.com/GenSpectrum/LAPIS/issues/1126)) ([64651ad](https://github.com/GenSpectrum/LAPIS/commit/64651aded37b441de7e90cf614671f0d5c1e9823))
+
+
+### Bug Fixes
+
+* **lapis-docs:** mention how arrays must be supplied in form urlencoded requests ([#1128](https://github.com/GenSpectrum/LAPIS/issues/1128)) ([4f24a76](https://github.com/GenSpectrum/LAPIS/commit/4f24a763e1ec2168a0f034276261c31e9eb48bfe)), closes [#1089](https://github.com/GenSpectrum/LAPIS/issues/1089)
+
 ## [0.4.1](https://github.com/GenSpectrum/LAPIS/compare/v0.4.0...v0.4.1) (2025-03-21)
 
 
