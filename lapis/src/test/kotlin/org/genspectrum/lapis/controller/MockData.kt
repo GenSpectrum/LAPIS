@@ -11,11 +11,9 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.response.AminoAcidInsertionResponse
-import org.genspectrum.lapis.response.AminoAcidMutationResponse
 import org.genspectrum.lapis.response.DetailsData
-import org.genspectrum.lapis.response.NucleotideInsertionResponse
-import org.genspectrum.lapis.response.NucleotideMutationResponse
+import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
@@ -30,6 +28,7 @@ data class MockDataCollection(
     val expectedJson: String,
     val expectedCsv: String,
     val expectedTsv: String,
+    val fields: List<String>?,
 ) {
     enum class DataFormat(
         val fileFormat: String,
@@ -49,12 +48,14 @@ data class MockDataCollection(
             expectedJson: String,
             expectedCsv: String,
             expectedTsv: String,
+            fields: List<String>? = null,
         ) = MockDataCollection(
             { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
             { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
             expectedJson,
             expectedCsv,
             expectedTsv,
+            fields,
         )
     }
 
@@ -93,6 +94,7 @@ data class MockDataCollection(
                     { assertThat(it, `is`(expectedTsv)) }
                 }
             },
+            fields = fields,
         )
 }
 
@@ -188,6 +190,7 @@ data class MockData(
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,
     val assertDataMatches: (String) -> Unit,
+    val fields: List<String>? = null,
 )
 
 object MockDataForEndpoints {
@@ -236,6 +239,7 @@ object MockDataForEndpoints {
                 mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
             ),
         ),
+        fields = listOf("country", "age"),
         expectedJson = """
             [
                 {
@@ -275,6 +279,7 @@ object MockDataForEndpoints {
                 ),
             ),
         ),
+        fields = listOf("country", "age", "floatValue"),
         expectedJson = """
             [
                 {
@@ -306,7 +311,7 @@ object MockDataForEndpoints {
     private val nucleotideMutations = MockDataCollection.create(
         siloQueryModelMockCall = { it::computeNucleotideMutationProportions },
         modelData = listOf(
-            NucleotideMutationResponse(
+            MutationResponse(
                 mutation = "sequenceName:A1234T",
                 count = 2345,
                 coverage = 3456,
@@ -346,7 +351,7 @@ object MockDataForEndpoints {
     private val aminoAcidMutations = MockDataCollection.create(
         siloQueryModelMockCall = { it::computeAminoAcidMutationProportions },
         modelData = listOf(
-            AminoAcidMutationResponse(
+            MutationResponse(
                 mutation = "sequenceName:A1234T",
                 count = 2345,
                 coverage = 3456,
@@ -386,7 +391,7 @@ object MockDataForEndpoints {
     private val nucleotideInsertions = MockDataCollection.create(
         siloQueryModelMockCall = { it::getNucleotideInsertions },
         modelData = listOf(
-            NucleotideInsertionResponse(
+            InsertionResponse(
                 insertion = "ins_1234:CAGAA",
                 count = 41,
                 insertedSymbols = "CAGAA",
@@ -420,7 +425,7 @@ object MockDataForEndpoints {
     private val aminoAcidInsertions = MockDataCollection.create(
         siloQueryModelMockCall = { it::getAminoAcidInsertions },
         modelData = listOf(
-            AminoAcidInsertionResponse(
+            InsertionResponse(
                 insertion = "ins_ORF1a:1234:CAGAA",
                 count = 41,
                 insertedSymbols = "CAGAA",

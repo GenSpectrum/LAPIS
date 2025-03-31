@@ -15,6 +15,10 @@ schema:
       generateLineageIndex: true
     - name: test_boolean_column
       type: boolean
+    - name: age
+      type: int
+    - name: floatValue
+      type: float
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: primaryKey

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -52,9 +53,13 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
+import org.genspectrum.lapis.response.DetailsCollection
+import org.genspectrum.lapis.response.InsertionsCollection
 import org.genspectrum.lapis.response.LapisResponseStreamer
+import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.SequenceType
@@ -77,6 +82,7 @@ class LapisController(
     private val fieldConverter: FieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
+    private val databaseConfig: DatabaseConfig,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -127,7 +133,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -186,7 +192,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -248,7 +254,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -274,7 +280,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -298,7 +304,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -325,7 +331,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAggregated,
+            getData = ::getAggregatedCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -333,6 +339,12 @@ class LapisController(
             ),
         )
     }
+
+    private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields): AggregatedCollection =
+        AggregatedCollection(
+            records = siloQueryModel.getAggregated(request),
+            fields = request.fields.map { it.fieldName },
+        )
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideMutationsResponse
@@ -382,7 +394,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -436,7 +448,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -493,7 +505,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -519,7 +531,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -543,7 +555,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -570,7 +582,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeNucleotideMutationProportions,
+            getData = ::getNucleotideMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -578,6 +590,11 @@ class LapisController(
             ),
         )
     }
+
+    private fun getNucleotideMutationsCollection(request: MutationProportionsRequest) =
+        MutationsCollection(
+            records = siloQueryModel.computeNucleotideMutationProportions(request),
+        )
 
     @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidMutationsResponse
@@ -623,7 +640,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -677,7 +694,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -734,7 +751,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -760,7 +777,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -784,7 +801,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -811,7 +828,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = mutationProportionsRequest,
-            getData = siloQueryModel::computeAminoAcidMutationProportions,
+            getData = ::getAminoAcidMutationsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -819,6 +836,11 @@ class LapisController(
             ),
         )
     }
+
+    private fun getAminoAcidMutationsCollection(request: MutationProportionsRequest) =
+        MutationsCollection(
+            records = siloQueryModel.computeAminoAcidMutationProportions(request),
+        )
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
@@ -869,7 +891,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -924,7 +946,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -983,7 +1005,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -1009,7 +1031,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -1033,7 +1055,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -1060,12 +1082,24 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getDetails,
+            getData = ::getDetailsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
                 acceptHeader = httpHeaders.accept,
             ),
+        )
+    }
+
+    private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
+        val fields = request.fields.map { it.fieldName }
+
+        return DetailsCollection(
+            records = siloQueryModel.getDetails(request),
+            fields = when (fields.isEmpty()) {
+                true -> databaseConfig.schema.metadata.map { it.name }
+                false -> fields
+            },
         )
     }
 
@@ -1114,7 +1148,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -1169,7 +1203,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -1227,7 +1261,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -1253,7 +1287,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -1277,7 +1311,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -1304,7 +1338,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getNucleotideInsertions,
+            getData = ::getNucleotideInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -1312,6 +1346,11 @@ class LapisController(
             ),
         )
     }
+
+    private fun getNucleotideInsertionsCollection(request: SequenceFiltersRequest) =
+        InsertionsCollection(
+            records = siloQueryModel.getNucleotideInsertions(request),
+        )
 
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAminoAcidInsertionsResponse
@@ -1358,7 +1397,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -1413,7 +1452,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -1471,7 +1510,7 @@ class LapisController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -1497,7 +1536,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -1521,7 +1560,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = COMMA,
@@ -1548,7 +1587,7 @@ class LapisController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = siloQueryModel::getAminoAcidInsertions,
+            getData = ::getAminoAcidInsertionsCollection,
             response = response,
             responseFormat = ResponseFormat.Csv(
                 delimiter = TAB,
@@ -1556,6 +1595,11 @@ class LapisController(
             ),
         )
     }
+
+    private fun getAminoAcidInsertionsCollection(request: SequenceFiltersRequest) =
+        InsertionsCollection(
+            records = siloQueryModel.getAminoAcidInsertions(request),
+        )
 
     @GetMapping(
         "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}",

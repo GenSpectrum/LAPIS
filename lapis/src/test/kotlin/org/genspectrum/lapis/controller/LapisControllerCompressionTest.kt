@@ -264,78 +264,93 @@ fun getRequests(
     endpoint: String,
     dataFormat: MockDataCollection.DataFormat,
     compressionFormat: String,
-) = listOf(
-    RequestScenario(
-        callDescription = "GET $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = getSample(
-            "$endpoint?country=Switzerland&dataFormat=${dataFormat.fileFormat}&compression=$compressionFormat",
+): List<RequestScenario> {
+    val mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat)
+    val maybeFields = getFieldsAsJsonPart(mockData.fields)
+
+    return listOf(
+        RequestScenario(
+            callDescription = "GET $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = getSample(endpoint)
+                .queryParam("country", "Switzerland")
+                .queryParam("dataFormat", dataFormat.fileFormat)
+                .queryParam("compression", compressionFormat)
+                .withFieldsQuery(mockData.fields),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
         ),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
-        expectedContentEncoding = null,
-    ),
-    RequestScenario(
-        callDescription = "GET $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = getSample("$endpoint?country=Switzerland&dataFormat=${dataFormat.fileFormat}")
-            .header(ACCEPT_ENCODING, compressionFormat),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForDataFormat(dataFormat),
-        expectedContentEncoding = compressionFormat,
-    ),
-    RequestScenario(
-        callDescription = "POST JSON $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = postSample(endpoint)
-            .content(
-                """{
-                    "country": "Switzerland",
-                    "dataFormat": "${dataFormat.fileFormat}",
-                    "compression": "$compressionFormat"}
-                """.trimMargin(),
-            )
-            .contentType(APPLICATION_JSON),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
-        expectedContentEncoding = null,
-    ),
-    RequestScenario(
-        callDescription = "POST JSON $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = postSample(endpoint)
-            .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}"}""")
-            .contentType(APPLICATION_JSON)
-            .header(ACCEPT_ENCODING, compressionFormat),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForDataFormat(dataFormat),
-        expectedContentEncoding = compressionFormat,
-    ),
-    RequestScenario(
-        callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = postSample(endpoint)
-            .param("country", "Switzerland")
-            .param("dataFormat", dataFormat.fileFormat)
-            .param("compression", compressionFormat)
-            .contentType(APPLICATION_FORM_URLENCODED),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
-        expectedContentEncoding = null,
-    ),
-    RequestScenario(
-        callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat),
-        request = postSample(endpoint)
-            .param("country", "Switzerland")
-            .param("dataFormat", dataFormat.fileFormat)
-            .contentType(APPLICATION_FORM_URLENCODED)
-            .header(ACCEPT_ENCODING, compressionFormat),
-        compressionFormat = compressionFormat,
-        expectedContentType = getContentTypeForDataFormat(dataFormat),
-        expectedContentEncoding = compressionFormat,
-    ),
-)
+        RequestScenario(
+            callDescription = "GET $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = getSample(endpoint)
+                .queryParam("country", "Switzerland")
+                .queryParam("dataFormat", dataFormat.fileFormat)
+                .withFieldsQuery(mockData.fields)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+        RequestScenario(
+            callDescription = "POST JSON $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = postSample(endpoint)
+                .content(
+                    """
+                        {
+                            "country": "Switzerland",
+                            "dataFormat": "${dataFormat.fileFormat}",
+                            "compression": "$compressionFormat"
+                            $maybeFields
+                        }
+                    """.trimMargin(),
+                )
+                .contentType(APPLICATION_JSON),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
+        ),
+        RequestScenario(
+            callDescription = "POST JSON $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = postSample(endpoint)
+                .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}" $maybeFields}""")
+                .contentType(APPLICATION_JSON)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+        RequestScenario(
+            callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = postSample(endpoint)
+                .param("country", "Switzerland")
+                .param("dataFormat", dataFormat.fileFormat)
+                .param("compression", compressionFormat)
+                .withFieldsParam(mockData.fields)
+                .contentType(APPLICATION_FORM_URLENCODED),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
+        ),
+        RequestScenario(
+            callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = postSample(endpoint)
+                .param("country", "Switzerland")
+                .param("dataFormat", dataFormat.fileFormat)
+                .withFieldsParam(mockData.fields)
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+    )
+}
 
 private fun getFastaRequests(
     endpoint: String,
@@ -346,7 +361,7 @@ private fun getFastaRequests(
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with request parameter",
         mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
-        request = getSample("$endpoint")
+        request = getSample(endpoint)
             .queryParam("country", "Switzerland")
             .queryParam("dataFormat", dataFormat.fileFormat)
             .queryParam("compression", compressionFormat),

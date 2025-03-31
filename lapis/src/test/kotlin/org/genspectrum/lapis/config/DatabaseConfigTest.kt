@@ -27,6 +27,8 @@ class DatabaseConfigTest {
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),
                 DatabaseMetadata(name = "pangoLineage", type = MetadataType.STRING, generateLineageIndex = true),
                 DatabaseMetadata(name = "test_boolean_column", type = MetadataType.BOOLEAN),
+                DatabaseMetadata(name = "age", type = MetadataType.INT),
+                DatabaseMetadata(name = "floatValue", type = MetadataType.FLOAT),
             ),
         )
         assertThat(

@@ -70,7 +70,10 @@ class LapisControllerDownloadAsFileTest(
             queryString += "&$DOWNLOAD_FILE_BASENAME_PROPERTY=${scenario.downloadFileBasename}"
         }
 
-        mockMvc.perform(getSample("${scenario.endpoint}?$queryString"))
+        mockMvc.perform(
+            getSample("${scenario.endpoint}?$queryString")
+                .withFieldsQuery(scenario.mockData.fields),
+        )
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
                 expectedFilename = scenario.expectedFilename,
@@ -93,7 +96,8 @@ class LapisControllerDownloadAsFileTest(
 
             else -> ""
         }
-        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat $maybeFileBasename }"""
+        val maybeFields = getFieldsAsJsonPart(scenario.mockData.fields)
+        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat $maybeFileBasename $maybeFields }"""
 
         mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -110,6 +114,7 @@ class LapisControllerDownloadAsFileTest(
 
         val request = postSample(scenario.endpoint)
             .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
+            .withFieldsParam(scenario.mockData.fields)
             .also {
                 if (scenario.requestedDataFormat != null) {
                     it.param(FORMAT_PROPERTY, scenario.requestedDataFormat)
@@ -162,12 +167,13 @@ class LapisControllerDownloadAsFileTest(
 
     @Test
     fun `GIVEN accept header contains several media types THEN picks the first one that matches`() {
-        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
-            .expecting(MockDataCollection.DataFormat.CSV)
+        val mockDataCollection = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
+        val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.CSV)
         mockData.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(
             getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                .withFieldsQuery(mockDataCollection.fields)
                 .header(ACCEPT, "text/plain,text/csv,application/json"),
         )
             .andExpect(status().isOk)
@@ -179,12 +185,13 @@ class LapisControllerDownloadAsFileTest(
 
     @Test
     fun `GIVEN accept headers with quality values THEN picks the matching one with the highest quality`() {
-        val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
-            .expecting(MockDataCollection.DataFormat.TSV)
+        val mockDataCollection = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
+        val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.TSV)
         mockData.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(
             getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+                .withFieldsQuery(mockDataCollection.fields)
                 .header(ACCEPT, "text/plain;q=1,text/csv;q=0.8,text/tab-separated-values;q=0.9"),
         )
             .andExpect(status().isOk)
