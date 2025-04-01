@@ -48,9 +48,11 @@ private const val SOME_VALUE = "some value"
 class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
     private val allowedSequenceFilterFields = SequenceFilterFields(emptyMap())
-    private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema, allowedSequenceFilterFields)
+    private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, allowedSequenceFilterFields)
 
-    private var underTest = SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade)
+    private var underTest =
+        SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
 
     @Test
     fun `given invalid filter key then throws exception`() {

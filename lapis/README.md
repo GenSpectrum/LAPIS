@@ -81,6 +81,8 @@ Run tests:
 ./gradlew test
 ```
 
+LAPIS uses ANTLR as a parser generator for variant and advanced queries. The grammar can be found in `src/main/antlr`. When the package is built you can find the produced query parser, lexer and listener modules in `lapis/build/generated-src/antlr/...`.
+
 e.g. when running via gradle:
 
 ```bash
