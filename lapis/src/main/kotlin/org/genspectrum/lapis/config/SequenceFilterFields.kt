@@ -137,6 +137,8 @@ sealed class SequenceFilterFieldType(
 
     data object VariantQuery : SequenceFilterFieldType("string")
 
+    data object AdvancedQuery : SequenceFilterFieldType("string")
+
     data class DateFrom(
         val associatedField: SequenceFilterFieldName,
     ) : SequenceFilterFieldType("string")
