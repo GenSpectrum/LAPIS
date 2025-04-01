@@ -148,6 +148,27 @@ class VariantQueryCustomListener(
         }
     }
 
+    private fun mapToLineageFilter(
+        metadataName: String,
+        metadataValue: String?,
+    ): Or =
+        Or(
+            when {
+                metadataValue.isNullOrBlank() -> LineageEquals(metadataName, null, includeSublineages = false)
+                metadataValue.endsWith(
+                    ".*",
+                ) -> LineageEquals(metadataName, metadataValue.substringBeforeLast(".*"), includeSublineages = true)
+                metadataValue.endsWith(
+                    '*',
+                ) -> LineageEquals(metadataName, metadataValue.substringBeforeLast('*'), includeSublineages = true)
+                metadataValue.endsWith('.') -> throw BadRequestException(
+                    "Invalid lineage: $metadataValue must not end with a dot. Did you mean '$metadataValue*'?",
+                )
+
+                else -> LineageEquals(metadataName, metadataValue, includeSublineages = false)
+            },
+        )
+
     override fun enterMetadataQuery(ctx: VariantQueryParser.MetadataQueryContext) {
         val metadataName = ctx.geneOrName().text
         val metadataValue = ctx.value().text
@@ -160,7 +181,10 @@ class VariantQueryCustomListener(
             }
 
             SequenceFilterFieldType.Lineage -> {
-                val lineage = LineageEquals(metadataName, metadataValue, false)
+                val lineage = mapToLineageFilter(
+                    metadataName,
+                    metadataValue,
+                )
                 expressionStack.addLast(lineage)
             }
 
