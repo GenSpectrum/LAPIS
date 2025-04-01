@@ -16,14 +16,9 @@ import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import VariantQueryParser.PangolineageWithPossibleSublineagesContext
 import mu.KotlinLogging
-import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.config.SequenceFilterField
-import org.genspectrum.lapis.config.SequenceFilterFieldType
-import org.genspectrum.lapis.config.SequenceFilterFields
-import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
@@ -31,14 +26,8 @@ import org.genspectrum.lapis.request.STOP_CODON
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
-import org.genspectrum.lapis.silo.BooleanEquals
-import org.genspectrum.lapis.silo.DateBetween
-import org.genspectrum.lapis.silo.FloatBetween
-import org.genspectrum.lapis.silo.FloatEquals
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
-import org.genspectrum.lapis.silo.IntBetween
-import org.genspectrum.lapis.silo.IntEquals
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
@@ -48,17 +37,11 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
-import org.genspectrum.lapis.silo.StringSearch
-import java.time.LocalDate
-import java.time.format.DateTimeParseException
-import java.util.Locale
-import kotlin.collections.ArrayDeque
 
 private val log = KotlinLogging.logger { }
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
-    private val allowedSequenceFilterFields: SequenceFilterFields,
 ) : VariantQueryBaseListener(),
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
@@ -70,287 +53,6 @@ class VariantQueryCustomListener(
         }
 
         return expressionStack.first()
-    }
-
-    override fun enterMetadataLessThanEqualQuery(ctx: VariantQueryParser.MetadataLessThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.dateOrNumber().text
-
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
-        when (field.type) {
-            SequenceFilterFieldType.Date -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
-            }
-
-            is SequenceFilterFieldType.Float -> {
-                try {
-                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
-            }
-
-            is SequenceFilterFieldType.Int -> {
-                try {
-                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
-            }
-
-            else -> {
-                throw BadRequestException("expression <= can not be used for ${field.type}", null)
-            }
-        }
-    }
-
-    override fun enterMetadataGreaterThanEqualQuery(ctx: VariantQueryParser.MetadataGreaterThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.dateOrNumber().text
-
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
-        when (field.type) {
-            SequenceFilterFieldType.Date -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
-            }
-
-            is SequenceFilterFieldType.Float -> {
-                try {
-                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
-            }
-
-            is SequenceFilterFieldType.Int -> {
-                try {
-                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
-            }
-
-            else -> {
-                throw BadRequestException("expression >= can not be used for ${field.type}", null)
-            }
-        }
-    }
-
-    private fun mapToLineageFilter(
-        metadataName: String,
-        metadataValue: String?,
-    ): Or =
-        Or(
-            when {
-                metadataValue.isNullOrBlank() -> LineageEquals(metadataName, null, includeSublineages = false)
-                metadataValue.endsWith(
-                    ".*",
-                ) -> LineageEquals(metadataName, metadataValue.substringBeforeLast(".*"), includeSublineages = true)
-                metadataValue.endsWith(
-                    '*',
-                ) -> LineageEquals(metadataName, metadataValue.substringBeforeLast('*'), includeSublineages = true)
-                metadataValue.endsWith('.') -> throw BadRequestException(
-                    "Invalid lineage: $metadataValue must not end with a dot. Did you mean '$metadataValue*'?",
-                )
-
-                else -> LineageEquals(metadataName, metadataValue, includeSublineages = false)
-            },
-        )
-
-    override fun enterMetadataQuery(ctx: VariantQueryParser.MetadataQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.value().text
-
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
-        when (field.type) {
-            SequenceFilterFieldType.String -> {
-                expressionStack.addLast(StringEquals(metadataName, metadataValue))
-            }
-
-            SequenceFilterFieldType.Lineage -> {
-                val lineage = mapToLineageFilter(
-                    metadataName,
-                    metadataValue,
-                )
-                expressionStack.addLast(lineage)
-            }
-
-            SequenceFilterFieldType.Boolean -> {
-                try {
-                    expressionStack.addLast(BooleanEquals(metadataName, metadataValue.toBoolean()))
-                } catch (e: IllegalArgumentException) {
-                    throw BadRequestException("'$metadataValue' is not a valid boolean", e)
-                }
-            }
-
-            SequenceFilterFieldType.Date -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(metadataName, to = date, from = date))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
-            }
-
-            is SequenceFilterFieldType.DateFrom -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(metadataName, to = null, from = date))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
-            }
-
-            is SequenceFilterFieldType.DateTo -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(metadataName, to = date, from = null))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
-            }
-
-            SequenceFilterFieldType.Float -> {
-                try {
-                    expressionStack.addLast(FloatEquals(metadataName, metadataValue.toDouble()))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
-            }
-
-            is SequenceFilterFieldType.FloatFrom -> {
-                try {
-                    expressionStack.addLast(FloatBetween(metadataName, from = metadataValue.toDouble(), to = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
-            }
-
-            is SequenceFilterFieldType.FloatTo -> {
-                try {
-                    expressionStack.addLast(FloatBetween(metadataName, to = metadataValue.toDouble(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
-            }
-
-            SequenceFilterFieldType.Int -> {
-                try {
-                    expressionStack.addLast(IntEquals(metadataName, metadataValue.toInt()))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
-            }
-
-            is SequenceFilterFieldType.IntFrom -> {
-                try {
-                    expressionStack.addLast(IntBetween(metadataName, from = metadataValue.toInt(), to = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
-            }
-
-            is SequenceFilterFieldType.IntTo -> {
-                try {
-                    expressionStack.addLast(IntBetween(metadataName, to = metadataValue.toInt(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
-            }
-
-            is SequenceFilterFieldType.StringSearch -> {
-                expressionStack.addLast(StringSearch(metadataName, metadataValue))
-            }
-
-            SequenceFilterFieldType.VariantQuery -> {
-                throw BadRequestException("VariantQuery cannot be recursive", null)
-            }
-        }
-    }
-
-    override fun enterIsNullQuery(ctx: VariantQueryParser.IsNullQueryContext) {
-        val metadataName = ctx.geneOrName().text
-
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
-        when (field.type) {
-            SequenceFilterFieldType.String -> {
-                expressionStack.addLast(StringEquals(metadataName, null))
-            }
-
-            SequenceFilterFieldType.Lineage -> {
-                val lineage = LineageEquals(metadataName, null, false)
-                expressionStack.addLast(lineage)
-            }
-
-            SequenceFilterFieldType.Boolean -> {
-                expressionStack.addLast(BooleanEquals(metadataName, null))
-            }
-
-            SequenceFilterFieldType.Date -> {
-                expressionStack.addLast(Not(DateBetween(metadataName, to = null, from = null)))
-            }
-
-            is SequenceFilterFieldType.DateFrom -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            is SequenceFilterFieldType.DateTo -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            SequenceFilterFieldType.Float -> {
-                expressionStack.addLast(FloatEquals(metadataName, null))
-            }
-
-            is SequenceFilterFieldType.FloatFrom -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            is SequenceFilterFieldType.FloatTo -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            SequenceFilterFieldType.Int -> {
-                expressionStack.addLast(IntEquals(metadataName, null))
-            }
-
-            is SequenceFilterFieldType.IntFrom -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            is SequenceFilterFieldType.IntTo -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            is SequenceFilterFieldType.StringSearch -> {
-                val fieldName = metadataName.split(".").first()
-                throw BadRequestException("Filter IsNull($fieldName) instead of IsNull($metadataName)", null)
-            }
-
-            SequenceFilterFieldType.VariantQuery -> {
-                throw BadRequestException("VariantQuery cannot be recursive", null)
-            }
-        }
     }
 
     override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
@@ -437,11 +139,6 @@ class VariantQueryCustomListener(
         if (ctx == null) {
             return
         }
-        try {
-            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
-        } catch (e: RecognitionException) {
-            throw BadRequestException("Gene not implemented", e)
-        }
         val position = ctx.position().text.toInt()
         val geneName = ctx.gene().text
         val gene = referenceGenomeSchema.getGene(geneName)?.name
@@ -456,11 +153,6 @@ class VariantQueryCustomListener(
     }
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
-        try {
-            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
-        } catch (e: RecognitionException) {
-            throw BadRequestException("Gene not implemented", e)
-        }
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val geneName = ctx.gene().text
         val gene = referenceGenomeSchema.getGene(geneName)?.name

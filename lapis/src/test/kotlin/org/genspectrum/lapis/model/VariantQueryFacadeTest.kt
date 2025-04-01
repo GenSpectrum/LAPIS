@@ -3,11 +3,9 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
-import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.LineageEquals
@@ -18,13 +16,11 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.StringEquals
-import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 class VariantQueryFacadeTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(
@@ -36,7 +32,7 @@ class VariantQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema, dummySequenceFilterFields)
+    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
@@ -46,31 +42,32 @@ class VariantQueryFacadeTest {
 
         val result = underTest.map(variantQuery)
 
-        val expectedResult = And(
-            LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
-            LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
-            NOf(
-                3,
-                matchExactly = false,
-                listOf(
-                    NucleotideSymbolEquals(null, 123, "A"),
-                    NucleotideSymbolEquals(null, 234, "T"),
-                    NucleotideSymbolEquals(null, 345, "G"),
+        val expectedResult =
+            And(
+                LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true),
+                LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true),
+                NOf(
+                    3,
+                    matchExactly = false,
+                    listOf(
+                        NucleotideSymbolEquals(null, 123, "A"),
+                        NucleotideSymbolEquals(null, 234, "T"),
+                        NucleotideSymbolEquals(null, 345, "G"),
+                    ),
                 ),
-            ),
-            Maybe(
+                Maybe(
+                    Or(
+                        NucleotideSymbolEquals(null, 800, "-"),
+                        NucleotideSymbolEquals(null, 700, "B"),
+                    ),
+                ),
+                Not(HasNucleotideMutation(null, 600)),
                 Or(
-                    NucleotideSymbolEquals(null, 800, "-"),
-                    NucleotideSymbolEquals(null, 700, "B"),
+                    NucleotideSymbolEquals(null, 500, "B"),
+                    NucleotideSymbolEquals(null, 400, "-"),
                 ),
-            ),
-            Not(HasNucleotideMutation(null, 600)),
-            Or(
-                NucleotideSymbolEquals(null, 500, "B"),
-                NucleotideSymbolEquals(null, 400, "-"),
-            ),
-            NucleotideSymbolEquals(null, 300, "G"),
-        )
+                NucleotideSymbolEquals(null, 300, "G"),
+            )
 
         assertThat(result, equalTo(expectedResult))
     }
@@ -426,15 +423,6 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given an invalid variantQuery with an invalid gene return error`() {
-        val variantQuery = "ins_invalidGene:501:EPE"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(variantQuery) }
-
-        assertThat(exception.message, `is`("Unknown gene from lower case: invalidgene"))
-    }
-
-    @Test
     fun `given a valid variantQuery with a 'AA insertion' expression with lower case gene then returns SILO query`() {
         val variantQuery = "ins_orF1a:501:EPE"
 
@@ -528,74 +516,6 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with string metadata expression then returns SILO query`() {
-        val variantQuery = "some_metadata=AB"
-
-        val result = underTest.map(variantQuery)
-
-        assertThat(result, equalTo(StringEquals("some_metadata", "AB")))
-    }
-
-    @Test
-    fun `given a valid variantQuery with mutation and metadata expression then returns SILO query`() {
-        val variantQuery = "(NOT some_metadata=AB) & 300G"
-
-        val result = underTest.map(variantQuery)
-
-        val expectedResult = And(
-            NucleotideSymbolEquals(null, 300, "G"),
-            Not(StringEquals("some_metadata", "AB")),
-        )
-
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `given a valid variantQuery with mutation and regex metadata expression then returns SILO query`() {
-        val variantQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
-
-        val result = underTest.map(variantQuery)
-
-        val expectedResult = And(
-            Or(
-                Not(AminoAcidSymbolEquals("S", 501, "Y")),
-                StringSearch("some_metadata.regex", "'BANGALOR'"),
-            ),
-            NucleotideSymbolEquals(null, 300, "G"),
-            StringEquals("some_metadata", "BANGALOR"),
-        )
-
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `given a valid variantQuery with string (with whitespace) metadata expression then returns SILO query`() {
-        val variantQuery = "some_metadata='Democratic Republic of the Congo'"
-
-        val result = underTest.map(variantQuery)
-
-        assertThat(result, equalTo(StringEquals("some_metadata", "'Democratic Republic of the Congo'")))
-    }
-
-    @Test
-    fun `given a valid variantQuery with string (with regex) metadata expression then returns SILO query`() {
-        val variantQuery = "some_metadata.regex='(Democratic.*'"
-
-        val result = underTest.map(variantQuery)
-
-        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*'")))
-    }
-
-    @Test
-    fun `given a valid variantQuery with date metadata expression then returns SILO query`() {
-        val variantQuery = "date=2020-01-01"
-
-        val result = underTest.map(variantQuery)
-
-        assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
-    }
-
-    @Test
     fun `given a valid variantQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
         val variantQuery = "nextcladePangoLineage:jn.1*"
 
@@ -615,9 +535,7 @@ class VariantQueryFacadeTest {
 
         assertThat(
             exception.message,
-            `is`(
-                "Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', ' AND ', ' OR '}.",
-            ),
+            `is`("Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '&', '|'}."),
         )
     }
 }

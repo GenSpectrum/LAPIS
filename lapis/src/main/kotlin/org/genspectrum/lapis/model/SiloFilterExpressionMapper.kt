@@ -47,6 +47,7 @@ typealias SequenceFilterFieldName = String
 class SiloFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
+    private val advancedQueryFacade: AdvancedQueryFacade,
 ) {
     fun map(sequenceFilters: CommonSequenceFilters): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
@@ -81,6 +82,7 @@ class SiloFilterExpressionMapper(
                 Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
                 Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
                 Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
+                Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
             }
         }
 
@@ -119,6 +121,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
             SequenceFilterFieldType.Boolean -> Pair(field.name, Filter.BooleanEquals)
+            SequenceFilterFieldType.AdvancedQuery -> Pair(field.name, Filter.AdvancedQuery)
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -224,6 +227,22 @@ class SiloFilterExpressionMapper(
         }
 
         return variantQueryFacade.map(variantQuery)
+    }
+
+    private fun mapToAdvancedQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
+        if (values[0].values.size != 1) {
+            throw BadRequestException(
+                "variantQuery must have exactly one value, found ${values[0].values.size} values.",
+            )
+        }
+
+        val advancedQuery = values[0].values.single()
+
+        if (advancedQuery.isNullOrBlank()) {
+            throw BadRequestException("variantQuery must not be empty, got '$advancedQuery'")
+        }
+
+        return advancedQueryFacade.map(advancedQuery)
     }
 
     private fun mapToDateBetweenFilter(
@@ -451,6 +470,7 @@ class SiloFilterExpressionMapper(
         PangoLineage,
         DateBetween,
         VariantQuery,
+        AdvancedQuery,
         IntEquals,
         IntBetween,
         FloatEquals,
