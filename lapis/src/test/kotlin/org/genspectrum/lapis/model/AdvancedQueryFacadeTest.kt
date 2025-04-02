@@ -43,11 +43,12 @@ class AdvancedQueryFacadeTest {
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
         val advancedQuery =
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
-                "pangoLineage='jn.1*'"
+                "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
 
         val result = underTest.map(advancedQuery)
 
         val expectedResult = And(
+            StringSearch("some_metadata.regex", "'^Democratic.*'"),
             LineageEquals(PANGO_LINEAGE_COLUMN, "jn.1", true),
             NOf(
                 3,
@@ -192,19 +193,8 @@ class AdvancedQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a 'Pangolineage' expression (including sublineages) then map should return the corresponding SiloQuery`() {
-        val advancedQuery = "pangolineage='A.1.2.3*'"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    @Suppress("ktlint:standard:max-line-length")
     fun `given a advancedQuery with a 'Pangolineage' expression with casing then map should return the corresponding SiloQuery`() {
-        val advancedQuery = "Pangolineage='A.1.2.3*'"
+        val advancedQuery = "Pangolineage=A.1.2.3*"
 
         val result = underTest.map(advancedQuery)
 
@@ -502,11 +492,11 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a valid advancedQuery with string (with regex) metadata expression then returns SILO query`() {
-        val advancedQuery = "some_metadata.regex='(Democratic.*'"
+        val advancedQuery = "some_metadata.regex='(Democratic.*Rep$'"
 
         val result = underTest.map(advancedQuery)
 
-        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*'")))
+        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*Rep$'")))
     }
 
     @Test
@@ -520,7 +510,7 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a valid advancedQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
-        val advancedQuery = "pangoLineage='jn.1*'"
+        val advancedQuery = "pangoLineage=jn.1*"
 
         val result = underTest.map(advancedQuery)
 
@@ -539,7 +529,7 @@ class AdvancedQueryFacadeTest {
         assertThat(
             exception.message,
             `is`(
-                "Failed to parse variant query (line 1:28): mismatched input 't' expecting {<EOF>, '|', '&', ' AND ', ' OR '}.",
+                "Expression contains symbols not allowed for metadata field of type Lineage (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
             ),
         )
     }

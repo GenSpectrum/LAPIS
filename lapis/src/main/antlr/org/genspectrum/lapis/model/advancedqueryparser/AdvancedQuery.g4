@@ -19,6 +19,7 @@ single:
   | aaMutationQuery
   | aaInsertionQuery
   | metadataQuery
+  | regexMetadataQuery
   | isNullQuery
   ;
 
@@ -52,13 +53,14 @@ possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol+;
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
-metadataQuery: geneOrName '=' value;
-value: geneOrName | STRING;
+metadataQuery: geneOrName '=' geneOrName;
+regexMetadataQuery: geneOrName '=' value;
+value: STRING;
 metadataGreaterThanEqualQuery: geneOrName '>=' dateOrNumber;
 metadataLessThanEqualQuery: geneOrName '<=' dateOrNumber;
 
 geneOrName: charOrNumber+;
-charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT;
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK;
 dateOrNumber: NUMBER | MINUS | DOT;
 
 isNullQuery: isnull_ '(' geneOrName ')';
@@ -96,7 +98,7 @@ MINUS: '-';
 UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
-STRING: '\'' (~['\r\n])* '\'';
+STRING: '\'' (~['\r\n])* '\'';  // matches all strings with quotes, except if they contain a newline
 AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
 OR: ' OR ';
 NOT: 'NOT ';
