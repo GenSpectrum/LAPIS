@@ -146,19 +146,22 @@ class AdvancedQueryCustomListener(
 
         return when {
             sanitizedValue.isNullOrBlank() -> LineageEquals(metadataName, null, includeSublineages = false)
-            sanitizedValue.endsWith(".*") -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast(".*"), includeSublineages = true)
-            sanitizedValue.endsWith('*') -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast('*'), includeSublineages = true)
+            sanitizedValue.endsWith(
+                ".*",
+            ) -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast(".*"), includeSublineages = true)
+            sanitizedValue.endsWith(
+                '*',
+            ) -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast('*'), includeSublineages = true)
             sanitizedValue.endsWith('.') -> throw BadRequestException(
-                "Invalid lineage: $sanitizedValue must not end with a dot. Did you mean '$sanitizedValue*'?"
+                "Invalid lineage: $sanitizedValue must not end with a dot. Did you mean '$sanitizedValue*'?",
             )
             else -> LineageEquals(metadataName, sanitizedValue, includeSublineages = false)
         }
     }
 
-
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.value().text
+        val metadataName = ctx.geneOrName()[0].text
+        val metadataValue = ctx.geneOrName()[1].text
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
@@ -268,6 +271,38 @@ class AdvancedQueryCustomListener(
 
             SequenceFilterFieldType.AdvancedQuery -> {
                 throw BadRequestException("AdvancedQuery cannot be called recursively", null)
+            }
+        }
+    }
+
+    override fun enterRegexMetadataQuery(ctx: AdvancedQueryParser.RegexMetadataQueryContext) {
+        val metadataName = ctx.geneOrName().text
+        val metadataValue = ctx.value().text
+
+        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        when (field.type) {
+            SequenceFilterFieldType.String -> {
+                expressionStack.addLast(StringEquals(field.name, metadataValue))
+            }
+
+            is SequenceFilterFieldType.StringSearch -> {
+                expressionStack.addLast(StringSearch(field.name, metadataValue))
+            }
+
+            SequenceFilterFieldType.VariantQuery -> {
+                throw BadRequestException("VariantQuery cannot be called from advanced query", null)
+            }
+
+            SequenceFilterFieldType.AdvancedQuery -> {
+                throw BadRequestException("AdvancedQuery cannot be called recursively", null)
+            }
+
+            else -> {
+                throw BadRequestException(
+                    "Expression contains symbols not allowed for metadata field of type ${field.type} (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
+                    null,
+                )
             }
         }
     }
