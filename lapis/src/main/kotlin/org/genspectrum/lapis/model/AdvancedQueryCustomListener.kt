@@ -11,7 +11,6 @@ import AdvancedQueryParser.NucleotideInsertionQueryContext
 import AdvancedQueryParser.NucleotideMutationQueryContext
 import AdvancedQueryParser.OrContext
 import mu.KotlinLogging
-import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.SequenceFilterField
@@ -467,11 +466,6 @@ class AdvancedQueryCustomListener(
         if (ctx == null) {
             return
         }
-        try {
-            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
-        } catch (e: RecognitionException) {
-            throw BadRequestException("Gene not implemented", e)
-        }
         val position = ctx.position().text.toInt()
         val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
 
@@ -484,11 +478,6 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
-        try {
-            referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
-        } catch (e: RecognitionException) {
-            throw BadRequestException("Gene not implemented", e)
-        }
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.geneOrName().text.lowercase()).name
 
