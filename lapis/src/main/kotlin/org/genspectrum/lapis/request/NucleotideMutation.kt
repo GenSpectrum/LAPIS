@@ -35,8 +35,8 @@ data class NucleotideMutation(
                     "Invalid nucleotide mutation: $nucleotideMutation: Did not find position",
                 )
 
-            val segmentName = matchGroups["sequenceName"]?.value?.lowercase()
-                ?.let { referenceGenomeSchema.getNucleotideSequenceFromLowercaseName(it).name }
+            val segmentName = matchGroups["sequenceName"]?.value
+                ?.let { referenceGenomeSchema.getNucleotideSequence(it).name }
 
             return NucleotideMutation(
                 segmentName,
