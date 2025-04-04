@@ -30,9 +30,9 @@ data class AminoAcidMutation(
 
             val matchGroups = match.groups
 
-            val geneLowerCase = matchGroups["gene"]?.value?.lowercase()
+            val gene = matchGroups["gene"]?.value
                 ?: throw BadRequestException("Invalid amino acid mutation: $aminoAcidMutation: Did not find gene")
-            val geneName = referenceGenomeSchema.getGeneFromLowercaseName(geneLowerCase).name
+            val geneName = referenceGenomeSchema.getGene(gene).name
 
             val position = matchGroups["position"]?.value?.toInt()
                 ?: throw BadRequestException(

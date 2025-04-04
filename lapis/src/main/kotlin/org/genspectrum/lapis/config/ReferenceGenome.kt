@@ -27,13 +27,13 @@ class ReferenceGenomeSchema(
     private val geneNames: Map<LowercaseName, ReferenceSequenceSchema> = genes
         .associateBy { it.name.lowercase() }
 
-    fun getNucleotideSequenceFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema =
-        nucleotideSequenceNames[lowercaseName]
-            ?: throw BadRequestException("Unknown nucleotide sequence from lower case: $lowercaseName")
+    fun getNucleotideSequence(name: String): ReferenceSequenceSchema =
+        nucleotideSequenceNames[name.lowercase()]
+            ?: throw BadRequestException("Unknown nucleotide sequence: $name")
 
-    fun getGeneFromLowercaseName(lowercaseName: LowercaseName): ReferenceSequenceSchema =
-        geneNames[lowercaseName]
-            ?: throw BadRequestException("Unknown gene from lower case: $lowercaseName")
+    fun getGene(name: String): ReferenceSequenceSchema =
+        geneNames[name.lowercase()]
+            ?: throw BadRequestException("Unknown gene: $name")
 
     fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1
 

@@ -32,11 +32,11 @@ data class AminoAcidInsertion(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find position",
                 )
 
-            val geneLowerCase = matchGroups["gene"]?.value?.lowercase()
+            val gene = matchGroups["gene"]?.value
                 ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
-            val geneName = referenceGenomeSchema.getGeneFromLowercaseName(geneLowerCase).name
+            val geneName = referenceGenomeSchema.getGene(gene).name
 
             val insertions = matchGroups["insertions"]?.value?.replace(STOP_CODON, ESCAPED_STOP_CODON)?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,

@@ -144,7 +144,7 @@ class VariantQueryCustomListener(
             return
         }
         val position = ctx.position().text.toInt()
-        val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
+        val gene = referenceGenomeSchema.getGene(ctx.gene().text).name
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
             null -> HasAminoAcidMutation(gene, position)
@@ -156,7 +156,7 @@ class VariantQueryCustomListener(
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
-        val gene = referenceGenomeSchema.getGeneFromLowercaseName(ctx.gene().text.lowercase()).name
+        val gene = referenceGenomeSchema.getGene(ctx.gene().text).name
 
         expressionStack.addLast(
             AminoAcidInsertionContains(

@@ -40,8 +40,8 @@ data class NucleotideInsertion(
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find insertions",
                 )
 
-            val segmentName = matchGroups["segment"]?.value?.lowercase()
-                ?.let { referenceGenomeSchema.getNucleotideSequenceFromLowercaseName(it).name }
+            val segmentName = matchGroups["segment"]?.value
+                ?.let { referenceGenomeSchema.getNucleotideSequence(it).name }
 
             return NucleotideInsertion(
                 position,
