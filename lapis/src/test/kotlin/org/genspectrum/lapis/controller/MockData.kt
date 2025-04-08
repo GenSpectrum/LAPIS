@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
@@ -316,7 +317,7 @@ object MockDataForEndpoints {
                 count = 2345,
                 coverage = 3456,
                 proportion = 0.987,
-                sequenceName = "sequenceName",
+                sequenceName = ExplicitlyNullable("sequenceName"),
                 mutationFrom = "A",
                 mutationTo = "T",
                 position = 1234,
@@ -356,7 +357,7 @@ object MockDataForEndpoints {
                 count = 2345,
                 coverage = 3456,
                 proportion = 0.987,
-                sequenceName = "sequenceName",
+                sequenceName = ExplicitlyNullable("sequenceName"),
                 mutationFrom = "A",
                 mutationTo = "T",
                 position = 1234,

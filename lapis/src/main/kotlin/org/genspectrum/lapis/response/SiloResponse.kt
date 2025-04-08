@@ -61,14 +61,14 @@ class AggregationDataDeserializer : JsonDeserializer<AggregationData>() {
 }
 
 data class MutationData(
-    val mutation: String,
-    val count: Int,
-    val proportion: Double,
-    val sequenceName: String,
-    val mutationFrom: String,
-    val mutationTo: String,
-    val position: Int,
-    val coverage: Int,
+    val mutation: String?,
+    val count: Int?,
+    val proportion: Double?,
+    val sequenceName: String?,
+    val mutationFrom: String?,
+    val mutationTo: String?,
+    val position: Int?,
+    val coverage: Int?,
 )
 
 data class InsertionData(

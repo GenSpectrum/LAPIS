@@ -29,6 +29,26 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(commonMutationProportion?.position).to.be.equal(478);
   });
 
+  it('should return only mutation when asking for only mutation', async () => {
+    const result = await lapisClient.postAminoAcidMutations({
+      sequenceFiltersWithMinProportion: { fields: ['mutation'], limit: 1, orderBy: [{ field: 'mutation' }] },
+    });
+
+    expect(result.data).to.have.length(1);
+
+    const mutation = result.data[0];
+    expect(mutation).to.deep.equal({
+      mutation: 'ORF1a:A1306S',
+      count: undefined,
+      coverage: undefined,
+      mutationFrom: undefined,
+      mutationTo: undefined,
+      position: undefined,
+      proportion: undefined,
+      sequenceName: undefined,
+    });
+  });
+
   it('should return mutation proportions for Switzerland with minProportion 0.5', async () => {
     const result = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {

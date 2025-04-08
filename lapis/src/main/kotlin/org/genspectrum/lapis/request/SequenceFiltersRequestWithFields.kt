@@ -22,7 +22,7 @@ data class SequenceFiltersRequestWithFields(
 
 @JsonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(
-    private val fieldConverter: FieldConverter,
+    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
 ) : JsonDeserializer<SequenceFiltersRequestWithFields>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -31,14 +31,7 @@ class SequenceFiltersRequestWithFieldsDeserializer(
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
-        val fields = when (val fields = node.get(FIELDS_PROPERTY)) {
-            null -> emptyList()
-            is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
-            else -> throw BadRequestException(
-                "fields must be an array or null",
-            )
-        }
-
+        val fields = parseFieldsProperty(node, caseInsensitiveFieldConverter)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return SequenceFiltersRequestWithFields(
@@ -53,4 +46,15 @@ class SequenceFiltersRequestWithFieldsDeserializer(
             parsedCommonFields.offset,
         )
     }
+}
+
+fun <T> parseFieldsProperty(
+    node: JsonNode,
+    fieldConverter: FieldConverter<T>,
+) = when (val fields = node.get(FIELDS_PROPERTY)) {
+    null -> emptyList()
+    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
+    else -> throw BadRequestException(
+        "fields must be an array or null",
+    )
 }

@@ -62,6 +62,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
+            fields: List<String> = emptyList(),
         ): SiloAction<MutationData> =
             MutationsAction(
                 minProportion = minProportion,
@@ -69,6 +70,7 @@ sealed class SiloAction<ResponseType>(
                 limit = limit,
                 offset = offset,
                 randomize = getRandomize(orderByFields),
+                fields = fields,
             )
 
         fun aminoAcidMutations(
@@ -76,6 +78,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
+            fields: List<String> = emptyList(),
         ): SiloAction<MutationData> =
             AminoAcidMutationsAction(
                 minProportion = minProportion,
@@ -83,6 +86,7 @@ sealed class SiloAction<ResponseType>(
                 limit = limit,
                 offset = offset,
                 randomize = getRandomize(orderByFields),
+                fields = fields,
             )
 
         fun details(
@@ -147,65 +151,73 @@ sealed class SiloAction<ResponseType>(
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class AggregatedAction(
+    data class AggregatedAction(
         val groupByFields: List<String>,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "Aggregated",
-    ) : SiloAction<AggregationData>(AggregationDataTypeReference(), cacheable = true)
+    ) : SiloAction<AggregationData>(AggregationDataTypeReference(), cacheable = true) {
+        val type: String = "Aggregated"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class MutationsAction(
+    data class MutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "Mutations",
-    ) : SiloAction<MutationData>(MutationDataTypeReference(), cacheable = true)
+        val fields: List<String> = emptyList(),
+    ) : SiloAction<MutationData>(MutationDataTypeReference(), cacheable = true) {
+        val type: String = "Mutations"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class AminoAcidMutationsAction(
+    data class AminoAcidMutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "AminoAcidMutations",
-    ) : SiloAction<MutationData>(AminoAcidMutationDataTypeReference(), cacheable = true)
+        val fields: List<String> = emptyList(),
+    ) : SiloAction<MutationData>(AminoAcidMutationDataTypeReference(), cacheable = true) {
+        val type: String = "AminoAcidMutations"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class DetailsAction(
+    data class DetailsAction(
         val fields: List<String> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "Details",
-    ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = false)
+    ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = false) {
+        val type: String = "Details"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class NucleotideInsertionsAction(
+    data class NucleotideInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "Insertions",
-    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true)
+    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
+        val type: String = "Insertions"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class AminoAcidInsertionsAction(
+    data class AminoAcidInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-        val type: String = "AminoAcidInsertions",
-    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true)
+    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
+        val type: String = "AminoAcidInsertions"
+    }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private data class SequenceAction(
+    data class SequenceAction(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: Boolean? = null,
         override val limit: Int? = null,
