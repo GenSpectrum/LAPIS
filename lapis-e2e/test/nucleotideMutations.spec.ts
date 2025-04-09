@@ -23,7 +23,7 @@ describe('The /nucleotideMutations endpoint', () => {
     );
     expect(commonMutationProportion?.count).to.equal(51);
     expect(commonMutationProportion?.proportion).to.be.approximately(0.5204, 0.0001);
-    expect(commonMutationProportion?.sequenceName).to.be.undefined;
+    expect(commonMutationProportion?.sequenceName).to.be.null;
     expect(commonMutationProportion?.mutationFrom).to.be.equal('G');
     expect(commonMutationProportion?.mutationTo).to.be.equal('C');
     expect(commonMutationProportion?.position).to.be.equal(28280);
@@ -112,7 +112,7 @@ describe('The /nucleotideMutations endpoint', () => {
       mutationFrom: 'C',
       mutationTo: 'T',
       position: 241,
-      sequenceName: undefined,
+      sequenceName: null,
     };
 
     const result = await lapisClient.postNucleotideMutations({
@@ -134,7 +134,7 @@ describe('The /nucleotideMutations endpoint', () => {
       mutationFrom: 'G',
       mutationTo: 'T',
       position: 210,
-      sequenceName: undefined,
+      sequenceName: null,
     };
 
     const result = await lapisClient.postNucleotideMutations({

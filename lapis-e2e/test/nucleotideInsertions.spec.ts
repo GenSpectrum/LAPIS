@@ -15,7 +15,7 @@ describe('The /nucleotideInsertions endpoint', () => {
     expect(specificInsertion?.count).to.equal(17);
     expect(specificInsertion?.insertedSymbols).to.equal('CCC');
     expect(specificInsertion?.position).to.equal(25701);
-    expect(specificInsertion?.sequenceName).to.be.undefined;
+    expect(specificInsertion?.sequenceName).to.be.null;
   });
 
   it('should return nucleotide insertions for multi segmented sequences', async () => {
@@ -86,14 +86,14 @@ describe('The /nucleotideInsertions endpoint', () => {
       insertedSymbols: 'CCC',
       insertion: 'ins_25701:CCC',
       position: 25701,
-      sequenceName: undefined,
+      sequenceName: null,
     });
     expect(result.data[1]).to.deep.equal({
       count: 1,
       insertedSymbols: 'TAT',
       insertion: 'ins_5959:TAT',
       position: 5959,
-      sequenceName: undefined,
+      sequenceName: null,
     });
   });
 
