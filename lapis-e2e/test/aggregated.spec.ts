@@ -102,7 +102,7 @@ describe('The /aggregated endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[0].division).to.be.null;
     expect(ascendingOrderedResult.data[1]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postAggregated({
