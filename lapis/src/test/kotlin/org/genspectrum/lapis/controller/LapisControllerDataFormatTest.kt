@@ -9,9 +9,11 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.LapisInfo
+import org.genspectrum.lapis.response.MutationResponse
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -244,6 +246,76 @@ class LapisControllerDataFormatTest(
             .andExpect(status().isOk)
             .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
             .andExpect(content().string(startsWith(scenario.expectedDetailsCsv)))
+    }
+
+    @Test
+    fun `GIVEN fields = position,mutation WHEN getting nucleotide mutations THEN csv contains only those columns`() {
+        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns Stream.of(
+            MutationResponse(
+                mutation = "A123T",
+                count = null,
+                coverage = null,
+                proportion = null,
+                sequenceName = null,
+                mutationFrom = null,
+                mutationTo = null,
+                position = 123,
+            ),
+        )
+
+        val fields = listOf(MutationsField.POSITION.value, MutationsField.MUTATION.value)
+        mockMvc.perform(
+            postSample(NUCLEOTIDE_MUTATIONS_ROUTE)
+                .content("""{"fields": ${(objectMapper.writeValueAsString(fields))}}""")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(ACCEPT, "text/csv"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(
+                content().string(
+                    """
+                        position,mutation
+                        123,A123T
+                        
+                    """.trimIndent(),
+                ),
+            )
+    }
+
+    @Test
+    fun `GIVEN fields = position,mutation WHEN getting amino acid mutations THEN csv contains only those columns`() {
+        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns Stream.of(
+            MutationResponse(
+                mutation = "gene:A123T",
+                count = null,
+                coverage = null,
+                proportion = null,
+                sequenceName = null,
+                mutationFrom = null,
+                mutationTo = null,
+                position = 123,
+            ),
+        )
+
+        val fields = listOf(MutationsField.POSITION.value, MutationsField.MUTATION.value)
+        mockMvc.perform(
+            postSample(AMINO_ACID_MUTATIONS_ROUTE)
+                .content("""{"fields": ${(objectMapper.writeValueAsString(fields))}}""")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(ACCEPT, "text/csv"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "text/csv;charset=UTF-8"))
+            .andExpect(
+                content().string(
+                    """
+                        position,mutation
+                        123,gene:A123T
+                        
+                    """.trimIndent(),
+                ),
+            )
     }
 
     private companion object {

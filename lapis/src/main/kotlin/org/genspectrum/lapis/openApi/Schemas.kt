@@ -23,6 +23,7 @@ import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.LapisMediaType
+import org.genspectrum.lapis.controller.MUTATIONS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
@@ -66,6 +67,7 @@ const val FORMAT_SCHEMA = "DataFormat"
 const val SEQUENCES_FORMAT_SCHEMA = "SequencesDataFormat"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
+const val MUTATIONS_FIELDS_SCHEMA = "MutationsFields"
 const val GENE_SCHEMA = "Gene"
 const val SEGMENT_SCHEMA = "Segment"
 
@@ -412,6 +414,14 @@ annotation class FieldsToAggregateBy
     description = DETAILS_FIELDS_DESCRIPTION,
 )
 annotation class DetailsFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$MUTATIONS_FIELDS_SCHEMA"),
+    description = MUTATIONS_FIELDS_DESCRIPTION,
+)
+annotation class MutationsFields
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

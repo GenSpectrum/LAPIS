@@ -7,11 +7,15 @@ data class Field(
     val fieldName: String,
 )
 
+fun interface FieldConverter<T> {
+    fun convert(source: String): T
+}
+
 @Component
-class FieldConverter(
+class CaseInsensitiveFieldConverter(
     private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
-) {
-    fun convert(source: String): Field {
+) : FieldConverter<Field> {
+    override fun convert(source: String): Field {
         val cleaned = caseInsensitiveFieldsCleaner.clean(source)
             ?: throw BadRequestException(
                 "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",

@@ -8,6 +8,7 @@ import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
+import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.silo.DataVersion
@@ -501,7 +502,7 @@ private fun someNucleotideMutationProportion() =
         count = 42,
         coverage = 52,
         proportion = 0.5,
-        sequenceName = "sequenceName",
+        sequenceName = ExplicitlyNullable("sequenceName"),
         mutationFrom = "G",
         mutationTo = "T",
         position = 29741,
@@ -513,7 +514,7 @@ private fun someAminoAcidMutationProportion() =
         count = 42,
         coverage = 52,
         proportion = 0.5,
-        sequenceName = "sequenceName",
+        sequenceName = ExplicitlyNullable("sequenceName"),
         mutationFrom = "G",
         mutationTo = "T",
         position = 29741,

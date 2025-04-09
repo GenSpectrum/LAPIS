@@ -33,6 +33,7 @@ import org.genspectrum.lapis.openApi.LapisDetailsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
 import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.MutationsFields
 import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
@@ -43,10 +44,11 @@ import org.genspectrum.lapis.openApi.SequencesDataFormat
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.FieldConverter
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
@@ -79,7 +81,7 @@ import org.springframework.web.bind.annotation.RestController
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val fieldConverter: FieldConverter,
+    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
@@ -125,7 +127,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -184,7 +186,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -246,7 +248,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -378,18 +380,22 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         response: HttpServletResponse,
     ) {
         val mutationProportionsRequest = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -431,19 +437,23 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val request = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -488,19 +498,23 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val request = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -594,6 +608,10 @@ class LapisController(
     private fun getNucleotideMutationsCollection(request: MutationProportionsRequest) =
         MutationsCollection(
             records = siloQueryModel.computeNucleotideMutationProportions(request),
+            fields = when (request.fields.isEmpty()) {
+                true -> MutationsField.entries
+                false -> request.fields
+            },
         )
 
     @GetMapping(AMINO_ACID_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -624,18 +642,22 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         response: HttpServletResponse,
     ) {
         val mutationProportionsRequest = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -677,19 +699,23 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val mutationProportionsRequest = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -734,19 +760,23 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @MutationsFields
+        @RequestParam
+        fields: List<String>?,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val mutationProportionsRequest = MutationProportionsRequest(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
-            nucleotideMutations ?: emptyList(),
-            aminoAcidMutations ?: emptyList(),
-            nucleotideInsertions ?: emptyList(),
-            aminoAcidInsertions ?: emptyList(),
-            minProportion,
-            orderBy ?: emptyList(),
-            limit,
-            offset,
+            sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations = nucleotideMutations ?: emptyList(),
+            aaMutations = aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions = nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
+            fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
+            minProportion = minProportion,
+            orderByFields = orderBy ?: emptyList(),
+            limit = limit,
+            offset = offset,
         )
 
         lapisResponseStreamer.streamData(
@@ -840,6 +870,10 @@ class LapisController(
     private fun getAminoAcidMutationsCollection(request: MutationProportionsRequest) =
         MutationsCollection(
             records = siloQueryModel.computeAminoAcidMutationProportions(request),
+            fields = when (request.fields.isEmpty()) {
+                true -> MutationsField.entries
+                false -> request.fields
+            },
         )
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -883,7 +917,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -938,7 +972,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,
@@ -997,7 +1031,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { fieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
             orderBy ?: emptyList(),
             limit,
             offset,

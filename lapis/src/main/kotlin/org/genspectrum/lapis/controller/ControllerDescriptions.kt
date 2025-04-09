@@ -54,6 +54,11 @@ const val DETAILS_FIELDS_DESCRIPTION =
 If empty, all fields are returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
 """
+const val MUTATIONS_FIELDS_DESCRIPTION =
+    """The fields that the response items should contain.
+If empty, all fields are returned.
+If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
+"""
 const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. Fields specified here must also be present in \"fields\"."""
 const val LIMIT_DESCRIPTION = """The maximum number of entries to return in the response"""

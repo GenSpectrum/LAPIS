@@ -5,11 +5,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.mutationData
+import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
-import org.genspectrum.lapis.request.MutationProportionsRequest
+import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationData
@@ -93,9 +96,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
-        underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList(), 0.5),
-        )
+        underTest.computeNucleotideMutationProportions(mutationProportionsRequest(minProportion = 0.5))
 
         verify {
             siloClientMock.sendQuery(
@@ -110,9 +111,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
-        val result = underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
-        ).toList()
+        val result = underTest.computeNucleotideMutationProportions(mutationProportionsRequest()).toList()
 
         val expectedMutation =
             MutationResponse(
@@ -120,11 +119,102 @@ class SiloQueryModelTest {
                 count = 1234,
                 coverage = 2345,
                 proportion = 0.1234,
-                sequenceName = null,
+                sequenceName = ExplicitlyNullable(null),
                 mutationFrom = "A",
                 mutationTo = "B",
                 position = 1234,
             )
+        assertThat(result, equalTo(listOf(expectedMutation)))
+    }
+
+    @Test
+    fun `GIVEN singleSegmented and fields = position WHEN get nuc mutations THEN sequence name is null`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns
+            Stream.of(mutationData(position = 123))
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
+
+        val result =
+            underTest.computeNucleotideMutationProportions(
+                mutationProportionsRequest(fields = listOf(MutationsField.POSITION)),
+            )
+                .toList()
+
+        val expectedMutation =
+            MutationResponse(
+                mutation = null,
+                count = null,
+                coverage = null,
+                proportion = null,
+                sequenceName = null,
+                mutationFrom = null,
+                mutationTo = null,
+                position = 123,
+            )
+        assertThat(result, equalTo(listOf(expectedMutation)))
+    }
+
+    @Test
+    fun `GIVEN singleSegmented and fields=sequenceName WHEN get nuc mutations THEN has explicit null sequence name`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(
+            mutationData(
+                sequenceName = "sequenceName",
+            ),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
+
+        val result = underTest.computeNucleotideMutationProportions(
+            mutationProportionsRequest(fields = listOf(MutationsField.SEQUENCE_NAME)),
+        ).toList()
+
+        val expectedMutation = MutationResponse(
+            mutation = null,
+            count = null,
+            coverage = null,
+            proportion = null,
+            sequenceName = ExplicitlyNullable(null),
+            mutationFrom = null,
+            mutationTo = null,
+            position = null,
+        )
+        assertThat(result, equalTo(listOf(expectedMutation)))
+    }
+
+    @Test
+    fun `GIVEN multiSegmented and fields = mutation WHEN get nuc mutations THEN sequence name is null`() {
+        every {
+            siloClientMock.sendQuery(
+                match<SiloQuery<MutationData>> {
+                    when (val action = it.action) {
+                        is SiloAction.MutationsAction -> action.fields.contains(MutationsField.SEQUENCE_NAME.value)
+                        else -> false
+                    }
+                },
+            )
+        } returns Stream.of(
+            mutationData(
+                mutation = "A1234B",
+                sequenceName = "sequenceName",
+            ),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
+
+        val result = underTest.computeNucleotideMutationProportions(
+            mutationProportionsRequest(fields = listOf(MutationsField.MUTATION)),
+        ).toList()
+
+        val expectedMutation = MutationResponse(
+            mutation = "sequenceName:A1234B",
+            count = null,
+            coverage = null,
+            proportion = null,
+            sequenceName = null,
+            mutationFrom = null,
+            mutationTo = null,
+            position = null,
+        )
         assertThat(result, equalTo(listOf(expectedMutation)))
     }
 
@@ -134,16 +224,14 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
-        val result = underTest.computeNucleotideMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
-        ).toList()
+        val result = underTest.computeNucleotideMutationProportions(mutationProportionsRequest()).toList()
 
         val expectedMutation = MutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
             coverage = 2345,
             proportion = 0.1234,
-            sequenceName = "sequenceName",
+            sequenceName = ExplicitlyNullable("sequenceName"),
             mutationFrom = "A",
             mutationTo = "B",
             position = 1234,
@@ -156,19 +244,56 @@ class SiloQueryModelTest {
         every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(someMutationData)
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
-        val result = underTest.computeAminoAcidMutationProportions(
-            MutationProportionsRequest(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList()),
-        ).toList()
+        val result = underTest.computeAminoAcidMutationProportions(mutationProportionsRequest()).toList()
 
         val expectedMutation = MutationResponse(
             mutation = "sequenceName:A1234B",
             count = 1234,
             coverage = 2345,
             proportion = 0.1234,
-            sequenceName = "sequenceName",
+            sequenceName = ExplicitlyNullable("sequenceName"),
             mutationFrom = "A",
             mutationTo = "B",
             position = 1234,
+        )
+        assertThat(result, equalTo(listOf(expectedMutation)))
+    }
+
+    @Test
+    fun `GIVEN fields = mutation WHEN getting amino acid mutations THEN sequence name is null`() {
+        every {
+            siloClientMock.sendQuery(
+                match<SiloQuery<MutationData>> {
+                    when (val action = it.action) {
+                        is SiloAction.AminoAcidMutationsAction -> action.fields.contains(
+                            MutationsField.SEQUENCE_NAME.value,
+                        )
+
+                        else -> false
+                    }
+                },
+            )
+        } returns Stream.of(
+            mutationData(
+                mutation = "A1234B",
+                sequenceName = "sequenceName",
+            ),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.computeAminoAcidMutationProportions(
+            mutationProportionsRequest(fields = listOf(MutationsField.MUTATION)),
+        ).toList()
+
+        val expectedMutation = MutationResponse(
+            mutation = "sequenceName:A1234B",
+            count = null,
+            coverage = null,
+            proportion = null,
+            sequenceName = null,
+            mutationFrom = null,
+            mutationTo = null,
+            position = null,
         )
         assertThat(result, equalTo(listOf(expectedMutation)))
     }

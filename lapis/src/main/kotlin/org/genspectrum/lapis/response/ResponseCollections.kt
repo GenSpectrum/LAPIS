@@ -2,6 +2,7 @@ package org.genspectrum.lapis.response
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
+import org.genspectrum.lapis.request.MutationsField
 import java.util.stream.Stream
 
 class AggregatedCollection(
@@ -35,30 +36,23 @@ private fun JsonNode.toCsvValue() =
 
 class MutationsCollection(
     override val records: Stream<MutationResponse>,
+    private val fields: List<MutationsField>,
 ) : RecordCollection<MutationResponse> {
-    override fun getHeader() =
-        listOf(
-            "mutation",
-            "count",
-            "coverage",
-            "proportion",
-            "sequenceName",
-            "mutationFrom",
-            "mutationTo",
-            "position",
-        )
+    override fun getHeader() = fields.map { it.value }
 
     override fun mapToCsvValuesList(value: MutationResponse): List<String?> =
-        listOf(
-            value.mutation,
-            value.count.toString(),
-            value.coverage.toString(),
-            value.proportion.toString(),
-            value.sequenceName ?: "",
-            value.mutationFrom,
-            value.mutationTo,
-            value.position.toString(),
-        )
+        fields.map {
+            when (it) {
+                MutationsField.MUTATION -> value.mutation
+                MutationsField.COUNT -> value.count.toString()
+                MutationsField.COVERAGE -> value.coverage.toString()
+                MutationsField.PROPORTION -> value.proportion.toString()
+                MutationsField.SEQUENCE_NAME -> value.sequenceName?.value ?: ""
+                MutationsField.MUTATION_FROM -> value.mutationFrom
+                MutationsField.MUTATION_TO -> value.mutationTo
+                MutationsField.POSITION -> value.position.toString()
+            }
+        }
 }
 
 class InsertionsCollection(

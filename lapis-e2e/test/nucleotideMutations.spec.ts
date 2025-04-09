@@ -29,6 +29,26 @@ describe('The /nucleotideMutations endpoint', () => {
     expect(commonMutationProportion?.position).to.be.equal(28280);
   });
 
+  it('should return only mutation when asking for only mutation', async () => {
+    const result = await lapisClient.postNucleotideMutations({
+      sequenceFiltersWithMinProportion: { fields: ['mutation'], limit: 1, orderBy: [{ field: 'mutation' }] },
+    });
+
+    expect(result.data).to.have.length(1);
+
+    const mutation = result.data[0];
+    expect(mutation).to.deep.equal({
+      mutation: 'A1-',
+      count: undefined,
+      coverage: undefined,
+      mutationFrom: undefined,
+      mutationTo: undefined,
+      position: undefined,
+      proportion: undefined,
+      sequenceName: undefined,
+    });
+  });
+
   it('should return mutations proportions for multi segmented', async () => {
     const result = await lapisClientMultiSegmented.postNucleotideMutations({
       sequenceFiltersWithMinProportion: { country: 'Switzerland' },

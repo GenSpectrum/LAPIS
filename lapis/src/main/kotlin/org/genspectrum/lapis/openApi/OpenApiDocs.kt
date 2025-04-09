@@ -41,6 +41,7 @@ import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
+import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NUCLEOTIDE_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -78,7 +79,8 @@ fun buildOpenApiSchema(
                                 sequenceFilterFields = sequenceFilterFields,
                                 orderByFieldsSchema = mutationsOrderByFieldsEnum(),
                                 dataFormatSchema = dataFormatSchema(),
-                            ) + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number")),
+                            ) + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number")) +
+                                Pair(FIELDS_PROPERTY, mutationsFieldsSchema()),
                         ),
                 )
                 .addSchemas(
@@ -179,11 +181,7 @@ fun buildOpenApiSchema(
                         Schema<String>()
                             .type("object")
                             .description("The count and proportion of a mutation.")
-                            .properties(nucleotideMutationProportionSchema())
-                            .required(
-                                nucleotideMutationProportionSchema().keys
-                                    .filterNot { referenceGenomeSchema.isSingleSegmented() && it == "sequenceName" },
-                            ),
+                            .properties(nucleotideMutationProportionSchema()),
                     ),
                 )
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
@@ -193,8 +191,7 @@ fun buildOpenApiSchema(
                         Schema<String>()
                             .type("object")
                             .description("The count and proportion of a mutation.")
-                            .properties(aminoAcidMutationProportionSchema())
-                            .required(aminoAcidMutationProportionSchema().keys.toList()),
+                            .properties(aminoAcidMutationProportionSchema()),
                     ),
                 )
                 .addSchemas(
@@ -236,6 +233,10 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
+                .addSchemas(
+                    MUTATIONS_FIELDS_SCHEMA,
+                    mutationsFieldsSchema(),
+                )
                 .addSchemas(AMINO_ACID_MUTATIONS_SCHEMA, aminoAcidMutations())
                 .addSchemas(NUCLEOTIDE_INSERTIONS_SCHEMA, nucleotideInsertions())
                 .addSchemas(AMINO_ACID_INSERTIONS_SCHEMA, aminoAcidInsertions())
@@ -670,7 +671,7 @@ private fun sequencesFormatSchema() =
         ._enum(listOf(SequencesDataFormat.FASTA, SequencesDataFormat.JSON, SequencesDataFormat.NDJSON))
 
 private fun fieldsArray(
-    databaseConfig: List<DatabaseMetadata>,
+    databaseConfig: List<DatabaseMetadata> = emptyList(),
     additionalFields: List<String> = emptyList(),
 ) = arraySchema(fieldsEnum(databaseConfig, additionalFields))
 
@@ -680,7 +681,7 @@ private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
 private fun mutationsOrderByFieldsEnum() =
     orderByFieldsEnum(
         emptyList(),
-        listOf("mutation", "count", "proportion", "sequenceName", "mutationFrom", "mutationTo", "position"),
+        MutationsField.entries.map { it.value },
     )
 
 private fun insertionsOrderByFieldsEnum() =
@@ -757,3 +758,6 @@ private fun sequencesResponse(
         }
     }
 }
+
+private fun mutationsFieldsSchema(): ArraySchema? =
+    fieldsArray(additionalFields = MutationsField.entries.map { it.value })

@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonValue
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
@@ -50,15 +52,16 @@ data class LapisInfo(
     val siloVersion: String? = null,
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class MutationResponse(
-    val mutation: String,
-    val count: Int,
-    val coverage: Int,
-    val proportion: Double,
-    val sequenceName: String?,
-    val mutationFrom: String,
-    val mutationTo: String,
-    val position: Int,
+    val mutation: String?,
+    val count: Int?,
+    val coverage: Int?,
+    val proportion: Double?,
+    val sequenceName: ExplicitlyNullable<String>?,
+    val mutationFrom: String?,
+    val mutationTo: String?,
+    val position: Int?,
 )
 
 data class InsertionResponse(
@@ -67,4 +70,25 @@ data class InsertionResponse(
     val insertedSymbols: String,
     val position: Int,
     val sequenceName: String?,
+)
+
+/**
+ * In Javascript terms, this is equivalent to using `null` instead of `undefined`.
+ * ExplicitlyNullable is used to serialize null values in JSON when the surrounding class ignores null values,
+ * i.e. treats `null` as `undefined`.
+ * In some cases, you still want to be able to explicitly set `null` on a field.
+ *
+ * Example:
+ * ```
+ * @JsonInclude(JsonInclude.Include.NON_NULL)
+ * data class Example(value: ExplicitlyNullable<String>?)
+ * ```
+ *
+ * - `Example(null)` will be serialized as `{}`.
+ * - `Example(ExplicitlyNullable(null))` will be serialized as `{"value":null}`.
+ * - `Example(ExplicitlyNullable("my value"))` will be serialized as `{"value":"my value"}`.
+ */
+data class ExplicitlyNullable<T>(
+    @get:JsonValue
+    val value: T? = null,
 )
