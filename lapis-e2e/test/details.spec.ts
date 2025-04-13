@@ -12,15 +12,8 @@ describe('The /details endpoint', () => {
 
     expect(result.data).to.have.length(2);
     expect(result.data[0]).to.be.deep.equal({
-      age: undefined,
-      country: undefined,
-      date: undefined,
       division: 'Zürich',
-      primaryKey: undefined,
       pangoLineage: 'B.1.617.2',
-      qcValue: undefined,
-      region: undefined,
-      testBooleanColumn: undefined,
     });
   });
 
@@ -39,9 +32,9 @@ describe('The /details endpoint', () => {
       division: 'Zürich',
       primaryKey: 'key_3128796',
       pangoLineage: 'B.1.617.2',
-      qcValue: 0.96,
+      qc_value: 0.96,
       region: 'Europe',
-      testBooleanColumn: false,
+      test_boolean_column: false,
     });
   });
 
@@ -53,8 +46,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
-    expect(ascendingOrderedResult.data[1].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[0].division).to.be.null;
+    expect(ascendingOrderedResult.data[1].division).to.be.null;
     expect(ascendingOrderedResult.data[2]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postDetails({
@@ -153,9 +146,9 @@ Solothurn	B.1	key_1002052
       division: 'Zürich',
       primaryKey: 'key_3578231',
       pangoLineage: 'P.1',
-      qcValue: 0.93,
+      qc_value: 0.93,
       region: 'Europe',
-      testBooleanColumn: undefined,
+      test_boolean_column: null,
     };
 
     const result = await lapisClient.postDetails({
@@ -176,9 +169,9 @@ Solothurn	B.1	key_1002052
       division: 'Vaud',
       primaryKey: 'key_3259931',
       pangoLineage: 'AY.43',
-      qcValue: 0.98,
+      qc_value: 0.98,
       region: 'Europe',
-      testBooleanColumn: true,
+      test_boolean_column: true,
     };
 
     const result = await lapisClient.postDetails({
@@ -219,6 +212,6 @@ key_1002052
       },
     });
 
-    expect(result).to.have.nested.property('data[0].division', undefined);
+    expect(result).to.have.nested.property('data[0].division', null);
   });
 });
