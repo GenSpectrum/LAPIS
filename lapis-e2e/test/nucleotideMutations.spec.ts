@@ -39,13 +39,6 @@ describe('The /nucleotideMutations endpoint', () => {
     const mutation = result.data[0];
     expect(mutation).to.deep.equal({
       mutation: 'A1-',
-      count: undefined,
-      coverage: undefined,
-      mutationFrom: undefined,
-      mutationTo: undefined,
-      position: undefined,
-      proportion: undefined,
-      sequenceName: undefined,
     });
   });
 
