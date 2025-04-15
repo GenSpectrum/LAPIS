@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/GenSpectrum/LAPIS/compare/v0.4.2...v0.4.3) (2025-04-15)
+
+
+### Features
+
+* **lapis:** add `fields` property to mutation endpoints ([#1149](https://github.com/GenSpectrum/LAPIS/issues/1149)) ([4d8df3a](https://github.com/GenSpectrum/LAPIS/commit/4d8df3a937fe9b66ec9d77e3ac4f4b75446c694d)), closes [#1092](https://github.com/GenSpectrum/LAPIS/issues/1092)
+
 ## [0.4.2](https://github.com/GenSpectrum/LAPIS/compare/v0.4.1...v0.4.2) (2025-03-31)
 
 
