@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/GenSpectrum/LAPIS/compare/v0.4.3...v0.4.4) (2025-04-22)
+
+
+### Bug Fixes
+
+* **lapis:** add missing `dataFormat` to amino acid mutation GET endpoint in Swagger UI ([#1160](https://github.com/GenSpectrum/LAPIS/issues/1160)) ([5c4dbe2](https://github.com/GenSpectrum/LAPIS/commit/5c4dbe2f58082522ca4f321c20bf0f6e2cce1849)), closes [#1159](https://github.com/GenSpectrum/LAPIS/issues/1159)
+
 ## [0.4.3](https://github.com/GenSpectrum/LAPIS/compare/v0.4.2...v0.4.3) (2025-04-15)
 
 
