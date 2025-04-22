@@ -20,10 +20,10 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4",
+    "@openapitools/openapi-generator-cli": "^2.19.1",
     "@types/chai": "^5.2.1",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.14.1",
     "chai": "^5.2.0",
     "mocha": "^11.1.0",
     "prettier": "^3.5.3",
