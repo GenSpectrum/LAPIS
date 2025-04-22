@@ -3,7 +3,6 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
@@ -370,7 +369,6 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
-        request: HttpServletRequest,
         @DataFormat
         @RequestParam
         dataFormat: String? = null,
@@ -636,6 +634,9 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
         @NucleotideInsertions
         @RequestParam
         nucleotideInsertions: List<NucleotideInsertion>?,
@@ -693,6 +694,9 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
         @NucleotideInsertions
         @RequestParam
         nucleotideInsertions: List<NucleotideInsertion>?,
@@ -754,6 +758,9 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
         @NucleotideInsertions
         @RequestParam
         nucleotideInsertions: List<NucleotideInsertion>?,
