@@ -442,6 +442,40 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
+    fun `given a query with a advancedQuery alongside nucleotide mutations then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("advancedQuery" to listOf("A123T")),
+            listOf(NucleotideMutation(null, 123, null)),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("advancedQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
+    @Test
+    fun `given a query with a advancedQuery and a variantQuery then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("advancedQuery" to listOf("A123T"), "variantQuery" to listOf("A123T")),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with advancedQuery filter"),
+        )
+    }
+
+    @Test
     fun `given a query with a variantQuery alongside amino acid mutations then it should throw an error`() {
         val filterParameter = DummySequenceFilters(
             mapOf("variantQuery" to listOf("A123T")),

@@ -197,7 +197,7 @@ class SequenceFilterFieldsTest {
         assertThat(underTest.fields, aMapWithSize(1))
         assertThat(
             underTest.fields,
-            hasEntry("advancedQuery", SequenceFilterField("advancedQuery", SequenceFilterFieldType.AdvancedQuery)),
+            hasEntry("advancedquery", SequenceFilterField("advancedQuery", SequenceFilterFieldType.AdvancedQuery)),
         )
     }
 

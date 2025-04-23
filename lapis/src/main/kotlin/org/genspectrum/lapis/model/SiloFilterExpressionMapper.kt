@@ -136,15 +136,29 @@ class SiloFilterExpressionMapper(
         nucleotideMutations: List<NucleotideMutation>,
         aaMutations: List<AminoAcidMutation>,
     ) {
-        val containsAdvancedVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery }
+        val containsVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery }
+        val containsAdvancedQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.AdvancedQuery }
         val containsSimpleVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes } ||
             nucleotideMutations.isNotEmpty() ||
             aaMutations.isNotEmpty()
 
-        if (containsAdvancedVariantQuery && containsSimpleVariantQuery) {
+        if (containsVariantQuery && containsSimpleVariantQuery) {
             throw BadRequestException(
                 "variantQuery filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
+            )
+        }
+
+        if (containsAdvancedQuery && containsSimpleVariantQuery) {
+            throw BadRequestException(
+                "advancedQuery filter cannot be used with other variant filters such as: " +
+                    variantQueryTypes.joinToString(", "),
+            )
+        }
+
+        if (containsVariantQuery && containsAdvancedQuery) {
+            throw BadRequestException(
+                "variantQuery filter cannot be used with advancedQuery filter",
             )
         }
 
