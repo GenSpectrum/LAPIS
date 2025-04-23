@@ -21,4 +21,5 @@ schema:
       type: float
   features:
     - name: sarsCoV2VariantQuery
+    - name: generalizedAdvancedQuery
   primaryKey: primaryKey

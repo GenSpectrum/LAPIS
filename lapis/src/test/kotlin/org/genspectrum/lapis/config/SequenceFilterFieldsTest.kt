@@ -188,6 +188,19 @@ class SequenceFilterFieldsTest {
         )
     }
 
+    @Test
+    fun `given database config with a feature of 'generalizedAdvancedQuery' then contains advancedQuery`() {
+        val input = databaseConfigWithFields(emptyList(), listOf(DatabaseFeature(GENERALIZED_ADVANCED_QUERY_FEATURE)))
+
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(1))
+        assertThat(
+            underTest.fields,
+            hasEntry("advancedQuery", SequenceFilterField("advancedQuery", SequenceFilterFieldType.AdvancedQuery)),
+        )
+    }
+
     private fun databaseConfigWithFields(
         databaseMetadata: List<DatabaseMetadata>,
         databaseFeatures: List<DatabaseFeature> = emptyList(),
