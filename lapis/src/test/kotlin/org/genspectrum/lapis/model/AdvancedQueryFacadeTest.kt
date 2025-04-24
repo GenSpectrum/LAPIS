@@ -37,7 +37,7 @@ class AdvancedQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummySequenceFilterFields)
+    private var underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
@@ -45,7 +45,7 @@ class AdvancedQueryFacadeTest {
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             StringSearch("some_metadata.regex", "'^Democratic.*'"),
@@ -80,7 +80,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a single entry then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300G"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = NucleotideSymbolEquals(null, 300, "G")
         assertThat(result, equalTo(expectedResult))
@@ -90,7 +90,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with mutation with position only then should return HasNucleotideMutation filter`() {
         val advancedQuery = "400"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(HasNucleotideMutation(null, 400)))
     }
@@ -99,7 +99,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with an 'And' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300G & 400-"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             NucleotideSymbolEquals(null, 400, "-"),
@@ -112,7 +112,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with two 'And' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300G & 400- & 500B"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             NucleotideSymbolEquals(null, 500, "B"),
@@ -126,7 +126,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Not' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "!300G"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = Not(NucleotideSymbolEquals(null, 300, "G"))
         assertThat(result, equalTo(expectedResult))
@@ -136,7 +136,7 @@ class AdvancedQueryFacadeTest {
     fun `given a variant advancedQuery with an 'Or' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300G | 400-"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = Or(
             NucleotideSymbolEquals(null, 400, "-"),
@@ -149,7 +149,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with an bracket expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300C & (400A | 500G)"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             Or(
@@ -165,7 +165,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Maybe' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "MAYBE(300G)"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = Maybe(NucleotideSymbolEquals(null, 300, "G"))
         assertThat(result, equalTo(expectedResult))
@@ -175,7 +175,7 @@ class AdvancedQueryFacadeTest {
     fun `GIVEN a advancedQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' SiloQuery`() {
         val advancedQuery = "maYbE(T12C)"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = Maybe(NucleotideSymbolEquals(null, 12, "C"))
         assertThat(result, equalTo(expectedResult))
@@ -185,7 +185,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Pangolineage' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "pangolineage=A.1.2.3"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = LineageEquals(PANGO_LINEAGE_FIELD, "A.1.2.3", false)
         assertThat(result, equalTo(expectedResult))
@@ -196,7 +196,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Pangolineage' expression with casing then map should return the corresponding SiloQuery`() {
         val advancedQuery = "Pangolineage=A.1.2.3*"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
         assertThat(result, equalTo(expectedResult))
@@ -206,7 +206,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Nof' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "[3-of: 123A, 234T, 345G, 456A]"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = NOf(
             3,
@@ -225,7 +225,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a exact 'Nof' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "[exactly-3-of: 123A, 234T, 345G, 456A]"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = NOf(
             3,
@@ -245,7 +245,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a nested exact 'Nof' expression then map should return the corresponding SiloQuery`() {
         val advancedQuery = "[exactly-3-of: 123A, !234G, 345G, 456A]"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = NOf(
             3,
@@ -265,7 +265,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a exact 'Nof' expression with casing then map should return the corresponding SiloQuery`() {
         val advancedQuery = "[exAcTly-3-oF: 123A, 234T, 345G]"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = NOf(
             3,
@@ -283,7 +283,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Insertion' expression then returns SILO query`() {
         val advancedQuery = "ins_1234:GAG"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
     }
@@ -293,14 +293,14 @@ class AdvancedQueryFacadeTest {
         //  COVID variant queries do not support segment name in insertion queries
         val advancedQuery = "ins_sequence:1234:GAG"
 
-        assertThrows<BadRequestException> { underTest.map(advancedQuery) }
+        assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
     }
 
     @Test
     fun `given a advancedQuery with a 'Insertion' expression with lower case letters then returns SILO query`() {
         val advancedQuery = "ins_1234:gAG"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
     }
@@ -309,7 +309,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Insertion' expression with casing letters then returns SILO query`() {
         val advancedQuery = "iNs_1234:gAG"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
     }
@@ -318,7 +318,7 @@ class AdvancedQueryFacadeTest {
     fun `given a advancedQuery with a 'Insertion' with wildcard expression then returns SILO query`() {
         val advancedQuery = "ins_1234:G?A?G"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(NucleotideInsertionContains(1234, "G.*A.*G", null)))
     }
@@ -327,7 +327,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression then should map to AminoAcidSymbolEquals`() {
         val advancedQuery = "S:N501Y"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
     }
@@ -336,7 +336,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression with lower case letters then should map to AminoAcidSymbolEquals`() {
         val advancedQuery = "S:n501y"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
     }
@@ -345,7 +345,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression with gene lower case letters then should map to AminoAcidSymbolEquals`() {
         val advancedQuery = "orf1a:N501Y"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidSymbolEquals("ORF1a", 501, "Y")))
     }
@@ -354,7 +354,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression without first symbol then should map to AminoAcidSymbolEquals`() {
         val advancedQuery = "S:501Y"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
     }
@@ -363,7 +363,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression without second symbol then should return HasAminoAcidMutation`() {
         val advancedQuery = "S:N501"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
     }
@@ -372,7 +372,7 @@ class AdvancedQueryFacadeTest {
     fun `given amino acid mutation expression without any symbol then should return HasAminoAcidMutation`() {
         val advancedQuery = "S:501"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
     }
@@ -381,7 +381,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'AA insertion' expression then returns SILO query`() {
         val advancedQuery = "ins_S:501:EPE"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "S")))
     }
@@ -390,7 +390,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a stop codon expression then returns SILO query`() {
         val advancedQuery = "ins_S:501:A*C"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "A\\*C", "S")))
     }
@@ -399,7 +399,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'AA insertion' expression with lower case then returns SILO query`() {
         val advancedQuery = "ins_ORF1a:501:ePe"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "ORF1a")))
     }
@@ -408,7 +408,7 @@ class AdvancedQueryFacadeTest {
     fun `given an invalid advancedQuery with an invalid gene return error`() {
         val advancedQuery = "ins_invalidGene:501:EPE"
 
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
+        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
 
         assertThat(exception.message, `is`("Unknown gene: invalidGene"))
     }
@@ -417,7 +417,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'AA insertion' expression with lower case gene then returns SILO query`() {
         val advancedQuery = "ins_orF1a:501:EPE"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "ORF1a")))
     }
@@ -426,7 +426,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'AA insertion' with wildcard then returns SILO query`() {
         val advancedQuery = "ins_S:501:E?E?"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*E.*", "S")))
     }
@@ -435,7 +435,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'AA insertion' with stop codon and wildcard then returns SILO query`() {
         val advancedQuery = "ins_S:501:E?*E"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*\\*E", "S")))
     }
@@ -444,7 +444,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with string metadata expression then returns SILO query`() {
         val advancedQuery = "some_metadata=AB"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(StringEquals("some_metadata", "AB")))
     }
@@ -453,7 +453,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with mutation and metadata expression then returns SILO query`() {
         val advancedQuery = "(NOT some_metadata=AB) & 300G"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             NucleotideSymbolEquals(null, 300, "G"),
@@ -467,7 +467,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with mutation and regex metadata expression then returns SILO query`() {
         val advancedQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
             Or(
@@ -485,7 +485,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with string (with whitespace) metadata expression then returns SILO query`() {
         val advancedQuery = "some_metadata='Democratic Republic of the Congo'"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(StringEquals("some_metadata", "'Democratic Republic of the Congo'")))
     }
@@ -494,7 +494,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with string (with regex) metadata expression then returns SILO query`() {
         val advancedQuery = "some_metadata.regex='(Democratic.*Rep$'"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*Rep$'")))
     }
@@ -503,7 +503,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with date metadata expression then returns SILO query`() {
         val advancedQuery = "date=2020-01-01"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
     }
@@ -512,7 +512,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with greater than equal date metadata expression then returns SILO query`() {
         val advancedQuery = "date>=2020-01-01 AND date<=2021-01-01"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(
             result,
@@ -529,7 +529,7 @@ class AdvancedQueryFacadeTest {
     fun `given a valid advancedQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
         val advancedQuery = "pangoLineage=jn.1*"
 
-        val result = underTest.map(advancedQuery)
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         assertThat(
             result,
@@ -541,7 +541,7 @@ class AdvancedQueryFacadeTest {
     fun `GIVEN an invalid variant query THEN throw bad request exception`() {
         val advancedQuery = "pangoLineage='jn.1* thisIsInvalid'"
 
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
+        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
 
         assertThat(
             exception.message,
