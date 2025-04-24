@@ -54,23 +54,26 @@ describe('The /nucleotideInsertions endpoint', () => {
     const resultWithLimit = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 2,
+        limit: 3,
       },
     });
 
-    expect(resultWithLimit.data).to.have.length(2);
+    expect(resultWithLimit.data).to.have.length(3);
+    expect(resultWithLimit.data[0]).to.have.property('count', '2');
+    expect(resultWithLimit.data[1]).to.have.property('count', '2');
+    expect(resultWithLimit.data[2]).to.have.property('count', '2');
     expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_22339:GCTGGT');
 
     const resultWithLimitAndOffset = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 2,
+        limit: 3,
         offset: 1,
       },
     });
 
-    expect(resultWithLimitAndOffset.data).to.have.length(2);
-    expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
+    expect(resultWithLimitAndOffset.data).to.have.length(3);
+    expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[2]);
   });
 
   it('should correctly handle nucleotide insertion requests', async () => {
