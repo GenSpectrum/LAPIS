@@ -410,7 +410,7 @@ class AdvancedQueryFacadeTest {
 
         val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
 
-        assertThat(exception.message, `is`("Unknown gene from lower case: invalidgene"))
+        assertThat(exception.message, `is`("Unknown gene: invalidGene"))
     }
 
     @Test
@@ -506,6 +506,23 @@ class AdvancedQueryFacadeTest {
         val result = underTest.map(advancedQuery)
 
         assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
+    }
+
+    @Test
+    fun `given a valid advancedQuery with greater than equal date metadata expression then returns SILO query`() {
+        val advancedQuery = "date>=2020-01-01 AND date<=2021-01-01"
+
+        val result = underTest.map(advancedQuery)
+
+        assertThat(
+            result,
+            equalTo(
+                And(
+                    DateBetween("date", null, LocalDate.parse("2021-01-01")),
+                    DateBetween("date", LocalDate.parse("2020-01-01"), null),
+                ),
+            ),
+        )
     }
 
     @Test

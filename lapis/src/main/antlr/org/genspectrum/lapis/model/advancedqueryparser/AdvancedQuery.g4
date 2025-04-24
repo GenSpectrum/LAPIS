@@ -19,6 +19,8 @@ single:
   | aaMutationQuery
   | aaInsertionQuery
   | metadataQuery
+  | metadataGreaterThanEqualQuery
+  | metadataLessThanEqualQuery
   | regexMetadataQuery
   | isNullQuery
   ;
@@ -54,14 +56,15 @@ aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol
 aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 
 metadataQuery: geneOrName '=' geneOrName;
+metadataGreaterThanEqualQuery: geneOrName '>=' geneOrName;
+metadataLessThanEqualQuery: geneOrName '<=' geneOrName;
 regexMetadataQuery: geneOrName '=' value;
 value: STRING;
-metadataGreaterThanEqualQuery: geneOrName '>=' dateOrNumber;
-metadataLessThanEqualQuery: geneOrName '<=' dateOrNumber;
 
+dateOrNumber: digit+;
+digit: NUMBER | MINUS | DOT;
 geneOrName: charOrNumber+;
 charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK;
-dateOrNumber: NUMBER | MINUS | DOT;
 
 isNullQuery: isnull_ '(' geneOrName ')';
 isnull_: I S N U L L ;
@@ -103,5 +106,5 @@ AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in 
 OR: ' OR ';
 NOT: 'NOT ';
 
-NUMBER: [0-9];
+NUMBER: [0-9]+;
 WHITESPACE: [ \r\n\t] -> skip;
