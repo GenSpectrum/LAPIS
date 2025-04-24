@@ -38,8 +38,8 @@ describe('The /nucleotideInsertions endpoint', () => {
         orderBy: [{ field: 'count', type: 'ascending' }],
       },
     });
-
-    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_22339:GCTGGT');
+    // the first two positions both have count 1 so their order could change
+    expect(ascendingOrderedResult.data[2]).to.have.property('insertion', 'ins_5959:TAT');
 
     const descendingOrderedResult = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
@@ -54,20 +54,19 @@ describe('The /nucleotideInsertions endpoint', () => {
     const resultWithLimit = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
         orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 3,
+        limit: 4,
       },
     });
 
-    expect(resultWithLimit.data).to.have.length(3);
-    expect(resultWithLimit.data[0]).to.have.property('count', '2');
-    expect(resultWithLimit.data[1]).to.have.property('count', '2');
-    expect(resultWithLimit.data[2]).to.have.property('count', '2');
-    expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_22339:GCTGGT');
+    expect(resultWithLimit.data).to.have.length(4);
+    expect(resultWithLimit.data[0]).to.have.property('count', 1);
+    expect(resultWithLimit.data[3]).to.have.property('count', 17);
+    expect(resultWithLimit.data[3]).to.have.property('insertion', 'ins_25701:CCC');
 
     const resultWithLimitAndOffset = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 3,
+        orderBy: [{ field: 'count', type: 'descending' }],
+        limit: 4,
         offset: 1,
       },
     });
