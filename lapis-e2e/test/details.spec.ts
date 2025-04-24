@@ -17,9 +17,6 @@ describe('The /details endpoint', () => {
       return 0;
     });
     expect(result.data[1]).to.be.deep.equal({
-      age: undefined,
-      country: undefined,
-      date: undefined,
       division: 'Zürich',
       pangoLineage: 'B.1.617.2',
     });
