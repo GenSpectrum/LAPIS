@@ -1,6 +1,15 @@
 import { expect } from 'chai';
 import { basePath, lapisClient, lapisClientMultiSegmented } from './common';
 
+function getNucleotideInsertions(params?: URLSearchParams) {
+  const nucleotideInsertionsEndpoint = '/sample/nucleotideInsertions';
+  if (params === undefined) {
+    return fetch(basePath + nucleotideInsertionsEndpoint);
+  }
+
+  return fetch(basePath + nucleotideInsertionsEndpoint + '?' + params.toString());
+}
+
 describe('The /nucleotideInsertions endpoint', () => {
   let someInsertion = 'ins_25701:CCC';
 
@@ -49,6 +58,17 @@ describe('The /nucleotideInsertions endpoint', () => {
 
     expect(descendingOrderedResult.data).to.have.length(4);
     expect(descendingOrderedResult.data[3]).to.have.property('insertion', 'ins_22204:CAGAA');
+  });
+
+  it('advancedQuery can filter out unwanted insertions', async () => {
+    const urlParams = new URLSearchParams({
+      variantQuery: 'NOT ins_5959:TAT AND country="Switzerland"',
+    });
+
+    const result = await getNucleotideInsertions(urlParams);
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data).to.have.length(3);
   });
 
   it('should apply limit and offset', async () => {
