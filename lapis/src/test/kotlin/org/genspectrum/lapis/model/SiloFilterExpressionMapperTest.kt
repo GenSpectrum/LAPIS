@@ -49,7 +49,7 @@ class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
     private val allowedSequenceFilterFields = SequenceFilterFields(emptyMap())
     private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
-    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, allowedSequenceFilterFields)
+    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema)
 
     private var underTest =
         SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
