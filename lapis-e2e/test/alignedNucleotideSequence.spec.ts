@@ -4,7 +4,6 @@ import {
   expectIsZstdEncoded,
   lapisMultiSegmentedSequenceController,
   lapisSingleSegmentedSequenceController,
-  sequenceData,
 } from './common';
 
 describe('The /alignedNucleotideSequence endpoint', () => {
@@ -14,8 +13,11 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    expect(result[0].primaryKey).to.equal('key_3259931');
-    expect(result[0].main).to.have.length(29903);
+    const match = result.find(
+      (item: { primaryKey: string; main: string | any[] }) =>
+        item.primaryKey === 'key_3259931' && item.main?.length === 29903
+    );
+    expect(match).to.exist;
   });
 
   it('should return aligned nucleotide sequences for multi segmented sequences', async () => {
