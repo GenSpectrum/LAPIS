@@ -62,8 +62,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataLessThanEqualQuery(ctx: AdvancedQueryParser.MetadataLessThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.dateOrNumber().text
+        val metadataName = ctx.geneOrName()[0].text
+        val metadataValue = ctx.geneOrName()[1].text
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
@@ -100,8 +100,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataGreaterThanEqualQuery(ctx: AdvancedQueryParser.MetadataGreaterThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.dateOrNumber().text
+        val metadataName = ctx.geneOrName()[0].text
+        val metadataValue = ctx.geneOrName()[1].text
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
@@ -109,7 +109,7 @@ class AdvancedQueryCustomListener(
             SequenceFilterFieldType.Date -> {
                 try {
                     val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(field.name, to = date, from = null))
+                    expressionStack.addLast(DateBetween(field.name, to = null, from = date))
                 } catch (exception: DateTimeParseException) {
                     throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
                 }
