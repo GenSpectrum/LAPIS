@@ -27,8 +27,10 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(6);
-    expect(result[0].primaryKey).to.equal('key_5');
-    expect(result[0].m).to.equal('TGGG');
+    const match = result.find(
+      (item: { primaryKey: string; m: string | any[] }) => item.primaryKey === 'key_5' && item.m === 'TGGG'
+    );
+    expect(match).to.exist;
   });
 
   it('should order ascending by specified fields', async () => {

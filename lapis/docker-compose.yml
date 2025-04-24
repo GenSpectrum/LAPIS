@@ -1,6 +1,7 @@
 services:
   lapisOpen:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+    platform: linux/amd64
     ports:
       - "8090:8080"
     command: --silo.url=http://silo:8081
@@ -16,6 +17,7 @@ services:
 
   silo:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    platform: linux/amd64
     ports:
       - "8091:8081"
     command: api
@@ -27,6 +29,7 @@ services:
 
   siloPreprocessing:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    platform: linux/amd64
     command: preprocessing
     volumes:
       - ../lapis-e2e/testData/singleSegmented:/preprocessing/input
@@ -36,6 +39,7 @@ services:
 
   siloMultisegmented:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    platform: linux/amd64
     ports:
       - "8093:8081"
     command: api
@@ -47,6 +51,7 @@ services:
 
   siloPreprocessingMultisegmented:
     image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+    platform: linux/amd64
     command: preprocessing
     volumes:
       - ../lapis-e2e/testData/multiSegmented:/preprocessing/input
@@ -56,6 +61,7 @@ services:
 
   lapisMultiSegmented:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+    platform: linux/amd64
     ports:
       - "8094:8080"
     command: --silo.url=http://siloMultisegmented:8081
@@ -71,6 +77,7 @@ services:
 
   lapisProtected:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+    platform: linux/amd64
     ports:
       - "8092:8080"
     command: --silo.url=http://silo:8081 --lapis.accessKeys.path=/workspace/access_keys.yaml

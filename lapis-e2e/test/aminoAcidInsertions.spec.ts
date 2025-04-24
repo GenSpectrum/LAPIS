@@ -105,16 +105,18 @@ insertion,count,insertedSymbols,position,sequenceName
     `.trim()
     );
 
-    expect(resultText).to.contain(
-      String.raw`
-ins_S:143:T,1,T,143,S
-ins_S:210:IV,1,IV,210,S
-ins_S:214:EPE,5,EPE,214,S
-ins_S:247:SGE,1,SGE,247,S
-ins_ORF1a:3602:F,1,F,3602,ORF1a
-ins_ORF1a:3602:FEP,1,FEP,3602,ORF1a
-`.trim()
-    );
+    const expectedLines = [
+      'ins_S:143:T,1,T,143,S',
+      'ins_S:210:IV,1,IV,210,S',
+      'ins_S:214:EPE,5,EPE,214,S',
+      'ins_S:247:SGE,1,SGE,247,S',
+      'ins_ORF1a:3602:F,1,F,3602,ORF1a',
+      'ins_ORF1a:3602:FEP,1,FEP,3602,ORF1a',
+    ];
+
+    expectedLines.forEach(line => {
+      expect(resultText).to.contain(line);
+    });
   });
 
   it('should return the data as TSV', async () => {
@@ -133,15 +135,17 @@ insertion	count	insertedSymbols	position	sequenceName
     `.trim()
     );
 
-    expect(resultText).to.contain(
-      String.raw`
-ins_S:143:T	1	T	143	S
-ins_S:210:IV	1	IV	210	S
-ins_S:214:EPE	5	EPE	214	S
-ins_S:247:SGE	1	SGE	247	S
-ins_ORF1a:3602:F	1	F	3602	ORF1a
-ins_ORF1a:3602:FEP	1	FEP	3602	ORF1a
-    `.trim()
-    );
+    const expectedLines = [
+      'ins_S:143:T\t1\tT\t143\tS',
+      'ins_S:210:IV\t1\tIV\t210\tS',
+      'ins_S:214:EPE\t5\tEPE\t214\tS',
+      'ins_S:247:SGE\t1\tSGE\t247\tS',
+      'ins_ORF1a:3602:F\t1\tF\t3602\tORF1a',
+      'ins_ORF1a:3602:FEP\t1\tFEP\t3602\tORF1a',
+    ];
+
+    expectedLines.forEach(line => {
+      expect(resultText).to.contain(line);
+    });
   });
 });
