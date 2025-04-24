@@ -287,7 +287,8 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.StringSearch -> {
-                expressionStack.addLast(StringSearch(field.name, stripped))
+                val baseFieldName = field.name.split(".").first()
+                expressionStack.addLast(StringSearch(baseFieldName, stripped))
             }
 
             SequenceFilterFieldType.VariantQuery -> {
