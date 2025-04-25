@@ -432,22 +432,6 @@ class AdvancedQueryCustomListener(
     }
 
     override fun exitMaybe(ctx: MaybeContext?) {
-        val nonSequenceRelatedQueries =
-            arrayOf(
-                "DateBetween",
-                "FloatBetween",
-                "IntBetween",
-                "StringEquals",
-                "LineageEquals",
-                "BooleanEquals",
-                "StringSearch",
-                "FloatEquals",
-                "IntEquals",
-                "DateEquals",
-            )
-        if (expressionStack.any { it.type in nonSequenceRelatedQueries }) {
-            throw BadRequestException("'MAYBE' operator is not allowed for metadata fields", null)
-        }
         val child = expressionStack.removeLast()
         expressionStack.addLast(Maybe(child))
     }
