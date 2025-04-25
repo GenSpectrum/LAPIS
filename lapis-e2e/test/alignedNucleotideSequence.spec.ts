@@ -13,7 +13,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    result.data.sort((a: any, b: any) => {
+    result.sort((a: any, b: any) => {
       if (a.primaryKey < b.primaryKey) return -1;
       if (a.primaryKey > b.primaryKey) return 1;
       return 0;
@@ -29,7 +29,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(6);
-    result.data.sort((a: any, b: any) => {
+    result.sort((a: any, b: any) => {
       if (a.primaryKey < b.primaryKey) return -1;
       if (a.primaryKey > b.primaryKey) return 1;
       return 0;
