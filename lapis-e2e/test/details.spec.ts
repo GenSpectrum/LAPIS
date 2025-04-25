@@ -314,7 +314,7 @@ key_1002052
 
     const urlParamsAdvanced = new URLSearchParams({
       fields: 'primaryKey',
-      advancedQuery: 'date>=2021-01-01 AND date=<2021-12-31',
+      advancedQuery: 'date>=2021-01-01 AND date<=2021-12-31',
       orderBy: 'primaryKey',
       dataFormat: 'csv',
     });
