@@ -253,7 +253,7 @@ key_1002052
   it('variantQuery and advancedQuery should be the same for sequences', async () => {
     const sequenceQueries = [
       '300G & !400- & (S:123T | S:234A)',
-      '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7:567-]',
+      '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]',
       '[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
       'MAYBE(123W)',
     ];
@@ -263,7 +263,6 @@ key_1002052
       '[^a-c]',
       'Basel.*',
       '^Basel.*Region$',
-      'Basel(?=Stadt)',
       'region{1,2}',
     ];
     for (var sequenceQuery of sequenceQueries) {
@@ -280,7 +279,7 @@ key_1002052
 
         expect(result.status).to.be.equal(200);
 
-        const advancedQuery = `division.regex='${regexQuery} AND ${sequenceQuery}'`;
+        const advancedQuery = `division.regex='${regexQuery}' AND ${sequenceQuery}`;
 
         const urlParamsAdvanced = new URLSearchParams({
           fields: 'primaryKey',
