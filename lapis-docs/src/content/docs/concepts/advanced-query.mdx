@@ -111,6 +111,8 @@ To use the regex substring search on a metadata field you must append `.regex` t
 host.regex='.*bos.*'
 ```
 
+The advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
+
 To search for empty fields (fields that are `null` or empty) use the `IS NULL` operator:
 
 ```
