@@ -343,7 +343,7 @@ age	country	count
     expect(resultJson.data[0]).to.have.property('count', 20);
   });
 
-  it('advancedQuery correctly handle string search filters in GET requests', async () => {
+  it('advancedQuery correctly handles string search filters in GET requests', async () => {
     const urlParams = new URLSearchParams({
       advancedQuery: "division.regex='Basel-(Land|Stadt)' AND country='Switzerland'",
     });
@@ -353,5 +353,17 @@ age	country	count
     expect(result.status).equals(200);
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 20);
+  });
+
+  it('advancedQuery handles IsNull correctly', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: "IsNull(division) AND country='Switzerland'",
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 2);
   });
 });
