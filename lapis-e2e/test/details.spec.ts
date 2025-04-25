@@ -91,6 +91,33 @@ describe('The /details endpoint', () => {
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
+  it('should handle advancedQuery', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'primaryKey',
+      aminoAcidInsertions: 'ins_S:143:T,ins_ORF1a:3602:F?P',
+      division: 'Vaud',
+      orderBy: 'primaryKey',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(result.status).to.be.equal(200);
+
+    const urlParamsAdvanced = new URLSearchParams({
+      fields: 'primaryKey',
+      advancedQuery: 'division=Vaud AND ins_S:143:T AND ins_ORF1a:3602:F?P',
+      orderBy: 'primaryKey',
+    });
+
+    const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+    expect(resultAdvanced.status).to.be.equal(200);
+
+    const resultJson = await result.json();
+    const resultAdvancedJson = await resultAdvanced.json();
+    expect(resultJson).to.deep.equal(resultAdvancedJson);
+  });
+
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
       fields: 'division,pangoLineage,primaryKey',
