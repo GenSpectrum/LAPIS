@@ -261,7 +261,8 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.StringSearch -> {
-                expressionStack.addLast(StringSearch(field.name, metadataValue))
+                val baseFieldName = field.name.split(".").first()
+                expressionStack.addLast(StringSearch(baseFieldName, metadataValue))
             }
 
             SequenceFilterFieldType.VariantQuery -> {
@@ -277,18 +278,17 @@ class AdvancedQueryCustomListener(
     override fun enterRegexMetadataQuery(ctx: AdvancedQueryParser.RegexMetadataQueryContext) {
         val metadataName = ctx.geneOrName().text
         val metadataValue = ctx.value().text
-        val stripped = metadataValue.trim('\'')
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.String -> {
-                expressionStack.addLast(StringEquals(field.name, stripped))
+                expressionStack.addLast(StringEquals(field.name, metadataValue))
             }
 
             is SequenceFilterFieldType.StringSearch -> {
                 val baseFieldName = field.name.split(".").first()
-                expressionStack.addLast(StringSearch(baseFieldName, stripped))
+                expressionStack.addLast(StringSearch(baseFieldName, metadataValue))
             }
 
             SequenceFilterFieldType.VariantQuery -> {
