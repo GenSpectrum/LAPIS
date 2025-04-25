@@ -105,7 +105,7 @@ To test the ANTLR parser you can run ANTLR locally on your grammar e.g. on the A
 
 ```
 antlr4 AdvancedQuery.g4 -o gen -visitor 
-cd gen    
+cd antlr-gen    
 
 javac *.java
 javac -cp ".:/path/to/antlr-4.13.2-complete.jar" *.java
