@@ -18,8 +18,8 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       if (a.primaryKey > b.primaryKey) return 1;
       return 0;
     });
-    expect(result[0].primaryKey).to.equal('key_3259931');
-    expect(result[0].main).to.have.length(29903);
+    expect(result[0].primaryKey).to.equal('key_1001493');
+    expect(result[0].main).to.have.length(59806);
   });
 
   it('should return aligned nucleotide sequences for multi segmented sequences', async () => {
@@ -34,8 +34,8 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       if (a.primaryKey > b.primaryKey) return 1;
       return 0;
     });
-    expect(result[0].primaryKey).to.equal('key_5');
-    expect(result[0].m).to.equal('TGGG');
+    expect(result[0].primaryKey).to.equal('key_0');
+    expect(result[0].m).to.equal('CGGG');
   });
 
   it('should order ascending by specified fields', async () => {
