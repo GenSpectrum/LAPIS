@@ -19,7 +19,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       return 0;
     });
     expect(result[0].primaryKey).to.equal('key_1001493');
-    expect(result[0].main).to.have.length(59806);
+    expect(result[0].main).to.have.length(29903);
   });
 
   it('should return aligned nucleotide sequences for multi segmented sequences', async () => {
