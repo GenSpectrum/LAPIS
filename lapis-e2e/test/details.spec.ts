@@ -249,4 +249,54 @@ key_1002052
 
     expect(result).to.have.nested.property('data[0].division', null);
   });
+
+  it('variantQuery and advancedQuery should be the same for sequences', async () => {
+    const sequenceQueries = [
+      '300G & !400- & (S:123T | S:234A)',
+      '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7:567-]',
+      '[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
+      'MAYBE(123W)',
+    ];
+    const regexQueries = [
+      'region\d',
+      'Basel(Stadt|Land)',
+      '[^a-c]',
+      'Basel.*',
+      '^Basel.*Region$',
+      'Basel(?=Stadt)',
+      'region{1,2}',
+    ];
+    for (var sequenceQuery of sequenceQueries) {
+      for (var regexQuery of regexQueries) {
+        const urlParams = new URLSearchParams({
+          'fields': 'primaryKey',
+          'variantQuery': sequenceQuery,
+          'division.regex': regexQuery,
+          'orderBy': 'primaryKey',
+          'dataFormat': 'csv',
+        });
+
+        const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+        expect(result.status).to.be.equal(200);
+
+        const advancedQuery = `division.regex='${regexQuery} AND ${sequenceQuery}'`;
+
+        const urlParamsAdvanced = new URLSearchParams({
+          fields: 'primaryKey',
+          advancedQuery: advancedQuery,
+          orderBy: 'primaryKey',
+          dataFormat: 'csv',
+        });
+
+        const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+        expect(resultAdvanced.status).to.be.equal(200);
+
+        const resultText = await result.text();
+        const resultAdvancedText = await resultAdvanced.text();
+        expect(resultText).to.be.equal(resultAdvancedText);
+      }
+    }
+  });
 });
