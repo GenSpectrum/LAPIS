@@ -48,7 +48,7 @@ class AdvancedQueryFacadeTest {
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
-            StringSearch("some_metadata.regex", "'^Democratic.*'"),
+            StringSearch("some_metadata", "'^Democratic.*'"),
             LineageEquals(PANGO_LINEAGE_COLUMN, "jn.1", true),
             NOf(
                 3,
@@ -472,7 +472,7 @@ class AdvancedQueryFacadeTest {
         val expectedResult = And(
             Or(
                 Not(AminoAcidSymbolEquals("S", 501, "Y")),
-                StringSearch("some_metadata.regex", "'BANGALOR'"),
+                StringSearch("some_metadata", "'BANGALOR'"),
             ),
             NucleotideSymbolEquals(null, 300, "G"),
             StringEquals("some_metadata", "BANGALOR"),
@@ -492,11 +492,20 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a valid advancedQuery with string (with regex) metadata expression then returns SILO query`() {
+        val advancedQuery = "some_metadata.regex='Basel\\{1,2\\}'"
+
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
+
+        assertThat(result, equalTo(StringSearch("some_metadata", "'Basel\\{1,2\\}'")))
+    }
+
+    @Test
+    fun `given a valid advancedQuery with escaped char in regex then returns SILO query`() {
         val advancedQuery = "some_metadata.regex='(Democratic.*Rep$'"
 
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
-        assertThat(result, equalTo(StringSearch("some_metadata.regex", "'(Democratic.*Rep$'")))
+        assertThat(result, equalTo(StringSearch("some_metadata", "'(Democratic.*Rep$'")))
     }
 
     @Test

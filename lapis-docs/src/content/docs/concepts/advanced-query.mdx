@@ -81,7 +81,29 @@ NOT host='bos taurus' AND 300G AND country=USA
 ```
 
 Note that if the metadata field does not only contain letters and numbers (e.g. it contains a space or a regex),
-it must be enclosed in single quotes. If the metadata field contains a single quote, it must be escaped with a backslash.
+it must be enclosed in single quotes. 
+
+!! When passing single quotes in curl they must be escaped correctly, for example the statement:
+
+```
+{
+  "advancedQuery": "country.regex='Basel{1,2}'"
+}
+```
+
+Must be formatted as: 
+
+```bash
+curl -X POST \
+  'http://localhost:8096/sample/details' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "advancedQuery": "country.regex='\''Basel\{1,2\}'\''"
+}'
+```
+
+If the metadata field contains a single quote, it must be escaped with a backslash.
 
 To use the regex substring search on a metadata field you must append `.regex` to the end of the metadata field name:
 
