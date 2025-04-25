@@ -81,21 +81,6 @@ Run tests:
 ./gradlew test
 ```
 
-LAPIS uses ANTLR as a parser generator for variant and advanced queries. The grammar can be found in `src/main/antlr`. When the package is built you can find the produced query parser, lexer and listener modules in `lapis/build/generated-src/antlr/...`.
-
-To test the ANTLR parser you can run ANTLR locally on your grammar e.g. on the AdvancedQuery.g4 grammar:
-
-```
-antlr4 AdvancedQuery.g4 -o gen -visitor 
-cd gen                                                                                                  
-javac *.java
-javac -cp ".:/path/to/antlr-4.13.2-complete.jar" *.java
-// see the tokens - paste expression and then hit Crtl+D
-java -cp ".:/path/to/antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig AdvancedQuery start -tokens
-// see the semantic tree - paste expression and then hit Crtl+D
-java -cp ".:/path/to/antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig AdvancedQuery start -tree
-```
-
 e.g. when running via gradle:
 
 ```bash
@@ -109,6 +94,25 @@ For example:
 If running from scratch you need to pre-build the code!!!
 ```
 ./gradlew build bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json --server.port=8096'
+```
+
+## ANTLR grammar
+
+
+LAPIS uses [ANTLR](https://www.antlr.org/) as a parser generator for variant and advanced queries. The grammar can be found in `src/main/antlr`. When the package is built you can find the produced query parser, lexer and listener modules in `lapis/build/generated-src/antlr/...`.
+
+To test the ANTLR parser you can run ANTLR locally on your grammar e.g. on the AdvancedQuery.g4 grammar:
+
+```
+antlr4 AdvancedQuery.g4 -o gen -visitor 
+cd gen    
+
+javac *.java
+javac -cp ".:/path/to/antlr-4.13.2-complete.jar" *.java
+// see the tokens - paste expression and then hit Crtl+D
+java -cp ".:/path/to/antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig AdvancedQuery start -tokens
+// see the semantic tree - paste expression and then hit Crtl+D
+java -cp ".:/path/to/antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig AdvancedQuery start -tree
 ```
 
 ## OpenApi Docs
