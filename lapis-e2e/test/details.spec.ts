@@ -250,7 +250,7 @@ key_1002052
     expect(result).to.have.nested.property('data[0].division', null);
   });
 
-  it('variantQuery and advancedQuery should be the same for sequences', async () => {
+  it('variantQuery and advancedQuery should be the same for sequence and regex joins', async () => {
     const sequenceQueries = [
       '300G & !400- & (S:123T | S:234A)',
       '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]',
@@ -297,5 +297,34 @@ key_1002052
         expect(resultText).to.be.equal(resultAdvancedText);
       }
     }
+  });
+
+  it('advancedQuery and metadata searches should be the same for dates', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'primaryKey',
+      dateFrom: '2021-01-01',
+      dateTo: '2021-12-31',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(result.status).to.be.equal(200);
+
+    const urlParamsAdvanced = new URLSearchParams({
+      fields: 'primaryKey',
+      advancedQuery: 'date>=2021-01-01 AND date=<2021-12-31',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+    expect(resultAdvanced.status).to.be.equal(200);
+
+    const resultText = await result.text();
+    const resultAdvancedText = await resultAdvanced.text();
+    expect(resultText).to.be.equal(resultAdvancedText);
   });
 });
