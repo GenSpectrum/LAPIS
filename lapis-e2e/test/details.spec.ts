@@ -250,6 +250,33 @@ key_1002052
     expect(result).to.have.nested.property('data[0].division', null);
   });
 
+  it('should throw an error for invalid Maybe request', async () => {
+    const metadataQueries = ['division=Basel', "division.regex='Basel'", 'date>=2021-01-01'];
+
+    for (const metadataQuery of metadataQueries) {
+      const advancedQuery = `MAYBE(${metadataQuery})`;
+
+      const urlParamsAdvanced = new URLSearchParams({
+        fields: 'primaryKey',
+        advancedQuery: advancedQuery,
+        orderBy: 'primaryKey',
+        dataFormat: 'csv',
+      });
+
+      const result = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+      expect(result.status).equals(400);
+      expect(result.headers.get('Content-Type')).equals('application/json');
+      const json = await result.json();
+      expect(json.error).to.deep.equal({
+        detail: "'MAYBE' operator is not allowed for metadata fields",
+        status: 400,
+        title: 'Bad Request',
+        type: 'about:blank',
+      });
+    }
+  });
+
   it('variantQuery and advancedQuery should be the same for sequence and regex joins', async () => {
     const sequenceQueries = [
       '300G & !400- & (S:123T | S:234A)',
