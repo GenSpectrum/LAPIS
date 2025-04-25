@@ -62,7 +62,7 @@ describe('The /nucleotideInsertions endpoint', () => {
 
   it('advancedQuery can filter out unwanted insertions', async () => {
     const urlParams = new URLSearchParams({
-      variantQuery: 'NOT ins_5959:TAT AND country="Switzerland"',
+      variantQuery: "NOT ins_5959:TAT AND country='Switzerland'",
     });
 
     const result = await getNucleotideInsertions(urlParams);

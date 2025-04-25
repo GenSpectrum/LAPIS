@@ -48,7 +48,7 @@ class AdvancedQueryFacadeTest {
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
         val expectedResult = And(
-            StringSearch("some_metadata", "'^Democratic.*'"),
+            StringSearch("some_metadata", "^Democratic.*"),
             LineageEquals(PANGO_LINEAGE_COLUMN, "jn.1", true),
             NOf(
                 3,
@@ -472,7 +472,7 @@ class AdvancedQueryFacadeTest {
         val expectedResult = And(
             Or(
                 Not(AminoAcidSymbolEquals("S", 501, "Y")),
-                StringSearch("some_metadata", "'BANGALOR'"),
+                StringSearch("some_metadata", "BANGALOR"),
             ),
             NucleotideSymbolEquals(null, 300, "G"),
             StringEquals("some_metadata", "BANGALOR"),
@@ -487,7 +487,7 @@ class AdvancedQueryFacadeTest {
 
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
-        assertThat(result, equalTo(StringEquals("some_metadata", "'Democratic Republic of the Congo'")))
+        assertThat(result, equalTo(StringEquals("some_metadata", "Democratic Republic of the Congo")))
     }
 
     @Test
@@ -496,7 +496,7 @@ class AdvancedQueryFacadeTest {
 
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
-        assertThat(result, equalTo(StringSearch("some_metadata", "'Basel\\{1,2\\}'")))
+        assertThat(result, equalTo(StringSearch("some_metadata", "Basel\\{1,2\\}")))
     }
 
     @Test
@@ -505,7 +505,7 @@ class AdvancedQueryFacadeTest {
 
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
 
-        assertThat(result, equalTo(StringSearch("some_metadata", "'(Democratic.*Rep$'")))
+        assertThat(result, equalTo(StringSearch("some_metadata", "(Democratic.*Rep$")))
     }
 
     @Test

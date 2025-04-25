@@ -97,6 +97,7 @@ describe('The /details endpoint', () => {
       aminoAcidInsertions: 'ins_S:143:T,ins_ORF1a:3602:F?P',
       division: 'Vaud',
       orderBy: 'primaryKey',
+      dataFormat: 'csv',
     });
 
     const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
@@ -107,15 +108,16 @@ describe('The /details endpoint', () => {
       fields: 'primaryKey',
       advancedQuery: 'division=Vaud AND ins_S:143:T AND ins_ORF1a:3602:F?P',
       orderBy: 'primaryKey',
+      dataFormat: 'csv',
     });
 
     const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
 
     expect(resultAdvanced.status).to.be.equal(200);
 
-    const resultJson = await result.json();
-    const resultAdvancedJson = await resultAdvanced.json();
-    expect(resultJson).to.deep.equal(resultAdvancedJson);
+    const resultText = await result.text();
+    const resultAdvancedText = await resultAdvanced.text();
+    expect(resultText).to.be.equal(resultAdvancedText);
   });
 
   it('should return the data as CSV', async () => {

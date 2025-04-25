@@ -277,7 +277,7 @@ class AdvancedQueryCustomListener(
 
     override fun enterRegexMetadataQuery(ctx: AdvancedQueryParser.RegexMetadataQueryContext) {
         val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.value().text
+        val metadataValue = ctx.value().text.trim('\'')
 
         val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
         field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
