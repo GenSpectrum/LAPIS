@@ -422,7 +422,26 @@ class AdvancedQueryCustomListener(
         expressionStack.addLast(And(lastChildren + secondLastChildren))
     }
 
+    override fun exitVariantAnd(ctx: AdvancedQueryParser.VariantAndContext?) {
+        val lastChildren = when (val last = expressionStack.removeLast()) {
+            is And -> last.children
+            else -> listOf(last)
+        }
+
+        val secondLastChildren = when (val secondLast = expressionStack.removeLast()) {
+            is And -> secondLast.children
+            else -> listOf(secondLast)
+        }
+
+        expressionStack.addLast(And(lastChildren + secondLastChildren))
+    }
+
     override fun exitNot(ctx: NotContext?) {
+        val child = expressionStack.removeLast()
+        expressionStack.addLast(Not(child))
+    }
+
+    override fun exitVariantNot(ctx: AdvancedQueryParser.VariantNotContext?) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Not(child))
     }
@@ -441,7 +460,26 @@ class AdvancedQueryCustomListener(
         expressionStack.addLast(Or(lastChildren + secondLastChildren))
     }
 
+    override fun exitVariantOr(ctx: AdvancedQueryParser.VariantOrContext?) {
+        val lastChildren = when (val last = expressionStack.removeLast()) {
+            is Or -> last.children
+            else -> listOf(last)
+        }
+
+        val secondLastChildren = when (val secondLast = expressionStack.removeLast()) {
+            is Or -> secondLast.children
+            else -> listOf(secondLast)
+        }
+
+        expressionStack.addLast(Or(lastChildren + secondLastChildren))
+    }
+
     override fun exitMaybe(ctx: MaybeContext?) {
+        val child = expressionStack.removeLast()
+        expressionStack.addLast(Maybe(child))
+    }
+
+    override fun exitVariantMaybe(ctx: AdvancedQueryParser.VariantMaybeContext?) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Maybe(child))
     }
