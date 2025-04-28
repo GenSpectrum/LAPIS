@@ -1,11 +1,9 @@
 package org.genspectrum.lapis.util
 
 import jakarta.servlet.http.HttpServletRequestWrapper
-import mu.KotlinLogging
+import org.genspectrum.lapis.log
 import java.util.Collections
 import java.util.Enumeration
-
-private val log = KotlinLogging.logger {}
 
 class HeaderModifyingRequestWrapper(
     private val reReadableRequest: CachedBodyHttpServletRequest,

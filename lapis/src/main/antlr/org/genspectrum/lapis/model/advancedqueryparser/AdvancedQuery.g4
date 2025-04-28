@@ -29,7 +29,7 @@ or_: OR | '|';
 maybe_: M A Y B E;
 not_: NOT | '!';
 and_: AND | '&';
-position: NUMBER+;
+position: NUMBER;
 
 nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
 nucleotideMutationQueryFirstSymbol: nucleotideSymbol;

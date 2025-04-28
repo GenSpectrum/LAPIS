@@ -37,7 +37,7 @@ class AdvancedQueryFacade(
     }
 }
 
-class ThrowingAdvancedQueryErrorListener : BaseErrorListener() {
+private class ThrowingAdvancedQueryErrorListener : BaseErrorListener() {
     override fun syntaxError(
         recognizer: Recognizer<*, *>?,
         offendingSymbol: Any?,

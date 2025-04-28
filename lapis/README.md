@@ -104,7 +104,7 @@ LAPIS uses [ANTLR](https://www.antlr.org/) as a parser generator for variant and
 To test the ANTLR parser you can run ANTLR locally on your grammar e.g. on the AdvancedQuery.g4 grammar:
 
 ```
-antlr4 AdvancedQuery.g4 -o gen -visitor 
+antlr4 AdvancedQuery.g4 -o antlr-gen -visitor 
 cd antlr-gen    
 
 javac *.java

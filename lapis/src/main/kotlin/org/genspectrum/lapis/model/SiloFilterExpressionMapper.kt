@@ -1,8 +1,10 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
 import org.genspectrum.lapis.config.SequenceFilterField
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -237,7 +239,7 @@ class SiloFilterExpressionMapper(
         val variantQuery = values[0].values.single()
 
         if (variantQuery.isNullOrBlank()) {
-            throw BadRequestException("variantQuery must not be empty, got '$variantQuery'")
+            throw BadRequestException("$VARIANT_QUERY_FIELD must not be empty, got '$variantQuery'")
         }
 
         return variantQueryFacade.map(variantQuery)
@@ -249,14 +251,14 @@ class SiloFilterExpressionMapper(
     ): SiloFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
-                "variantQuery must have exactly one value, found ${values[0].values.size} values.",
+                "$ADVANCED_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
             )
         }
 
         val advancedQuery = values[0].values.single()
 
         if (advancedQuery.isNullOrBlank()) {
-            throw BadRequestException("variantQuery must not be empty, got '$advancedQuery'")
+            throw BadRequestException("$ADVANCED_QUERY_FIELD must not be empty, got '$advancedQuery'")
         }
 
         return advancedQueryFacade.map(advancedQuery, allowedSequenceFilterFields)

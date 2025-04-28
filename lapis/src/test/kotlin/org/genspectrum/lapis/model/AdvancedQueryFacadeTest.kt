@@ -9,8 +9,10 @@ import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
+import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
@@ -40,7 +42,7 @@ class AdvancedQueryFacadeTest {
     private var underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
-    fun `given a complex variant query then map should return the corresponding SiloQuery`() {
+    fun `given a complex advanced query then map should return the corresponding SiloQuery`() {
         val advancedQuery =
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
@@ -106,6 +108,12 @@ class AdvancedQueryFacadeTest {
             NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
+
+        val advancedQueryWords = "300G AND 400-"
+
+        val resultWords = underTest.map(advancedQueryWords, dummySequenceFilterFields)
+
+        assertThat(resultWords, equalTo(result))
     }
 
     @Test
@@ -120,6 +128,12 @@ class AdvancedQueryFacadeTest {
             NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
+
+        val advancedQueryWords = "300G & 400- AND 500B"
+
+        val resultWords = underTest.map(advancedQueryWords, dummySequenceFilterFields)
+
+        assertThat(resultWords, equalTo(result))
     }
 
     @Test
@@ -130,6 +144,12 @@ class AdvancedQueryFacadeTest {
 
         val expectedResult = Not(NucleotideSymbolEquals(null, 300, "G"))
         assertThat(result, equalTo(expectedResult))
+
+        val advancedQueryWords = "NOT 300G"
+
+        val resultWords = underTest.map(advancedQueryWords, dummySequenceFilterFields)
+
+        assertThat(resultWords, equalTo(result))
     }
 
     @Test
@@ -143,6 +163,12 @@ class AdvancedQueryFacadeTest {
             NucleotideSymbolEquals(null, 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
+
+        val advancedQueryWords = "300G OR 400-"
+
+        val resultWords = underTest.map(advancedQueryWords, dummySequenceFilterFields)
+
+        assertThat(resultWords, equalTo(result))
     }
 
     @Test
@@ -159,6 +185,12 @@ class AdvancedQueryFacadeTest {
             NucleotideSymbolEquals(null, 300, "C"),
         )
         assertThat(result, equalTo(expectedResult))
+
+        val advancedQueryWords = "300C AND (400A OR 500G)"
+
+        val resultWords = underTest.map(advancedQueryWords, dummySequenceFilterFields)
+
+        assertThat(resultWords, equalTo(result))
     }
 
     @Test
@@ -532,31 +564,79 @@ class AdvancedQueryFacadeTest {
                 ),
             ),
         )
+
+        val invalidDate = "date<=2021.01.01"
+
+        assertThrows<BadRequestException> { underTest.map(invalidDate, dummySequenceFilterFields) }
+
+        val invalidField = "some_metadata<=2021.01.01"
+
+        assertThrows<BadRequestException> { underTest.map(invalidField, dummySequenceFilterFields) }
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
-        val advancedQuery = "pangoLineage=jn.1*"
+    fun `given a valid advancedQuery with greater than equal int metadata expression then returns SILO query`() {
+        val advancedQuery = "intField>=1 AND intField<=18"
 
         val result = underTest.map(advancedQuery, dummySequenceFilterFields)
-
         assertThat(
             result,
-            equalTo(LineageEquals(PANGO_LINEAGE_FIELD, "jn.1", true)),
+            equalTo(
+                And(
+                    IntBetween("intField", null, 18),
+                    IntBetween("intField", 1, null),
+                ),
+            ),
         )
+
+        val invalidInt = "intField>=One"
+
+        assertThrows<BadRequestException> { underTest.map(invalidInt, dummySequenceFilterFields) }
     }
 
     @Test
-    fun `GIVEN an invalid variant query THEN throw bad request exception`() {
-        val advancedQuery = "pangoLineage='jn.1* thisIsInvalid'"
+    fun `given a valid advancedQuery with greater than equal float metadata expression then returns SILO query`() {
+        val advancedQuery = "floatField>=0 AND floatField<=10e-1"
+
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
+        assertThat(
+            result,
+            equalTo(
+                And(
+                    FloatBetween("floatField", null, 1.0),
+                    FloatBetween("floatField", 0.0, null),
+                ),
+            ),
+        )
+
+        val invalidFloat = "floatField>=One"
+
+        assertThrows<BadRequestException> { underTest.map(invalidFloat, dummySequenceFilterFields) }
+    }
+
+    @Test
+    fun `GIVEN an invalid advanced regex query THEN throw bad request exception`() {
+        val advancedQuery = "date='jn.1* thisIsInvalid'"
 
         val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
 
         assertThat(
             exception.message,
             `is`(
-                "Expression contains symbols not allowed for metadata field of type Lineage (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
+                "Expression contains symbols not allowed for metadata field of type Date (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
             ),
+        )
+    }
+
+    @Test
+    fun `GIVEN an invalid advanced query THEN throw bad request exception`() {
+        val advancedQuery = "PangoLineage=jn.1* AND thisIsInvalid"
+
+        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
+
+        assertThat(
+            exception.message,
+            `is`("Failed to parse advanced query (line 1:36): no viable alternative at input 'thisIsInvalid'."),
         )
     }
 }
