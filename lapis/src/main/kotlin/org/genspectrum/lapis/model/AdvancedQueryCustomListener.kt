@@ -199,21 +199,11 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.DateFrom -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(field.name, to = null, from = date))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
             }
 
             is SequenceFilterFieldType.DateTo -> {
-                try {
-                    val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(field.name, to = date, from = null))
-                } catch (exception: DateTimeParseException) {
-                    throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
             }
 
             SequenceFilterFieldType.Float -> {
@@ -225,19 +215,11 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.FloatFrom -> {
-                try {
-                    expressionStack.addLast(FloatBetween(field.name, from = metadataValue.toDouble(), to = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
             }
 
             is SequenceFilterFieldType.FloatTo -> {
-                try {
-                    expressionStack.addLast(FloatBetween(field.name, to = metadataValue.toDouble(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid float", e)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
             }
 
             SequenceFilterFieldType.Int -> {
@@ -249,19 +231,11 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.IntFrom -> {
-                try {
-                    expressionStack.addLast(IntBetween(field.name, from = metadataValue.toInt(), to = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
             }
 
             is SequenceFilterFieldType.IntTo -> {
-                try {
-                    expressionStack.addLast(IntBetween(field.name, to = metadataValue.toInt(), from = null))
-                } catch (e: NumberFormatException) {
-                    throw BadRequestException("'$metadataValue' is not a valid integer", e)
-                }
+                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
             }
 
             is SequenceFilterFieldType.StringSearch -> {

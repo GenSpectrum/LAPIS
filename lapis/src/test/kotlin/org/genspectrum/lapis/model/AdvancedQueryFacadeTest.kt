@@ -649,6 +649,14 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
+    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`() {
+        val advancedQueries = listOf("dateFrom=2020-01-01", "dateTo=2020-01-01", "intFieldFrom=1", "intFieldTo=1", "floatFieldFrom=1", "floatFieldTo=1")
+        for (advancedQuery in advancedQueries) {
+            val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
+        }
+    }
+
+    @Test
     fun `GIVEN an invalid advanced regex query THEN throw bad request exception`() {
         val advancedQuery = "date='jn.1* thisIsInvalid'"
 
