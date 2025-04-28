@@ -13,11 +13,9 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    result.sort((a: any, b: any) => {
-      if (a.primaryKey < b.primaryKey) return -1;
-      if (a.primaryKey > b.primaryKey) return 1;
-      return 0;
-    });
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
+    );
     expect(result[0].primaryKey).to.equal('key_1001493');
     expect(result[0].main).to.have.length(29903);
   });
@@ -29,11 +27,9 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(6);
-    result.sort((a: any, b: any) => {
-      if (a.primaryKey < b.primaryKey) return -1;
-      if (a.primaryKey > b.primaryKey) return 1;
-      return 0;
-    });
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
+    );
     expect(result[0].primaryKey).to.equal('key_0');
     expect(result[0].m).to.equal('CGGG');
   });

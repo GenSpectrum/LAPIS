@@ -8,11 +8,11 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    const match = result.find(
-      (item: { primaryKey: string; main: string | any[] }) =>
-        item.primaryKey === 'key_3086369' && item.main?.length === 29903
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
     );
-    expect(match).to.exist;
+    expect(result[0].primaryKey).to.equal('key_1001493');
+    expect(result[0].main).to.have.length(29903);
   });
 
   it('should order ascending by specified fields', async () => {

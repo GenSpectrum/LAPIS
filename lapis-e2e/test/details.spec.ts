@@ -11,11 +11,9 @@ describe('The /details endpoint', () => {
     });
 
     expect(result.data).to.have.length(2);
-    result.data.sort((a: any, b: any) => {
-      if (a.division < b.division) return -1;
-      if (a.division > b.division) return 1;
-      return 0;
-    });
+    result.data.sort((a: { division: string }, b: { division: string }) =>
+      a.division.localeCompare(b.division)
+    );
     expect(result.data[1]).to.be.deep.equal({
       division: 'Zürich',
       pangoLineage: 'B.1.617.2',
@@ -30,11 +28,9 @@ describe('The /details endpoint', () => {
     });
 
     expect(result.data).to.have.length(2);
-    result.data.sort((a: any, b: any) => {
-      if (a.division < b.division) return -1;
-      if (a.division > b.division) return 1;
-      return 0;
-    });
+    result.data.sort((a: { division: string }, b: { division: string }) =>
+      a.division.localeCompare(b.division)
+    );
     expect(result.data[1]).to.be.deep.equal({
       age: 54,
       country: 'Switzerland',
