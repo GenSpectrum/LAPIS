@@ -327,6 +327,28 @@ key_1002052
     }
   });
 
+  it('should throw an error for invalid Maybe request', async () => {
+    const metadataQueries = ['division=Basel', "division.regex='Basel'", 'date>=2021-01-01'];
+
+    for (const metadataQuery of metadataQueries) {
+      const advancedQuery = `MAYBE(${metadataQuery})`;
+
+      const urlParamsAdvanced = new URLSearchParams({
+        fields: 'primaryKey',
+        advancedQuery: advancedQuery,
+        orderBy: 'primaryKey',
+        dataFormat: 'csv',
+      });
+
+      const result = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+      expect(result.status).equals(400);
+      expect(result.headers.get('Content-Type')).equals('application/json');
+      const json = await result.json();
+      expect(json.error.detail).to.include('Failed to parse advanced query');
+    }
+  });
+
   it('advancedQuery and metadata searches should be the same for dates', async () => {
     const urlParams = new URLSearchParams({
       fields: 'primaryKey',
