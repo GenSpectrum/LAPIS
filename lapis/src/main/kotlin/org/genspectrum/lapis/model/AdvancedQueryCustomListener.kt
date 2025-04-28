@@ -199,11 +199,17 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.DateFrom -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    null,
+                )
             }
 
             is SequenceFilterFieldType.DateTo -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    null,
+                )
             }
 
             SequenceFilterFieldType.Float -> {
@@ -215,11 +221,17 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.FloatFrom -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    null,
+                )
             }
 
             is SequenceFilterFieldType.FloatTo -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    null,
+                )
             }
 
             SequenceFilterFieldType.Int -> {
@@ -231,11 +243,17 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.IntFrom -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    null,
+                )
             }
 
             is SequenceFilterFieldType.IntTo -> {
-                throw BadRequestException("Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead", null)
+                throw BadRequestException(
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    null,
+                )
             }
 
             is SequenceFilterFieldType.StringSearch -> {
