@@ -10,13 +10,15 @@ import AdvancedQueryParser.NotContext
 import AdvancedQueryParser.NucleotideInsertionQueryContext
 import AdvancedQueryParser.NucleotideMutationQueryContext
 import AdvancedQueryParser.OrContext
-import mu.KotlinLogging
 import org.antlr.v4.runtime.tree.ParseTreeListener
+import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.SequenceFilterField
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -42,8 +44,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
-
-private val log = KotlinLogging.logger { }
 
 class AdvancedQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -71,7 +71,7 @@ class AdvancedQueryCustomListener(
             SequenceFilterFieldType.Date -> {
                 try {
                     val date = LocalDate.parse(metadataValue)
-                    expressionStack.addLast(DateBetween(field.name, to = date, from = null))
+                    expressionStack.addLast(DateBetween(field.name, from = null, to = date))
                 } catch (exception: DateTimeParseException) {
                     throw BadRequestException("'$metadataValue' is not a valid date: ${exception.message}", exception)
                 }
@@ -117,7 +117,7 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.Float -> {
                 try {
-                    expressionStack.addLast(FloatBetween(field.name, to = metadataValue.toDouble(), from = null))
+                    expressionStack.addLast(FloatBetween(field.name, from = metadataValue.toDouble(), to = null))
                 } catch (e: NumberFormatException) {
                     throw BadRequestException("'$metadataValue' is not a valid float", e)
                 }
@@ -125,7 +125,7 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.Int -> {
                 try {
-                    expressionStack.addLast(IntBetween(field.name, to = metadataValue.toInt(), from = null))
+                    expressionStack.addLast(IntBetween(field.name, from = metadataValue.toInt(), to = null))
                 } catch (e: NumberFormatException) {
                     throw BadRequestException("'$metadataValue' is not a valid integer", e)
                 }
@@ -141,16 +141,20 @@ class AdvancedQueryCustomListener(
         metadataName: String,
         metadataValue: String?,
     ): LineageEquals {
-        val sanitizedValue = metadataValue?.removeSurrounding("'") // Remove surrounding single quotes
+        val sanitizedValue = metadataValue?.removeSurrounding("'")
 
         return when {
-            sanitizedValue.isNullOrBlank() -> LineageEquals(metadataName, null, includeSublineages = false)
+            sanitizedValue.isNullOrBlank() -> throw BadRequestException(
+                "Invalid lineage: $sanitizedValue is NULL - to search for NULL values use `IsNull($metadataName)`?",
+            )
             sanitizedValue.endsWith(
                 ".*",
             ) -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast(".*"), includeSublineages = true)
-            sanitizedValue.endsWith(
-                '*',
-            ) -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast('*'), includeSublineages = true)
+            sanitizedValue.endsWith("*") -> LineageEquals(
+                metadataName,
+                sanitizedValue.substringBeforeLast("*"),
+                includeSublineages = true,
+            )
             sanitizedValue.endsWith('.') -> throw BadRequestException(
                 "Invalid lineage: $sanitizedValue must not end with a dot. Did you mean '$sanitizedValue*'?",
             )
@@ -261,16 +265,15 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.StringSearch -> {
-                val baseFieldName = field.name.split(".").first()
-                expressionStack.addLast(StringSearch(baseFieldName, metadataValue))
+                expressionStack.addLast(StringSearch(field.type.associatedField, metadataValue))
             }
 
             SequenceFilterFieldType.VariantQuery -> {
-                throw BadRequestException("VariantQuery cannot be called from advanced query", null)
+                throw BadRequestException("$VARIANT_QUERY_FIELD cannot be called from advanced query", null)
             }
 
             SequenceFilterFieldType.AdvancedQuery -> {
-                throw BadRequestException("AdvancedQuery cannot be called recursively", null)
+                throw BadRequestException("$ADVANCED_QUERY_FIELD cannot be called recursively", null)
             }
         }
     }
@@ -287,16 +290,23 @@ class AdvancedQueryCustomListener(
             }
 
             is SequenceFilterFieldType.StringSearch -> {
-                val baseFieldName = field.name.split(".").first()
-                expressionStack.addLast(StringSearch(baseFieldName, metadataValue))
+                expressionStack.addLast(StringSearch(field.type.associatedField, metadataValue))
+            }
+
+            SequenceFilterFieldType.Lineage -> {
+                val lineage = mapToLineageFilter(
+                    field.name,
+                    metadataValue,
+                )
+                expressionStack.addLast(lineage)
             }
 
             SequenceFilterFieldType.VariantQuery -> {
-                throw BadRequestException("VariantQuery cannot be called from advanced query", null)
+                throw BadRequestException("$VARIANT_QUERY_FIELD cannot be called from advanced query", null)
             }
 
             SequenceFilterFieldType.AdvancedQuery -> {
-                throw BadRequestException("AdvancedQuery cannot be called recursively", null)
+                throw BadRequestException("$ADVANCED_QUERY_FIELD cannot be called recursively", null)
             }
 
             else -> {
@@ -375,11 +385,11 @@ class AdvancedQueryCustomListener(
             }
 
             SequenceFilterFieldType.VariantQuery -> {
-                throw BadRequestException("VariantQuery cannot be called from advanced query", null)
+                throw BadRequestException("$VARIANT_QUERY_FIELD cannot be called from advanced query", null)
             }
 
             SequenceFilterFieldType.AdvancedQuery -> {
-                throw BadRequestException("AdvancedQuery cannot be called recursively", null)
+                throw BadRequestException("$ADVANCED_QUERY_FIELD cannot be called recursively", null)
             }
         }
     }

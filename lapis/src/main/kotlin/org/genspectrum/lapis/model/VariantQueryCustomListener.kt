@@ -15,10 +15,10 @@ import VariantQueryParser.NucleotideMutationQueryContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import VariantQueryParser.PangolineageWithPossibleSublineagesContext
-import mu.KotlinLogging
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
@@ -37,8 +37,6 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
-
-private val log = KotlinLogging.logger { }
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,

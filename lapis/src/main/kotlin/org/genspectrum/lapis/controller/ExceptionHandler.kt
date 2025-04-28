@@ -2,7 +2,6 @@ package org.genspectrum.lapis.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
@@ -30,8 +29,6 @@ import org.springframework.web.servlet.View
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-
-private val log = KotlinLogging.logger {}
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 

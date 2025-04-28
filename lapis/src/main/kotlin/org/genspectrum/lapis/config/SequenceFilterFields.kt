@@ -112,8 +112,8 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
         )
     }
 
-private const val VARIANT_QUERY_FIELD = "variantQuery"
-private const val ADVANCED_QUERY_FIELD = "advancedQuery"
+public const val VARIANT_QUERY_FIELD = "variantQuery"
+public const val ADVANCED_QUERY_FIELD = "advancedQuery"
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) =
     when (databaseFeature.name) {
