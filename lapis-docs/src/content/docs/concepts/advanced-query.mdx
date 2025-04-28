@@ -125,12 +125,6 @@ For dates and numbers (int or float) we allow queries for ranges, using the `>=`
 date>=2021-01-01 AND date<=2021-12-31
 ```
 
-Note this is equivalent to:
-
-```
-dateFrom=2021-01-01 AND dateTo=2021-12-31
-```
-
 Of course
 
 ```
@@ -140,5 +134,5 @@ date=2021-01-01
 can still be used which is equivalent to
 
 ```
-dateFrom=2021-01-01 AND dateTo=2021-01-01
+dateFrom>=2021-01-01 AND dateTo<=2021-01-01
 ```
