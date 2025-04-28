@@ -4,12 +4,17 @@ grammar AdvancedQuery;
 
 start: expr EOF;
 expr:
-  single             # Uni
+  both             # Uni
   | not_ expr         # Not
   | expr and_ expr    # And
   | expr or_ expr    # Or
   | '(' expr ')'     # Parenthesis
-  | maybe_ '(' expr ')' # Maybe
+  | maybeQuery       # Maybe
+  ;
+
+both: 
+  single
+  | metadataQueryExpr
   ;
 
 single:
@@ -18,11 +23,27 @@ single:
   | nucleotideInsertionQuery
   | aaMutationQuery
   | aaInsertionQuery
-  | metadataQuery
+  ;
+
+metadataQueryExpr:
+  metadataQuery
   | metadataGreaterThanEqualQuery
   | metadataLessThanEqualQuery
   | regexMetadataQuery
   | isNullQuery
+  ;
+
+variantExpr:
+  single # VariantUni
+  | not_ variantExpr # VariantNot
+  | variantExpr and_ variantExpr # VariantAnd
+  | variantExpr or_ variantExpr # VariantOr
+  | '(' variantExpr ')'  # VariantParenthesis
+  | maybe_ '(' variantExpr ')' # VariantMaybe
+  ;
+
+maybeQuery:
+  maybe_ '(' variantExpr ')'
   ;
 
 or_: OR | '|';

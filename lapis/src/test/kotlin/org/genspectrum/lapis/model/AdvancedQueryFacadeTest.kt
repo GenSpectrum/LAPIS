@@ -79,6 +79,40 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
+    fun `given a complex advanced query with MAYBE then map should return the corresponding SiloQuery`() {
+        val advancedQuery =
+            "MAYBE((700B | 800-) & !600 & [3-of: 123A, 234T, 345G]) & " +
+                "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
+
+        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
+
+        val expectedResult = And(
+            StringSearch("some_metadata", "^Democratic.*"),
+            LineageEquals(PANGO_LINEAGE_COLUMN, "jn.1", true),
+            Maybe(
+                And(
+                    NOf(
+                        3,
+                        matchExactly = false,
+                        listOf(
+                            NucleotideSymbolEquals(null, 123, "A"),
+                            NucleotideSymbolEquals(null, 234, "T"),
+                            NucleotideSymbolEquals(null, 345, "G"),
+                        ),
+                    ),
+                    Not(HasNucleotideMutation(null, 600)),
+                    Or(
+                        NucleotideSymbolEquals(null, 800, "-"),
+                        NucleotideSymbolEquals(null, 700, "B"),
+                    ),
+                ),
+            ),
+        )
+
+        assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
     fun `given a advancedQuery with a single entry then map should return the corresponding SiloQuery`() {
         val advancedQuery = "300G"
 
@@ -624,6 +658,20 @@ class AdvancedQueryFacadeTest {
             exception.message,
             `is`(
                 "Expression contains symbols not allowed for metadata field of type Date (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN an invalid advanced query where MAYBE is used fro metadata THEN throw bad request exception`() {
+        val advancedQuery = "MAYBE(PangoLineage=jn.1* AND country=Switzerland)"
+
+        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
+
+        assertThat(
+            exception.message,
+            `is`(
+                "Failed to parse advanced query (line 1:18): mismatched input '=' expecting {':', A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, '-', '_', '.', '*', NUMBER}.",
             ),
         )
     }
