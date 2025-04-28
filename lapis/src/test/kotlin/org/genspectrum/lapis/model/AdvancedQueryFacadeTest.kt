@@ -650,9 +650,36 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`() {
-        val advancedQueries = listOf("dateFrom=2020-01-01", "dateTo=2020-01-01", "intFieldFrom=1", "intFieldTo=1", "floatFieldFrom=1", "floatFieldTo=1")
+        val advancedQueries =
+            listOf(
+                "dateFrom=2020-01-01",
+                "dateTo=2020-01-01",
+                "intFieldFrom=1",
+                "intFieldTo=1",
+                "floatFieldFrom=1",
+                "floatFieldTo=1",
+            )
         for (advancedQuery in advancedQueries) {
-            val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
+            val exception =
+                assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
+        }
+    }
+
+    @Test
+    fun `given a advancedQuery with not allowed fields in IsNull throw BadRequestException`() {
+        val advancedQueries =
+            listOf(
+                "dateFrom=2020-01-01",
+                "dateTo=2020-01-01",
+                "intFieldFrom=1",
+                "intFieldTo=1",
+                "floatFieldFrom=1",
+                "floatFieldTo=1",
+                "metadata.regex=1",
+            )
+        for (advancedQuery in advancedQueries) {
+            val query = "IsNull(%s)".format(advancedQuery)
+            val exception = assertThrows<BadRequestException> { underTest.map(query, dummySequenceFilterFields) }
         }
     }
 
