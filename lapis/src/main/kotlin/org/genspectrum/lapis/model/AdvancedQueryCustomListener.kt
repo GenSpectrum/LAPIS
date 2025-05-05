@@ -258,6 +258,10 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.StringSearch -> {
                 expressionStack.addLast(StringSearch(field.type.associatedField, metadataValue))
+                throw BadRequestException(
+                    "Regex queries should be wrapped in `'`, replace query with `$metadataName='$metadataValue'`",
+                    null,
+                )
             }
 
             SequenceFilterFieldType.VariantQuery -> {
@@ -270,7 +274,7 @@ class AdvancedQueryCustomListener(
         }
     }
 
-    override fun enterRegexMetadataQuery(ctx: AdvancedQueryParser.RegexMetadataQueryContext) {
+    override fun enterQuotedMetadataQuery(ctx: AdvancedQueryParser.QuotedMetadataQueryContext) {
         val metadataName = ctx.geneOrName().text
         val metadataValue = ctx.value().text.trim('\'')
 
@@ -303,7 +307,7 @@ class AdvancedQueryCustomListener(
 
             else -> {
                 throw BadRequestException(
-                    "Expression contains symbols not allowed for metadata field of type ${field.type} (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
+                    "Query expression for metadata field `${field.name}` of type ${field.type} was wrapped in `'`- this is only allowed for string searches and regex queries",
                     null,
                 )
             }

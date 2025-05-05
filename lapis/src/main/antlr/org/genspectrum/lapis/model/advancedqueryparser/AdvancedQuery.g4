@@ -29,7 +29,7 @@ metadataQueryExpr:
   metadataQuery
   | metadataGreaterThanEqualQuery
   | metadataLessThanEqualQuery
-  | regexMetadataQuery
+  | quotedMetadataQuery
   | isNullQuery
   ;
 
@@ -79,8 +79,8 @@ aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
 metadataQuery: geneOrName '=' geneOrName;
 metadataGreaterThanEqualQuery: geneOrName '>=' geneOrName;
 metadataLessThanEqualQuery: geneOrName '<=' geneOrName;
-regexMetadataQuery: geneOrName '=' value;
-value: STRING;
+quotedMetadataQuery: geneOrName '=' value;
+value: QUOTED_STRING;
 
 dateOrNumber: digit+;
 digit: NUMBER | MINUS | DOT;
@@ -122,7 +122,7 @@ MINUS: '-';
 UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
-STRING: '\'' (~['\r\n])* '\'';  // matches all strings with quotes, except if they contain a newline
+QUOTED_STRING: '\'' (~['\r\n])* '\'';  // matches all strings with quotes, except if they contain a newline
 AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
 OR: ' OR ';
 NOT: 'NOT ';
