@@ -359,8 +359,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Insertion' expression with sequenceName throws`() {
-        //  COVID variant queries do not support segment name in insertion queries
+    fun `given a advancedQuery with a 'Insertion' expression with invalid sequenceName throws`() {
         val advancedQuery = "ins_sequence:1234:GAG"
 
         assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
@@ -480,7 +479,7 @@ class AdvancedQueryFacadeTest {
 
         val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
 
-        assertThat(exception.message, `is`("Unknown gene: invalidGene"))
+        assertThat(exception.message, `is`("invalidGene is not a known segment or gene"))
     }
 
     @Test

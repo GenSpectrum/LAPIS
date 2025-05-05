@@ -1,11 +1,10 @@
 package org.genspectrum.lapis.model
 
 import AdvancedQueryBaseListener
-import AdvancedQueryParser.AaInsertionQueryContext
-import AdvancedQueryParser.AaMutationQueryContext
 import AdvancedQueryParser.AndContext
 import AdvancedQueryParser.MaybeContext
 import AdvancedQueryParser.NOfQueryContext
+import AdvancedQueryParser.NamedInsertionQueryContext
 import AdvancedQueryParser.NotContext
 import AdvancedQueryParser.NucleotideInsertionQueryContext
 import AdvancedQueryParser.NucleotideMutationQueryContext
@@ -44,6 +43,51 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
+
+val nucleotideSymbols = setOf('A', 'C', 'G', 'T')
+val ambiguousNucSymbols = setOf('M', 'R', 'W', 'S', 'Y', 'K', 'V', 'H', 'D', 'B', 'N', '-', '.', '?')
+val aaSymbols = setOf(
+    'A',
+    'R',
+    'N',
+    'D',
+    'C',
+    'E',
+    'Q',
+    'G',
+    'H',
+    'I',
+    'L',
+    'K',
+    'M',
+    'F',
+    'P',
+    'S',
+    'T',
+    'W',
+    'Y',
+    'V',
+    '*',
+)
+val ambiguousAaSymbols = setOf('X', '-', '.', '?')
+
+fun isStrictNucleotideSymbol(c: Char) {
+    if (c.uppercaseChar() !in nucleotideSymbols) {
+        throw BadRequestException("Invalid nucleotide symbol: $c")
+    }
+}
+
+fun isValidNucleotideSymbol(c: Char) {
+    if (c.uppercaseChar() !in ambiguousNucSymbols && c.uppercaseChar() !in nucleotideSymbols) {
+        throw BadRequestException("Invalid nucleotide symbol: $c")
+    }
+}
+
+fun isValidAminoAcidSymbol(c: Char) {
+    if (c.uppercaseChar() !in ambiguousAaSymbols && c.uppercaseChar() !in aaSymbols) {
+        throw BadRequestException("Invalid amino acid symbol: $c")
+    }
+}
 
 class AdvancedQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -508,31 +552,84 @@ class AdvancedQueryCustomListener(
         )
     }
 
-    override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
+    override fun enterNamedMutationQuery(ctx: AdvancedQueryParser.NamedMutationQueryContext?) {
         if (ctx == null) {
             return
         }
+        val mutatedTo = ctx.mutationQuerySecondSymbol()?.text
+        val mutatedFrom = ctx.mutationQueryFirstSymbol()?.text
         val position = ctx.position().text.toInt()
-        val gene = referenceGenomeSchema.getGene(ctx.geneOrName().text).name
+        val geneOrName = ctx.geneOrName().text
 
-        val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
-            null -> HasAminoAcidMutation(gene, position)
-            else -> AminoAcidSymbolEquals(gene, position, aaSymbol.text.uppercase())
+        // Ensure that the geneName is a valid gene or segment
+        var gene: String? = null
+        var sequenceName: String? = null
+        try {
+            gene = referenceGenomeSchema.getGene(geneOrName).name
+        } catch (e: BadRequestException) {
+            try {
+                sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+            } catch (e: BadRequestException) {
+                throw BadRequestException("$geneOrName is not a known segment or gene", null)
+            }
         }
 
-        expressionStack.addLast(expression)
+        if (gene != null) {
+            // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
+            mutatedTo?.first()?.let { isValidAminoAcidSymbol(it) }
+            val expression = when (val aaSymbol = ctx.mutationQuerySecondSymbol()) {
+                null -> HasAminoAcidMutation(gene, position)
+                else -> AminoAcidSymbolEquals(gene, position, aaSymbol.text.uppercase())
+            }
+            expressionStack.addLast(expression)
+        }
+        if (sequenceName != null) {
+            // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
+            mutatedTo?.first()?.let { isValidNucleotideSymbol(it) }
+            mutatedFrom?.first()?.let { isStrictNucleotideSymbol(it) }
+            val expression = when (val nucSymbol = ctx.mutationQuerySecondSymbol()) {
+                null -> HasNucleotideMutation(sequenceName, position)
+                else -> NucleotideSymbolEquals(sequenceName, position, nucSymbol.text.uppercase())
+            }
+            expressionStack.addLast(expression)
+        }
     }
 
-    override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
-        val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
-        val gene = referenceGenomeSchema.getGene(ctx.geneOrName().text).name
-
-        expressionStack.addLast(
-            AminoAcidInsertionContains(
-                ctx.position().text.toInt(),
-                value.uppercase(),
-                gene,
-            ),
-        )
+    override fun enterNamedInsertionQuery(ctx: NamedInsertionQueryContext) {
+        val value = ctx.namedInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
+        val plainString = ctx.namedInsertionSymbol().joinToString(separator = "") { it.text.uppercase() }
+        val geneOrName = ctx.geneOrName().text
+        var gene: String? = null
+        var sequenceName: String? = null
+        try {
+            gene = referenceGenomeSchema.getGene(geneOrName).name
+        } catch (e: BadRequestException) {
+            try {
+                sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+            } catch (e: BadRequestException) {
+                throw BadRequestException("$geneOrName is not a known segment or gene", null)
+            }
+        }
+        if (gene != null) {
+            plainString.forEach { isValidAminoAcidSymbol(it) }
+            expressionStack.addLast(
+                AminoAcidInsertionContains(
+                    ctx.position().text.toInt(),
+                    value.uppercase(),
+                    gene,
+                ),
+            )
+        }
+        if (sequenceName != null) {
+            val sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+            plainString.forEach { isValidNucleotideSymbol(it) }
+            expressionStack.addLast(
+                NucleotideInsertionContains(
+                    ctx.position().text.toInt(),
+                    value.uppercase(),
+                    sequenceName,
+                ),
+            )
+        }
     }
 }
