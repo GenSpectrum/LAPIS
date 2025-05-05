@@ -91,9 +91,9 @@ For example:
 ./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
 ```
 
-If running from scratch you need to pre-build the code!!!
+bootRun rebuilds the code as needed - if you want to ensure a fresh build you can first explicitly build lapis
 ```
-./gradlew build bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json --server.port=8096'
+./gradlew clean build
 ```
 
 ## ANTLR grammar
