@@ -311,10 +311,10 @@ class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
     override fun getContentLength(
         str: String,
         contentType: MediaType?,
-    ): Long =
+    ): Long? =
         when (requestCompression.compressionSource.compression) {
             null -> super.getContentLength(str, contentType)
-            else -> -1L
+            else -> null
         }
 
     companion object {
