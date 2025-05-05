@@ -1,7 +1,6 @@
 # Editors
-.idea/*
+**/.idea/*
 !.idea/runConfigurations
-lapis/.idea/libraries
 *.iml
 
 # Personal preference
