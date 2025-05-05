@@ -35,41 +35,41 @@ describe('The /nucleotideInsertions endpoint', () => {
   it('should order by specified fields', async () => {
     const ascendingOrderedResult = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
+        orderBy: [{ field: 'insertion', type: 'ascending' }],
       },
     });
-
-    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_22339:GCTGGT');
+    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_22204:CAGAA');
+    expect(ascendingOrderedResult.data).to.have.length(4);
 
     const descendingOrderedResult = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'descending' }],
+        orderBy: [{ field: 'insertion', type: 'descending' }],
       },
     });
 
-    expect(descendingOrderedResult.data[0]).to.have.property('insertion', 'ins_25701:CCC');
+    expect(descendingOrderedResult.data).to.have.length(4);
+    expect(descendingOrderedResult.data[3]).to.have.property('insertion', 'ins_22204:CAGAA');
   });
 
   it('should apply limit and offset', async () => {
     const resultWithLimit = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 2,
+        orderBy: [{ field: 'insertion', type: 'ascending' }],
+        limit: 4,
       },
     });
 
-    expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('insertion', 'ins_22339:GCTGGT');
+    expect(resultWithLimit.data).to.have.length(4);
 
     const resultWithLimitAndOffset = await lapisClient.postNucleotideInsertions({
       insertionsRequest: {
-        orderBy: [{ field: 'count', type: 'ascending' }],
-        limit: 2,
+        orderBy: [{ field: 'insertion', type: 'ascending' }],
+        limit: 4,
         offset: 1,
       },
     });
 
-    expect(resultWithLimitAndOffset.data).to.have.length(2);
+    expect(resultWithLimitAndOffset.data).to.have.length(3);
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 

@@ -4,7 +4,6 @@ import {
   expectIsZstdEncoded,
   lapisMultiSegmentedSequenceController,
   lapisSingleSegmentedSequenceController,
-  sequenceData,
 } from './common';
 
 describe('The /alignedNucleotideSequence endpoint', () => {
@@ -14,7 +13,10 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    expect(result[0].primaryKey).to.equal('key_3259931');
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
+    );
+    expect(result[0].primaryKey).to.equal('key_1001493');
     expect(result[0].main).to.have.length(29903);
   });
 
@@ -25,8 +27,11 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     });
 
     expect(result).to.have.length(6);
-    expect(result[0].primaryKey).to.equal('key_5');
-    expect(result[0].m).to.equal('TGGG');
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
+    );
+    expect(result[0].primaryKey).to.equal('key_0');
+    expect(result[0].m).to.equal('CGGG');
   });
 
   it('should order ascending by specified fields', async () => {

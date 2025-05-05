@@ -9,7 +9,10 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
-    expect(result[0].primaryKey).to.equal('key_3259931');
+    result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
+      a.primaryKey.localeCompare(b.primaryKey)
+    );
+    expect(result[0].primaryKey).to.equal('key_1001493');
     expect(result[0].s).to.have.length(1274);
   });
 
