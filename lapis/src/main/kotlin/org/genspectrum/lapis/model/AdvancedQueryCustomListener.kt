@@ -109,8 +109,9 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.geneOrName()[0].text
         val metadataValue = ctx.geneOrName()[1].text
 
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: SequenceFilterField =
+            allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.Date -> {
                 try {
@@ -147,8 +148,9 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.geneOrName()[0].text
         val metadataValue = ctx.geneOrName()[1].text
 
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: SequenceFilterField =
+            allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.Date -> {
                 try {
@@ -210,8 +212,9 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.geneOrName()[0].text
         val metadataValue = ctx.geneOrName()[1].text
 
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: SequenceFilterField =
+            allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.String -> {
                 expressionStack.addLast(StringEquals(field.name, metadataValue))
@@ -244,14 +247,14 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.DateFrom -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.type.associatedField}) instead",
                     null,
                 )
             }
 
             is SequenceFilterFieldType.DateTo -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.type.associatedField}) instead",
                     null,
                 )
             }
@@ -266,14 +269,14 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.FloatFrom -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.type.associatedField}) instead",
                     null,
                 )
             }
 
             is SequenceFilterFieldType.FloatTo -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.type.associatedField}) instead",
                     null,
                 )
             }
@@ -288,14 +291,14 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.IntFrom -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use >=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use >=(${field.type.associatedField}) instead",
                     null,
                 )
             }
 
             is SequenceFilterFieldType.IntTo -> {
                 throw BadRequestException(
-                    "Cannot use $metadataName in advancedQuery, use <=(${field.name}) instead",
+                    "Cannot use $metadataName in advancedQuery, use <=(${field.type.associatedField}) instead",
                     null,
                 )
             }
@@ -322,8 +325,9 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.geneOrName().text
         val metadataValue = ctx.value().text.trim('\'')
 
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: SequenceFilterField =
+            allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.String -> {
                 expressionStack.addLast(StringEquals(field.name, metadataValue))
@@ -361,8 +365,9 @@ class AdvancedQueryCustomListener(
     override fun enterIsNullQuery(ctx: AdvancedQueryParser.IsNullQueryContext) {
         val metadataName = ctx.geneOrName().text
 
-        val field: SequenceFilterField? = allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
-        field ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: SequenceFilterField =
+            allowedSequenceFilterFields.fields[metadataName.lowercase(Locale.US)]
+                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
         when (field.type) {
             SequenceFilterFieldType.String -> {
                 expressionStack.addLast(StringEquals(field.name, null))
