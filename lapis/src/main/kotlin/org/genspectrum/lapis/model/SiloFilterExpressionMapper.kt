@@ -146,21 +146,21 @@ class SiloFilterExpressionMapper(
 
         if (containsVariantQuery && containsSimpleVariantQuery) {
             throw BadRequestException(
-                "variantQuery filter cannot be used with other variant filters such as: " +
+                "$VARIANT_QUERY_FIELD filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
             )
         }
 
         if (containsAdvancedQuery && containsSimpleVariantQuery) {
             throw BadRequestException(
-                "advancedQuery filter cannot be used with other variant filters such as: " +
+                "$ADVANCED_QUERY_FIELD filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
             )
         }
 
         if (containsVariantQuery && containsAdvancedQuery) {
             throw BadRequestException(
-                "variantQuery filter cannot be used with advancedQuery filter",
+                "$VARIANT_QUERY_FIELD filter cannot be used with $ADVANCED_QUERY_FIELD filter",
             )
         }
 
@@ -232,7 +232,7 @@ class SiloFilterExpressionMapper(
     private fun mapToVariantQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
-                "variantQuery must have exactly one value, found ${values[0].values.size} values.",
+                "$VARIANT_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
             )
         }
 
