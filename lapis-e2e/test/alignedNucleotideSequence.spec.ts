@@ -32,7 +32,7 @@ describe('The /alignedNucleotideSequence endpoint', () => {
     );
     expect(result[0].primaryKey).to.equal('key_0');
     expect(result[0].m).to.equal('CGGG');
-});
+  });
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({

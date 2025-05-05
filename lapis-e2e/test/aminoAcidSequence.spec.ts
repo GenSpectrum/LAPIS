@@ -15,8 +15,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
     );
     expect(result[0].primaryKey).to.equal('key_1001493');
     expect(result[0].s).to.have.length(1274);
-
-    });
+  });
 
   it('should order ascending by specified fields', async () => {
     const result = await lapisClient.postAlignedAminoAcidSequence({
