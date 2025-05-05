@@ -21,8 +21,8 @@ single:
   nucleotideMutationQuery
   | nOfQuery
   | nucleotideInsertionQuery
-  | aaMutationQuery
-  | aaInsertionQuery
+  | namedMutationQuery
+  | namedInsertionQuery
   ;
 
 metadataQueryExpr:
@@ -69,12 +69,15 @@ nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbo
 nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
-aaMutationQuery: geneOrName ':' aaSymbol? position possiblyAmbiguousAaSymbol?;
+namedMutationQuery: geneOrName ':' mutationQueryFirstSymbol? position mutationQuerySecondSymbol?;
+mutationQueryFirstSymbol: nucleotideSymbol | aaSymbol;
+mutationQuerySecondSymbol: nucleotideSymbol | ambiguousNucleotideSymbol | aaSymbol | ambiguousAaSymbol;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
-aaInsertionQuery: insertionKeyword geneOrName ':' position ':' aaInsertionSymbol+;
-aaInsertionSymbol: possiblyAmbiguousAaSymbol | '?';
+
+namedInsertionQuery: insertionKeyword geneOrName ':' position ':' namedInsertionSymbol+;
+namedInsertionSymbol: possibleAmbiguousNucleotideSymbol | possiblyAmbiguousAaSymbol | '?';
 
 metadataQuery: geneOrName '=' geneOrName;
 metadataGreaterThanEqualQuery: geneOrName '>=' geneOrName;
