@@ -721,7 +721,7 @@ class AdvancedQueryFacadeTest {
         assertThat(
             exception.message,
             `is`(
-                "Expression contains symbols not allowed for metadata field of type Date (allowed symbols: a-z, A-Z, 0-9, ., *, -, _)",
+                "Query expression for metadata field `date` of type Date was wrapped in `'`- this is only allowed for string searches and regex queries",
             ),
         )
     }
