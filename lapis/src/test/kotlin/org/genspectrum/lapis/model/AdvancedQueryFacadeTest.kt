@@ -586,13 +586,13 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
     }
 
-    data class ValidRangeTestCase(
+    data class ValidTestCase(
         val description: String,
         val query: String,
         val expected: SiloFilterExpression,
     )
 
-    data class InvalidRangeTestCase(
+    data class InvalidTestCase(
         val description: String,
         val query: String,
         val expected: String,
@@ -600,9 +600,9 @@ class AdvancedQueryFacadeTest {
 
     companion object {
         @JvmStatic
-        fun validQueryProvider() =
+        fun validRangeQueryProvider() =
             listOf(
-                ValidRangeTestCase(
+                ValidTestCase(
                     "intField",
                     "intField>=1 AND intField<=18",
                     And(
@@ -610,7 +610,7 @@ class AdvancedQueryFacadeTest {
                         IntBetween("intField", 1, null),
                     ),
                 ),
-                ValidRangeTestCase(
+                ValidTestCase(
                     "floatField",
                     "floatField>=0 AND floatField<=10e-1",
                     And(
@@ -618,7 +618,7 @@ class AdvancedQueryFacadeTest {
                         FloatBetween("floatField", 0.0, null),
                     ),
                 ),
-                ValidRangeTestCase(
+                ValidTestCase(
                     "date",
                     "date>=2020-01-01 AND date<=2021-01-01",
                     And(
@@ -629,33 +629,68 @@ class AdvancedQueryFacadeTest {
             ).map { arrayOf(it.description, it.query, it.expected) }
 
         @JvmStatic
-        fun invalidQueryProvider() =
+        fun invalidRangeQueryProvider() =
             listOf(
-                InvalidRangeTestCase(
+                InvalidTestCase(
                     "date",
                     "date<=2021.01.01",
                     "'2021.01.01' is not a valid date",
                 ),
-                InvalidRangeTestCase(
+                InvalidTestCase(
                     "metadata",
                     "some_metadata<=2021.01.01",
                     "expression <= cannot be used for String",
                 ),
-                InvalidRangeTestCase(
+                InvalidTestCase(
                     "intField",
                     "intField>=One",
                     "'One' is not a valid int",
                 ),
-                InvalidRangeTestCase(
+                InvalidTestCase(
                     "floatField",
                     "floatField>=One",
                     "'One' is not a valid float",
                 ),
             ).map { arrayOf(it.description, it.query, it.expected) }
+
+        @JvmStatic
+        fun invalidMetadataProvider() =
+            listOf(
+                InvalidTestCase(
+                    "dateFrom",
+                    "dateFrom=2020-01-01",
+                    "Cannot use dateFrom in advancedQuery, use >=(date) instead",
+                ),
+                InvalidTestCase(
+                    "dateTo",
+                    "dateTo=2020-01-01",
+                    "Cannot use dateTo in advancedQuery, use <=(date) instead",
+                ),
+                InvalidTestCase(
+                    "intFieldFrom",
+                    "intFieldFrom=1",
+                    "Cannot use intFieldFrom in advancedQuery, use >=(intField) instead",
+                ),
+                InvalidTestCase(
+                    "intFieldTo",
+                    "intFieldTo=1",
+                    "Cannot use intFieldTo in advancedQuery, use <=(intField) instead",
+                ),
+                InvalidTestCase(
+                    "floatFieldFrom",
+                    "floatFieldFrom=1",
+                    "Cannot use floatFieldFrom in advancedQuery, use >=(floatField) instead",
+                ),
+                InvalidTestCase(
+                    "floatFieldTo",
+                    "floatFieldTo=1",
+                    "Cannot use floatFieldTo in advancedQuery, use <=(floatField) instead",
+                ),
+            ).map { arrayOf(it.description, it.query, it.expected) }
     }
 
     @ParameterizedTest(name = "valid {0} with >= and <=")
-    @MethodSource("validQueryProvider")
+    @MethodSource("validRangeQueryProvider")
     fun `test valid advanced queries`(
         description: String,
         query: String,
@@ -666,7 +701,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @ParameterizedTest(name = "invalid {0} with >= and <=")
-    @MethodSource("invalidQueryProvider")
+    @MethodSource("invalidRangeQueryProvider")
     fun `test invalid advanced queries`(
         description: String,
         query: String,
@@ -676,21 +711,21 @@ class AdvancedQueryFacadeTest {
         assertThat(exception.message, containsString(expected))
     }
 
-    @Test
-    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`() {
-        val advancedQueries =
-            listOf(
-                "dateFrom=2020-01-01",
-                "dateTo=2020-01-01",
-                "intFieldFrom=1",
-                "intFieldTo=1",
-                "floatFieldFrom=1",
-                "floatFieldTo=1",
-            )
-        for (advancedQuery in advancedQueries) {
-            val exception =
-                assertThrows<BadRequestException> { underTest.map(advancedQuery, dummySequenceFilterFields) }
-        }
+    @ParameterizedTest(name = "invalid metadata field {0}")
+    @MethodSource("invalidMetadataProvider")
+    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`(
+        description: String,
+        query: String,
+        expected: String,
+    ) {
+        val exception =
+            assertThrows<BadRequestException> { underTest.map(query, dummySequenceFilterFields) }
+        assertThat(
+            exception.message,
+            `is`(
+                expected,
+            ),
+        )
     }
 
     @Test
