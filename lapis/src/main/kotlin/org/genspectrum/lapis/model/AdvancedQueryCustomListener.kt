@@ -79,7 +79,7 @@ class AdvancedQueryCustomListener(
 
             is SequenceFilterFieldType.Float -> {
                 try {
-                    expressionStack.addLast(FloatBetween(field.name, to = metadataValue.toDouble(), from = null))
+                    expressionStack.addLast(FloatBetween(field.name, from = null, to = metadataValue.toDouble()))
                 } catch (e: NumberFormatException) {
                     throw BadRequestException("'$metadataValue' is not a valid float", e)
                 }
@@ -94,7 +94,7 @@ class AdvancedQueryCustomListener(
             }
 
             else -> {
-                throw BadRequestException("expression <= can not be used for ${field.type}", null)
+                throw BadRequestException("expression <= cannot be used for ${field.type}", null)
             }
         }
     }
@@ -132,7 +132,7 @@ class AdvancedQueryCustomListener(
             }
 
             else -> {
-                throw BadRequestException("expression >= can not be used for ${field.type}", null)
+                throw BadRequestException("expression >= cannot be used for ${field.type}", null)
             }
         }
     }

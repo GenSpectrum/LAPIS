@@ -20,13 +20,17 @@ import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
 class AdvancedQueryFacadeTest {
@@ -583,69 +587,94 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01"))))
     }
 
-    @Test
-    fun `given a valid advancedQuery with greater than equal date metadata expression then returns SILO query`() {
-        val advancedQuery = "date>=2020-01-01 AND date<=2021-01-01"
+    data class ValidRangeTestCase(
+        val description: String,
+        val query: String,
+        val expected: SiloFilterExpression,
+    )
 
-        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
+    data class InvalidRangeTestCase(
+        val description: String,
+        val query: String,
+        val expected: String,
+    )
 
-        assertThat(
-            result,
-            equalTo(
-                And(
-                    DateBetween("date", null, LocalDate.parse("2021-01-01")),
-                    DateBetween("date", LocalDate.parse("2020-01-01"), null),
+    companion object {
+        @JvmStatic
+        fun validQueryProvider() =
+            listOf(
+                ValidRangeTestCase(
+                    "intField",
+                    "intField>=1 AND intField<=18",
+                    And(
+                        IntBetween("intField", null, 18),
+                        IntBetween("intField", 1, null),
+                    ),
                 ),
-            ),
-        )
+                ValidRangeTestCase(
+                    "floatField",
+                    "floatField>=0 AND floatField<=10e-1",
+                    And(
+                        FloatBetween("floatField", null, 1.0),
+                        FloatBetween("floatField", 0.0, null),
+                    ),
+                ),
+                ValidRangeTestCase(
+                    "date",
+                    "date>=2020-01-01 AND date<=2021-01-01",
+                    And(
+                        DateBetween("date", null, LocalDate.parse("2021-01-01")),
+                        DateBetween("date", LocalDate.parse("2020-01-01"), null),
+                    ),
+                ),
+            ).map { arrayOf(it.description, it.query, it.expected) }
 
-        val invalidDate = "date<=2021.01.01"
-
-        assertThrows<BadRequestException> { underTest.map(invalidDate, dummySequenceFilterFields) }
-
-        val invalidField = "some_metadata<=2021.01.01"
-
-        assertThrows<BadRequestException> { underTest.map(invalidField, dummySequenceFilterFields) }
+        @JvmStatic
+        fun invalidQueryProvider() =
+            listOf(
+                InvalidRangeTestCase(
+                    "date",
+                    "date<=2021.01.01",
+                    "'2021.01.01' is not a valid date",
+                ),
+                InvalidRangeTestCase(
+                    "metadata",
+                    "some_metadata<=2021.01.01",
+                    "expression <= cannot be used for String",
+                ),
+                InvalidRangeTestCase(
+                    "intField",
+                    "intField>=One",
+                    "'One' is not a valid int",
+                ),
+                InvalidRangeTestCase(
+                    "floatField",
+                    "floatField>=One",
+                    "'One' is not a valid float",
+                ),
+            ).map { arrayOf(it.description, it.query, it.expected) }
     }
 
-    @Test
-    fun `given a valid advancedQuery with greater than equal int metadata expression then returns SILO query`() {
-        val advancedQuery = "intField>=1 AND intField<=18"
-
-        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
-        assertThat(
-            result,
-            equalTo(
-                And(
-                    IntBetween("intField", null, 18),
-                    IntBetween("intField", 1, null),
-                ),
-            ),
-        )
-
-        val invalidInt = "intField>=One"
-
-        assertThrows<BadRequestException> { underTest.map(invalidInt, dummySequenceFilterFields) }
+    @ParameterizedTest(name = "valid {0} with >= and <=")
+    @MethodSource("validQueryProvider")
+    fun `test valid advanced queries`(
+        description: String,
+        query: String,
+        expected: SiloFilterExpression,
+    ) {
+        val result = underTest.map(query, dummySequenceFilterFields)
+        assertThat(result, equalTo(expected))
     }
 
-    @Test
-    fun `given a valid advancedQuery with greater than equal float metadata expression then returns SILO query`() {
-        val advancedQuery = "floatField>=0 AND floatField<=10e-1"
-
-        val result = underTest.map(advancedQuery, dummySequenceFilterFields)
-        assertThat(
-            result,
-            equalTo(
-                And(
-                    FloatBetween("floatField", null, 1.0),
-                    FloatBetween("floatField", 0.0, null),
-                ),
-            ),
-        )
-
-        val invalidFloat = "floatField>=One"
-
-        assertThrows<BadRequestException> { underTest.map(invalidFloat, dummySequenceFilterFields) }
+    @ParameterizedTest(name = "invalid {0} with >= and <=")
+    @MethodSource("invalidQueryProvider")
+    fun `test invalid advanced queries`(
+        description: String,
+        query: String,
+        expected: String,
+    ) {
+        val exception = assertThrows<BadRequestException> { underTest.map(query, dummySequenceFilterFields) }
+        assertThat(exception.message, containsString(expected))
     }
 
     @Test
