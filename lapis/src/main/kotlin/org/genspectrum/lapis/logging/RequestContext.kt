@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.util.TimeFactory
 import org.slf4j.Logger
@@ -22,8 +22,6 @@ class RequestContext {
     var responseCode: Int? = null
     var cached: Boolean? = null
 }
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class RequestContextLoggerFilterAdapter(

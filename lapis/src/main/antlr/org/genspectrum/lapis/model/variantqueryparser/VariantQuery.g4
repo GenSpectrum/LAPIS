@@ -1,7 +1,5 @@
 grammar VariantQuery;
-
 // parser rules
-
 start: expr EOF;
 expr:
   single             # Uni
@@ -31,7 +29,6 @@ position: NUMBER+;
 nucleotideSymbol: A | C | G | T;
 ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
 possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
-
 
 pangolineageQuery: pangolineageWithPossibleSublineages;
 pangolineageWithPossibleSublineages: pangolineage pangolineageIncludeSublineages?;

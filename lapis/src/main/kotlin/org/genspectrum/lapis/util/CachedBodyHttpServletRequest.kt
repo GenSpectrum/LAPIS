@@ -7,15 +7,13 @@ import jakarta.servlet.ReadListener
 import jakarta.servlet.ServletInputStream
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletRequestWrapper
-import mu.KotlinLogging
+import org.genspectrum.lapis.log
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-
-private val log = KotlinLogging.logger {}
 
 class CachedBodyHttpServletRequest private constructor(
     request: HttpServletRequest,

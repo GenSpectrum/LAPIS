@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 import { basePath, lapisClient } from './common';
 
+function setsAreEqual<T>(a: Set<T>, b: Set<T>) {
+  return a.size === b.size && [...a].every(x => b.has(x));
+}
+
 describe('The /details endpoint', () => {
   it('should return details with specified fields', async () => {
     const result = await lapisClient.postDetails({
@@ -89,6 +93,35 @@ describe('The /details endpoint', () => {
 
     expect(resultWithLimitAndOffset.data).to.have.length(2);
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
+  });
+
+  it('should handle advancedQuery', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'primaryKey',
+      aminoAcidInsertions: 'ins_S:143:T,ins_ORF1a:3602:F?P',
+      division: 'Vaud',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(result.status).to.be.equal(200);
+
+    const urlParamsAdvanced = new URLSearchParams({
+      fields: 'primaryKey',
+      advancedQuery: 'division=Vaud AND ins_S:143:T AND ins_ORF1a:3602:F?P',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+    expect(resultAdvanced.status).to.be.equal(200);
+
+    const resultText = await result.text();
+    const resultAdvancedText = await resultAdvanced.text();
+    expect(resultText).to.be.equal(resultAdvancedText);
   });
 
   it('should return the data as CSV', async () => {
@@ -219,5 +252,129 @@ key_1002052
     });
 
     expect(result).to.have.nested.property('data[0].division', null);
+  });
+
+  it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {
+    const sequenceQueries = [
+      '300G & !400- & (S:123T | S:234A)',
+      '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]',
+      '[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
+      'MAYBE(123W)',
+    ];
+    const regexQueries = ['region\d', 'Basel-(Stadt|Land)', '[^a-c]', 'Basel.*', '^Z.*rich$', 'region{1,2}'];
+    for (var sequenceQuery of sequenceQueries) {
+      for (var regexQuery of regexQueries) {
+        const urlRegex = new URLSearchParams({
+          'fields': 'primaryKey',
+          'division.regex': regexQuery,
+          'orderBy': 'primaryKey',
+          'dataFormat': 'csv',
+        });
+
+        const urlVariant = new URLSearchParams({
+          fields: 'primaryKey',
+          variantQuery: sequenceQuery,
+          orderBy: 'primaryKey',
+          dataFormat: 'csv',
+        });
+
+        const resultRegex = await fetch(basePath + '/sample/details?' + urlRegex.toString());
+        const resultVariant = await fetch(basePath + '/sample/details?' + urlVariant.toString());
+
+        expect(resultRegex.status).to.be.equal(200);
+        expect(resultVariant.status).to.be.equal(200);
+
+        const resultRegexText = await resultRegex.text();
+        const resultVariantText = await resultVariant.text();
+        const setRegex = new Set(resultRegexText.split('\n').filter(Boolean));
+        const setVariant = new Set(resultVariantText.split('\n').filter(Boolean));
+
+        const advancedQueryIntersection = `division.regex='${regexQuery}' AND ${sequenceQuery}`;
+        const advancedQueryUnion = `division.regex='${regexQuery}' OR ${sequenceQuery}`;
+
+        const urlParamsAdvancedIntersection = new URLSearchParams({
+          fields: 'primaryKey',
+          advancedQuery: advancedQueryIntersection,
+          orderBy: 'primaryKey',
+          dataFormat: 'csv',
+        });
+
+        const urlParamsAdvancedUnion = new URLSearchParams({
+          fields: 'primaryKey',
+          advancedQuery: advancedQueryUnion,
+          orderBy: 'primaryKey',
+          dataFormat: 'csv',
+        });
+
+        const resultAdvancedIntersection = await fetch(
+          basePath + '/sample/details?' + urlParamsAdvancedIntersection.toString()
+        );
+        const resultAdvancedUnion = await fetch(
+          basePath + '/sample/details?' + urlParamsAdvancedUnion.toString()
+        );
+
+        expect(resultAdvancedIntersection.status).to.be.equal(200);
+        expect(resultAdvancedUnion.status).to.be.equal(200);
+
+        const resultIntersectionText = await resultAdvancedIntersection.text();
+        const resultUnionText = await resultAdvancedUnion.text();
+        const setIntersection = new Set(resultIntersectionText.split('\n').filter(Boolean));
+        const setUnion = new Set(resultUnionText.split('\n').filter(Boolean));
+
+        expect(setsAreEqual(setRegex.union(setVariant), setUnion)).to.be.true;
+        expect(setsAreEqual(setRegex.intersection(setVariant), setIntersection)).to.be.true;
+      }
+    }
+  });
+
+  it('should throw an error for invalid Maybe request', async () => {
+    const metadataQueries = ['division=Basel', "division.regex='Basel'", 'date>=2021-01-01'];
+
+    for (const metadataQuery of metadataQueries) {
+      const advancedQuery = `MAYBE(${metadataQuery})`;
+
+      const urlParamsAdvanced = new URLSearchParams({
+        fields: 'primaryKey',
+        advancedQuery: advancedQuery,
+        orderBy: 'primaryKey',
+        dataFormat: 'csv',
+      });
+
+      const result = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+      expect(result.status).equals(400);
+      expect(result.headers.get('Content-Type')).equals('application/json');
+      const json = await result.json();
+      expect(json.error.detail).to.include('Failed to parse advanced query');
+    }
+  });
+
+  it('advancedQuery and metadata searches should be the same for dates', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'primaryKey',
+      dateFrom: '2021-01-01',
+      dateTo: '2021-12-31',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(result.status).to.be.equal(200);
+
+    const urlParamsAdvanced = new URLSearchParams({
+      fields: 'primaryKey',
+      advancedQuery: 'date>=2021-01-01 AND date<=2021-12-31',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+    expect(resultAdvanced.status).to.be.equal(200);
+
+    const resultText = await result.text();
+    const resultAdvancedText = await resultAdvanced.text();
+    expect(resultText).to.be.equal(resultAdvancedText);
   });
 });

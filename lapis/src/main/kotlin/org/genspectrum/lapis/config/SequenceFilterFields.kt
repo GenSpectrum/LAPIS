@@ -6,9 +6,11 @@ typealias SequenceFilterFieldName = String
 typealias LowercaseName = String
 
 const val SARS_COV2_VARIANT_QUERY_FEATURE = "sarsCoV2VariantQuery"
+const val GENERALIZED_ADVANCED_QUERY_FEATURE = "generalizedAdvancedQuery"
 
 val FEATURES_FOR_SEQUENCE_FILTERS = listOf(
     SARS_COV2_VARIANT_QUERY_FEATURE,
+    GENERALIZED_ADVANCED_QUERY_FEATURE,
 )
 
 data class SequenceFilterFields(
@@ -110,13 +112,19 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
         )
     }
 
-private const val VARIANT_QUERY_FIELD = "variantQuery"
+public const val VARIANT_QUERY_FIELD = "variantQuery"
+public const val ADVANCED_QUERY_FIELD = "advancedQuery"
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) =
     when (databaseFeature.name) {
         SARS_COV2_VARIANT_QUERY_FEATURE -> VARIANT_QUERY_FIELD.lowercase(Locale.US) to SequenceFilterField(
             name = VARIANT_QUERY_FIELD,
             type = SequenceFilterFieldType.VariantQuery,
+        )
+
+        GENERALIZED_ADVANCED_QUERY_FEATURE -> ADVANCED_QUERY_FIELD.lowercase(Locale.US) to SequenceFilterField(
+            name = ADVANCED_QUERY_FIELD,
+            type = SequenceFilterFieldType.AdvancedQuery,
         )
 
         else -> throw IllegalArgumentException(
@@ -136,6 +144,8 @@ sealed class SequenceFilterFieldType(
     data object Boolean : SequenceFilterFieldType("boolean")
 
     data object VariantQuery : SequenceFilterFieldType("string")
+
+    data object AdvancedQuery : SequenceFilterFieldType("string")
 
     data class DateFrom(
         val associatedField: SequenceFilterFieldName,
