@@ -4,6 +4,7 @@ import org.genspectrum.lapis.DATE_FIELD
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -47,7 +48,7 @@ private const val SOME_VALUE = "some value"
 class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
     private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
-    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema)
+    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     private var underTest =
         SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
