@@ -7,7 +7,7 @@ import { OnlyIf } from '../../../components/OnlyIf.tsx';
 import { hasFeature } from '../../../config.ts';
 
 {/* prettier-ignore */}
-<OnlyIf condition={hasFeature('advancedQuery')}>
+<OnlyIf condition={hasFeature('generalizedAdvancedQuery')}>
 :::note
 This feature is not enabled for this LAPIS instance.
 It must be enabled in the `features` section of the database configuration by the maintainer of the instance.
@@ -83,7 +83,7 @@ NOT host='bos taurus' AND 300G AND country=USA
 Note that if the metadata field does not only contain letters and numbers (e.g. it contains a space or a regex),
 it must be enclosed in single quotes.
 
-!! When passing single quotes in curl they must be escaped correctly, for example the statement:
+:::note When passing single quotes in curl they must be escaped correctly, for example the statement:
 
 ```
 {
@@ -111,7 +111,7 @@ To use the regex substring search on a metadata field you must append `.regex` t
 host.regex='.*bos.*'
 ```
 
-The advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
+For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
 
 To search for empty fields (fields that are `null` or empty) use the `ISNULL` operator:
 
