@@ -112,6 +112,10 @@ export default defineConfig({
                             link: '/concepts/variant-query',
                         },
                         {
+                            label: 'Advanced query',
+                            link: '/concepts/advanced-query',
+                        },
+                        {
                             label: 'String search',
                             link: '/concepts/string-search',
                         },
