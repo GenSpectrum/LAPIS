@@ -8,8 +8,8 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.tree.ParseTreeWalker
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.springframework.stereotype.Component
@@ -17,19 +17,16 @@ import org.springframework.stereotype.Component
 @Component
 class AdvancedQueryFacade(
     val referenceGenomeSchema: ReferenceGenomeSchema,
+    val databaseConfig: DatabaseConfig,
 ) {
-    fun map(
-        advancedQuery: String,
-        allowedSequenceFilterFields: SequenceFilterFields,
-    ): SiloFilterExpression {
+    fun map(advancedQuery: String): SiloFilterExpression {
         val lexer = AdvancedQueryLexer(CharStreams.fromString(advancedQuery))
         val tokens = CommonTokenStream(lexer)
         val parser = AdvancedQueryParser(tokens)
         parser.removeErrorListeners()
         parser.addErrorListener(ThrowingAdvancedQueryErrorListener())
 
-        val listener = AdvancedQueryCustomListener(referenceGenomeSchema, allowedSequenceFilterFields)
-
+        val listener = AdvancedQueryCustomListener(referenceGenomeSchema, databaseConfig)
         val walker = ParseTreeWalker()
         walker.walk(listener, parser.start())
 

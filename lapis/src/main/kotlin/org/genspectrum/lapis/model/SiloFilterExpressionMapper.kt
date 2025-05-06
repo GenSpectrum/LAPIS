@@ -261,7 +261,7 @@ class SiloFilterExpressionMapper(
             throw BadRequestException("$ADVANCED_QUERY_FIELD must not be empty, got '$advancedQuery'")
         }
 
-        return advancedQueryFacade.map(advancedQuery, allowedSequenceFilterFields)
+        return advancedQueryFacade.map(advancedQuery)
     }
 
     private fun mapToDateBetweenFilter(
