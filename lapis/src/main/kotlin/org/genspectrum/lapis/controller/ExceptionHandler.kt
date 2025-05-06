@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
 import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.model.SiloNotImplementedError
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
@@ -67,14 +66,6 @@ class ExceptionHandler(
         log.warn(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
 
         return responseEntity(e.statusCode, e.title, e.message)
-    }
-
-    @ExceptionHandler(SiloNotImplementedError::class)
-    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
-    fun handleNotImplementedError(e: SiloNotImplementedError): ErrorResponse {
-        log.warn(e) { "Caught SiloNotImplementedError: ${e.message}" }
-
-        return responseEntity(HttpStatus.NOT_IMPLEMENTED, e.message)
     }
 
     @ExceptionHandler(SiloUnavailableException::class)
