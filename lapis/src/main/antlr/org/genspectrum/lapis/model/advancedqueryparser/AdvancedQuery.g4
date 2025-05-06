@@ -29,7 +29,6 @@ metadataQueryExpr:
   metadataQuery
   | metadataGreaterThanEqualQuery
   | metadataLessThanEqualQuery
-  | quotedMetadataQuery
   | isNullQuery
   ;
 
@@ -79,11 +78,10 @@ possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 namedInsertionQuery: insertionKeyword geneOrName ':' position ':' namedInsertionSymbol+;
 namedInsertionSymbol: possibleAmbiguousNucleotideSymbol | possiblyAmbiguousAaSymbol | '?';
 
-metadataQuery: geneOrName '=' geneOrName;
 metadataGreaterThanEqualQuery: geneOrName '>=' geneOrName;
 metadataLessThanEqualQuery: geneOrName '<=' geneOrName;
-quotedMetadataQuery: geneOrName '=' value;
-value: QUOTED_STRING;
+metadataQuery: geneOrName '=' value;
+value: geneOrName | QUOTED_STRING;
 
 dateOrNumber: digit+;
 digit: NUMBER | MINUS | DOT;

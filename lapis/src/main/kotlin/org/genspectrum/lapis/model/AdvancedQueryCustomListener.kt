@@ -210,8 +210,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
-        val metadataName = ctx.geneOrName()[0].text
-        val metadataValue = ctx.geneOrName()[1].text
+        val metadataName = ctx.geneOrName().text
+        val metadataValue = ctx.value().text.trim('\'')
 
         var name = metadataName
         if (metadataName.endsWith(".regex")) {
@@ -226,7 +226,16 @@ class AdvancedQueryCustomListener(
                 if (field.generateLineageIndex) {
                     expressionStack.addLast(mapToLineageFilter(field.name, metadataValue))
                 } else {
-                    expressionStack.addLast(StringEquals(field.name, metadataValue))
+                    if (field.lapisAllowsRegexSearch and metadataName.endsWith(".regex")) {
+                        expressionStack.addLast(StringSearch(field.name, metadataValue))
+                    } else if (metadataName.endsWith(".regex")) {
+                        throw BadRequestException(
+                            "Metadata field `${field.name}` does not support regex search.",
+                            null,
+                        )
+                    } else {
+                        expressionStack.addLast(StringEquals(field.name, metadataValue))
+                    }
                 }
             }
 
@@ -261,45 +270,6 @@ class AdvancedQueryCustomListener(
                 } catch (e: NumberFormatException) {
                     throw BadRequestException("'$metadataValue' is not a valid integer", e)
                 }
-            }
-        }
-    }
-
-    override fun enterQuotedMetadataQuery(ctx: AdvancedQueryParser.QuotedMetadataQueryContext) {
-        val metadataName = ctx.geneOrName().text
-        val metadataValue = ctx.value().text.trim('\'')
-
-        var name = metadataName
-        if (metadataName.endsWith(".regex")) {
-            name = metadataName.substringBeforeLast(".regex")
-        }
-
-        val field: DatabaseMetadata =
-            metadataFieldsByName[name.lowercase(Locale.US)]
-                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
-        when (field.type) {
-            MetadataType.STRING -> {
-                if (field.generateLineageIndex) {
-                    expressionStack.addLast(mapToLineageFilter(field.name, metadataValue))
-                } else {
-                    if (field.lapisAllowsRegexSearch and metadataName.endsWith(".regex")) {
-                        expressionStack.addLast(StringSearch(field.name, metadataValue))
-                    } else if (metadataName.endsWith(".regex")) {
-                        throw BadRequestException(
-                            "Metadata field `${field.name}` does not support regex search.",
-                            null,
-                        )
-                    } else {
-                        expressionStack.addLast(StringEquals(field.name, metadataValue))
-                    }
-                }
-            }
-
-            else -> {
-                throw BadRequestException(
-                    "Query expression for metadata field `${field.name}` of type ${field.type} was wrapped in `'`- this is only allowed for string searches and regex queries",
-                    null,
-                )
             }
         }
     }

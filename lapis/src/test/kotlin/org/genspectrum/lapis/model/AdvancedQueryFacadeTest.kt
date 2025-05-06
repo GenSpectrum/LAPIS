@@ -755,7 +755,7 @@ class AdvancedQueryFacadeTest {
         assertThat(
             exception.message,
             `is`(
-                "Query expression for metadata field `date` of type DATE was wrapped in `'`- this is only allowed for string searches and regex queries",
+                "'jn.1* thisIsInvalid' is not a valid date: Text 'jn.1* thisIsInvalid' could not be parsed at index 0",
             ),
         )
     }
