@@ -19,6 +19,7 @@ import mu.KotlinLogging
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
@@ -144,7 +145,9 @@ class VariantQueryCustomListener(
             return
         }
         val position = ctx.position().text.toInt()
-        val gene = referenceGenomeSchema.getGene(ctx.gene().text).name
+        val geneName = ctx.gene().text
+        val gene = referenceGenomeSchema.getGene(geneName)?.name
+            ?: throw BadRequestException("Unknown gene: $geneName")
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
             null -> HasAminoAcidMutation(gene, position)
@@ -156,7 +159,9 @@ class VariantQueryCustomListener(
 
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
-        val gene = referenceGenomeSchema.getGene(ctx.gene().text).name
+        val geneName = ctx.gene().text
+        val gene = referenceGenomeSchema.getGene(geneName)?.name
+            ?: throw BadRequestException("Unknown gene: $geneName")
 
         expressionStack.addLast(
             AminoAcidInsertionContains(

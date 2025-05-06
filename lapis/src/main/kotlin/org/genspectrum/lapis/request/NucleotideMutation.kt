@@ -36,7 +36,11 @@ data class NucleotideMutation(
                 )
 
             val segmentName = matchGroups["sequenceName"]?.value
-                ?.let { referenceGenomeSchema.getNucleotideSequence(it).name }
+                ?.let {
+                    referenceGenomeSchema.getNucleotideSequence(it)
+                        ?: throw BadRequestException("Unknown nucleotide sequence: $it")
+                }
+                ?.name
 
             return NucleotideMutation(
                 segmentName,

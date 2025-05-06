@@ -36,7 +36,8 @@ data class AminoAcidInsertion(
                 ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find gene",
                 )
-            val geneName = referenceGenomeSchema.getGene(gene).name
+            val geneName = referenceGenomeSchema.getGene(gene)?.name
+                ?: throw BadRequestException("Unknown gene: $gene")
 
             val insertions = matchGroups["insertions"]?.value?.replace(STOP_CODON, ESCAPED_STOP_CODON)?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
