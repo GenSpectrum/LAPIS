@@ -7,8 +7,8 @@ import AdvancedQueryParser.NOfQueryContext
 import AdvancedQueryParser.NamedInsertionQueryContext
 import AdvancedQueryParser.NotContext
 import AdvancedQueryParser.NucleotideInsertionQueryContext
-import AdvancedQueryParser.NucleotideMutationQueryContext
 import AdvancedQueryParser.OrContext
+import AdvancedQueryParser.SingleSegmentedMutationQueryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
@@ -315,13 +315,13 @@ class AdvancedQueryCustomListener(
         }
     }
 
-    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
+    override fun enterSingleSegmentedMutationQuery(ctx: SingleSegmentedMutationQueryContext?) {
         if (ctx == null) {
             return
         }
         val position = ctx.position().text.toInt()
 
-        val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
+        val expression = when (val secondSymbol = ctx.singleSegmentedMutationQuerySecondSymbol()) {
             null -> HasNucleotideMutation(null, position)
             else -> NucleotideSymbolEquals(null, position, secondSymbol.text.uppercase())
         }
