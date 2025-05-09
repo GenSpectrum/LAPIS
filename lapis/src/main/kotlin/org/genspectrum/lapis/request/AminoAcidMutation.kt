@@ -32,7 +32,8 @@ data class AminoAcidMutation(
 
             val gene = matchGroups["gene"]?.value
                 ?: throw BadRequestException("Invalid amino acid mutation: $aminoAcidMutation: Did not find gene")
-            val geneName = referenceGenomeSchema.getGene(gene).name
+            val geneName = referenceGenomeSchema.getGene(gene)?.name
+                ?: throw BadRequestException("Unknown gene: $gene")
 
             val position = matchGroups["position"]?.value?.toInt()
                 ?: throw BadRequestException(

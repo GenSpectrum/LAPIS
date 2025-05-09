@@ -41,7 +41,11 @@ data class NucleotideInsertion(
                 )
 
             val segmentName = matchGroups["segment"]?.value
-                ?.let { referenceGenomeSchema.getNucleotideSequence(it).name }
+                ?.let {
+                    referenceGenomeSchema.getNucleotideSequence(it)
+                        ?: throw BadRequestException("Unknown nucleotide sequence: $it")
+                }
+                ?.name
 
             return NucleotideInsertion(
                 position,
