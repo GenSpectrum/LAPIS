@@ -68,27 +68,27 @@ nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbo
 nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
-namedMutationQuery: geneOrName ':' mutationQueryFirstSymbol? position mutationQuerySecondSymbol?;
+namedMutationQuery: name ':' mutationQueryFirstSymbol? position mutationQuerySecondSymbol?;
 mutationQueryFirstSymbol: nucleotideSymbol | aaSymbol;
 mutationQuerySecondSymbol: nucleotideSymbol | ambiguousNucleotideSymbol | aaSymbol | ambiguousAaSymbol;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
 possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
 
-namedInsertionQuery: insertionKeyword geneOrName ':' position ':' namedInsertionSymbol+;
+namedInsertionQuery: insertionKeyword name ':' position ':' namedInsertionSymbol+;
 namedInsertionSymbol: possibleAmbiguousNucleotideSymbol | possiblyAmbiguousAaSymbol | '?';
 
-metadataGreaterThanEqualQuery: geneOrName '>=' geneOrName;
-metadataLessThanEqualQuery: geneOrName '<=' geneOrName;
-metadataQuery: geneOrName '=' value;
-value: geneOrName | QUOTED_STRING;
+metadataGreaterThanEqualQuery: name '>=' name;
+metadataLessThanEqualQuery: name '<=' name;
+metadataQuery: name '=' value;
+value: name | QUOTED_STRING;
 
 dateOrNumber: digit+;
 digit: NUMBER | MINUS | DOT;
-geneOrName: charOrNumber+;
+name: charOrNumber+;
 charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK;
 
-isNullQuery: isnull_ '(' geneOrName ')';
+isNullQuery: isnull_ '(' name ')';
 isnull_: I S N U L L ;
 
 

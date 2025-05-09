@@ -107,8 +107,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataLessThanEqualQuery(ctx: AdvancedQueryParser.MetadataLessThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName()[0].text
-        val metadataValue = ctx.geneOrName()[1].text
+        val metadataName = ctx.name()[0].text
+        val metadataValue = ctx.name()[1].text
 
         val field: DatabaseMetadata =
             metadataFieldsByName[metadataName.lowercase(Locale.US)]
@@ -146,8 +146,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataGreaterThanEqualQuery(ctx: AdvancedQueryParser.MetadataGreaterThanEqualQueryContext) {
-        val metadataName = ctx.geneOrName()[0].text
-        val metadataValue = ctx.geneOrName()[1].text
+        val metadataName = ctx.name()[0].text
+        val metadataValue = ctx.name()[1].text
 
         val field: DatabaseMetadata =
             metadataFieldsByName[metadataName.lowercase(Locale.US)]
@@ -210,7 +210,7 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
-        val metadataName = ctx.geneOrName().text
+        val metadataName = ctx.name().text
         val metadataValue = ctx.value().text.trim('\'')
 
         var name = metadataName
@@ -275,7 +275,7 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterIsNullQuery(ctx: AdvancedQueryParser.IsNullQueryContext) {
-        val metadataName = ctx.geneOrName().text
+        val metadataName = ctx.name().text
 
         var name = metadataName
         if (metadataName.endsWith(".regex")) {
@@ -440,18 +440,18 @@ class AdvancedQueryCustomListener(
         val mutatedTo = ctx.mutationQuerySecondSymbol()?.text
         val mutatedFrom = ctx.mutationQueryFirstSymbol()?.text
         val position = ctx.position().text.toInt()
-        val geneOrName = ctx.geneOrName().text
+        val name = ctx.name().text
 
         // Ensure that the geneName is a valid gene or segment
         var gene: String? = null
         var sequenceName: String? = null
         try {
-            gene = referenceGenomeSchema.getGene(geneOrName).name
+            gene = referenceGenomeSchema.getGene(name).name
         } catch (e: BadRequestException) {
             try {
-                sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+                sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
             } catch (e: BadRequestException) {
-                throw BadRequestException("$geneOrName is not a known segment or gene", null)
+                throw BadRequestException("$name is not a known segment or gene", null)
             }
         }
 
@@ -479,16 +479,16 @@ class AdvancedQueryCustomListener(
     override fun enterNamedInsertionQuery(ctx: NamedInsertionQueryContext) {
         val value = ctx.namedInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val plainString = ctx.namedInsertionSymbol().joinToString(separator = "") { it.text.uppercase() }
-        val geneOrName = ctx.geneOrName().text
+        val name = ctx.name().text
         var gene: String? = null
         var sequenceName: String? = null
         try {
-            gene = referenceGenomeSchema.getGene(geneOrName).name
+            gene = referenceGenomeSchema.getGene(name).name
         } catch (e: BadRequestException) {
             try {
-                sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+                sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
             } catch (e: BadRequestException) {
-                throw BadRequestException("$geneOrName is not a known segment or gene", null)
+                throw BadRequestException("$name is not a known segment or gene", null)
             }
         }
         if (gene != null) {
@@ -502,7 +502,7 @@ class AdvancedQueryCustomListener(
             )
         }
         if (sequenceName != null) {
-            val sequenceName = referenceGenomeSchema.getNucleotideSequence(geneOrName).name
+            val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
             plainString.forEach { isValidNucleotideSymbol(it) }
             expressionStack.addLast(
                 NucleotideInsertionContains(
