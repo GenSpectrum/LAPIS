@@ -307,6 +307,9 @@ class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
     environment: Environment,
     private val requestCompression: RequestCompression,
 ) : StringHttpMessageConverter(getCharsetFromEnvironment(environment)) {
+    // The original method is declared in Java as returning Long (can be null)
+    // but in Kotlin it is Long! (platform type) which is not nullable.
+    @Suppress("INCOMPATIBLE_OVERRIDE")
     override fun getContentLength(
         str: String,
         contentType: MediaType?,
