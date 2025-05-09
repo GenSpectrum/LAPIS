@@ -590,13 +590,17 @@ class AdvancedQueryFacadeTest {
         val description: String,
         val query: String,
         val expected: SiloFilterExpression,
-    )
+    ) {
+        override fun toString(): String = description
+    }
 
     data class InvalidTestCase(
         val description: String,
         val query: String,
         val expected: String,
-    )
+    ) {
+        override fun toString(): String = description
+    }
 
     companion object {
         @JvmStatic
@@ -626,7 +630,7 @@ class AdvancedQueryFacadeTest {
                         DateBetween("date", LocalDate.parse("2020-01-01"), null),
                     ),
                 ),
-            ).map { arrayOf(it.description, it.query, it.expected) }
+            )
 
         @JvmStatic
         fun invalidRangeQueryProvider() =
@@ -651,10 +655,10 @@ class AdvancedQueryFacadeTest {
                     "floatField>=One",
                     "'One' is not a valid float",
                 ),
-            ).map { arrayOf(it.description, it.query, it.expected) }
+            )
 
         @JvmStatic
-        fun invalidMetadataProvider() =
+        fun invalidMetadataProvider(): List<InvalidTestCase> =
             listOf(
                 InvalidTestCase(
                     "dateFrom",
@@ -686,44 +690,32 @@ class AdvancedQueryFacadeTest {
                     "floatFieldTo=1",
                     "Metadata field floatFieldTo does not exist",
                 ),
-            ).map { arrayOf(it.description, it.query, it.expected) }
+            )
     }
 
     @ParameterizedTest(name = "valid {0} with >= and <=")
     @MethodSource("validRangeQueryProvider")
-    fun `test valid advanced queries`(
-        description: String,
-        query: String,
-        expected: SiloFilterExpression,
-    ) {
-        val result = underTest.map(query)
-        assertThat(result, equalTo(expected))
+    fun `test valid advanced queries`(testCase: ValidTestCase) {
+        val result = underTest.map(testCase.query)
+        assertThat(result, equalTo(testCase.expected))
     }
 
     @ParameterizedTest(name = "invalid {0} with >= and <=")
     @MethodSource("invalidRangeQueryProvider")
-    fun `test invalid advanced queries`(
-        description: String,
-        query: String,
-        expected: String,
-    ) {
-        val exception = assertThrows<BadRequestException> { underTest.map(query) }
-        assertThat(exception.message, containsString(expected))
+    fun `test invalid advanced queries`(testCase: InvalidTestCase) {
+        val exception = assertThrows<BadRequestException> { underTest.map(testCase.query) }
+        assertThat(exception.message, containsString(testCase.expected))
     }
 
     @ParameterizedTest(name = "invalid metadata field {0}")
     @MethodSource("invalidMetadataProvider")
-    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`(
-        description: String,
-        query: String,
-        expected: String,
-    ) {
+    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`(testCase: InvalidTestCase) {
         val exception =
-            assertThrows<BadRequestException> { underTest.map(query) }
+            assertThrows<BadRequestException> { underTest.map(testCase.query) }
         assertThat(
             exception.message,
             `is`(
-                expected,
+                testCase.expected,
             ),
         )
     }
