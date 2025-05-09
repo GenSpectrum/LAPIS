@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.5](https://github.com/GenSpectrum/LAPIS/compare/v0.4.4...v0.4.5) (2025-05-09)
+
+
+### Bug Fixes
+
+* **lapis-docs:** correct invalid gene in example ([#1165](https://github.com/GenSpectrum/LAPIS/issues/1165)) ([42b79a2](https://github.com/GenSpectrum/LAPIS/commit/42b79a2548e0a68027e871d2bde03d60e7f790f0))
+* **lapis-e2e:** remove tests that rely on order without specifying lapis to sort output ([#1163](https://github.com/GenSpectrum/LAPIS/issues/1163)) ([9d30e29](https://github.com/GenSpectrum/LAPIS/commit/9d30e29fd8eaf31032ee63e5ea896d0a2a1b2f88))
+
 ## [0.4.4](https://github.com/GenSpectrum/LAPIS/compare/v0.4.3...v0.4.4) (2025-04-22)
 
 
