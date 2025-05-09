@@ -633,33 +633,28 @@ class AdvancedQueryFacadeTest {
             )
 
         @JvmStatic
-        fun invalidRangeQueryProvider() =
+        fun invalidQueryProvider() =
             listOf(
                 InvalidTestCase(
-                    "date",
+                    "date >= and <=",
                     "date<=2021.01.01",
                     "'2021.01.01' is not a valid date",
                 ),
                 InvalidTestCase(
-                    "metadata",
+                    "metadata >= and <=",
                     "some_metadata<=2021.01.01",
                     "expression <= cannot be used for field some_metadata of type STRING",
                 ),
                 InvalidTestCase(
-                    "intField",
+                    "intField >= and <=",
                     "intField>=One",
                     "'One' is not a valid int",
                 ),
                 InvalidTestCase(
-                    "floatField",
+                    "floatField >= and <=",
                     "floatField>=One",
                     "'One' is not a valid float",
                 ),
-            )
-
-        @JvmStatic
-        fun invalidMetadataProvider(): List<InvalidTestCase> =
-            listOf(
                 InvalidTestCase(
                     "dateFrom",
                     "dateFrom=2020-01-01",
@@ -690,6 +685,36 @@ class AdvancedQueryFacadeTest {
                     "floatFieldTo=1",
                     "Metadata field floatFieldTo does not exist",
                 ),
+                InvalidTestCase(
+                    "date>= with IsNull",
+                    "IsNull(dateFrom>=2020-01-01)",
+                    "Failed to parse advanced query (line 1:15): mismatched input '>=' expecting",
+                ),
+                InvalidTestCase(
+                    "date<= with IsNull",
+                    "IsNull(dateFrom<=2020-01-01)",
+                    "Failed to parse advanced query (line 1:15): mismatched input '<=' expecting",
+                ),
+                InvalidTestCase(
+                    "metadata with IsNull",
+                    "IsNull(some_metadata='country')",
+                    "Failed to parse advanced query (line 1:20): mismatched input '=' expecting",
+                ),
+                InvalidTestCase(
+                    "metadata regex with IsNull",
+                    "IsNull(some_metadata.regex='country')",
+                    "Failed to parse advanced query (line 1:26): mismatched input '=' expecting",
+                ),
+                InvalidTestCase(
+                    "intField with IsNull",
+                    "IsNull(intField>=1)",
+                    "Failed to parse advanced query (line 1:15): mismatched input '>=' expecting",
+                ),
+                InvalidTestCase(
+                    "floatField with IsNull",
+                    "IsNull(floatField>=1)",
+                    "Failed to parse advanced query (line 1:17): mismatched input '>=' expecting",
+                ),
             )
     }
 
@@ -700,42 +725,11 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(testCase.expected))
     }
 
-    @ParameterizedTest(name = "invalid {0} with >= and <=")
-    @MethodSource("invalidRangeQueryProvider")
+    @ParameterizedTest(name = "invalid query {0}")
+    @MethodSource("invalidQueryProvider")
     fun `test invalid advanced queries`(testCase: InvalidTestCase) {
         val exception = assertThrows<BadRequestException> { underTest.map(testCase.query) }
         assertThat(exception.message, containsString(testCase.expected))
-    }
-
-    @ParameterizedTest(name = "invalid metadata field {0}")
-    @MethodSource("invalidMetadataProvider")
-    fun `given a advancedQuery with xFrom or xTo field throw BadRequestException`(testCase: InvalidTestCase) {
-        val exception =
-            assertThrows<BadRequestException> { underTest.map(testCase.query) }
-        assertThat(
-            exception.message,
-            `is`(
-                testCase.expected,
-            ),
-        )
-    }
-
-    @Test
-    fun `given a advancedQuery with not allowed fields in IsNull throw BadRequestException`() {
-        val advancedQueries =
-            listOf(
-                "dateFrom=2020-01-01",
-                "dateTo=2020-01-01",
-                "intFieldFrom=1",
-                "intFieldTo=1",
-                "floatFieldFrom=1",
-                "floatFieldTo=1",
-                "metadata.regex=1",
-            )
-        for (advancedQuery in advancedQueries) {
-            val query = "IsNull(%s)".format(advancedQuery)
-            val exception = assertThrows<BadRequestException> { underTest.map(query) }
-        }
     }
 
     @Test
