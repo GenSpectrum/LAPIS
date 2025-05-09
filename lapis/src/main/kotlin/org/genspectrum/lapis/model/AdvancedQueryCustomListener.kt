@@ -134,7 +134,10 @@ class AdvancedQueryCustomListener(
             }
 
             else -> {
-                throw BadRequestException("expression <= cannot be used for ${field.type}", null)
+                throw BadRequestException(
+                    "expression <= cannot be used for field ${field.name} of type ${field.type}",
+                    null,
+                )
             }
         }
     }
@@ -173,7 +176,10 @@ class AdvancedQueryCustomListener(
             }
 
             else -> {
-                throw BadRequestException("expression >= cannot be used for ${field.type}", null)
+                throw BadRequestException(
+                    "expression >= cannot be used for field ${field.name} of type ${field.type}",
+                    null,
+                )
             }
         }
     }
