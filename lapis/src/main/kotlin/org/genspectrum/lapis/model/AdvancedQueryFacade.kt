@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class AdvancedQueryFacade(
-    val referenceGenomeSchema: ReferenceGenomeSchema,
-    val databaseConfig: DatabaseConfig,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val databaseConfig: DatabaseConfig,
 ) {
     fun map(advancedQuery: String): SiloFilterExpression {
         val lexer = AdvancedQueryLexer(CharStreams.fromString(advancedQuery))

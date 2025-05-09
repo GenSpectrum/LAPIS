@@ -47,10 +47,10 @@ private const val SOME_VALUE = "some value"
 
 class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
-    private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
-    private var advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
+    private val variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
-    private var underTest =
+    private val underTest =
         SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
 
     @Test

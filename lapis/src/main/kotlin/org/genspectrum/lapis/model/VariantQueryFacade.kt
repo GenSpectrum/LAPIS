@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class VariantQueryFacade(
-    val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
     fun map(variantQuery: String): SiloFilterExpression {
         val lexer = VariantQueryLexer(CharStreams.fromString(variantQuery))

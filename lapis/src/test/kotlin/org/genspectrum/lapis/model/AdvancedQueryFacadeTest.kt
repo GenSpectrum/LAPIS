@@ -43,7 +43,7 @@ class AdvancedQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
+    private val underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     @Test
     fun `given a complex advanced query then map should return the corresponding SiloQuery`() {
@@ -639,7 +639,7 @@ class AdvancedQueryFacadeTest {
                 InvalidTestCase(
                     "metadata",
                     "some_metadata<=2021.01.01",
-                    "expression <= cannot be used for STRING",
+                    "expression <= cannot be used for field some_metadata of type STRING",
                 ),
                 InvalidTestCase(
                     "intField",
