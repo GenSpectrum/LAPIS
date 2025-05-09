@@ -201,8 +201,3 @@ fun mapInsertionSymbol(ctx: RuleContext): String =
         LAPIS_INSERTION_AMBIGUITY_SYMBOL -> SILO_INSERTION_AMBIGUITY_SYMBOL
         else -> ctx.text
     }.uppercase()
-
-class SiloNotImplementedError(
-    message: String?,
-    cause: Throwable?,
-) : Exception(message, cause)
