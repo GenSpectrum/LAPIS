@@ -83,7 +83,7 @@ NOT host='bos taurus' AND 300G AND country=USA
 Note that if the metadata field does not only contain letters and numbers (e.g. it contains a space or a regex),
 it must be enclosed in single quotes.
 
-:::note When passing single quotes in curl they must be escaped correctly, for example the statement:
+:::note Depending on which tool you use to make curl queries the single quotes might need to be escaped. For example SwaggerUI will reformat:
 
 ```
 {
@@ -91,7 +91,7 @@ it must be enclosed in single quotes.
 }
 ```
 
-Must be formatted as:
+as:
 
 ```bash
 curl -X POST \
@@ -102,6 +102,7 @@ curl -X POST \
   "advancedQuery": "country.regex='\''Basel\{1,2\}'\''"
 }'
 ```
+:::
 
 If the metadata field contains a single quote, it must be escaped with a backslash.
 
@@ -113,7 +114,7 @@ host.regex='.*bos.*'
 
 For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
 
-To search for empty fields (fields that are `null` or empty) use the `ISNULL` operator:
+To search for empty fields (fields that are `null`) use the `ISNULL` operator:
 
 ```
 IsNull(host)
