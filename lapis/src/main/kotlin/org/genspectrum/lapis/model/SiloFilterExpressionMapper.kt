@@ -84,7 +84,7 @@ class SiloFilterExpressionMapper(
                 Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
                 Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
                 Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
-                Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values, allowedSequenceFilterFields)
+                Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
             }
         }
 
@@ -245,10 +245,7 @@ class SiloFilterExpressionMapper(
         return variantQueryFacade.map(variantQuery)
     }
 
-    private fun mapToAdvancedQueryFilter(
-        values: List<SequenceFilterValue>,
-        allowedSequenceFilterFields: SequenceFilterFields,
-    ): SiloFilterExpression {
+    private fun mapToAdvancedQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
                 "$ADVANCED_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",

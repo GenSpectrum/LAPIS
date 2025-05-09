@@ -42,44 +42,12 @@ import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
 
-val nucleotideSymbols = setOf('A', 'C', 'G', 'T')
-val ambiguousNucSymbols = setOf('M', 'R', 'W', 'S', 'Y', 'K', 'V', 'H', 'D', 'B', 'N', '-', '.', '?')
-val aaSymbols = setOf(
-    'A',
-    'R',
-    'N',
-    'D',
-    'C',
-    'E',
-    'Q',
-    'G',
-    'H',
-    'I',
-    'L',
-    'K',
-    'M',
-    'F',
-    'P',
-    'S',
-    'T',
-    'W',
-    'Y',
-    'V',
-    '*',
-)
-val ambiguousAaSymbols = setOf('X', '-', '.', '?')
-
-fun validateNucleotideSymbol(c: Char) {
-    if (c.uppercaseChar() !in ambiguousNucSymbols && c.uppercaseChar() !in nucleotideSymbols) {
-        throw BadRequestException("Invalid nucleotide symbol: $c")
-    }
-}
-
-fun validateAminoAcidSymbol(c: Char) {
-    if (c.uppercaseChar() !in ambiguousAaSymbols && c.uppercaseChar() !in aaSymbols) {
-        throw BadRequestException("Invalid amino acid symbol: $c")
-    }
-}
+fun getFieldOrThrow(
+    metadataFieldsByName: Map<String, DatabaseMetadata>,
+    metadataName: String,
+): DatabaseMetadata =
+    metadataFieldsByName[metadataName.lowercase(Locale.US)]
+        ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
 
 class AdvancedQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -104,9 +72,7 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.name()[0].text
         val metadataValue = ctx.name()[1].text
 
-        val field: DatabaseMetadata =
-            metadataFieldsByName[metadataName.lowercase(Locale.US)]
-                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, metadataName)
         when (field.type) {
             MetadataType.DATE -> {
                 try {
@@ -146,9 +112,7 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.name()[0].text
         val metadataValue = ctx.name()[1].text
 
-        val field: DatabaseMetadata =
-            metadataFieldsByName[metadataName.lowercase(Locale.US)]
-                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, metadataName)
         when (field.type) {
             MetadataType.DATE -> {
                 try {
@@ -218,9 +182,7 @@ class AdvancedQueryCustomListener(
             name = metadataName.substringBeforeLast(".regex")
         }
 
-        val field: DatabaseMetadata =
-            metadataFieldsByName[name.lowercase(Locale.US)]
-                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, name)
         when (field.type) {
             MetadataType.STRING -> {
                 if (field.generateLineageIndex) {
@@ -282,9 +244,7 @@ class AdvancedQueryCustomListener(
             name = metadataName.substringBeforeLast(".regex")
         }
 
-        val field: DatabaseMetadata =
-            metadataFieldsByName[name.lowercase(Locale.US)]
-                ?: throw BadRequestException("Metadata field $metadataName does not exist", null)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, name)
         when (field.type) {
             MetadataType.STRING -> {
                 if (field.generateLineageIndex) {
