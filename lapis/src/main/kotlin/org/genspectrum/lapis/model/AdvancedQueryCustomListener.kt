@@ -69,19 +69,13 @@ val aaSymbols = setOf(
 )
 val ambiguousAaSymbols = setOf('X', '-', '.', '?')
 
-fun isStrictNucleotideSymbol(c: Char) {
-    if (c.uppercaseChar() !in nucleotideSymbols) {
-        throw BadRequestException("Invalid nucleotide symbol: $c")
-    }
-}
-
-fun isValidNucleotideSymbol(c: Char) {
+fun validateNucleotideSymbol(c: Char) {
     if (c.uppercaseChar() !in ambiguousNucSymbols && c.uppercaseChar() !in nucleotideSymbols) {
         throw BadRequestException("Invalid nucleotide symbol: $c")
     }
 }
 
-fun isValidAminoAcidSymbol(c: Char) {
+fun validateAminoAcidSymbol(c: Char) {
     if (c.uppercaseChar() !in ambiguousAaSymbols && c.uppercaseChar() !in aaSymbols) {
         throw BadRequestException("Invalid amino acid symbol: $c")
     }
@@ -444,33 +438,34 @@ class AdvancedQueryCustomListener(
 
         // Ensure that the geneName is a valid gene or segment
         var gene: String? = null
-        var sequenceName: String? = null
-        try {
-            gene = referenceGenomeSchema.getGene(name).name
-        } catch (e: BadRequestException) {
-            try {
-                sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
-            } catch (e: BadRequestException) {
+        var segmentName: String? = null
+        when {
+            referenceGenomeSchema.hasGene(name) -> {
+                gene = referenceGenomeSchema.getGene(name).name
+            }
+            referenceGenomeSchema.hasNucleotideSequence(name) -> {
+                segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
+            }
+            else -> {
                 throw BadRequestException("$name is not a known segment or gene", null)
             }
         }
 
         if (gene != null) {
             // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
-            mutatedTo?.first()?.let { isValidAminoAcidSymbol(it) }
+            mutatedTo?.first()?.let { validateAminoAcidSymbol(it) }
             val expression = when (val aaSymbol = ctx.mutationQuerySecondSymbol()) {
                 null -> HasAminoAcidMutation(gene, position)
                 else -> AminoAcidSymbolEquals(gene, position, aaSymbol.text.uppercase())
             }
             expressionStack.addLast(expression)
         }
-        if (sequenceName != null) {
+        if (segmentName != null) {
             // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
-            mutatedTo?.first()?.let { isValidNucleotideSymbol(it) }
-            mutatedFrom?.first()?.let { isStrictNucleotideSymbol(it) }
+            mutatedTo?.first()?.let { validateNucleotideSymbol(it) }
             val expression = when (val nucSymbol = ctx.mutationQuerySecondSymbol()) {
-                null -> HasNucleotideMutation(sequenceName, position)
-                else -> NucleotideSymbolEquals(sequenceName, position, nucSymbol.text.uppercase())
+                null -> HasNucleotideMutation(segmentName, position)
+                else -> NucleotideSymbolEquals(segmentName, position, nucSymbol.text.uppercase())
             }
             expressionStack.addLast(expression)
         }
@@ -492,7 +487,7 @@ class AdvancedQueryCustomListener(
             }
         }
         if (gene != null) {
-            plainString.forEach { isValidAminoAcidSymbol(it) }
+            plainString.forEach { validateAminoAcidSymbol(it) }
             expressionStack.addLast(
                 AminoAcidInsertionContains(
                     ctx.position().text.toInt(),
@@ -503,7 +498,7 @@ class AdvancedQueryCustomListener(
         }
         if (sequenceName != null) {
             val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
-            plainString.forEach { isValidNucleotideSymbol(it) }
+            plainString.forEach { validateNucleotideSymbol(it) }
             expressionStack.addLast(
                 NucleotideInsertionContains(
                     ctx.position().text.toInt(),

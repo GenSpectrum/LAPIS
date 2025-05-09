@@ -27,9 +27,13 @@ class ReferenceGenomeSchema(
     private val geneNames: Map<LowercaseName, ReferenceSequenceSchema> = genes
         .associateBy { it.name.lowercase() }
 
+    fun hasNucleotideSequence(name: String): Boolean = nucleotideSequenceNames.containsKey(name.lowercase())
+
     fun getNucleotideSequence(name: String): ReferenceSequenceSchema =
         nucleotideSequenceNames[name.lowercase()]
             ?: throw BadRequestException("Unknown nucleotide sequence: $name")
+
+    fun hasGene(name: String): Boolean = geneNames.containsKey(name.lowercase())
 
     fun getGene(name: String): ReferenceSequenceSchema =
         geneNames[name.lowercase()]

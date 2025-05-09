@@ -115,10 +115,6 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
         val exceptionAa = assertThrows<BadRequestException> { underTest.map(aaMutation) }
         assertThat(exceptionAa.message, `is`("Invalid nucleotide symbol: P"))
-
-        val fromAaMutation = "seg1:R300G"
-        val exception = assertThrows<BadRequestException> { underTest.map(fromAaMutation) }
-        assertThat(exception.message, `is`("Invalid nucleotide symbol: R"))
     }
 
     @Test
