@@ -110,7 +110,29 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an invalid nucleotide mutation then throw error`() {
+    fun `given a advancedQuery for a nucleotide mutation without a segment for a segmented virus THEN error`() {
+        val aaMutation = "300T"
+
+        val exceptionAa = assertThrows<BadRequestException> { underTest.map(aaMutation) }
+        assertThat(
+            exceptionAa.message,
+            `is`("Reference genome is multi-segmented, you must specify segment as part of mutation query"),
+        )
+    }
+
+    @Test
+    fun `given a advancedQuery for an insertion without a segment for a segmented virus THEN error`() {
+        val aaInsertion = "ins_300:T"
+
+        val exceptionAa = assertThrows<BadRequestException> { underTest.map(aaInsertion) }
+        assertThat(
+            exceptionAa.message,
+            `is`("Reference genome is multi-segmented, you must specify segment as part of mutation query"),
+        )
+    }
+
+    @Test
+    fun `given a advancedQuery with an invalid nucleotide mutation THEN throw error`() {
         val aaMutation = "seg1:300P"
 
         val exceptionAa = assertThrows<BadRequestException> { underTest.map(aaMutation) }
@@ -118,7 +140,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an invalid amino acid mutation then throw error`() {
+    fun `given a advancedQuery with an invalid amino acid mutation THEN throw error`() {
         val nucMutation = "S:300B"
 
         val exceptionNuc = assertThrows<BadRequestException> { underTest.map(nucMutation) }
@@ -126,7 +148,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an invalid nucleotide insertion then throw error`() {
+    fun `given a advancedQuery with an invalid nucleotide insertion THEN throw error`() {
         val aaMutation = "ins_seg1:300:GP"
 
         val exceptionAa = assertThrows<BadRequestException> { underTest.map(aaMutation) }
@@ -134,7 +156,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an invalid amino acid insertion then throw error`() {
+    fun `given a advancedQuery with an invalid amino acid insertion THEN throw error`() {
         val nucMutation = "ins_S:300:GB"
 
         val exceptionNuc = assertThrows<BadRequestException> { underTest.map(nucMutation) }

@@ -279,6 +279,12 @@ class AdvancedQueryCustomListener(
         if (ctx == null) {
             return
         }
+        if (!referenceGenomeSchema.isSingleSegmented()) {
+            throw BadRequestException(
+                "Reference genome is multi-segmented, you must specify segment as part of mutation query",
+                null,
+            )
+        }
         val position = ctx.position().text.toInt()
 
         val expression = when (val secondSymbol = ctx.singleSegmentedMutationQuerySecondSymbol()) {
@@ -383,6 +389,12 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterNucleotideInsertionQuery(ctx: NucleotideInsertionQueryContext) {
+        if (!referenceGenomeSchema.isSingleSegmented()) {
+            throw BadRequestException(
+                "Reference genome is multi-segmented, you must specify segment as part of mutation query",
+                null,
+            )
+        }
         val value = ctx.nucleotideInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         expressionStack.addLast(
             NucleotideInsertionContains(
