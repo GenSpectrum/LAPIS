@@ -35,7 +35,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
+    private val underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     @Test
     fun `given a complex advanced query then map should return the corresponding SiloQuery`() {

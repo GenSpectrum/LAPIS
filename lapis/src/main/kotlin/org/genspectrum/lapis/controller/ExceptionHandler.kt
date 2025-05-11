@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
