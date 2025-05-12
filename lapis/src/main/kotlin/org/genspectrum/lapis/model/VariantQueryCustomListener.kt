@@ -55,10 +55,7 @@ class VariantQueryCustomListener(
         return expressionStack.first()
     }
 
-    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext) {
         val position = ctx.position().text.toInt()
 
         val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
@@ -73,7 +70,7 @@ class VariantQueryCustomListener(
         addPangoLineage(ctx.pangolineageWithPossibleSublineages(), PANGO_LINEAGE_COLUMN)
     }
 
-    override fun exitAnd(ctx: AndContext?) {
+    override fun exitAnd(ctx: AndContext) {
         val lastChildren = when (val last = expressionStack.removeLast()) {
             is And -> last.children
             else -> listOf(last)
@@ -87,12 +84,12 @@ class VariantQueryCustomListener(
         expressionStack.addLast(And(lastChildren + secondLastChildren))
     }
 
-    override fun exitNot(ctx: NotContext?) {
+    override fun exitNot(ctx: NotContext) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Not(child))
     }
 
-    override fun exitOr(ctx: OrContext?) {
+    override fun exitOr(ctx: OrContext) {
         val lastChildren = when (val last = expressionStack.removeLast()) {
             is Or -> last.children
             else -> listOf(last)
@@ -106,16 +103,12 @@ class VariantQueryCustomListener(
         expressionStack.addLast(Or(lastChildren + secondLastChildren))
     }
 
-    override fun exitMaybe(ctx: MaybeContext?) {
+    override fun exitMaybe(ctx: MaybeContext) {
         val child = expressionStack.removeLast()
         expressionStack.addLast(Maybe(child))
     }
 
-    override fun exitNOfQuery(ctx: NOfQueryContext?) {
-        if (ctx == null) {
-            return
-        }
-
+    override fun exitNOfQuery(ctx: NOfQueryContext) {
         val n = ctx.nOfNumberOfMatchers().text.toInt()
         val matchExactly = ctx.nOfMatchExactly() != null
         val nOfExprs = ctx.nOfExprs().expr().size
@@ -139,10 +132,7 @@ class VariantQueryCustomListener(
         )
     }
 
-    override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterAaMutationQuery(ctx: AaMutationQueryContext) {
         val position = ctx.position().text.toInt()
         val gene = referenceGenomeSchema.getGene(ctx.gene().text).name
 
