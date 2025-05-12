@@ -151,27 +151,24 @@ class AdvancedQueryCustomListener(
     private fun mapToLineageFilter(
         metadataName: String,
         metadataValue: String?,
-    ): LineageEquals {
-        val sanitizedValue = metadataValue?.removeSurrounding("'")
-
-        return when {
-            sanitizedValue.isNullOrBlank() -> throw BadRequestException(
-                "Invalid lineage: $sanitizedValue is NULL - to search for NULL values use `IsNull($metadataName)`?",
+    ): LineageEquals =
+        when {
+            metadataValue.isNullOrBlank() -> throw BadRequestException(
+                "Invalid lineage: $metadataValue is NULL - to search for NULL values use `IsNull($metadataName)`?",
             )
-            sanitizedValue.endsWith(
+            metadataValue.endsWith(
                 ".*",
-            ) -> LineageEquals(metadataName, sanitizedValue.substringBeforeLast(".*"), includeSublineages = true)
-            sanitizedValue.endsWith("*") -> LineageEquals(
+            ) -> LineageEquals(metadataName, metadataValue.substringBeforeLast(".*"), includeSublineages = true)
+            metadataValue.endsWith("*") -> LineageEquals(
                 metadataName,
-                sanitizedValue.substringBeforeLast("*"),
+                metadataValue.substringBeforeLast("*"),
                 includeSublineages = true,
             )
-            sanitizedValue.endsWith('.') -> throw BadRequestException(
-                "Invalid lineage: $sanitizedValue must not end with a dot. Did you mean '$sanitizedValue*'?",
+            metadataValue.endsWith('.') -> throw BadRequestException(
+                "Invalid lineage: $metadataValue must not end with a dot. Did you mean '$metadataValue*'?",
             )
-            else -> LineageEquals(metadataName, sanitizedValue, includeSublineages = false)
+            else -> LineageEquals(metadataName, metadataValue, includeSublineages = false)
         }
-    }
 
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
         val metadataName = ctx.name().text
@@ -203,7 +200,9 @@ class AdvancedQueryCustomListener(
 
             MetadataType.BOOLEAN -> {
                 try {
-                    expressionStack.addLast(BooleanEquals(field.name, metadataValue.toBoolean()))
+                    expressionStack.addLast(
+                        BooleanEquals(field.name, metadataValue.lowercase(Locale.US).toBooleanStrict()),
+                    )
                 } catch (e: IllegalArgumentException) {
                     throw BadRequestException("'$metadataValue' is not a valid boolean", e)
                 }
@@ -410,42 +409,34 @@ class AdvancedQueryCustomListener(
             return
         }
         val mutatedTo = ctx.mutationQuerySecondSymbol()?.text
-        val mutatedFrom = ctx.mutationQueryFirstSymbol()?.text
         val position = ctx.position().text.toInt()
         val name = ctx.name().text
 
         // Ensure that the geneName is a valid gene or segment
-        var gene: String? = null
-        var segmentName: String? = null
         when {
             referenceGenomeSchema.hasGene(name) -> {
-                gene = referenceGenomeSchema.getGene(name).name
+                val gene = referenceGenomeSchema.getGene(name).name
+                // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
+                mutatedTo?.first()?.let { validateAminoAcidSymbol(it) }
+                val expression = when (val aaSymbol = mutatedTo) {
+                    null -> HasAminoAcidMutation(gene, position)
+                    else -> AminoAcidSymbolEquals(gene, position, aaSymbol.uppercase())
+                }
+                expressionStack.addLast(expression)
             }
             referenceGenomeSchema.hasNucleotideSequence(name) -> {
-                segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
+                val segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
+                // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
+                mutatedTo?.first()?.let { validateNucleotideSymbol(it) }
+                val expression = when (val nucSymbol = mutatedTo) {
+                    null -> HasNucleotideMutation(segmentName, position)
+                    else -> NucleotideSymbolEquals(segmentName, position, nucSymbol.uppercase())
+                }
+                expressionStack.addLast(expression)
             }
             else -> {
                 throw BadRequestException("$name is not a known segment or gene", null)
             }
-        }
-
-        if (gene != null) {
-            // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
-            mutatedTo?.first()?.let { validateAminoAcidSymbol(it) }
-            val expression = when (val aaSymbol = ctx.mutationQuerySecondSymbol()) {
-                null -> HasAminoAcidMutation(gene, position)
-                else -> AminoAcidSymbolEquals(gene, position, aaSymbol.text.uppercase())
-            }
-            expressionStack.addLast(expression)
-        }
-        if (segmentName != null) {
-            // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
-            mutatedTo?.first()?.let { validateNucleotideSymbol(it) }
-            val expression = when (val nucSymbol = ctx.mutationQuerySecondSymbol()) {
-                null -> HasNucleotideMutation(segmentName, position)
-                else -> NucleotideSymbolEquals(segmentName, position, nucSymbol.text.uppercase())
-            }
-            expressionStack.addLast(expression)
         }
     }
 
@@ -453,37 +444,34 @@ class AdvancedQueryCustomListener(
         val value = ctx.namedInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val plainString = ctx.namedInsertionSymbol().joinToString(separator = "") { it.text.uppercase() }
         val name = ctx.name().text
-        var gene: String? = null
-        var sequenceName: String? = null
-        try {
-            gene = referenceGenomeSchema.getGene(name).name
-        } catch (e: BadRequestException) {
-            try {
-                sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
-            } catch (e: BadRequestException) {
+        // Ensure that the geneName is a valid gene or segment
+        when {
+            referenceGenomeSchema.hasGene(name) -> {
+                val gene = referenceGenomeSchema.getGene(name).name
+                plainString.forEach { validateAminoAcidSymbol(it) }
+                expressionStack.addLast(
+                    AminoAcidInsertionContains(
+                        ctx.position().text.toInt(),
+                        value.uppercase(),
+                        gene,
+                    ),
+                )
+            }
+            referenceGenomeSchema.hasNucleotideSequence(name) -> {
+                val segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
+                val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
+                plainString.forEach { validateNucleotideSymbol(it) }
+                expressionStack.addLast(
+                    NucleotideInsertionContains(
+                        ctx.position().text.toInt(),
+                        value.uppercase(),
+                        sequenceName,
+                    ),
+                )
+            }
+            else -> {
                 throw BadRequestException("$name is not a known segment or gene", null)
             }
-        }
-        if (gene != null) {
-            plainString.forEach { validateAminoAcidSymbol(it) }
-            expressionStack.addLast(
-                AminoAcidInsertionContains(
-                    ctx.position().text.toInt(),
-                    value.uppercase(),
-                    gene,
-                ),
-            )
-        }
-        if (sequenceName != null) {
-            val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
-            plainString.forEach { validateNucleotideSymbol(it) }
-            expressionStack.addLast(
-                NucleotideInsertionContains(
-                    ctx.position().text.toInt(),
-                    value.uppercase(),
-                    sequenceName,
-                ),
-            )
         }
     }
 }
