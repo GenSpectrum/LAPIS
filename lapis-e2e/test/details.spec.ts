@@ -262,64 +262,46 @@ key_1002052
       'MAYBE(123W)',
     ];
     const regexQueries = ['region\d', 'Basel-(Stadt|Land)', '[^a-c]', 'Basel.*', '^Z.*rich$', 'region{1,2}'];
-    for (var sequenceQuery of sequenceQueries) {
-      for (var regexQuery of regexQueries) {
-        const urlRegex = new URLSearchParams({
-          'fields': 'primaryKey',
-          'division.regex': regexQuery,
-          'orderBy': 'primaryKey',
-          'dataFormat': 'csv',
-        });
+    for (const sequenceQuery of sequenceQueries) {
+      for (const regexQuery of regexQueries) {
+        const resultRegex = await lapisClient.postDetails({  
+          detailsPostRequest: {  
+            'fields': ['primaryKey'],  
+            'division.regex': regexQuery,  
+            'orderBy': ['primaryKey'],  
+          },  
+        });  
+        const resultVariant = await lapisClient.postDetails({  
+          detailsPostRequest: {  
+            fields: ['primaryKey'],  
+            variantQuery: sequenceQuery,  
+            orderBy: ['primaryKey'],  
+          },  
+        });  
 
-        const urlVariant = new URLSearchParams({
-          fields: 'primaryKey',
-          variantQuery: sequenceQuery,
-          orderBy: 'primaryKey',
-          dataFormat: 'csv',
-        });
-
-        const resultRegex = await fetch(basePath + '/sample/details?' + urlRegex.toString());
-        const resultVariant = await fetch(basePath + '/sample/details?' + urlVariant.toString());
-
-        expect(resultRegex.status).to.be.equal(200);
-        expect(resultVariant.status).to.be.equal(200);
-
-        const resultRegexText = await resultRegex.text();
-        const resultVariantText = await resultVariant.text();
-        const setRegex = new Set(resultRegexText.split('\n').filter(Boolean));
-        const setVariant = new Set(resultVariantText.split('\n').filter(Boolean));
+        const setRegex = new Set(resultRegex.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
+        const setVariant = new Set(resultVariant.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
 
         const advancedQueryIntersection = `division.regex='${regexQuery}' AND ${sequenceQuery}`;
         const advancedQueryUnion = `division.regex='${regexQuery}' OR ${sequenceQuery}`;
 
-        const urlParamsAdvancedIntersection = new URLSearchParams({
-          fields: 'primaryKey',
-          advancedQuery: advancedQueryIntersection,
-          orderBy: 'primaryKey',
-          dataFormat: 'csv',
-        });
-
-        const urlParamsAdvancedUnion = new URLSearchParams({
-          fields: 'primaryKey',
-          advancedQuery: advancedQueryUnion,
-          orderBy: 'primaryKey',
-          dataFormat: 'csv',
-        });
-
-        const resultAdvancedIntersection = await fetch(
-          basePath + '/sample/details?' + urlParamsAdvancedIntersection.toString()
-        );
-        const resultAdvancedUnion = await fetch(
-          basePath + '/sample/details?' + urlParamsAdvancedUnion.toString()
-        );
-
-        expect(resultAdvancedIntersection.status).to.be.equal(200);
-        expect(resultAdvancedUnion.status).to.be.equal(200);
-
-        const resultIntersectionText = await resultAdvancedIntersection.text();
-        const resultUnionText = await resultAdvancedUnion.text();
-        const setIntersection = new Set(resultIntersectionText.split('\n').filter(Boolean));
-        const setUnion = new Set(resultUnionText.split('\n').filter(Boolean));
+        const resultIntersection = await lapisClient.postDetails({  
+          detailsPostRequest: {  
+            'fields': ['primaryKey'],  
+            'advancedQuery': advancedQueryIntersection,  
+            'orderBy': ['primaryKey'],  
+          },  
+        });  
+        const resultUnion = await lapisClient.postDetails({  
+          detailsPostRequest: {  
+            fields: ['primaryKey'],  
+            advancedQuery: advancedQueryUnion,  
+            orderBy: ['primaryKey'],  
+          },  
+        }); 
+        
+        const setIntersection = new Set(resultIntersection.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
+        const setUnion = new Set(resultUnion.data.map((entry: { primaryKey: string; }) => entry.primaryKey)); 
 
         expect(setsAreEqual(setRegex.union(setVariant), setUnion)).to.be.true;
         expect(setsAreEqual(setRegex.intersection(setVariant), setIntersection)).to.be.true;

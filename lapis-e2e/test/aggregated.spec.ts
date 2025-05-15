@@ -72,7 +72,7 @@ describe('The /aggregated endpoint', () => {
 
   it('advancedQuery correctly handle multiple mutation requests in GET requests', async () => {
     const urlParams = new URLSearchParams({
-      advancedQuery: 'T1- AND A23062T AND S:501Y AND ORF1b:12 AND country="Switzerland"',
+      advancedQuery: 'T1- AND A23062T AND S:501Y AND ORF1b:12 AND country=Switzerland',
     });
 
     const result = await getAggregated(urlParams);
@@ -96,7 +96,7 @@ describe('The /aggregated endpoint', () => {
 
   it('advancedQuery correctly handle nucleotide insertion requests in GET requests', async () => {
     const urlParams = new URLSearchParams({
-      advancedQuery: 'ins_25701:CC? AND ins_5959:?AT AND country="Switzerland"',
+      advancedQuery: 'ins_25701:CC? AND ins_5959:?AT AND country=Switzerland',
     });
 
     const result = await getAggregated(urlParams);
