@@ -8,6 +8,7 @@ import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.BooleanEquals
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.FloatBetween
 import org.genspectrum.lapis.silo.FloatEquals
@@ -602,8 +603,13 @@ class AdvancedQueryFacadeTest {
 
     companion object {
         @JvmStatic
-        fun validRangeQueryProvider() =
+        fun validQueryProvider() =
             listOf(
+                ValidTestCase(
+                    "boolean with = true",
+                    "test_boolean_column=true",
+                    BooleanEquals("test_boolean_column", true),
+                ),
                 ValidTestCase(
                     "intField with = ",
                     "intField=1",
@@ -756,7 +762,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @ParameterizedTest(name = "valid query: {0}")
-    @MethodSource("validRangeQueryProvider")
+    @MethodSource("validQueryProvider")
     fun `test valid advanced queries`(testCase: ValidTestCase) {
         val result = underTest.map(testCase.query)
         assertThat(result, equalTo(testCase.expected))

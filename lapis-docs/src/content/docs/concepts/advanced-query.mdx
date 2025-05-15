@@ -7,15 +7,19 @@ import { OnlyIf } from '../../../components/OnlyIf.tsx';
 import { hasFeature } from '../../../config.ts';
 
 {/* prettier-ignore */}
-<OnlyIf condition={hasFeature('generalizedAdvancedQuery')}>
+<OnlyIf condition={!hasFeature('generalizedAdvancedQuery')}>
 :::note
 This feature is not enabled for this LAPIS instance.
 It must be enabled in the `features` section of the database configuration by the maintainer of the instance.
 :::
 </OnlyIf>
 
-For those readers familiar with cov-spectrum's [variant query](../concepts/variant-query) feature advanced queries can be
+For those readers familiar with the [variant query](../concepts/variant-query) feature advanced queries can be
 seen a superset of variant queries, in which not only variant information can be queried but also metadata information.
+
+Advanced queries should allow an arbitrary combination of filters. Standard LAPIS filters take the form
+`filter1 AND filter2 AND ... filterN` but they cannot query for more custom cases such as `filter1 OR (filter2 AND NOT filter3)`,
+the advanced queries feature allows such combinations and the creation of more custom queries.
 
 Advanced queries can be used to filter sequences and metadata and can be passed to the server through the query parameter
 `advancedQuery`. Don't forget to encode/escape the query correctly (in JavaScript, this can be done with the
@@ -30,60 +34,54 @@ The respective
 [unit test](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/src/test/kotlin/org/genspectrum/lapis/model/AdvancedQueryFacadeTest.kt)
 provides a full list of possible atomic queries.
 
-The query language understands Boolean logic. Expressions can be connected with `&` (and), `|` (or) and `!` (not).
-Both `&` and `AND` are recognized as `and`, `|` and `OR` are recognized as `or`, and `!` and `NOT` are recognized as `not`.
-Parentheses `(` and `)` can be used to define the order of the operations. Further, there is a special syntax to match
-sequences for which at least or exactly `n` out of a list of expressions are fulfilled. For variants we additionally add
-the `MAYBE` operator to query [ambiguous nucleotide symbols](../concepts/ambiguous-symbols).
+## Features
 
-For metadata fields we also add custom queries to allow for regex substring search, is null queries (to search for fields
-which are empty or `null`) as well as range queries for dates and numbers.
+### Variant Queries
 
-## Examples
+We support mutation and insertion queries for both nucleotide and amino acid sequences, see the [mutation filter](../concepts/mutation-filters)
+page for more details. Note the addition of the `MAYBE` operator to query [ambiguous nucleotide symbols](../concepts/ambiguous-symbols).
 
-Get the sequences with the nucleotide mutation 300G, without a deletion at position 400 and either the AA change S:123T
-or the AA change S:234A:
+### Metadata Queries
+
+Standard metadata queries take the form `metadataField=query`, for example
 
 ```
-300G & !400- & (S:123T | S:234A)
+country=Ghana
 ```
 
-This can also be written as
+Note that if the metadata field does not only contain letters and numbers it must be enclosed in single quotes, for example
 
 ```
-300G AND NOT 400- AND (S:123T OR S:234A)
+country='United States of America'
 ```
 
-Get the sequences with at least 3 out of five mutations/deletions:
+To search for empty fields (fields that are `null`) use the `ISNULL` operator:
 
 ```
-[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]
+IsNull(host)
 ```
 
-Get the sequences that fulfill exactly 2 out of 4 conditions:
+For dates and numbers (int or float) we allow queries for ranges, using the `>=` and `<=` operators, for example:
 
 ```
-[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]
+date>=2021-01-01
 ```
 
-Get sequences that might have the mutation 123W (this includes ambiguous symbols and `N`):
-
 ```
-MAYBE(123W)
+date<=2021-12-31
 ```
 
-We can also add metadata queries to the advanced query.
-
-For example, to get all sequences from the USA that do not have cows as a host and that also have the mutation 300G:
+For string fields we also allow regex search. To use the regex substring search on a metadata field you must append `.regex` to the end of the metadata field name
+and enclose the query in single quotes:
 
 ```
-NOT host='bos taurus' AND 300G AND country=USA
+host.regex='.*bos.*'
 ```
 
-Note that if the metadata field does not only contain letters and numbers (e.g. it contains a space or a regex),
-it must be enclosed in single quotes.
+For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
 
-:::note Depending on which tool you use to make curl queries the single quotes might need to be escaped. For example SwaggerUI will reformat:
+:::note
+Depending on which tool you use to make curl queries the single quotes might need to be escaped. For example SwaggerUI will reformat:
 
 ```
 {
@@ -105,36 +103,43 @@ curl -X POST \
 
 :::
 
-If the metadata field contains a single quote, it must be escaped with a backslash.
+### Boolean operators
 
-To use the regex substring search on a metadata field you must append `.regex` to the end of the metadata field name:
+The query language understands Boolean logic. Expressions can be connected with `&` (and), `|` (or) and `!` (not).
+Both `&` and `AND` are recognized as `and`, `|` and `OR` are recognized as `or`, and `!` and `NOT` are recognized as `not`.
+Parentheses `(` and `)` can be used to define the order of the operations.
 
-```
-host.regex='.*bos.*'
-```
+We also add a custom syntax `N-of` and `exactly-N-of` to match sequences for which at least or exactly `N` out of a list of expressions are fulfilled.
 
-For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
+## Examples
 
-To search for empty fields (fields that are `null`) use the `ISNULL` operator:
+- Get the sequences with the nucleotide mutation 300G, without a deletion at position 400 and either the AA change S:123T
+  or the AA change S:234A:
 
-```
-IsNull(host)
-```
+    ```
+    300G & !400- & (S:123T | S:234A)
+    ```
 
-For dates and numbers (int or float) we allow queries for ranges, using the `>=` and `<=` operators:
+    This can also be written as
 
-```
-date>=2021-01-01 AND date<=2021-12-31
-```
+    ```
+    300G AND NOT 400- AND (S:123T OR S:234A)
+    ```
 
-Of course
+- Get all sequences from the USA that do not have cows as a host and that also have the mutation 300G:
 
-```
-date=2021-01-01
-```
+    ```
+    NOT host='bos taurus' AND 300G AND country=USA
+    ```
 
-can still be used which is equivalent to
+- Get the sequences with at least 3 out of five mutations/deletions:
 
-```
-dateFrom>=2021-01-01 AND dateTo<=2021-01-01
-```
+    ```
+    [3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]
+    ```
+
+- Get the sequences that fulfill exactly 2 out of 4 conditions:
+
+    ```
+    [exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]
+    ```
