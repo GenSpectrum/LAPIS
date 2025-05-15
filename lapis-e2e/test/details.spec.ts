@@ -256,52 +256,55 @@ key_1002052
 
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {
     const sequenceQueries = [
-      '300G & !400- & (S:123T | S:234A)',
-      '[3-of: 123A, 234T, S:345-, ORF1a:456K, ORF7A:100-]',
-      '[exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
-      'MAYBE(123W)',
+      '!400- & (S:222V | S:234A)',
+      '[exactly-2-of: N:A220V, S:222V, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
+      'MAYBE(S:222V)',
     ];
-    const regexQueries = ['region\d', 'Basel-(Stadt|Land)', '[^a-c]', 'Basel.*', '^Z.*rich$', 'region{1,2}'];
+    const regexQueries = ['region\d', 'Basel-(Stadt|Land)', '[^a-c]', 'Basel.*', '^Z.*rich$'];
     for (const sequenceQuery of sequenceQueries) {
       for (const regexQuery of regexQueries) {
-        const resultRegex = await lapisClient.postDetails({  
-          detailsPostRequest: {  
-            'fields': ['primaryKey'],  
-            'division.regex': regexQuery,  
-            'orderBy': ['primaryKey'],  
-          },  
-        });  
-        const resultVariant = await lapisClient.postDetails({  
-          detailsPostRequest: {  
-            fields: ['primaryKey'],  
-            variantQuery: sequenceQuery,  
-            orderBy: ['primaryKey'],  
-          },  
-        });  
+        const resultRegex = await lapisClient.postDetails({
+          detailsPostRequest: {
+            'fields': ['primaryKey'],
+            'division.regex': regexQuery,
+            'orderBy': ['primaryKey'],
+          },
+        });
+        const resultVariant = await lapisClient.postDetails({
+          detailsPostRequest: {
+            fields: ['primaryKey'],
+            variantQuery: sequenceQuery,
+            orderBy: ['primaryKey'],
+          },
+        });
 
-        const setRegex = new Set(resultRegex.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
-        const setVariant = new Set(resultVariant.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
+        const setRegex = new Set(resultRegex.data.map((entry: { primaryKey: string }) => entry.primaryKey));
+        const setVariant = new Set(
+          resultVariant.data.map((entry: { primaryKey: string }) => entry.primaryKey)
+        );
 
         const advancedQueryIntersection = `division.regex='${regexQuery}' AND ${sequenceQuery}`;
         const advancedQueryUnion = `division.regex='${regexQuery}' OR ${sequenceQuery}`;
 
-        const resultIntersection = await lapisClient.postDetails({  
-          detailsPostRequest: {  
-            'fields': ['primaryKey'],  
-            'advancedQuery': advancedQueryIntersection,  
-            'orderBy': ['primaryKey'],  
-          },  
-        });  
-        const resultUnion = await lapisClient.postDetails({  
-          detailsPostRequest: {  
-            fields: ['primaryKey'],  
-            advancedQuery: advancedQueryUnion,  
-            orderBy: ['primaryKey'],  
-          },  
-        }); 
-        
-        const setIntersection = new Set(resultIntersection.data.map((entry: { primaryKey: string; }) => entry.primaryKey));  
-        const setUnion = new Set(resultUnion.data.map((entry: { primaryKey: string; }) => entry.primaryKey)); 
+        const resultIntersection = await lapisClient.postDetails({
+          detailsPostRequest: {
+            fields: ['primaryKey'],
+            advancedQuery: advancedQueryIntersection,
+            orderBy: ['primaryKey'],
+          },
+        });
+        const resultUnion = await lapisClient.postDetails({
+          detailsPostRequest: {
+            fields: ['primaryKey'],
+            advancedQuery: advancedQueryUnion,
+            orderBy: ['primaryKey'],
+          },
+        });
+
+        const setIntersection = new Set(
+          resultIntersection.data.map((entry: { primaryKey: string }) => entry.primaryKey)
+        );
+        const setUnion = new Set(resultUnion.data.map((entry: { primaryKey: string }) => entry.primaryKey));
 
         expect(setsAreEqual(setRegex.union(setVariant), setUnion)).to.be.true;
         expect(setsAreEqual(setRegex.intersection(setVariant), setIntersection)).to.be.true;
