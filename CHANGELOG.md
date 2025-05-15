@@ -3,9 +3,6 @@
 ## [0.4.5](https://github.com/GenSpectrum/LAPIS/compare/v0.4.4...v0.4.5) (2025-05-15)
 
 
-### Features
-
-* **lapis:** ignore false-positive compiler warning and add comment ([#1174](https://github.com/GenSpectrum/LAPIS/issues/1174)) ([6c61a48](https://github.com/GenSpectrum/LAPIS/commit/6c61a4880c5b2025d0f1edaae451fb3ac990bd6b))
 
 
 ### Bug Fixes
