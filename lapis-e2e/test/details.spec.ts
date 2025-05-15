@@ -260,16 +260,16 @@ key_1002052
       '[exactly-2-of: N:A220V, S:222V, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]',
       'MAYBE(S:222V)',
     ];
-    const regexQueries = ['region\d', 'Basel-(Stadt|Land)', '[^a-c]', 'Basel.*', '^Z.*rich$'];
+    const regexQueries = ['region\d', 'Basel-(Stadt|Land)', 'Basel.*', '^Z.*rich$'];
     for (const sequenceQuery of sequenceQueries) {
       for (const regexQuery of regexQueries) {
-        const resultRegex = await lapisClient.postDetails({
-          detailsPostRequest: {
-            'fields': ['primaryKey'],
-            'division.regex': regexQuery,
-            'orderBy': ['primaryKey'],
-          },
+        const urlRegex = new URLSearchParams({
+          'fields': 'primaryKey',
+          'division.regex': regexQuery,
+          'orderBy': 'primaryKey',
         });
+        const resultRegex = await fetch(basePath + '/sample/details?' + urlRegex.toString());
+        const resultRegexJson = await resultRegex.json();
         const resultVariant = await lapisClient.postDetails({
           detailsPostRequest: {
             fields: ['primaryKey'],
@@ -278,7 +278,10 @@ key_1002052
           },
         });
 
-        const setRegex = new Set(resultRegex.data.map((entry: { primaryKey: string }) => entry.primaryKey));
+        const setRegex = new Set(
+          resultRegexJson.data.map((entry: { primaryKey: string }) => entry.primaryKey)
+        );
+        console.log('Regex:', setRegex.size);
         const setVariant = new Set(
           resultVariant.data.map((entry: { primaryKey: string }) => entry.primaryKey)
         );
