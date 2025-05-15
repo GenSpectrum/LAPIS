@@ -41,6 +41,7 @@ variantExpr:
   | maybe_ '(' variantExpr ')' # VariantMaybe
   ;
 
+// Maybe queries should only be used in the context of variant queries
 maybeQuery:
   maybe_ '(' variantExpr ')'
   ;
