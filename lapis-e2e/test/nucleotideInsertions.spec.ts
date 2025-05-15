@@ -61,6 +61,17 @@ describe('The /nucleotideInsertions endpoint', () => {
   });
 
   it('advancedQuery can filter out unwanted insertions', async () => {
+    const preFilterUrlParams = new URLSearchParams({
+      advancedQuery: "country='Switzerland'",
+    });
+
+    const preFilterResult = await getNucleotideInsertions(preFilterUrlParams);
+    expect(preFilterResult.status).equals(200);
+    const preFilterResultJson = await preFilterResult.json();
+    const tatInsertion = preFilterResultJson.data.find((entry: any) => entry.insertion === 'ins_5959:TAT');
+    expect(tatInsertion).to.not.be.undefined;
+    expect(tatInsertion.count).to.equal(2);
+
     const urlParams = new URLSearchParams({
       advancedQuery: "NOT ins_5959:TAT AND country='Switzerland'",
     });
@@ -69,6 +80,8 @@ describe('The /nucleotideInsertions endpoint', () => {
     expect(result.status).equals(200);
     const resultJson = await result.json();
     expect(resultJson.data).to.have.length(3);
+    const hasFilteredInsertion = resultJson.data.some((entry: any) => entry.insertion === 'ins_5959:TAT');
+    expect(hasFilteredInsertion).to.be.false;
   });
 
   it('should apply limit and offset', async () => {

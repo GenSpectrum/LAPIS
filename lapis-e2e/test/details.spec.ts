@@ -281,7 +281,6 @@ key_1002052
         const setRegex = new Set(
           resultRegexJson.data.map((entry: { primaryKey: string }) => entry.primaryKey)
         );
-        console.log('Regex:', setRegex.size);
         const setVariant = new Set(
           resultVariant.data.map((entry: { primaryKey: string }) => entry.primaryKey)
         );
