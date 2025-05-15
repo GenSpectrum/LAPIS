@@ -84,9 +84,4 @@ The feature object permits the following fields:
 | name | string | true     | The name of the feature. |
 
 Currently, we support the `sarsCoV2VariantQuery` as well as the `generalizedAdvancedQuery` feature.
-The `sarsCoV2VariantQuery` is a specialized query language for SARS-CoV-2 instances, while the `generalizedAdvancedQuery` feature can be used for all instances.
-
-<OnlyIf condition={hasFeature('sarsCoV2VariantQuery')}>See [variant queries](../../concepts/variant-query).</OnlyIf>
-<OnlyIf condition={hasFeature('generalizedAdvancedQuery')}>
-    See [advanced queries](../../concepts/advanced-query).
-</OnlyIf>
+The `sarsCoV2VariantQuery` is a specialized query language for SARS-CoV-2 instances (see [variant queries](../../concepts/variant-query)), while the `generalizedAdvancedQuery` feature can be used for all instances (see [advanced queries](../../concepts/advanced-query)).
