@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.5](https://github.com/GenSpectrum/LAPIS/compare/v0.4.4...v0.4.5) (2025-05-15)
+
+
+### Features
+
+* **lapis:** ignore false-positive compiler warning and add comment ([#1174](https://github.com/GenSpectrum/LAPIS/issues/1174)) ([6c61a48](https://github.com/GenSpectrum/LAPIS/commit/6c61a4880c5b2025d0f1edaae451fb3ac990bd6b))
+
+
+### Bug Fixes
+
+* **lapis-docs:** correct invalid gene in example ([#1165](https://github.com/GenSpectrum/LAPIS/issues/1165)) ([42b79a2](https://github.com/GenSpectrum/LAPIS/commit/42b79a2548e0a68027e871d2bde03d60e7f790f0))
+* **lapis-docs:** fix condition when to show the "variant queries are not available" banner ([#1186](https://github.com/GenSpectrum/LAPIS/issues/1186)) ([6fe60fe](https://github.com/GenSpectrum/LAPIS/commit/6fe60fe9f7bcb943d5d5e35cb8448ddebe93e1f5))
+* **lapis-e2e:** remove tests that rely on order without specifying lapis to sort output ([#1163](https://github.com/GenSpectrum/LAPIS/issues/1163)) ([9d30e29](https://github.com/GenSpectrum/LAPIS/commit/9d30e29fd8eaf31032ee63e5ea896d0a2a1b2f88))
+
 ## [0.4.4](https://github.com/GenSpectrum/LAPIS/compare/v0.4.3...v0.4.4) (2025-04-22)
 
 
