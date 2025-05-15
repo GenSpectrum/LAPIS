@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.5](https://github.com/GenSpectrum/LAPIS/compare/v0.4.4...v0.4.5) (2025-05-15)
+
+
+
+
+### Bug Fixes
+
+* **lapis-docs:** correct invalid gene in example ([#1165](https://github.com/GenSpectrum/LAPIS/issues/1165)) ([42b79a2](https://github.com/GenSpectrum/LAPIS/commit/42b79a2548e0a68027e871d2bde03d60e7f790f0))
+* **lapis-docs:** fix condition when to show the "variant queries are not available" banner ([#1186](https://github.com/GenSpectrum/LAPIS/issues/1186)) ([6fe60fe](https://github.com/GenSpectrum/LAPIS/commit/6fe60fe9f7bcb943d5d5e35cb8448ddebe93e1f5))
+
 ## [0.4.4](https://github.com/GenSpectrum/LAPIS/compare/v0.4.3...v0.4.4) (2025-04-22)
 
 
