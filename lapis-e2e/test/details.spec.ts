@@ -306,7 +306,18 @@ key_1002052
         );
         const setUnion = new Set(resultUnion.data.map((entry: { primaryKey: string }) => entry.primaryKey));
 
+        if (!setsAreEqual(setRegex.union(setVariant), setUnion)) {
+          console.error('Union mismatch');
+          console.log('Actual:', Array.from(setRegex.union(setVariant)));
+          console.log('Expected:', Array.from(setUnion));
+        }
         expect(setsAreEqual(setRegex.union(setVariant), setUnion)).to.be.true;
+
+        if (!setsAreEqual(setRegex.intersection(setVariant), setIntersection)) {
+          console.error('Intersection mismatch');
+          console.log('Actual:', Array.from(setRegex.intersection(setVariant)));
+          console.log('Expected:', Array.from(setIntersection));
+        }
         expect(setsAreEqual(setRegex.intersection(setVariant), setIntersection)).to.be.true;
       }
     }
