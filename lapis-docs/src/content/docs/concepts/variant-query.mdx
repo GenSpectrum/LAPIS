@@ -7,7 +7,7 @@ import { OnlyIf } from '../../../components/OnlyIf.tsx';
 import { hasFeature } from '../../../config.ts';
 
 {/* prettier-ignore */}
-<OnlyIf condition={hasFeature('sarsCoV2VariantQuery')}>
+<OnlyIf condition={!hasFeature('sarsCoV2VariantQuery')}>
 :::note
 This feature is not enabled for this LAPIS instance.
 It must be enabled in the `features` section of the database configuration by the maintainer of the instance.
