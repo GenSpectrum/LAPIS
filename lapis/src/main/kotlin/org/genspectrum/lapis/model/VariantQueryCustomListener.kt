@@ -53,10 +53,7 @@ class VariantQueryCustomListener(
         return expressionStack.first()
     }
 
-    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterNucleotideMutationQuery(ctx: NucleotideMutationQueryContext) {
         val position = ctx.position().text.toInt()
 
         val expression = when (val secondSymbol = ctx.nucleotideMutationQuerySecondSymbol()) {
@@ -133,14 +130,10 @@ class VariantQueryCustomListener(
         )
     }
 
-    override fun enterAaMutationQuery(ctx: AaMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterAaMutationQuery(ctx: AaMutationQueryContext) {
         val position = ctx.position().text.toInt()
         val geneName = ctx.gene().text
-        val gene = referenceGenomeSchema.getGene(geneName)?.name
-            ?: throw BadRequestException("Unknown gene: $geneName")
+        val gene = referenceGenomeSchema.getGene(geneName).name
 
         val expression = when (val aaSymbol = ctx.possiblyAmbiguousAaSymbol()) {
             null -> HasAminoAcidMutation(gene, position)
@@ -153,8 +146,7 @@ class VariantQueryCustomListener(
     override fun enterAaInsertionQuery(ctx: AaInsertionQueryContext) {
         val value = ctx.aaInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val geneName = ctx.gene().text
-        val gene = referenceGenomeSchema.getGene(geneName)?.name
-            ?: throw BadRequestException("Unknown gene: $geneName")
+        val gene = referenceGenomeSchema.getGene(geneName).name
 
         expressionStack.addLast(
             AminoAcidInsertionContains(

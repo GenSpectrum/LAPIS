@@ -3,6 +3,7 @@ package org.genspectrum.lapis.config
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.controller.BadRequestException
 import java.io.File
 
 const val REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX = "referenceGenome.segments"

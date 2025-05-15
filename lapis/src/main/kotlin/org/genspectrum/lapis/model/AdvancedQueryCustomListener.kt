@@ -274,10 +274,7 @@ class AdvancedQueryCustomListener(
         }
     }
 
-    override fun enterSingleSegmentedMutationQuery(ctx: SingleSegmentedMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterSingleSegmentedMutationQuery(ctx: SingleSegmentedMutationQueryContext) {
         if (!referenceGenomeSchema.isSingleSegmented()) {
             throw BadRequestException(
                 "Reference genome is multi-segmented, you must specify segment as part of mutation query",
@@ -372,11 +369,7 @@ class AdvancedQueryCustomListener(
         expressionStack.addLast(Maybe(child))
     }
 
-    override fun exitNOfQuery(ctx: NOfQueryContext?) {
-        if (ctx == null) {
-            return
-        }
-
+    override fun exitNOfQuery(ctx: NOfQueryContext) {
         val n = ctx.nOfNumberOfMatchers().text.toInt()
         val matchExactly = ctx.nOfMatchExactly() != null
         val nOfExprs = ctx.nOfExprs().expr().size
@@ -406,10 +399,7 @@ class AdvancedQueryCustomListener(
         )
     }
 
-    override fun enterNamedMutationQuery(ctx: AdvancedQueryParser.NamedMutationQueryContext?) {
-        if (ctx == null) {
-            return
-        }
+    override fun enterNamedMutationQuery(ctx: AdvancedQueryParser.NamedMutationQueryContext) {
         val mutatedTo = ctx.mutationQuerySecondSymbol()?.text
         val position = ctx.position().text.toInt()
         val name = ctx.name().text
