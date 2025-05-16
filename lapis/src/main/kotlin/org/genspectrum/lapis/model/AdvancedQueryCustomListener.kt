@@ -398,10 +398,8 @@ class AdvancedQueryCustomListener(
         val position = ctx.position().text.toInt()
         val name = ctx.name().text
 
-        // Ensure that the geneName is a valid gene or segment
-        when {
-            referenceGenomeSchema.hasGene(name) -> {
-                val gene = referenceGenomeSchema.getGene(name).name
+        when (val gene = referenceGenomeSchema.getGene(name)?.name) {
+            is String -> {
                 // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
                 mutatedTo?.first()?.let { validateAminoAcidSymbol(it) }
                 val expression = when (val aaSymbol = mutatedTo) {
@@ -409,10 +407,12 @@ class AdvancedQueryCustomListener(
                     else -> AminoAcidSymbolEquals(gene, position, aaSymbol.uppercase())
                 }
                 expressionStack.addLast(expression)
+                return
             }
+        }
 
-            referenceGenomeSchema.hasNucleotideSequence(name) -> {
-                val segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
+        when (val segmentName = referenceGenomeSchema.getNucleotideSequence(name)?.name) {
+            is String -> {
                 // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
                 mutatedTo?.first()?.let { validateNucleotideSymbol(it) }
                 val expression = when (val nucSymbol = mutatedTo) {
@@ -420,22 +420,20 @@ class AdvancedQueryCustomListener(
                     else -> NucleotideSymbolEquals(segmentName, position, nucSymbol.uppercase())
                 }
                 expressionStack.addLast(expression)
-            }
-
-            else -> {
-                throw BadRequestException("$name is not a known segment or gene", null)
+                return
             }
         }
+
+        throw BadRequestException("$name is not a known segment or gene", null)
     }
 
     override fun enterNamedInsertionQuery(ctx: NamedInsertionQueryContext) {
         val value = ctx.namedInsertionSymbol().joinToString("", transform = ::mapInsertionSymbol)
         val plainString = ctx.namedInsertionSymbol().joinToString(separator = "") { it.text.uppercase() }
         val name = ctx.name().text
-        // Ensure that the geneName is a valid gene or segment
-        when {
-            referenceGenomeSchema.hasGene(name) -> {
-                val gene = referenceGenomeSchema.getGene(name).name
+
+        when (val gene = referenceGenomeSchema.getGene(name)?.name) {
+            is String -> {
                 plainString.forEach { validateAminoAcidSymbol(it) }
                 expressionStack.addLast(
                     AminoAcidInsertionContains(
@@ -444,10 +442,12 @@ class AdvancedQueryCustomListener(
                         gene,
                     ),
                 )
+                return
             }
+        }
 
-            referenceGenomeSchema.hasNucleotideSequence(name) -> {
-                val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
+        when (val sequenceName = referenceGenomeSchema.getNucleotideSequence(name)?.name) {
+            is String -> {
                 plainString.forEach { validateNucleotideSymbol(it) }
                 expressionStack.addLast(
                     NucleotideInsertionContains(
@@ -456,11 +456,10 @@ class AdvancedQueryCustomListener(
                         sequenceName,
                     ),
                 )
-            }
-
-            else -> {
-                throw BadRequestException("$name is not a known segment or gene", null)
+                return
             }
         }
+
+        throw BadRequestException("$name is not a known segment or gene", null)
     }
 }
