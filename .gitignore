@@ -1,5 +1,5 @@
 # Editors
-.idea/*
+**/.idea/*
 !.idea/runConfigurations
 *.iml
 
@@ -9,5 +9,8 @@ bin/
 
 log/
 logs/
+
+# ANTLR generated files
+antlr-gen/
 
 **/node_modules/

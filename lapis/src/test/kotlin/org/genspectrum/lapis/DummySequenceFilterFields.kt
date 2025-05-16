@@ -26,6 +26,7 @@ val dummySequenceFilterFields = SequenceFilterFields(
         "some_metadata.regex" to SequenceFilterFieldType.StringSearch("some_metadata"),
         "other_metadata" to SequenceFilterFieldType.String,
         "variantQuery" to SequenceFilterFieldType.VariantQuery,
+        "advancedQuery" to SequenceFilterFieldType.AdvancedQuery,
         "intField" to SequenceFilterFieldType.Int,
         "intFieldTo" to SequenceFilterFieldType.IntTo("intField"),
         "intFieldFrom" to SequenceFilterFieldType.IntFrom("intField"),

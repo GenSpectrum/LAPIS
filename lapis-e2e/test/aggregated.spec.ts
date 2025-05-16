@@ -70,9 +70,33 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.data[0]).to.have.property('count', 0);
   });
 
+  it('advancedQuery correctly handle multiple mutation requests in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: 'T1- AND A23062T AND S:501Y AND ORF1b:12 AND country=Switzerland',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 0);
+  });
+
   it('should correctly handle nucleotide insertion requests in GET requests', async () => {
     const urlParams = new URLSearchParams({
       nucleotideInsertions: 'ins_25701:CC?,ins_5959:?AT',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
+  });
+
+  it('advancedQuery correctly handle nucleotide insertion requests in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: 'ins_25701:CC? AND ins_5959:?AT AND country=Switzerland',
     });
 
     const result = await getAggregated(urlParams);
@@ -317,5 +341,29 @@ age	country	count
     expect(result.status).equals(200);
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 20);
+  });
+
+  it('advancedQuery correctly handles string search filters in GET requests', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: "division.regex='Basel-(Land|Stadt)' AND country='Switzerland'",
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 20);
+  });
+
+  it('advancedQuery handles IsNull correctly', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: "IsNull(division) AND country='Switzerland'",
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 2);
   });
 });

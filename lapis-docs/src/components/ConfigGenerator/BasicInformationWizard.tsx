@@ -1,10 +1,14 @@
-import { ConfigContext, LAPIS_OPENNESS_OPEN, type PartialConfig } from './configContext.tsx';
+import { ConfigContext, featureSchema, LAPIS_OPENNESS_OPEN, type PartialConfig } from './configContext.tsx';
 import { useContext, useEffect } from 'react';
 
 const features = [
     {
         featureName: 'sarsCoV2VariantQuery',
         label: 'SARS CoV2 Variant Query',
+    },
+    {
+        featureName: 'generalizedAdvancedQuery',
+        label: 'Generalized Advanced Query',
     },
 ];
 

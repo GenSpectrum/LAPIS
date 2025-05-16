@@ -32,7 +32,7 @@ class VariantQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private var underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private val underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {
