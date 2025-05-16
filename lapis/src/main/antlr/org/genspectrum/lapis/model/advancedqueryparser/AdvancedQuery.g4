@@ -125,9 +125,9 @@ UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 QUOTED_STRING: '\'' (~['\r\n])* '\'';  // matches all strings with quotes, except if they contain a newline
-AND: ' AND '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
-OR: ' OR ';
-NOT: 'NOT ';
+AND: ' ' A N D ' '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
+OR: ' ' O R ' ';
+NOT: N O T ' ';
 
 NUMBER: [0-9]+;
 WHITESPACE: [ \r\n\t] -> skip;

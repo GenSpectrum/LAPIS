@@ -528,13 +528,13 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a valid advancedQuery with mutation and metadata expression THEN returns SILO query`() {
-        val advancedQuery = "(NOT some_metadata=AB) & 300G"
+        val advancedQuery = "(NOT Some_metadata=and) & 300G"
 
         val result = underTest.map(advancedQuery)
 
         val expectedResult = And(
             NucleotideSymbolEquals(null, 300, "G"),
-            Not(StringEquals("some_metadata", "AB")),
+            Not(StringEquals("some_metadata", "and")),
         )
 
         assertThat(result, equalTo(expectedResult))
@@ -542,7 +542,7 @@ class AdvancedQueryFacadeTest {
 
     @Test
     fun `given a valid advancedQuery with mutation and regex metadata expression THEN returns SILO query`() {
-        val advancedQuery = "(some_metadata=BANGALOR AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
+        val advancedQuery = "(some_metadata='Turks and Caicos' AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
 
         val result = underTest.map(advancedQuery)
 
@@ -552,7 +552,7 @@ class AdvancedQueryFacadeTest {
                 StringSearch("some_metadata", "BANGALOR"),
             ),
             NucleotideSymbolEquals(null, 300, "G"),
-            StringEquals("some_metadata", "BANGALOR"),
+            StringEquals("some_metadata", "Turks and Caicos"),
         )
 
         assertThat(result, equalTo(expectedResult))
