@@ -16,13 +16,12 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with a string field allowing regex then contains a string and string search field`() {
+    fun `given database config with a string field then contains a string and string search field`() {
         val input = databaseConfigWithFields(
             listOf(
                 DatabaseMetadata(
                     name = "fieldName",
                     type = MetadataType.STRING,
-                    lapisAllowsRegexSearch = true,
                 ),
             ),
         )
@@ -44,48 +43,13 @@ class SequenceFilterFieldsTest {
     }
 
     @Test
-    fun `given database config with a string field forbidding regex then only contains a string field`() {
-        val input = databaseConfigWithFields(listOf(DatabaseMetadata("fieldName", MetadataType.STRING)))
-
-        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
-
-        assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(
-            underTest.fields,
-            hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
-        )
-    }
-
-    @Test
-    fun `GIVEN database config with a field with lineage index THEN contains a lineage field`() {
+    fun `GIVEN config with a field with lineage index THEN contains a lineage and regex field`() {
         val input = databaseConfigWithFields(
             listOf(
                 DatabaseMetadata(
                     name = "pangoLineage",
                     type = MetadataType.STRING,
                     generateLineageIndex = true,
-                ),
-            ),
-        )
-
-        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
-
-        assertThat(underTest.fields, aMapWithSize(1))
-        assertThat(
-            underTest.fields,
-            hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.Lineage)),
-        )
-    }
-
-    @Test
-    fun `GIVEN config with a field with lineage index and regex search THEN contains a lineage and regex field`() {
-        val input = databaseConfigWithFields(
-            listOf(
-                DatabaseMetadata(
-                    name = "pangoLineage",
-                    type = MetadataType.STRING,
-                    generateLineageIndex = true,
-                    lapisAllowsRegexSearch = true,
                 ),
             ),
         )

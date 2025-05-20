@@ -174,27 +174,29 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.name().text
         val metadataValue = ctx.value().text.trim('\'')
 
-        var name = metadataName
         if (metadataName.endsWith(".regex")) {
-            name = metadataName.substringBeforeLast(".regex")
+            val fieldName = metadataName.substringBeforeLast(".regex")
+            val field = getFieldOrThrow(metadataFieldsByName, fieldName)
+
+            if (field.type !== MetadataType.STRING) {
+                throw BadRequestException(
+                    "Metadata field '${field.name}' of type ${field.type} does not support regex search. " +
+                        "Only string fields do.",
+                    null,
+                )
+            }
+
+            expressionStack.addLast(StringSearch(field.name, metadataValue))
+            return
         }
 
-        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, name)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, metadataName)
         when (field.type) {
             MetadataType.STRING -> {
                 if (field.generateLineageIndex) {
                     expressionStack.addLast(mapToLineageFilter(field.name, metadataValue))
                 } else {
-                    if (field.lapisAllowsRegexSearch and metadataName.endsWith(".regex")) {
-                        expressionStack.addLast(StringSearch(field.name, metadataValue))
-                    } else if (metadataName.endsWith(".regex")) {
-                        throw BadRequestException(
-                            "Metadata field `${field.name}` does not support regex search.",
-                            null,
-                        )
-                    } else {
-                        expressionStack.addLast(StringEquals(field.name, metadataValue))
-                    }
+                    expressionStack.addLast(StringEquals(field.name, metadataValue))
                 }
             }
 
@@ -416,6 +418,7 @@ class AdvancedQueryCustomListener(
                 }
                 expressionStack.addLast(expression)
             }
+
             referenceGenomeSchema.hasNucleotideSequence(name) -> {
                 val segmentName = referenceGenomeSchema.getNucleotideSequence(name).name
                 // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
@@ -426,6 +429,7 @@ class AdvancedQueryCustomListener(
                 }
                 expressionStack.addLast(expression)
             }
+
             else -> {
                 throw BadRequestException("$name is not a known segment or gene", null)
             }
@@ -449,6 +453,7 @@ class AdvancedQueryCustomListener(
                     ),
                 )
             }
+
             referenceGenomeSchema.hasNucleotideSequence(name) -> {
                 val sequenceName = referenceGenomeSchema.getNucleotideSequence(name).name
                 plainString.forEach { validateNucleotideSymbol(it) }
@@ -460,6 +465,7 @@ class AdvancedQueryCustomListener(
                     ),
                 )
             }
+
             else -> {
                 throw BadRequestException("$name is not a known segment or gene", null)
             }

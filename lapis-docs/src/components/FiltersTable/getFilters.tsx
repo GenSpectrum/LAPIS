@@ -39,21 +39,17 @@ export function getFilters(config: Config) {
                 description: `Filters the "${metadata.name}" column" with exact match`,
             };
 
-            if (metadata.lapisAllowsRegexSearch) {
-                const allowRegexSearchDescription = {
-                    name: `${metadata.name}.regex`,
-                    type: metadata.type,
-                    description: `Filters the "${metadata.name}" column using a regular expression,`,
-                    link: {
-                        href: '/concepts/string-search',
-                        text: 'string search',
-                    },
-                };
+            const allowRegexSearchDescription = {
+                name: `${metadata.name}.regex`,
+                type: metadata.type,
+                description: `Filters the "${metadata.name}" column using a regular expression,`,
+                link: {
+                    href: '/concepts/string-search',
+                    text: 'string search',
+                },
+            };
 
-                return [stringDescription, allowRegexSearchDescription];
-            }
-
-            return [stringDescription];
+            return [stringDescription, allowRegexSearchDescription];
         }
 
         if (metadata.type === 'pango_lineage') {

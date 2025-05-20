@@ -3,20 +3,10 @@ title: String search
 description: String search
 ---
 
-import { OnlyIf } from '../../../components/OnlyIf.tsx';
-import { getConfig, hasRegexSearchFields } from '../../../config.ts';
-
-{/* prettier-ignore */}
-<OnlyIf condition={!hasRegexSearchFields(getConfig())}>
-:::note
-This feature is not available in this LAPIS instance, because none of the string fields are configured accordingly.
-:::
-</OnlyIf>
-
 LAPIS allows users to filter string fields in the metadata using [regular expressions](https://en.wikipedia.org/wiki/Regular_expression).
 This is useful when the full string is unknown or when a more complex search is needed.
 
-By default, the string search is disabled for all string fields. It can be enabled by the instance administrator.
+String search is enabled for all string fields.
 A list of searchable fields of this LAPIS instance can be found [here](../references/filters).
 
 The syntax for the string search is a subset of the syntax of the [PCRE](https://www.pcre.org/) library.

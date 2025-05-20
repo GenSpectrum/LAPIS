@@ -21,7 +21,6 @@ data class DatabaseMetadata(
     val name: String,
     val type: MetadataType,
     val valuesAreUnique: Boolean = false,
-    val lapisAllowsRegexSearch: Boolean = false,
     val generateLineageIndex: Boolean = false,
 )
 

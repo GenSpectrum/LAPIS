@@ -758,6 +758,11 @@ class AdvancedQueryFacadeTest {
                     "IsNull(floatField>=1)",
                     "Failed to parse advanced query (line 1:17): mismatched input '>=' expecting",
                 ),
+                InvalidTestCase(
+                    "non-string field with regex",
+                    "date.regex = 'this should not be allowed'",
+                    "Metadata field 'date' of type DATE does not support regex search.",
+                ),
             )
     }
 
