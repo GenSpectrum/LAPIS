@@ -38,9 +38,10 @@ This layer maps the request to a
 [SILO query](https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md).
 A SILO query consists of two parts:
 
-* the **query action** (aggregated, details, etc.): This is directly determined by which **LAPIS endpoint** has been
-  called.
+* the **query action** (aggregated, details, etc.): 
+  The action type is directly determined by which **LAPIS endpoint** has been called.
   LAPIS offers endpoints for every SILO query action.
+  Some request parameters (e.g. `fields` and `limit`) are used as parameters for the action.
 * the **query filter**: This is determined by the **request parameters**.
   LAPIS tries to match the request parameters on the metadata fields defined in the database configuration.
 
