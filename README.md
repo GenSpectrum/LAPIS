@@ -65,3 +65,8 @@ Higher versions will also work if they are not specified in the table.
   It is an optional component that can be hosted alongside LAPIS to provide more comprehensive documentation.
 * `lapis-e2e`: The end-to-end tests for LAPIS.
   Check the tests if you are looking for example queries, e.g. [here](lapis-e2e/test/aggregatedQueries).
+
+## Contributing
+
+We welcome contributions to LAPIS!
+Please check the [contributing guide](CONTRIBUTING.md) for more information.

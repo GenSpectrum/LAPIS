@@ -16,7 +16,7 @@ LAPIS is divided into three main components (from outer to inner):
 #### HTTP Layer
 
 The HTTP layer is responsible for handling incoming requests and sending responses.
-It mainly relies on Spring.
+It mainly relies on [Spring Boot](https://spring.io/projects/spring-boot).
 It is responsible for:
 
 * parsing the incoming request and handling different request types
@@ -34,7 +34,8 @@ This approach has the advantage that it doesn't need to be implemented for every
 #### Query Mapping Layer
 
 Once the data is extracted from the request, it is passed to the query mapping layer.
-This layer maps the request to a SILO query.
+This layer maps the request to a 
+[SILO query](https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md).
 A SILO query consists of two parts:
 
 * the **query action** (aggregated, details, etc.): This is directly determined by which **LAPIS endpoint** has been
@@ -46,9 +47,11 @@ A SILO query consists of two parts:
 There are some concepts that we use throughout the LAPIS code:
 
 * Metadata fields are defined by the instance maintainer in the database configuration.
-* Sequence filters are derived from the metadata fields.
-  They contain the plain metadata fields (such as `country` or `date`)
-  and the derived filters (such as `country.regex` or `dataFrom` and `dateTo`).
+* "Sequence filters" are derived from the metadata fields.
+  Available sequence filters depend on the types of metadata fields.
+  Filters that match metadata field names (such as country or date) perform equality checks,
+  while others support advanced filtering such as matching regular expressions
+  or range filtering (such as `country.regex`, `dataFrom`, or `dateTo`).
 * We called all request properties that are statically known "special properties".
   Those contain the mutation and insertion filters
   and fields that either relevant for the SILO action (such as `limit` or `orderBy`)
