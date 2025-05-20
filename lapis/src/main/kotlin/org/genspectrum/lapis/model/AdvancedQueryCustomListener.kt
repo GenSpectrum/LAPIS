@@ -238,20 +238,12 @@ class AdvancedQueryCustomListener(
     override fun enterIsNullQuery(ctx: AdvancedQueryParser.IsNullQueryContext) {
         val metadataName = ctx.name().text
 
-        var name = metadataName
-        if (metadataName.endsWith(".regex")) {
-            name = metadataName.substringBeforeLast(".regex")
-        }
-
-        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, name)
+        val field: DatabaseMetadata = getFieldOrThrow(metadataFieldsByName, metadataName)
         when (field.type) {
             MetadataType.STRING -> {
                 if (field.generateLineageIndex) {
                     expressionStack.addLast(LineageEquals(field.name, null, false))
                 } else {
-                    if (metadataName.endsWith(".regex")) {
-                        throw BadRequestException("Filter IsNull($name) instead of IsNull($metadataName)", null)
-                    }
                     expressionStack.addLast(StringEquals(field.name, null))
                 }
             }
