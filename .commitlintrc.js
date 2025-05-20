@@ -20,6 +20,7 @@ const Configuration = {
         ],
         "header-max-length": [RuleConfigSeverity.Disabled],
         "body-max-line-length": [RuleConfigSeverity.Disabled],
+        "footer-max-line-length": [RuleConfigSeverity.Disabled],
     }
 };
 
