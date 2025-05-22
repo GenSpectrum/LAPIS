@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/GenSpectrum/LAPIS/compare/v0.4.5...v0.5.0) (2025-05-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** lapisAllowsRegexSearch on string metadata fields in the database config is not necessary anymore, regex search is always enabled for all string fields.
+
+### Features
+
+* **lapis:** add advanced queries feature ([#1144](https://github.com/GenSpectrum/LAPIS/issues/1144)) ([b8e8ca8](https://github.com/GenSpectrum/LAPIS/commit/b8e8ca8177e987e1dce4c4c7d0fcf298cfe02574))
+
 ## [0.4.5](https://github.com/GenSpectrum/LAPIS/compare/v0.4.4...v0.4.5) (2025-05-15)
 
 
