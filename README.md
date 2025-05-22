@@ -61,23 +61,12 @@ Higher versions will also work if they are not specified in the table.
 ## Repository Structure
 
 * `lapis`: The code for [LAPIS](lapis/README.md).
-* `lapis-docs`: The [documentation website](lapis-docs/README.md) for LAPIS.
+* `lapis-docs`: The [documentation website](lapis-docs/README.md) for LAPIS. 
+  It is an optional component that can be hosted alongside LAPIS to provide more comprehensive documentation.
 * `lapis-e2e`: The end-to-end tests for LAPIS.
   Check the tests if you are looking for example queries, e.g. [here](lapis-e2e/test/aggregatedQueries).
 
-## Creating A Release
+## Contributing
 
-This project uses [Release Please](https://github.com/google-github-actions/release-please-action) to generate releases.
-On every commit on the `main` branch, it will update a Pull Request with a changelog.
-When the PR is merged, the release will be created.
-Creating a release means:
-
-* A new Git tag is created.
-* The Docker images of lapis and lapis-docs are tagged with the new version.
-    * Suppose the created version is `2.4.5`, then it creates the tags `2`, `2.4` and `2.4.5`.
-
-The changelog and the version number are determined by the commit messages.
-Therefore, commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
-Also refer to the Release Please documentation for more information on how to write commit messages.
-If you want to indicate a breaking change, you can use the `BREAKING CHANGE` keyword in the commit message,
-followed by the description of the breaking change.
+We welcome contributions to LAPIS!
+Please check the [contributing guide](CONTRIBUTING.md) for more information.
