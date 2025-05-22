@@ -16,7 +16,7 @@ val dummyDatabaseConfig = DatabaseConfig(
         listOf(
             DatabaseMetadata(DATE_FIELD, MetadataType.DATE),
             DatabaseMetadata(PANGO_LINEAGE_FIELD, MetadataType.STRING, generateLineageIndex = true),
-            DatabaseMetadata("some_metadata", MetadataType.STRING, lapisAllowsRegexSearch = true),
+            DatabaseMetadata("some_metadata", MetadataType.STRING),
             DatabaseMetadata("other_metadata", MetadataType.STRING),
             DatabaseMetadata("floatField", MetadataType.FLOAT),
             DatabaseMetadata("intField", MetadataType.INT),

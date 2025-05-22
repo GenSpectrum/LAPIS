@@ -55,17 +55,13 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 )
             }
 
-            when (databaseMetadata.lapisAllowsRegexSearch) {
-                true -> listOf(
-                    baseField,
-                    SequenceFilterField(
-                        name = "${databaseMetadata.name}.regex",
-                        type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
-                    ),
-                )
-
-                false -> listOf(baseField)
-            }
+            listOf(
+                baseField,
+                SequenceFilterField(
+                    name = "${databaseMetadata.name}.regex",
+                    type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
+                ),
+            )
         }
 
         MetadataType.DATE -> listOf(
@@ -112,8 +108,8 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
         )
     }
 
-public const val VARIANT_QUERY_FIELD = "variantQuery"
-public const val ADVANCED_QUERY_FIELD = "advancedQuery"
+const val VARIANT_QUERY_FIELD = "variantQuery"
+const val ADVANCED_QUERY_FIELD = "advancedQuery"
 
 private fun mapToSequenceFilterFieldsFromFeatures(databaseFeature: DatabaseFeature) =
     when (databaseFeature.name) {
