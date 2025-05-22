@@ -263,13 +263,13 @@ key_1002052
     const regexQueries = ['region\d', 'Basel-(Stadt|Land)', 'Basel.*', '^Z.*rich$'];
     for (const sequenceQuery of sequenceQueries) {
       for (const regexQuery of regexQueries) {
-        const urlRegex = new URLSearchParams({
-          'fields': 'primaryKey',
-          'division.regex': regexQuery,
-          'orderBy': 'primaryKey',
+        const resultRegexJson = await lapisClient.postDetails({
+          detailsPostRequest: {
+            fields: ['primaryKey'],
+            divisionRegex: regexQuery,
+            orderBy: ['primaryKey'],
+          },
         });
-        const resultRegex = await fetch(basePath + '/sample/details?' + urlRegex.toString());
-        const resultRegexJson = await resultRegex.json();
         const resultVariant = await lapisClient.postDetails({
           detailsPostRequest: {
             fields: ['primaryKey'],
@@ -308,19 +308,15 @@ key_1002052
         );
         const setUnion = new Set(resultUnion.data.map((entry: { primaryKey: string }) => entry.primaryKey));
 
-        if (!setsAreEqual(setRegex.union(setVariant), setUnion)) {
-          console.error('Union mismatch');
-          console.log('Actual:', Array.from(setRegex.union(setVariant)));
-          console.log('Expected:', Array.from(setUnion));
-        }
-        expect(setsAreEqual(setRegex.union(setVariant), setUnion)).to.be.true;
+        expect(
+          setsAreEqual(setRegex.union(setVariant), setUnion),
+          `Union mismatch, actual: ${Array.from(setRegex.union(setVariant))}, expected: ${Array.from(setUnion)}`
+        ).to.be.true;
 
-        if (!setsAreEqual(setRegex.intersection(setVariant), setIntersection)) {
-          console.error('Intersection mismatch');
-          console.log('Actual:', Array.from(setRegex.intersection(setVariant)));
-          console.log('Expected:', Array.from(setIntersection));
-        }
-        expect(setsAreEqual(setRegex.intersection(setVariant), setIntersection)).to.be.true;
+        expect(
+          setsAreEqual(setRegex.intersection(setVariant), setIntersection),
+          `Intersection mismatch, actual: ${Array.from(setRegex.intersection(setVariant))}, expected: ${Array.from(setIntersection)}`
+        ).to.be.true;
       }
     }
   });

@@ -355,4 +355,28 @@ age	country	count
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 2);
   });
+
+  it('advancedQuery handles IsNull on dates correctly', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: 'IsNull(date)',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
+  });
+
+  it('advancedQuery handles IsNull on lineages correctly', async () => {
+    const urlParams = new URLSearchParams({
+      advancedQuery: 'IsNull(pangoLineage)',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(200);
+    const resultJson = await result.json();
+    expect(resultJson.data[0]).to.have.property('count', 1);
+  });
 });

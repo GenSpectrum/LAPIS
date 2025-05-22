@@ -611,6 +611,11 @@ class AdvancedQueryFacadeTest {
                     BooleanEquals("test_boolean_column", true),
                 ),
                 ValidTestCase(
+                    "boolean with = false",
+                    "test_boolean_column=false",
+                    BooleanEquals("test_boolean_column", false),
+                ),
+                ValidTestCase(
                     "intField with = ",
                     "intField=1",
                     IntEquals("intField", 1),
@@ -656,6 +661,16 @@ class AdvancedQueryFacadeTest {
                         StringEquals("some_metadata", "country"),
                         StringEquals("some_metadata", null),
                     ),
+                ),
+                ValidTestCase(
+                    "lineage metadata with isNull",
+                    "isNull(PangoLineage)",
+                    LineageEquals("pangoLineage", null, false),
+                ),
+                ValidTestCase(
+                    "date metadata with isNull",
+                    "isNull(date)",
+                    Not(DateBetween("date", null, null)),
                 ),
                 ValidTestCase(
                     "int metadata with isNull",
@@ -772,6 +787,11 @@ class AdvancedQueryFacadeTest {
                     "non-string field with regex",
                     "date.regex = 'this should not be allowed'",
                     "Metadata field 'date' of type DATE does not support regex search.",
+                ),
+                InvalidTestCase(
+                    "invalid boolean field",
+                    "test_boolean_column=maybe",
+                    "'maybe' is not a valid boolean",
                 ),
             )
     }
