@@ -744,9 +744,19 @@ class AdvancedQueryFacadeTest {
                     "Failed to parse advanced query (line 1:20): mismatched input '=' expecting",
                 ),
                 InvalidTestCase(
-                    "metadata regex with IsNull",
+                    "metadata regex with value in IsNull",
                     "IsNull(some_metadata.regex='country')",
                     "Failed to parse advanced query (line 1:26): mismatched input '=' expecting",
+                ),
+                InvalidTestCase(
+                    "metadata regex in IsNull",
+                    "IsNull(some_metadata.regex)",
+                    "Metadata field some_metadata.regex does not exist",
+                ),
+                InvalidTestCase(
+                    "boolean.regex in IsNull",
+                    "IsNull(test_boolean_column.regex)",
+                    "Metadata field test_boolean_column.regex does not exist",
                 ),
                 InvalidTestCase(
                     "intField with IsNull",
