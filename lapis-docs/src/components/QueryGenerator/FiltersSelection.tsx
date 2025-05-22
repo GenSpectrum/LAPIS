@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const FiltersSelection = (props: Props) => {
-    const { config, filters, onFiltersChange } = props;
+    const { config } = props;
     return (
         <div>
             <div>
@@ -27,7 +27,7 @@ export const FiltersSelection = (props: Props) => {
                         );
                     }
 
-                    if (metadata.type === 'string' && metadata.lapisAllowsRegexSearch) {
+                    if (metadata.type === 'string') {
                         return (
                             <>
                                 <FilterField key={metadata.name} name={metadata.name} {...props} />

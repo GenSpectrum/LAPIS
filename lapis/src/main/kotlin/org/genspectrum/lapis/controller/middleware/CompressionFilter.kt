@@ -7,7 +7,7 @@ import jakarta.servlet.ServletOutputStream
 import jakarta.servlet.WriteListener
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.response.LapisErrorResponse
@@ -34,8 +34,6 @@ import java.io.OutputStream
 import java.nio.charset.Charset
 import java.util.Enumeration
 import java.util.zip.GZIPOutputStream
-
-private val log = KotlinLogging.logger {}
 
 enum class Compression(
     val value: String,

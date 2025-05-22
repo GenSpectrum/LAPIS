@@ -46,12 +46,11 @@ it will be beneficial to set `dateToSortBy` to that column.
 
 The metadata object permits the following fields:
 
-| Key                    | Type    | Required | Description                                                                                                   |
-| ---------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| name                   | string  | true     | The name of the metadata field.                                                                               |
-| type                   | enum    | true     | The [type of the metadata](#metadata-types).                                                                  |
-| generateIndex          | boolean | false    | See [Generating an index](#generating-an-index) below                                                         |
-| lapisAllowsRegexSearch | boolean | false    | If true, LAPIS will autogenerate a filter `${name}.regex`. See [String search](../../concepts/string-search). |
+| Key           | Type    | Required | Description                                           |
+| ------------- | ------- | -------- | ----------------------------------------------------- |
+| name          | string  | true     | The name of the metadata field.                       |
+| type          | enum    | true     | The [type of the metadata](#metadata-types).          |
+| generateIndex | boolean | false    | See [Generating an index](#generating-an-index) below |
 
 :::caution
 The `name` must not contain the reserved character `.`.
@@ -83,7 +82,5 @@ The feature object permits the following fields:
 | ---- | ------ | -------- | ------------------------ |
 | name | string | true     | The name of the feature. |
 
-Currently, there is only one available feature: `sarsCoV2VariantQuery`.
-This enables a specialized query language for SARS-CoV-2 instances.
-
-<OnlyIf condition={hasFeature('sarsCoV2VariantQuery')}>See [variant queries](../../concepts/variant-query).</OnlyIf>
+Currently, we support the `sarsCoV2VariantQuery` as well as the `generalizedAdvancedQuery` feature.
+The `sarsCoV2VariantQuery` is a specialized query language for SARS-CoV-2 instances (see [variant queries](../../concepts/variant-query)), while the `generalizedAdvancedQuery` feature can be used for all instances (see [advanced queries](../../concepts/advanced-query)).

@@ -9,6 +9,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
     });
 
     expect(result).to.have.length(100);
+
     result.sort((a: { primaryKey: string }, b: { primaryKey: string }) =>
       a.primaryKey.localeCompare(b.primaryKey)
     );

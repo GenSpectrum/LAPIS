@@ -10,3 +10,9 @@ How to execute the tests
 - Install NPM dependencies: `npm install`
 - Generate a Typescript client for LAPIS: `npm run generateLapisClient && npm run generateLapisClientProtected && npm run generateLapisClientMultiSegmented`
 - Execute the tests: `npm run test`
+
+To only run single tests:
+
+```
+npm test -- --grep <Test Name>
+```

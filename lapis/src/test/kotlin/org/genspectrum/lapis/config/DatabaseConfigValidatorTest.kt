@@ -45,28 +45,4 @@ class DatabaseConfigValidatorTest {
             `is`("Metadata field name 'field.with.regex.separator' contains the reserved character '.'"),
         )
     }
-
-    @Test
-    fun `GIVEN lapisAllowsRegexSearch on non-string field THEN config is invalid`() {
-        val invalidConfig = DatabaseConfig(
-            DatabaseSchema(
-                instanceName = "test",
-                primaryKey = "primaryKey",
-                opennessLevel = OpennessLevel.OPEN,
-                metadata = listOf(
-                    DatabaseMetadata(
-                        name = "test field",
-                        type = MetadataType.INT,
-                        lapisAllowsRegexSearch = true,
-                    ),
-                ),
-            ),
-        )
-
-        val exception = assertThrows<IllegalArgumentException> { underTest.validate(invalidConfig) }
-        assertThat(
-            exception.message,
-            `is`("Metadata field 'test field' has lapisAllowsRegexSearch set to true, but is not of type STRING."),
-        )
-    }
 }

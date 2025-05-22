@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.scheduler
 
-import mu.KotlinLogging
 import org.genspectrum.lapis.config.SiloVersion
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.CachedSiloClient
 import org.genspectrum.lapis.silo.SILO_QUERY_CACHE_NAME
@@ -10,8 +10,6 @@ import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class DataVersionCacheInvalidator(

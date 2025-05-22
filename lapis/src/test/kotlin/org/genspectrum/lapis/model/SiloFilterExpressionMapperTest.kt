@@ -4,6 +4,7 @@ import org.genspectrum.lapis.DATE_FIELD
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -46,9 +47,11 @@ private const val SOME_VALUE = "some value"
 
 class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
-    private var variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private val variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
-    private var underTest = SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade)
+    private val underTest =
+        SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
 
     @Test
     fun `given invalid filter key then throws exception`() {
@@ -434,6 +437,40 @@ class SiloFilterExpressionMapperTest {
         assertThat(
             exception.message,
             containsString("variantQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
+    @Test
+    fun `given a query with a advancedQuery alongside nucleotide mutations then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("advancedQuery" to listOf("A123T")),
+            listOf(NucleotideMutation(null, 123, null)),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("advancedQuery filter cannot be used with other variant filters such as: "),
+        )
+    }
+
+    @Test
+    fun `given a query with a advancedQuery and a variantQuery then it should throw an error`() {
+        val filterParameter = DummySequenceFilters(
+            mapOf("advancedQuery" to listOf("A123T"), "variantQuery" to listOf("A123T")),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+            emptyList(),
+        )
+
+        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
+        assertThat(
+            exception.message,
+            containsString("variantQuery filter cannot be used with advancedQuery filter"),
         )
     }
 

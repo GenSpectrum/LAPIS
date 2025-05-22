@@ -1,8 +1,10 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
 import org.genspectrum.lapis.config.SequenceFilterField
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -47,6 +49,7 @@ typealias SequenceFilterFieldName = String
 class SiloFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
+    private val advancedQueryFacade: AdvancedQueryFacade,
 ) {
     fun map(sequenceFilters: CommonSequenceFilters): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
@@ -81,6 +84,7 @@ class SiloFilterExpressionMapper(
                 Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
                 Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
                 Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
+                Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
             }
         }
 
@@ -119,6 +123,7 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.FloatFrom -> Pair(type.associatedField, Filter.FloatBetween)
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
             SequenceFilterFieldType.Boolean -> Pair(field.name, Filter.BooleanEquals)
+            SequenceFilterFieldType.AdvancedQuery -> Pair(field.name, Filter.AdvancedQuery)
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -133,15 +138,29 @@ class SiloFilterExpressionMapper(
         nucleotideMutations: List<NucleotideMutation>,
         aaMutations: List<AminoAcidMutation>,
     ) {
-        val containsAdvancedVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery }
+        val containsVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.VariantQuery }
+        val containsAdvancedQuery = allowedSequenceFiltersWithType.keys.any { it.second == Filter.AdvancedQuery }
         val containsSimpleVariantQuery = allowedSequenceFiltersWithType.keys.any { it.second in variantQueryTypes } ||
             nucleotideMutations.isNotEmpty() ||
             aaMutations.isNotEmpty()
 
-        if (containsAdvancedVariantQuery && containsSimpleVariantQuery) {
+        if (containsVariantQuery && containsSimpleVariantQuery) {
             throw BadRequestException(
-                "variantQuery filter cannot be used with other variant filters such as: " +
+                "$VARIANT_QUERY_FIELD filter cannot be used with other variant filters such as: " +
                     variantQueryTypes.joinToString(", "),
+            )
+        }
+
+        if (containsAdvancedQuery && containsSimpleVariantQuery) {
+            throw BadRequestException(
+                "$ADVANCED_QUERY_FIELD filter cannot be used with other variant filters such as: " +
+                    variantQueryTypes.joinToString(", "),
+            )
+        }
+
+        if (containsVariantQuery && containsAdvancedQuery) {
+            throw BadRequestException(
+                "$VARIANT_QUERY_FIELD filter cannot be used with $ADVANCED_QUERY_FIELD filter",
             )
         }
 
@@ -213,17 +232,33 @@ class SiloFilterExpressionMapper(
     private fun mapToVariantQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
-                "variantQuery must have exactly one value, found ${values[0].values.size} values.",
+                "$VARIANT_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
             )
         }
 
         val variantQuery = values[0].values.single()
 
         if (variantQuery.isNullOrBlank()) {
-            throw BadRequestException("variantQuery must not be empty, got '$variantQuery'")
+            throw BadRequestException("$VARIANT_QUERY_FIELD must not be empty, got '$variantQuery'")
         }
 
         return variantQueryFacade.map(variantQuery)
+    }
+
+    private fun mapToAdvancedQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
+        if (values[0].values.size != 1) {
+            throw BadRequestException(
+                "$ADVANCED_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
+            )
+        }
+
+        val advancedQuery = values[0].values.single()
+
+        if (advancedQuery.isNullOrBlank()) {
+            throw BadRequestException("$ADVANCED_QUERY_FIELD must not be empty, got '$advancedQuery'")
+        }
+
+        return advancedQueryFacade.map(advancedQuery)
     }
 
     private fun mapToDateBetweenFilter(
@@ -451,6 +486,7 @@ class SiloFilterExpressionMapper(
         PangoLineage,
         DateBetween,
         VariantQuery,
+        AdvancedQuery,
         IntEquals,
         IntBetween,
         FloatEquals,
