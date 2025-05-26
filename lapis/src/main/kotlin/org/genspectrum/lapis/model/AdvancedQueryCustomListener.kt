@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.model
 
 import AdvancedQueryBaseListener
+import AdvancedQueryParser
 import AdvancedQueryParser.AndContext
 import AdvancedQueryParser.MaybeContext
 import AdvancedQueryParser.NOfQueryContext
@@ -41,6 +42,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
+import kotlin.collections.Map
+import kotlin.collections.associateBy
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.mutableListOf
+import kotlin.collections.plus
+import kotlin.collections.plusAssign
+import kotlin.collections.reversed
 
 fun getFieldOrThrow(
     metadataFieldsByName: Map<String, DatabaseMetadata>,
@@ -174,8 +183,8 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.name().text
         val metadataValue = ctx.value().text.trim('\'')
 
-        if (metadataName.endsWith(".regex")) {
-            val fieldName = metadataName.substringBeforeLast(".regex")
+        if (metadataName.endsWith(".regex", ignoreCase = true)) {
+            val fieldName = metadataName.substringBeforeLast(".")
             val field = getFieldOrThrow(metadataFieldsByName, fieldName)
 
             if (field.type !== MetadataType.STRING) {

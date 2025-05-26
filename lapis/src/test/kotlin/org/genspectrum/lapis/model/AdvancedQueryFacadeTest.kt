@@ -181,22 +181,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Not' expression THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "!300G"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = Not(NucleotideSymbolEquals(null, 300, "G"))
-        assertThat(result, equalTo(expectedResult))
-
-        val advancedQueryWords = "NOT 300G"
-
-        val resultWords = underTest.map(advancedQueryWords)
-
-        assertThat(resultWords, equalTo(result))
-    }
-
-    @Test
     fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding SiloQuery`() {
         val advancedQuery = "300G | 400-"
 
@@ -235,26 +219,6 @@ class AdvancedQueryFacadeTest {
         val resultWords = underTest.map(advancedQueryWords)
 
         assertThat(resultWords, equalTo(result))
-    }
-
-    @Test
-    fun `given a advancedQuery with a 'Maybe' expression THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "MAYBE(300G)"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = Maybe(NucleotideSymbolEquals(null, 300, "G"))
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `GIVEN a advancedQuery with a mixed-case 'Maybe' expression THEN returns 'Maybe' SiloQuery`() {
-        val advancedQuery = "maYbE(T12C)"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = Maybe(NucleotideSymbolEquals(null, 12, "C"))
-        assertThat(result, equalTo(expectedResult))
     }
 
     @Test
@@ -567,40 +531,6 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(StringEquals("some_metadata", "Democratic Republic of the Congo")))
     }
 
-    @Test
-    fun `given a valid advancedQuery with string (with regex) metadata expression THEN returns SILO query`() {
-        val advancedQuery = "some_metadata.regex='Basel\\{1,2\\}'"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(StringSearch("some_metadata", "Basel\\{1,2\\}")))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with escaped char in regex THEN returns SILO query`() {
-        val advancedQuery = "some_metadata.regex='(Democratic.*Rep$'"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(StringSearch("some_metadata", "(Democratic.*Rep$")))
-    }
-
-    data class ValidTestCase(
-        val description: String,
-        val query: String,
-        val expected: SiloFilterExpression,
-    ) {
-        override fun toString(): String = description
-    }
-
-    data class InvalidTestCase(
-        val description: String,
-        val query: String,
-        val expected: String,
-    ) {
-        override fun toString(): String = description
-    }
-
     companion object {
         @JvmStatic
         fun validQueryProvider() =
@@ -654,41 +584,7 @@ class AdvancedQueryFacadeTest {
                         DateBetween("date", LocalDate.parse("2020-01-01"), null),
                     ),
                 ),
-                ValidTestCase(
-                    "string metadata with isNull",
-                    "isNull(some_metadata) OR some_metadata='country'",
-                    Or(
-                        StringEquals("some_metadata", "country"),
-                        StringEquals("some_metadata", null),
-                    ),
-                ),
-                ValidTestCase(
-                    "lineage metadata with isNull",
-                    "isNull(PangoLineage)",
-                    LineageEquals("pangoLineage", null, false),
-                ),
-                ValidTestCase(
-                    "date metadata with isNull",
-                    "isNull(date)",
-                    Not(DateBetween("date", null, null)),
-                ),
-                ValidTestCase(
-                    "int metadata with isNull",
-                    "isNull(intField) OR intField=5",
-                    Or(
-                        IntEquals("intField", 5),
-                        IntEquals("intField", null),
-                    ),
-                ),
-                ValidTestCase(
-                    "float metadata with isNull",
-                    "isNull(floatField) OR floatField=5",
-                    Or(
-                        FloatEquals("floatField", 5.0),
-                        FloatEquals("floatField", null),
-                    ),
-                ),
-            )
+            ) + regexCases.valid + isNullCases.valid + maybeCases.valid + notCases.valid
 
         @JvmStatic
         fun invalidQueryProvider() =
@@ -744,6 +640,82 @@ class AdvancedQueryFacadeTest {
                     "Metadata field floatFieldTo does not exist",
                 ),
                 InvalidTestCase(
+                    "non-string field with regex",
+                    "date.regex = 'this should not be allowed'",
+                    "Metadata field 'date' of type DATE does not support regex search.",
+                ),
+                InvalidTestCase(
+                    "invalid boolean field",
+                    "test_boolean_column=maybe",
+                    "'maybe' is not a valid boolean",
+                ),
+            ) + regexCases.invalid + isNullCases.invalid + maybeCases.invalid + notCases.invalid
+
+        private val regexCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "regex",
+                    query = "some_metadata.regex='Basel\\{1,2\\}'",
+                    expected = StringSearch("some_metadata", "Basel\\{1,2\\}"),
+                ),
+                ValidTestCase(
+                    description = "another regex",
+                    query = "some_metadata.regex='(Democratic.*Rep$'",
+                    expected = StringSearch("some_metadata", "(Democratic.*Rep$"),
+                ),
+                ValidTestCase(
+                    description = "upper case regex",
+                    query = "some_metadata.REGEX='value'",
+                    expected = StringSearch("some_metadata", "value"),
+                ),
+                ValidTestCase(
+                    description = "mixed case regex",
+                    query = "some_metadata.ReGeX='value'",
+                    expected = StringSearch("some_metadata", "value"),
+                ),
+            ),
+            invalid = listOf(),
+        )
+
+        private val isNullCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    "string metadata with isNull",
+                    "isNull(some_metadata) OR some_metadata='country'",
+                    Or(
+                        StringEquals("some_metadata", "country"),
+                        StringEquals("some_metadata", null),
+                    ),
+                ),
+                ValidTestCase(
+                    "lineage metadata with isNull",
+                    "isNull(PangoLineage)",
+                    LineageEquals("pangoLineage", null, false),
+                ),
+                ValidTestCase(
+                    "date metadata with isNull",
+                    "isNull(date)",
+                    Not(DateBetween("date", null, null)),
+                ),
+                ValidTestCase(
+                    "int metadata with isNull",
+                    "isNull(intField) OR intField=5",
+                    Or(
+                        IntEquals("intField", 5),
+                        IntEquals("intField", null),
+                    ),
+                ),
+                ValidTestCase(
+                    "float metadata with isNull",
+                    "isNull(floatField) OR floatField=5",
+                    Or(
+                        FloatEquals("floatField", 5.0),
+                        FloatEquals("floatField", null),
+                    ),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
                     "date>= with IsNull",
                     "IsNull(date>=2020-01-01)",
                     "Failed to parse advanced query (line 1:11): mismatched input '>=' expecting",
@@ -783,17 +755,66 @@ class AdvancedQueryFacadeTest {
                     "IsNull(floatField>=1)",
                     "Failed to parse advanced query (line 1:17): mismatched input '>=' expecting",
                 ),
-                InvalidTestCase(
-                    "non-string field with regex",
-                    "date.regex = 'this should not be allowed'",
-                    "Metadata field 'date' of type DATE does not support regex search.",
+            ),
+        )
+
+        private val maybeCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "maybe with a single entry",
+                    query = "MAYBE(300G)",
+                    expected = Maybe(NucleotideSymbolEquals(null, 300, "G")),
                 ),
-                InvalidTestCase(
-                    "invalid boolean field",
-                    "test_boolean_column=maybe",
-                    "'maybe' is not a valid boolean",
+                ValidTestCase(
+                    description = "mixed case maybe",
+                    query = "maYbE(T12C)",
+                    expected = Maybe(NucleotideSymbolEquals(null, 12, "C")),
                 ),
-            )
+                ValidTestCase(
+                    description = "lower case maybe",
+                    query = "maybe(T12C)",
+                    expected = Maybe(NucleotideSymbolEquals(null, 12, "C")),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
+                    description = "maybe with an invalid expression",
+                    query = "MAYBE(PangoLineage=jn.1* AND country=Switzerland)",
+                    expected = "Failed to parse advanced query (line 1:18): mismatched input '=' expecting {':', A, ",
+                ),
+            ),
+        )
+
+        private val notCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "textual not",
+                    query = "NOT 300G",
+                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                ),
+                ValidTestCase(
+                    description = "lower case textual not",
+                    query = "not 300G",
+                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                ),
+                ValidTestCase(
+                    description = "mixed case textual not",
+                    query = "nOt 300G",
+                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                ),
+                ValidTestCase(
+                    description = "not symbol",
+                    query = "!300G",
+                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                ),
+                ValidTestCase(
+                    description = "not on metadata",
+                    query = "NOT some_metadata = 'Switzerland'",
+                    expected = Not(StringEquals("some_metadata", "Switzerland")),
+                ),
+            ),
+            invalid = listOf(),
+        )
     }
 
     @ParameterizedTest(name = "valid query: {0}")
@@ -825,20 +846,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `GIVEN an invalid advanced query where MAYBE is used fro metadata THEN throw bad request exception`() {
-        val advancedQuery = "MAYBE(PangoLineage=jn.1* AND country=Switzerland)"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
-
-        assertThat(
-            exception.message,
-            `is`(
-                "Failed to parse advanced query (line 1:18): mismatched input '=' expecting {':', A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, '-', '_', '.', '*', NUMBER}.",
-            ),
-        )
-    }
-
-    @Test
     fun `GIVEN an invalid advanced query THEN throw bad request exception`() {
         val advancedQuery = "PangoLineage=jn.1* AND thisIsInvalid"
 
@@ -850,3 +857,24 @@ class AdvancedQueryFacadeTest {
         )
     }
 }
+
+data class ValidTestCase(
+    val description: String,
+    val query: String,
+    val expected: SiloFilterExpression,
+) {
+    override fun toString(): String = description
+}
+
+data class InvalidTestCase(
+    val description: String,
+    val query: String,
+    val expected: String,
+) {
+    override fun toString(): String = description
+}
+
+data class TestCaseCollection(
+    val valid: List<ValidTestCase>,
+    val invalid: List<InvalidTestCase>,
+)
