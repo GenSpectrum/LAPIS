@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.model
 
 import AdvancedQueryBaseListener
-import AdvancedQueryParser
 import AdvancedQueryParser.AndContext
 import AdvancedQueryParser.MaybeContext
 import AdvancedQueryParser.NOfQueryContext
@@ -42,14 +41,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale
 import kotlin.collections.ArrayDeque
-import kotlin.collections.Map
-import kotlin.collections.associateBy
-import kotlin.collections.joinToString
-import kotlin.collections.listOf
-import kotlin.collections.mutableListOf
-import kotlin.collections.plus
-import kotlin.collections.plusAssign
-import kotlin.collections.reversed
 
 fun getFieldOrThrow(
     metadataFieldsByName: Map<String, DatabaseMetadata>,
