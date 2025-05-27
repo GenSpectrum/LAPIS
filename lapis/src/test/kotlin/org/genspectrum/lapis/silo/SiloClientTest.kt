@@ -63,7 +63,7 @@ class SiloClientTest(
 
         someQuery = SiloQuery(
             SiloAction.aggregated(),
-            StringEquals("theColumn", "a value that is difference for each test method: $counter"),
+            StringEquals("theColumn", "a value that is different for each test method: $counter"),
         )
         counter++
     }
