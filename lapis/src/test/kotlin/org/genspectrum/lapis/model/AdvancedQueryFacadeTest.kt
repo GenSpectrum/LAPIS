@@ -640,11 +640,6 @@ class AdvancedQueryFacadeTest {
                     "Metadata field floatFieldTo does not exist",
                 ),
                 InvalidTestCase(
-                    "non-string field with regex",
-                    "date.regex = 'this should not be allowed'",
-                    "Metadata field 'date' of type DATE does not support regex search.",
-                ),
-                InvalidTestCase(
                     "invalid boolean field",
                     "test_boolean_column=maybe",
                     "'maybe' is not a valid boolean",
@@ -674,7 +669,13 @@ class AdvancedQueryFacadeTest {
                     expected = StringSearch("some_metadata", "value"),
                 ),
             ),
-            invalid = listOf(),
+            invalid = listOf(
+                InvalidTestCase(
+                    "non-string field with regex",
+                    "date.regex = 'this should not be allowed'",
+                    "Metadata field 'date' of type DATE does not support regex search.",
+                ),
+            ),
         )
 
         private val isNullCases = TestCaseCollection(
