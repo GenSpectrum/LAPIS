@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/GenSpectrum/LAPIS/compare/v0.5.0...v0.5.1) (2025-05-28)
+
+
+### Bug Fixes
+
+* **lapis:** advanced queries: make `.regex` case-insensitive ([#1198](https://github.com/GenSpectrum/LAPIS/issues/1198)) ([fd85fa5](https://github.com/GenSpectrum/LAPIS/commit/fd85fa5fbe8cb765c6a994214d10fb587cd36d10))
+
 ## [0.5.0](https://github.com/GenSpectrum/LAPIS/compare/v0.4.5...v0.5.0) (2025-05-22)
 
 
