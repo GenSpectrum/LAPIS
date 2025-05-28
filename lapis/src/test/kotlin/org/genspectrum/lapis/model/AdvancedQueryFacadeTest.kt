@@ -222,27 +222,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Pangolineage' expression THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "pangolineage=A.1.2.3"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = LineageEquals(PANGO_LINEAGE_FIELD, "A.1.2.3", false)
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a 'Pangolineage' expression with casing THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "Pangolineage=A.1.2.3*"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = LineageEquals(PANGO_LINEAGE_COLUMN, "A.1.2.3", true)
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
     fun `given a advancedQuery with a 'Nof' expression THEN returns the corresponding SiloQuery`() {
         val advancedQuery = "[3-of: 123A, 234T, 345G, 456A]"
 
@@ -482,15 +461,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with string metadata expression THEN returns SILO query`() {
-        val advancedQuery = "some_metadata=AB"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(StringEquals("some_metadata", "AB")))
-    }
-
-    @Test
     fun `given a valid advancedQuery with mutation and metadata expression THEN returns SILO query`() {
         val advancedQuery = "(NOT Some_metadata=and) & 300G"
 
@@ -522,44 +492,10 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(expectedResult))
     }
 
-    @Test
-    fun `given a valid advancedQuery with string (with whitespace) metadata expression THEN returns SILO query`() {
-        val advancedQuery = "some_metadata='Democratic Republic of the Congo'"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(StringEquals("some_metadata", "Democratic Republic of the Congo")))
-    }
-
     companion object {
         @JvmStatic
         fun validQueryProvider() =
             listOf(
-                ValidTestCase(
-                    "boolean with = true",
-                    "test_boolean_column=true",
-                    BooleanEquals("test_boolean_column", true),
-                ),
-                ValidTestCase(
-                    "boolean with = false",
-                    "test_boolean_column=false",
-                    BooleanEquals("test_boolean_column", false),
-                ),
-                ValidTestCase(
-                    "intField with = ",
-                    "intField=1",
-                    IntEquals("intField", 1),
-                ),
-                ValidTestCase(
-                    "floatField with = ",
-                    "floatField=0",
-                    FloatEquals("floatField", 0.0),
-                ),
-                ValidTestCase(
-                    "date with = ",
-                    "date=2020-01-01",
-                    DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01")),
-                ),
                 ValidTestCase(
                     "intField with >= and <=",
                     "intField>=1 AND intField<=18",
@@ -584,7 +520,12 @@ class AdvancedQueryFacadeTest {
                         DateBetween("date", LocalDate.parse("2020-01-01"), null),
                     ),
                 ),
-            ) + regexCases.valid + isNullCases.valid + maybeCases.valid + notCases.valid
+            ) +
+                regexCases.valid +
+                isNullCases.valid +
+                maybeCases.valid +
+                notCases.valid +
+                metadataEqualsCases.valid
 
         @JvmStatic
         fun invalidQueryProvider() =
@@ -609,42 +550,12 @@ class AdvancedQueryFacadeTest {
                     "floatField>=One",
                     "'One' is not a valid float",
                 ),
-                InvalidTestCase(
-                    "dateFrom",
-                    "dateFrom=2020-01-01",
-                    "Metadata field dateFrom does not exist",
-                ),
-                InvalidTestCase(
-                    "dateTo",
-                    "dateTo=2020-01-01",
-                    "Metadata field dateTo does not exist",
-                ),
-                InvalidTestCase(
-                    "intFieldFrom",
-                    "intFieldFrom=1",
-                    "Metadata field intFieldFrom does not exist",
-                ),
-                InvalidTestCase(
-                    "intFieldTo",
-                    "intFieldTo=1",
-                    "Metadata field intFieldTo does not exist",
-                ),
-                InvalidTestCase(
-                    "floatFieldFrom",
-                    "floatFieldFrom=1",
-                    "Metadata field floatFieldFrom does not exist",
-                ),
-                InvalidTestCase(
-                    "floatFieldTo",
-                    "floatFieldTo=1",
-                    "Metadata field floatFieldTo does not exist",
-                ),
-                InvalidTestCase(
-                    "invalid boolean field",
-                    "test_boolean_column=maybe",
-                    "'maybe' is not a valid boolean",
-                ),
-            ) + regexCases.invalid + isNullCases.invalid + maybeCases.invalid + notCases.invalid
+            ) +
+                regexCases.invalid +
+                isNullCases.invalid +
+                maybeCases.invalid +
+                notCases.invalid +
+                metadataEqualsCases.invalid
 
         private val regexCases = TestCaseCollection(
             valid = listOf(
@@ -816,6 +727,118 @@ class AdvancedQueryFacadeTest {
             ),
             invalid = listOf(),
         )
+
+        private val metadataEqualsCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "lineage equals",
+                    query = "pangolineage=A.1.2.3",
+                    expected = LineageEquals(PANGO_LINEAGE_FIELD, "A.1.2.3", includeSublineages = false),
+                ),
+                ValidTestCase(
+                    description = "lineage equals including sublineages",
+                    query = "pangolineage=A.1.2.3*",
+                    expected = LineageEquals(PANGO_LINEAGE_FIELD, "A.1.2.3", includeSublineages = true),
+                ),
+                ValidTestCase(
+                    description = "lineage equals with mixed case field name",
+                    query = "PangoLineage=A.1.2.3",
+                    expected = LineageEquals(PANGO_LINEAGE_FIELD, "A.1.2.3", includeSublineages = false),
+                ),
+                ValidTestCase(
+                    description = "string equals",
+                    query = "some_metadata=AB",
+                    expected = StringEquals("some_metadata", "AB"),
+                ),
+                ValidTestCase(
+                    description = "string equals with whitespaces in value",
+                    query = "some_metadata='Democratic Republic of the Congo'",
+                    expected = StringEquals("some_metadata", "Democratic Republic of the Congo"),
+                ),
+                ValidTestCase(
+                    "boolean with = true",
+                    "test_boolean_column=true",
+                    BooleanEquals("test_boolean_column", true),
+                ),
+                ValidTestCase(
+                    "boolean with = false",
+                    "test_boolean_column=false",
+                    BooleanEquals("test_boolean_column", false),
+                ),
+                ValidTestCase(
+                    "intField with = ",
+                    "intField=1",
+                    IntEquals("intField", 1),
+                ),
+                ValidTestCase(
+                    "floatField with = ",
+                    "floatField=0",
+                    FloatEquals("floatField", 0.0),
+                ),
+                ValidTestCase(
+                    "date with = ",
+                    "date=2020-01-01",
+                    DateBetween("date", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-01")),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
+                    description = "string equals where value contains single quotes",
+                    query = "some_metadata='some'value'",
+                    expected = "Failed to parse advanced query (line 1:20): mismatched input 'v'",
+                ),
+                InvalidTestCase(
+                    "dateFrom",
+                    "dateFrom=2020-01-01",
+                    "Metadata field dateFrom does not exist",
+                ),
+                InvalidTestCase(
+                    "dateTo",
+                    "dateTo=2020-01-01",
+                    "Metadata field dateTo does not exist",
+                ),
+                InvalidTestCase(
+                    "intFieldFrom",
+                    "intFieldFrom=1",
+                    "Metadata field intFieldFrom does not exist",
+                ),
+                InvalidTestCase(
+                    "intFieldTo",
+                    "intFieldTo=1",
+                    "Metadata field intFieldTo does not exist",
+                ),
+                InvalidTestCase(
+                    "floatFieldFrom",
+                    "floatFieldFrom=1",
+                    "Metadata field floatFieldFrom does not exist",
+                ),
+                InvalidTestCase(
+                    "floatFieldTo",
+                    "floatFieldTo=1",
+                    "Metadata field floatFieldTo does not exist",
+                ),
+                InvalidTestCase(
+                    "invalid boolean field",
+                    "test_boolean_column=maybe",
+                    "'maybe' is not a valid boolean",
+                ),
+                InvalidTestCase(
+                    "invalid date",
+                    "date='jn.1* thisIsInvalid'",
+                    "'jn.1* thisIsInvalid' is not a valid date: Text 'jn.1* thisIsInvalid' could not be parsed at index 0",
+                ),
+                InvalidTestCase(
+                    "invalid int",
+                    "intField=notAnInt",
+                    "'notAnInt' is not a valid integer",
+                ),
+                InvalidTestCase(
+                    "invalid float",
+                    "floatField=notAFloat",
+                    "'notAFloat' is not a valid float",
+                ),
+            ),
+        )
     }
 
     @ParameterizedTest(name = "valid query: {0}")
@@ -830,20 +853,6 @@ class AdvancedQueryFacadeTest {
     fun `test invalid advanced queries`(testCase: InvalidTestCase) {
         val exception = assertThrows<BadRequestException> { underTest.map(testCase.query) }
         assertThat(exception.message, containsString(testCase.expected))
-    }
-
-    @Test
-    fun `GIVEN an invalid advanced regex query THEN throw bad request exception`() {
-        val advancedQuery = "date='jn.1* thisIsInvalid'"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
-
-        assertThat(
-            exception.message,
-            `is`(
-                "'jn.1* thisIsInvalid' is not a valid date: Text 'jn.1* thisIsInvalid' could not be parsed at index 0",
-            ),
-        )
     }
 
     @Test
