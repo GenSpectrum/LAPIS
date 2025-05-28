@@ -142,45 +142,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with an 'And' expression THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "300G & 400-"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = And(
-            NucleotideSymbolEquals(null, 400, "-"),
-            NucleotideSymbolEquals(null, 300, "G"),
-        )
-        assertThat(result, equalTo(expectedResult))
-
-        val advancedQueryWords = "300G AND 400-"
-
-        val resultWords = underTest.map(advancedQueryWords)
-
-        assertThat(resultWords, equalTo(result))
-    }
-
-    @Test
-    fun `given a advancedQuery with two 'And' expression THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "300G & 400- & 500B"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = And(
-            NucleotideSymbolEquals(null, 500, "B"),
-            NucleotideSymbolEquals(null, 400, "-"),
-            NucleotideSymbolEquals(null, 300, "G"),
-        )
-        assertThat(result, equalTo(expectedResult))
-
-        val advancedQueryWords = "300G & 400- AND 500B"
-
-        val resultWords = underTest.map(advancedQueryWords)
-
-        assertThat(resultWords, equalTo(result))
-    }
-
-    @Test
     fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding SiloQuery`() {
         val advancedQuery = "300G | 400-"
 
@@ -460,38 +421,6 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*\\*E", "S")))
     }
 
-    @Test
-    fun `given a valid advancedQuery with mutation and metadata expression THEN returns SILO query`() {
-        val advancedQuery = "(NOT Some_metadata=and) & 300G"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = And(
-            NucleotideSymbolEquals(null, 300, "G"),
-            Not(StringEquals("some_metadata", "and")),
-        )
-
-        assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with mutation and regex metadata expression THEN returns SILO query`() {
-        val advancedQuery = "(some_metadata='Turks and Caicos' AND 300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
-
-        val result = underTest.map(advancedQuery)
-
-        val expectedResult = And(
-            Or(
-                Not(AminoAcidSymbolEquals("S", 501, "Y")),
-                StringSearch("some_metadata", "BANGALOR"),
-            ),
-            NucleotideSymbolEquals(null, 300, "G"),
-            StringEquals("some_metadata", "Turks and Caicos"),
-        )
-
-        assertThat(result, equalTo(expectedResult))
-    }
-
     companion object {
         @JvmStatic
         fun validQueryProvider() =
@@ -525,6 +454,7 @@ class AdvancedQueryFacadeTest {
                 isNullCases.valid +
                 maybeCases.valid +
                 notCases.valid +
+                andCases.valid +
                 metadataEqualsCases.valid
 
         @JvmStatic
@@ -555,6 +485,7 @@ class AdvancedQueryFacadeTest {
                 isNullCases.invalid +
                 maybeCases.invalid +
                 notCases.invalid +
+                andCases.invalid +
                 metadataEqualsCases.invalid
 
         private val regexCases = TestCaseCollection(
@@ -726,6 +657,109 @@ class AdvancedQueryFacadeTest {
                 ),
             ),
             invalid = listOf(),
+        )
+
+        private val andCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "symbol and",
+                    query = "300G & 400-",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "textual and",
+                    query = "300G AND 400-",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "textual and in mixed case",
+                    query = "300G aNd 400-",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "textual and in lower case",
+                    query = "300G and 400-",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "two symbol ands",
+                    query = "300G & 400- & 500B",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 500, "B"),
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "two ands with symbol and textual",
+                    query = "300G & 400- and 500B",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 500, "B"),
+                        NucleotideSymbolEquals(null, 400, "-"),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "and on metadata",
+                    query = "some_metadata = value1 AND some_metadata = value2",
+                    expected = And(
+                        StringEquals("some_metadata", "value2"),
+                        StringEquals("some_metadata", "value1"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "and on metadata and mutation",
+                    query = "some_metadata = value1 AND 300G",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 300, "G"),
+                        StringEquals("some_metadata", "value1"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "nested and",
+                    query = "(some_metadata='Turks and Caicos' AND 300G)&(some_metadata.regex='BANGAL' OR NOT S:501Y)",
+                    expected = And(
+                        Or(
+                            Not(AminoAcidSymbolEquals("S", 501, "Y")),
+                            StringSearch("some_metadata", "BANGAL"),
+                        ),
+                        NucleotideSymbolEquals(null, 300, "G"),
+                        StringEquals("some_metadata", "Turks and Caicos"),
+                    ),
+                ),
+                ValidTestCase(
+                    description = "and on metadata where metadata value is also 'and'",
+                    query = "(NOT Some_metadata=and) & 300G",
+                    expected = And(
+                        NucleotideSymbolEquals(null, 300, "G"),
+                        Not(StringEquals("some_metadata", "and")),
+                    ),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
+                    "and without left side",
+                    "& 300G",
+                    "extraneous input '&' expecting",
+                ),
+                InvalidTestCase(
+                    "and without right side",
+                    "300G &",
+                    "mismatched input '<EOF>' expecting",
+                ),
+            ),
         )
 
         private val metadataEqualsCases = TestCaseCollection(
