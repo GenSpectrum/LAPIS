@@ -174,8 +174,8 @@ class AdvancedQueryCustomListener(
         val metadataName = ctx.name().text
         val metadataValue = ctx.value().text.trim('\'')
 
-        if (metadataName.endsWith(".regex")) {
-            val fieldName = metadataName.substringBeforeLast(".regex")
+        if (metadataName.endsWith(".regex", ignoreCase = true)) {
+            val fieldName = metadataName.substringBeforeLast(".")
             val field = getFieldOrThrow(metadataFieldsByName, fieldName)
 
             if (field.type !== MetadataType.STRING) {
