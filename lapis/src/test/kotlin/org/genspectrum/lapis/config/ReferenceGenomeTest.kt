@@ -54,6 +54,30 @@ class ReferenceGenomeSchemaTest {
         )
         assertThat(multiSegmented.isSingleSegmented(), equalTo(false))
     }
+
+    @Test
+    fun `getNucleotideSequences should be case insensitive`() {
+        val referenceGenomeSchema = ReferenceGenomeSchema(
+            listOf(ReferenceSequenceSchema("Main"), ReferenceSequenceSchema("OtherSegment")),
+            emptyList(),
+        )
+
+        assertThat(referenceGenomeSchema.getNucleotideSequence("main")?.name, equalTo("Main"))
+        assertThat(referenceGenomeSchema.getNucleotideSequence("MAIN")?.name, equalTo("Main"))
+        assertThat(referenceGenomeSchema.getNucleotideSequence("mAiN")?.name, equalTo("Main"))
+    }
+
+    @Test
+    fun `getGene should be case insensitive`() {
+        val referenceGenomeSchema = ReferenceGenomeSchema(
+            emptyList(),
+            listOf(ReferenceSequenceSchema("Gene1"), ReferenceSequenceSchema("Gene2")),
+        )
+
+        assertThat(referenceGenomeSchema.getGene("gene1")?.name, equalTo("Gene1"))
+        assertThat(referenceGenomeSchema.getGene("GENE1")?.name, equalTo("Gene1"))
+        assertThat(referenceGenomeSchema.getGene("gEnE1")?.name, equalTo("Gene1"))
+    }
 }
 
 class ReferenceGenomeTest {
