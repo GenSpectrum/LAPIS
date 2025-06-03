@@ -6,15 +6,14 @@
   "expected": [
     {
       "count": 34,
-      "test_boolean_column": true
+      "testBooleanColumn": true
+    },
+    {
+      "count": 33
     },
     {
       "count": 33,
-      "test_boolean_column": null
-    },
-    {
-      "count": 33,
-      "test_boolean_column": false
+      "testBooleanColumn": false
     }
   ]
 }

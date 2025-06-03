@@ -82,18 +82,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build OpenAPI Spec
-        working-directory: lapis
-        run: ./gradlew generateOpenApiDocs
-
-      - name: Build OpenAPI Spec Protected
-        working-directory: lapis
-        run: ./gradlew generateOpenApiDocs -PopennessLevel=protected
-
-      - name: Build OpenAPI Spec Multi segmented
-        working-directory: lapis
-        run: ./gradlew generateOpenApiDocs -Psegmented=true
-
       - name: Cache .npm
         uses: actions/cache@v4
         with:
@@ -105,15 +93,7 @@ jobs:
         working-directory: lapis-e2e
 
       - name: Generate Lapis Client
-        run: npm run generateLapisClient
-        working-directory: lapis-e2e
-
-      - name: Generate Lapis Client Protected
-        run: npm run generateLapisClientProtected
-        working-directory: lapis-e2e
-
-      - name: Generate Lapis Client Multi Segmented
-        run: npm run generateLapisClientMultiSegmented
+        run: ./generateOpenApiClients.sh
         working-directory: lapis-e2e
 
       - name: Check Format

@@ -19,8 +19,15 @@ describe('The /details endpoint', () => {
       a.division.localeCompare(b.division)
     );
     expect(result.data[1]).to.be.deep.equal({
+      age: undefined,
+      country: undefined,
+      date: undefined,
       division: 'Zürich',
       pangoLineage: 'B.1.617.2',
+      primaryKey: undefined,
+      qcValue: undefined,
+      region: undefined,
+      testBooleanColumn: undefined,
     });
   });
 
@@ -42,9 +49,9 @@ describe('The /details endpoint', () => {
       division: 'Zürich',
       primaryKey: 'key_3128796',
       pangoLineage: 'B.1.617.2',
-      qc_value: 0.96,
+      qcValue: 0.96,
       region: 'Europe',
-      test_boolean_column: false,
+      testBooleanColumn: false,
     });
   });
 
@@ -56,8 +63,8 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0].division).to.be.null;
-    expect(ascendingOrderedResult.data[1].division).to.be.null;
+    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
+    expect(ascendingOrderedResult.data[1].division).to.be.undefined;
     expect(ascendingOrderedResult.data[2]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postDetails({
@@ -185,9 +192,9 @@ Solothurn	B.1	key_1002052
       division: 'Zürich',
       primaryKey: 'key_3578231',
       pangoLineage: 'P.1',
-      qc_value: 0.93,
+      qcValue: 0.93,
       region: 'Europe',
-      test_boolean_column: null,
+      testBooleanColumn: undefined,
     };
 
     const result = await lapisClient.postDetails({
@@ -208,9 +215,9 @@ Solothurn	B.1	key_1002052
       division: 'Vaud',
       primaryKey: 'key_3259931',
       pangoLineage: 'AY.43',
-      qc_value: 0.98,
+      qcValue: 0.98,
       region: 'Europe',
-      test_boolean_column: true,
+      testBooleanColumn: true,
     };
 
     const result = await lapisClient.postDetails({
@@ -251,7 +258,7 @@ key_1002052
       },
     });
 
-    expect(result).to.have.nested.property('data[0].division', null);
+    expect(result).to.have.nested.property('data[0].division', undefined);
   });
 
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {
@@ -267,14 +274,14 @@ key_1002052
           detailsPostRequest: {
             fields: ['primaryKey'],
             divisionRegex: regexQuery,
-            orderBy: ['primaryKey'],
+            orderBy: [{ field: 'primaryKey' }],
           },
         });
         const resultVariant = await lapisClient.postDetails({
           detailsPostRequest: {
             fields: ['primaryKey'],
             variantQuery: sequenceQuery,
-            orderBy: ['primaryKey'],
+            orderBy: [{ field: 'primaryKey' }],
           },
         });
 
@@ -292,14 +299,14 @@ key_1002052
           detailsPostRequest: {
             fields: ['primaryKey'],
             advancedQuery: advancedQueryIntersection,
-            orderBy: ['primaryKey'],
+            orderBy: [{ field: 'primaryKey' }],
           },
         });
         const resultUnion = await lapisClient.postDetails({
           detailsPostRequest: {
             fields: ['primaryKey'],
             advancedQuery: advancedQueryUnion,
-            orderBy: ['primaryKey'],
+            orderBy: [{ field: 'primaryKey' }],
           },
         });
 

@@ -38,7 +38,14 @@ describe('The /aminoAcidMutations endpoint', () => {
 
     const mutation = result.data[0];
     expect(mutation).to.deep.equal({
+      count: undefined,
+      coverage: undefined,
       mutation: 'ORF1a:A1306S',
+      mutationFrom: undefined,
+      mutationTo: undefined,
+      position: undefined,
+      proportion: undefined,
+      sequenceName: undefined,
     });
   });
 
