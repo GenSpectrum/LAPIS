@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.DATE_FIELD
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.dummySequenceFilterFields
@@ -46,7 +47,8 @@ import java.time.LocalDate
 private const val SOME_VALUE = "some value"
 
 class SiloFilterExpressionMapperTest {
-    private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(emptyList(), emptyList())
+    private val dummyReferenceGenomeSchema =
+        ReferenceGenomeSchema(listOf(ReferenceSequenceSchema("sequenceName")), emptyList())
     private val variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
     private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
@@ -443,17 +445,22 @@ class SiloFilterExpressionMapperTest {
     @Test
     fun `given a query with a advancedQuery alongside nucleotide mutations then it should throw an error`() {
         val filterParameter = DummySequenceFilters(
-            mapOf("advancedQuery" to listOf("A123T")),
-            listOf(NucleotideMutation(null, 123, null)),
+            mapOf("advancedQuery" to listOf("sequenceName:A124T")),
+            listOf(NucleotideMutation("sequenceName", 123, "T")),
             emptyList(),
             emptyList(),
             emptyList(),
         )
+        val result = underTest.map(filterParameter)
 
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
         assertThat(
-            exception.message,
-            containsString("advancedQuery filter cannot be used with other variant filters such as: "),
+            result,
+            equalTo(
+                And(
+                    NucleotideSymbolEquals("sequenceName", 124, "T"),
+                    NucleotideSymbolEquals("sequenceName", 123, "T"),
+                ),
+            ),
         )
     }
 

@@ -151,13 +151,6 @@ class SiloFilterExpressionMapper(
             )
         }
 
-        if (containsAdvancedQuery && containsSimpleVariantQuery) {
-            throw BadRequestException(
-                "$ADVANCED_QUERY_FIELD filter cannot be used with other variant filters such as: " +
-                    variantQueryTypes.joinToString(", "),
-            )
-        }
-
         if (containsVariantQuery && containsAdvancedQuery) {
             throw BadRequestException(
                 "$VARIANT_QUERY_FIELD filter cannot be used with $ADVANCED_QUERY_FIELD filter",
