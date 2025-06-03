@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.2](https://github.com/GenSpectrum/LAPIS/compare/v0.5.1...v0.5.2) (2025-06-03)
+
+
+### Bug Fixes
+
+* **lapis:** advanced queries: tell which metadata fields exist when finding an unknown one ([#1209](https://github.com/GenSpectrum/LAPIS/issues/1209)) ([1011154](https://github.com/GenSpectrum/LAPIS/commit/1011154db50b541b166f88d996f966fdb45c8293))
+* **lapis:** allow advanced queries to be used with simple variant and metadata queries ([#1212](https://github.com/GenSpectrum/LAPIS/issues/1212)) ([8a1409e](https://github.com/GenSpectrum/LAPIS/commit/8a1409e736abbdcf3d9b2e3e136ca04789717ad2))
+
 ## [0.5.1](https://github.com/GenSpectrum/LAPIS/compare/v0.5.0...v0.5.1) (2025-05-28)
 
 
