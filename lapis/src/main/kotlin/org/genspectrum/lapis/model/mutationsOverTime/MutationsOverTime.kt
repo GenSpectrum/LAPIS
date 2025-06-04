@@ -2,7 +2,7 @@ package org.genspectrum.lapis.model.mutationsOverTime
 
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.nucleotideSymbols
-import org.genspectrum.lapis.request.BaseSequenceFilters
+import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.And
@@ -36,7 +36,7 @@ class MutationsOverTime(
     fun evaluate(
         mutations: List<NucleotideMutation>,
         dateRanges: List<DateRange>,
-        lapisFilter: BaseSequenceFilters,
+        lapisFilter: CommonSequenceFilters,
         dateField: String,
     ): MutationOverTimeResponse {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {

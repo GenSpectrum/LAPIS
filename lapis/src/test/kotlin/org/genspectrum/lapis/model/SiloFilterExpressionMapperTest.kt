@@ -7,6 +7,7 @@ import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.dummySequenceFilterFields
+import org.genspectrum.lapis.request.AdditionalSequenceFilters
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -891,5 +892,6 @@ class SiloFilterExpressionMapperTest {
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : CommonSequenceFilters
+    ) : CommonSequenceFilters,
+        AdditionalSequenceFilters
 }

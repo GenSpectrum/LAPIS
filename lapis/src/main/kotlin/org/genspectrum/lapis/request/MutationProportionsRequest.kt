@@ -22,7 +22,8 @@ data class MutationProportionsRequest(
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
-) : CommonSequenceFilters {
+) : CommonSequenceFilters,
+    AdditionalSequenceFilters {
     fun shouldResponseContainSequenceName() = fields.isEmpty() || fields.contains(MutationsField.SEQUENCE_NAME)
 }
 

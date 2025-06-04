@@ -18,7 +18,8 @@ data class SequenceFiltersRequestWithFields(
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
-) : CommonSequenceFilters
+) : CommonSequenceFilters,
+    AdditionalSequenceFilters
 
 @JsonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(

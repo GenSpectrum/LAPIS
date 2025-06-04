@@ -7,7 +7,7 @@ import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.BaseSequenceFilters
+import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFilters
@@ -33,7 +33,7 @@ private data class TestLapisFilter(
     override val aaMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-) : BaseSequenceFilters
+) : CommonSequenceFilters
 
 const val DUMMY_DATE_FIELD = "date"
 private val DUMMY_LAPIS_FILTER = TestLapisFilter(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList())
