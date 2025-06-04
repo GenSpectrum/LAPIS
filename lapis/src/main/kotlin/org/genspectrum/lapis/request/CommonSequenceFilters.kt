@@ -10,15 +10,12 @@ import org.springframework.util.MultiValueMap
 typealias SequenceFilters = Map<String, List<String?>>
 typealias GetRequestSequenceFilters = MultiValueMap<String, String>
 
-interface CommonSequenceFilters {
+interface BaseSequenceFilters {
     val sequenceFilters: SequenceFilters
     val nucleotideMutations: List<NucleotideMutation>
     val aaMutations: List<AminoAcidMutation>
     val nucleotideInsertions: List<NucleotideInsertion>
     val aminoAcidInsertions: List<AminoAcidInsertion>
-    val orderByFields: List<OrderByField>
-    val limit: Int?
-    val offset: Int?
 
     fun isEmpty() =
         sequenceFilters.isEmpty() &&
@@ -26,6 +23,12 @@ interface CommonSequenceFilters {
             aaMutations.isEmpty() &&
             nucleotideInsertions.isEmpty() &&
             aminoAcidInsertions.isEmpty()
+}
+
+interface CommonSequenceFilters : BaseSequenceFilters {
+    val orderByFields: List<OrderByField>
+    val limit: Int?
+    val offset: Int?
 }
 
 fun parseCommonFields(

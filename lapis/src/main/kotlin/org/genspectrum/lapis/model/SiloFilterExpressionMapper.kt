@@ -8,7 +8,7 @@ import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.MaybeMutation
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -51,7 +51,7 @@ class SiloFilterExpressionMapper(
     private val variantQueryFacade: VariantQueryFacade,
     private val advancedQueryFacade: AdvancedQueryFacade,
 ) {
-    fun map(sequenceFilters: CommonSequenceFilters): SiloFilterExpression {
+    fun map(sequenceFilters: BaseSequenceFilters): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
