@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/GenSpectrum/LAPIS/compare/v0.5.2...v0.5.3) (2025-06-05)
+
+
+### Bug Fixes
+
+* **lapis:** fix Swagger UI layout of GET requests ([#1217](https://github.com/GenSpectrum/LAPIS/issues/1217)) ([70b0089](https://github.com/GenSpectrum/LAPIS/commit/70b0089c896eda559b5fe5404b4c741715fa30b0)), closes [#1193](https://github.com/GenSpectrum/LAPIS/issues/1193)
+
 ## [0.5.2](https://github.com/GenSpectrum/LAPIS/compare/v0.5.1...v0.5.2) (2025-06-03)
 
 
