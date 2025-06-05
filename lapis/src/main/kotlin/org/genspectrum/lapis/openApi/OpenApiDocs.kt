@@ -64,14 +64,14 @@ fun buildOpenApiSchema(
                 .addSchemas(
                     PRIMITIVE_FIELD_FILTERS_SCHEMA,
                     Schema<String>()
-                        .type("object")
+                        .types(setOf("object"))
                         .description("valid filters for sequence data")
                         .properties(computePrimitiveFieldFilters(databaseConfig, sequenceFilterFields)),
                 )
                 .addSchemas(
                     REQUEST_SCHEMA_WITH_MIN_PROPORTION,
                     Schema<String>()
-                        .type("object")
+                        .types(setOf("object"))
                         .description("valid filters for sequence data")
                         .properties(
                             getSequenceFiltersWithFormat(
@@ -79,7 +79,7 @@ fun buildOpenApiSchema(
                                 sequenceFilterFields = sequenceFilterFields,
                                 orderByFieldsSchema = mutationsOrderByFieldsEnum(),
                                 dataFormatSchema = dataFormatSchema(),
-                            ) + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().type("number")) +
+                            ) + Pair(MIN_PROPORTION_PROPERTY, Schema<String>().types(setOf("number"))) +
                                 Pair(FIELDS_PROPERTY, mutationsFieldsSchema()),
                         ),
                 )
@@ -152,7 +152,7 @@ fun buildOpenApiSchema(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description(
                                 "Aggregated sequence data. " +
                                     "If fields are specified, then these fields are also keys in the result. " +
@@ -168,7 +168,7 @@ fun buildOpenApiSchema(
                     DETAILS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description(
                                 "The response contains the metadata of every sequence matching the sequence filters.",
                             )
@@ -179,7 +179,7 @@ fun buildOpenApiSchema(
                     NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
                             .properties(nucleotideMutationProportionSchema()),
                     ),
@@ -189,7 +189,7 @@ fun buildOpenApiSchema(
                     AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
                             .properties(aminoAcidMutationProportionSchema()),
                     ),
@@ -198,7 +198,7 @@ fun buildOpenApiSchema(
                     NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description("Nucleotide Insertion data.")
                             .properties(nucleotideInsertionSchema())
                             .required(
@@ -211,7 +211,7 @@ fun buildOpenApiSchema(
                     AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
-                            .type("object")
+                            .types(setOf("object"))
                             .description("Amino Acid Insertion data.")
                             .properties(aminoAcidInsertionSchema())
                             .required(aminoAcidInsertionSchema().keys.toList()),
@@ -324,26 +324,26 @@ private fun computePrimitiveFieldFilters(
     }
 
 private fun lapisResponseSchema(dataSchema: Schema<Any>) =
-    Schema<Any>().type("object")
+    Schema<Any>().types(setOf("object"))
         .properties(
             mapOf(
-                "data" to Schema<Any>().type("array").items(dataSchema),
+                "data" to Schema<Any>().types(setOf("array")).items(dataSchema),
                 "info" to infoResponseSchema(),
             ),
         )
         .required(listOf("data", "info"))
 
 private fun infoResponseSchema() =
-    Schema<LapisInfo>().type("object")
+    Schema<LapisInfo>().types(setOf("object"))
         .description(LAPIS_INFO_DESCRIPTION)
         .properties(
             mapOf(
-                "dataVersion" to Schema<String>().type("string")
+                "dataVersion" to Schema<String>().types(setOf("string"))
                     .description(LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION)
                     .example(LAPIS_DATA_VERSION_EXAMPLE),
-                "requestId" to Schema<String>().type("string").description(REQUEST_ID_HEADER_DESCRIPTION),
-                "requestInfo" to Schema<String>().type("string").description(REQUEST_INFO_STRING_DESCRIPTION),
-                "reportTo" to Schema<String>().type("string"),
+                "requestId" to Schema<String>().types(setOf("string")).description(REQUEST_ID_HEADER_DESCRIPTION),
+                "requestInfo" to Schema<String>().types(setOf("string")).description(REQUEST_INFO_STRING_DESCRIPTION),
+                "reportTo" to Schema<String>().types(setOf("string")),
                 "lapisVersion" to StringSchema().description(VERSION_DESCRIPTION),
                 "siloVersion" to StringSchema().description(SILO_VERSION_DESCRIPTION),
             ),
@@ -351,12 +351,12 @@ private fun infoResponseSchema() =
         .required(listOf("reportTo"))
 
 private fun aggregatedMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
-    databaseConfig.schema.metadata.associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
+    databaseConfig.schema.metadata.associate { it.name to Schema<String>().types(setOf(mapToOpenApiType(it.type))) }
 
 private fun detailsMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
     databaseConfig.schema
         .metadata
-        .associate { it.name to Schema<String>().type(mapToOpenApiType(it.type)) }
+        .associate { it.name to Schema<String>().types(setOf(mapToOpenApiType(it.type))) }
 
 private fun mapToOpenApiType(type: MetadataType): String =
     when (type) {
@@ -377,13 +377,13 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
         SequenceFilterFieldType.String ->
             Schema<String>().anyOf(
                 listOf(
-                    nullableStringSchema(fieldType.openApiType),
-                    logicalOrArraySchema(nullableStringSchema(fieldType.openApiType)),
+                    stringSchema(fieldType.openApiType),
+                    logicalOrArraySchema(stringSchema(fieldType.openApiType)),
                 ),
             )
 
         SequenceFilterFieldType.Lineage -> {
-            val fieldSchema = nullableStringSchema(fieldType.openApiType)
+            val fieldSchema = stringSchema(fieldType.openApiType)
                 .description(
                     "Filter sequences by this lineage. " +
                         "You can suffix the filter value with '*' to include sublineages.",
@@ -399,28 +399,30 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
         is SequenceFilterFieldType.StringSearch ->
             Schema<String>().anyOf(
                 listOf(
-                    nullableStringRegexSchema(fieldType.associatedField),
-                    logicalOrArraySchema(nullableStringRegexSchema(fieldType.associatedField)),
+                    stringRegexSchema(fieldType.associatedField),
+                    logicalOrArraySchema(stringRegexSchema(fieldType.associatedField)),
                 ),
             )
 
-        else -> nullableStringSchema(fieldType.openApiType)
+        else -> stringSchema(fieldType.openApiType)
     }
 
-private fun nullableStringRegexSchema(associatedField: SequenceFilterFieldName) =
-    nullableStringSchema("string")
+private fun stringRegexSchema(associatedField: SequenceFilterFieldName) =
+    stringSchema("string")
         .description(
             "A regex pattern (subset of PCRE) for filtering '$associatedField'. " +
                 "For details on the syntax, see https://github.com/google/re2/wiki/Syntax.",
         )
 
-private fun nullableStringSchema(type: String) = Schema<String>().type(type).nullable(true)
+private fun stringSchema(type: String) =
+    Schema<String>()
+        .types(setOf(type))
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
 ): Schema<*> =
-    Schema<String>()
-        .type("object")
+    Schema<Any>()
+        .types(setOf("object"))
         .description("valid filters for sequence data")
         .properties(requestProperties)
 
@@ -429,8 +431,8 @@ private fun requestSchemaWithFields(
     fieldsDescription: String,
     databaseConfig: List<DatabaseMetadata>,
 ): Schema<*> =
-    Schema<String>()
-        .type("object")
+    Schema<Any>()
+        .types(setOf("object"))
         .description("valid filters for sequence data")
         .properties(
             requestProperties + Pair(
@@ -569,33 +571,33 @@ private fun aminoAcidInsertionSchema() =
 
 private fun nucleotideMutations() =
     Schema<List<NucleotideMutation>>()
-        .type("array")
+        .types(setOf("array"))
         .description("Logical \"and\" concatenation of a list of mutations.")
         .items(
             Schema<String>()
-                .type("string")
+                .types(setOf("string"))
                 .example("sequence1:A123T")
                 .description(NUCLEOTIDE_MUTATION_DESCRIPTION),
         )
 
 private fun aminoAcidMutations() =
     Schema<List<AminoAcidMutation>>()
-        .type("array")
+        .types(setOf("array"))
         .description("Logical \"and\" concatenation of a list of mutations.")
         .items(
             Schema<String>()
-                .type("string")
+                .types(setOf("string"))
                 .example("S:123T")
                 .description(AMINO_ACID_MUTATION_DESCRIPTION),
         )
 
 private fun nucleotideInsertions() =
     Schema<List<NucleotideInsertion>>()
-        .type("array")
+        .types(setOf("array"))
         .description("Logical \"and\" concatenation of a list of insertions.")
         .items(
             Schema<String>()
-                .type("string")
+                .types(setOf("string"))
                 .example("ins_123:ATT")
                 .description(
                     """
@@ -607,11 +609,11 @@ private fun nucleotideInsertions() =
 
 private fun aminoAcidInsertions() =
     Schema<List<AminoAcidInsertion>>()
-        .type("array")
+        .types(setOf("array"))
         .description("Logical \"and\" concatenation of a list of insertions.")
         .items(
             Schema<String>()
-                .type("string")
+                .types(setOf("string"))
                 .example("ins_ORF1a:123:ATT")
                 .description(
                     """
@@ -622,20 +624,20 @@ private fun aminoAcidInsertions() =
 
 private fun orderByPostSchema(orderByFieldsSchema: Schema<*>) =
     Schema<List<String>>()
-        .type("array")
+        .types(setOf("array"))
         .items(
             Schema<String>().anyOf(
                 listOf(
                     orderByFieldsSchema,
                     Schema<OrderByField>()
-                        .type("object")
+                        .types(setOf("object"))
                         .description("The fields by which the result is ordered with ascending or descending order.")
                         .required(listOf("field"))
                         .properties(
                             mapOf(
                                 "field" to orderByFieldsSchema,
                                 "type" to Schema<String>()
-                                    .type("string")
+                                    .types(setOf("string"))
                                     ._enum(listOf("ascending", "descending"))
                                     ._default("ascending"),
                             ),
@@ -646,18 +648,18 @@ private fun orderByPostSchema(orderByFieldsSchema: Schema<*>) =
 
 private fun limitSchema() =
     Schema<Int>()
-        .type("integer")
+        .types(setOf("integer"))
         .description(LIMIT_DESCRIPTION)
         .example(100)
 
 private fun offsetSchema() =
     Schema<Int>()
-        .type("integer")
+        .types(setOf("integer"))
         .description(OFFSET_DESCRIPTION)
 
 private fun dataFormatSchema() =
     Schema<String>()
-        .type("string")
+        .types(setOf("string"))
         .description(
             DATA_FORMAT_DESCRIPTION,
         )
@@ -666,7 +668,7 @@ private fun dataFormatSchema() =
 
 private fun sequencesFormatSchema() =
     Schema<String>()
-        .type("string")
+        .types(setOf("string"))
         .description(SEQUENCES_DATA_FORMAT_DESCRIPTION)
         ._enum(listOf(SequencesDataFormat.FASTA, SequencesDataFormat.JSON, SequencesDataFormat.NDJSON))
 
@@ -713,7 +715,7 @@ private fun fieldsEnum(
     databaseConfig: List<DatabaseMetadata> = emptyList(),
     additionalFields: List<String> = emptyList(),
 ) = Schema<String>()
-    .type("string")
+    .types(setOf("string"))
     ._enum(databaseConfig.map { it.name } + additionalFields)
 
 private fun logicalOrArraySchema(schema: Schema<Any>) =
@@ -729,8 +731,8 @@ private fun sequencesResponse(
     referenceSequenceSchemas: List<ReferenceSequenceSchema>,
 ): Schema<*> {
     val baseSchema = Schema<Any>()
-        .type("object")
-        .addProperty(schema.primaryKey, Schema<String>().type("string"))
+        .types(setOf("object"))
+        .addProperty(schema.primaryKey, Schema<String>().types(setOf("string")))
         .addRequiredItem(schema.primaryKey)
 
     return when (referenceSequenceSchemas.size == 1) {
@@ -739,7 +741,7 @@ private fun sequencesResponse(
                 .addProperty(
                     referenceSequenceSchemas[0].name,
                     Schema<String>()
-                        .type("string")
+                        .types(setOf("string"))
                         .description("The sequence data."),
                 )
                 .addRequiredItem(referenceSequenceSchemas[0].name)
@@ -747,7 +749,7 @@ private fun sequencesResponse(
 
         false -> {
             for (nucleotideSequence in referenceSequenceSchemas) {
-                baseSchema.addProperty(nucleotideSequence.name, Schema<String>().type("string"))
+                baseSchema.addProperty(nucleotideSequence.name, Schema<String>().types(setOf("string")))
             }
             baseSchema
                 .description(

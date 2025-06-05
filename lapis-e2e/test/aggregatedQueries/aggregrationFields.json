@@ -13,8 +13,7 @@
   "expected": [
     {
       "count": 2,
-      "country": "Switzerland",
-      "division": null
+      "country": "Switzerland"
     },
     {
       "count": 6,
