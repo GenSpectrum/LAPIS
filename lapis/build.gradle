@@ -41,7 +41,7 @@ dependencies {
     implementation 'org.antlr:antlr4-runtime:4.13.2'
     implementation 'org.apache.commons:commons-csv:1.14.0'
     implementation 'com.github.luben:zstd-jni:1.5.7-3'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.6.2'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
