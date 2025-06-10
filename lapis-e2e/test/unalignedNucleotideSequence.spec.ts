@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { lapisSingleSegmentedSequenceController } from './common';
+import { lapisMultiSegmentedSequenceController, lapisSingleSegmentedSequenceController } from './common';
 
 describe('The /unalignedNucleotideSequence endpoint', () => {
   it('should return unaligned nucleotide sequences for Switzerland', async () => {
@@ -96,5 +96,27 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
     expect(result).to.have.length(1);
     expect(result[0].primaryKey).to.equal('key_1749899');
     expect(result[0].main).to.equal('some_very_short_string');
+  });
+
+  it('should return multi segmented aligned sequences', async () => {
+    const result = await lapisMultiSegmentedSequenceController.postAlignedNucleotideSequence({
+      segment: 'L',
+      nucleotideSequenceRequest: { primaryKey: 'key_0', dataFormat: 'JSON' },
+    });
+
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_0');
+    expect(result[0].l).to.equal('ACTCT');
+  });
+
+  it('should return multi segmented unaligned sequences', async () => {
+    const result = await lapisMultiSegmentedSequenceController.postUnalignedNucleotideSequence({
+      segment: 'L',
+      nucleotideSequenceRequest: { primaryKey: 'key_0', dataFormat: 'JSON' },
+    });
+
+    expect(result).to.have.length(1);
+    expect(result[0].primaryKey).to.equal('key_0');
+    expect(result[0].l).to.equal('L_key_0');
   });
 });

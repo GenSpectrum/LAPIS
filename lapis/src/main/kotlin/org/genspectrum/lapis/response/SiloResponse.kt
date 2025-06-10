@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.util.UNALIGNED_PREFIX
 import org.springframework.boot.jackson.JsonComponent
 
 const val COUNT_PROPERTY = "count"
@@ -104,7 +105,7 @@ class SequenceDataDeserializer(
         val node = p.readValueAsTree<JsonNode>()
         val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
 
-        val (key, value) = node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }
+        val (key, value) = node.properties().first { it.key != databaseConfig.schema.primaryKey }
         val sequence = when (value.nodeType) {
             JsonNodeType.NULL -> null
             JsonNodeType.STRING -> value.asText()
@@ -113,10 +114,12 @@ class SequenceDataDeserializer(
             )
         }
 
+        val sequenceName = key.removePrefix(UNALIGNED_PREFIX)
+
         return SequenceData(
             sequenceKey = sequenceKey,
             sequence = sequence,
-            sequenceName = key,
+            sequenceName = sequenceName,
         )
     }
 }

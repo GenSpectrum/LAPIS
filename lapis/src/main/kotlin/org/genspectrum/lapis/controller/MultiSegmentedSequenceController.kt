@@ -29,6 +29,7 @@ import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -211,7 +212,7 @@ class MultiSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             request,
             SequenceType.UNALIGNED,
-            segment,
+            toUnalignedSequenceName(segment),
         )
             .also {
                 sequencesStreamer.stream(
@@ -245,7 +246,7 @@ class MultiSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             request,
             SequenceType.UNALIGNED,
-            segment,
+            toUnalignedSequenceName(segment),
         )
             .also {
                 sequencesStreamer.stream(
