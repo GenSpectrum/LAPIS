@@ -1,6 +1,7 @@
 services:
   lapis-docs:
     image: ${IMAGE}
+    platform: linux/amd64
     ports:
       - "4321:3000"
     volumes:
