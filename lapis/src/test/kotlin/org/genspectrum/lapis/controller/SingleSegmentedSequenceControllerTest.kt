@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
+private const val UNALIGNED_SEGMENT_NAME = "unaligned_otherSegment"
 
 @SpringBootTest(
     properties = [
@@ -115,14 +116,6 @@ class SingleSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFilters = sequenceFiltersRequest(emptyMap()),
-                sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf(SEGMENT_NAME),
-            )
-        } returns returnedValue
-
         mockMvc.perform(request("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/someSegment"))
             .andExpect(status().isNotFound)
     }
@@ -137,7 +130,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(SEGMENT_NAME),
+                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -154,7 +147,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(SEGMENT_NAME),
+                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -174,14 +167,6 @@ class SingleSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFilters = sequenceFiltersRequest(emptyMap()),
-                sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf(SEGMENT_NAME),
-            )
-        } returns returnedValue
-
         mockMvc.perform(request("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/someSegment"))
             .andExpect(status().isNotFound)
     }
