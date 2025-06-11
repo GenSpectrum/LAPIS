@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
+private const val UNALIGNED_SEGMENT_NAME = "unaligned_otherSegment"
 
 @SpringBootTest(
     properties = [
@@ -114,14 +115,6 @@ class SingleSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
-            )
-        } returns returnedValue
-
         mockMvc.perform(request("$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/someSegment"))
             .andExpect(status().isNotFound)
     }
@@ -136,7 +129,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(emptyMap()),
                 SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                UNALIGNED_SEGMENT_NAME,
             )
         } returns returnedValue
 
@@ -153,7 +146,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                UNALIGNED_SEGMENT_NAME,
             )
         } returns returnedValue
 
@@ -173,14 +166,6 @@ class SingleSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
-            )
-        } returns returnedValue
-
         mockMvc.perform(request("$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/someSegment"))
             .andExpect(status().isNotFound)
     }
@@ -188,13 +173,13 @@ class SingleSegmentedSequenceControllerTest(
     companion object {
         @JvmStatic
         val alignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
-            route = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE",
+            route = ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
             sequenceName = SEGMENT_NAME,
         )
 
         @JvmStatic
         val unalignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
-            route = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE",
+            route = UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
             sequenceName = SEGMENT_NAME,
         )
     }

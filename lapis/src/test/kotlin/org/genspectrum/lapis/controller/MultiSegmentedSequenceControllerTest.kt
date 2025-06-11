@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
+private const val UNALIGNED_SEGMENT_NAME = "unaligned_otherSegment"
 
 @SpringBootTest(
     properties = [
@@ -117,14 +118,6 @@ class MultiSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                "someSegment",
-            )
-        } returns returnedValue
-
         mockMvc.perform(request(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
             .andExpect(status().isNotFound)
     }
@@ -139,7 +132,7 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(emptyMap()),
                 SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                UNALIGNED_SEGMENT_NAME,
             )
         } returns returnedValue
 
@@ -156,7 +149,7 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                UNALIGNED_SEGMENT_NAME,
             )
         } returns returnedValue
 
@@ -176,14 +169,6 @@ class MultiSegmentedSequenceControllerTest(
         description: String,
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
-        every {
-            siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                "someSegment",
-            )
-        } returns returnedValue
-
         mockMvc.perform(request(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
             .andExpect(status().isNotFound)
     }
