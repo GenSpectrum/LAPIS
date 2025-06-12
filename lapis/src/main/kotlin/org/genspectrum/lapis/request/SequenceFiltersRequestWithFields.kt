@@ -55,6 +55,6 @@ fun <T> parseFieldsProperty(
     null -> emptyList()
     is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
     else -> throw BadRequestException(
-        "fields must be an array or null",
+        "$FIELDS_PROPERTY must be an array or null",
     )
 }

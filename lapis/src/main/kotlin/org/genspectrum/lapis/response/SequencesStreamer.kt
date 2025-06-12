@@ -19,12 +19,13 @@ class SequencesStreamer(
         sequenceData: Stream<SequenceData>,
         response: HttpServletResponse,
         acceptHeaders: List<MediaType>,
+        singleSequenceEntry: Boolean,
     ) {
         response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
 
         for (acceptHeader in acceptHeaders) {
             if (TEXT_X_FASTA.includes(acceptHeader)) {
-                streamFasta(response, sequenceData)
+                streamFasta(response, sequenceData, singleSequenceEntry)
                 return
             }
 
@@ -39,20 +40,34 @@ class SequencesStreamer(
             }
         }
 
-        streamFasta(response, sequenceData)
+        streamFasta(response, sequenceData, singleSequenceEntry)
     }
 
     private fun streamFasta(
         response: HttpServletResponse,
         sequenceData: Stream<SequenceData>,
+        singleSequenceEntry: Boolean,
     ) {
         if (response.contentType == null) {
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
         response.outputStream.writer().use { stream ->
-            sequenceData.filter { it.sequence != null }
-                .forEach { stream.appendLine(it.writeAsFasta()) }
+            if (singleSequenceEntry) {
+                sequenceData.filter { (_, sequences) -> sequences.values.any { it != null } }.forEach {
+                    val sequence = it.sequences.values.first()
+                    stream.appendLine(">${it.sequenceKey}\n$sequence")
+                }
+            } else {
+                sequenceData
+                    .forEach { (sequenceKey, sequences) ->
+                        sequences
+                            .filter { (_, sequence) -> sequence != null }
+                            .forEach { (segmentName, sequence) ->
+                                stream.appendLine(">$sequenceKey|$segmentName\n$sequence")
+                            }
+                    }
+            }
         }
     }
 
@@ -67,7 +82,7 @@ class SequencesStreamer(
         var isFirstEntry = true
         response.outputStream.writer().use { stream ->
             stream.append('[')
-            sequenceData.filter { it.sequence != null }
+            sequenceData.filter { (_, sequences) -> sequences.values.any { it != null } }
                 .forEach {
                     if (isFirstEntry) {
                         isFirstEntry = false
@@ -89,7 +104,7 @@ class SequencesStreamer(
         }
 
         response.outputStream.writer().use { stream ->
-            sequenceData.filter { it.sequence != null }
+            sequenceData.filter { (_, sequences) -> sequences.values.any { it != null } }
                 .forEach { stream.appendLine(objectMapper.writeValueAsString(it)) }
         }
     }

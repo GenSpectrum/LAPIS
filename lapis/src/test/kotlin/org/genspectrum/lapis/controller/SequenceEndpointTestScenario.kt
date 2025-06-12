@@ -10,10 +10,18 @@ data class SequenceEndpointTestScenario(
 ) {
     override fun toString() = description
 
+    sealed class Mode {
+        data class SingleSequence(
+            val sequenceName: String,
+        ) : Mode()
+
+        object AllSequences : Mode()
+    }
+
     companion object {
         fun createScenarios(
             route: String,
-            sequenceName: String,
+            mode: Mode,
         ): List<SequenceEndpointTestScenario> =
             listOf(
                 null,
@@ -24,7 +32,13 @@ data class SequenceEndpointTestScenario(
                 .flatMap { dataFormat ->
                     val dataFormatJsonSnippet =
                         dataFormat?.let { """, "dataFormat": "${dataFormat.fileFormat}" """ } ?: ""
-                    val mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName)
+
+                    val mockDataCollection = when (mode) {
+                        is Mode.SingleSequence -> MockDataForEndpoints.sequenceEndpointMockData(mode.sequenceName)
+                        Mode.AllSequences -> MockDataForEndpoints.sequenceEndpointMockDataForAllSequences()
+                    }
+
+                    val mockData = mockDataCollection
                         .expecting(dataFormat ?: SequenceEndpointMockDataCollection.DataFormat.FASTA)
 
                     listOf(

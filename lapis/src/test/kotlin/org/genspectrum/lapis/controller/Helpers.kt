@@ -5,6 +5,7 @@ import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithSegments
 import org.genspectrum.lapis.response.MutationData
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 
@@ -57,6 +58,19 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     emptyList(),
     fields.map { Field(it) },
     emptyList(),
+)
+
+fun sequenceFiltersRequestWithSegments(
+    sequenceFilters: Map<String, String>,
+    segments: List<String> = emptyList(),
+) = SequenceFiltersRequestWithSegments(
+    sequenceFilters = sequenceFilters.mapValues { listOf(it.value) },
+    nucleotideMutations = emptyList(),
+    aaMutations = emptyList(),
+    nucleotideInsertions = emptyList(),
+    aminoAcidInsertions = emptyList(),
+    segments = segments,
+    orderByFields = emptyList(),
 )
 
 fun mutationData(

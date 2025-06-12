@@ -4,7 +4,10 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
+import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
@@ -17,7 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -78,9 +81,9 @@ class MultiSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -95,9 +98,9 @@ class MultiSegmentedSequenceControllerTest(
     fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -111,22 +114,58 @@ class MultiSegmentedSequenceControllerTest(
         scenario.mockData.assertDataMatches(responseContent)
     }
 
-    @ParameterizedTest(name = "should not {0} alignedNucleotideSequence without segment")
-    @MethodSource("getRequestsWithoutFilter")
-    fun `should not call alignedNucleotideSequence without segment`(
-        description: String,
-        request: (String) -> MockHttpServletRequestBuilder,
-    ) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getAlignedRequestsForAllSequencesWithFilter")
+    fun `should call allAlignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
+        scenario.mockData.mockWithData(siloQueryModelMock)
+
+        val responseContent = mockMvc.perform(scenario.request)
+            .andExpect(status().isOk)
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
+    }
+
+    @Test
+    fun `WHEN getting all aligned sequences with segment THEN calls model with correct arguments`() {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                "someSegment",
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
-        } returns returnedValue
+        } returns Stream.empty()
 
-        mockMvc.perform(request(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
-            .andExpect(status().isNotFound)
+        mockMvc.perform(
+            getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                .param(SEGMENTS_PROPERTY, SEGMENT_NAME)
+                .param("country", "Switzerland"),
+        )
+            .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `WHEN posting all aligned sequences with segment THEN calls model with correct arguments`() {
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFilters = sequenceFiltersRequestWithSegments(
+                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    segments = listOf(SEGMENT_NAME),
+                ),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
+            )
+        } returns Stream.empty()
+
+        mockMvc.perform(
+            postSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .content("""{"country": "Switzerland", "$SEGMENTS_PROPERTY": ["$SEGMENT_NAME"]}"""),
+        )
+            .andExpect(status().isOk)
     }
 
     @ParameterizedTest(name = "should {0} unalignedNucleotideSequences with empty filter")
@@ -137,9 +176,9 @@ class MultiSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -154,9 +193,9 @@ class MultiSegmentedSequenceControllerTest(
     fun `should call unalignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -178,9 +217,9 @@ class MultiSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                "someSegment",
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf("someSegment"),
             )
         } returns returnedValue
 
@@ -192,13 +231,19 @@ class MultiSegmentedSequenceControllerTest(
         @JvmStatic
         val alignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
             route = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME",
-            sequenceName = SEGMENT_NAME,
+            mode = SingleSequence(SEGMENT_NAME),
         )
 
         @JvmStatic
         val unalignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
             route = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/$SEGMENT_NAME",
-            sequenceName = SEGMENT_NAME,
+            mode = SingleSequence(SEGMENT_NAME),
+        )
+
+        @JvmStatic
+        val alignedRequestsForAllSequencesWithFilter = SequenceEndpointTestScenario.createScenarios(
+            route = ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+            mode = AllSequences,
         )
 
         @JvmStatic
@@ -212,7 +257,7 @@ class MultiSegmentedSequenceControllerTest(
                 { route: String ->
                     postSample(route)
                         .content("""{}""")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                 },
             ),
             // Spring doesn't support empty form encoded requests

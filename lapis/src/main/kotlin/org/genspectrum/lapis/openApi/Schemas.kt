@@ -40,6 +40,7 @@ const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
 const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
 const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
+const val ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "AllNucleotideSequenceRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
@@ -48,6 +49,7 @@ const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
 const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
 const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
+const val ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "AllNucleotideSequencesResponse"
 const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
@@ -84,7 +86,7 @@ const val LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION =
 const val REQUEST_ID_HEADER_DESCRIPTION =
     """
 A UUID that uniquely identifies the request for tracing purposes.
-If none if provided in the request, LAPIS will generate one.
+If none is provided in the request, LAPIS will generate one.
 """
 
 const val REQUEST_INFO_STRING_DESCRIPTION =
@@ -119,6 +121,9 @@ An access key that grants access to the protected data that this instance serves
 There are two types or access keys: One only grants access to aggregated data,
 the other also grants access to detailed data.
 """
+
+const val SEGMENTS_DESCRIPTION =
+    "List of segments to retrieve sequences for. If not provided, all segments will be returned."
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -267,6 +272,36 @@ annotation class LapisNucleotideSequenceResponse(
     @get:AliasFor(annotation = LapisResponseAnnotation::class, attribute = "description")
     val description: String = "",
 )
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = "Returns the sequences of all requested segments that match the given filter criteria.",
+    content = [
+        Content(
+            mediaType = LapisMediaType.TEXT_X_FASTA_VALUE,
+            schema = Schema(
+                type = "string",
+                description = "The fasta headers are of the format '<sequence key>|<segment name>'",
+                example = ">sequenceKey|segmentName\nATCG...",
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            array = ArraySchema(
+                schema = Schema(ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA"),
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_NDJSON_VALUE,
+            schema = Schema(
+                description = "An NDJSON stream of nucleotide sequences. The schema is to be understood per line",
+                ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
+)
+annotation class LapisAllNucleotideSequencesResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

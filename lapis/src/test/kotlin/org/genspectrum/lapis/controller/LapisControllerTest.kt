@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.response.AggregationData
@@ -250,7 +251,7 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.ALIGNED,
-                "geneName",
+                listOf("geneName"),
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
@@ -410,7 +411,7 @@ class LapisControllerTest(
         @JvmStatic
         val alignedAminoAcidSequencesScenarios = SequenceEndpointTestScenario.createScenarios(
             route = "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/geneName",
-            sequenceName = "geneName",
+            mode = SingleSequence("geneName"),
         )
     }
 

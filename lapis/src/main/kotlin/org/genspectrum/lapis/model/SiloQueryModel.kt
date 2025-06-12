@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
@@ -187,14 +188,14 @@ class SiloQueryModel(
     }
 
     fun getGenomicSequence(
-        sequenceFilters: SequenceFiltersRequest,
+        sequenceFilters: CommonSequenceFilters,
         sequenceType: SequenceType,
-        sequenceName: String,
+        sequenceNames: List<String>,
     ) = siloClient.sendQuery(
         SiloQuery(
             SiloAction.genomicSequence(
                 sequenceType,
-                sequenceName,
+                sequenceNames,
                 sequenceFilters.orderByFields,
                 sequenceFilters.limit,
                 sequenceFilters.offset,

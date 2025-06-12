@@ -209,9 +209,9 @@ object MockDataForEndpoints {
     fun sequenceEndpointMockData(sequenceName: String = "main") =
         SequenceEndpointMockDataCollection.create(
             sequenceData = listOf(
-                SequenceData(sequenceKey = "sequence1", sequence = "CAGAA", sequenceName = sequenceName),
-                SequenceData(sequenceKey = "sequence2", sequence = "CAGAT", sequenceName = sequenceName),
-                SequenceData(sequenceKey = "sequence3", sequence = null, sequenceName = sequenceName),
+                SequenceData(sequenceKey = "sequence1", sequences = mapOf(sequenceName to "CAGAA")),
+                SequenceData(sequenceKey = "sequence2", sequences = mapOf(sequenceName to "CAGAT")),
+                SequenceData(sequenceKey = "sequence3", sequences = mapOf(sequenceName to null)),
             ),
             expectedFasta = """
                 >sequence1
@@ -229,6 +229,38 @@ object MockDataForEndpoints {
             expectedNdjson = """
                 { "primaryKey": "sequence1", "$sequenceName": "CAGAA" }
                 { "primaryKey": "sequence2", "$sequenceName": "CAGAT" }
+            """.trimIndent(),
+        )
+
+    fun sequenceEndpointMockDataForAllSequences() =
+        SequenceEndpointMockDataCollection.create(
+            sequenceData = listOf(
+                SequenceData(sequenceKey = "key1", sequences = mapOf("sequence1" to "CAGAA", "sequence2" to "CAGAT")),
+                SequenceData(sequenceKey = "key2", sequences = mapOf("sequence1" to "CAGAT", "sequence2" to null)),
+                SequenceData(sequenceKey = "key3", sequences = mapOf("sequence1" to null, "sequence2" to "CAGAC")),
+            ),
+            expectedFasta = """
+                >key1|sequence1
+                CAGAA
+                >key1|sequence2
+                CAGAT
+                >key2|sequence1
+                CAGAT
+                >key3|sequence2
+                CAGAC
+                
+            """.trimIndent(),
+            expectedJson = """
+                [
+                    { "primaryKey": "key1", "sequence1": "CAGAA", "sequence2": "CAGAT" },
+                    { "primaryKey": "key2", "sequence1": "CAGAT", "sequence2": null },
+                    { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" }
+                ]
+            """.trimIndent(),
+            expectedNdjson = """
+                { "primaryKey": "key1", "sequence1": "CAGAA", "sequence2": "CAGAT" }
+                { "primaryKey": "key2", "sequence1": "CAGAT", "sequence2": null }
+                { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" }
             """.trimIndent(),
         )
 

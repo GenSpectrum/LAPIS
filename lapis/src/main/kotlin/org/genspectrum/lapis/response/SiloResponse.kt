@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.type.TypeReference
@@ -81,12 +80,8 @@ data class InsertionData(
 
 data class SequenceData(
     val sequenceKey: String,
-    val sequence: String?,
-    @JsonIgnore
-    val sequenceName: String,
-) {
-    fun writeAsFasta() = ">$sequenceKey\n$sequence"
-}
+    val sequences: Map<String, String?>,
+)
 
 data class InfoData(
     val dataVersion: String,
@@ -104,19 +99,22 @@ class SequenceDataDeserializer(
         val node = p.readValueAsTree<JsonNode>()
         val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
 
-        val (key, value) = node.fields().asSequence().first { it.key != databaseConfig.schema.primaryKey }
-        val sequence = when (value.nodeType) {
-            JsonNodeType.NULL -> null
-            JsonNodeType.STRING -> value.asText()
-            else -> throw RuntimeException(
-                "Error deserializing sequence data: got unexpected value $value of type ${value.nodeType}",
-            )
-        }
+        val sequences = node.properties()
+            .filter { it.key != databaseConfig.schema.primaryKey }
+            .associate { (sequenceName, value) ->
+                val sequence = when (value.nodeType) {
+                    JsonNodeType.NULL -> null
+                    JsonNodeType.STRING -> value.asText()
+                    else -> throw RuntimeException(
+                        "Error deserializing sequence data: got unexpected value $value of type ${value.nodeType}",
+                    )
+                }
+                sequenceName to sequence
+            }
 
         return SequenceData(
             sequenceKey = sequenceKey,
-            sequence = sequence,
-            sequenceName = key,
+            sequences = sequences,
         )
     }
 }
@@ -132,7 +130,13 @@ class SequenceDataSerializer(
     ) {
         gen.writeStartObject()
         gen.writeStringField(databaseConfig.schema.primaryKey, value.sequenceKey)
-        gen.writeStringField(value.sequenceName, value.sequence)
+        value.sequences.forEach { (sequenceName, sequence) ->
+            if (sequence == null) {
+                gen.writeNullField(sequenceName)
+            } else {
+                gen.writeStringField(sequenceName, sequence)
+            }
+        }
         gen.writeEndObject()
     }
 }

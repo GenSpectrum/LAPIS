@@ -1694,12 +1694,17 @@ class LapisController(
 
         requestContext.filter = request
 
-        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(gene),
+        )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -1722,12 +1727,17 @@ class LapisController(
     ) {
         requestContext.filter = request
 
-        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(gene),
+        )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
