@@ -189,12 +189,12 @@ class SiloQueryModel(
     fun getGenomicSequence(
         sequenceFilters: SequenceFiltersRequest,
         sequenceType: SequenceType,
-        sequenceName: String,
+        sequenceNames: List<String>,
     ) = siloClient.sendQuery(
         SiloQuery(
             SiloAction.genomicSequence(
                 sequenceType,
-                sequenceName,
+                sequenceNames,
                 sequenceFilters.orderByFields,
                 sequenceFilters.limit,
                 sequenceFilters.offset,

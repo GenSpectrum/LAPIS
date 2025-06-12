@@ -107,15 +107,16 @@ class MultiSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.ALIGNED,
-            segment,
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -141,15 +142,16 @@ class MultiSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.ALIGNED,
-            segment,
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -209,15 +211,16 @@ class MultiSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.UNALIGNED,
-            segment,
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -243,15 +246,16 @@ class MultiSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.UNALIGNED,
-            segment,
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
