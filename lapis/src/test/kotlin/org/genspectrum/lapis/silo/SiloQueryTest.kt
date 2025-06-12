@@ -267,11 +267,11 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
+                    SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
                     """
                         {
                             "type": "FastaAligned",
-                            "sequenceName": "someSequenceName",
+                            "sequenceName": ["someSequenceName"],
                             "randomize": false
                         }
                     """,
@@ -279,7 +279,7 @@ class SiloQueryTest {
                 Arguments.of(
                     SiloAction.genomicSequence(
                         SequenceType.ALIGNED,
-                        "someSequenceName",
+                        listOf("someSequenceName"),
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -291,7 +291,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "FastaAligned",
-                            "sequenceName": "someSequenceName",
+                            "sequenceName": ["someSequenceName"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
@@ -303,11 +303,11 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.UNALIGNED, "someSequenceName"),
+                    SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
                     """
                         {
                             "type": "Fasta",
-                            "sequenceName": "someSequenceName",
+                            "sequenceName": ["someSequenceName"],
                             "randomize": false
                         }
                     """,
@@ -315,7 +315,7 @@ class SiloQueryTest {
                 Arguments.of(
                     SiloAction.genomicSequence(
                         SequenceType.UNALIGNED,
-                        "someSequenceName",
+                        listOf("someSequenceName"),
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -327,7 +327,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "Fasta",
-                            "sequenceName": "someSequenceName",
+                            "sequenceName": ["someSequenceName"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}

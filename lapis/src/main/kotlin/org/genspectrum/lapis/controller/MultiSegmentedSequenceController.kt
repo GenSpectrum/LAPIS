@@ -53,6 +53,76 @@ class MultiSegmentedSequenceController(
     private val sequencesStreamer: SequencesStreamer,
 ) {
     @GetMapping(
+        ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+    )
+    // TODO use the collect annotation
+    @LapisNucleotideSequenceResponse(
+        description = ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    )
+    fun getAllAlignedNucleotideSequences(
+        // TODO add annotation for correct type
+        @RequestParam
+        segments: List<String>,
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @NucleotideSequencesOrderByFields
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Limit
+        @RequestParam
+        limit: Int? = null,
+        @Offset
+        @RequestParam
+        offset: Int? = null,
+        @SequencesDataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = SequenceFiltersRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = request
+
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = segments,
+        )
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = false,
+                )
+            }
+    }
+
+    @GetMapping(
         "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}",
         produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
     )

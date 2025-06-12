@@ -75,9 +75,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -92,9 +92,9 @@ class SingleSegmentedSequenceControllerTest(
     fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -116,9 +116,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -134,9 +134,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -151,9 +151,9 @@ class SingleSegmentedSequenceControllerTest(
     fun `should call unalignedNucleotideSequence with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -175,9 +175,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 

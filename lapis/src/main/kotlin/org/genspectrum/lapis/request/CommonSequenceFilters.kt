@@ -89,8 +89,7 @@ fun parseCommonFields(
         else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
     }
 
-    val sequenceFilters = node.fields()
-        .asSequence()
+    val sequenceFilters = node.properties()
         .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
         .associate { it.key to getValuesList(it.value, it.key) }
     return ParsedCommonFields(

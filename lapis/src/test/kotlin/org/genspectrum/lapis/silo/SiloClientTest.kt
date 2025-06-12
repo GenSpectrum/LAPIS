@@ -160,7 +160,7 @@ class SiloClientTest(
         )
 
         val query = SiloQuery(
-            SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"),
+            SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
             StringEquals("theColumn", "theValue"),
         )
         val result = underTest.sendQuery(query).toList()
@@ -169,9 +169,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(sequenceKey = "key1", sequence = "ABCD", sequenceName = "someSequenceName"),
-                SequenceData(sequenceKey = "key2", sequence = "DEFG", sequenceName = "someSequenceName"),
-                SequenceData(sequenceKey = "key3", sequence = null, sequenceName = "someSequenceName"),
+                SequenceData(sequenceKey = "key1", sequences = mapOf("someSequenceName" to "ABCD")),
+                SequenceData(sequenceKey = "key2", sequences = mapOf("someSequenceName" to "DEFG")),
+                SequenceData(sequenceKey = "key3", sequences = mapOf("someSequenceName" to null)),
             ),
         )
     }
@@ -517,8 +517,8 @@ class SiloClientTest(
         @JvmStatic
         val queriesThatShouldNotBeCached = listOf(
             SiloQuery(SiloAction.details(), True),
-            SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, "sequenceName"), True),
-            SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, "sequenceName"), True),
+            SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("sequenceName")), True),
+            SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("sequenceName")), True),
         )
 
         @JvmStatic

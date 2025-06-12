@@ -250,7 +250,7 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 SequenceType.ALIGNED,
-                "geneName",
+                listOf("geneName"),
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")

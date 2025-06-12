@@ -357,7 +357,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getGenomicSequence(
-            SequenceFiltersRequest(
+            sequenceFilters = SequenceFiltersRequest(
                 emptyMap(),
                 emptyList(),
                 emptyList(),
@@ -365,13 +365,19 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
             ),
-            SequenceType.ALIGNED,
-            "someSequenceName",
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf("someSequenceName"),
         )
 
         verify {
             siloClientMock.sendQuery(
-                SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, "someSequenceName"), True),
+                SiloQuery(
+                    SiloAction.genomicSequence(
+                        type = SequenceType.ALIGNED,
+                        sequenceName = listOf("someSequenceName"),
+                    ),
+                    True,
+                ),
             )
         }
     }

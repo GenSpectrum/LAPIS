@@ -209,9 +209,9 @@ object MockDataForEndpoints {
     fun sequenceEndpointMockData(sequenceName: String = "main") =
         SequenceEndpointMockDataCollection.create(
             sequenceData = listOf(
-                SequenceData(sequenceKey = "sequence1", sequence = "CAGAA", sequenceName = sequenceName),
-                SequenceData(sequenceKey = "sequence2", sequence = "CAGAT", sequenceName = sequenceName),
-                SequenceData(sequenceKey = "sequence3", sequence = null, sequenceName = sequenceName),
+                SequenceData(sequenceKey = "sequence1", sequences = mapOf(sequenceName to "CAGAA")),
+                SequenceData(sequenceKey = "sequence2", sequences = mapOf(sequenceName to "CAGAT")),
+                SequenceData(sequenceKey = "sequence3", sequences = mapOf(sequenceName to null)),
             ),
             expectedFasta = """
                 >sequence1
