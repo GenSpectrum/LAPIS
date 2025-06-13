@@ -40,6 +40,7 @@ const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
 const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
 const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
+const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
@@ -49,6 +50,7 @@ const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
 const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
 const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
 const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
+const val NUCLEOTIDE_MUTATIONS_OVER_TIME_RESPONSE_SCHEMA = "NucleotideMutationsOverTimeResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -267,6 +269,18 @@ annotation class LapisNucleotideSequenceResponse(
     @get:AliasFor(annotation = LapisResponseAnnotation::class, attribute = "description")
     val description: String = "",
 )
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    content = [
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_OVER_TIME_RESPONSE_SCHEMA"),
+        ),
+    ],
+)
+annotation class NucleotideMutationsOverTimeResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
