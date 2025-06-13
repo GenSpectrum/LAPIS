@@ -41,6 +41,9 @@ const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of unaligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered.
     Sequences that don't have an unaligned sequence for this segment are omitted."""
+const val NUCLEOTIDE_MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION =
+    """Returns the number of sequences containing the specified mutations within the requested date ranges, along 
+    with the corresponding coverage."""
 
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     """The fields to stratify by.

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.BooleanSchema
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.media.NumberSchema
+import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -181,8 +182,12 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
+                    MUTATIONS_OVER_TIME_REQUEST_SCHEMA,
+                    requestSchemaForMutationsOverTime(databaseConfig, sequenceFilterFields),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description(
@@ -198,7 +203,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     DETAILS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description(
@@ -209,7 +214,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
@@ -219,7 +224,7 @@ fun buildOpenApiSchema(
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(
                     AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
@@ -228,7 +233,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("Nucleotide Insertion data.")
@@ -241,7 +246,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("Amino Acid Insertion data.")
@@ -332,17 +337,28 @@ private fun getSequenceFilters(
     sequenceFilterFields: SequenceFilterFields,
     orderByFieldsSchema: Schema<*>,
 ): Map<SequenceFilterFieldName, Schema<*>> =
+    getBaseSequenceFilters(databaseConfig, sequenceFilterFields) +
+        Pair(ORDER_BY_PROPERTY, orderByPostSchema(orderByFieldsSchema)) +
+        Pair(LIMIT_PROPERTY, limitSchema()) +
+        Pair(OFFSET_PROPERTY, offsetSchema()) +
+        getCompressionAndDownloadSchema()
+
+private fun getBaseSequenceFilters(
+    databaseConfig: DatabaseConfig,
+    sequenceFilterFields: SequenceFilterFields,
+): Map<SequenceFilterFieldName, Schema<*>> =
     computePrimitiveFieldFilters(databaseConfig, sequenceFilterFields) +
         Pair(NUCLEOTIDE_MUTATIONS_PROPERTY, nucleotideMutations()) +
         Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
         Pair(NUCLEOTIDE_INSERTIONS_PROPERTY, nucleotideInsertions()) +
-        Pair(AMINO_ACID_INSERTIONS_PROPERTY, aminoAcidInsertions()) +
-        Pair(ORDER_BY_PROPERTY, orderByPostSchema(orderByFieldsSchema)) +
-        Pair(LIMIT_PROPERTY, limitSchema()) +
-        Pair(OFFSET_PROPERTY, offsetSchema()) +
-        Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema()) +
-        Pair(DOWNLOAD_FILE_BASENAME_PROPERTY, downloadFileBasenameSchema()) +
-        Pair(COMPRESSION_PROPERTY, compressionSchema())
+        Pair(AMINO_ACID_INSERTIONS_PROPERTY, aminoAcidInsertions())
+
+private fun getCompressionAndDownloadSchema() =
+    mapOf(
+        Pair(DOWNLOAD_AS_FILE_PROPERTY, downloadAsFileSchema()),
+        Pair(DOWNLOAD_FILE_BASENAME_PROPERTY, downloadFileBasenameSchema()),
+        Pair(COMPRESSION_PROPERTY, compressionSchema()),
+    )
 
 fun downloadAsFileSchema(): Schema<*> =
     BooleanSchema()
@@ -373,11 +389,14 @@ private fun lapisResponseSchema(dataSchema: Schema<Any>) =
     Schema<Any>().types(setOf("object"))
         .properties(
             mapOf(
-                "data" to Schema<Any>().types(setOf("array")).items(dataSchema),
+                "data" to dataSchema,
                 "info" to infoResponseSchema(),
             ),
         )
         .required(listOf("data", "info"))
+
+private fun lapisArrayResponseSchema(dataSchema: Schema<Any>) =
+    lapisResponseSchema(Schema<Any>().types(setOf("array")).items(dataSchema))
 
 private fun infoResponseSchema() =
     Schema<LapisInfo>().types(setOf("object"))
@@ -513,6 +532,47 @@ private fun requestSchemaWithGenes(
                 GENES_PROPERTY,
                 arraySchema(genesEnum(referenceGenomeSchema)).description(GENES_DESCRIPTION),
             ),
+        )
+
+private fun requestSchemaForMutationsOverTime(
+    databaseConfig: DatabaseConfig,
+    sequenceFilterFields: SequenceFilterFields,
+): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("Request schema for fetching mutations over time.")
+        .properties(
+            mapOf(
+                "filters" to
+                    Schema<Any>()
+                        .types(setOf("object"))
+                        .description("Sequence filters")
+                        .properties(
+                            getBaseSequenceFilters(databaseConfig, sequenceFilterFields),
+                        ),
+            ) +
+                getCompressionAndDownloadSchema() +
+                mapOf(
+                    "includeMutations" to Schema<List<String>>()
+                        .types(setOf("array"))
+                        .items(
+                            Schema<String>()
+                                .example("C44T")
+                                .description("Mutation to include"),
+                        )
+                        .description("List of mutations to include"),
+                    "dateRanges" to ArraySchema()
+                        .items(
+                            ObjectSchema()
+                                .addProperty("dateFrom", Schema<String>().example("2025-05-12"))
+                                .addProperty("dateTo", Schema<String>().example("2025-06-12"))
+                                .description("Date range in which to aggregate mutation data."),
+                        )
+                        .description("List of date ranges for aggregation."),
+                    "dateField" to Schema<String>()
+                        .example("date")
+                        .description("Metadata field name containing the date"),
+                ),
         )
 
 private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilterFieldName, Schema<Any>>) =
