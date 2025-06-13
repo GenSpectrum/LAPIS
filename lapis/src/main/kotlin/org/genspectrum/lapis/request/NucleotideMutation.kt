@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
@@ -51,6 +52,20 @@ data class NucleotideMutation(
     }
 
     override fun asMaybe() = copy(maybe = true)
+
+    fun toString(referenceGenome: ReferenceGenome): String {
+        val sequenceNamePrefix = if (sequenceName != null) "$sequenceName:" else ""
+        // TODO This could lead to an array index out of bounds exception because the position has not necessarily been
+        //  validated. Is that alright?
+        val referenceBase = referenceGenome.getNucleotideSequence(sequenceName)[position - 1]
+        val symbolString = symbol ?: ""
+        val mutationString = "${sequenceNamePrefix}${referenceBase}$position$symbolString"
+
+        if (maybe) {
+            return "maybe($mutationString)"
+        }
+        return mutationString
+    }
 }
 
 private val NUCLEOTIDE_MUTATION_REGEX =

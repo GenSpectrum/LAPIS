@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.nucleotideSymbols
 import org.genspectrum.lapis.request.BaseSequenceFilters
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 data class MutationOverTimeResponse(
-    var rowLabels: List<NucleotideMutation>,
+    var rowLabels: List<String>,
     var columnLabels: List<DateRange>,
     var data: List<List<MutationOverTimeCell>>,
 )
@@ -32,6 +33,7 @@ data class MutationOverTimeCell(
 class MutationsOverTime(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
+    private val referenceGenome: ReferenceGenome,
 ) {
     fun evaluate(
         mutations: List<NucleotideMutation>,
@@ -41,14 +43,18 @@ class MutationsOverTime(
     ): MutationOverTimeResponse {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
             return MutationOverTimeResponse(
-                rowLabels = mutations,
+                rowLabels = mutations.map { it.toString(referenceGenome) },
                 columnLabels = dateRanges,
                 data = emptyList(),
             )
         }
 
         val dateQuery =
-            DateBetween(column = dateField, from = dateRanges[0].dateFrom, to = dateRanges.last().dateTo)
+            DateBetween(
+                column = dateField,
+                from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
+                to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
+            )
 
         val siloExpressionFromLapisFilter = siloFilterExpressionMapper.map(lapisFilter)
 
@@ -70,7 +76,7 @@ class MutationsOverTime(
         }.toList()
 
         return MutationOverTimeResponse(
-            rowLabels = mutations,
+            rowLabels = mutations.map { it.toString(referenceGenome) },
             columnLabels = dateRanges,
             data = data,
         )
