@@ -79,6 +79,13 @@ data class ReferenceGenome(
     companion object {
         fun readFromFile(filename: String): ReferenceGenome = jacksonObjectMapper().readValue(File(filename))
     }
+
+    fun getNucleotideSequence(sequenceName: String?): String {
+        if (sequenceName == null) {
+            return nucleotideSequences.first().sequence
+        }
+        return nucleotideSequences.first { it.name == sequenceName }.sequence
+    }
 }
 
 data class ReferenceSequence(

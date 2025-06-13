@@ -1,11 +1,13 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.nucleotideSymbols
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
@@ -14,65 +16,91 @@ import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.WithDataVersion
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-data class MutationOverTimeResponse(
-    var rowLabels: List<NucleotideMutation>,
+data class MutationsOverTimeResult(
+    var rowLabels: List<String>,
     var columnLabels: List<DateRange>,
-    var data: List<List<MutationOverTimeCell>>,
+    var data: List<List<MutationsOverTimeCell>>,
 )
 
-data class MutationOverTimeCell(
+data class MutationsOverTimeCell(
     var count: Int,
     var coverage: Int,
 )
 
 @Component
-class MutationsOverTime(
+class MutationsOverTimeModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
+    private val referenceGenome: ReferenceGenome,
+    private val dataVersion: DataVersion,
 ) {
     fun evaluate(
         mutations: List<NucleotideMutation>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
         dateField: String,
-    ): MutationOverTimeResponse {
+        remainingRetries: Int = 1,
+    ): MutationsOverTimeResult {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
-            return MutationOverTimeResponse(
-                rowLabels = mutations,
+            return MutationsOverTimeResult(
+                rowLabels = mutations.map { it.toString(referenceGenome) },
                 columnLabels = dateRanges,
                 data = emptyList(),
             )
         }
 
         val dateQuery =
-            DateBetween(column = dateField, from = dateRanges[0].dateFrom, to = dateRanges.last().dateTo)
+            DateBetween(
+                column = dateField,
+                from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
+                to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
+            )
 
         val siloExpressionFromLapisFilter = siloFilterExpressionMapper.map(lapisFilter)
 
-        val data = mutations.parallelStream().map { mutation ->
-            val counts = queryCounts(
+        val dataWithDataVersions = mutations.parallelStream().map { mutation ->
+            val countsWithDataVersion = queryCounts(
                 mutation = mutation,
                 baseSiloFilterExpression = siloExpressionFromLapisFilter,
                 dateQuery = dateQuery,
                 dateField = dateField,
             )
-            val coverage = queryCoverage(
+            val coverageWithDataVersion = queryCoverage(
                 mutation = mutation,
                 baseSiloFilterExpression = siloExpressionFromLapisFilter,
                 dateQuery = dateQuery,
                 dateField = dateField,
             )
 
-            buildResultRow(dateRanges, counts, coverage, dateField)
+            listOf(countsWithDataVersion.dataVersion, coverageWithDataVersion.dataVersion) to
+                buildResultRow(
+                    dateRanges,
+                    countsWithDataVersion.queryResult,
+                    coverageWithDataVersion.queryResult,
+                    dateField,
+                )
         }.toList()
 
-        return MutationOverTimeResponse(
-            rowLabels = mutations,
+        val dataVersions = dataWithDataVersions.flatMap { it.first }
+        if (dataVersions.distinct().size != 1) {
+            if (remainingRetries > 0) {
+                return evaluate(mutations, dateRanges, lapisFilter, dateField, remainingRetries - 1)
+            }
+            throw RuntimeException(
+                "The data has been updated multiple times during the execution of the request. This is unexpected. " +
+                    "Please try again or inform the administrator of the LAPIS instance or the LAPIS developers.",
+            )
+        }
+        dataVersion.dataVersion = dataVersions.first()
+
+        return MutationsOverTimeResult(
+            rowLabels = mutations.map { it.toString(referenceGenome) },
             columnLabels = dateRanges,
-            data = data,
+            data = dataWithDataVersions.map { it.second },
         )
     }
 
@@ -81,7 +109,7 @@ class MutationsOverTime(
         baseSiloFilterExpression: SiloFilterExpression,
         dateQuery: DateBetween,
         dateField: String,
-    ): List<AggregationData> {
+    ): WithDataVersion<List<AggregationData>> {
         val mutationQuery = when (mutation.symbol) {
             null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
             else -> NucleotideSymbolEquals(
@@ -104,7 +132,7 @@ class MutationsOverTime(
         baseSiloFilterExpression: SiloFilterExpression,
         dateQuery: DateBetween,
         dateField: String,
-    ): List<AggregationData> {
+    ): WithDataVersion<List<AggregationData>> {
         val coverageQuery = Or(
             nucleotideSymbols.map {
                 NucleotideSymbolEquals(
@@ -128,8 +156,8 @@ class MutationsOverTime(
         dateQuery: SiloFilterExpression,
         mutationQuery: SiloFilterExpression,
         dateField: String,
-    ): List<AggregationData> =
-        siloClient.sendQuery(
+    ): WithDataVersion<List<AggregationData>> =
+        siloClient.sendQueryAndGetDataVersion(
             SiloQuery(
                 SiloAction.aggregated(
                     listOf(dateField),
@@ -145,15 +173,16 @@ class MutationsOverTime(
                     ),
                 ),
             ),
-        ).toList()
+            setRequestDataVersion = false,
+        ).map { it.toList() }
 
     private fun buildResultRow(
         dateRanges: List<DateRange>,
         counts: List<AggregationData>,
         coverage: List<AggregationData>,
         dateField: String,
-    ): List<MutationOverTimeCell> {
-        val result = Array(dateRanges.size) { MutationOverTimeCell(0, 0) }
+    ): List<MutationsOverTimeCell> {
+        val result = Array(dateRanges.size) { MutationsOverTimeCell(0, 0) }
 
         counts.forEach { dateCount ->
             val dateString = dateCount.fields[dateField]?.asText()
