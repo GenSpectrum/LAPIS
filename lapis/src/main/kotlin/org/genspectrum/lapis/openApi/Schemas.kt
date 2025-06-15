@@ -50,7 +50,7 @@ const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
 const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
 const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
 const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
-const val NUCLEOTIDE_MUTATIONS_OVER_TIME_RESPONSE_SCHEMA = "NucleotideMutationsOverTimeResponse"
+const val MUTATIONS_OVER_TIME_RESPONSE_SCHEMA = "MutationsOverTimeResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -276,11 +276,11 @@ annotation class LapisNucleotideSequenceResponse(
     content = [
         Content(
             mediaType = MediaType.APPLICATION_JSON_VALUE,
-            schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_MUTATIONS_OVER_TIME_RESPONSE_SCHEMA"),
+            schema = Schema(ref = "#/components/schemas/$MUTATIONS_OVER_TIME_RESPONSE_SCHEMA"),
         ),
     ],
 )
-annotation class NucleotideMutationsOverTimeResponse
+annotation class MutationsOverTimeResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

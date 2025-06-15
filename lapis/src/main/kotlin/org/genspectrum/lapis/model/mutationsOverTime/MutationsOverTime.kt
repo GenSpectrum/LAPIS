@@ -2,12 +2,16 @@ package org.genspectrum.lapis.model.mutationsOverTime
 
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.nucleotideSymbols
+import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -35,97 +39,95 @@ class MutationsOverTime(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
 ) {
-    fun evaluate(
+    fun evaluateNucleotideMutations(
         mutations: List<NucleotideMutation>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
         dateField: String,
+    ): MutationOverTimeResponse =
+        evaluateInternal(
+            mutations = mutations,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
+            countQueryFn = { mutation ->
+                when (mutation.symbol) {
+                    null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
+                    else -> NucleotideSymbolEquals(mutation.sequenceName, mutation.position, mutation.symbol)
+                }
+            },
+            coverageQueryFn = { mutation ->
+                Or(
+                    nucleotideSymbols.map {
+                        NucleotideSymbolEquals(mutation.sequenceName, mutation.position, it.toString())
+                    },
+                )
+            },
+        )
+
+    fun evaluateAminoAcidMutations(
+        mutations: List<AminoAcidMutation>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+    ): MutationOverTimeResponse =
+        evaluateInternal(
+            mutations = mutations,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
+            countQueryFn = { mutation ->
+                when (mutation.symbol) {
+                    null -> HasAminoAcidMutation(mutation.gene, mutation.position)
+                    else -> AminoAcidSymbolEquals(mutation.gene, mutation.position, mutation.symbol)
+                }
+            },
+            coverageQueryFn = { mutation ->
+                Or(
+                    aaSymbols.map {
+                        AminoAcidSymbolEquals(mutation.gene, mutation.position, it.toString())
+                    },
+                )
+            },
+        )
+
+    private fun <T> evaluateInternal(
+        mutations: List<T>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+        mutationToStringFn: (T) -> String,
+        countQueryFn: (T) -> SiloFilterExpression,
+        coverageQueryFn: (T) -> SiloFilterExpression,
     ): MutationOverTimeResponse {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
             return MutationOverTimeResponse(
-                rowLabels = mutations.map { it.toString(referenceGenome) },
+                rowLabels = mutations.map(mutationToStringFn),
                 columnLabels = dateRanges,
                 data = emptyList(),
             )
         }
 
-        val dateQuery =
-            DateBetween(
-                column = dateField,
-                from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
-                to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
-            )
+        val dateQuery = DateBetween(
+            column = dateField,
+            from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
+            to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
+        )
 
-        val siloExpressionFromLapisFilter = siloFilterExpressionMapper.map(lapisFilter)
+        val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
         val data = mutations.parallelStream().map { mutation ->
-            val counts = queryCounts(
-                mutation = mutation,
-                baseSiloFilterExpression = siloExpressionFromLapisFilter,
-                dateQuery = dateQuery,
-                dateField = dateField,
-            )
-            val coverage = queryCoverage(
-                mutation = mutation,
-                baseSiloFilterExpression = siloExpressionFromLapisFilter,
-                dateQuery = dateQuery,
-                dateField = dateField,
-            )
-
+            val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
+            val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
             buildResultRow(dateRanges, counts, coverage, dateField)
         }.toList()
 
         return MutationOverTimeResponse(
-            rowLabels = mutations.map { it.toString(referenceGenome) },
+            rowLabels = mutations.map(mutationToStringFn),
             columnLabels = dateRanges,
             data = data,
-        )
-    }
-
-    private fun queryCounts(
-        mutation: NucleotideMutation,
-        baseSiloFilterExpression: SiloFilterExpression,
-        dateQuery: DateBetween,
-        dateField: String,
-    ): List<AggregationData> {
-        val mutationQuery = when (mutation.symbol) {
-            null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
-            else -> NucleotideSymbolEquals(
-                mutation.sequenceName,
-                mutation.position,
-                mutation.symbol,
-            )
-        }
-
-        return sendQuery(
-            dateQuery = dateQuery,
-            baseSiloFilterExpression = baseSiloFilterExpression,
-            dateField = dateField,
-            mutationQuery = mutationQuery,
-        )
-    }
-
-    private fun queryCoverage(
-        mutation: NucleotideMutation,
-        baseSiloFilterExpression: SiloFilterExpression,
-        dateQuery: DateBetween,
-        dateField: String,
-    ): List<AggregationData> {
-        val coverageQuery = Or(
-            nucleotideSymbols.map {
-                NucleotideSymbolEquals(
-                    sequenceName = mutation.sequenceName,
-                    position = mutation.position,
-                    symbol = it.toString(),
-                )
-            },
-        )
-
-        return sendQuery(
-            dateQuery = dateQuery,
-            baseSiloFilterExpression = baseSiloFilterExpression,
-            dateField = dateField,
-            mutationQuery = coverageQuery,
         )
     }
 

@@ -78,6 +78,8 @@ data class ReferenceGenome(
         }
         return nucleotideSequences.first { it.name == sequenceName }.sequence
     }
+
+    fun getGeneSequence(gene: String): String = genes.first { it.name == gene }.sequence
 }
 
 data class ReferenceSequence(

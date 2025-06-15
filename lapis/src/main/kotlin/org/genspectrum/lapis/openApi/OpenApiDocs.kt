@@ -237,7 +237,7 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
-                    NUCLEOTIDE_MUTATIONS_OVER_TIME_RESPONSE_SCHEMA,
+                    MUTATIONS_OVER_TIME_RESPONSE_SCHEMA,
                     mutationsOverTimeResponse(),
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
