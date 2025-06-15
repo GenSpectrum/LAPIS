@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -46,12 +47,15 @@ class MutationsOverTimeTest {
     @Autowired
     private lateinit var siloFilterExpressionMapper: SiloFilterExpressionMapper
 
+    @Autowired
+    private lateinit var referenceGenome: ReferenceGenome
+
     private lateinit var underTest: MutationsOverTime
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = MutationsOverTime(siloQueryClient, siloFilterExpressionMapper)
+        underTest = MutationsOverTime(siloQueryClient, siloFilterExpressionMapper, referenceGenome)
     }
 
     @Test
@@ -61,7 +65,7 @@ class MutationsOverTimeTest {
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = DUMMY_LAPIS_FILTER,
@@ -76,18 +80,18 @@ class MutationsOverTimeTest {
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
-            NucleotideMutation(sequenceName = "sequence1", position = 234, symbol = "G"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 2, symbol = "G"),
         )
         val dateRanges = emptyList<DateRange>()
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
+        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.columnLabels, equalTo(emptyList()))
     }
@@ -106,8 +110,8 @@ class MutationsOverTimeTest {
                         query.filterExpression is And &&
                         (query.filterExpression as And).children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 123 &&
+                                it.sequenceName == null &&
+                                it.position == 1 &&
                                 it.symbol == "T"
                         } &&
                         (query.filterExpression as And).children.any {
@@ -137,8 +141,8 @@ class MutationsOverTimeTest {
                         query.filterExpression is And &&
                         (query.filterExpression as And).children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 234 &&
+                                it.sequenceName == null &&
+                                it.position == 2 &&
                                 it.symbol == "G"
                         } &&
                         (query.filterExpression as And).children.any {
@@ -171,8 +175,8 @@ class MutationsOverTimeTest {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 123 &&
+                                        child.sequenceName == null &&
+                                        child.position == 1 &&
                                         child.symbol in listOf("A", "C", "T", "G")
                                 }
                         } &&
@@ -205,8 +209,8 @@ class MutationsOverTimeTest {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 234 &&
+                                        child.sequenceName == null &&
+                                        child.position == 2 &&
                                         child.symbol in listOf("A", "C", "T", "G")
                                 }
                         } &&
@@ -227,22 +231,22 @@ class MutationsOverTimeTest {
         }
 
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
-            NucleotideMutation(sequenceName = "sequence1", position = 234, symbol = "G"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 2, symbol = "G"),
         )
         val dateRanges = listOf(
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
 
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
+        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.columnLabels, equalTo(dateRanges))
         assertThat(
             result.data,
@@ -275,8 +279,8 @@ class MutationsOverTimeTest {
                         query.filterExpression is And &&
                         (query.filterExpression as And).children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 123 &&
+                                it.sequenceName == null &&
+                                it.position == 1 &&
                                 it.symbol == "T"
                         } &&
                         (query.filterExpression as And).children.any {
@@ -305,8 +309,8 @@ class MutationsOverTimeTest {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 123 &&
+                                        child.sequenceName == null &&
+                                        child.position == 1 &&
                                         child.symbol in listOf("A", "C", "T", "G")
                                 }
                         } &&
@@ -323,21 +327,21 @@ class MutationsOverTimeTest {
         }
 
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
         )
         val dateRanges = listOf(
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
 
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
+        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.columnLabels, equalTo(dateRanges))
         assertThat(
             result.data,

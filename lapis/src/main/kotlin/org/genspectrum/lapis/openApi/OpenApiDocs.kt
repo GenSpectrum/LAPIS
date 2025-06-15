@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.BooleanSchema
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.media.NumberSchema
+import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -149,8 +150,12 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
+                    MUTATIONS_OVER_TIME_REQUEST_SCHEMA,
+                    requestSchemaForMutationsOverTime(),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description(
@@ -166,7 +171,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     DETAILS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description(
@@ -177,7 +182,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
@@ -187,7 +192,7 @@ fun buildOpenApiSchema(
                 .addSchemas(NUCLEOTIDE_MUTATIONS_SCHEMA, nucleotideMutations())
                 .addSchemas(
                     AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("The count and proportion of a mutation.")
@@ -196,7 +201,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("Nucleotide Insertion data.")
@@ -209,7 +214,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA,
-                    lapisResponseSchema(
+                    lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description("Amino Acid Insertion data.")
@@ -230,6 +235,10 @@ fun buildOpenApiSchema(
                         databaseConfig.schema,
                         referenceGenomeSchema.genes,
                     ),
+                )
+                .addSchemas(
+                    MUTATIONS_OVER_TIME_RESPONSE_SCHEMA,
+                    mutationsOverTimeResponse(),
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
@@ -327,11 +336,14 @@ private fun lapisResponseSchema(dataSchema: Schema<Any>) =
     Schema<Any>().types(setOf("object"))
         .properties(
             mapOf(
-                "data" to Schema<Any>().types(setOf("array")).items(dataSchema),
+                "data" to dataSchema,
                 "info" to infoResponseSchema(),
             ),
         )
         .required(listOf("data", "info"))
+
+private fun lapisArrayResponseSchema(dataSchema: Schema<Any>) =
+    lapisResponseSchema(Schema<Any>().types(setOf("array")).items(dataSchema))
 
 private fun infoResponseSchema() =
     Schema<LapisInfo>().types(setOf("object"))
@@ -438,6 +450,34 @@ private fun requestSchemaWithFields(
             requestProperties + Pair(
                 FIELDS_PROPERTY,
                 fieldsArray(databaseConfig).description(fieldsDescription),
+            ),
+        )
+
+private fun requestSchemaForMutationsOverTime(): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("Request schema for fetching mutations over time.")
+        .properties(
+            mapOf(
+                "includeMutations" to Schema<List<String>>()
+                    .types(setOf("array"))
+                    .items(
+                        Schema<String>()
+                            .example("C44T")
+                            .description("Mutation to include"),
+                    )
+                    .description("List of mutations to include"),
+                "dateRanges" to ArraySchema()
+                    .items(
+                        ObjectSchema()
+                            .addProperty("dateFrom", Schema<String>().example("2025-05-12"))
+                            .addProperty("dateTo", Schema<String>().example("2025-06-12"))
+                            .description("Date range in which to aggregate mutation data."),
+                    )
+                    .description("List of date ranges for aggregation."),
+                "dateField" to Schema<String>()
+                    .example("date")
+                    .description("Metadata field name containing the date"),
             ),
         )
 
@@ -759,6 +799,46 @@ private fun sequencesResponse(
                 )
         }
     }
+}
+
+private fun mutationsOverTimeResponse(): Schema<Any> {
+    val dataSchema = ObjectSchema()
+        .addProperty(
+            "rowLabels",
+            ArraySchema()
+                .items(
+                    StringSchema()
+                        .example("sequence1:G29741T"),
+                )
+                .description("List of mutations"),
+        )
+        .addProperty(
+            "columnLabels",
+            ArraySchema()
+                .items(
+                    ObjectSchema()
+                        .addProperty("dateFrom", Schema<String>().example("2025-05-12"))
+                        .addProperty("dateTo", Schema<String>().example("2025-06-12"))
+                        .description("Date range for which mutation counts were aggregated."),
+                )
+                .description("List of date ranges (columns) in the format {dateFrom, dateTo}."),
+        )
+        .addProperty(
+            "data",
+            ArraySchema()
+                .items(
+                    ArraySchema()
+                        .items(
+                            ObjectSchema()
+                                .addProperty("count", Schema<Int>().example(10))
+                                .addProperty("coverage", Schema<Int>().example(20))
+                                .description("Count and coverage for the given mutation in the time range."),
+                        ),
+                )
+                .description("2D array with mutation data corresponding to row and column labels."),
+        )
+        .description("Aggregated mutation data over time, structured by row and column labels.")
+    return lapisResponseSchema(dataSchema)
 }
 
 private fun mutationsFieldsSchema(): ArraySchema? =
