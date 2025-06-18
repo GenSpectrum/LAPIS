@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
+import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -17,6 +19,7 @@ import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -268,6 +272,61 @@ class LapisControllerTest(
         scenario.mockData.assertDataMatches(responseContent)
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getAllAlignedAminoAcidSequencesScenarios")
+    fun allAlignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
+        scenario.mockData.mockWithData(siloQueryModelMock)
+
+        val responseContent = mockMvc.perform(scenario.request)
+            .andExpect(status().isOk)
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
+    }
+
+    @Test
+    fun `WHEN getting all amino acid sequences with gene THEN calls model with correct arguments`() {
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf("gene1", "gene2"),
+            )
+        } returns Stream.empty()
+
+        mockMvc.perform(
+            getSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
+                .param(SEGMENTS_PROPERTY, "gene1")
+                .param(SEGMENTS_PROPERTY, "gene2")
+                .param("country", "Switzerland"),
+        )
+            .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `WHEN posting all aligned sequences with segment THEN calls model with correct arguments`() {
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFilters = sequenceFiltersRequestWithGenes(
+                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    genes = listOf("gene1", "gene2"),
+                ),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf("gene1", "gene2"),
+            )
+        } returns Stream.empty()
+
+        mockMvc.perform(
+            postSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .content("""{"country": "Switzerland", "$SEGMENTS_PROPERTY": ["gene1", "gene2"]}"""),
+        )
+            .andExpect(status().isOk)
+    }
+
     private companion object {
         @JvmStatic
         val standardRequests = listOf(
@@ -412,6 +471,12 @@ class LapisControllerTest(
         val alignedAminoAcidSequencesScenarios = SequenceEndpointTestScenario.createScenarios(
             route = "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/geneName",
             mode = SingleSequence("geneName"),
+        )
+
+        @JvmStatic
+        val allAlignedAminoAcidSequencesScenarios = SequenceEndpointTestScenario.createScenarios(
+            route = ALIGNED_AMINO_ACID_SEQUENCES_ROUTE,
+            mode = AllSequences,
         )
     }
 

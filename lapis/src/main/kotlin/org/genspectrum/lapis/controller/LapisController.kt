@@ -2,9 +2,11 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -12,6 +14,7 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.AggregatedOrderByFields
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
@@ -21,11 +24,14 @@ import org.genspectrum.lapis.openApi.DataFormat
 import org.genspectrum.lapis.openApi.DetailsFields
 import org.genspectrum.lapis.openApi.DetailsOrderByFields
 import org.genspectrum.lapis.openApi.FieldsToAggregateBy
+import org.genspectrum.lapis.openApi.GENES_DESCRIPTION
+import org.genspectrum.lapis.openApi.GENE_SCHEMA
 import org.genspectrum.lapis.openApi.Gene
 import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.InsertionsOrderByFields
 import org.genspectrum.lapis.openApi.LapisAggregatedResponse
 import org.genspectrum.lapis.openApi.LapisAlignedAminoAcidSequenceResponse
+import org.genspectrum.lapis.openApi.LapisAllAminoAcidSequencesResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidMutationsResponse
 import org.genspectrum.lapis.openApi.LapisDetailsResponse
@@ -54,6 +60,7 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
@@ -84,6 +91,7 @@ class LapisController(
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -1641,6 +1649,106 @@ class LapisController(
         InsertionsCollection(
             records = siloQueryModel.getAminoAcidInsertions(request),
         )
+
+    @GetMapping(
+        ALIGNED_AMINO_ACID_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+    )
+    @LapisAllAminoAcidSequencesResponse
+    fun getAllAlignedAminoAcidSequences(
+        @RequestParam
+        @Parameter(
+            array = ArraySchema(schema = Schema(ref = "#/components/schemas/$GENE_SCHEMA")),
+            description = GENES_DESCRIPTION,
+        )
+        genes: List<String>?,
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @AminoAcidSequencesOrderByFields
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Limit
+        @RequestParam
+        limit: Int? = null,
+        @Offset
+        @RequestParam
+        offset: Int? = null,
+        @SequencesDataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = SequenceFiltersRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = request
+
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = genes ?: referenceGenomeSchema.getGeneNames(),
+        )
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = false,
+                )
+            }
+    }
+
+    @PostMapping(
+        ALIGNED_AMINO_ACID_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisAllAminoAcidSequencesResponse
+    fun postAllAlignedAminoAcidSequences(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithGenes,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        requestContext.filter = request
+
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = request.genes,
+        )
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = false,
+                )
+            }
+    }
 
     @GetMapping(
         "$ALIGNED_AMINO_ACID_SEQUENCES_ROUTE/{gene}",

@@ -192,7 +192,7 @@ class LapisControllerDataFormatTest(
     }
 
     @Test
-    fun `GIVEN fields in request WHEN getting aggregated csv THEN fiels are ordered as in request`() {
+    fun `GIVEN fields in request WHEN getting aggregated csv THEN fields are ordered as in request`() {
         every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,

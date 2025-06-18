@@ -39,6 +39,7 @@ import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
+import org.genspectrum.lapis.request.GENES_PROPERTY
 import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.request.MutationsField
@@ -133,6 +134,21 @@ fun buildOpenApiSchema(
                             ),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
+                    ),
+                )
+                .addSchemas(
+                    ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
+                    requestSchemaWithGenes(
+                        requestProperties = getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(
+                                referenceGenomeSchema,
+                                databaseConfig,
+                            ),
+                            dataFormatSchema = sequencesFormatSchema(),
+                        ),
+                        referenceGenomeSchema = referenceGenomeSchema,
                     ),
                 )
                 .addSchemas(
@@ -254,6 +270,13 @@ fun buildOpenApiSchema(
                         referenceGenomeSchema.genes,
                     ),
                 )
+                .addSchemas(
+                    ALL_AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA,
+                    allSequencesResponse(
+                        databaseConfig.schema,
+                        referenceGenomeSchema.genes,
+                    ),
+                )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
@@ -288,7 +311,7 @@ fun buildOpenApiSchema(
                     SEGMENT_SCHEMA,
                     segmentsEnum(referenceGenomeSchema),
                 )
-                .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenomeSchema.genes.map { it.name }))
+                .addSchemas(GENE_SCHEMA, genesEnum(referenceGenomeSchema))
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
@@ -474,7 +497,21 @@ private fun requestSchemaWithSegment(
         .properties(
             requestProperties + Pair(
                 SEGMENTS_PROPERTY,
-                arraySchema(segmentsEnum(referenceGenomeSchema)),
+                arraySchema(segmentsEnum(referenceGenomeSchema)).description(SEGMENTS_DESCRIPTION),
+            ),
+        )
+
+private fun requestSchemaWithGenes(
+    requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
+    referenceGenomeSchema: ReferenceGenomeSchema,
+): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("valid filters for sequence data")
+        .properties(
+            requestProperties + Pair(
+                GENES_PROPERTY,
+                arraySchema(genesEnum(referenceGenomeSchema)).description(GENES_DESCRIPTION),
             ),
         )
 
@@ -757,6 +794,9 @@ private fun fieldsEnum(
 
 private fun segmentsEnum(referenceGenomeSchema: ReferenceGenomeSchema) =
     fieldsEnum(additionalFields = referenceGenomeSchema.getNucleotideSequenceNames())
+
+private fun genesEnum(referenceGenomeSchema: ReferenceGenomeSchema) =
+    fieldsEnum(additionalFields = referenceGenomeSchema.getGeneNames())
 
 private fun logicalOrArraySchema(schema: Schema<Any>) =
     arraySchema(schema)
