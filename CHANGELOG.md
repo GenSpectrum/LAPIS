@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/GenSpectrum/LAPIS/compare/v0.5.3...v0.5.4) (2025-06-18)
+
+
+### Features
+
+* **lapis:** add endpoint to download all aligned segments (or a subset) at once (for multi segmented organisms) ([#1235](https://github.com/GenSpectrum/LAPIS/issues/1235)) ([6207d32](https://github.com/GenSpectrum/LAPIS/commit/6207d32bf736eb4b4689916b7eb2c661327363b5))
+
 ## [0.5.3](https://github.com/GenSpectrum/LAPIS/compare/v0.5.2...v0.5.3) (2025-06-05)
 
 
