@@ -129,14 +129,14 @@ sealed class SiloAction<ResponseType>(
 
         fun genomicSequence(
             type: SequenceType,
-            sequenceName: List<String>,
+            sequenceNames: List<String>,
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<SequenceData> =
             SequenceAction(
                 type = type,
-                sequenceName = sequenceName,
+                sequenceNames = sequenceNames,
                 orderByFields = getNonRandomizedOrderByFields(orderByFields),
                 limit = limit,
                 offset = offset,
@@ -223,7 +223,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: SequenceType,
-        val sequenceName: List<String>,
+        val sequenceNames: List<String>,
     ) : SiloAction<SequenceData>(SequenceDataTypeReference(), cacheable = false)
 }
 

@@ -74,7 +74,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns aggregated response then response can be deserialized`() {
+    fun `GIVEN server returns aggregated response THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -102,7 +102,7 @@ class SiloClientTest(
 
     @ParameterizedTest
     @MethodSource("getMutationActions")
-    fun `given server returns mutations response then response can be deserialized`(action: SiloAction<MutationData>) {
+    fun `GIVEN server returns mutations response THEN response can be deserialized`(action: SiloAction<MutationData>) {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -146,7 +146,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns sequence data then response can be deserialized`() {
+    fun `GIVEN server returns sequence data THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -177,7 +177,38 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns details response then response can be deserialized`() {
+    fun `GIVEN server returns unaligned sequence data THEN response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """
+                        {"primaryKey": "key1","unaligned_someSequenceName": "ABCD"}
+                        {"primaryKey": "key2","unaligned_someSequenceName": "DEFG"}
+                        {"primaryKey": "key3","unaligned_someSequenceName": null}
+                    """,
+                ),
+        )
+
+        val query = SiloQuery(
+            SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
+            StringEquals("theColumn", "theValue"),
+        )
+        val result = underTest.sendQuery(query).toList()
+
+        assertThat(result, hasSize(3))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                SequenceData(sequenceKey = "key1", sequences = mapOf("someSequenceName" to "ABCD")),
+                SequenceData(sequenceKey = "key2", sequences = mapOf("someSequenceName" to "DEFG")),
+                SequenceData(sequenceKey = "key3", sequences = mapOf("someSequenceName" to null)),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN server returns details response THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -260,7 +291,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns error in unexpected format then throws exception`() {
+    fun `GIVEN server returns error in unexpected format THEN throws exception`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -278,7 +309,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns SILO error then throws exception with details and response code`() {
+    fun `GIVEN server returns SILO error THEN throws exception with details and response code`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -292,7 +323,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `given server returns unexpected 200 response then throws exception`() {
+    fun `GIVEN server returns unexpected 200 response THEN throws exception`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)

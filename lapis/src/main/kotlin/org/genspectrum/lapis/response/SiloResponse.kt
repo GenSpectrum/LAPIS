@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.util.UNALIGNED_PREFIX
 import org.springframework.boot.jackson.JsonComponent
 
 const val COUNT_PROPERTY = "count"
@@ -109,7 +110,7 @@ class SequenceDataDeserializer(
                         "Error deserializing sequence data: got unexpected value $value of type ${value.nodeType}",
                     )
                 }
-                sequenceName to sequence
+                sequenceName.removePrefix(UNALIGNED_PREFIX) to sequence
             }
 
         return SequenceData(
