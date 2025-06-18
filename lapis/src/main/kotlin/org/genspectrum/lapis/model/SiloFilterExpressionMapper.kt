@@ -68,7 +68,7 @@ class SiloFilterExpressionMapper(
         crossValidateFilters(
             allowedSequenceFiltersWithType,
             sequenceFilters.nucleotideMutations,
-            sequenceFilters.aaMutations,
+            sequenceFilters.aminoAcidMutations,
         )
 
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
@@ -89,7 +89,7 @@ class SiloFilterExpressionMapper(
         }
 
         val nucleotideMutationExpressions = sequenceFilters.nucleotideMutations.map { toNucleotideMutationFilter(it) }
-        val aminoAcidMutationExpressions = sequenceFilters.aaMutations.map { toAminoAcidMutationFilter(it) }
+        val aminoAcidMutationExpressions = sequenceFilters.aminoAcidMutations.map { toAminoAcidMutationFilter(it) }
         val nucleotideInsertionExpressions =
             sequenceFilters.nucleotideInsertions.map { toNucleotideInsertionFilter(it) }
         val aminoAcidInsertionExpressions = sequenceFilters.aminoAcidInsertions.map { toAminoAcidInsertionFilter(it) }

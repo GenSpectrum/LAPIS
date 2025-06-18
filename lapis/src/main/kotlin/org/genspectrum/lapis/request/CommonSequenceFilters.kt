@@ -13,14 +13,14 @@ typealias GetRequestSequenceFilters = MultiValueMap<String, String>
 interface BaseSequenceFilters {
     val sequenceFilters: SequenceFilters
     val nucleotideMutations: List<NucleotideMutation>
-    val aaMutations: List<AminoAcidMutation>
+    val aminoAcidMutations: List<AminoAcidMutation>
     val nucleotideInsertions: List<NucleotideInsertion>
     val aminoAcidInsertions: List<AminoAcidInsertion>
 
     fun isEmpty() =
         sequenceFilters.isEmpty() &&
             nucleotideMutations.isEmpty() &&
-            aaMutations.isEmpty() &&
+            aminoAcidMutations.isEmpty() &&
             nucleotideInsertions.isEmpty() &&
             aminoAcidInsertions.isEmpty()
 }

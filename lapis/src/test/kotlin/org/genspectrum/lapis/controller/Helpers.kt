@@ -26,7 +26,7 @@ fun mutationProportionsRequest(
 ) = MutationProportionsRequest(
     sequenceFilters = sequenceFilters.mapValues { listOf(it.value) },
     nucleotideMutations = emptyList(),
-    aaMutations = emptyList(),
+    aminoAcidMutations = emptyList(),
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     fields = fields,
@@ -66,7 +66,7 @@ fun sequenceFiltersRequestWithSegments(
 ) = SequenceFiltersRequestWithSegments(
     sequenceFilters = sequenceFilters.mapValues { listOf(it.value) },
     nucleotideMutations = emptyList(),
-    aaMutations = emptyList(),
+    aminoAcidMutations = emptyList(),
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     segments = segments,

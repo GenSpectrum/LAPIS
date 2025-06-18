@@ -885,7 +885,7 @@ class SiloFilterExpressionMapperTest {
     data class DummySequenceFilters(
         override val sequenceFilters: SequenceFilters,
         override val nucleotideMutations: List<NucleotideMutation> = emptyList(),
-        override val aaMutations: List<AminoAcidMutation> = emptyList(),
+        override val aminoAcidMutations: List<AminoAcidMutation> = emptyList(),
         override val nucleotideInsertions: List<NucleotideInsertion> = emptyList(),
         override val aminoAcidInsertions: List<AminoAcidInsertion> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),

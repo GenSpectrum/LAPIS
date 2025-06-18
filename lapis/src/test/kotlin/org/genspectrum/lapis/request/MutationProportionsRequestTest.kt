@@ -55,7 +55,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = mapOf("country" to listOf("Switzerland")),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),
@@ -71,7 +71,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = mapOf("country" to listOf("Switzerland", "Germany")),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),
@@ -90,7 +90,7 @@ class MutationProportionsRequestTest {
                             NucleotideMutation(null, 1, "-"),
                             NucleotideMutation(null, 23062, "T"),
                         ),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),
@@ -106,7 +106,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = listOf(
+                        aminoAcidMutations = listOf(
                             AminoAcidMutation("gene1", 501, "Y"),
                             AminoAcidMutation("gene2", 12, null),
                         ),
@@ -125,7 +125,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = listOf(
                             NucleotideInsertion(501, "Y", "other_segment"),
                             NucleotideInsertion(12, "ABCD", null),
@@ -144,7 +144,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = listOf(
                             AminoAcidInsertion(501, "gene1", "Y"),
@@ -163,7 +163,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),
@@ -179,7 +179,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),
@@ -191,7 +191,7 @@ class MutationProportionsRequestTest {
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = emptyList(),
-                        aaMutations = emptyList(),
+                        aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),

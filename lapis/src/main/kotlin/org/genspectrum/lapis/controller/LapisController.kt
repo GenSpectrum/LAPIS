@@ -386,7 +386,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -444,7 +444,7 @@ class LapisController(
         val request = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -505,7 +505,7 @@ class LapisController(
         val request = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -651,7 +651,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -712,7 +712,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -776,7 +776,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),

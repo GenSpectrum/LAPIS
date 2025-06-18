@@ -14,7 +14,7 @@ const val DEFAULT_MIN_PROPORTION = 0.05
 data class MutationProportionsRequest(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
-    override val aaMutations: List<AminoAcidMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val fields: List<MutationsField>,
@@ -70,7 +70,7 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
         return MutationProportionsRequest(
             sequenceFilters = parsedCommonFields.sequenceFilters,
             nucleotideMutations = parsedCommonFields.nucleotideMutations,
-            aaMutations = parsedCommonFields.aminoAcidMutations,
+            aminoAcidMutations = parsedCommonFields.aminoAcidMutations,
             nucleotideInsertions = parsedCommonFields.nucleotideInsertions,
             aminoAcidInsertions = parsedCommonFields.aminoAcidInsertions,
             fields = fields,

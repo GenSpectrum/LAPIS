@@ -30,7 +30,7 @@ import java.util.stream.Stream
 private data class TestLapisFilter(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
-    override val aaMutations: List<AminoAcidMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
 ) : BaseSequenceFilters

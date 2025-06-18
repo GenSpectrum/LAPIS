@@ -12,7 +12,7 @@ import org.springframework.boot.jackson.JsonComponent
 data class SequenceFiltersRequestWithSegments(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
-    override val aaMutations: List<AminoAcidMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val segments: List<String>,
@@ -38,7 +38,7 @@ class SequenceFiltersRequestWithSegmentsDeserializer(
         return SequenceFiltersRequestWithSegments(
             sequenceFilters = parsedCommonFields.sequenceFilters,
             nucleotideMutations = parsedCommonFields.nucleotideMutations,
-            aaMutations = parsedCommonFields.aminoAcidMutations,
+            aminoAcidMutations = parsedCommonFields.aminoAcidMutations,
             nucleotideInsertions = parsedCommonFields.nucleotideInsertions,
             aminoAcidInsertions = parsedCommonFields.aminoAcidInsertions,
             segments = segments,
