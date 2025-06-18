@@ -386,7 +386,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -444,7 +444,7 @@ class LapisController(
         val request = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -505,7 +505,7 @@ class LapisController(
         val request = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -651,7 +651,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -712,7 +712,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -776,7 +776,7 @@ class LapisController(
         val mutationProportionsRequest = MutationProportionsRequest(
             sequenceFilters = sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations = nucleotideMutations ?: emptyList(),
-            aaMutations = aminoAcidMutations ?: emptyList(),
+            aminoAcidMutations = aminoAcidMutations ?: emptyList(),
             nucleotideInsertions = nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
@@ -1694,12 +1694,17 @@ class LapisController(
 
         requestContext.filter = request
 
-        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(gene),
+        )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -1722,12 +1727,17 @@ class LapisController(
     ) {
         requestContext.filter = request
 
-        siloQueryModel.getGenomicSequence(request, SequenceType.ALIGNED, gene)
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(gene),
+        )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }

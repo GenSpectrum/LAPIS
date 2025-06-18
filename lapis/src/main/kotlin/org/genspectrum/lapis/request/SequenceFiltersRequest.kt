@@ -9,7 +9,7 @@ import org.springframework.boot.jackson.JsonComponent
 data class SequenceFiltersRequest(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
-    override val aaMutations: List<AminoAcidMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     override val orderByFields: List<OrderByField> = emptyList(),

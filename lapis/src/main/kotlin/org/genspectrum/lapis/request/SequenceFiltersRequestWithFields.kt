@@ -11,7 +11,7 @@ import org.springframework.boot.jackson.JsonComponent
 data class SequenceFiltersRequestWithFields(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
-    override val aaMutations: List<AminoAcidMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val fields: List<Field>,
@@ -55,6 +55,6 @@ fun <T> parseFieldsProperty(
     null -> emptyList()
     is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
     else -> throw BadRequestException(
-        "fields must be an array or null",
+        "$FIELDS_PROPERTY must be an array or null",
     )
 }

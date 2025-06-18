@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
+import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
@@ -75,9 +76,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -92,9 +93,9 @@ class SingleSegmentedSequenceControllerTest(
     fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -116,9 +117,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -134,9 +135,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -151,9 +152,9 @@ class SingleSegmentedSequenceControllerTest(
     fun `should call unalignedNucleotideSequence with filter`(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.UNALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -175,9 +176,9 @@ class SingleSegmentedSequenceControllerTest(
     ) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(emptyMap()),
-                SequenceType.ALIGNED,
-                SEGMENT_NAME,
+                sequenceFilters = sequenceFiltersRequest(emptyMap()),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -188,14 +189,14 @@ class SingleSegmentedSequenceControllerTest(
     companion object {
         @JvmStatic
         val alignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
-            route = "$ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE",
-            sequenceName = SEGMENT_NAME,
+            route = ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+            mode = SingleSequence(SEGMENT_NAME),
         )
 
         @JvmStatic
         val unalignedRequestsWithFilter = SequenceEndpointTestScenario.createScenarios(
-            route = "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE",
-            sequenceName = SEGMENT_NAME,
+            route = UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+            mode = SingleSequence(SEGMENT_NAME),
         )
     }
 }

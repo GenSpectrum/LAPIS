@@ -28,6 +28,8 @@ class ReferenceGenomeSchema(
 
     fun getNucleotideSequence(name: String): ReferenceSequenceSchema? = nucleotideSequenceNames[name.lowercase()]
 
+    fun getNucleotideSequenceNames() = nucleotideSequenceNames.values.map { it.name }
+
     fun getGene(name: String): ReferenceSequenceSchema? = geneNames[name.lowercase()]
 
     fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1

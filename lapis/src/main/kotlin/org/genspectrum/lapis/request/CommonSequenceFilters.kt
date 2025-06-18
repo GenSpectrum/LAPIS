@@ -13,14 +13,14 @@ typealias GetRequestSequenceFilters = MultiValueMap<String, String>
 interface BaseSequenceFilters {
     val sequenceFilters: SequenceFilters
     val nucleotideMutations: List<NucleotideMutation>
-    val aaMutations: List<AminoAcidMutation>
+    val aminoAcidMutations: List<AminoAcidMutation>
     val nucleotideInsertions: List<NucleotideInsertion>
     val aminoAcidInsertions: List<AminoAcidInsertion>
 
     fun isEmpty() =
         sequenceFilters.isEmpty() &&
             nucleotideMutations.isEmpty() &&
-            aaMutations.isEmpty() &&
+            aminoAcidMutations.isEmpty() &&
             nucleotideInsertions.isEmpty() &&
             aminoAcidInsertions.isEmpty()
 }
@@ -89,8 +89,7 @@ fun parseCommonFields(
         else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
     }
 
-    val sequenceFilters = node.fields()
-        .asSequence()
+    val sequenceFilters = node.properties()
         .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
         .associate { it.key to getValuesList(it.value, it.key) }
     return ParsedCommonFields(

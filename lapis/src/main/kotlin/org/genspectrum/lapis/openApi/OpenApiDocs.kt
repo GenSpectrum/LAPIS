@@ -49,6 +49,7 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OFFSET_PROPERTY
 import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
@@ -149,6 +150,21 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
+                    ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA,
+                    requestSchemaWithSegment(
+                        requestProperties = getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(
+                                referenceGenomeSchema,
+                                databaseConfig,
+                            ),
+                            dataFormatSchema = sequencesFormatSchema(),
+                        ),
+                        referenceGenomeSchema = referenceGenomeSchema,
+                    ),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisResponseSchema(
                         Schema<String>()
@@ -225,6 +241,13 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
+                    ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA,
+                    allSequencesResponse(
+                        databaseConfig.schema,
+                        referenceGenomeSchema.nucleotideSequences,
+                    ),
+                )
+                .addSchemas(
                     AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA,
                     sequencesResponse(
                         databaseConfig.schema,
@@ -263,7 +286,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     SEGMENT_SCHEMA,
-                    fieldsEnum(additionalFields = referenceGenomeSchema.nucleotideSequences.map { it.name }),
+                    segmentsEnum(referenceGenomeSchema),
                 )
                 .addSchemas(GENE_SCHEMA, fieldsEnum(additionalFields = referenceGenomeSchema.genes.map { it.name }))
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
@@ -438,6 +461,20 @@ private fun requestSchemaWithFields(
             requestProperties + Pair(
                 FIELDS_PROPERTY,
                 fieldsArray(databaseConfig).description(fieldsDescription),
+            ),
+        )
+
+private fun requestSchemaWithSegment(
+    requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
+    referenceGenomeSchema: ReferenceGenomeSchema,
+): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("valid filters for sequence data")
+        .properties(
+            requestProperties + Pair(
+                SEGMENTS_PROPERTY,
+                arraySchema(segmentsEnum(referenceGenomeSchema)),
             ),
         )
 
@@ -718,6 +755,9 @@ private fun fieldsEnum(
     .types(setOf("string"))
     ._enum(databaseConfig.map { it.name } + additionalFields)
 
+private fun segmentsEnum(referenceGenomeSchema: ReferenceGenomeSchema) =
+    fieldsEnum(additionalFields = referenceGenomeSchema.getNucleotideSequenceNames())
+
 private fun logicalOrArraySchema(schema: Schema<Any>) =
     arraySchema(schema)
         .description("Logical \"or\" concatenation of a list of values.")
@@ -759,6 +799,27 @@ private fun sequencesResponse(
                 )
         }
     }
+}
+
+private fun allSequencesResponse(
+    schema: DatabaseSchema,
+    referenceSequenceSchemas: List<ReferenceSequenceSchema>,
+): Schema<*> {
+    val baseSchema = Schema<Any>()
+        .types(setOf("object"))
+        .addProperty(schema.primaryKey, Schema<String>().types(setOf("string")))
+        .addRequiredItem(schema.primaryKey)
+
+    for (nucleotideSequence in referenceSequenceSchemas) {
+        baseSchema.addProperty(nucleotideSequence.name, Schema<String>().types(setOf("string")))
+    }
+    baseSchema
+        .description(
+            "An object containing the primary key and the requested sequences of a sample. " +
+                "Only the requested sequences are contained in the response, the others are omitted.",
+        )
+
+    return baseSchema
 }
 
 private fun mutationsFieldsSchema(): ArraySchema? =

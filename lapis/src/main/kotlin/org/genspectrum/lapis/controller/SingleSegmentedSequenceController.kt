@@ -105,15 +105,16 @@ class SingleSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.ALIGNED,
-            referenceGenomeSchema.nucleotideSequences[0].name,
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -136,15 +137,16 @@ class SingleSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.ALIGNED,
-            referenceGenomeSchema.nucleotideSequences[0].name,
+            sequenceFilters = request,
+            sequenceType = SequenceType.ALIGNED,
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -201,15 +203,16 @@ class SingleSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.UNALIGNED,
-            referenceGenomeSchema.nucleotideSequences[0].name,
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
@@ -232,15 +235,16 @@ class SingleSegmentedSequenceController(
         requestContext.filter = request
 
         siloQueryModel.getGenomicSequence(
-            request,
-            SequenceType.UNALIGNED,
-            referenceGenomeSchema.nucleotideSequences[0].name,
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(
                     sequenceData = it,
                     response = response,
                     acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = true,
                 )
             }
     }
