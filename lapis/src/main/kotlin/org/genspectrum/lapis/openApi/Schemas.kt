@@ -125,6 +125,9 @@ the other also grants access to detailed data.
 const val SEGMENTS_DESCRIPTION =
     "List of segments to retrieve sequences for. If not provided, all segments will be returned."
 
+const val GENES_DESCRIPTION =
+    "List of genes to retrieve sequences for. If not provided, all genes will be returned."
+
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @Operation
@@ -302,6 +305,36 @@ annotation class LapisNucleotideSequenceResponse(
     ],
 )
 annotation class LapisAllNucleotideSequencesResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = "Returns the sequences of all requested genes that match the given filter criteria.",
+    content = [
+        Content(
+            mediaType = LapisMediaType.TEXT_X_FASTA_VALUE,
+            schema = Schema(
+                type = "string",
+                description = "The fasta headers are of the format '<sequence key>|<gene name>'",
+                example = ">sequenceKey|geneName\nATCG...",
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            array = ArraySchema(
+                schema = Schema(ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA"),
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_NDJSON_VALUE,
+            schema = Schema(
+                description = "An NDJSON stream of amino acid sequences. The schema is to be understood per line",
+                ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
+)
+annotation class LapisAllAminoAcidSequencesResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
