@@ -374,7 +374,7 @@ class SiloQueryModelTest {
                 SiloQuery(
                     SiloAction.genomicSequence(
                         type = SequenceType.ALIGNED,
-                        sequenceName = listOf("someSequenceName"),
+                        sequenceNames = listOf("someSequenceName"),
                     ),
                     True,
                 ),

@@ -271,7 +271,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "FastaAligned",
-                            "sequenceName": ["someSequenceName"],
+                            "sequenceNames": ["someSequenceName"],
                             "randomize": false
                         }
                     """,
@@ -291,7 +291,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "FastaAligned",
-                            "sequenceName": ["someSequenceName"],
+                            "sequenceNames": ["someSequenceName"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
@@ -307,7 +307,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "Fasta",
-                            "sequenceName": ["someSequenceName"],
+                            "sequenceNames": ["someSequenceName"],
                             "randomize": false
                         }
                     """,
@@ -327,7 +327,7 @@ class SiloQueryTest {
                     """
                         {
                             "type": "Fasta",
-                            "sequenceName": ["someSequenceName"],
+                            "sequenceNames": ["someSequenceName"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}

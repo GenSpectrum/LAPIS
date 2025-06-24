@@ -63,9 +63,9 @@ describe('The /details endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0].division).to.be.undefined;
-    expect(ascendingOrderedResult.data[1].division).to.be.undefined;
-    expect(ascendingOrderedResult.data[2]).to.have.property('division', 'Aargau');
+    expect(ascendingOrderedResult.data.at(-1).division).to.be.undefined;
+    expect(ascendingOrderedResult.data.at(-2).division).to.be.undefined;
+    expect(ascendingOrderedResult.data[0]).to.have.property('division', 'Aargau');
 
     const descendingOrderedResult = await lapisClient.postDetails({
       detailsPostRequest: {
@@ -258,7 +258,7 @@ key_1002052
       },
     });
 
-    expect(result).to.have.nested.property('data[0].division', undefined);
+    expect(result).to.have.nested.property('data[0].division', 'Aargau');
   });
 
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {
