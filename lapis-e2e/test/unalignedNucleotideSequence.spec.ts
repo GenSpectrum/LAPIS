@@ -117,6 +117,6 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
 
     expect(result).to.have.length(1);
     expect(result[0].primaryKey).to.equal('key_0');
-    expect(result[0].l).to.equal('L_key_0');
+    expect(result[0].l).to.equal('ACNTCT');
   });
 });
