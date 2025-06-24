@@ -220,23 +220,29 @@ class LapisControllerCompressionTest(
                     .flatMap { (route, sequenceName) ->
                         getFastaRequests(
                             endpoint = "${route.pathSegment}/$sequenceName",
-                            sequenceName = sequenceName,
+                            mockDataCollection = MockDataForEndpoints.sequenceEndpointMockData(sequenceName),
                             dataFormat = SequenceEndpointMockDataCollection.DataFormat.FASTA,
                             compressionFormat = COMPRESSION_FORMAT_GZIP,
                         ) +
                             getFastaRequests(
                                 endpoint = "${route.pathSegment}/$sequenceName",
-                                sequenceName = sequenceName,
+                                mockDataCollection = MockDataForEndpoints.sequenceEndpointMockData(sequenceName),
                                 dataFormat = SequenceEndpointMockDataCollection.DataFormat.JSON,
                                 compressionFormat = COMPRESSION_FORMAT_ZSTD,
                             ) +
                             getFastaRequests(
                                 endpoint = "${route.pathSegment}/$sequenceName",
-                                sequenceName = sequenceName,
+                                mockDataCollection = MockDataForEndpoints.sequenceEndpointMockData(sequenceName),
                                 dataFormat = SequenceEndpointMockDataCollection.DataFormat.NDJSON,
                                 compressionFormat = COMPRESSION_FORMAT_ZSTD,
                             )
-                    }
+                    } +
+                getFastaRequests(
+                    endpoint = ALIGNED_AMINO_ACID_SEQUENCES.pathSegment,
+                    mockDataCollection = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences(),
+                    dataFormat = SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                    compressionFormat = COMPRESSION_FORMAT_ZSTD,
+                )
 
         @JvmStatic
         val compressionFormats = listOf(COMPRESSION_FORMAT_GZIP, COMPRESSION_FORMAT_ZSTD)
@@ -354,13 +360,13 @@ fun getRequests(
 
 private fun getFastaRequests(
     endpoint: String,
-    sequenceName: String,
+    mockDataCollection: SequenceEndpointMockDataCollection,
     dataFormat: SequenceEndpointMockDataCollection.DataFormat,
     compressionFormat: String,
 ) = listOf(
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = getSample(endpoint)
             .queryParam("country", "Switzerland")
             .queryParam("dataFormat", dataFormat.fileFormat)
@@ -371,7 +377,7 @@ private fun getFastaRequests(
     ),
     RequestScenario(
         callDescription = "GET $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = getSample("$endpoint?country=Switzerland")
             .accept(dataFormat.acceptHeader)
             .header(ACCEPT_ENCODING, compressionFormat),
@@ -381,7 +387,7 @@ private fun getFastaRequests(
     ),
     RequestScenario(
         callDescription = "POST JSON $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = postSample(endpoint)
             .content(
                 """
@@ -399,7 +405,7 @@ private fun getFastaRequests(
     ),
     RequestScenario(
         callDescription = "POST JSON $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = postSample(endpoint)
             .content("""{"country": "Switzerland"}""")
             .contentType(APPLICATION_JSON)
@@ -411,7 +417,7 @@ private fun getFastaRequests(
     ),
     RequestScenario(
         callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = postSample(endpoint)
             .param("country", "Switzerland")
             .param("dataFormat", dataFormat.fileFormat)
@@ -423,7 +429,7 @@ private fun getFastaRequests(
     ),
     RequestScenario(
         callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
-        mockData = MockDataForEndpoints.sequenceEndpointMockData(sequenceName).expecting(dataFormat),
+        mockData = mockDataCollection.expecting(dataFormat),
         request = postSample(endpoint)
             .param("country", "Switzerland")
             .contentType(APPLICATION_FORM_URLENCODED)

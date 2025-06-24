@@ -39,6 +39,7 @@ const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
 const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
+const val ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AllAminoAcidSequenceRequest"
 const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
 const val ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "AllNucleotideSequenceRequest"
 
@@ -51,6 +52,7 @@ const val AMINO_ACID_INSERTIONS_RESPONSE_SCHEMA = "AminoAcidInsertionsResponse"
 const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
 const val ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "AllNucleotideSequencesResponse"
 const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
+const val ALL_AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AllAminoAcidSequencesResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -124,6 +126,9 @@ the other also grants access to detailed data.
 
 const val SEGMENTS_DESCRIPTION =
     "List of segments to retrieve sequences for. If not provided, all segments will be returned."
+
+const val GENES_DESCRIPTION =
+    "List of genes to retrieve sequences for. If not provided, all genes will be returned."
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -302,6 +307,36 @@ annotation class LapisNucleotideSequenceResponse(
     ],
 )
 annotation class LapisAllNucleotideSequencesResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = "Returns the sequences of all requested genes that match the given filter criteria.",
+    content = [
+        Content(
+            mediaType = LapisMediaType.TEXT_X_FASTA_VALUE,
+            schema = Schema(
+                type = "string",
+                description = "The fasta headers are of the format '<sequence key>|<gene name>'",
+                example = ">sequenceKey|geneName\nATCG...",
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            array = ArraySchema(
+                schema = Schema(ref = "#/components/schemas/$ALL_AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA"),
+            ),
+        ),
+        Content(
+            mediaType = MediaType.APPLICATION_NDJSON_VALUE,
+            schema = Schema(
+                description = "An NDJSON stream of amino acid sequences. The schema is to be understood per line",
+                ref = "#/components/schemas/$ALL_AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
+)
+annotation class LapisAllAminoAcidSequencesResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)

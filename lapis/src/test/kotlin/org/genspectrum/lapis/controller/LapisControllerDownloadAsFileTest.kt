@@ -341,7 +341,67 @@ data class DownloadAsFileScenario(
                 expectedFilename = "my_sequence.ndjson",
                 downloadFileBasename = "my_sequence",
             ),
-        )
+        ) +
+            when (route) {
+                // TODO #1236 also enable those tests for unaligned sequences
+                UNALIGNED_NUCLEOTIDE_SEQUENCES -> emptyList()
+                else -> listOf(
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                        ),
+                        requestedDataFormat = null,
+                        expectedFilename = "$expectedFilename.fasta",
+                        downloadFileBasename = null,
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.JSON,
+                        ),
+                        requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.JSON.fileFormat,
+                        expectedFilename = "$expectedFilename.json",
+                        downloadFileBasename = null,
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.NDJSON,
+                        ),
+                        requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.NDJSON.fileFormat,
+                        expectedFilename = "$expectedFilename.ndjson",
+                        downloadFileBasename = null,
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                        ),
+                        requestedDataFormat = null,
+                        expectedFilename = "my_sequence.fasta",
+                        downloadFileBasename = "my_sequence",
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.JSON,
+                        ),
+                        requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.JSON.fileFormat,
+                        expectedFilename = "my_sequence.json",
+                        downloadFileBasename = "my_sequence",
+                    ),
+                    DownloadAsFileScenario(
+                        endpoint = route.pathSegment,
+                        mockData = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences().expecting(
+                            SequenceEndpointMockDataCollection.DataFormat.NDJSON,
+                        ),
+                        requestedDataFormat = SequenceEndpointMockDataCollection.DataFormat.NDJSON.fileFormat,
+                        expectedFilename = "my_sequence.ndjson",
+                        downloadFileBasename = "my_sequence",
+                    ),
+                )
+            }
 
         private fun forDataFormats(
             endpoint: String,
