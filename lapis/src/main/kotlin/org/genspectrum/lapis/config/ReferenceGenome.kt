@@ -36,6 +36,11 @@ class ReferenceGenomeSchema(
 
     fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1
 
+    fun getSequenceNameFromCaseInsensitiveName(name: String) =
+        nucleotideSequenceNames[name.lowercase()]?.name
+            ?: geneNames[name.lowercase()]?.name
+            ?: name
+
     companion object {
         fun readFromFileFromProgramArgsOrEnv(args: Array<String>): ReferenceGenomeSchema {
             val filename = readFilenameFromProgramArgs(args)

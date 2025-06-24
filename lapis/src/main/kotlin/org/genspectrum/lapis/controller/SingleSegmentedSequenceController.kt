@@ -206,7 +206,7 @@ class SingleSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
-            sequenceNames = listOf(toUnalignedSequenceName(referenceGenomeSchema.nucleotideSequences[0].name)),
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(
@@ -238,7 +238,7 @@ class SingleSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
-            sequenceNames = listOf(toUnalignedSequenceName(referenceGenomeSchema.nucleotideSequences[0].name)),
+            sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
         )
             .also {
                 sequencesStreamer.stream(

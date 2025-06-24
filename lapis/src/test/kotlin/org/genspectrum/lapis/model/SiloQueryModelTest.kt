@@ -5,10 +5,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.mutationData
 import org.genspectrum.lapis.controller.mutationProportionsRequest
+import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationsField
+import org.genspectrum.lapis.request.Order
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.AggregationData
@@ -355,6 +359,8 @@ class SiloQueryModelTest {
     fun `getGenomicSequence calls the SILO client with a sequence action`() {
         every { siloClientMock.sendQuery(any<SiloQuery<SequenceData>>()) } returns Stream.empty()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.getSequenceNameFromCaseInsensitiveName("someSequenceName") } returns
+            "someSequenceName"
 
         underTest.getGenomicSequence(
             sequenceFilters = SequenceFiltersRequest(
@@ -375,6 +381,46 @@ class SiloQueryModelTest {
                     SiloAction.genomicSequence(
                         type = SequenceType.ALIGNED,
                         sequenceNames = listOf("someSequenceName"),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `GIVEN request with unaligned sequences WHEN getting genomic sequences THEN maps sequence names`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<SequenceData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        referenceGenomeSchemaMock = ReferenceGenomeSchema(
+            nucleotideSequences = listOf(ReferenceSequenceSchema("Segment1"), ReferenceSequenceSchema("Segment2")),
+            genes = emptyList(),
+        )
+        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock)
+
+        underTest.getGenomicSequence(
+            sequenceFilters = sequenceFiltersRequest(
+                sequenceFilters = emptyMap(),
+                orderByFields = listOf(
+                    OrderByField(field = "primaryKey", order = Order.ASCENDING),
+                    OrderByField(field = "segment1", order = Order.DESCENDING),
+                ),
+            ),
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = listOf("segment1", "segment2"),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.genomicSequence(
+                        type = SequenceType.UNALIGNED,
+                        sequenceNames = listOf("unaligned_Segment1", "unaligned_Segment2"),
+                        orderByFields = listOf(
+                            OrderByField(field = "primaryKey", order = Order.ASCENDING),
+                            OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
+                        ),
                     ),
                     True,
                 ),

@@ -36,7 +36,6 @@ import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithSegments
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.SequenceType
-import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -65,7 +64,9 @@ class MultiSegmentedSequenceController(
         ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
         produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
     )
-    @LapisAllNucleotideSequencesResponse()
+    @LapisAllNucleotideSequencesResponse(
+        description = ALL_ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    )
     fun getAllAlignedNucleotideSequences(
         @RequestParam
         @Parameter(
@@ -136,7 +137,9 @@ class MultiSegmentedSequenceController(
         produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
-    @LapisAllNucleotideSequencesResponse()
+    @LapisAllNucleotideSequencesResponse(
+        description = ALL_ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    )
     fun postAllAlignedNucleotideSequences(
         @Parameter(schema = Schema(ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
         @RequestBody
@@ -266,6 +269,110 @@ class MultiSegmentedSequenceController(
     }
 
     @GetMapping(
+        UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+    )
+    @LapisAllNucleotideSequencesResponse(
+        description = ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    )
+    fun getAllUnalignedNucleotideSequences(
+        @RequestParam
+        @Parameter(
+            array = ArraySchema(schema = Schema(ref = "#/components/schemas/$SEGMENT_SCHEMA")),
+            description = SEGMENTS_DESCRIPTION,
+        )
+        segments: List<String>?,
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @NucleotideSequencesOrderByFields
+        @RequestParam
+        orderBy: List<OrderByField>?,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @Limit
+        @RequestParam
+        limit: Int? = null,
+        @Offset
+        @RequestParam
+        offset: Int? = null,
+        @SequencesDataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = SequenceFiltersRequest(
+            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            orderBy ?: emptyList(),
+            limit,
+            offset,
+        )
+
+        requestContext.filter = request
+
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = segments ?: referenceGenomeSchema.getNucleotideSequenceNames(),
+        )
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = false,
+                )
+            }
+    }
+
+    @PostMapping(
+        UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+        produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisAllNucleotideSequencesResponse(
+        description = ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION,
+    )
+    fun postAllUnalignedNucleotideSequences(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithSegments,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        requestContext.filter = request
+
+        siloQueryModel.getGenomicSequence(
+            sequenceFilters = request,
+            sequenceType = SequenceType.UNALIGNED,
+            sequenceNames = request.segments,
+        )
+            .also {
+                sequencesStreamer.stream(
+                    sequenceData = it,
+                    response = response,
+                    acceptHeaders = httpHeaders.accept,
+                    singleSequenceEntry = false,
+                )
+            }
+    }
+
+    @GetMapping(
         "$UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE/{segment}",
         produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],
     )
@@ -322,7 +429,7 @@ class MultiSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
-            sequenceNames = listOf(toUnalignedSequenceName(segment)),
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(
@@ -357,7 +464,7 @@ class MultiSegmentedSequenceController(
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
-            sequenceNames = listOf(toUnalignedSequenceName(segment)),
+            sequenceNames = listOf(segment),
         )
             .also {
                 sequencesStreamer.stream(

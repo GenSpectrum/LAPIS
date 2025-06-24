@@ -281,7 +281,6 @@ annotation class LapisNucleotideSequenceResponse(
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
-    description = "Returns the sequences of all requested segments that match the given filter criteria.",
     content = [
         Content(
             mediaType = LapisMediaType.TEXT_X_FASTA_VALUE,
@@ -306,7 +305,10 @@ annotation class LapisNucleotideSequenceResponse(
         ),
     ],
 )
-annotation class LapisAllNucleotideSequencesResponse
+annotation class LapisAllNucleotideSequencesResponse(
+    @get:AliasFor(annotation = LapisResponseAnnotation::class, attribute = "description")
+    val description: String = "",
+)
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
