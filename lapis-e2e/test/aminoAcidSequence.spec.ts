@@ -164,7 +164,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
       const errorResponse = await response.json();
       expect(errorResponse.error.detail).to.match(
-        /Database does not contain a sequence with name: 'unknownGene'/
+        /Error from SILO: The table does not contain the SequenceColumn 'unknownGene'/
       );
     });
   });
