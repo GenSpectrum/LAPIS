@@ -26,7 +26,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
-private const val UNALIGNED_SEGMENT_NAME = "unaligned_otherSegment"
 
 @SpringBootTest(
     properties = [
@@ -130,7 +129,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -147,7 +146,7 @@ class SingleSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
