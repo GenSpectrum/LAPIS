@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
-private const val UNALIGNED_SEGMENT_NAME = "unaligned_otherSegment"
 
 @SpringBootTest(
     properties = [
@@ -179,7 +178,7 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -196,7 +195,7 @@ class MultiSegmentedSequenceControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
-                sequenceNames = listOf(UNALIGNED_SEGMENT_NAME),
+                sequenceNames = listOf(SEGMENT_NAME),
             )
         } returns returnedValue
 
@@ -210,14 +209,65 @@ class MultiSegmentedSequenceControllerTest(
         scenario.mockData.assertDataMatches(responseContent)
     }
 
-    @ParameterizedTest(name = "should not {0} unalignedNucleotideSequences without segment")
-    @MethodSource("getRequestsWithoutFilter")
-    fun `should not call unalignedNucleotideSequences without segment`(
-        description: String,
-        request: (String) -> MockHttpServletRequestBuilder,
-    ) {
-        mockMvc.perform(request(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE))
-            .andExpect(status().isNotFound)
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getUnalignedRequestsForAllSequencesWithFilter")
+    fun `should call allUnalignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
+        scenario.mockData.mockWithData(siloQueryModelMock)
+
+        val responseContent = mockMvc.perform(scenario.request)
+            .andExpect(status().isOk)
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andReturn()
+            .response
+            .contentAsString
+
+        scenario.mockData.assertDataMatches(responseContent)
+    }
+
+    @Test
+    fun `WHEN getting all unaligned sequences with segment THEN calls model with correct arguments`() {
+        val otherSegment = "otherSegment"
+
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME, otherSegment),
+            )
+        } returns Stream.empty()
+
+        mockMvc.perform(
+            getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                .param(SEGMENTS_PROPERTY, SEGMENT_NAME)
+                .param(SEGMENTS_PROPERTY, otherSegment)
+                .param("country", "Switzerland"),
+        )
+            .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `WHEN posting all unaligned sequences with segment THEN calls model with correct arguments`() {
+        val otherSegment = "otherSegment"
+
+        every {
+            siloQueryModelMock.getGenomicSequence(
+                sequenceFilters = sequenceFiltersRequestWithSegments(
+                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    segments = listOf(SEGMENT_NAME, otherSegment),
+                ),
+                sequenceType = SequenceType.UNALIGNED,
+                sequenceNames = listOf(SEGMENT_NAME, otherSegment),
+            )
+        } returns Stream.empty()
+
+        mockMvc.perform(
+            postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .content(
+                    """{"country": "Switzerland", "$SEGMENTS_PROPERTY": ["$SEGMENT_NAME", "$otherSegment"]}""",
+                ),
+        )
+            .andExpect(status().isOk)
     }
 
     companion object {
@@ -236,6 +286,12 @@ class MultiSegmentedSequenceControllerTest(
         @JvmStatic
         val alignedRequestsForAllSequencesWithFilter = SequenceEndpointTestScenario.createScenarios(
             route = ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
+            mode = AllSequences,
+        )
+
+        @JvmStatic
+        val unalignedRequestsForAllSequencesWithFilter = SequenceEndpointTestScenario.createScenarios(
+            route = UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
             mode = AllSequences,
         )
 
