@@ -253,7 +253,7 @@ key_1002052
   it('should order by random', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {
-        orderBy: [{ field: 'random' }, { field: 'division', type: 'descending' }],
+        orderBy: [{ field: 'random' }, { field: 'division', type: 'ascending' }],
         fields: ['primaryKey', 'division'],
       },
     });
