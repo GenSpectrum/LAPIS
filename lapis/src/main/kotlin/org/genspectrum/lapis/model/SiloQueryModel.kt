@@ -210,7 +210,7 @@ class SiloQueryModel(
         sequenceNames: List<String>,
         sequenceType: SequenceType,
     ) = sequenceNames
-        .map(referenceGenomeSchema::getSequenceNameFromCaseInsensitiveName)
+        .map { referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it) ?: it }
         .map {
             when (sequenceType) {
                 SequenceType.ALIGNED -> it
@@ -222,7 +222,7 @@ class SiloQueryModel(
         orderByFields: List<OrderByField>,
         sequenceType: SequenceType,
     ) = orderByFields
-        .map { it.copy(field = referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it.field)) }
+        .map { it.copy(field = referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it.field) ?: it.field) }
         .map {
             when (sequenceType) {
                 SequenceType.ALIGNED -> it
