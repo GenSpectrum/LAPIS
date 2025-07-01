@@ -82,7 +82,7 @@ class SequencesStreamer(
         var isFirstEntry = true
         response.outputStream.writer().use { stream ->
             stream.append('[')
-            sequenceData.filter { (_, sequences) -> sequences.values.any { it != null } }
+            sequenceData
                 .forEach {
                     if (isFirstEntry) {
                         isFirstEntry = false
@@ -104,7 +104,7 @@ class SequencesStreamer(
         }
 
         response.outputStream.writer().use { stream ->
-            sequenceData.filter { (_, sequences) -> sequences.values.any { it != null } }
+            sequenceData
                 .forEach { stream.appendLine(objectMapper.writeValueAsString(it)) }
         }
     }
