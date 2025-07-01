@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.4](https://github.com/GenSpectrum/LAPIS/compare/v0.5.3...v0.5.4) (2025-07-01)
+
+
+### Features
+
+* **lapis:** adapt to SILO changes that renamed the unaligned sequences to have the "unaligned_" prefix ([#1225](https://github.com/GenSpectrum/LAPIS/issues/1225)) ([d669335](https://github.com/GenSpectrum/LAPIS/commit/d6693359a987708e932b1aefb8e4e5ca82e1cce9))
+* **lapis:** add endpoint `/sample/alignedAminoAcidSequences` to download all genes at once ([#1242](https://github.com/GenSpectrum/LAPIS/issues/1242)) ([36dfd5f](https://github.com/GenSpectrum/LAPIS/commit/36dfd5fe16998721b681859ed8c990d49cb788ed))
+* **lapis:** add endpoint `/sample/unalignedNucleotideSequences` for multi-segmented organism to download several sequences at once ([#1246](https://github.com/GenSpectrum/LAPIS/issues/1246)) ([f9275c2](https://github.com/GenSpectrum/LAPIS/commit/f9275c2875b19b74f654a0018cbef1faa66e2182))
+* **lapis:** add endpoint to download all aligned segments (or a subset) at once (for multi segmented organisms) ([#1235](https://github.com/GenSpectrum/LAPIS/issues/1235)) ([6207d32](https://github.com/GenSpectrum/LAPIS/commit/6207d32bf736eb4b4689916b7eb2c661327363b5))
+
 ## [0.5.3](https://github.com/GenSpectrum/LAPIS/compare/v0.5.2...v0.5.3) (2025-06-05)
 
 
