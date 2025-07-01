@@ -122,7 +122,7 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         },
       });
 
-      expect(result).to.have.length(2);
+      expect(result).to.have.length(6);
       expect(result[0]).to.deep.equal({
         primaryKey: 'key_0',
         l: 'ACNTCT',
@@ -135,6 +135,12 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         m: undefined,
         s: undefined,
       });
+      expect(result[2]).to.deep.equal({
+        primaryKey: 'key_2',
+        l: undefined,
+        m: undefined,
+        s: undefined,
+      });
     });
 
     it('should order by segment', async () => {
@@ -142,21 +148,27 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         allNucleotideSequenceRequest: {
           country: 'Switzerland',
           dataFormat: 'JSON',
-          orderBy: [{ field: 'L', type: 'ascending' }],
+          orderBy: [{ field: 'L', type: 'descending' }],
           segments: ['L'],
         },
       });
 
-      expect(result).to.have.length(2);
+      expect(result).to.have.length(6);
       expect(result[0]).to.deep.equal({
+        primaryKey: 'key_1',
+        l: 'NACTCT',
+        m: undefined,
+        s: undefined,
+      });
+      expect(result[1]).to.deep.equal({
         primaryKey: 'key_0',
         l: 'ACNTCT',
         m: undefined,
         s: undefined,
       });
-      expect(result[1]).to.deep.equal({
-        primaryKey: 'key_1',
-        l: 'NACTCT',
+      expect(result[2]).to.deep.equal({
+        primaryKey: 'key_2',
+        l: undefined,
         m: undefined,
         s: undefined,
       });

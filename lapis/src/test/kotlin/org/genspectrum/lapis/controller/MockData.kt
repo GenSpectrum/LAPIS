@@ -223,12 +223,14 @@ object MockDataForEndpoints {
             expectedJson = """
                 [
                     { "primaryKey": "sequence1", "$sequenceName": "CAGAA" },
-                    { "primaryKey": "sequence2", "$sequenceName": "CAGAT" }
+                    { "primaryKey": "sequence2", "$sequenceName": "CAGAT" },
+                    { "primaryKey": "sequence3", "$sequenceName": null }
                 ]
             """.trimIndent(),
             expectedNdjson = """
                 { "primaryKey": "sequence1", "$sequenceName": "CAGAA" }
                 { "primaryKey": "sequence2", "$sequenceName": "CAGAT" }
+                { "primaryKey": "sequence3", "$sequenceName": null }
             """.trimIndent(),
         )
 
@@ -238,6 +240,7 @@ object MockDataForEndpoints {
                 SequenceData(sequenceKey = "key1", sequences = mapOf("sequence1" to "CAGAA", "sequence2" to "CAGAT")),
                 SequenceData(sequenceKey = "key2", sequences = mapOf("sequence1" to "CAGAT", "sequence2" to null)),
                 SequenceData(sequenceKey = "key3", sequences = mapOf("sequence1" to null, "sequence2" to "CAGAC")),
+                SequenceData(sequenceKey = "key4", sequences = mapOf("sequence1" to null, "sequence2" to null)),
             ),
             expectedFasta = """
                 >key1|sequence1
@@ -254,13 +257,15 @@ object MockDataForEndpoints {
                 [
                     { "primaryKey": "key1", "sequence1": "CAGAA", "sequence2": "CAGAT" },
                     { "primaryKey": "key2", "sequence1": "CAGAT", "sequence2": null },
-                    { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" }
+                    { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" },
+                    { "primaryKey": "key4", "sequence1": null, "sequence2": null }
                 ]
             """.trimIndent(),
             expectedNdjson = """
                 { "primaryKey": "key1", "sequence1": "CAGAA", "sequence2": "CAGAT" }
                 { "primaryKey": "key2", "sequence1": "CAGAT", "sequence2": null }
                 { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" }
+                { "primaryKey": "key4", "sequence1": null, "sequence2": null }
             """.trimIndent(),
         )
 
