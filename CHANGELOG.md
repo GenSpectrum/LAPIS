@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.5](https://github.com/GenSpectrum/LAPIS/compare/v0.5.4...v0.5.5) (2025-07-01)
+
+
+### Bug Fixes
+
+* **lapis:** also return sequences that are null when requesting JSON or NDJSON ([#1256](https://github.com/GenSpectrum/LAPIS/issues/1256)) ([a888965](https://github.com/GenSpectrum/LAPIS/commit/a888965c000abafd80cebeb5a88861ab2a93dd8e)), closes [#1255](https://github.com/GenSpectrum/LAPIS/issues/1255)
+
 ## [0.5.4](https://github.com/GenSpectrum/LAPIS/compare/v0.5.3...v0.5.4) (2025-07-01)
 
 
