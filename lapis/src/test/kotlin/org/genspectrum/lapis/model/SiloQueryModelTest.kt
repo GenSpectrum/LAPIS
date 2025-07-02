@@ -67,7 +67,12 @@ class SiloQueryModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock)
+        underTest = SiloQueryModel(
+            siloClientMock,
+            siloFilterExpressionMapperMock,
+            referenceGenomeSchemaMock,
+            FastaHeaderTemplateParser(),
+        )
     }
 
     @Test
@@ -397,7 +402,8 @@ class SiloQueryModelTest {
             nucleotideSequences = listOf(ReferenceSequenceSchema("Segment1"), ReferenceSequenceSchema("Segment2")),
             genes = emptyList(),
         )
-        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock)
+        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock,
+            FastaHeaderTemplateParser())
 
         underTest.getGenomicSequence(
             sequenceFilters = sequenceFiltersRequest(
