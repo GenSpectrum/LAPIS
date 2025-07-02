@@ -1689,6 +1689,9 @@ class LapisController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1709,6 +1712,7 @@ class LapisController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = genes ?: referenceGenomeSchema.getGeneNames(),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.gene}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -1739,6 +1743,7 @@ class LapisController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = request.genes,
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.gene}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -1786,6 +1791,9 @@ class LapisController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1806,6 +1814,7 @@ class LapisController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -1839,6 +1848,7 @@ class LapisController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(

@@ -378,6 +378,7 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),
+            TODO()
         )
 
         verify {
@@ -415,6 +416,7 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf("segment1", "segment2"),
+            TODO()
         )
 
         verify {

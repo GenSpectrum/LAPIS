@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -52,6 +53,7 @@ class SingleSegmentedSequenceController(
     private val requestContext: RequestContext,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val sequencesStreamer: SequencesStreamer,
+    private val databaseConfig: DatabaseConfig
 ) {
     @GetMapping(
         ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
@@ -88,6 +90,9 @@ class SingleSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -108,6 +113,7 @@ class SingleSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -140,6 +146,7 @@ class SingleSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -186,6 +193,9 @@ class SingleSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -206,6 +216,7 @@ class SingleSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -238,6 +249,7 @@ class SingleSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(

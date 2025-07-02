@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -59,6 +60,7 @@ class MultiSegmentedSequenceController(
     private val requestContext: RequestContext,
     private val sequencesStreamer: SequencesStreamer,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val databaseConfig: DatabaseConfig
 ) {
     @GetMapping(
         ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
@@ -101,6 +103,9 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -121,6 +126,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = segments ?: referenceGenomeSchema.getNucleotideSequenceNames(),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.segment}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -153,6 +159,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = request.segments,
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.segment}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -202,6 +209,9 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -222,6 +232,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(segment),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -257,6 +268,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(segment),
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -309,6 +321,9 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -329,6 +344,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = segments ?: referenceGenomeSchema.getNucleotideSequenceNames(),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.segment}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -361,6 +377,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = request.segments,
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.segment}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -410,6 +427,9 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormat
         @RequestParam
         dataFormat: String? = null,
+        // TODO description
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -430,6 +450,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(segment),
+            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(
@@ -465,6 +486,7 @@ class MultiSegmentedSequenceController(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(segment),
+            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
         )
             .also {
                 sequencesStreamer.stream(

@@ -130,12 +130,14 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                         any(),
+                        any(),
                     )
                 } returns Stream.empty()
             },
             mockWithData = { modelMock ->
                 every {
                     modelMock.getGenomicSequence(
+                        any(),
                         any(),
                         any(),
                         any(),

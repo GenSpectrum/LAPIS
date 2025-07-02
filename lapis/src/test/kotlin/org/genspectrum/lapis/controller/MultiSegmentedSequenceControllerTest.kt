@@ -84,6 +84,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -101,6 +102,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -136,6 +138,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
         } returns Stream.empty()
 
@@ -157,6 +160,7 @@ class MultiSegmentedSequenceControllerTest(
                 ),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
         } returns Stream.empty()
 
@@ -179,6 +183,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -196,6 +201,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -233,6 +239,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
+                rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
         } returns Stream.empty()
 
@@ -257,6 +264,7 @@ class MultiSegmentedSequenceControllerTest(
                 ),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
+                rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
         } returns Stream.empty()
 

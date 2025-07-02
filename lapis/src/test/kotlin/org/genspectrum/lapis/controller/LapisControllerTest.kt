@@ -8,6 +8,7 @@ import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSeq
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
+import org.genspectrum.lapis.request.GENES_PROPERTY
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -253,9 +254,10 @@ class LapisControllerTest(
     fun alignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.ALIGNED,
-                listOf("geneName"),
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf("geneName"),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
@@ -293,14 +295,14 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf("gene1", "gene2"),
+                sequenceNames = listOf("gene1"),
+                rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
             )
         } returns Stream.empty()
 
         mockMvc.perform(
             getSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
-                .param(SEGMENTS_PROPERTY, "gene1")
-                .param(SEGMENTS_PROPERTY, "gene2")
+                .param(GENES_PROPERTY, "gene1")
                 .param("country", "Switzerland"),
         )
             .andExpect(status().isOk)
@@ -312,17 +314,18 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithGenes(
                     sequenceFilters = mapOf("country" to "Switzerland"),
-                    genes = listOf("gene1", "gene2"),
+                    genes = listOf("gene1"),
                 ),
                 sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf("gene1", "gene2"),
+                sequenceNames = listOf("gene1"),
+                rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
             )
         } returns Stream.empty()
 
         mockMvc.perform(
             postSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .content("""{"country": "Switzerland", "$SEGMENTS_PROPERTY": ["gene1", "gene2"]}"""),
+                .content("""{"country": "Switzerland", "$GENES_PROPERTY": ["gene1"]}"""),
         )
             .andExpect(status().isOk)
     }

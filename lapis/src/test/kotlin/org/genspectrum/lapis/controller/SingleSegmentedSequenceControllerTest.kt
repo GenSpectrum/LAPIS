@@ -79,6 +79,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -96,6 +97,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -130,6 +132,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 
@@ -147,6 +150,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
             )
         } returns returnedValue
 

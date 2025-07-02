@@ -18,7 +18,7 @@ const val DOWNLOAD_FILE_BASENAME_PROPERTY = "downloadFileBasename"
 const val COMPRESSION_PROPERTY = "compression"
 const val SEGMENTS_PROPERTY = "segments"
 const val GENES_PROPERTY = "genes"
-const val FASTA_HEADER_TEMPLATE_PROPERTY = "genes"
+const val FASTA_HEADER_TEMPLATE_PROPERTY = "fastaHeaderTemplate"
 
 val SPECIAL_REQUEST_PROPERTY_TYPES = mapOf(
     FORMAT_PROPERTY to JsonNodeType.STRING,

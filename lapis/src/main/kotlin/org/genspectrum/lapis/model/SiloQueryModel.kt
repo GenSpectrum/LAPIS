@@ -195,9 +195,11 @@ class SiloQueryModel(
         sequenceFilters: CommonSequenceFilters,
         sequenceType: SequenceType,
         sequenceNames: List<String>,
-//        rawFastaHeaderTemplate: String,
+        rawFastaHeaderTemplate: String,
     ): Stream<SequenceData> {
-//        fastaHeaderTemplateParser.parseTemplate(rawFastaHeaderTemplate)
+        fastaHeaderTemplateParser.parseTemplate(rawFastaHeaderTemplate)
+
+        // TODO
 
         return siloClient.sendQuery(
             SiloQuery(
