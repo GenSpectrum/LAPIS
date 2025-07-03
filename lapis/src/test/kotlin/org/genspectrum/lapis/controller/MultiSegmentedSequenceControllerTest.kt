@@ -44,8 +44,7 @@ class MultiSegmentedSequenceControllerTest(
 ) {
     val returnedValue = MockDataForEndpoints
         .sequenceEndpointMockData(SEGMENT_NAME)
-        .sequencesResponse
-        .copy()
+        .getSequencesResponse()
 
     val expectedFasta = MockDataForEndpoints
         .sequenceEndpointMockData(SEGMENT_NAME)

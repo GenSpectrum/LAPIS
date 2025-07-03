@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.response
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.NullNode
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
@@ -42,7 +43,7 @@ class SequencesStreamer(
             sequencesResponse.sequenceData.forEach {
                 for (sequenceName in sequencesResponse.requestedSequenceNames) {
                     val sequence = it[sequenceName]
-                    if (sequence == null) {
+                    if (sequence == null || sequence == NullNode.instance) {
                         continue
                     }
 

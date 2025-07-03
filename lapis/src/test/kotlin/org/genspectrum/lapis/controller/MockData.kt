@@ -103,7 +103,7 @@ data class MockDataCollection(
 }
 
 data class SequenceEndpointMockDataCollection(
-    val sequencesResponse: SequencesResponse,
+    val getSequencesResponse: () -> SequencesResponse,
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,
     val expectedFasta: String,
@@ -121,12 +121,12 @@ data class SequenceEndpointMockDataCollection(
 
     companion object {
         fun create(
-            sequencesResponse: SequencesResponse,
+            getSequencesResponse: () -> SequencesResponse,
             expectedFasta: String,
             expectedJson: String,
             expectedNdjson: String,
         ) = SequenceEndpointMockDataCollection(
-            sequencesResponse = sequencesResponse,
+            getSequencesResponse = getSequencesResponse,
             mockToReturnEmptyData = { modelMock ->
                 every {
                     modelMock.getGenomicSequence(
@@ -135,7 +135,7 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                     )
-                } returns sequencesResponse.copy()
+                } returns getSequencesResponse()
             },
             mockWithData = { modelMock ->
                 every {
@@ -145,7 +145,7 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                     )
-                } returns sequencesResponse.copy()
+                } returns getSequencesResponse()
             },
             expectedFasta = expectedFasta,
             expectedJson = expectedJson,
@@ -213,18 +213,20 @@ object MockDataForEndpoints {
 
     fun sequenceEndpointMockData(sequenceName: String = "main") =
         SequenceEndpointMockDataCollection.create(
-            sequencesResponse = SequencesResponse(
-                sequenceData = listOf<SequenceData>(
-                    SequenceData(mapOf("primaryKey" to TextNode("sequence1"), sequenceName to TextNode("CAGAA"))),
-                    SequenceData(mapOf("primaryKey" to TextNode("sequence2"), sequenceName to TextNode("CAGAT"))),
-                    SequenceData(mapOf("primaryKey" to TextNode("sequence3"), sequenceName to NullNode.instance)),
-                ).stream(),
-                requestedSequenceNames = listOf(sequenceName),
-                fastaHeaderTemplate = FastaHeaderTemplate(
-                    templateString = "{primaryKey}",
-                    fields = setOf(TemplateField.MetadataField("primaryKey")),
-                ),
-            ),
+            getSequencesResponse = {
+                SequencesResponse(
+                    sequenceData = listOf<SequenceData>(
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence1"), sequenceName to TextNode("CAGAA"))),
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence2"), sequenceName to TextNode("CAGAT"))),
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence3"), sequenceName to NullNode.instance)),
+                    ).stream(),
+                    requestedSequenceNames = listOf(sequenceName),
+                    fastaHeaderTemplate = FastaHeaderTemplate(
+                        templateString = "{primaryKey}",
+                        fields = setOf(TemplateField.MetadataField("primaryKey")),
+                    ),
+                )
+            },
             expectedFasta = """
                 >sequence1
                 CAGAA
@@ -248,43 +250,45 @@ object MockDataForEndpoints {
 
     fun sequenceEndpointMockDataForAllSequences() =
         SequenceEndpointMockDataCollection.create(
-            sequencesResponse = SequencesResponse(
-                sequenceData = listOf<SequenceData>(
-                    SequenceData(
-                        mapOf(
-                            "primaryKey" to TextNode("key1"),
-                            "sequence1" to TextNode("CAGAA"),
-                            "sequence2" to TextNode("CAGAT"),
+            getSequencesResponse = {
+                SequencesResponse(
+                    sequenceData = listOf(
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key1"),
+                                "sequence1" to TextNode("CAGAA"),
+                                "sequence2" to TextNode("CAGAT"),
+                            ),
                         ),
-                    ),
-                    SequenceData(
-                        mapOf(
-                            "primaryKey" to TextNode("key2"),
-                            "sequence1" to TextNode("CAGAT"),
-                            "sequence2" to NullNode.instance,
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key2"),
+                                "sequence1" to TextNode("CAGAT"),
+                                "sequence2" to NullNode.instance,
+                            ),
                         ),
-                    ),
-                    SequenceData(
-                        mapOf(
-                            "primaryKey" to TextNode("key3"),
-                            "sequence1" to NullNode.instance,
-                            "sequence2" to TextNode("CAGAC"),
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key3"),
+                                "sequence1" to NullNode.instance,
+                                "sequence2" to TextNode("CAGAC"),
+                            ),
                         ),
-                    ),
-                    SequenceData(
-                        mapOf(
-                            "primaryKey" to TextNode("key4"),
-                            "sequence1" to NullNode.instance,
-                            "sequence2" to NullNode.instance,
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key4"),
+                                "sequence1" to NullNode.instance,
+                                "sequence2" to NullNode.instance,
+                            ),
                         ),
+                    ).stream(),
+                    requestedSequenceNames = listOf("sequence1", "sequence2"),
+                    fastaHeaderTemplate = FastaHeaderTemplate(
+                        templateString = "{primaryKey}|{.segment}",
+                        fields = setOf(TemplateField.MetadataField("primaryKey"), TemplateField.SegmentField),
                     ),
-                ).stream(),
-                requestedSequenceNames = listOf("sequence1", "sequence2"),
-                fastaHeaderTemplate = FastaHeaderTemplate(
-                    templateString = "{primaryKey}|{.segment}",
-                    fields = setOf(TemplateField.MetadataField("primaryKey"), TemplateField.SegmentField),
-                ),
-            ),
+                )
+            },
             expectedFasta = """
                 >key1|sequence1
                 CAGAA

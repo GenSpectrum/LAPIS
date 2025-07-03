@@ -262,8 +262,7 @@ class LapisControllerTest(
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
-            .sequencesResponse
-            .copy()
+            .getSequencesResponse()
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
