@@ -469,7 +469,7 @@ annotation class DataFormat
     schema = Schema(ref = "#/components/schemas/$SEQUENCES_FORMAT_SCHEMA"),
     description = SEQUENCES_DATA_FORMAT_DESCRIPTION,
 )
-annotation class SequencesDataFormat
+annotation class SequencesDataFormatParam
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

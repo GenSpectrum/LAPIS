@@ -10,6 +10,7 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
+import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
@@ -45,7 +46,7 @@ import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
-import org.genspectrum.lapis.openApi.SequencesDataFormat
+import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -1686,7 +1687,7 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
-        @SequencesDataFormat
+        @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
         // TODO description
@@ -1708,18 +1709,23 @@ class LapisController(
 
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = genes ?: referenceGenomeSchema.getGeneNames(),
-            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.gene}",
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}|{.gene}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = false,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -1739,18 +1745,23 @@ class LapisController(
     ) {
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = request.genes,
-            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}|{.gene}",
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = request.fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}|{.gene}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = false,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -1788,7 +1799,7 @@ class LapisController(
         @Offset
         @RequestParam
         offset: Int? = null,
-        @SequencesDataFormat
+        @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
         // TODO description
@@ -1810,18 +1821,23 @@ class LapisController(
 
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),
-            rawFastaHeaderTemplate = fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -1844,18 +1860,23 @@ class LapisController(
     ) {
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),
-            rawFastaHeaderTemplate = request.fastaHeaderTemplate ?: "{${databaseConfig.schema.primaryKey}}",
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = request.fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }

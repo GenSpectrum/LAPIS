@@ -6,9 +6,10 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFI
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
-import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.startsWith
@@ -41,10 +42,10 @@ private const val SEGMENT_NAME = "otherSegment"
 class MultiSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = MockDataForEndpoints
+    val returnedValue = MockDataForEndpoints
         .sequenceEndpointMockData(SEGMENT_NAME)
-        .sequenceData
-        .stream()
+        .sequencesResponse
+        .copy()
 
     val expectedFasta = MockDataForEndpoints
         .sequenceEndpointMockData(SEGMENT_NAME)
@@ -140,7 +141,11 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf(SEGMENT_NAME),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
@@ -162,7 +167,11 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf(SEGMENT_NAME),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             postSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
@@ -241,7 +250,11 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf(SEGMENT_NAME, otherSegment),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
@@ -266,7 +279,11 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf(SEGMENT_NAME, otherSegment),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)

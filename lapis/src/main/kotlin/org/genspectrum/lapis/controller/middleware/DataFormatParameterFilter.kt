@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
@@ -23,10 +24,32 @@ object DataFormat {
     const val TSV = "TSV"
 }
 
-object SequencesDataFormat {
-    const val JSON = DataFormat.JSON
-    const val FASTA = "FASTA"
-    const val NDJSON = "NDJSON"
+enum class SequencesDataFormat(
+    val value: String,
+) {
+    FASTA("FASTA"),
+    JSON(DataFormat.JSON),
+    NDJSON("NDJSON"),
+    ;
+
+    companion object {
+        fun fromAcceptHeaders(acceptHeaders: List<MediaType>): SequencesDataFormat {
+            for (acceptHeader in acceptHeaders) {
+                if (TEXT_X_FASTA.includes(acceptHeader)) {
+                    return FASTA
+                }
+
+                if (MediaType.APPLICATION_JSON.includes(acceptHeader)) {
+                    return JSON
+                }
+
+                if (MediaType.APPLICATION_NDJSON.includes(acceptHeader)) {
+                    return NDJSON
+                }
+            }
+            return FASTA
+        }
+    }
 }
 
 @Component
@@ -60,8 +83,8 @@ class DataFormatParameterFilter(
             DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
             DataFormat.TSV -> LapisMediaType.TEXT_TSV_VALUE
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
-            SequencesDataFormat.FASTA -> LapisMediaType.TEXT_X_FASTA_VALUE
-            SequencesDataFormat.NDJSON -> MediaType.APPLICATION_NDJSON_VALUE
+            SequencesDataFormat.FASTA.value -> LapisMediaType.TEXT_X_FASTA_VALUE
+            SequencesDataFormat.NDJSON.value -> MediaType.APPLICATION_NDJSON_VALUE
 
             else -> "unknown/unknown"
         }

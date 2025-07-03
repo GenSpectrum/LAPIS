@@ -6,6 +6,8 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GENES_PROPERTY
@@ -261,8 +263,8 @@ class LapisControllerTest(
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
-            .sequenceData
-            .stream()
+            .sequencesResponse
+            .copy()
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -298,7 +300,11 @@ class LapisControllerTest(
                 sequenceNames = listOf("gene1"),
                 rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf("gene1"),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             getSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
@@ -320,7 +326,12 @@ class LapisControllerTest(
                 sequenceNames = listOf("gene1"),
                 rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf("gene1"),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
+
 
         mockMvc.perform(
             postSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)

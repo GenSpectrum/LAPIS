@@ -25,7 +25,7 @@ class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-    private val fastaHeaderTemplateParser: FastaHeaderTemplateParser
+    private val fastaHeaderTemplateParser: FastaHeaderTemplateParser,
 ) {
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
         siloClient.sendQuery(
@@ -196,12 +196,12 @@ class SiloQueryModel(
         sequenceType: SequenceType,
         sequenceNames: List<String>,
         rawFastaHeaderTemplate: String,
-    ): Stream<SequenceData> {
-        fastaHeaderTemplateParser.parseTemplate(rawFastaHeaderTemplate)
+    ): SequencesResponse {
+        val fastaHeaderTemplate = fastaHeaderTemplateParser.parseTemplate(rawFastaHeaderTemplate)
 
         // TODO
 
-        return siloClient.sendQuery(
+        val sequenceData = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.genomicSequence(
                     type = sequenceType,
@@ -212,6 +212,11 @@ class SiloQueryModel(
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
+        )
+        return SequencesResponse(
+            sequenceData = sequenceData,
+            requestedSequenceNames = sequenceNames,
+            fastaHeaderTemplate = fastaHeaderTemplate,
         )
     }
 
@@ -254,3 +259,9 @@ class SiloQueryModel(
             else -> fields
         }
 }
+
+data class SequencesResponse(
+    val sequenceData: Stream<SequenceData>,
+    val requestedSequenceNames: List<String>,
+    val fastaHeaderTemplate: FastaHeaderTemplate,
+)

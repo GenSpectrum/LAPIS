@@ -744,7 +744,13 @@ private fun sequencesFormatSchema() =
     Schema<String>()
         .types(setOf("string"))
         .description(SEQUENCES_DATA_FORMAT_DESCRIPTION)
-        ._enum(listOf(SequencesDataFormat.FASTA, SequencesDataFormat.JSON, SequencesDataFormat.NDJSON))
+        ._enum(
+            listOf(
+                SequencesDataFormat.FASTA.value,
+                SequencesDataFormat.JSON.value,
+                SequencesDataFormat.NDJSON.value,
+            ),
+        )
 
 private fun fieldsArray(
     databaseConfig: List<DatabaseMetadata> = emptyList(),

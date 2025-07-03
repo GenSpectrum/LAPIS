@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.model
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
-import com.fasterxml.jackson.databind.node.ValueNode
 import org.springframework.stereotype.Component
 
 data class FastaHeaderTemplate(
@@ -15,7 +15,7 @@ data class FastaHeaderTemplate(
     val hasSegmentField = fields.any { it is TemplateField.SegmentField }
 
     fun fillTemplate(
-        values: Map<String, ValueNode>,
+        values: Map<String, JsonNode>,
         sequenceName: String?,
     ): String {
         var result = templateString

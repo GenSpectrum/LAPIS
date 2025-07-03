@@ -37,10 +37,10 @@ private const val SEGMENT_NAME = "otherSegment"
 class SingleSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = MockDataForEndpoints
+    val returnedValue = MockDataForEndpoints
         .sequenceEndpointMockData("otherSegment")
-        .sequenceData
-        .stream()
+        .sequencesResponse
+        .copy()
 
     val expectedFasta = MockDataForEndpoints
         .sequenceEndpointMockData("otherSegment")

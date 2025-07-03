@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.node.JsonNodeType
+import com.fasterxml.jackson.databind.node.ObjectNode
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.util.UNALIGNED_PREFIX
@@ -80,9 +80,8 @@ data class InsertionData(
 )
 
 data class SequenceData(
-    val sequenceKey: String,
-    val sequences: Map<String, String?>,
-)
+    val map: Map<String, JsonNode>,
+) : Map<String, JsonNode> by map
 
 data class InfoData(
     val dataVersion: String,
@@ -97,47 +96,10 @@ class SequenceDataDeserializer(
         p: JsonParser,
         ctxt: DeserializationContext,
     ): SequenceData {
-        val node = p.readValueAsTree<JsonNode>()
-        val sequenceKey = node.get(databaseConfig.schema.primaryKey).asText()
-
-        val sequences = node.properties()
-            .filter { it.key != databaseConfig.schema.primaryKey }
-            .associate { (sequenceName, value) ->
-                val sequence = when (value.nodeType) {
-                    JsonNodeType.NULL -> null
-                    JsonNodeType.STRING -> value.asText()
-                    else -> throw RuntimeException(
-                        "Error deserializing sequence data: got unexpected value $value of type ${value.nodeType}",
-                    )
-                }
-                sequenceName.removePrefix(UNALIGNED_PREFIX) to sequence
-            }
+        val node = p.readValueAsTree<ObjectNode>()
 
         return SequenceData(
-            sequenceKey = sequenceKey,
-            sequences = sequences,
+            node.properties().associate { (key, value) -> key.removePrefix(UNALIGNED_PREFIX) to value },
         )
-    }
-}
-
-@JsonComponent
-class SequenceDataSerializer(
-    val databaseConfig: DatabaseConfig,
-) : JsonSerializer<SequenceData>() {
-    override fun serialize(
-        value: SequenceData,
-        gen: JsonGenerator,
-        serializers: SerializerProvider,
-    ) {
-        gen.writeStartObject()
-        gen.writeStringField(databaseConfig.schema.primaryKey, value.sequenceKey)
-        value.sequences.forEach { (sequenceName, sequence) ->
-            if (sequence == null) {
-                gen.writeNullField(sequenceName)
-            } else {
-                gen.writeStringField(sequenceName, sequence)
-            }
-        }
-        gen.writeEndObject()
     }
 }
