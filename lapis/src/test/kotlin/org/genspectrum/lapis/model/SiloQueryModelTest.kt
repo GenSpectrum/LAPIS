@@ -378,7 +378,7 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),
-            TODO()
+            TODO(),
         )
 
         verify {
@@ -403,8 +403,12 @@ class SiloQueryModelTest {
             nucleotideSequences = listOf(ReferenceSequenceSchema("Segment1"), ReferenceSequenceSchema("Segment2")),
             genes = emptyList(),
         )
-        underTest = SiloQueryModel(siloClientMock, siloFilterExpressionMapperMock, referenceGenomeSchemaMock,
-            FastaHeaderTemplateParser())
+        underTest = SiloQueryModel(
+            siloClientMock,
+            siloFilterExpressionMapperMock,
+            referenceGenomeSchemaMock,
+            FastaHeaderTemplateParser(),
+        )
 
         underTest.getGenomicSequence(
             sequenceFilters = sequenceFiltersRequest(
@@ -416,7 +420,7 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf("segment1", "segment2"),
-            TODO()
+            TODO(),
         )
 
         verify {

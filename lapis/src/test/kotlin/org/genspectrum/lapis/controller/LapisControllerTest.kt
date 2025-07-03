@@ -11,7 +11,6 @@ import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GENES_PROPERTY
-import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -331,7 +330,6 @@ class LapisControllerTest(
             requestedSequenceNames = listOf("gene1"),
             fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
         )
-
 
         mockMvc.perform(
             postSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
