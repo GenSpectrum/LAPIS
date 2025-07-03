@@ -23,8 +23,28 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
-private const val SEGMENT_NAME = "otherSegment"
+private const val SEGMENT_NAME = "main"
 private const val GENE_NAME = "gene1"
+
+const val NUCLEOTIDE_TEMPLATE = "segment={.segment}|primaryKey={primaryKey}"
+
+val expectedTemplatedNucleotideFasta = """
+    >segment=$SEGMENT_NAME|primaryKey=1234
+    AAAA
+    >segment=$SEGMENT_NAME|primaryKey=5678
+    GGGG
+    
+""".trimIndent()
+
+const val GENE_TEMPLATE = "gene={.gene}|primaryKey={primaryKey}"
+
+val expectedTemplatedAminoAcidFasta = """
+    >gene=$GENE_NAME|primaryKey=1234
+    AAAA
+    >gene=$GENE_NAME|primaryKey=5678
+    GGGG
+    
+""".trimIndent()
 
 @SpringBootTest(
     properties = [
@@ -80,16 +100,6 @@ class LapisControllerFastaHeaderTemplateTest(
     }
 
     private companion object {
-        const val NUCLEOTIDE_TEMPLATE = "segment={.segment}|primaryKey={primaryKey}"
-
-        val expectedTemplatedNucleotideFasta = """
-            >segment=$SEGMENT_NAME|primaryKey=1234
-            AAAA
-            >segment=$SEGMENT_NAME|primaryKey=5678
-            GGGG
-            
-        """.trimIndent()
-
         @JvmStatic
         fun getNucleotideFastaHeaderScenarios() =
             listOf(
@@ -175,8 +185,6 @@ class LapisControllerFastaHeaderTemplateTest(
                         
                     """.trimIndent(),
                 ),
-
-
                 FastaHeaderRequestScenario(
                     description = "GET all unaligned nucleotide sequences with header template",
                     request = getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
@@ -260,16 +268,6 @@ class LapisControllerFastaHeaderTemplateTest(
                     """.trimIndent(),
                 ),
             )
-
-        const val GENE_TEMPLATE = "gene={.gene}|primaryKey={primaryKey}"
-
-        val expectedTemplatedAminoAcidFasta = """
-            >gene=$GENE_NAME|primaryKey=1234
-            AAAA
-            >gene=$GENE_NAME|primaryKey=5678
-            GGGG
-            
-        """.trimIndent()
 
         @JvmStatic
         val aminoAcidFastaHeaderScenarios = listOf(
@@ -356,6 +354,134 @@ class LapisControllerFastaHeaderTemplateTest(
                 """.trimIndent(),
             ),
         )
+    }
+}
+
+@SpringBootTest(
+    properties = [
+        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=$SEGMENT_NAME",
+        "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=$GENE_NAME,gene2",
+    ],
+)
+@AutoConfigureMockMvc
+class LapisControllerSingleSegmentedFastaHeaderTemplateTest(
+    @param:Autowired val mockMvc: MockMvc,
+) {
+    @MockkBean
+    lateinit var siloClient: SiloClient
+
+    @MockkBean
+    lateinit var dataVersion: DataVersion
+
+    @BeforeEach
+    fun setup() {
+        every {
+            dataVersion.dataVersion
+        } returns "1234"
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getNucleotideFastaHeaderScenarios")
+    fun `nucleotide fasta header templates`(scenario: FastaHeaderRequestScenario) {
+        every {
+            siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
+        } returns Stream.of(
+            SequenceData(mapOf(SEGMENT_NAME to TextNode("AAAA"), "primaryKey" to TextNode("1234"))),
+            SequenceData(mapOf(SEGMENT_NAME to TextNode("GGGG"), "primaryKey" to TextNode("5678"))),
+        )
+
+        mockMvc.perform(scenario.request)
+            .andExpect(status().isOk)
+            .andExpect(content().string(scenario.expectedFasta))
+    }
+
+    private companion object {
+        @JvmStatic
+        fun getNucleotideFastaHeaderScenarios() =
+            listOf(
+                FastaHeaderRequestScenario(
+                    description = "GET aligned nucleotide sequences with header template",
+                    request = getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .param(FASTA_HEADER_TEMPLATE_PROPERTY, NUCLEOTIDE_TEMPLATE),
+                    expectedFastaHeaderTemplate = NUCLEOTIDE_TEMPLATE,
+                    expectedFasta = expectedTemplatedNucleotideFasta,
+                ),
+                FastaHeaderRequestScenario(
+                    description = "GET aligned nucleotide sequences without explicit header template",
+                    request = getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE),
+                    expectedFastaHeaderTemplate = "{primaryKey}",
+                    expectedFasta = """
+                        >1234
+                        AAAA
+                        >5678
+                        GGGG
+                        
+                    """.trimIndent(),
+                ),
+                FastaHeaderRequestScenario(
+                    description = "POST aligned nucleotide sequences with header template",
+                    request = postSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .contentType(APPLICATION_JSON)
+                        .content("""{ "$FASTA_HEADER_TEMPLATE_PROPERTY": "$NUCLEOTIDE_TEMPLATE" }"""),
+                    expectedFastaHeaderTemplate = NUCLEOTIDE_TEMPLATE,
+                    expectedFasta = expectedTemplatedNucleotideFasta,
+                ),
+                FastaHeaderRequestScenario(
+                    description = "POST aligned nucleotide sequences without explicit header template",
+                    request = postSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .contentType(APPLICATION_JSON)
+                        .content("{}"),
+                    expectedFastaHeaderTemplate = "{primaryKey}",
+                    expectedFasta = """
+                        >1234
+                        AAAA
+                        >5678
+                        GGGG
+                        
+                    """.trimIndent(),
+                ),
+                FastaHeaderRequestScenario(
+                    description = "GET unaligned nucleotide sequences with header template",
+                    request = getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .param(FASTA_HEADER_TEMPLATE_PROPERTY, NUCLEOTIDE_TEMPLATE),
+                    expectedFastaHeaderTemplate = NUCLEOTIDE_TEMPLATE,
+                    expectedFasta = expectedTemplatedNucleotideFasta,
+                ),
+                FastaHeaderRequestScenario(
+                    description = "GET unaligned nucleotide sequences without explicit header template",
+                    request = getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE),
+                    expectedFastaHeaderTemplate = "{primaryKey}",
+                    expectedFasta = """
+                        >1234
+                        AAAA
+                        >5678
+                        GGGG
+                        
+                    """.trimIndent(),
+                ),
+                FastaHeaderRequestScenario(
+                    description = "POST unaligned nucleotide sequences with header template",
+                    request = postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .contentType(APPLICATION_JSON)
+                        .content("""{ "$FASTA_HEADER_TEMPLATE_PROPERTY": "$NUCLEOTIDE_TEMPLATE" }"""),
+                    expectedFastaHeaderTemplate = NUCLEOTIDE_TEMPLATE,
+                    expectedFasta = expectedTemplatedNucleotideFasta,
+                ),
+                FastaHeaderRequestScenario(
+                    description = "POST unaligned nucleotide sequences without explicit header template",
+                    request = postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                        .contentType(APPLICATION_JSON)
+                        .content("{}"),
+                    expectedFastaHeaderTemplate = "{primaryKey}",
+                    expectedFasta = """
+                        >1234
+                        AAAA
+                        >5678
+                        GGGG
+                        
+                    """.trimIndent(),
+                ),
+            )
     }
 }
 
