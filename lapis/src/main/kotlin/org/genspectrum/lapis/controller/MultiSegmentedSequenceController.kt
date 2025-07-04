@@ -19,6 +19,7 @@ import org.genspectrum.lapis.openApi.LapisAllNucleotideSequencesResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideSequenceResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.NucleotideFastaHeaderTemplateParam
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.NucleotideSequencesOrderByFields
@@ -105,7 +106,7 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @NucleotideFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
@@ -223,7 +224,7 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @NucleotideFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
@@ -347,7 +348,7 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @NucleotideFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
@@ -465,7 +466,7 @@ class MultiSegmentedSequenceController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @NucleotideFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,

@@ -18,6 +18,7 @@ import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.AggregatedOrderByFields
+import org.genspectrum.lapis.openApi.AminoAcidFastaHeaderTemplateParam
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
 import org.genspectrum.lapis.openApi.AminoAcidSequencesOrderByFields
@@ -1691,7 +1692,7 @@ class LapisController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @AminoAcidFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
@@ -1805,7 +1806,7 @@ class LapisController(
         @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
-        // TODO description
+        @AminoAcidFastaHeaderTemplateParam
         @RequestParam
         fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,

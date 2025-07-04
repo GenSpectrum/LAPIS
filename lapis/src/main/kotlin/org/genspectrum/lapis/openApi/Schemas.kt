@@ -13,6 +13,7 @@ import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
@@ -24,6 +25,7 @@ import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.LapisMediaType
 import org.genspectrum.lapis.controller.MUTATIONS_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
@@ -69,6 +71,8 @@ const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
 const val SEQUENCES_FORMAT_SCHEMA = "SequencesDataFormat"
+const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA = "NucleotideFastaHeaderTemplate"
+const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplate"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 const val MUTATIONS_FIELDS_SCHEMA = "MutationsFields"
@@ -470,6 +474,22 @@ annotation class DataFormat
     description = SEQUENCES_DATA_FORMAT_DESCRIPTION,
 )
 annotation class SequencesDataFormatParam
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA"),
+    description = NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION,
+)
+annotation class NucleotideFastaHeaderTemplateParam
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA"),
+    description = AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION,
+)
+annotation class AminoAcidFastaHeaderTemplateParam
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
