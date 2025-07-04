@@ -278,20 +278,22 @@ class SiloQueryTest {
                 ),
                 Arguments.of(
                     SiloAction.genomicSequence(
-                        SequenceType.ALIGNED,
-                        listOf("someSequenceName"),
-                        listOf(
+                        type = SequenceType.ALIGNED,
+                        sequenceNames = listOf("someSequenceName"),
+                        additionalFields = listOf("field1", "field2"),
+                        orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
                         ),
-                        100,
-                        50,
+                        limit = 100,
+                        offset = 50,
                     ),
                     """
                         {
                             "type": "FastaAligned",
                             "sequenceNames": ["someSequenceName"],
+                            "additionalFields": ["field1", "field2"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
@@ -314,20 +316,22 @@ class SiloQueryTest {
                 ),
                 Arguments.of(
                     SiloAction.genomicSequence(
-                        SequenceType.UNALIGNED,
-                        listOf("someSequenceName"),
-                        listOf(
+                        type = SequenceType.UNALIGNED,
+                        sequenceNames = listOf("someSequenceName"),
+                        additionalFields = listOf("field1", "field2"),
+                        orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
                         ),
-                        100,
-                        50,
+                        limit = 100,
+                        offset = 50,
                     ),
                     """
                         {
                             "type": "Fasta",
                             "sequenceNames": ["someSequenceName"],
+                            "additionalFields": ["field1", "field2"],
                             "orderByFields": [
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}

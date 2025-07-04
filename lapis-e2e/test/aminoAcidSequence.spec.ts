@@ -100,6 +100,36 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       expect(result).to.have.length(1);
       expect(result[0].primaryKey).to.equal('key_3259931');
     });
+
+    it('should ignore the fasta header template when returning JSON', async () => {
+      const result = await lapisClient.postAlignedAminoAcidSequence({
+        gene: 'S',
+        aminoAcidSequenceRequest: {
+          dataFormat: 'JSON',
+          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+        },
+      });
+
+      expect(result).to.have.length(100);
+      expect(
+        Object.entries(result[0])
+          .filter(([_, value]) => value !== undefined)
+          .map(([key]) => key)
+      ).to.have.members(['primaryKey', 's']);
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{country}|{.gene}',
+        primaryKey: 'key_1408408',
+      });
+
+      const response = await fetch(`${basePath}/sample/alignedAminoAcidSequences/S?${urlParams}`);
+
+      expect(response.status).to.equal(200);
+      const text = await response.text();
+      expect(text.split('\n')[0]).to.equal('>key=key_1408408|2021-03-18|Switzerland|S');
+    });
   });
 
   describe('when getting all sequences', () => {
@@ -166,6 +196,45 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       expect(errorResponse.error.detail).to.match(
         /Error from SILO: The table does not contain the SequenceColumn 'unknownGene'/
       );
+    });
+
+    it('should ignore the fasta header template when returning JSON', async () => {
+      const result = await lapisClient.postAllAlignedAminoAcidSequences({
+        allAminoAcidSequenceRequest: {
+          dataFormat: 'JSON',
+          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+        },
+      });
+
+      expect(result).to.have.length(100);
+      expect(Object.keys(result[0])).to.have.members([
+        'primaryKey',
+        's',
+        'e',
+        'm',
+        'n',
+        'oRF1a',
+        'oRF1b',
+        'oRF3a',
+        'oRF6',
+        'oRF7a',
+        'oRF7b',
+        'oRF8',
+        'oRF9b',
+      ]);
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.gene}',
+        primaryKey: 'key_1408408',
+      });
+
+      const response = await fetch(`${basePath}/sample/alignedAminoAcidSequences?${urlParams}`);
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_1408408|2021-03-18|Switzerland|E');
     });
   });
 });

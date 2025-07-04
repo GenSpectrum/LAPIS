@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { lapisMultiSegmentedSequenceController, lapisSingleSegmentedSequenceController } from './common';
+import {
+  basePath,
+  basePathMultiSegmented,
+  lapisMultiSegmentedSequenceController,
+  lapisSingleSegmentedSequenceController,
+} from './common';
 
 describe('The /unalignedNucleotideSequence endpoint', () => {
   describe('single segmented', () => {
@@ -98,6 +103,31 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
       expect(result[0].primaryKey).to.equal('key_1749899');
       expect(result[0].main).to.equal('some_very_short_string');
     });
+
+    it('should ignore the fasta header template when returning JSON', async () => {
+      const result = await lapisSingleSegmentedSequenceController.postUnalignedNucleotideSequence({
+        nucleotideSequenceRequest: {
+          dataFormat: 'JSON',
+          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+        },
+      });
+
+      expect(result).to.have.length(100);
+      expect(Object.keys(result[0])).to.have.members(['primaryKey', 'main']);
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_1408408',
+      });
+
+      const response = await fetch(`${basePath}/sample/unalignedNucleotideSequences?${urlParams}`);
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_1408408|2021-03-18|Switzerland|main');
+    });
   });
 
   describe('multi segmented', () => {
@@ -172,6 +202,65 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         m: undefined,
         s: undefined,
       });
+    });
+
+    it('should ignore the fasta header template when returning JSON', async () => {
+      const result = await lapisMultiSegmentedSequenceController.postUnalignedNucleotideSequence({
+        nucleotideSequenceRequest: {
+          dataFormat: 'JSON',
+          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+        },
+        segment: 'M',
+      });
+
+      expect(result).to.have.length(6);
+      expect(
+        Object.entries(result[0])
+          .filter(([_, value]) => value !== undefined)
+          .map(([key]) => key)
+      ).to.have.members(['primaryKey', 'm']);
+    });
+
+    it('should ignore the fasta header template when returning all sequences JSON', async () => {
+      const result = await lapisMultiSegmentedSequenceController.postAllUnalignedNucleotideSequences({
+        allNucleotideSequenceRequest: {
+          dataFormat: 'JSON',
+          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+        },
+      });
+
+      expect(result).to.have.length(6);
+      expect(Object.keys(result[0])).to.have.members(['primaryKey', 'm', 'l', 's']);
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences/M?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|M');
+    });
+
+    it('should fill the fasta header template when getting all sequences', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|L');
     });
   });
 });

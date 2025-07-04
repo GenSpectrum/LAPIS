@@ -9,7 +9,10 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
+import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.TemplateField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -100,7 +103,7 @@ data class MockDataCollection(
 }
 
 data class SequenceEndpointMockDataCollection(
-    val sequenceData: List<SequenceData>,
+    val getSequencesResponse: () -> SequencesResponse,
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,
     val expectedFasta: String,
@@ -118,20 +121,22 @@ data class SequenceEndpointMockDataCollection(
 
     companion object {
         fun create(
-            sequenceData: List<SequenceData>,
+            getSequencesResponse: () -> SequencesResponse,
             expectedFasta: String,
             expectedJson: String,
             expectedNdjson: String,
         ) = SequenceEndpointMockDataCollection(
-            sequenceData = sequenceData,
+            getSequencesResponse = getSequencesResponse,
             mockToReturnEmptyData = { modelMock ->
                 every {
                     modelMock.getGenomicSequence(
                         any(),
                         any(),
                         any(),
+                        any(),
+                        any(),
                     )
-                } returns Stream.empty()
+                } returns getSequencesResponse()
             },
             mockWithData = { modelMock ->
                 every {
@@ -139,8 +144,10 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                         any(),
+                        any(),
+                        any(),
                     )
-                } returns sequenceData.stream()
+                } returns getSequencesResponse()
             },
             expectedFasta = expectedFasta,
             expectedJson = expectedJson,
@@ -208,11 +215,25 @@ object MockDataForEndpoints {
 
     fun sequenceEndpointMockData(sequenceName: String = "main") =
         SequenceEndpointMockDataCollection.create(
-            sequenceData = listOf(
-                SequenceData(sequenceKey = "sequence1", sequences = mapOf(sequenceName to "CAGAA")),
-                SequenceData(sequenceKey = "sequence2", sequences = mapOf(sequenceName to "CAGAT")),
-                SequenceData(sequenceKey = "sequence3", sequences = mapOf(sequenceName to null)),
-            ),
+            getSequencesResponse = {
+                SequencesResponse(
+                    sequenceData = listOf<SequenceData>(
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence1"), sequenceName to TextNode("CAGAA"))),
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence2"), sequenceName to TextNode("CAGAT"))),
+                        SequenceData(mapOf("primaryKey" to TextNode("sequence3"), sequenceName to NullNode.instance)),
+                    ).stream(),
+                    requestedSequenceNames = listOf(sequenceName),
+                    fastaHeaderTemplate = FastaHeaderTemplate(
+                        templateString = "{primaryKey}",
+                        fields = setOf(
+                            TemplateField.MetadataField(
+                                fieldNameInTemplate = "primaryKey",
+                                fieldNameInConfig = "primaryKey",
+                            ),
+                        ),
+                    ),
+                )
+            },
             expectedFasta = """
                 >sequence1
                 CAGAA
@@ -236,12 +257,51 @@ object MockDataForEndpoints {
 
     fun sequenceEndpointMockDataForAllSequences() =
         SequenceEndpointMockDataCollection.create(
-            sequenceData = listOf(
-                SequenceData(sequenceKey = "key1", sequences = mapOf("sequence1" to "CAGAA", "sequence2" to "CAGAT")),
-                SequenceData(sequenceKey = "key2", sequences = mapOf("sequence1" to "CAGAT", "sequence2" to null)),
-                SequenceData(sequenceKey = "key3", sequences = mapOf("sequence1" to null, "sequence2" to "CAGAC")),
-                SequenceData(sequenceKey = "key4", sequences = mapOf("sequence1" to null, "sequence2" to null)),
-            ),
+            getSequencesResponse = {
+                SequencesResponse(
+                    sequenceData = listOf(
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key1"),
+                                "sequence1" to TextNode("CAGAA"),
+                                "sequence2" to TextNode("CAGAT"),
+                            ),
+                        ),
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key2"),
+                                "sequence1" to TextNode("CAGAT"),
+                                "sequence2" to NullNode.instance,
+                            ),
+                        ),
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key3"),
+                                "sequence1" to NullNode.instance,
+                                "sequence2" to TextNode("CAGAC"),
+                            ),
+                        ),
+                        SequenceData(
+                            mapOf(
+                                "primaryKey" to TextNode("key4"),
+                                "sequence1" to NullNode.instance,
+                                "sequence2" to NullNode.instance,
+                            ),
+                        ),
+                    ).stream(),
+                    requestedSequenceNames = listOf("sequence1", "sequence2"),
+                    fastaHeaderTemplate = FastaHeaderTemplate(
+                        templateString = "{primaryKey}|{.segment}",
+                        fields = setOf(
+                            TemplateField.MetadataField(
+                                fieldNameInTemplate = "primaryKey",
+                                fieldNameInConfig = "primaryKey",
+                            ),
+                            TemplateField.SegmentField,
+                        ),
+                    ),
+                )
+            },
             expectedFasta = """
                 >key1|sequence1
                 CAGAA

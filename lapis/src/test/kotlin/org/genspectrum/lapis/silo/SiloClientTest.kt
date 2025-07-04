@@ -2,6 +2,7 @@ package org.genspectrum.lapis.silo
 
 import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
@@ -169,9 +170,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(sequenceKey = "key1", sequences = mapOf("someSequenceName" to "ABCD")),
-                SequenceData(sequenceKey = "key2", sequences = mapOf("someSequenceName" to "DEFG")),
-                SequenceData(sequenceKey = "key3", sequences = mapOf("someSequenceName" to null)),
+                SequenceData(mapOf("primaryKey" to TextNode("key1"), "someSequenceName" to TextNode("ABCD"))),
+                SequenceData(mapOf("primaryKey" to TextNode("key2"), "someSequenceName" to TextNode("DEFG"))),
+                SequenceData(mapOf("primaryKey" to TextNode("key3"), "someSequenceName" to NullNode.instance)),
             ),
         )
     }
@@ -200,9 +201,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(sequenceKey = "key1", sequences = mapOf("someSequenceName" to "ABCD")),
-                SequenceData(sequenceKey = "key2", sequences = mapOf("someSequenceName" to "DEFG")),
-                SequenceData(sequenceKey = "key3", sequences = mapOf("someSequenceName" to null)),
+                SequenceData(mapOf("primaryKey" to TextNode("key1"), "someSequenceName" to TextNode("ABCD"))),
+                SequenceData(mapOf("primaryKey" to TextNode("key2"), "someSequenceName" to TextNode("DEFG"))),
+                SequenceData(mapOf("primaryKey" to TextNode("key3"), "someSequenceName" to NullNode.instance)),
             ),
         )
     }

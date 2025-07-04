@@ -3,22 +3,26 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
+import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
 import org.genspectrum.lapis.openApi.LapisNucleotideSequenceResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.NucleotideFastaHeaderTemplateParam
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.NucleotideSequencesOrderByFields
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
-import org.genspectrum.lapis.openApi.SequencesDataFormat
+import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
@@ -52,6 +56,7 @@ class SingleSegmentedSequenceController(
     private val requestContext: RequestContext,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val sequencesStreamer: SequencesStreamer,
+    private val databaseConfig: DatabaseConfig,
 ) {
     @GetMapping(
         ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
@@ -85,9 +90,12 @@ class SingleSegmentedSequenceController(
         @Offset
         @RequestParam
         offset: Int? = null,
-        @SequencesDataFormat
+        @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideFastaHeaderTemplateParam
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -104,17 +112,24 @@ class SingleSegmentedSequenceController(
 
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -136,17 +151,24 @@ class SingleSegmentedSequenceController(
     ) {
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = request.fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -183,9 +205,12 @@ class SingleSegmentedSequenceController(
         @Offset
         @RequestParam
         offset: Int? = null,
-        @SequencesDataFormat
+        @SequencesDataFormatParam
         @RequestParam
         dataFormat: String? = null,
+        @NucleotideFastaHeaderTemplateParam
+        @RequestParam
+        fastaHeaderTemplate: String? = null,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -202,17 +227,24 @@ class SingleSegmentedSequenceController(
 
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }
@@ -234,17 +266,24 @@ class SingleSegmentedSequenceController(
     ) {
         requestContext.filter = request
 
+        val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
+
         siloQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
+            rawFastaHeaderTemplate = getFastaHeaderTemplate(
+                requestedTemplate = request.fastaHeaderTemplate,
+                defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
+                sequencesDataFormat = sequencesDataFormat,
+            ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
-                    sequenceData = it,
+                    sequencesResponse = it,
                     response = response,
-                    acceptHeaders = httpHeaders.accept,
-                    singleSequenceEntry = true,
+                    sequencesDataFormat = sequencesDataFormat,
                 )
             }
     }

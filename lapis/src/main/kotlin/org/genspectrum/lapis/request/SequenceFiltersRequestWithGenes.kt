@@ -19,6 +19,7 @@ data class SequenceFiltersRequestWithGenes(
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
+    val fastaHeaderTemplate: String? = null,
 ) : CommonSequenceFilters
 
 @JsonComponent
@@ -33,6 +34,7 @@ class SequenceFiltersRequestWithGenesDeserializer(
         val codec = jsonParser.codec
 
         val genes = parseGenes(node)
+        val fastaHeaderTemplate = parseFastaHeaderTemplateParameter(node)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return SequenceFiltersRequestWithGenes(
@@ -45,6 +47,7 @@ class SequenceFiltersRequestWithGenesDeserializer(
             orderByFields = parsedCommonFields.orderByFields,
             limit = parsedCommonFields.limit,
             offset = parsedCommonFields.offset,
+            fastaHeaderTemplate = fastaHeaderTemplate,
         )
     }
 

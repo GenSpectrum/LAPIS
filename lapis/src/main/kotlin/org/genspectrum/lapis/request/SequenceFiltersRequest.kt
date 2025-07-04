@@ -15,6 +15,7 @@ data class SequenceFiltersRequest(
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
+    val fastaHeaderTemplate: String? = null,
 ) : CommonSequenceFilters
 
 @JsonComponent
@@ -26,17 +27,19 @@ class SequenceFiltersRequestDeserializer : JsonDeserializer<SequenceFiltersReque
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
+        val fastaHeaderTemplate = parseFastaHeaderTemplateParameter(node)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return SequenceFiltersRequest(
-            parsedCommonFields.sequenceFilters,
-            parsedCommonFields.nucleotideMutations,
-            parsedCommonFields.aminoAcidMutations,
-            parsedCommonFields.nucleotideInsertions,
-            parsedCommonFields.aminoAcidInsertions,
-            parsedCommonFields.orderByFields,
-            parsedCommonFields.limit,
-            parsedCommonFields.offset,
+            sequenceFilters = parsedCommonFields.sequenceFilters,
+            nucleotideMutations = parsedCommonFields.nucleotideMutations,
+            aminoAcidMutations = parsedCommonFields.aminoAcidMutations,
+            nucleotideInsertions = parsedCommonFields.nucleotideInsertions,
+            aminoAcidInsertions = parsedCommonFields.aminoAcidInsertions,
+            orderByFields = parsedCommonFields.orderByFields,
+            limit = parsedCommonFields.limit,
+            offset = parsedCommonFields.offset,
+            fastaHeaderTemplate = fastaHeaderTemplate,
         )
     }
 }
