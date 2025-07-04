@@ -88,12 +88,7 @@ class FastaHeaderTemplateParser(
                     else -> TemplateField.MetadataField(
                         fieldNameInTemplate = fieldName,
                         fieldNameInConfig = caseInsensitiveFieldsCleaner.clean(fieldName)
-                            ?: throw BadRequestException(
-                                "Invalid FASTA header template: '$fieldName' is not a valid metadata field. " +
-                                    "Available fields: ${
-                                        caseInsensitiveFieldsCleaner.getKnownFields().joinToString(", ")
-                                    }",
-                            ),
+                            ?: throw invalidFieldException(fieldName, sequenceSymbolType),
                     )
                 }
             }
@@ -101,4 +96,17 @@ class FastaHeaderTemplateParser(
 
         return FastaHeaderTemplate(template, templateFields)
     }
+
+    private fun invalidFieldException(
+        fieldName: String,
+        sequenceSymbolType: SequenceSymbolType,
+    ): BadRequestException =
+        BadRequestException(
+            "Invalid FASTA header template: '$fieldName' is not a valid metadata field. " +
+                "Available fields: ${caseInsensitiveFieldsCleaner.getKnownFields().joinToString(", ")}. " +
+                when (sequenceSymbolType) {
+                    SequenceSymbolType.NUCLEOTIDE -> "Use {$SEGMENT_PLACEHOLDER} as a placeholder for segment name."
+                    SequenceSymbolType.AMINO_ACID -> "Use {$GENE_PLACEHOLDER} as a placeholder for gene name."
+                },
+        )
 }
