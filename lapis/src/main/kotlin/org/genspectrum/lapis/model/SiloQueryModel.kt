@@ -210,6 +210,7 @@ class SiloQueryModel(
                 SiloAction.genomicSequence(
                     type = sequenceType,
                     sequenceNames = mapSequenceNames(cleanedSequenceNames, sequenceType),
+                    additionalFields = fastaHeaderTemplate.metadataFieldNames,
                     orderByFields = mapSequenceOrderByFields(sequenceFilters.orderByFields, sequenceType),
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,

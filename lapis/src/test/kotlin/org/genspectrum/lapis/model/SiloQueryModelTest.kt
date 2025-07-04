@@ -405,7 +405,7 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),
-            rawFastaHeaderTemplate = "{primaryKey}",
+            rawFastaHeaderTemplate = "{primaryKey}{date}{.segment}",
             sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
 
@@ -415,6 +415,7 @@ class SiloQueryModelTest {
                     SiloAction.genomicSequence(
                         type = SequenceType.ALIGNED,
                         sequenceNames = listOf("someSequenceName"),
+                        additionalFields = listOf("primaryKey", "date"),
                     ),
                     True,
                 ),
@@ -448,8 +449,8 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf("segment1", "segment2"),
-            rawFastaHeaderTemplate = "{primaryKey}",
-            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
+            rawFastaHeaderTemplate = "{primaryKey}{date}{.gene}",
+            sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
         )
 
         verify {
@@ -458,6 +459,7 @@ class SiloQueryModelTest {
                     SiloAction.genomicSequence(
                         type = SequenceType.UNALIGNED,
                         sequenceNames = listOf("unaligned_Segment1", "unaligned_Segment2"),
+                        additionalFields = listOf("primaryKey", "date"),
                         orderByFields = listOf(
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),

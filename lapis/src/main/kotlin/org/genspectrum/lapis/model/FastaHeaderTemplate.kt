@@ -11,6 +11,10 @@ data class FastaHeaderTemplate(
     private val templateString: String,
     private val fields: Set<TemplateField>,
 ) {
+    val metadataFieldNames = fields
+        .filterIsInstance<TemplateField.MetadataField>()
+        .map { it.fieldNameInConfig }
+
     fun fillTemplate(
         values: Map<String, JsonNode>,
         sequenceName: String,
