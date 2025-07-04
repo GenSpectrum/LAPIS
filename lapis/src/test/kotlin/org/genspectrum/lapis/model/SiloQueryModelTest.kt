@@ -4,11 +4,17 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
+import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.DatabaseMetadata
+import org.genspectrum.lapis.config.DatabaseSchema
+import org.genspectrum.lapis.config.MetadataType
+import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.mutationData
 import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
+import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
@@ -64,14 +70,35 @@ class SiloQueryModelTest {
 
     private lateinit var underTest: SiloQueryModel
 
+    private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
+        caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
+            databaseConfig = DatabaseConfig(
+                schema = DatabaseSchema(
+                    instanceName = "test",
+                    opennessLevel = OpennessLevel.OPEN,
+                    metadata = listOf(
+                        DatabaseMetadata(name = "accession", type = MetadataType.STRING),
+                        DatabaseMetadata(name = "age", type = MetadataType.INT),
+                        DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
+                        DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
+                        DatabaseMetadata(name = "date", type = MetadataType.DATE),
+                        DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
+                    ),
+                    primaryKey = "primaryKey",
+                    features = emptyList(),
+                ),
+            ),
+        ),
+    )
+
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
         underTest = SiloQueryModel(
-            siloClientMock,
-            siloFilterExpressionMapperMock,
-            referenceGenomeSchemaMock,
-            FastaHeaderTemplateParser(),
+            siloClient = siloClientMock,
+            siloFilterExpressionMapper = siloFilterExpressionMapperMock,
+            referenceGenomeSchema = referenceGenomeSchemaMock,
+            fastaHeaderTemplateParser = fastaHeaderTemplateParser,
         )
     }
 
@@ -378,7 +405,8 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),
-            TODO(),
+            rawFastaHeaderTemplate = "{primaryKey}",
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
 
         verify {
@@ -404,10 +432,10 @@ class SiloQueryModelTest {
             genes = emptyList(),
         )
         underTest = SiloQueryModel(
-            siloClientMock,
-            siloFilterExpressionMapperMock,
-            referenceGenomeSchemaMock,
-            FastaHeaderTemplateParser(),
+            siloClient = siloClientMock,
+            siloFilterExpressionMapper = siloFilterExpressionMapperMock,
+            referenceGenomeSchema = referenceGenomeSchemaMock,
+            fastaHeaderTemplateParser = fastaHeaderTemplateParser,
         )
 
         underTest.getGenomicSequence(
@@ -420,7 +448,8 @@ class SiloQueryModelTest {
             ),
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf("segment1", "segment2"),
-            TODO(),
+            rawFastaHeaderTemplate = "{primaryKey}",
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
 
         verify {

@@ -7,6 +7,7 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
@@ -259,6 +260,7 @@ class LapisControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf("geneName"),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
@@ -297,6 +299,7 @@ class LapisControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf("gene1"),
                 rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),
@@ -323,6 +326,7 @@ class LapisControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf("gene1"),
                 rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),

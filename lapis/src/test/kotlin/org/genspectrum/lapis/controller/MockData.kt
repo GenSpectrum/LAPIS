@@ -134,12 +134,14 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                         any(),
+                        any(),
                     )
                 } returns getSequencesResponse()
             },
             mockWithData = { modelMock ->
                 every {
                     modelMock.getGenomicSequence(
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -223,7 +225,12 @@ object MockDataForEndpoints {
                     requestedSequenceNames = listOf(sequenceName),
                     fastaHeaderTemplate = FastaHeaderTemplate(
                         templateString = "{primaryKey}",
-                        fields = setOf(TemplateField.MetadataField("primaryKey")),
+                        fields = setOf(
+                            TemplateField.MetadataField(
+                                fieldNameInTemplate = "primaryKey",
+                                fieldNameInConfig = "primaryKey",
+                            ),
+                        ),
                     ),
                 )
             },
@@ -285,7 +292,13 @@ object MockDataForEndpoints {
                     requestedSequenceNames = listOf("sequence1", "sequence2"),
                     fastaHeaderTemplate = FastaHeaderTemplate(
                         templateString = "{primaryKey}|{.segment}",
-                        fields = setOf(TemplateField.MetadataField("primaryKey"), TemplateField.SegmentField),
+                        fields = setOf(
+                            TemplateField.MetadataField(
+                                fieldNameInTemplate = "primaryKey",
+                                fieldNameInConfig = "primaryKey",
+                            ),
+                            TemplateField.SegmentField,
+                        ),
                     ),
                 )
             },

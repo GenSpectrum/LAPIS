@@ -5,6 +5,7 @@ import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
@@ -77,6 +78,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -95,6 +97,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -130,6 +133,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -148,6 +152,7 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 

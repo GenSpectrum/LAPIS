@@ -7,6 +7,7 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PR
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
@@ -85,6 +86,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -103,6 +105,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -139,6 +142,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),
@@ -165,6 +169,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),
@@ -192,6 +197,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -210,6 +216,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
                 rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -248,6 +255,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),
@@ -277,6 +285,7 @@ class MultiSegmentedSequenceControllerTest(
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns SequencesResponse(
             sequenceData = Stream.empty(),

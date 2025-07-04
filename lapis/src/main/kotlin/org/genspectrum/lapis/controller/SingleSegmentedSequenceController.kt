@@ -9,6 +9,7 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
@@ -121,6 +122,7 @@ class SingleSegmentedSequenceController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
@@ -159,6 +161,7 @@ class SingleSegmentedSequenceController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
@@ -234,6 +237,7 @@ class SingleSegmentedSequenceController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(
@@ -272,6 +276,7 @@ class SingleSegmentedSequenceController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
             .also {
                 sequencesStreamer.stream(

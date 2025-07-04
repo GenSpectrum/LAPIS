@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
@@ -1720,6 +1721,7 @@ class LapisController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}|{.gene}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
         )
             .also {
                 sequencesStreamer.stream(
@@ -1756,6 +1758,7 @@ class LapisController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}|{.gene}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
         )
             .also {
                 sequencesStreamer.stream(
@@ -1832,6 +1835,7 @@ class LapisController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
         )
             .also {
                 sequencesStreamer.stream(
@@ -1871,6 +1875,7 @@ class LapisController(
                 defaultTemplate = "{${databaseConfig.schema.primaryKey}}",
                 sequencesDataFormat = sequencesDataFormat,
             ),
+            sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
         )
             .also {
                 sequencesStreamer.stream(

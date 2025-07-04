@@ -2,47 +2,42 @@ package org.genspectrum.lapis.model
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
+import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 data class FastaHeaderTemplate(
     private val templateString: String,
     private val fields: Set<TemplateField>,
 ) {
-    val metadataFields = fields.filterIsInstance<TemplateField.MetadataField>()
-
-    val hasGeneField = fields.any { it is TemplateField.GeneField }
-
-    val hasSegmentField = fields.any { it is TemplateField.SegmentField }
-
     fun fillTemplate(
         values: Map<String, JsonNode>,
-        sequenceName: String?,
+        sequenceName: String,
     ): String {
         var result = templateString
 
         fields
             .map { field ->
                 when (field) {
-                    is TemplateField.MetadataField -> field.fieldName to values[field.fieldName]
-                    TemplateField.GeneField -> GENE_PLACEHOLDER to sequenceName?.let { TextNode(it) }
-                    TemplateField.SegmentField -> SEGMENT_PLACEHOLDER to sequenceName?.let { TextNode(it) }
+                    is TemplateField.MetadataField -> field.fieldNameInTemplate to values[field.fieldNameInConfig]
+                    TemplateField.GeneField -> GENE_PLACEHOLDER to TextNode(sequenceName)
+                    TemplateField.SegmentField -> SEGMENT_PLACEHOLDER to TextNode(sequenceName)
                 }
             }
             .filter { (_, value) -> value != null }
             .forEach { (field, value) ->
-                result = result.replace("{$field}", value!!.asText())
+                result = result.replace("{$field}", value!!.asText(), ignoreCase = true)
             }
 
-        values.forEach { (field, value) ->
-            result = result.replace("{$field}", value.asText())
-        }
         return result
     }
 }
 
 sealed interface TemplateField {
     data class MetadataField(
-        val fieldName: String,
+        val fieldNameInTemplate: String,
+        val fieldNameInConfig: String,
     ) : TemplateField
 
     data object SegmentField : TemplateField
@@ -54,18 +49,48 @@ private const val SEGMENT_PLACEHOLDER = ".segment"
 private const val GENE_PLACEHOLDER = ".gene"
 
 @Component
-class FastaHeaderTemplateParser {
+class FastaHeaderTemplateParser(
+    private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
+) {
     companion object {
         private val FIELD_REGEX = Regex("""\{([^}]+)}""")
     }
 
-    fun parseTemplate(template: String): FastaHeaderTemplate {
+    fun parseTemplate(
+        template: String,
+        sequenceSymbolType: SequenceSymbolType,
+    ): FastaHeaderTemplate {
         val templateFields = FIELD_REGEX.findAll(template)
             .map { matchResult ->
-                when (val fieldName = matchResult.groupValues[1]) {
-                    SEGMENT_PLACEHOLDER -> TemplateField.SegmentField
-                    GENE_PLACEHOLDER -> TemplateField.GeneField
-                    else -> TemplateField.MetadataField(fieldName = fieldName)
+                when (val fieldName = matchResult.groupValues[1].lowercase(Locale.US)) {
+                    SEGMENT_PLACEHOLDER -> {
+                        if (sequenceSymbolType != SequenceSymbolType.NUCLEOTIDE) {
+                            throw BadRequestException(
+                                "Invalid FASTA header template: '$SEGMENT_PLACEHOLDER' is only valid for nucleotide sequences.",
+                            )
+                        }
+                        TemplateField.SegmentField
+                    }
+
+                    GENE_PLACEHOLDER -> {
+                        if (sequenceSymbolType != SequenceSymbolType.AMINO_ACID) {
+                            throw BadRequestException(
+                                "Invalid FASTA header template: '$GENE_PLACEHOLDER' is only valid for amino acid sequences.",
+                            )
+                        }
+                        TemplateField.GeneField
+                    }
+
+                    else -> TemplateField.MetadataField(
+                        fieldNameInTemplate = fieldName,
+                        fieldNameInConfig = caseInsensitiveFieldsCleaner.clean(fieldName)
+                            ?: throw BadRequestException(
+                                "Invalid FASTA header template: '$fieldName' is not a valid metadata field. " +
+                                    "Available fields: ${
+                                        caseInsensitiveFieldsCleaner.getKnownFields().joinToString(", ")
+                                    }",
+                            ),
+                    )
                 }
             }
             .toSet()
