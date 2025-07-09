@@ -80,9 +80,9 @@ class MutationsOverTimeModelTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.rowLabels, equalTo(emptyList()))
+        assertThat(result.mutations, equalTo(emptyList()))
         assertThat(result.data, equalTo(emptyList()))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.dateRanges, equalTo(dateRanges))
     }
 
     @Test
@@ -99,9 +99,9 @@ class MutationsOverTimeModelTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.data, equalTo(emptyList()))
-        assertThat(result.columnLabels, equalTo(emptyList()))
+        assertThat(result.dateRanges, equalTo(emptyList()))
     }
 
     @Test
@@ -270,8 +270,8 @@ class MutationsOverTimeModelTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
@@ -373,8 +373,8 @@ class MutationsOverTimeModelTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations.map { it.toString(referenceGenome) }))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(

@@ -54,8 +54,8 @@ class MutationsOverTimeControllerTest(
     @Test
     fun `POST mutationsOverTime returns expected response`() {
         val resultMock = MutationsOverTimeResult(
-            rowLabels = listOf("123T", "456G"),
-            columnLabels = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
+            mutations = listOf("123T", "456G"),
+            dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(
                 listOf(MutationsOverTimeCell(count = 10, coverage = 100)),
                 listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
@@ -93,8 +93,10 @@ class MutationsOverTimeControllerTest(
         )
             .andExpect(status().isOk)
             .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
-            .andExpect(jsonPath("$.data.rowLabels[0]").value("123T"))
-            .andExpect(jsonPath("$.data.rowLabels[1]").value("456G"))
+            .andExpect(jsonPath("$.data.mutations[0]").value("123T"))
+            .andExpect(jsonPath("$.data.mutations[1]").value("456G"))
+            .andExpect(jsonPath("$.data.dateRanges[0].dateFrom").value("2025-01-01"))
+            .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
             .andExpect(jsonPath("$.data.data[0][0].count").value(10))
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
@@ -117,8 +119,8 @@ class MutationsOverTimeControllerTest(
     @Test
     fun `POST mutationsOverTime compresses result with zstd when requested`() {
         every { modelMock.evaluate(any(), any(), any(), any()) } returns MutationsOverTimeResult(
-            rowLabels = listOf("123T"),
-            columnLabels = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
+            mutations = listOf("123T"),
+            dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
         )
 

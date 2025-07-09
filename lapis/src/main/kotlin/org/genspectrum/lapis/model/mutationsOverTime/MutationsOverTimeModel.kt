@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.deletionSymbols
@@ -21,14 +22,33 @@ import org.genspectrum.lapis.silo.WithDataVersion
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
+@Schema(
+    description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
+        "columns (inner array).",
+)
 data class MutationsOverTimeResult(
-    var rowLabels: List<String>,
-    var columnLabels: List<DateRange>,
+    @param:Schema(
+        description = "The list of requested mutations",
+    )
+    var mutations: List<String>,
+    @param:Schema(
+        description = "The list of requested date ranges",
+    )
+    var dateRanges: List<DateRange>,
+    @param:Schema(
+        description = "A 2D array of mutation counts and coverage. " +
+            "It should be understood as data[index of mutation][index of date range].",
+    )
     var data: List<List<MutationsOverTimeCell>>,
 )
 
 data class MutationsOverTimeCell(
+    @param:Schema(description = "Number of sequences with the mutation in the date range")
     var count: Int,
+    @param:Schema(
+        description = "Number of sequences with coverage (i.e., having a non-ambiguous symbol) at the position in" +
+            "the date range. Confirmed deletions (i.e., \"-\") are included.",
+    )
     var coverage: Int,
 )
 
@@ -48,8 +68,8 @@ class MutationsOverTimeModel(
     ): MutationsOverTimeResult {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
             return MutationsOverTimeResult(
-                rowLabels = mutations.map { it.toString(referenceGenome) },
-                columnLabels = dateRanges,
+                mutations = mutations.map { it.toString(referenceGenome) },
+                dateRanges = dateRanges,
                 data = emptyList(),
             )
         }
@@ -99,8 +119,8 @@ class MutationsOverTimeModel(
         dataVersion.dataVersion = dataVersions.first()
 
         return MutationsOverTimeResult(
-            rowLabels = mutations.map { it.toString(referenceGenome) },
-            columnLabels = dateRanges,
+            mutations = mutations.map { it.toString(referenceGenome) },
+            dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
         )
     }
