@@ -14,7 +14,6 @@ import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.silo.DataVersion
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
@@ -176,7 +175,7 @@ class MutationsOverTimeControllerTest(
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to read request")))
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to read request")))
     }
 
     @Test
@@ -197,6 +196,6 @@ class MutationsOverTimeControllerTest(
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to read request")))
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to read request")))
     }
 }
