@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model.mutationsOverTime
 
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.deletionSymbols
 import org.genspectrum.lapis.model.nucleotideSymbols
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -134,7 +135,7 @@ class MutationsOverTimeModel(
         dateField: String,
     ): WithDataVersion<List<AggregationData>> {
         val coverageQuery = Or(
-            nucleotideSymbols.map {
+            (nucleotideSymbols + deletionSymbols).map {
                 NucleotideSymbolEquals(
                     sequenceName = mutation.sequenceName,
                     position = mutation.position,

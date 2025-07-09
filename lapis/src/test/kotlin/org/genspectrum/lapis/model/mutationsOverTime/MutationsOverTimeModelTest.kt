@@ -193,7 +193,7 @@ class MutationsOverTimeModelTest {
                                     child is NucleotideSymbolEquals &&
                                         child.sequenceName == null &&
                                         child.position == 1 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
                         query.filterExpression.children.any {
@@ -231,7 +231,7 @@ class MutationsOverTimeModelTest {
                                     child is NucleotideSymbolEquals &&
                                         child.sequenceName == null &&
                                         child.position == 2 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
                         query.filterExpression.children.any {
@@ -339,7 +339,7 @@ class MutationsOverTimeModelTest {
                                     child is NucleotideSymbolEquals &&
                                         child.sequenceName == null &&
                                         child.position == 1 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
                         query.filterExpression.children.any {
