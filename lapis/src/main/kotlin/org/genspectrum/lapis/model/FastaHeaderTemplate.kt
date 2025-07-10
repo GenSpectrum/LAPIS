@@ -7,6 +7,9 @@ import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.springframework.stereotype.Component
 import java.util.Locale
 
+private const val SEGMENT_PLACEHOLDER = ".segment"
+private const val GENE_PLACEHOLDER = ".gene"
+
 data class FastaHeaderTemplate(
     private val templateString: String,
     private val fields: Set<TemplateField>,
@@ -48,9 +51,6 @@ sealed interface TemplateField {
 
     data object GeneField : TemplateField
 }
-
-private const val SEGMENT_PLACEHOLDER = ".segment"
-private const val GENE_PLACEHOLDER = ".gene"
 
 @Component
 class FastaHeaderTemplateParser(
