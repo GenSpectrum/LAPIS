@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.model
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
@@ -34,7 +35,11 @@ data class FastaHeaderTemplate(
             }
             .filter { (_, value) -> value != null }
             .forEach { (field, value) ->
-                result = result.replace("{$field}", value!!.asText(), ignoreCase = true)
+                val replacement = when (value) {
+                    is NullNode -> ""
+                    else -> value!!.asText()
+                }
+                result = result.replace("{$field}", replacement, ignoreCase = true)
             }
 
         return result

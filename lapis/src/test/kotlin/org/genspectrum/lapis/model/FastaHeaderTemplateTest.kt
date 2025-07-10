@@ -73,7 +73,7 @@ class FastaHeaderTemplateTest {
     @Test
     fun `GIVEN template with multiple placeholders THEN is filled correctly`() {
         val template = fastaHeaderTemplateParser.parseTemplate(
-            template = "accession: {accession}, age: {age}, qc: {qc}, isBoolean: {isBoolean}, date: {date}",
+            template = "accession: {accession}, age: {age}, qc: {qc}, date: {date}, isBoolean: {isBoolean}",
             sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
         )
 
@@ -90,7 +90,7 @@ class FastaHeaderTemplateTest {
 
         assertThat(
             filledTemplate,
-            `is`("accession: my_accession, age: 42, qc: 0.987, isBoolean: true, date: null"),
+            `is`("accession: my_accession, age: 42, qc: 0.987, date: , isBoolean: true"),
         )
     }
 
