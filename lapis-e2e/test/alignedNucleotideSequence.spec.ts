@@ -110,16 +110,17 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       expectIsZstdEncoded(await response.arrayBuffer());
     });
 
-    it('should ignore the fasta header template when returning JSON', async () => {
-      const result = await lapisSingleSegmentedSequenceController.postAlignedNucleotideSequence({
-        nucleotideSequenceRequest: {
-          dataFormat: 'JSON',
-          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
-        },
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      expect(result).to.have.length(100);
-      expect(Object.keys(result[0])).to.have.members(['primaryKey', 'main']);
+      const response = await fetch(`${basePath}/sample/alignedNucleotideSequences?${urlParams}`);
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
     });
 
     it('should fill the fasta header template', async () => {
@@ -170,33 +171,34 @@ describe('The /alignedNucleotideSequence endpoint', () => {
       });
     });
 
-    it('should ignore the fasta header template when returning JSON', async () => {
-      const result = await lapisMultiSegmentedSequenceController.postAlignedNucleotideSequence({
-        nucleotideSequenceRequest: {
-          dataFormat: 'JSON',
-          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
-        },
-        segment: 'M',
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      expect(result).to.have.length(6);
-      expect(
-        Object.entries(result[0])
-          .filter(([_, value]) => value !== undefined)
-          .map(([key]) => key)
-      ).to.have.members(['primaryKey', 'm']);
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences/M?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
     });
 
-    it('should ignore the fasta header template when returning all sequences JSON', async () => {
-      const result = await lapisMultiSegmentedSequenceController.postAllAlignedNucleotideSequences({
-        allNucleotideSequenceRequest: {
-          dataFormat: 'JSON',
-          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
-        },
+    it('should throw an error for fasta header template when returning all sequences JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      expect(result).to.have.length(6);
-      expect(Object.keys(result[0])).to.have.members(['primaryKey', 'm', 'l', 's']);
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
     });
 
     it('should fill the fasta header template', async () => {

@@ -101,21 +101,17 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       expect(result[0].primaryKey).to.equal('key_3259931');
     });
 
-    it('should ignore the fasta header template when returning JSON', async () => {
-      const result = await lapisClient.postAlignedAminoAcidSequence({
-        gene: 'S',
-        aminoAcidSequenceRequest: {
-          dataFormat: 'JSON',
-          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
-        },
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      expect(result).to.have.length(100);
-      expect(
-        Object.entries(result[0])
-          .filter(([_, value]) => value !== undefined)
-          .map(([key]) => key)
-      ).to.have.members(['primaryKey', 's']);
+      const response = await fetch(`${basePath}/sample/alignedAminoAcidSequences/S?${urlParams}`);
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
     });
 
     it('should fill the fasta header template', async () => {
@@ -198,30 +194,17 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
       );
     });
 
-    it('should ignore the fasta header template when returning JSON', async () => {
-      const result = await lapisClient.postAllAlignedAminoAcidSequences({
-        allAminoAcidSequenceRequest: {
-          dataFormat: 'JSON',
-          fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
-        },
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      expect(result).to.have.length(100);
-      expect(Object.keys(result[0])).to.have.members([
-        'primaryKey',
-        's',
-        'e',
-        'm',
-        'n',
-        'oRF1a',
-        'oRF1b',
-        'oRF3a',
-        'oRF6',
-        'oRF7a',
-        'oRF7b',
-        'oRF8',
-        'oRF9b',
-      ]);
+      const response = await fetch(`${basePath}/sample/alignedAminoAcidSequences?${urlParams}`);
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
     });
 
     it('should fill the fasta header template', async () => {

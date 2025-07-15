@@ -10,7 +10,9 @@ import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
+import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +22,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
@@ -97,6 +100,21 @@ class LapisControllerFastaHeaderTemplateTest(
         mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
             .andExpect(content().string(scenario.expectedFasta))
+    }
+
+    @Test
+    fun `GIVEN fasta header template WHEN I request non-fasta data THEN throws bad request`() {
+        mockMvc.perform(
+            getSample(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
+                .accept(APPLICATION_JSON)
+                .param(FASTA_HEADER_TEMPLATE_PROPERTY, "my test template"),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(
+                jsonPath(
+                    "\$.error.detail",
+                ).value(containsString("fastaHeaderTemplate is only applicable for FASTA format")),
+            )
     }
 
     private companion object {
