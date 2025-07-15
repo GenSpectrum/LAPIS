@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.6](https://github.com/GenSpectrum/LAPIS/compare/v0.5.5...v0.5.6) (2025-07-15)
+
+
+### Features
+
+* **lapis:** add nucleotideMutationsOverTime endpoint ([#1229](https://github.com/GenSpectrum/LAPIS/issues/1229)) ([cade8d9](https://github.com/GenSpectrum/LAPIS/commit/cade8d9a1ec217c3d449c882b77a1ac07574a7bb)), closes [#1205](https://github.com/GenSpectrum/LAPIS/issues/1205)
+
 ## [0.5.5](https://github.com/GenSpectrum/LAPIS/compare/v0.5.4...v0.5.5) (2025-07-01)
 
 
