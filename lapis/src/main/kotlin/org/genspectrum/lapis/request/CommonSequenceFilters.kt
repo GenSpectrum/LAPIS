@@ -35,6 +35,48 @@ fun parseCommonFields(
     node: JsonNode,
     codec: ObjectCodec,
 ): ParsedCommonFields {
+    val parsedMutationsAndInsertions = parseMutationsAndInsertions(node, codec)
+
+    val orderByFields = when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> orderByNode.map { codec.treeToValue(it, OrderByField::class.java) }
+        else -> throw BadRequestException(
+            "orderBy must be an array or null, ${butWas(orderByNode)}",
+        )
+    }
+
+    val limitNode = node.get(LIMIT_PROPERTY)
+    val limit = when (limitNode?.nodeType) {
+        null -> null
+        JsonNodeType.NULL, JsonNodeType.NUMBER -> limitNode.asInt()
+        else -> throw BadRequestException("limit must be a number or null, ${butWas(limitNode)}")
+    }
+
+    val offsetNode = node.get(OFFSET_PROPERTY)
+    val offset = when (offsetNode?.nodeType) {
+        null -> null
+        JsonNodeType.NULL, JsonNodeType.NUMBER -> offsetNode.asInt()
+        else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
+    }
+
+    val sequenceFilters = parseSequenceFilters(node, codec)
+
+    return ParsedCommonFields(
+        nucleotideMutations = parsedMutationsAndInsertions.nucleotideMutations,
+        aminoAcidMutations = parsedMutationsAndInsertions.aminoAcidMutations,
+        nucleotideInsertions = parsedMutationsAndInsertions.nucleotideInsertions,
+        aminoAcidInsertions = parsedMutationsAndInsertions.aminoAcidInsertions,
+        sequenceFilters = sequenceFilters,
+        orderByFields = orderByFields,
+        limit = limit,
+        offset = offset,
+    )
+}
+
+fun parseMutationsAndInsertions(
+    node: JsonNode,
+    codec: ObjectCodec,
+): ParsedMutationsAndInsertions {
     val nucleotideMutations = when (val nucleotideMutationsNode = node.get(NUCLEOTIDE_MUTATIONS_PROPERTY)) {
         null -> emptyList()
         is ArrayNode -> nucleotideMutationsNode.map { codec.treeToValue(it, NucleotideMutation::class.java) }
@@ -67,44 +109,25 @@ fun parseCommonFields(
         )
     }
 
-    val orderByFields = when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
-        null -> emptyList()
-        is ArrayNode -> orderByNode.map { codec.treeToValue(it, OrderByField::class.java) }
-        else -> throw BadRequestException(
-            "orderBy must be an array or null, ${butWas(orderByNode)}",
-        )
-    }
-
-    val limitNode = node.get(LIMIT_PROPERTY)
-    val limit = when (limitNode?.nodeType) {
-        null -> null
-        JsonNodeType.NULL, JsonNodeType.NUMBER -> limitNode.asInt()
-        else -> throw BadRequestException("limit must be a number or null, ${butWas(limitNode)}")
-    }
-
-    val offsetNode = node.get(OFFSET_PROPERTY)
-    val offset = when (offsetNode?.nodeType) {
-        null -> null
-        JsonNodeType.NULL, JsonNodeType.NUMBER -> offsetNode.asInt()
-        else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
-    }
-
-    val sequenceFilters = node.properties()
-        .filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) }
-        .associate { it.key to getValuesList(it.value, it.key) }
-    return ParsedCommonFields(
-        nucleotideMutations = nucleotideMutations,
-        aminoAcidMutations = aminoAcidMutations,
-        nucleotideInsertions = nucleotideInsertions,
-        aminoAcidInsertions = aminoAcidInsertions,
-        sequenceFilters = sequenceFilters,
-        orderByFields = orderByFields,
-        limit = limit,
-        offset = offset,
+    return ParsedMutationsAndInsertions(
+        nucleotideMutations,
+        aminoAcidMutations,
+        nucleotideInsertions,
+        aminoAcidInsertions,
     )
 }
 
-private fun butWas(jsonNode: JsonNode) = "but was $jsonNode (${jsonNode.nodeType})"
+fun parseSequenceFilters(
+    node: JsonNode,
+    codec: ObjectCodec,
+    fieldsToExclude: Set<String> = SPECIAL_REQUEST_PROPERTIES,
+): SequenceFilters =
+    node.properties()
+        .asSequence()
+        .filter { !fieldsToExclude.contains(it.key) }
+        .associate { it.key to getValuesList(it.value, it.key) }
+
+fun butWas(jsonNode: JsonNode) = "but was $jsonNode (${jsonNode.nodeType})"
 
 data class ParsedCommonFields(
     val nucleotideMutations: List<NucleotideMutation>,
@@ -117,7 +140,14 @@ data class ParsedCommonFields(
     val offset: Int?,
 )
 
-private fun getValuesList(
+data class ParsedMutationsAndInsertions(
+    val nucleotideMutations: List<NucleotideMutation>,
+    val aminoAcidMutations: List<AminoAcidMutation>,
+    val nucleotideInsertions: List<NucleotideInsertion>,
+    val aminoAcidInsertions: List<AminoAcidInsertion>,
+)
+
+fun getValuesList(
     value: JsonNode,
     key: String,
 ) = when {
@@ -137,7 +167,7 @@ private fun getValuesList(
     )
 }
 
-private fun getValueNode(value: JsonNode): String? {
+fun getValueNode(value: JsonNode): String? {
     if (value.isNull) {
         return null
     }

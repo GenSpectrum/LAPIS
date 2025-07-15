@@ -28,21 +28,29 @@ class SiloClient(
     private val dataVersion: DataVersion,
     private val requestContext: RequestContext,
 ) {
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): Stream<ResponseType> {
-        val (currentDataVersion, queryResult) = when (query.action.cacheable) {
-            true -> cachedSiloClient.sendCachedQuery(query)
-                .let { it.dataVersion to it.queryResult.stream() }
+    fun <ResponseType> sendQuery(
+        query: SiloQuery<ResponseType>,
+        setRequestDataVersion: Boolean = true,
+    ): Stream<ResponseType> = sendQueryAndGetDataVersion(query, setRequestDataVersion).queryResult
 
-            else -> cachedSiloClient.sendQuery(query).let { it.dataVersion to it.queryResult }
+    fun <ResponseType> sendQueryAndGetDataVersion(
+        query: SiloQuery<ResponseType>,
+        setRequestDataVersion: Boolean = true,
+    ): WithDataVersion<Stream<ResponseType>> {
+        val response = when (query.action.cacheable) {
+            true -> cachedSiloClient.sendCachedQuery(query).map { it.stream() }
+            else -> cachedSiloClient.sendQuery(query)
         }
 
-        dataVersion.dataVersion = currentDataVersion
+        if (setRequestDataVersion) {
+            dataVersion.dataVersion = response.dataVersion
+        }
 
         if (RequestContextHolder.getRequestAttributes() != null && requestContext.cached == null) {
             requestContext.cached = true
         }
 
-        return queryResult
+        return response
     }
 
     fun callInfo(): InfoData {
@@ -226,7 +234,10 @@ class SiloUnavailableException(
 data class WithDataVersion<ResponseType>(
     val dataVersion: String,
     val queryResult: ResponseType,
-)
+) {
+    fun <NewResponseType> map(transform: (ResponseType) -> NewResponseType): WithDataVersion<NewResponseType> =
+        WithDataVersion(dataVersion, transform(queryResult))
+}
 
 data class SiloErrorResponse(
     val error: String,

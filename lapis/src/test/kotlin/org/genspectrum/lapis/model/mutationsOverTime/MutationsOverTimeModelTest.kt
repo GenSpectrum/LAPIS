@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
@@ -13,15 +14,19 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.SequenceFilters
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
+import org.genspectrum.lapis.silo.WithDataVersion
+import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDate
@@ -37,21 +42,28 @@ private data class TestLapisFilter(
 
 const val DUMMY_DATE_FIELD = "date"
 private val DUMMY_LAPIS_FILTER = TestLapisFilter(emptyMap(), emptyList(), emptyList(), emptyList(), emptyList())
+const val DUMMY_DATA_VERSION = "1750941114"
 
 @SpringBootTest
-class MutationsOverTimeTest {
+class MutationsOverTimeModelTest {
     @MockK
     private lateinit var siloQueryClient: SiloClient
 
     @Autowired
     private lateinit var siloFilterExpressionMapper: SiloFilterExpressionMapper
 
-    private lateinit var underTest: MutationsOverTime
+    @Autowired
+    private lateinit var referenceGenome: ReferenceGenome
+
+    @Autowired
+    private lateinit var dataVersion: DataVersion
+
+    private lateinit var underTest: MutationsOverTimeModel
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = MutationsOverTime(siloQueryClient, siloFilterExpressionMapper)
+        underTest = MutationsOverTimeModel(siloQueryClient, siloFilterExpressionMapper, referenceGenome, dataVersion)
     }
 
     @Test
@@ -68,16 +80,16 @@ class MutationsOverTimeTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.rowLabels, equalTo(emptyList()))
+        assertThat(result.mutations, equalTo(emptyList()))
         assertThat(result.data, equalTo(emptyList()))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.dateRanges, equalTo(dateRanges))
     }
 
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
-            NucleotideMutation(sequenceName = "sequence1", position = 234, symbol = "G"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 2, symbol = "G"),
         )
         val dateRanges = emptyList<DateRange>()
         val result = underTest.evaluate(
@@ -87,15 +99,15 @@ class MutationsOverTimeTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.data, equalTo(emptyList()))
-        assertThat(result.columnLabels, equalTo(emptyList()))
+        assertThat(result.dateRanges, equalTo(emptyList()))
     }
 
     @Test
     fun `given a list of mutations and date ranges, then it returns the count and coverage data`() {
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -104,29 +116,33 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 123 &&
+                                it.sequenceName == null &&
+                                it.position == 1 &&
                                 it.symbol == "T"
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.of(
-                AggregationData(1, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.of(
+                    AggregationData(1, fields = mapOf("date" to TextNode("2021-06-01"))),
+                    AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
+                ),
             )
         }
 
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -135,30 +151,34 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 234 &&
+                                it.sequenceName == null &&
+                                it.position == 2 &&
                                 it.symbol == "G"
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.of(
-                AggregationData(3, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-07-01"))),
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.of(
+                    AggregationData(3, fields = mapOf("date" to TextNode("2021-06-01"))),
+                    AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
+                    AggregationData(2, fields = mapOf("date" to TextNode("2022-07-01"))),
+                ),
             )
         }
 
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -167,32 +187,36 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 123 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.sequenceName == null &&
+                                        child.position == 1 &&
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.of(
-                AggregationData(5, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(6, fields = mapOf("date" to TextNode("2022-06-01"))),
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.of(
+                    AggregationData(5, fields = mapOf("date" to TextNode("2021-06-01"))),
+                    AggregationData(6, fields = mapOf("date" to TextNode("2022-06-01"))),
+                ),
             )
         }
 
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -201,34 +225,38 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 234 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.sequenceName == null &&
+                                        child.position == 2 &&
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.of(
-                AggregationData(0, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.of(
+                    AggregationData(0, fields = mapOf("date" to TextNode("2021-06-01"))),
+                    AggregationData(1, fields = mapOf("date" to TextNode("2022-06-01"))),
+                    AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
+                ),
             )
         }
 
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
-            NucleotideMutation(sequenceName = "sequence1", position = 234, symbol = "G"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 2, symbol = "G"),
         )
         val dateRanges = listOf(
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
@@ -242,19 +270,19 @@ class MutationsOverTimeTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
                     listOf(
-                        MutationOverTimeCell(count = 1, coverage = 5),
-                        MutationOverTimeCell(count = 2, coverage = 6),
+                        MutationsOverTimeCell(count = 1, coverage = 5),
+                        MutationsOverTimeCell(count = 2, coverage = 6),
                     ),
                     listOf(
-                        MutationOverTimeCell(count = 3, coverage = 0),
-                        MutationOverTimeCell(count = 4, coverage = 2),
+                        MutationsOverTimeCell(count = 3, coverage = 0),
+                        MutationsOverTimeCell(count = 4, coverage = 2),
                     ),
                 ),
             ),
@@ -264,7 +292,7 @@ class MutationsOverTimeTest {
     @Test
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -273,26 +301,30 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is NucleotideSymbolEquals &&
-                                it.sequenceName == "sequence1" &&
-                                it.position == 123 &&
+                                it.sequenceName == null &&
+                                it.position == 1 &&
                                 it.symbol == "T"
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.empty()
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.empty(),
+            )
         }
 
         every {
-            siloQueryClient.sendQuery<AggregationData>(
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(
                 match { query ->
                     query.action == SiloAction.aggregated(
                         listOf(DUMMY_DATE_FIELD),
@@ -301,29 +333,33 @@ class MutationsOverTimeTest {
                         null,
                     ) &&
                         query.filterExpression is And &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is Or &&
                                 (it).children.all { child ->
                                     child is NucleotideSymbolEquals &&
-                                        child.sequenceName == "sequence1" &&
-                                        child.position == 123 &&
-                                        child.symbol in listOf("A", "C", "T", "G")
+                                        child.sequenceName == null &&
+                                        child.position == 1 &&
+                                        child.symbol in listOf("A", "C", "T", "G", "-")
                                 }
                         } &&
-                        (query.filterExpression as And).children.any {
+                        query.filterExpression.children.any {
                             it is DateBetween &&
                                 it.column == DUMMY_DATE_FIELD &&
                                 it.from == LocalDate.parse("2021-01-01") &&
                                 it.to == LocalDate.parse("2022-12-31")
                         }
                 },
+                false,
             )
         } answers {
-            Stream.empty()
+            WithDataVersion(
+                DUMMY_DATA_VERSION,
+                Stream.empty(),
+            )
         }
 
         val mutations = listOf(
-            NucleotideMutation(sequenceName = "sequence1", position = 123, symbol = "T"),
+            NucleotideMutation(sequenceName = null, position = 1, symbol = "T"),
         )
         val dateRanges = listOf(
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
@@ -337,18 +373,75 @@ class MutationsOverTimeTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.rowLabels, equalTo(mutations))
-        assertThat(result.columnLabels, equalTo(dateRanges))
+        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
                     listOf(
-                        MutationOverTimeCell(count = 0, coverage = 0),
-                        MutationOverTimeCell(count = 0, coverage = 0),
+                        MutationsOverTimeCell(count = 0, coverage = 0),
+                        MutationsOverTimeCell(count = 0, coverage = 0),
                     ),
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `given one data version change, then it succeeds`() {
+        var callCount = 0
+        every {
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+        } answers {
+            val version = if (callCount++ == 0) "1" else "2"
+            WithDataVersion(
+                version,
+                Stream.of(
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                ),
+            )
+        }
+
+        val mutations = listOf(NucleotideMutation(null, 1, "T"))
+        val dateRanges = listOf(DateRange(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-12-31")))
+
+        val result = underTest.evaluate(
+            mutations = mutations,
+            lapisFilter = DUMMY_LAPIS_FILTER,
+            dateField = DUMMY_DATE_FIELD,
+            dateRanges = dateRanges,
+        )
+
+        assertThat(result.data[0][0].count, equalTo(1))
+    }
+
+    @Test
+    fun `given more than once data version change, then it throws`() {
+        var callCount = 0
+        every {
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+        } answers {
+            val version = (callCount++).toString()
+            WithDataVersion(
+                version,
+                Stream.of(
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                ),
+            )
+        }
+
+        val mutations = listOf(NucleotideMutation(null, 1, "T"))
+        val dateRanges = listOf(DateRange(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-12-31")))
+
+        val exception = assertThrows<RuntimeException> {
+            underTest.evaluate(
+                mutations = mutations,
+                lapisFilter = DUMMY_LAPIS_FILTER,
+                dateField = DUMMY_DATE_FIELD,
+                dateRanges = dateRanges,
+            )
+        }
+        assertThat(exception.message, containsString("data has been updated multiple times"))
     }
 }

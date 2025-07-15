@@ -2,8 +2,11 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.controller.BadRequestException
 
+val deletionSymbols = setOf('-')
+val querySymbols = setOf('.', '?')
 val nucleotideSymbols = setOf('A', 'C', 'G', 'T')
-val ambiguousNucSymbols = setOf('M', 'R', 'W', 'S', 'Y', 'K', 'V', 'H', 'D', 'B', 'N', '-', '.', '?')
+val ambiguousNucleotideSymbols = setOf('M', 'R', 'W', 'S', 'Y', 'K', 'V', 'H', 'D', 'B', 'N')
+val allNucleotideQuerySymbols = nucleotideSymbols + ambiguousNucleotideSymbols + deletionSymbols + querySymbols
 val aaSymbols = setOf(
     'A',
     'R',
@@ -27,16 +30,17 @@ val aaSymbols = setOf(
     'V',
     '*',
 )
-val ambiguousAaSymbols = setOf('X', '-', '.', '?')
+val ambiguousAaSymbols = setOf('X')
+val allAaQuerySymbols = aaSymbols + ambiguousAaSymbols + deletionSymbols + querySymbols
 
 fun validateNucleotideSymbol(c: Char) {
-    if (c.uppercaseChar() !in ambiguousNucSymbols && c.uppercaseChar() !in nucleotideSymbols) {
+    if (c.uppercaseChar() !in allNucleotideQuerySymbols) {
         throw BadRequestException("Invalid nucleotide symbol: $c")
     }
 }
 
 fun validateAminoAcidSymbol(c: Char) {
-    if (c.uppercaseChar() !in ambiguousAaSymbols && c.uppercaseChar() !in aaSymbols) {
+    if (c.uppercaseChar() !in allAaQuerySymbols) {
         throw BadRequestException("Invalid amino acid symbol: $c")
     }
 }
