@@ -132,10 +132,7 @@ fun buildOpenApiSchema(
                         getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
-                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(
-                                referenceGenomeSchema,
-                                databaseConfig,
-                            ),
+                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         databaseConfig = databaseConfig,
@@ -147,10 +144,7 @@ fun buildOpenApiSchema(
                         requestProperties = getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
-                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(
-                                referenceGenomeSchema,
-                                databaseConfig,
-                            ),
+                            orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         referenceGenomeSchema = referenceGenomeSchema,
@@ -163,10 +157,7 @@ fun buildOpenApiSchema(
                         getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
-                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(
-                                referenceGenomeSchema,
-                                databaseConfig,
-                            ),
+                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         databaseConfig = databaseConfig,
@@ -178,10 +169,7 @@ fun buildOpenApiSchema(
                         requestProperties = getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
-                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(
-                                referenceGenomeSchema,
-                                databaseConfig,
-                            ),
+                            orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         referenceGenomeSchema = referenceGenomeSchema,
@@ -313,11 +301,11 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(aminoAcidSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig)),
+                    arraySchema(aminoAcidSequenceOrderByFieldsEnum(databaseConfig)),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
-                    arraySchema(nucleotideSequenceOrderByFieldsEnum(referenceGenomeSchema, databaseConfig)),
+                    arraySchema(nucleotideSequenceOrderByFieldsEnum(databaseConfig)),
                 )
                 .addSchemas(
                     SEGMENT_SCHEMA,
@@ -881,20 +869,13 @@ private fun mutationsOrderByFieldsEnum() =
 private fun insertionsOrderByFieldsEnum() =
     orderByFieldsEnum(emptyList(), listOf("insertion", "count", "position", "sequenceName", "insertedSymbols"))
 
-private fun aminoAcidSequenceOrderByFieldsEnum(
-    referenceGenomeSchema: ReferenceGenomeSchema,
-    databaseConfig: DatabaseConfig,
-) = orderByFieldsEnum(emptyList(), referenceGenomeSchema.genes.map { it.name } + databaseConfig.schema.primaryKey)
+private fun aminoAcidSequenceOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
+    orderByFieldsEnum(databaseConfig.schema.metadata)
+        .description(AMINO_ACID_SEQUENCES_ORDER_BY_DESCRIPTION)
 
-private fun nucleotideSequenceOrderByFieldsEnum(
-    referenceGenomeSchema: ReferenceGenomeSchema,
-    databaseConfig: DatabaseConfig,
-) = orderByFieldsEnum(
-    emptyList(),
-    referenceGenomeSchema.nucleotideSequences.map {
-        it.name
-    } + databaseConfig.schema.primaryKey,
-)
+private fun nucleotideSequenceOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
+    orderByFieldsEnum(databaseConfig.schema.metadata)
+        .description(NUCLEOTIDE_SEQUENCES_ORDER_BY_DESCRIPTION)
 
 private fun detailsOrderByFieldsEnum(databaseConfig: DatabaseConfig) = orderByFieldsEnum(databaseConfig.schema.metadata)
 
