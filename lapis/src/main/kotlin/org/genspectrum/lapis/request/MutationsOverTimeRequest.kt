@@ -7,9 +7,16 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.springframework.boot.jackson.JsonComponent
 
-data class MutationsOverTimeRequest(
+data class NucleotideMutationsOverTimeRequest(
     val filters: MutationsOverTimeRequestFilters,
     val includeMutations: List<NucleotideMutation>,
+    val dateRanges: List<DateRange>,
+    val dateField: String,
+)
+
+data class AminoAcidMutationsOverTimeRequest(
+    val filters: MutationsOverTimeRequestFilters,
+    val includeMutations: List<AminoAcidMutation>,
     val dateRanges: List<DateRange>,
     val dateField: String,
 )

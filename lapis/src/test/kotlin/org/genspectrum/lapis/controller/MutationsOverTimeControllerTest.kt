@@ -68,7 +68,7 @@ class MutationsOverTimeControllerTest(
         val dateFieldSlot = slot<String>()
 
         every {
-            modelMock.evaluate(
+            modelMock.evaluateNucleotideMutations(
                 capture(mutationsSlot),
                 capture(dateRangesSlot),
                 capture(filtersSlot),
@@ -103,7 +103,7 @@ class MutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
-        verify(exactly = 1) { modelMock.evaluate(any(), any(), any(), any()) }
+        verify(exactly = 1) { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) }
         assertThat(dateFieldSlot.captured, `is`("date"))
         assertThat(mutationsSlot.captured, hasSize(2))
         assertThat(mutationsSlot.captured[0].position, `is`(123))
@@ -118,7 +118,7 @@ class MutationsOverTimeControllerTest(
 
     @Test
     fun `POST mutationsOverTime compresses result with zstd when requested`() {
-        every { modelMock.evaluate(any(), any(), any(), any()) } returns MutationsOverTimeResult(
+        every { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) } returns MutationsOverTimeResult(
             mutations = listOf("123T"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),

@@ -73,7 +73,7 @@ class MutationsOverTimeModelTest {
             DateRange(dateFrom = LocalDate.parse("2021-01-01"), dateTo = LocalDate.parse("2021-12-31")),
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = DUMMY_LAPIS_FILTER,
@@ -92,7 +92,7 @@ class MutationsOverTimeModelTest {
             NucleotideMutation(sequenceName = null, position = 2, symbol = "G"),
         )
         val dateRanges = emptyList<DateRange>()
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = DUMMY_LAPIS_FILTER,
@@ -263,7 +263,7 @@ class MutationsOverTimeModelTest {
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
 
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
@@ -366,7 +366,7 @@ class MutationsOverTimeModelTest {
             DateRange(dateFrom = LocalDate.parse("2022-01-01"), dateTo = LocalDate.parse("2022-12-31")),
         )
 
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
@@ -406,7 +406,7 @@ class MutationsOverTimeModelTest {
         val mutations = listOf(NucleotideMutation(null, 1, "T"))
         val dateRanges = listOf(DateRange(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-12-31")))
 
-        val result = underTest.evaluate(
+        val result = underTest.evaluateNucleotideMutations(
             mutations = mutations,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
@@ -435,7 +435,7 @@ class MutationsOverTimeModelTest {
         val dateRanges = listOf(DateRange(LocalDate.parse("2021-01-01"), LocalDate.parse("2021-12-31")))
 
         val exception = assertThrows<RuntimeException> {
-            underTest.evaluate(
+            underTest.evaluateNucleotideMutations(
                 mutations = mutations,
                 lapisFilter = DUMMY_LAPIS_FILTER,
                 dateField = DUMMY_DATE_FIELD,
