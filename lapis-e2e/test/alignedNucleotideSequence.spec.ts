@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import {
   basePath,
+  basePathMultiSegmented,
   expectIsZstdEncoded,
   lapisMultiSegmentedSequenceController,
   lapisSingleSegmentedSequenceController,
@@ -108,6 +109,32 @@ describe('The /alignedNucleotideSequence endpoint', () => {
 
       expectIsZstdEncoded(await response.arrayBuffer());
     });
+
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(`${basePath}/sample/alignedNucleotideSequences?${urlParams}`);
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_1408408',
+      });
+
+      const response = await fetch(`${basePath}/sample/alignedNucleotideSequences?${urlParams}`);
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_1408408|2021-03-18|Switzerland|main');
+    });
   });
 
   describe('multi segmented', () => {
@@ -142,6 +169,66 @@ describe('The /alignedNucleotideSequence endpoint', () => {
         m: 'CGGG',
         s: undefined,
       });
+    });
+
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences/M?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should throw an error for fasta header template when returning all sequences JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences/M?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|M');
+    });
+
+    it('should fill the fasta header template when getting all sequences', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/alignedNucleotideSequences?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|L');
     });
   });
 });

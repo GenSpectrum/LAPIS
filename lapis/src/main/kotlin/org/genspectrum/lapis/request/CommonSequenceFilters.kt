@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
+import com.fasterxml.jackson.databind.node.NullNode
+import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.util.MultiValueMap
 
@@ -173,3 +175,13 @@ fun getValueNode(value: JsonNode): String? {
     }
     return value.asText()
 }
+
+fun parseFastaHeaderTemplateParameter(node: JsonNode) =
+    when (val fastaHeaderTemplate = node.get(FASTA_HEADER_TEMPLATE_PROPERTY)) {
+        is TextNode -> fastaHeaderTemplate.asText()
+        is NullNode -> null
+        null -> null
+        else -> throw BadRequestException(
+            "Fasta header template parameter must be a string or null, but was $node (${node.nodeType})",
+        )
+    }

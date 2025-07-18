@@ -20,10 +20,12 @@ import org.genspectrum.lapis.config.SequenceFilterFieldName
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
+import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
@@ -38,6 +40,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
+import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.request.GENES_PROPERTY
@@ -125,7 +128,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
-                    requestSchemaForCommonSequenceFilters(
+                    aminoAcidSequencesRequestSchema(
                         getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
@@ -135,6 +138,7 @@ fun buildOpenApiSchema(
                             ),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
+                        databaseConfig = databaseConfig,
                     ),
                 )
                 .addSchemas(
@@ -150,11 +154,12 @@ fun buildOpenApiSchema(
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         referenceGenomeSchema = referenceGenomeSchema,
+                        databaseConfig = databaseConfig,
                     ),
                 )
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA,
-                    requestSchemaForCommonSequenceFilters(
+                    nucleotideSequencesRequestSchema(
                         getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
@@ -164,6 +169,7 @@ fun buildOpenApiSchema(
                             ),
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
+                        databaseConfig = databaseConfig,
                     ),
                 )
                 .addSchemas(
@@ -179,6 +185,7 @@ fun buildOpenApiSchema(
                             dataFormatSchema = sequencesFormatSchema(),
                         ),
                         referenceGenomeSchema = referenceGenomeSchema,
+                        databaseConfig = databaseConfig,
                     ),
                 )
                 .addSchemas(
@@ -320,6 +327,11 @@ fun buildOpenApiSchema(
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
+                .addSchemas(
+                    NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA,
+                    nucleotideFastaHeaderTemplateSchema(databaseConfig),
+                )
+                .addSchemas(AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA, aminoAcidFastaHeaderTemplateSchema(databaseConfig))
                 .addSchemas(FORMAT_SCHEMA, dataFormatSchema()),
         )
 
@@ -506,9 +518,34 @@ private fun requestSchemaWithFields(
             ),
         )
 
+private fun nucleotideSequencesRequestSchema(
+    requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
+    databaseConfig: DatabaseConfig,
+): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("valid filters for sequence data")
+        .properties(
+            requestProperties +
+                Pair(FASTA_HEADER_TEMPLATE_PROPERTY, nucleotideFastaHeaderTemplateSchema(databaseConfig)),
+        )
+
+private fun aminoAcidSequencesRequestSchema(
+    requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
+    databaseConfig: DatabaseConfig,
+): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("valid filters for sequence data")
+        .properties(
+            requestProperties +
+                Pair(FASTA_HEADER_TEMPLATE_PROPERTY, aminoAcidFastaHeaderTemplateSchema(databaseConfig)),
+        )
+
 private fun requestSchemaWithSegment(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
     referenceGenomeSchema: ReferenceGenomeSchema,
+    databaseConfig: DatabaseConfig,
 ): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
@@ -517,12 +554,14 @@ private fun requestSchemaWithSegment(
             requestProperties + Pair(
                 SEGMENTS_PROPERTY,
                 arraySchema(segmentsEnum(referenceGenomeSchema)).description(SEGMENTS_DESCRIPTION),
-            ),
+            ) +
+                Pair(FASTA_HEADER_TEMPLATE_PROPERTY, aminoAcidFastaHeaderTemplateSchema(databaseConfig)),
         )
 
 private fun requestSchemaWithGenes(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
     referenceGenomeSchema: ReferenceGenomeSchema,
+    databaseConfig: DatabaseConfig,
 ): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
@@ -531,7 +570,8 @@ private fun requestSchemaWithGenes(
             requestProperties + Pair(
                 GENES_PROPERTY,
                 arraySchema(genesEnum(referenceGenomeSchema)).description(GENES_DESCRIPTION),
-            ),
+            ) +
+                Pair(FASTA_HEADER_TEMPLATE_PROPERTY, aminoAcidFastaHeaderTemplateSchema(databaseConfig)),
         )
 
 private fun requestSchemaForMutationsOverTime(
@@ -804,7 +844,25 @@ private fun sequencesFormatSchema() =
     Schema<String>()
         .types(setOf("string"))
         .description(SEQUENCES_DATA_FORMAT_DESCRIPTION)
-        ._enum(listOf(SequencesDataFormat.FASTA, SequencesDataFormat.JSON, SequencesDataFormat.NDJSON))
+        ._enum(
+            listOf(
+                SequencesDataFormat.FASTA.value,
+                SequencesDataFormat.JSON.value,
+                SequencesDataFormat.NDJSON.value,
+            ),
+        )
+
+private fun nucleotideFastaHeaderTemplateSchema(databaseConfig: DatabaseConfig) =
+    Schema<String>()
+        .types(setOf("string"))
+        .description(NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION)
+        .example("{.segment}|accession={${databaseConfig.schema.primaryKey}}")
+
+private fun aminoAcidFastaHeaderTemplateSchema(databaseConfig: DatabaseConfig) =
+    Schema<String>()
+        .types(setOf("string"))
+        .description(AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION)
+        .example("{.gene}|accession={${databaseConfig.schema.primaryKey}}")
 
 private fun fieldsArray(
     databaseConfig: List<DatabaseMetadata> = emptyList(),

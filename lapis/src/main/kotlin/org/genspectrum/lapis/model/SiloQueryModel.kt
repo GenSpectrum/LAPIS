@@ -11,6 +11,7 @@ import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
+import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
@@ -24,6 +25,7 @@ class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val fastaHeaderTemplateParser: FastaHeaderTemplateParser,
 ) {
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
         siloClient.sendQuery(
@@ -193,24 +195,41 @@ class SiloQueryModel(
         sequenceFilters: CommonSequenceFilters,
         sequenceType: SequenceType,
         sequenceNames: List<String>,
-    ) = siloClient.sendQuery(
-        SiloQuery(
-            SiloAction.genomicSequence(
-                type = sequenceType,
-                sequenceNames = mapSequenceNames(sequenceNames, sequenceType),
-                orderByFields = mapSequenceOrderByFields(sequenceFilters.orderByFields, sequenceType),
-                limit = sequenceFilters.limit,
-                offset = sequenceFilters.offset,
+        rawFastaHeaderTemplate: String,
+        sequenceSymbolType: SequenceSymbolType,
+    ): SequencesResponse {
+        val fastaHeaderTemplate = fastaHeaderTemplateParser.parseTemplate(
+            template = rawFastaHeaderTemplate,
+            sequenceSymbolType = sequenceSymbolType,
+        )
+        val cleanedSequenceNames = sequenceNames
+            .map { referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it) ?: it }
+
+        val sequenceData = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.genomicSequence(
+                    type = sequenceType,
+                    sequenceNames = mapSequenceNames(cleanedSequenceNames, sequenceType),
+                    additionalFields = fastaHeaderTemplate.metadataFieldNames,
+                    orderByFields = mapSequenceOrderByFields(sequenceFilters.orderByFields, sequenceType),
+                    limit = sequenceFilters.limit,
+                    offset = sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
             ),
-            siloFilterExpressionMapper.map(sequenceFilters),
-        ),
-    )
+        )
+
+        return SequencesResponse(
+            sequenceData = sequenceData,
+            requestedSequenceNames = cleanedSequenceNames,
+            fastaHeaderTemplate = fastaHeaderTemplate,
+        )
+    }
 
     private fun mapSequenceNames(
         sequenceNames: List<String>,
         sequenceType: SequenceType,
     ) = sequenceNames
-        .map { referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it) ?: it }
         .map {
             when (sequenceType) {
                 SequenceType.ALIGNED -> it
@@ -245,3 +264,9 @@ class SiloQueryModel(
             else -> fields
         }
 }
+
+data class SequencesResponse(
+    val sequenceData: Stream<SequenceData>,
+    val requestedSequenceNames: List<String>,
+    val fastaHeaderTemplate: FastaHeaderTemplate,
+)

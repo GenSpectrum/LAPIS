@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { lapisMultiSegmentedSequenceController, lapisSingleSegmentedSequenceController } from './common';
+import {
+  basePath,
+  basePathMultiSegmented,
+  lapisMultiSegmentedSequenceController,
+  lapisSingleSegmentedSequenceController,
+} from './common';
 
 describe('The /unalignedNucleotideSequence endpoint', () => {
   describe('single segmented', () => {
@@ -98,6 +103,32 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
       expect(result[0].primaryKey).to.equal('key_1749899');
       expect(result[0].main).to.equal('some_very_short_string');
     });
+
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(`${basePath}/sample/unalignedNucleotideSequences?${urlParams}`);
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_1408408',
+      });
+
+      const response = await fetch(`${basePath}/sample/unalignedNucleotideSequences?${urlParams}`);
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_1408408|2021-03-18|Switzerland|main');
+    });
   });
 
   describe('multi segmented', () => {
@@ -172,6 +203,66 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         m: undefined,
         s: undefined,
       });
+    });
+
+    it('should throw an error for fasta header template when returning JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences/L?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should throw an error for fasta header template when returning all sequences JSON', async () => {
+      const urlParams = new URLSearchParams({
+        dataFormat: 'JSON',
+        fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences?${urlParams}`
+      );
+
+      const body = await response.json();
+      expect(response.status, body).to.equal(400);
+      expect(body.error.detail).to.contain('fastaHeaderTemplate is only applicable for FASTA format');
+    });
+
+    it('should fill the fasta header template', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences/M?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|M');
+    });
+
+    it('should fill the fasta header template when getting all sequences', async () => {
+      const urlParams = new URLSearchParams({
+        fastaHeaderTemplate: 'key={primaryKey}|{date}|{counTry}|{.segment}',
+        primaryKey: 'key_0',
+      });
+
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences?${urlParams}`
+      );
+
+      const text = await response.text();
+      expect(response.status, text).to.equal(200);
+      expect(text.split('\n')[0]).to.equal('>key=key_0|2021-03-18|Switzerland|L');
     });
   });
 });

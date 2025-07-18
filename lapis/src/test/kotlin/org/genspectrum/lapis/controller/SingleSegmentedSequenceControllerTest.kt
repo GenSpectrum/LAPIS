@@ -5,8 +5,8 @@ import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
-import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.startsWith
@@ -23,7 +23,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "otherSegment"
 
@@ -37,10 +36,9 @@ private const val SEGMENT_NAME = "otherSegment"
 class SingleSegmentedSequenceControllerTest(
     @Autowired val mockMvc: MockMvc,
 ) {
-    val returnedValue: Stream<SequenceData> = MockDataForEndpoints
+    val returnedValue = MockDataForEndpoints
         .sequenceEndpointMockData("otherSegment")
-        .sequenceData
-        .stream()
+        .getSequencesResponse()
 
     val expectedFasta = MockDataForEndpoints
         .sequenceEndpointMockData("otherSegment")
@@ -79,6 +77,8 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -96,6 +96,8 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -130,6 +132,8 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 
@@ -147,6 +151,8 @@ class SingleSegmentedSequenceControllerTest(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
+                rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
         } returns returnedValue
 

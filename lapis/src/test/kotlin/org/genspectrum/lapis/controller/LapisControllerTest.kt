@@ -6,9 +6,12 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.SequenceSymbolType
+import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
+import org.genspectrum.lapis.request.GENES_PROPERTY
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -253,14 +256,15 @@ class LapisControllerTest(
     fun alignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
         every {
             siloQueryModelMock.getGenomicSequence(
-                sequenceFiltersRequest(mapOf("country" to "Switzerland")),
-                SequenceType.ALIGNED,
-                listOf("geneName"),
+                sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
+                sequenceType = SequenceType.ALIGNED,
+                sequenceNames = listOf("geneName"),
+                rawFastaHeaderTemplate = "{primaryKey}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
         } returns MockDataForEndpoints
             .sequenceEndpointMockData("geneName")
-            .sequenceData
-            .stream()
+            .getSequencesResponse()
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -293,14 +297,19 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf("gene1", "gene2"),
+                sequenceNames = listOf("gene1"),
+                rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf("gene1"),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             getSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
-                .param(SEGMENTS_PROPERTY, "gene1")
-                .param(SEGMENTS_PROPERTY, "gene2")
+                .param(GENES_PROPERTY, "gene1")
                 .param("country", "Switzerland"),
         )
             .andExpect(status().isOk)
@@ -312,17 +321,23 @@ class LapisControllerTest(
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithGenes(
                     sequenceFilters = mapOf("country" to "Switzerland"),
-                    genes = listOf("gene1", "gene2"),
+                    genes = listOf("gene1"),
                 ),
                 sequenceType = SequenceType.ALIGNED,
-                sequenceNames = listOf("gene1", "gene2"),
+                sequenceNames = listOf("gene1"),
+                rawFastaHeaderTemplate = "{primaryKey}|{.gene}",
+                sequenceSymbolType = SequenceSymbolType.AMINO_ACID,
             )
-        } returns Stream.empty()
+        } returns SequencesResponse(
+            sequenceData = Stream.empty(),
+            requestedSequenceNames = listOf("gene1"),
+            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+        )
 
         mockMvc.perform(
             postSample(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .content("""{"country": "Switzerland", "$SEGMENTS_PROPERTY": ["gene1", "gene2"]}"""),
+                .content("""{"country": "Switzerland", "$GENES_PROPERTY": ["gene1"]}"""),
         )
             .andExpect(status().isOk)
     }

@@ -82,6 +82,18 @@ Alternatively, the data format can be specified by setting the \"Accept\"-header
 When both are specified, the request parameter takes precedence over the header.
 """
 
+const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION = """Use this to customize the header of the FASTA file.
+This parameter will be ignored if the data format is not FASTA.
+It supports free-form text, placeholders of the form "{<metadataField>}" to include metadata fields in the header and
+"the keyword {.segment}" to include the segment name in the header.
+"""
+
+const val AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION = """Use this to customize the header of the FASTA file.
+This parameter will be ignored if the data format is not FASTA.
+It supports free-form text, placeholders of the form "{<metadataField>}" to include metadata fields in the header and
+"the keyword {.gene}" to include the gene name in the header.
+"""
+
 private const val MAYBE_DESCRIPTION = """
 A mutation can be wrapped in a maybe expression "MAYBE(\<mutation\>)"
 to include sequences with ambiguous symbols at the given position.

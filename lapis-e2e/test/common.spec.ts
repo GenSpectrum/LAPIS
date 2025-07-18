@@ -101,6 +101,18 @@ describe('All endpoints', () => {
           expect(lines).to.have.length(100);
           expect(JSON.parse(lines[0])).to.have.property('primaryKey');
         });
+
+        it('should return bad request for invalid fasta header template', async () => {
+          const response = await get(
+            new URLSearchParams({
+              dataFormat: 'fasta',
+              fastaHeaderTemplate: '{unknown field}',
+            })
+          );
+
+          expect(response.status).equals(400);
+          expect((await response.json()).error.detail).to.include('Invalid FASTA header template');
+        });
       } else {
         it('should return the lapis data version header for CSV data', async () => {
           const response = await get(new URLSearchParams({ dataFormat: 'csv' }));
