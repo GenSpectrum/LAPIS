@@ -3,14 +3,18 @@ package org.genspectrum.lapis.model.mutationsOverTime
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.deletionSymbols
 import org.genspectrum.lapis.model.nucleotideSymbols
+import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.DateBetween
+import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -59,16 +63,96 @@ class MutationsOverTimeModel(
     private val referenceGenome: ReferenceGenome,
     private val dataVersion: DataVersion,
 ) {
-    fun evaluate(
+    fun evaluateAminoAcidMutations(
+        mutations: List<AminoAcidMutation>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+        remainingRetries: Int = 1,
+    ): MutationsOverTimeResult =
+        evaluateInternal(
+            mutations = mutations,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
+            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
+            countQueryFn = { mutation ->
+                when (mutation.symbol) {
+                    null -> HasAminoAcidMutation(mutation.gene, mutation.position)
+                    else -> AminoAcidSymbolEquals(
+                        mutation.gene,
+                        mutation.position,
+                        mutation.symbol,
+                    )
+                }
+            },
+            coverageQueryFn = { mutation ->
+                Or(
+                    (aaSymbols + deletionSymbols).map {
+                        AminoAcidSymbolEquals(
+                            sequenceName = mutation.gene,
+                            position = mutation.position,
+                            symbol = it.toString(),
+                        )
+                    },
+                )
+            },
+            retryFn = { evaluateAminoAcidMutations(mutations, dateRanges, lapisFilter, dateField, it - 1) },
+        )
+
+    fun evaluateNucleotideMutations(
         mutations: List<NucleotideMutation>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
+    ): MutationsOverTimeResult =
+        evaluateInternal(
+            mutations = mutations,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
+            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
+            countQueryFn = { mutation ->
+                when (mutation.symbol) {
+                    null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
+                    else -> NucleotideSymbolEquals(
+                        mutation.sequenceName,
+                        mutation.position,
+                        mutation.symbol,
+                    )
+                }
+            },
+            coverageQueryFn = { mutation ->
+                Or(
+                    (nucleotideSymbols + deletionSymbols).map {
+                        NucleotideSymbolEquals(
+                            sequenceName = mutation.sequenceName,
+                            position = mutation.position,
+                            symbol = it.toString(),
+                        )
+                    },
+                )
+            },
+            retryFn = { evaluateNucleotideMutations(mutations, dateRanges, lapisFilter, dateField, it - 1) },
+        )
+
+    fun <T> evaluateInternal(
+        mutations: List<T>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+        remainingRetries: Int = 1,
+        mutationToStringFn: (mutation: T) -> String,
+        countQueryFn: (mutation: T) -> SiloFilterExpression,
+        coverageQueryFn: (mutation: T) -> SiloFilterExpression,
+        retryFn: (remainingRetries: Int) -> MutationsOverTimeResult,
     ): MutationsOverTimeResult {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
             return MutationsOverTimeResult(
-                mutations = mutations.map { it.toString(referenceGenome) },
+                mutations = mutations.map(mutationToStringFn),
                 dateRanges = dateRanges,
                 data = emptyList(),
             )
@@ -81,21 +165,11 @@ class MutationsOverTimeModel(
                 to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
             )
 
-        val siloExpressionFromLapisFilter = siloFilterExpressionMapper.map(lapisFilter)
+        val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
         val dataWithDataVersions = mutations.parallelStream().map { mutation ->
-            val countsWithDataVersion = queryCounts(
-                mutation = mutation,
-                baseSiloFilterExpression = siloExpressionFromLapisFilter,
-                dateQuery = dateQuery,
-                dateField = dateField,
-            )
-            val coverageWithDataVersion = queryCoverage(
-                mutation = mutation,
-                baseSiloFilterExpression = siloExpressionFromLapisFilter,
-                dateQuery = dateQuery,
-                dateField = dateField,
-            )
+            val countsWithDataVersion = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
+            val coverageWithDataVersion = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
 
             listOf(countsWithDataVersion.dataVersion, coverageWithDataVersion.dataVersion) to
                 buildResultRow(
@@ -109,7 +183,7 @@ class MutationsOverTimeModel(
         val dataVersions = dataWithDataVersions.flatMap { it.first }
         if (dataVersions.distinct().size != 1) {
             if (remainingRetries > 0) {
-                return evaluate(mutations, dateRanges, lapisFilter, dateField, remainingRetries - 1)
+                return retryFn(remainingRetries - 1)
             }
             throw RuntimeException(
                 "The data has been updated multiple times during the execution of the request. This is unexpected. " +
@@ -119,56 +193,9 @@ class MutationsOverTimeModel(
         dataVersion.dataVersion = dataVersions.first()
 
         return MutationsOverTimeResult(
-            mutations = mutations.map { it.toString(referenceGenome) },
+            mutations = mutations.map(mutationToStringFn),
             dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
-        )
-    }
-
-    private fun queryCounts(
-        mutation: NucleotideMutation,
-        baseSiloFilterExpression: SiloFilterExpression,
-        dateQuery: DateBetween,
-        dateField: String,
-    ): WithDataVersion<List<AggregationData>> {
-        val mutationQuery = when (mutation.symbol) {
-            null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
-            else -> NucleotideSymbolEquals(
-                mutation.sequenceName,
-                mutation.position,
-                mutation.symbol,
-            )
-        }
-
-        return sendQuery(
-            dateQuery = dateQuery,
-            baseSiloFilterExpression = baseSiloFilterExpression,
-            dateField = dateField,
-            mutationQuery = mutationQuery,
-        )
-    }
-
-    private fun queryCoverage(
-        mutation: NucleotideMutation,
-        baseSiloFilterExpression: SiloFilterExpression,
-        dateQuery: DateBetween,
-        dateField: String,
-    ): WithDataVersion<List<AggregationData>> {
-        val coverageQuery = Or(
-            (nucleotideSymbols + deletionSymbols).map {
-                NucleotideSymbolEquals(
-                    sequenceName = mutation.sequenceName,
-                    position = mutation.position,
-                    symbol = it.toString(),
-                )
-            },
-        )
-
-        return sendQuery(
-            dateQuery = dateQuery,
-            baseSiloFilterExpression = baseSiloFilterExpression,
-            dateField = dateField,
-            mutationQuery = coverageQuery,
         )
     }
 
