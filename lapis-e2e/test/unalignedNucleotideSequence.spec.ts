@@ -174,37 +174,6 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
       });
     });
 
-    it('should order by segment', async () => {
-      const result = await lapisMultiSegmentedSequenceController.postAllUnalignedNucleotideSequences({
-        allNucleotideSequenceRequest: {
-          country: 'Switzerland',
-          dataFormat: 'JSON',
-          orderBy: [{ field: 'L', type: 'descending' }],
-          segments: ['L'],
-        },
-      });
-
-      expect(result).to.have.length(6);
-      expect(result[0]).to.deep.equal({
-        primaryKey: 'key_1',
-        l: 'NACTCT',
-        m: undefined,
-        s: undefined,
-      });
-      expect(result[1]).to.deep.equal({
-        primaryKey: 'key_0',
-        l: 'ACNTCT',
-        m: undefined,
-        s: undefined,
-      });
-      expect(result[2]).to.deep.equal({
-        primaryKey: 'key_2',
-        l: undefined,
-        m: undefined,
-        s: undefined,
-      });
-    });
-
     it('should throw an error for fasta header template when returning JSON', async () => {
       const urlParams = new URLSearchParams({
         dataFormat: 'JSON',

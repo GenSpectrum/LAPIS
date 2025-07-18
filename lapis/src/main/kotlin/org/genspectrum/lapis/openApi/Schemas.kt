@@ -30,6 +30,8 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTI
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
+import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
+import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 import org.springframework.core.annotation.AliasFor
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
@@ -134,6 +136,14 @@ const val SEGMENTS_DESCRIPTION =
 
 const val GENES_DESCRIPTION =
     "List of genes to retrieve sequences for. If not provided, all genes will be returned."
+
+const val AMINO_ACID_SEQUENCES_ORDER_BY_DESCRIPTION = "The parts of the fasta header to order by. " +
+    "By default, only the primary key and '$ORDER_BY_RANDOM_FIELD_NAME' are allowed. " +
+    "The other fields are only allowed if they are part of the '$FASTA_HEADER_TEMPLATE_PROPERTY'."
+
+const val NUCLEOTIDE_SEQUENCES_ORDER_BY_DESCRIPTION = "The parts of the fasta header to order by. " +
+    "By default, only the primary key and '$ORDER_BY_RANDOM_FIELD_NAME' are allowed. " +
+    "The other fields are only allowed if they are part of the '$FASTA_HEADER_TEMPLATE_PROPERTY'."
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -409,7 +419,8 @@ annotation class InsertionsOrderByFields
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA"),
-    description = "The parts of the fasta header to order by.",
+    description =
+    AMINO_ACID_SEQUENCES_ORDER_BY_DESCRIPTION,
 )
 annotation class AminoAcidSequencesOrderByFields
 
@@ -417,7 +428,8 @@ annotation class AminoAcidSequencesOrderByFields
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA"),
-    description = "The parts of the fasta header to order by.",
+    description =
+    NUCLEOTIDE_SEQUENCES_ORDER_BY_DESCRIPTION,
 )
 annotation class NucleotideSequencesOrderByFields
 
