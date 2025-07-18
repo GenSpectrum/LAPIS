@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.7](https://github.com/GenSpectrum/LAPIS/compare/v0.5.6...v0.5.7) (2025-07-18)
+
+
+### Features
+
+* **lapis:** add parameter `fastaHeaderTemplate` to customize the fasta header in sequences endpoints ([#1258](https://github.com/GenSpectrum/LAPIS/issues/1258)) ([ac7fc29](https://github.com/GenSpectrum/LAPIS/commit/ac7fc29bb3d7eb8f76a2b12f6661cf89cf7fad37)), closes [#857](https://github.com/GenSpectrum/LAPIS/issues/857)
+* **lapis:** drop sorting by segment/gene from docs of sequence endpoints ([#1268](https://github.com/GenSpectrum/LAPIS/issues/1268)) ([bc67a7c](https://github.com/GenSpectrum/LAPIS/commit/bc67a7c109e129744f1da932375fd6671fab9cdf)), closes [#1248](https://github.com/GenSpectrum/LAPIS/issues/1248)
+
 ## [0.5.6](https://github.com/GenSpectrum/LAPIS/compare/v0.5.5...v0.5.6) (2025-07-15)
 
 
