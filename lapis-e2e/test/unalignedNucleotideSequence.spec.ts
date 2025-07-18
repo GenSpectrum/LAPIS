@@ -211,7 +211,9 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      const response = await fetch(`${basePathMultiSegmented}/sample/unalignedNucleotideSequences/L?${urlParams}`);
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences/L?${urlParams}`
+      );
 
       const body = await response.json();
       expect(response.status, body).to.equal(400);
@@ -224,7 +226,9 @@ describe('The /unalignedNucleotideSequence endpoint', () => {
         fastaHeaderTemplate: '{primaryKey}{date}{something invalid}',
       });
 
-      const response = await fetch(`${basePathMultiSegmented}/sample/unalignedNucleotideSequences?${urlParams}`);
+      const response = await fetch(
+        `${basePathMultiSegmented}/sample/unalignedNucleotideSequences?${urlParams}`
+      );
 
       const body = await response.json();
       expect(response.status, body).to.equal(400);
