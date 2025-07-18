@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.config
 
+import org.genspectrum.lapis.databaseConfig
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.hasEntry
@@ -168,13 +169,9 @@ class SequenceFilterFieldsTest {
     private fun databaseConfigWithFields(
         databaseMetadata: List<DatabaseMetadata>,
         databaseFeatures: List<DatabaseFeature> = emptyList(),
-    ) = DatabaseConfig(
-        DatabaseSchema(
-            "test config",
-            OpennessLevel.OPEN,
-            databaseMetadata,
-            "test primary key",
-            databaseFeatures,
-        ),
+    ) = databaseConfig(
+        primaryKey = "test primary key",
+        metadata = databaseMetadata,
+        databaseFeatures = databaseFeatures,
     )
 }

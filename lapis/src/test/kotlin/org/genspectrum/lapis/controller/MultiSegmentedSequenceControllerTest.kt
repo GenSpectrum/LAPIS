@@ -51,6 +51,14 @@ class MultiSegmentedSequenceControllerTest(
         .sequenceEndpointMockData(SEGMENT_NAME)
         .expectedFasta
 
+    val otherSegment = "otherSegment"
+
+    val arbitraryOkResponse = SequencesResponse(
+        sequenceData = Stream.empty(),
+        requestedSequenceNames = listOf(SEGMENT_NAME, otherSegment),
+        fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
+    )
+
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
@@ -247,8 +255,6 @@ class MultiSegmentedSequenceControllerTest(
 
     @Test
     fun `WHEN getting all unaligned sequences with segment THEN calls model with correct arguments`() {
-        val otherSegment = "otherSegment"
-
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
@@ -257,11 +263,7 @@ class MultiSegmentedSequenceControllerTest(
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
                 sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
-        } returns SequencesResponse(
-            sequenceData = Stream.empty(),
-            requestedSequenceNames = listOf(SEGMENT_NAME, otherSegment),
-            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
-        )
+        } returns arbitraryOkResponse
 
         mockMvc.perform(
             getSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)
@@ -274,12 +276,10 @@ class MultiSegmentedSequenceControllerTest(
 
     @Test
     fun `WHEN posting all unaligned sequences with segment THEN calls model with correct arguments`() {
-        val otherSegment = "otherSegment"
-
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithSegments(
-                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    sequenceFilters = mapOf("country" to "Germany"),
                     segments = listOf(SEGMENT_NAME, otherSegment),
                 ),
                 sequenceType = SequenceType.UNALIGNED,
@@ -287,11 +287,7 @@ class MultiSegmentedSequenceControllerTest(
                 rawFastaHeaderTemplate = "{primaryKey}|{.segment}",
                 sequenceSymbolType = SequenceSymbolType.NUCLEOTIDE,
             )
-        } returns SequencesResponse(
-            sequenceData = Stream.empty(),
-            requestedSequenceNames = listOf(SEGMENT_NAME, otherSegment),
-            fastaHeaderTemplate = FastaHeaderTemplate("", emptySet()),
-        )
+        } returns arbitraryOkResponse
 
         mockMvc.perform(
             postSample(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE)

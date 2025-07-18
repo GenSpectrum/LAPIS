@@ -4,16 +4,14 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
-import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
-import org.genspectrum.lapis.config.DatabaseSchema
 import org.genspectrum.lapis.config.MetadataType
-import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.mutationData
 import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
+import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationsField
@@ -72,21 +70,16 @@ class SiloQueryModelTest {
 
     private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
         caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
-            databaseConfig = DatabaseConfig(
-                schema = DatabaseSchema(
-                    instanceName = "test",
-                    opennessLevel = OpennessLevel.OPEN,
-                    metadata = listOf(
-                        DatabaseMetadata(name = "accession", type = MetadataType.STRING),
-                        DatabaseMetadata(name = "age", type = MetadataType.INT),
-                        DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
-                        DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
-                        DatabaseMetadata(name = "date", type = MetadataType.DATE),
-                        DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
-                    ),
-                    primaryKey = "primaryKey",
-                    features = emptyList(),
+            databaseConfig = databaseConfig(
+                metadata = listOf(
+                    DatabaseMetadata(name = "accession", type = MetadataType.STRING),
+                    DatabaseMetadata(name = "age", type = MetadataType.INT),
+                    DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
+                    DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
+                    DatabaseMetadata(name = "date", type = MetadataType.DATE),
+                    DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
                 ),
+                primaryKey = "primaryKey",
             ),
         ),
     )

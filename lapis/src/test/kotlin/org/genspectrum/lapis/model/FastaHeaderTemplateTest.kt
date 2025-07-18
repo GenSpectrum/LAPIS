@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
-import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
-import org.genspectrum.lapis.config.DatabaseSchema
 import org.genspectrum.lapis.config.MetadataType
-import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -21,21 +19,16 @@ import org.junit.jupiter.api.assertThrows
 class FastaHeaderTemplateTest {
     private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
         caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
-            databaseConfig = DatabaseConfig(
-                schema = DatabaseSchema(
-                    instanceName = "test",
-                    opennessLevel = OpennessLevel.OPEN,
-                    metadata = listOf(
-                        DatabaseMetadata(name = "accession", type = MetadataType.STRING),
-                        DatabaseMetadata(name = "age", type = MetadataType.INT),
-                        DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
-                        DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
-                        DatabaseMetadata(name = "date", type = MetadataType.DATE),
-                        DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
-                    ),
-                    primaryKey = "primaryKey",
-                    features = emptyList(),
+            databaseConfig = databaseConfig(
+                metadata = listOf(
+                    DatabaseMetadata(name = "accession", type = MetadataType.STRING),
+                    DatabaseMetadata(name = "age", type = MetadataType.INT),
+                    DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
+                    DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
+                    DatabaseMetadata(name = "date", type = MetadataType.DATE),
+                    DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
                 ),
+                primaryKey = "primaryKey",
             ),
         ),
     )
