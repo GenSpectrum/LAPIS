@@ -279,7 +279,7 @@ class MultiSegmentedSequenceControllerTest(
         every {
             siloQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithSegments(
-                    sequenceFilters = mapOf("country" to "Germany"),
+                    sequenceFilters = mapOf("country" to "Switzerland"),
                     segments = listOf(SEGMENT_NAME, otherSegment),
                 ),
                 sequenceType = SequenceType.UNALIGNED,
