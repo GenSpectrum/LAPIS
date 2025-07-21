@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
+import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
@@ -49,6 +50,17 @@ data class AminoAcidMutation(
     }
 
     override fun asMaybe() = copy(maybe = true)
+
+    fun toString(referenceGenome: ReferenceGenome): String {
+        val referenceBase = referenceGenome.getGeneSequence(gene)[position - 1]
+        val symbolString = symbol ?: ""
+        val mutationString = "$gene:${referenceBase}$position$symbolString"
+
+        if (maybe) {
+            return "maybe($mutationString)"
+        }
+        return mutationString
+    }
 }
 
 private val AMINO_ACID_MUTATION_REGEX =

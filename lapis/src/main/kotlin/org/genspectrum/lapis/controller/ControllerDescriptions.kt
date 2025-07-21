@@ -45,7 +45,7 @@ const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     Sequences that don't have an unaligned sequence for this segment are omitted."""
 const val ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """"Returns the unaligned nucleotide sequences of all requested segments that match the given filter criteria."""
-const val NUCLEOTIDE_MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION =
+const val MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION =
     """Returns the number of sequences containing the specified mutations within the requested date ranges, along 
     with the corresponding coverage."""
 
