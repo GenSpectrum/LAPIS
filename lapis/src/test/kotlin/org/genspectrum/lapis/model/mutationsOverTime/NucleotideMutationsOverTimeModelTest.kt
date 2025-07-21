@@ -235,7 +235,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given a maybe() query, then it throws`() {
-        val mutations = listOf(NucleotideMutation(null, 1, "T", true))
+        val mutations = listOf(NucleotideMutation(null, 1, "T", maybe = true))
         val dateRanges = listOf(DUMMY_DATE_RANGE1)
 
         val exception = assertThrows<BadRequestException> {

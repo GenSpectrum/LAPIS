@@ -235,7 +235,7 @@ class AminoAcidMutationsOverTimeModelTest {
 
     @Test
     fun `given a maybe() query, then it throws`() {
-        val mutations = listOf(AminoAcidMutation("S", 1, "R", true))
+        val mutations = listOf(AminoAcidMutation("S", 1, "R", maybe = true))
         val dateRanges = listOf(DUMMY_DATE_RANGE1)
 
         val exception = assertThrows<BadRequestException> {
