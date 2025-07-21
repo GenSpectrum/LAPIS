@@ -98,7 +98,6 @@ class MutationsOverTimeModel(
                     },
                 )
             },
-            retryFn = { evaluateAminoAcidMutations(mutations, dateRanges, lapisFilter, dateField, it - 1) },
         )
 
     fun evaluateNucleotideMutations(
@@ -136,7 +135,6 @@ class MutationsOverTimeModel(
                     },
                 )
             },
-            retryFn = { evaluateNucleotideMutations(mutations, dateRanges, lapisFilter, dateField, it - 1) },
         )
 
     fun <T> evaluateInternal(
@@ -148,7 +146,6 @@ class MutationsOverTimeModel(
         mutationToStringFn: (mutation: T) -> String,
         countQueryFn: (mutation: T) -> SiloFilterExpression,
         coverageQueryFn: (mutation: T) -> SiloFilterExpression,
-        retryFn: (remainingRetries: Int) -> MutationsOverTimeResult,
     ): MutationsOverTimeResult {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
             return MutationsOverTimeResult(
@@ -183,7 +180,16 @@ class MutationsOverTimeModel(
         val dataVersions = dataWithDataVersions.flatMap { it.first }
         if (dataVersions.distinct().size != 1) {
             if (remainingRetries > 0) {
-                return retryFn(remainingRetries - 1)
+                return evaluateInternal(
+                    mutations,
+                    dateRanges,
+                    lapisFilter,
+                    dateField,
+                    remainingRetries - 1,
+                    mutationToStringFn,
+                    countQueryFn,
+                    coverageQueryFn,
+                )
             }
             throw RuntimeException(
                 "The data has been updated multiple times during the execution of the request. This is unexpected. " +

@@ -581,10 +581,9 @@ private fun requestSchemaForMutationsOverTime(
             ) +
                 getCompressionAndDownloadSchema() +
                 mapOf(
-                    "includeMutations" to Schema<List<String>>()
-                        .types(setOf("array"))
+                    "includeMutations" to ArraySchema()
                         .items(
-                            Schema<String>()
+                            StringSchema()
                                 .example("C44T")
                                 .description("Mutation to include"),
                         )
@@ -592,12 +591,12 @@ private fun requestSchemaForMutationsOverTime(
                     "dateRanges" to ArraySchema()
                         .items(
                             ObjectSchema()
-                                .addProperty("dateFrom", Schema<String>().example("2025-05-12"))
-                                .addProperty("dateTo", Schema<String>().example("2025-06-12"))
+                                .addProperty("dateFrom", StringSchema().example("2025-05-12"))
+                                .addProperty("dateTo", StringSchema().example("2025-06-12"))
                                 .description("Date range in which to aggregate mutation data."),
                         )
                         .description("List of date ranges for aggregation."),
-                    "dateField" to Schema<String>()
+                    "dateField" to StringSchema()
                         .example("date")
                         .description("Metadata field name containing the date"),
                 ),

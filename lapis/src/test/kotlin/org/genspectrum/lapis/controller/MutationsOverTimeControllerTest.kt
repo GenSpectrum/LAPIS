@@ -18,6 +18,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -107,8 +108,10 @@ class NucleotideMutationsOverTimeControllerTest(
         verify(exactly = 1) { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) }
         assertThat(dateFieldSlot.captured, `is`("date"))
         assertThat(mutationsSlot.captured, hasSize(2))
+        assertThat(mutationsSlot.captured[0].sequenceName, `is`(nullValue()))
         assertThat(mutationsSlot.captured[0].position, `is`(123))
         assertThat(mutationsSlot.captured[0].symbol, `is`("T"))
+        assertThat(mutationsSlot.captured[1].sequenceName, `is`(nullValue()))
         assertThat(mutationsSlot.captured[1].position, `is`(456))
         assertThat(mutationsSlot.captured[1].symbol, `is`("G"))
         assertThat(dateRangesSlot.captured, hasSize(1))
