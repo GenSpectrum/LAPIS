@@ -5,6 +5,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
@@ -14,6 +15,7 @@ import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -229,5 +231,21 @@ class NucleotideMutationsOverTimeModelTest {
             )
         }
         assertThat(exception.message, containsString("data has been updated multiple times"))
+    }
+
+    @Test
+    fun `given a maybe() query, then it throws`() {
+        val mutations = listOf(NucleotideMutation(null, 1, "T", true))
+        val dateRanges = listOf(DUMMY_DATE_RANGE1)
+
+        val exception = assertThrows<BadRequestException> {
+            underTest.evaluateNucleotideMutations(
+                mutations = mutations,
+                lapisFilter = DUMMY_LAPIS_FILTER,
+                dateField = DUMMY_DATE_FIELD,
+                dateRanges = dateRanges,
+            )
+        }
+        assertThat(exception.message, `is`("Invalid mutation in includeMutations – maybe() is not allowed: maybe(A1T)"))
     }
 }

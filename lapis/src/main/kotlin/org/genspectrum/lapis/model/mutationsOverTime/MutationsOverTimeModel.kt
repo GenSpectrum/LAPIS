@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model.mutationsOverTime
 
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.deletionSymbols
@@ -69,8 +70,16 @@ class MutationsOverTimeModel(
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-    ): MutationsOverTimeResult =
-        evaluateInternal(
+    ): MutationsOverTimeResult {
+        for (mutation in mutations) {
+            if (mutation.maybe) {
+                throw BadRequestException(
+                    "Invalid mutation in includeMutations – maybe() is not allowed: " +
+                        mutation.toString(referenceGenome),
+                )
+            }
+        }
+        return evaluateInternal(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
@@ -99,6 +108,7 @@ class MutationsOverTimeModel(
                 )
             },
         )
+    }
 
     fun evaluateNucleotideMutations(
         mutations: List<NucleotideMutation>,
@@ -106,8 +116,16 @@ class MutationsOverTimeModel(
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-    ): MutationsOverTimeResult =
-        evaluateInternal(
+    ): MutationsOverTimeResult {
+        for (mutation in mutations) {
+            if (mutation.maybe) {
+                throw BadRequestException(
+                    "Invalid mutation in includeMutations – maybe() is not allowed: " +
+                        mutation.toString(referenceGenome),
+                )
+            }
+        }
+        return evaluateInternal(
             mutations = mutations,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
@@ -136,6 +154,7 @@ class MutationsOverTimeModel(
                 )
             },
         )
+    }
 
     fun <T> evaluateInternal(
         mutations: List<T>,
