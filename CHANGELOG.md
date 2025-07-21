@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.8](https://github.com/GenSpectrum/LAPIS/compare/v0.5.7...v0.5.8) (2025-07-21)
+
+
+### Features
+
+* **lapis:** add aminoAcidMutationsOverTime ([#1270](https://github.com/GenSpectrum/LAPIS/issues/1270)) ([c9adf26](https://github.com/GenSpectrum/LAPIS/commit/c9adf264268cbbdf291ff4b84649e3a114012868)), closes [#1214](https://github.com/GenSpectrum/LAPIS/issues/1214)
+
 ## [0.5.7](https://github.com/GenSpectrum/LAPIS/compare/v0.5.6...v0.5.7) (2025-07-18)
 
 
