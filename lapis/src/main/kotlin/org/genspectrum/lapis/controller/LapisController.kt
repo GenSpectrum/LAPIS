@@ -917,8 +917,8 @@ class LapisController(
         @RequestParam
         phyloTreeField: String,
         @PrintNodesNotInTreeField
-        @RequestParam
-        printNodesNotInTree: Boolean = false,
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
     ) {
         val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
             MostRecentCommonAncestorCollection(
@@ -945,11 +945,8 @@ class LapisController(
         @RequestParam
         phyloTreeField: String,
         @PrintNodesNotInTreeField
-        @RequestParam
-        printNodesNotInTree: Boolean = false,
-        @DetailsOrderByFields
-        @RequestParam
-        orderBy: List<OrderByField>?,
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
         @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
@@ -974,7 +971,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             listOf(caseInsensitiveFieldConverter.convert(phyloTreeField)),
-            orderBy ?: emptyList(),
+            emptyList(),
         )
 
         val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
