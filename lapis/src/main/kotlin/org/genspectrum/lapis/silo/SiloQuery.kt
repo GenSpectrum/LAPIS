@@ -106,7 +106,7 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
-        fun mostCommonRecentAncestor(
+        fun mostRecentCommonAncestor(
             phyloTreeField: String,
             orderByFields: List<OrderByField> = emptyList(),
             printNodesNotInTree: Boolean = false,

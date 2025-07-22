@@ -148,7 +148,7 @@ class SiloQueryModel(
         printNodesNotInTree: Boolean,
     ) = siloClient.sendQuery(
         SiloQuery(
-            SiloAction.mostCommonRecentAncestor(
+            SiloAction.mostRecentCommonAncestor(
                 phyloTreeField,
                 sequenceFilters.orderByFields,
                 printNodesNotInTree,

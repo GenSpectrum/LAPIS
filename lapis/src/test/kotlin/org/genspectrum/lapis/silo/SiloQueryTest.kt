@@ -43,7 +43,7 @@ class SiloQueryTest {
     @Test
     fun `MRCA query is correctly serialized to JSON`() {
         val underTest =
-            SiloQuery(SiloAction.mostCommonRecentAncestor("phyloTreeField"), StringEquals("theColumn", "theValue"))
+            SiloQuery(SiloAction.mostRecentCommonAncestor("phyloTreeField"), StringEquals("theColumn", "theValue"))
 
         val result = objectMapper.writeValueAsString(underTest)
 
