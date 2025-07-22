@@ -10,6 +10,7 @@ import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.DETAILS
+import org.genspectrum.lapis.controller.SampleRoute.MOST_RECENT_COMMON_ANCESTOR
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
@@ -249,6 +250,7 @@ fun SampleRoute.getExpectedFilename() =
         ALIGNED_NUCLEOTIDE_SEQUENCES -> "alignedNucleotideSequences"
         ALIGNED_AMINO_ACID_SEQUENCES -> "alignedAminoAcidSequences"
         UNALIGNED_NUCLEOTIDE_SEQUENCES -> "unalignedNucleotideSequences"
+        MOST_RECENT_COMMON_ANCESTOR -> "mostRecentCommonAncestor"
     }
 
 data class DownloadAsFileScenario(

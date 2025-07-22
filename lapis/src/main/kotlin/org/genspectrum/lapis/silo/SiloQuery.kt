@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
+import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
 import java.time.LocalDate
@@ -28,6 +29,8 @@ class DetailsDataTypeReference : TypeReference<DetailsData>()
 class InsertionDataTypeReference : TypeReference<InsertionData>()
 
 class SequenceDataTypeReference : TypeReference<SequenceData>()
+
+class MostCommonAncestorDataTypeReference : TypeReference<MostCommonAncestorData>()
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -104,11 +107,13 @@ sealed class SiloAction<ResponseType>(
             )
 
         fun mostCommonRecentAncestor(
+            phyloTreeField: String,
             orderByFields: List<OrderByField> = emptyList(),
             printNodesNotInTree: Boolean = false,
-        ): SiloAction<DetailsData> =
+        ): SiloAction<MostCommonAncestorData> =
             MostRecentCommonAncestorAction(
                 orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                columnName = phyloTreeField,
                 printNodesNotInTree,
             )
 
@@ -220,11 +225,12 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class MostRecentCommonAncestorAction(
         override val orderByFields: List<OrderByField> = emptyList(),
+        val columnName: String,
         val printNodesNotInTree: Boolean? = false,
         override val limit: Int? = null,
         override val offset: Int? = null,
         override val randomize: Boolean? = null,
-    ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = true) {
+    ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
         val type: String = "MostRecentCommonAncestor"
     }
 

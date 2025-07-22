@@ -143,11 +143,13 @@ class SiloQueryModel(
         )
 
     fun getMostRecentCommonAncestor(
-        printNodesNotInTree: Boolean,
         sequenceFilters: SequenceFiltersRequestWithFields,
+        phyloTreeField: String,
+        printNodesNotInTree: Boolean,
     ) = siloClient.sendQuery(
         SiloQuery(
             SiloAction.mostCommonRecentAncestor(
+                phyloTreeField,
                 sequenceFilters.orderByFields,
                 printNodesNotInTree,
             ),

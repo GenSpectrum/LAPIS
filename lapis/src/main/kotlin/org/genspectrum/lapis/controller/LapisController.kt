@@ -931,7 +931,7 @@ class LapisController(
         response: HttpServletResponse,
     ) {
         val request = SequenceFiltersRequestWithFields(
-            sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
+            sequenceFilters?.filterKeys { it != "phyloTreeField" } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
@@ -942,7 +942,7 @@ class LapisController(
 
         val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
             MostRecentCommonAncestorCollection(
-                records = siloQueryModel.getMostRecentCommonAncestor(printNodesNotInTree, req),
+                records = siloQueryModel.getMostRecentCommonAncestor(req, phyloTreeField, printNodesNotInTree),
                 fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
             )
         }

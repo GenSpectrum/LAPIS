@@ -79,6 +79,11 @@ data class InsertionData(
     val sequenceName: String,
 )
 
+data class MostCommonAncestorData(
+    val columnName: Int,
+    val printNodesNotInTree: String,
+)
+
 data class SequenceData(
     val map: Map<String, JsonNode>,
 ) : Map<String, JsonNode> by map
