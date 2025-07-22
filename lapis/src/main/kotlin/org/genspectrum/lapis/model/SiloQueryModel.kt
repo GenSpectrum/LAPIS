@@ -142,15 +142,18 @@ class SiloQueryModel(
             ),
         )
 
-    fun getMostRecentCommonAncestor(sequenceFilters: SequenceFiltersRequestWithFields) =
-        siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.mostCommonRecentAncestor(
-                    sequenceFilters.orderByFields,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+    fun getMostRecentCommonAncestor(
+        printNodesNotInTree: Boolean,
+        sequenceFilters: SequenceFiltersRequestWithFields,
+    ) = siloClient.sendQuery(
+        SiloQuery(
+            SiloAction.mostCommonRecentAncestor(
+                sequenceFilters.orderByFields,
+                printNodesNotInTree,
             ),
-        )
+            siloFilterExpressionMapper.map(sequenceFilters),
+        ),
+    )
 
     fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): Stream<InsertionResponse> {
         val data = siloClient.sendQuery(

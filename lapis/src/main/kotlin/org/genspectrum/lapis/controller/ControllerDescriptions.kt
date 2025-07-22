@@ -68,6 +68,10 @@ If requesting CSV or TSV data, the columns are ordered in the same order as the 
 """
 const val PHYLO_TREE_FIELD_DESCRIPTION =
     """The field that contains the node labels in the phylogenetic tree."""
+const val PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION =
+    """If true, the response will include a comma separated list of nodes that fit the filter criteria 
+    but are not present in the phylogenetic tree. The field \"missingNodeCount\" will contain the number of 
+    sequences that were not included in the phylogenetic tree."""
 const val MUTATIONS_FIELDS_DESCRIPTION =
     """The fields that the response items should contain.
 If empty, all fields are returned.

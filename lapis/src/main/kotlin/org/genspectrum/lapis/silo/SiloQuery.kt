@@ -103,9 +103,13 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
-        fun mostCommonRecentAncestor(orderByFields: List<OrderByField> = emptyList()): SiloAction<DetailsData> =
+        fun mostCommonRecentAncestor(
+            orderByFields: List<OrderByField> = emptyList(),
+            printNodesNotInTree: Boolean = false,
+        ): SiloAction<DetailsData> =
             MostRecentCommonAncestorAction(
                 orderByFields = getNonRandomizedOrderByFields(orderByFields),
+                printNodesNotInTree,
             )
 
         fun nucleotideInsertions(

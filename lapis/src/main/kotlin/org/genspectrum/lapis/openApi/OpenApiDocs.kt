@@ -294,6 +294,10 @@ fun buildOpenApiSchema(
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
+                    PRINT_NODES_NOT_IN_TREE_FIELD_SCHEMA,
+                    Schema<Boolean>(),
+                )
+                .addSchemas(
                     PHYLO_TREE_FIELD_SCHEMA,
                     fieldsArray(
                         databaseConfig.schema.metadata

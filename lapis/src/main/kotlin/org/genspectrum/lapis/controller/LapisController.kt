@@ -49,6 +49,7 @@ import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PhyloTreeField
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
+import org.genspectrum.lapis.openApi.PrintNodesNotInTreeField
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
@@ -906,6 +907,9 @@ class LapisController(
         @PhyloTreeField
         @RequestParam
         phyloTreeField: String,
+        @PrintNodesNotInTreeField
+        @RequestParam
+        printNodesNotInTree: Boolean = false,
         @DetailsOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -936,21 +940,20 @@ class LapisController(
             orderBy ?: emptyList(),
         )
 
+        val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
+            MostRecentCommonAncestorCollection(
+                records = siloQueryModel.getMostRecentCommonAncestor(printNodesNotInTree, req),
+                fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
+            )
+        }
+
         lapisResponseStreamer.streamData(
             request = request,
-            getData = ::getMostRecentCommonAncestor,
+            getData = getData,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
     }
-
-    private fun getMostRecentCommonAncestor(
-        request: SequenceFiltersRequestWithFields,
-    ): MostRecentCommonAncestorCollection =
-        MostRecentCommonAncestorCollection(
-            records = siloQueryModel.getMostRecentCommonAncestor(request),
-            fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
-        )
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
