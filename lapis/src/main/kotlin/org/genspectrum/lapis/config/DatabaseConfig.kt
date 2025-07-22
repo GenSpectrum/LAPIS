@@ -22,7 +22,7 @@ data class DatabaseMetadata(
     val type: MetadataType,
     val valuesAreUnique: Boolean = false,
     val generateLineageIndex: Boolean = false,
-    val isPhyloTreeNodeIdentifier: Boolean = false,
+    val phyloTreeNodeIdentifier: Boolean = false,
 )
 
 enum class MetadataType {

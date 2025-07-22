@@ -297,7 +297,7 @@ fun buildOpenApiSchema(
                     PHYLO_TREE_FIELD_SCHEMA,
                     fieldsArray(
                         databaseConfig.schema.metadata
-                            .filter { it.isPhyloTreeNodeIdentifier },
+                            .filter { it.phyloTreeNodeIdentifier },
                     ),
                 )
                 .addSchemas(
