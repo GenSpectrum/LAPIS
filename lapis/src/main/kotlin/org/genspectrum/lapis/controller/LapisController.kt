@@ -50,7 +50,6 @@ import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
 import org.genspectrum.lapis.openApi.PhyloTreeField
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
-import org.genspectrum.lapis.openApi.PrintNodesNotInTreeField
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
@@ -916,7 +915,9 @@ class LapisController(
         @PhyloTreeField
         @RequestParam
         phyloTreeField: String,
-        @PrintNodesNotInTreeField
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
         @RequestParam(required = false, defaultValue = "false")
         printNodesNotInTree: Boolean,
     ) {
@@ -944,7 +945,9 @@ class LapisController(
         @PhyloTreeField
         @RequestParam
         phyloTreeField: String,
-        @PrintNodesNotInTreeField
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
         @RequestParam(required = false, defaultValue = "false")
         printNodesNotInTree: Boolean,
         @NucleotideMutations
@@ -965,13 +968,13 @@ class LapisController(
         response: HttpServletResponse,
     ) {
         val request = SequenceFiltersRequestWithFields(
-            sequenceFilters?.filterKeys { it != "phyloTreeField" } ?: emptyMap(),
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             listOf(caseInsensitiveFieldConverter.convert(phyloTreeField)),
-            emptyList(),
         )
 
         val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->

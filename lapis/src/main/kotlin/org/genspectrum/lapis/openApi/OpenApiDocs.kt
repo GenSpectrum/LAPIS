@@ -55,6 +55,7 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OFFSET_PROPERTY
 import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
@@ -103,6 +104,7 @@ fun buildOpenApiSchema(
                         databaseConfig.schema.metadata,
                     ),
                 )
+                // TODO: add sth like this for the new phyloTree post subtype
                 .addSchemas(
                     DETAILS_REQUEST_SCHEMA,
                     requestSchemaWithFields(
@@ -294,8 +296,10 @@ fun buildOpenApiSchema(
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
-                    PRINT_NODES_NOT_IN_TREE_FIELD_SCHEMA,
-                    Schema<Boolean>(),
+                    PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY,
+                    BooleanSchema()
+                        ._default(false)
+                        .description(PHYLO_TREE_FIELD_DESCRIPTION),
                 )
                 .addSchemas(
                     PHYLO_TREE_FIELD_SCHEMA,

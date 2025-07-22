@@ -545,14 +545,6 @@ annotation class PhyloTreeField
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
-    schema = Schema(ref = "#/components/schemas/$PRINT_NODES_NOT_IN_TREE_FIELD_SCHEMA"),
-    description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
-)
-annotation class PrintNodesNotInTreeField
-
-@Target(AnnotationTarget.VALUE_PARAMETER)
-@Retention(AnnotationRetention.RUNTIME)
-@Parameter(
     schema = Schema(ref = "#/components/schemas/$MUTATIONS_FIELDS_SCHEMA"),
     description = MUTATIONS_FIELDS_DESCRIPTION,
 )

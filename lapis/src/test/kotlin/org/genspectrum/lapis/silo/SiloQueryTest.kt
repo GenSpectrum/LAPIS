@@ -52,7 +52,8 @@ class SiloQueryTest {
                 "action": {
                     "columnName": "phyloTreeField",
                     "printNodesNotInTree": false,
-                     "type": "MostRecentCommonAncestor"
+                    "randomize": false,
+                    "type": "MostRecentCommonAncestor"
                 },
                 "filterExpression": {
                     "column": "theColumn",

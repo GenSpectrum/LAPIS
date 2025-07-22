@@ -150,7 +150,6 @@ class SiloQueryModel(
         SiloQuery(
             SiloAction.mostRecentCommonAncestor(
                 phyloTreeField,
-                sequenceFilters.orderByFields,
                 printNodesNotInTree,
             ),
             siloFilterExpressionMapper.map(sequenceFilters),

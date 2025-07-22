@@ -108,11 +108,9 @@ sealed class SiloAction<ResponseType>(
 
         fun mostRecentCommonAncestor(
             phyloTreeField: String,
-            orderByFields: List<OrderByField> = emptyList(),
             printNodesNotInTree: Boolean = false,
         ): SiloAction<MostCommonAncestorData> =
             MostRecentCommonAncestorAction(
-                orderByFields = getNonRandomizedOrderByFields(orderByFields),
                 columnName = phyloTreeField,
                 printNodesNotInTree,
             )
@@ -224,12 +222,12 @@ sealed class SiloAction<ResponseType>(
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class MostRecentCommonAncestorAction(
-        override val orderByFields: List<OrderByField> = emptyList(),
         val columnName: String,
         val printNodesNotInTree: Boolean? = false,
+        override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-        override val randomize: Boolean? = null,
+        override val randomize: Boolean? = false,
     ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
         val type: String = "MostRecentCommonAncestor"
     }
