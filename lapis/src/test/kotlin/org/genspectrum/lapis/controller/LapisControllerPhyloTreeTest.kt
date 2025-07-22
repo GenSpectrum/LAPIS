@@ -1,5 +1,9 @@
 package org.genspectrum.lapis.controller
 
+<<<<<<< HEAD
+=======
+import com.fasterxml.jackson.databind.ObjectMapper
+>>>>>>> 76e07252 (feat(lapis): add e2e tests)
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -12,7 +16,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+<<<<<<< HEAD
 import org.springframework.http.MediaType
+=======
+>>>>>>> 76e07252 (feat(lapis): add e2e tests)
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -25,6 +32,10 @@ private const val DATA_VERSION = "1234"
 @AutoConfigureMockMvc
 class LapisControllerPhyloTreeTest(
     @Autowired private val mockMvc: MockMvc,
+<<<<<<< HEAD
+=======
+    @Autowired private val objectMapper: ObjectMapper,
+>>>>>>> 76e07252 (feat(lapis): add e2e tests)
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
@@ -43,6 +54,7 @@ class LapisControllerPhyloTreeTest(
             .andExpect(status().isBadRequest)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(jsonPath("\$.detail", startsWith("Required parameter 'phyloTreeField' is not present")))
+<<<<<<< HEAD
 
         mockMvc.perform(
             postSample("/mostRecentCommonAncestor")
@@ -57,6 +69,8 @@ class LapisControllerPhyloTreeTest(
                     startsWith("phyloTreeField is required and must be a string representing a phylo tree field"),
                 ),
             )
+=======
+>>>>>>> 76e07252 (feat(lapis): add e2e tests)
     }
 
     @Test
@@ -80,6 +94,7 @@ class LapisControllerPhyloTreeTest(
     }
 
     @Test
+<<<<<<< HEAD
     fun `GIVEN call to mostRecentCommonAncestor endpoint with invalid PhyloTreeField returns 400 error`() {
         listOf(
             mockMvc.perform(getSample("/mostRecentCommonAncestor?phyloTreeField=floatValue")),
@@ -99,5 +114,16 @@ class LapisControllerPhyloTreeTest(
                     ),
                 )
         }
+=======
+    fun `GIVEN call to mostRecentCommonAncestor endpoint with invalid PhyloTreeField returns error`() {
+        mockMvc.perform(getSample("/mostRecentCommonAncestor?phyloTreeField=floatValue"))
+            .andExpect(status().isBadRequest)
+            .andExpect(
+                jsonPath(
+                    "$.error.detail",
+                    containsString("'floatValue' is not a phylo tree field, known phylo tree fields are [primaryKey]"),
+                ),
+            )
+>>>>>>> 76e07252 (feat(lapis): add e2e tests)
     }
 }

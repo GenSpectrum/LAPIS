@@ -18,6 +18,7 @@ const val FIELD_WITH_ONLY_LOWERCASE_LETTERS = DATE_FIELD
 
 val dummySequenceFilterFields = SequenceFilterFields(
     mapOf(
+        "primaryKey.PhyloDescendantOf" to SequenceFilterFieldType.PhyloDescendantOf(PRIMARY_KEY_FIELD),
         DATE_FIELD to SequenceFilterFieldType.Date,
         "dateTo" to SequenceFilterFieldType.DateTo(DATE_FIELD),
         "dateFrom" to SequenceFilterFieldType.DateFrom(DATE_FIELD),
