@@ -42,6 +42,7 @@ import org.genspectrum.lapis.openApi.LapisMostRecentCommonAncestorResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
 import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA
 import org.genspectrum.lapis.openApi.MutationsFields
 import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
@@ -897,6 +898,42 @@ class LapisController(
                 false -> request.fields
             },
         )
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisMostRecentCommonAncestorResponse
+    @Operation(
+        operationId = "postMostRecentCommonAncestor",
+    )
+    fun postMostRecentCommonAncestorAsJson(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
+        @RequestBody
+        request: SequenceFiltersRequestWithFields,
+        response: HttpServletResponse,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @PrintNodesNotInTreeField
+        @RequestParam
+        printNodesNotInTree: Boolean = false,
+    ) {
+        val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
+            MostRecentCommonAncestorCollection(
+                records = siloQueryModel.getMostRecentCommonAncestor(req, phyloTreeField, printNodesNotInTree),
+                fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
+            )
+        }
+
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = getData,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
+    }
 
     @GetMapping(MOST_RECENT_COMMON_ANCESTOR_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisMostRecentCommonAncestorResponse

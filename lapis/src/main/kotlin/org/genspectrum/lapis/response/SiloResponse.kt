@@ -80,8 +80,8 @@ data class InsertionData(
 )
 
 data class MostCommonAncestorData(
-    val columnName: Int,
-    val printNodesNotInTree: String,
+    val columnName: String,
+    val printNodesNotInTree: Boolean?,
 )
 
 data class SequenceData(
