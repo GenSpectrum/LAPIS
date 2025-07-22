@@ -28,6 +28,7 @@ import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
@@ -112,6 +113,19 @@ fun buildOpenApiSchema(
                             dataFormatSchema = dataFormatSchema(),
                         ),
                         DETAILS_FIELDS_DESCRIPTION,
+                        databaseConfig.schema.metadata,
+                    ),
+                )
+                .addSchemas(
+                    MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA,
+                    requestSchemaWithFields(
+                        getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
+                            dataFormatSchema = dataFormatSchema(),
+                        ),
+                        PHYLO_TREE_FIELD_DESCRIPTION,
                         databaseConfig.schema.metadata,
                     ),
                 )
@@ -279,6 +293,13 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
+                .addSchemas(
+                    PHYLO_TREE_FIELD_SCHEMA,
+                    fieldsArray(
+                        databaseConfig.schema.metadata
+                            .filter { it.isPhyloTreeNodeIdentifier },
+                    ),
+                )
                 .addSchemas(
                     MUTATIONS_FIELDS_SCHEMA,
                     mutationsFieldsSchema(),

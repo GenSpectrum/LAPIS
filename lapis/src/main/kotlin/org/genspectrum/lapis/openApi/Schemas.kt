@@ -24,11 +24,13 @@ import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.LapisMediaType
+import org.genspectrum.lapis.controller.MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.MUTATIONS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
@@ -50,6 +52,7 @@ const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
+const val MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA = "MostRecentCommonAncestorResponse"
 const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
@@ -78,6 +81,7 @@ const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA = "NucleotideFastaHeaderTempla
 const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplate"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
+const val PHYLO_TREE_FIELD_SCHEMA = "PhyloTreeField"
 const val MUTATIONS_FIELDS_SCHEMA = "MutationsFields"
 const val GENE_SCHEMA = "Gene"
 const val SEGMENT_SCHEMA = "Segment"
@@ -220,6 +224,14 @@ annotation class LapisAminoAcidMutationsResponse
     content = [Content(schema = Schema(ref = "#/components/schemas/$DETAILS_RESPONSE_SCHEMA"))],
 )
 annotation class LapisDetailsResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))],
+)
+annotation class LapisMostRecentCommonAncestorResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
@@ -519,6 +531,14 @@ annotation class FieldsToAggregateBy
     description = DETAILS_FIELDS_DESCRIPTION,
 )
 annotation class DetailsFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$PHYLO_TREE_FIELD_SCHEMA"),
+    description = PHYLO_TREE_FIELD_DESCRIPTION,
+)
+annotation class PhyloTreeField
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

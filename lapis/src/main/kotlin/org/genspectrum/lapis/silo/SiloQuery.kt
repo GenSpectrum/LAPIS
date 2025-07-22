@@ -103,6 +103,11 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
+        fun mostCommonRecentAncestor(orderByFields: List<OrderByField> = emptyList()): SiloAction<DetailsData> =
+            MostRecentCommonAncestorAction(
+                orderByFields = getNonRandomizedOrderByFields(orderByFields),
+            )
+
         fun nucleotideInsertions(
             orderByFields: List<OrderByField> = emptyList(),
             limit: Int? = null,
@@ -206,6 +211,17 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
         val type: String = "Insertions"
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class MostRecentCommonAncestorAction(
+        override val orderByFields: List<OrderByField> = emptyList(),
+        val printNodesNotInTree: Boolean? = false,
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        override val randomize: Boolean? = null,
+    ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = true) {
+        val type: String = "MostRecentCommonAncestor"
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -9,6 +9,7 @@ const val AMINO_ACID_INSERTIONS_ROUTE = "/aminoAcidInsertions"
 const val ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/alignedNucleotideSequences"
 const val ALIGNED_AMINO_ACID_SEQUENCES_ROUTE = "/alignedAminoAcidSequences"
 const val UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/unalignedNucleotideSequences"
+const val MOST_RECENT_COMMON_ANCESTOR_ROUTE = "/mostRecentCommonAncestor"
 
 enum class SampleRoute(
     val pathSegment: String,

@@ -17,6 +17,17 @@ class AggregatedCollection(
             .plus(value.count.toString())
 }
 
+class MostRecentCommonAncestorCollection(
+    override val records: Stream<DetailsData>,
+    private val fields: List<String>,
+) : RecordCollection<DetailsData> {
+    override fun getHeader() = fields
+
+    override fun mapToCsvValuesList(value: DetailsData): List<String?> =
+        fields
+            .map { value[it]?.toCsvValue() }
+}
+
 class DetailsCollection(
     override val records: Stream<DetailsData>,
     private val fields: List<String>,
