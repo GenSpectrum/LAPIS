@@ -42,7 +42,7 @@ import org.genspectrum.lapis.openApi.LapisMostRecentCommonAncestorResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
 import org.genspectrum.lapis.openApi.Limit
-import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA
+import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.MutationsFields
 import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
@@ -909,7 +909,7 @@ class LapisController(
         operationId = "postMostRecentCommonAncestor",
     )
     fun postMostRecentCommonAncestorAsJson(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
         request: PhyloTreeSequenceFiltersRequestWithFields,
         response: HttpServletResponse,
@@ -928,10 +928,11 @@ class LapisController(
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
     @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
         operationId = "postMostRecentCommonAncestorAsCsv",
     )
     fun postMostRecentCommonAncestorAsCsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
         request: PhyloTreeSequenceFiltersRequestWithFields,
         @RequestHeader httpHeaders: HttpHeaders,
@@ -954,10 +955,11 @@ class LapisController(
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
     @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
         operationId = "postMostRecentCommonAncestorAsTsv",
     )
     fun postMostRecentCommonAncestorAsTsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
         request: PhyloTreeSequenceFiltersRequestWithFields,
         @RequestHeader httpHeaders: HttpHeaders,

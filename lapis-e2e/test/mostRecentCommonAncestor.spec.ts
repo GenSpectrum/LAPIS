@@ -4,7 +4,7 @@ import { basePath, lapisClient } from './common';
 describe('The /mostRecentCommonAncestor endpoint', () => {
   it('should return MRCA with missing nodes if specified', async () => {
     const result = await lapisClient.postMostRecentCommonAncestor({
-      mostRecentCommonAncestorResponse: {
+      mostRecentCommonAncestorRequest: {
         phyloTreeField: 'primaryKey',
         printNodesNotInTree: true,
         advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
@@ -21,7 +21,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
 
   it('should return MRCA without missing nodes if specified', async () => {
     const result = await lapisClient.postMostRecentCommonAncestor({
-      mostRecentCommonAncestorResponse: {
+      mostRecentCommonAncestorRequest: {
         phyloTreeField: 'primaryKey',
         printNodesNotInTree: false,
         advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
@@ -32,7 +32,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
     expect(result.data[0]).to.be.deep.equal({
       mrcaNode: 'NODE_0000043',
       missingNodeCount: 1,
-      missingFromTree: 'key_1408408',
+      missingFromTree: null,
     });
   });
 

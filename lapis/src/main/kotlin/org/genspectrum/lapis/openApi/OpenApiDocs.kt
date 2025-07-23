@@ -29,6 +29,7 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIP
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
+import org.genspectrum.lapis.controller.PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
@@ -55,6 +56,7 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OFFSET_PROPERTY
 import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PHYLO_TREE_FIELD_PROPERTY
 import org.genspectrum.lapis.request.PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
@@ -104,7 +106,6 @@ fun buildOpenApiSchema(
                         databaseConfig.schema.metadata,
                     ),
                 )
-                // TODO: add sth like this for the new phyloTree post subtype
                 .addSchemas(
                     DETAILS_REQUEST_SCHEMA,
                     requestSchemaWithFields(
@@ -119,16 +120,14 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
-                    MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA,
-                    requestSchemaWithFields(
+                    MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA,
+                    requestSchemaPhyloTree(
                         getSequenceFiltersWithFormat(
                             databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
                         ),
-                        PHYLO_TREE_FIELD_DESCRIPTION,
-                        databaseConfig.schema.metadata,
                     ),
                 )
                 .addSchemas(
@@ -210,6 +209,17 @@ fun buildOpenApiSchema(
                             .properties(
                                 getAggregatedResponseProperties(aggregatedMetadataFieldSchemas(databaseConfig)),
                             ),
+                    ),
+                )
+                .addSchemas(
+                    MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA,
+                    lapisArrayResponseSchema(
+                        Schema<String>()
+                            .types(setOf("object"))
+                            .description(
+                                "The response contains the most recent common ancestor node label `mrcaNode`, the number of nodes in the filter not in the phylotree `missingNodeCount` and optionally their names `missingFromTree`.",
+                            )
+                            .properties(mostRecentCommonAncestorMetadataFieldSchemas()),
                     ),
                 )
                 .addSchemas(
@@ -452,6 +462,16 @@ private fun detailsMetadataFieldSchemas(databaseConfig: DatabaseConfig) =
         .metadata
         .associate { it.name to Schema<String>().types(setOf(mapToOpenApiType(it.type))) }
 
+private fun mostRecentCommonAncestorMetadataFieldSchemas(): Map<String, Schema<*>> =
+    mapOf(
+        "mrcaNode" to StringSchema()
+            .description("The label of the most recent common ancestor node in the phylogenetic tree."),
+        "missingNodeCount" to IntegerSchema()
+            .description("The number of nodes in the filter not in the phylogenetic tree."),
+        "missingFromTree" to StringSchema()
+            .description("The comma-separated list of names of the nodes in the filter not in the phylogenetic tree."),
+    )
+
 private fun mapToOpenApiType(type: MetadataType): String =
     when (type) {
         MetadataType.STRING -> "string"
@@ -533,6 +553,23 @@ private fun requestSchemaWithFields(
                 FIELDS_PROPERTY,
                 fieldsArray(databaseConfig).description(fieldsDescription),
             ),
+        )
+
+private fun requestSchemaPhyloTree(requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("valid filters for sequence data")
+        .properties(
+            requestProperties + Pair(
+                PHYLO_TREE_FIELD_PROPERTY,
+                Schema<String>().description(PHYLO_TREE_FIELD_DESCRIPTION),
+            ) +
+                Pair(
+                    PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY,
+                    BooleanSchema()
+                        ._default(false)
+                        .description(PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION),
+                ),
         )
 
 private fun nucleotideSequencesRequestSchema(
