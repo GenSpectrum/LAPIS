@@ -34,9 +34,9 @@ class CaseInsensitiveFieldConverter(
         if (converted.fieldName !in validFields) {
             throw BadRequestException(
                 "Field '${converted.fieldName}' is not a phylo tree field, " +
-                    "known phylo tree fields are ${validFields.joinToString(
+                    "known phylo tree fields are [${validFields.joinToString(
                         ", ",
-                    )}",
+                    )}]",
             )
         }
     }
