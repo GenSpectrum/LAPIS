@@ -108,11 +108,19 @@ fun mutationData(
 fun MockHttpServletRequestBuilder.withFieldsQuery(fields: List<String>?) =
     fields?.fold(this) { request, field -> request.queryParam("fields", field) } ?: this
 
+fun MockHttpServletRequestBuilder.withPhyloTreeFieldQuery(phyloTreeField: String?) =
+    phyloTreeField?.let { this.queryParam("phyloTreeField", it) } ?: this
+
 fun MockHttpServletRequestBuilder.withFieldsParam(fields: List<String>?) =
     fields?.fold(this) { request, field -> request.param("fields", field) } ?: this
+
+fun MockHttpServletRequestBuilder.withPhyloTreeFieldParam(phyloTreeField: String?) =
+    phyloTreeField?.let { this.param("phyloTreeField", it) } ?: this
 
 fun getFieldsAsJsonPart(fields: List<String>?) =
     fields
         ?.joinToString { "\"$it\"" }
         ?.let { ", \"fields\": [$it]" }
         ?: ""
+
+fun getPhyloTreeFieldAsJsonPart(phyloTreeField: String?) = phyloTreeField?.let { ", \"phyloTreeField\": \"$it\"" } ?: ""

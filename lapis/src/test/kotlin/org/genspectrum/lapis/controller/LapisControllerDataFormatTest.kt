@@ -335,7 +335,8 @@ class LapisControllerDataFormatTest(
                         getSample(endpoint)
                             .queryParam("country", "Switzerland")
                             .queryParam("dataFormat", dataFormat)
-                            .withFieldsQuery(mockDataCollection.fields),
+                            .withFieldsQuery(mockDataCollection.fields)
+                            .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField),
                     ),
                     RequestScenario(
                         "GET $endpoint with accept header",
@@ -343,6 +344,7 @@ class LapisControllerDataFormatTest(
                         getSample(endpoint)
                             .queryParam("country", "Switzerland")
                             .withFieldsQuery(mockDataCollection.fields)
+                            .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
                     RequestScenario(

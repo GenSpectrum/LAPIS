@@ -408,7 +408,12 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithNucleotideMutationFilter")
     fun `GET endpoint with invalid nucleotide mutation filter`(endpoint: String) {
-        mockMvc.perform(getSample("$endpoint?nucleotideMutations=invalidMutation"))
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+            "$endpoint?phyloTreeField=primaryKey&nucleotideMutations=invalidMutation"
+        } else {
+            "$endpoint?nucleotideMutations=invalidMutation"
+        }
+        mockMvc.perform(getSample(path))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideMutations'")))
     }
@@ -416,7 +421,12 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithAminoAcidMutationFilter")
     fun `GET endpoint with invalid amino acid mutation`(endpoint: String) {
-        mockMvc.perform(getSample("$endpoint?aminoAcidMutations=invalidMutation"))
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+            "$endpoint?phyloTreeField=primaryKey&aminoAcidMutations=invalidMutation"
+        } else {
+            "$endpoint?aminoAcidMutations=invalidMutation"
+        }
+        mockMvc.perform(getSample(path))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidMutations'")))
     }
@@ -424,7 +434,12 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotideInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid nucleotide insertion filter`(endpoint: String) {
-        mockMvc.perform(getSample("$endpoint?nucleotideInsertions=invalidInsertion"))
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+            "$endpoint?phyloTreeField=primaryKey&nucleotideInsertions=invalidInsertion"
+        } else {
+            "$endpoint?nucleotideInsertions=invalidInsertion"
+        }
+        mockMvc.perform(getSample(path))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'nucleotideInsertions'")))
     }
@@ -432,7 +447,12 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid aminoAcidInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid amino acid insertionFilter`(endpoint: String) {
-        mockMvc.perform(getSample("$endpoint?aminoAcidInsertions=invalidInsertion"))
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+            "$endpoint?phyloTreeField=primaryKey&aminoAcidInsertions=invalidInsertion"
+        } else {
+            "$endpoint?aminoAcidInsertions=invalidInsertion"
+        }
+        mockMvc.perform(getSample(path))
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.detail").value(Matchers.containsString("Failed to convert 'aminoAcidInsertions'")))
     }
@@ -440,7 +460,12 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with non existing field should throw")
     @MethodSource("getEndpointsWithFields")
     fun `GET with non existing field should throw`(endpoint: String) {
-        mockMvc.perform(getSample("$endpoint?fields=nonExistingField"))
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+            "$endpoint?phyloTreeField=primaryKey&fields=nonExistingField"
+        } else {
+            "$endpoint?fields=nonExistingField"
+        }
+        mockMvc.perform(getSample(path))
             .andExpect(status().isBadRequest)
             .andExpect(
                 jsonPath(

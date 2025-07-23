@@ -17,6 +17,7 @@ import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
@@ -33,6 +34,7 @@ data class MockDataCollection(
     val expectedCsv: String,
     val expectedTsv: String,
     val fields: List<String>?,
+    val phyloTreeField: String? = null,
 ) {
     enum class DataFormat(
         val fileFormat: String,
@@ -53,6 +55,7 @@ data class MockDataCollection(
             expectedCsv: String,
             expectedTsv: String,
             fields: List<String>? = null,
+            phyloTreeField: String? = null,
         ) = MockDataCollection(
             { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
             { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
@@ -60,6 +63,7 @@ data class MockDataCollection(
             expectedCsv,
             expectedTsv,
             fields,
+            phyloTreeField,
         )
     }
 
@@ -99,6 +103,7 @@ data class MockDataCollection(
                 }
             },
             fields = fields,
+            phyloTreeField = phyloTreeField,
         )
 }
 
@@ -199,6 +204,7 @@ data class MockData(
     val mockWithData: (SiloQueryModel) -> Unit,
     val assertDataMatches: (String) -> Unit,
     val fields: List<String>? = null,
+    val phyloTreeField: String? = null,
 )
 
 object MockDataForEndpoints {
@@ -210,6 +216,7 @@ object MockDataForEndpoints {
             AMINO_ACID_MUTATIONS_ROUTE -> aminoAcidMutations
             NUCLEOTIDE_INSERTIONS_ROUTE -> nucleotideInsertions
             AMINO_ACID_INSERTIONS_ROUTE -> aminoAcidInsertions
+            MOST_RECENT_COMMON_ANCESTOR_ROUTE -> mostRecentCommonAncestor
             else -> throw IllegalArgumentException("Test issue: no mock data for endpoint $endpoint")
         }
 
@@ -517,6 +524,37 @@ object MockDataForEndpoints {
             insertion	count	insertedSymbols	position	sequenceName
             ins_1234:CAGAA	41	CAGAA	1234	sequenceName
             
+        """.trimIndent(),
+    )
+
+    private val mostRecentCommonAncestor = MockDataCollection.create(
+        siloQueryModelMockCall = { it::getMostRecentCommonAncestor },
+        modelData = listOf(
+            MostCommonAncestorData(
+                mrcaNode = "node1",
+                missingNodeCount = 0,
+                missingFromTree = null,
+            ),
+        ),
+        phyloTreeField = "primaryKey",
+        expectedJson = """
+            [
+                {
+                    "mrcaNode": "node1",
+                    "missingNodeCount": 0,
+                    "missingFromTree": null
+                }
+            ]
+        """.trimIndent(),
+        expectedCsv = """
+            mrcaNode,missingNodeCount,missingFromTree
+            node1,0,
+
+        """.trimIndent(),
+        expectedTsv = """
+            mrcaNode	missingNodeCount	missingFromTree
+            node1	0	
+        
         """.trimIndent(),
     )
 

@@ -282,7 +282,8 @@ fun getRequests(
                 .queryParam("country", "Switzerland")
                 .queryParam("dataFormat", dataFormat.fileFormat)
                 .queryParam("compression", compressionFormat)
-                .withFieldsQuery(mockData.fields),
+                .withFieldsQuery(mockData.fields)
+                .withPhyloTreeFieldQuery(mockData.phyloTreeField),
             compressionFormat = compressionFormat,
             expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
             expectedContentEncoding = null,
@@ -294,6 +295,7 @@ fun getRequests(
                 .queryParam("country", "Switzerland")
                 .queryParam("dataFormat", dataFormat.fileFormat)
                 .withFieldsQuery(mockData.fields)
+                .withPhyloTreeFieldQuery(mockData.phyloTreeField)
                 .header(ACCEPT_ENCODING, compressionFormat),
             compressionFormat = compressionFormat,
             expectedContentType = getContentTypeForDataFormat(dataFormat),

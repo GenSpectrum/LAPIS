@@ -23,7 +23,12 @@ class MostRecentCommonAncestorCollection(
 ) : RecordCollection<MostCommonAncestorData> {
     override fun getHeader() = fields
 
-    override fun mapToCsvValuesList(value: MostCommonAncestorData): List<String?> = fields
+    override fun mapToCsvValuesList(value: MostCommonAncestorData): List<String?> =
+        listOf(
+            value.mrcaNode,
+            value.missingNodeCount.toString(),
+            value.missingFromTree ?: "",
+        )
 }
 
 class DetailsCollection(
