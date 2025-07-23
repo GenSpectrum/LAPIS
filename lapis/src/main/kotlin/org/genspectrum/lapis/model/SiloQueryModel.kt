@@ -5,6 +5,7 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -142,19 +143,16 @@ class SiloQueryModel(
             ),
         )
 
-    fun getMostRecentCommonAncestor(
-        sequenceFilters: SequenceFiltersRequestWithFields,
-        phyloTreeField: String,
-        printNodesNotInTree: Boolean,
-    ) = siloClient.sendQuery(
-        SiloQuery(
-            SiloAction.mostRecentCommonAncestor(
-                phyloTreeField,
-                printNodesNotInTree,
+    fun getMostRecentCommonAncestor(sequenceFilters: PhyloTreeSequenceFiltersRequestWithFields) =
+        siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.mostRecentCommonAncestor(
+                    sequenceFilters.phyloTreeField,
+                    sequenceFilters.printNodesNotInTree,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
             ),
-            siloFilterExpressionMapper.map(sequenceFilters),
-        ),
-    )
+        )
 
     fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): Stream<InsertionResponse> {
         val data = siloClient.sendQuery(

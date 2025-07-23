@@ -20,6 +20,19 @@ data class SequenceFiltersRequestWithFields(
     override val offset: Int? = null,
 ) : CommonSequenceFilters
 
+data class PhyloTreeSequenceFiltersRequestWithFields(
+    override val sequenceFilters: SequenceFilters,
+    override val nucleotideMutations: List<NucleotideMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
+    override val nucleotideInsertions: List<NucleotideInsertion>,
+    override val aminoAcidInsertions: List<AminoAcidInsertion>,
+    val phyloTreeField: String,
+    override val orderByFields: List<OrderByField> = emptyList(),
+    override val limit: Int? = null,
+    override val offset: Int? = null,
+    val printNodesNotInTree: Boolean = false,
+) : CommonSequenceFilters
+
 @JsonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
@@ -44,6 +57,36 @@ class SequenceFiltersRequestWithFieldsDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
+        )
+    }
+}
+
+@JsonComponent
+class PhyloTreeSequenceFiltersRequestWithFieldsDeserializer(
+    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+) : JsonDeserializer<PhyloTreeSequenceFiltersRequestWithFields>() {
+    override fun deserialize(
+        jsonParser: JsonParser,
+        ctxt: DeserializationContext,
+    ): PhyloTreeSequenceFiltersRequestWithFields {
+        val node = jsonParser.readValueAsTree<JsonNode>()
+        val codec = jsonParser.codec
+
+        val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)?.asText()
+            ?: throw BadRequestException("$PHYLO_TREE_FIELD_PROPERTY is required")
+        val parsedCommonFields = parseCommonFields(node, codec)
+
+        return PhyloTreeSequenceFiltersRequestWithFields(
+            parsedCommonFields.sequenceFilters,
+            parsedCommonFields.nucleotideMutations,
+            parsedCommonFields.aminoAcidMutations,
+            parsedCommonFields.nucleotideInsertions,
+            parsedCommonFields.aminoAcidInsertions,
+            phyloTreeField,
+            parsedCommonFields.orderByFields,
+            parsedCommonFields.limit,
+            parsedCommonFields.offset,
+            printNodesNotInTree = node.get(PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY)?.asBoolean() ?: false,
         )
     }
 }

@@ -63,6 +63,7 @@ import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
@@ -910,27 +911,12 @@ class LapisController(
     fun postMostRecentCommonAncestorAsJson(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: PhyloTreeSequenceFiltersRequestWithFields,
         response: HttpServletResponse,
-        @PhyloTreeField
-        @RequestParam
-        phyloTreeField: String,
-        @Parameter(
-            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
-        )
-        @RequestParam(required = false, defaultValue = "false")
-        printNodesNotInTree: Boolean,
     ) {
-        val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
-            MostRecentCommonAncestorCollection(
-                records = siloQueryModel.getMostRecentCommonAncestor(req, phyloTreeField, printNodesNotInTree),
-                fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
-            )
-        }
-
         lapisResponseStreamer.streamData(
             request = request,
-            getData = getData,
+            getData = ::getMostRecentCommonAncestorCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -967,30 +953,32 @@ class LapisController(
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = PhyloTreeSequenceFiltersRequestWithFields(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            listOf(caseInsensitiveFieldConverter.convert(phyloTreeField)),
+            phyloTreeField,
+            printNodesNotInTree = printNodesNotInTree,
         )
-
-        val getData: (SequenceFiltersRequestWithFields) -> MostRecentCommonAncestorCollection = { req ->
-            MostRecentCommonAncestorCollection(
-                records = siloQueryModel.getMostRecentCommonAncestor(req, phyloTreeField, printNodesNotInTree),
-                fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
-            )
-        }
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = getData,
+            getData = ::getMostRecentCommonAncestorCollection,
             response = response,
             responseFormat = ResponseFormat.Json,
         )
     }
+
+    private fun getMostRecentCommonAncestorCollection(
+        request: PhyloTreeSequenceFiltersRequestWithFields,
+    ): MostRecentCommonAncestorCollection =
+        MostRecentCommonAncestorCollection(
+            records = siloQueryModel.getMostRecentCommonAncestor(request),
+            fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
+        )
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse

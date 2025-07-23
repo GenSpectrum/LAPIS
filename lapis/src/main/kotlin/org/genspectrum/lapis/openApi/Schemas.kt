@@ -31,7 +31,6 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTI
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
-import org.genspectrum.lapis.controller.PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
@@ -83,7 +82,6 @@ const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplat
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 const val PHYLO_TREE_FIELD_SCHEMA = "PhyloTreeField"
-const val PRINT_NODES_NOT_IN_TREE_FIELD_SCHEMA = "PrintNodesNotInTreeField"
 const val MUTATIONS_FIELDS_SCHEMA = "MutationsFields"
 const val GENE_SCHEMA = "Gene"
 const val SEGMENT_SCHEMA = "Segment"
