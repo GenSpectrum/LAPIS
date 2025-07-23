@@ -566,6 +566,7 @@ data class DownloadCompressedFileScenario(
                     request = postSample(endpoint)
                         .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
                         .param(COMPRESSION_PROPERTY, compressionFormat)
+                        .withPhyloTreeFieldParam(mockData.phyloTreeField)
                         .contentType(APPLICATION_FORM_URLENCODED)
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,

@@ -327,6 +327,7 @@ class LapisControllerDataFormatTest(
             endpoints.flatMap { endpoint ->
                 val mockDataCollection = MockDataForEndpoints.getMockData(endpoint)
                 val fieldsJsonPart = getFieldsAsJsonPart(mockDataCollection.fields)
+                val phyloTreeFieldJsonPart = getPhyloTreeFieldAsJsonPart(mockDataCollection.phyloTreeField)
 
                 listOf(
                     RequestScenario(
@@ -351,14 +352,14 @@ class LapisControllerDataFormatTest(
                         "POST JSON $endpoint with request parameter",
                         mockDataCollection,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat" $fieldsJsonPart}""")
+                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat" $fieldsJsonPart $phyloTreeFieldJsonPart}""")
                             .contentType(MediaType.APPLICATION_JSON),
                     ),
                     RequestScenario(
                         "POST JSON $endpoint with accept header",
                         mockDataCollection,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland" $fieldsJsonPart}""")
+                            .content("""{"country": "Switzerland" $fieldsJsonPart $phyloTreeFieldJsonPart}""")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),
@@ -369,6 +370,7 @@ class LapisControllerDataFormatTest(
                             .param("country", "Switzerland")
                             .param("dataFormat", dataFormat)
                             .withFieldsParam(mockDataCollection.fields)
+                            .withPhyloTreeFieldParam(mockDataCollection.phyloTreeField)
                             .contentType(MediaType.APPLICATION_FORM_URLENCODED),
                     ),
                     RequestScenario(
@@ -377,6 +379,7 @@ class LapisControllerDataFormatTest(
                         postSample(endpoint)
                             .param("country", "Switzerland")
                             .withFieldsParam(mockDataCollection.fields)
+                            .withPhyloTreeFieldParam(mockDataCollection.phyloTreeField)
                             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                             .header(ACCEPT, getAcceptHeaderFor(dataFormat)),
                     ),

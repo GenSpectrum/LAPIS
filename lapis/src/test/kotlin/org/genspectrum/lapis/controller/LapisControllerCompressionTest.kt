@@ -273,6 +273,7 @@ fun getRequests(
 ): List<RequestScenario> {
     val mockData = MockDataForEndpoints.getMockData(endpoint).expecting(dataFormat)
     val maybeFields = getFieldsAsJsonPart(mockData.fields)
+    val maybePhyloTreeField = getPhyloTreeFieldAsJsonPart(mockData.phyloTreeField)
 
     return listOf(
         RequestScenario(
@@ -312,6 +313,7 @@ fun getRequests(
                             "dataFormat": "${dataFormat.fileFormat}",
                             "compression": "$compressionFormat"
                             $maybeFields
+                            $maybePhyloTreeField
                         }
                     """.trimMargin(),
                 )
@@ -324,7 +326,7 @@ fun getRequests(
             callDescription = "POST JSON $endpoint as $dataFormat with accept header",
             mockData = mockData,
             request = postSample(endpoint)
-                .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}" $maybeFields}""")
+                .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}" $maybeFields} ${maybePhyloTreeField}""")
                 .contentType(APPLICATION_JSON)
                 .header(ACCEPT_ENCODING, compressionFormat),
             compressionFormat = compressionFormat,
@@ -339,6 +341,7 @@ fun getRequests(
                 .param("dataFormat", dataFormat.fileFormat)
                 .param("compression", compressionFormat)
                 .withFieldsParam(mockData.fields)
+                .withPhyloTreeFieldParam(mockData.phyloTreeField)
                 .contentType(APPLICATION_FORM_URLENCODED),
             compressionFormat = compressionFormat,
             expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
@@ -351,6 +354,7 @@ fun getRequests(
                 .param("country", "Switzerland")
                 .param("dataFormat", dataFormat.fileFormat)
                 .withFieldsParam(mockData.fields)
+                .withPhyloTreeFieldParam(mockData.phyloTreeField)
                 .contentType(APPLICATION_FORM_URLENCODED)
                 .header(ACCEPT_ENCODING, compressionFormat),
             compressionFormat = compressionFormat,
