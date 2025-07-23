@@ -526,13 +526,18 @@ data class DownloadCompressedFileScenario(
             }
             val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$fileEnding"
             val expectedContentType = getContentTypeForCompressionFormat(compressionFormat)
+            val maybePhyloTreeField = getPhyloTreeFieldAsJsonPart(mockData.phyloTreeField)
+            val maybePhyloTreeFieldParam: String =
+                mockData.phyloTreeField
+                    ?.let { "&phyloTreeField=$it" }
+                    ?: ""
 
             return listOf(
                 DownloadCompressedFileScenario(
                     description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
                     request = getSample(
-                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat",
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat$maybePhyloTreeFieldParam",
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
@@ -542,7 +547,7 @@ data class DownloadCompressedFileScenario(
                     description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat} with basename",
                     mockData = mockData,
                     request = getSample(
-                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat$maybePhyloTreeFieldParam" +
                             "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file",
                     )
                         .header(ACCEPT, acceptHeader),
@@ -553,7 +558,7 @@ data class DownloadCompressedFileScenario(
                     description = "POST JSON $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
                     request = postSample(endpoint).content(
-                        """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" }""",
+                        """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" $maybePhyloTreeField}""",
                     )
                         .contentType(APPLICATION_JSON)
                         .header(ACCEPT, acceptHeader),
