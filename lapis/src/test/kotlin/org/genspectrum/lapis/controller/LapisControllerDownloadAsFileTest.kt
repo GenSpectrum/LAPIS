@@ -547,8 +547,8 @@ data class DownloadCompressedFileScenario(
                     description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat} with basename",
                     mockData = mockData,
                     request = getSample(
-                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat$maybePhyloTreeFieldParam" +
-                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file",
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
+                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file$maybePhyloTreeFieldParam",
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = "my_file.$dataFileFormat.$fileEnding",

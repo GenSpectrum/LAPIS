@@ -9,6 +9,10 @@ data class Field(
 
 fun interface FieldConverter<T> {
     fun convert(source: String): T
+
+    fun validatePhyloTreeFields(source: String) {
+        // Default implementation does nothing, can be overridden if needed
+    }
 }
 
 @Component
@@ -22,5 +26,18 @@ class CaseInsensitiveFieldConverter(
             )
 
         return Field(cleaned)
+    }
+
+    override fun validatePhyloTreeFields(source: String) {
+        val converted = convert(source)
+        val validFields = caseInsensitiveFieldsCleaner.getPhyloTreeFields()
+        if (converted.fieldName !in validFields) {
+            throw BadRequestException(
+                "Field '${converted.fieldName}' is not a phylo tree field, " +
+                    "known phylo tree fields are ${validFields.joinToString(
+                        ", ",
+                    )}",
+            )
+        }
     }
 }

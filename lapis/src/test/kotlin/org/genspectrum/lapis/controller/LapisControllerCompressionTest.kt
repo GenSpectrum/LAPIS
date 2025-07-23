@@ -326,7 +326,9 @@ fun getRequests(
             callDescription = "POST JSON $endpoint as $dataFormat with accept header",
             mockData = mockData,
             request = postSample(endpoint)
-                .content("""{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}" $maybeFields $maybePhyloTreeField}""")
+                .content(
+                    """{"country": "Switzerland", "dataFormat": "${dataFormat.fileFormat}" $maybeFields $maybePhyloTreeField}""",
+                )
                 .contentType(APPLICATION_JSON)
                 .header(ACCEPT_ENCODING, compressionFormat),
             compressionFormat = compressionFormat,

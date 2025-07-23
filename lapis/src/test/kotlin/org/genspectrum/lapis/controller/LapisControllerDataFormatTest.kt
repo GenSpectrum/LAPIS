@@ -352,7 +352,9 @@ class LapisControllerDataFormatTest(
                         "POST JSON $endpoint with request parameter",
                         mockDataCollection,
                         postSample(endpoint)
-                            .content("""{"country": "Switzerland", "dataFormat": "$dataFormat" $fieldsJsonPart $phyloTreeFieldJsonPart}""")
+                            .content(
+                                """{"country": "Switzerland", "dataFormat": "$dataFormat" $fieldsJsonPart $phyloTreeFieldJsonPart}""",
+                            )
                             .contentType(MediaType.APPLICATION_JSON),
                     ),
                     RequestScenario(

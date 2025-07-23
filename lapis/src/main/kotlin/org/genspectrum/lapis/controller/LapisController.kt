@@ -927,6 +927,9 @@ class LapisController(
         produces = [TEXT_CSV_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
+    @StringResponseOperation(
+        operationId = "postMostRecentCommonAncestorAsCsv",
+    )
     fun postMostRecentCommonAncestorAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
         @RequestBody
@@ -949,6 +952,9 @@ class LapisController(
         MOST_RECENT_COMMON_ANCESTOR_ROUTE,
         produces = [TEXT_TSV_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @StringResponseOperation(
+        operationId = "postMostRecentCommonAncestorAsTsv",
     )
     fun postMostRecentCommonAncestorAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))
@@ -1132,11 +1138,13 @@ class LapisController(
 
     private fun getMostRecentCommonAncestorCollection(
         request: PhyloTreeSequenceFiltersRequestWithFields,
-    ): MostRecentCommonAncestorCollection =
-        MostRecentCommonAncestorCollection(
+    ): MostRecentCommonAncestorCollection {
+        caseInsensitiveFieldConverter.validatePhyloTreeFields(request.phyloTreeField)
+        return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
         )
+    }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse
