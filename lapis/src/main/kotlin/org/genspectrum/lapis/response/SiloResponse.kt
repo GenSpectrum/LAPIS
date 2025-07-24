@@ -79,6 +79,12 @@ data class InsertionData(
     val sequenceName: String,
 )
 
+data class MostCommonAncestorData(
+    val mrcaNode: String?,
+    val missingNodeCount: Int,
+    val missingFromTree: String?,
+)
+
 data class SequenceData(
     val map: Map<String, JsonNode>,
 ) : Map<String, JsonNode> by map

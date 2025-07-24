@@ -4,6 +4,7 @@ import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
@@ -49,6 +50,21 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     fields.map { Field(it) },
     emptyList(),
+)
+
+fun phyloTreeSequenceFiltersRequest(
+    sequenceFilters: Map<String, String>,
+    phyloTreeField: String,
+    printNodesNotInTree: Boolean = false,
+) = PhyloTreeSequenceFiltersRequest(
+    sequenceFilters.mapValues { listOf(it.value) },
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    phyloTreeField,
+    emptyList(),
+    printNodesNotInTree = printNodesNotInTree,
 )
 
 fun sequenceFiltersRequestWithArrayValuedFilters(
@@ -108,11 +124,19 @@ fun mutationData(
 fun MockHttpServletRequestBuilder.withFieldsQuery(fields: List<String>?) =
     fields?.fold(this) { request, field -> request.queryParam("fields", field) } ?: this
 
+fun MockHttpServletRequestBuilder.withPhyloTreeFieldQuery(phyloTreeField: String?) =
+    phyloTreeField?.let { this.queryParam("phyloTreeField", it) } ?: this
+
 fun MockHttpServletRequestBuilder.withFieldsParam(fields: List<String>?) =
     fields?.fold(this) { request, field -> request.param("fields", field) } ?: this
+
+fun MockHttpServletRequestBuilder.withPhyloTreeFieldParam(phyloTreeField: String?) =
+    phyloTreeField?.let { this.param("phyloTreeField", it) } ?: this
 
 fun getFieldsAsJsonPart(fields: List<String>?) =
     fields
         ?.joinToString { "\"$it\"" }
         ?.let { ", \"fields\": [$it]" }
         ?: ""
+
+fun getPhyloTreeFieldAsJsonPart(phyloTreeField: String?) = phyloTreeField?.let { ", \"phyloTreeField\": \"$it\"" } ?: ""

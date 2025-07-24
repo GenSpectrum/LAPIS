@@ -1,3 +1,4 @@
 ndjsonInputFilename: 'input_file.ndjson'
 lineageDefinitionsFilename: 'lineage_definitions.yaml'
 referenceGenomeFilename: reference_genomes.json
+phyloTreeFilename: 'phylogenetic_tree.nwk'

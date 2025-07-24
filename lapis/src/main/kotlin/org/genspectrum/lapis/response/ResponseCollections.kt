@@ -17,6 +17,20 @@ class AggregatedCollection(
             .plus(value.count.toString())
 }
 
+class MostRecentCommonAncestorCollection(
+    override val records: Stream<MostCommonAncestorData>,
+    private val fields: List<String>,
+) : RecordCollection<MostCommonAncestorData> {
+    override fun getHeader() = fields
+
+    override fun mapToCsvValuesList(value: MostCommonAncestorData): List<String?> =
+        listOf(
+            value.mrcaNode,
+            value.missingNodeCount.toString(),
+            value.missingFromTree ?: "",
+        )
+}
+
 class DetailsCollection(
     override val records: Stream<DetailsData>,
     private val fields: List<String>,

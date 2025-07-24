@@ -3,6 +3,11 @@ package org.genspectrum.lapis.controller
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
 
 const val DETAILS_ENDPOINT_DESCRIPTION = """Returns the specified metadata fields of sequences matching the filter."""
+const val MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION =
+    """Returns the most recent common ancestor of sequences matching the filter.
+    If sequences included in the filter do not exist in the phylogenetic tree they are ignored and the count 
+    is added to the field missingNodeCount. To include these sequences in the response set the `printNodesNotInTree`
+     parameter to true."""
 const val AGGREGATED_ENDPOINT_DESCRIPTION =
     """Returns the number of sequences matching the specified sequence filters."""
 const val NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION =
@@ -61,6 +66,12 @@ const val DETAILS_FIELDS_DESCRIPTION =
 If empty, all fields are returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
 """
+const val PHYLO_TREE_FIELD_DESCRIPTION =
+    """The field that contains the node labels in the phylogenetic tree."""
+const val PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION =
+    """If true, the response will include a comma separated list of nodes that fit the filter criteria 
+    but are not present in the phylogenetic tree. The field \"missingNodeCount\" will contain the number of 
+    sequences that were not included in the phylogenetic tree."""
 const val MUTATIONS_FIELDS_DESCRIPTION =
     """The fields that the response items should contain.
 If empty, all fields are returned.
