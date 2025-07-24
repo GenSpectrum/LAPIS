@@ -63,7 +63,7 @@ import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
-import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
@@ -930,7 +930,7 @@ class LapisController(
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequestWithFields(
+        val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -983,7 +983,7 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequestWithFields(
+        val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -1039,7 +1039,7 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequestWithFields(
+        val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
@@ -1073,7 +1073,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsJson(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
+        request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -1096,7 +1096,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
+        request: PhyloTreeSequenceFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1123,7 +1123,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
+        request: PhyloTreeSequenceFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1139,7 +1139,7 @@ class LapisController(
     }
 
     private fun getMostRecentCommonAncestorCollection(
-        request: PhyloTreeSequenceFiltersRequestWithFields,
+        request: PhyloTreeSequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
         caseInsensitiveFieldConverter.validatePhyloTreeFields(request.phyloTreeField)
         return MostRecentCommonAncestorCollection(

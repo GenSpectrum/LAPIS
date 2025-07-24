@@ -10,9 +10,7 @@ data class Field(
 fun interface FieldConverter<T> {
     fun convert(source: String): T
 
-    fun validatePhyloTreeFields(source: String) {
-        // Default implementation does nothing, can be overridden if needed
-    }
+    fun validatePhyloTreeFields(source: String) {}
 }
 
 @Component

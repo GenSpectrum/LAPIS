@@ -5,7 +5,7 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
-import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -143,7 +143,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getMostRecentCommonAncestor(sequenceFilters: PhyloTreeSequenceFiltersRequestWithFields) =
+    fun getMostRecentCommonAncestor(sequenceFilters: PhyloTreeSequenceFiltersRequest) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.mostRecentCommonAncestor(
