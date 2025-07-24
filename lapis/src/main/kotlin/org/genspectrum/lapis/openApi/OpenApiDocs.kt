@@ -217,7 +217,7 @@ fun buildOpenApiSchema(
                         Schema<String>()
                             .types(setOf("object"))
                             .description(
-                                "The response contains the most recent common ancestor node label `mrcaNode`, the number of nodes in the filter not in the phylotree `missingNodeCount` and optionally their names `missingFromTree`.",
+                                "The response contains the most recent common ancestor of the nodes in the filter.",
                             )
                             .properties(mostRecentCommonAncestorMetadataFieldSchemas()),
                     ),

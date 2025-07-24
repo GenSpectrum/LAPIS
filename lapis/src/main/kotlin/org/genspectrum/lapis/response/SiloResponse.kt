@@ -80,7 +80,7 @@ data class InsertionData(
 )
 
 data class MostCommonAncestorData(
-    val mrcaNode: String,
+    val mrcaNode: String?,
     val missingNodeCount: Int,
     val missingFromTree: String?,
 )
