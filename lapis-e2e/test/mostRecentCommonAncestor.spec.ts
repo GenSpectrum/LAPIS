@@ -36,6 +36,23 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
     });
   });
 
+  it('should return MRCA as null if filter has no nodes', async () => {
+    const result = await lapisClient.postMostRecentCommonAncestor({
+      mostRecentCommonAncestorRequest: {
+        phyloTreeField: 'primaryKey',
+        printNodesNotInTree: false,
+        primaryKey: 'string',
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.be.deep.equal({
+      mrcaNode: undefined,
+      missingNodeCount: 0,
+      missingFromTree: undefined,
+    });
+  });
+
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
       phyloTreeField: 'primaryKey',
