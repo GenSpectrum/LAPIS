@@ -21,9 +21,7 @@ data class PhyloTreeSequenceFiltersRequest(
 ) : CommonSequenceFilters
 
 @JsonComponent
-class PhyloTreeSequenceFiltersRequestDeserializer(
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-) : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
+class PhyloTreeSequenceFiltersRequestDeserializer : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
