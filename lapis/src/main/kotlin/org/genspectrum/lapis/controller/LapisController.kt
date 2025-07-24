@@ -899,83 +899,6 @@ class LapisController(
             },
         )
 
-    @PostMapping(
-        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
-    )
-    @LapisMostRecentCommonAncestorResponse
-    @Operation(
-        operationId = "postMostRecentCommonAncestor",
-    )
-    fun postMostRecentCommonAncestorAsJson(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
-        @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
-        response: HttpServletResponse,
-    ) {
-        lapisResponseStreamer.streamData(
-            request = request,
-            getData = ::getMostRecentCommonAncestorCollection,
-            response = response,
-            responseFormat = ResponseFormat.Json,
-        )
-    }
-
-    @PostMapping(
-        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
-        produces = [TEXT_CSV_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
-    )
-    @StringResponseOperation(
-        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
-        operationId = "postMostRecentCommonAncestorAsCsv",
-    )
-    fun postMostRecentCommonAncestorAsCsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
-        @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
-        @RequestHeader httpHeaders: HttpHeaders,
-        response: HttpServletResponse,
-    ) {
-        lapisResponseStreamer.streamData(
-            request = request,
-            getData = ::getMostRecentCommonAncestorCollection,
-            response = response,
-            responseFormat = ResponseFormat.Csv(
-                delimiter = COMMA,
-                acceptHeader = httpHeaders.accept,
-            ),
-        )
-    }
-
-    @PostMapping(
-        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
-        produces = [TEXT_TSV_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
-    )
-    @StringResponseOperation(
-        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
-        operationId = "postMostRecentCommonAncestorAsTsv",
-    )
-    fun postMostRecentCommonAncestorAsTsv(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
-        @RequestBody
-        request: PhyloTreeSequenceFiltersRequestWithFields,
-        @RequestHeader httpHeaders: HttpHeaders,
-        response: HttpServletResponse,
-    ) {
-        lapisResponseStreamer.streamData(
-            request = request,
-            getData = ::getMostRecentCommonAncestorCollection,
-            response = response,
-            responseFormat = ResponseFormat.Csv(
-                delimiter = TAB,
-                acceptHeader = httpHeaders.accept,
-            ),
-        )
-    }
-
     @GetMapping(MOST_RECENT_COMMON_ANCESTOR_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisMostRecentCommonAncestorResponse
     fun getMostRecentCommonAncestorAsJson(
@@ -1127,6 +1050,83 @@ class LapisController(
             printNodesNotInTree = printNodesNotInTree,
         )
 
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisMostRecentCommonAncestorResponse
+    @Operation(
+        operationId = "postMostRecentCommonAncestor",
+    )
+    fun postMostRecentCommonAncestorAsJson(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequestWithFields,
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
+        operationId = "postMostRecentCommonAncestorAsCsv",
+    )
+    fun postMostRecentCommonAncestorAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequestWithFields,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
+        operationId = "postMostRecentCommonAncestorAsTsv",
+    )
+    fun postMostRecentCommonAncestorAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequestWithFields,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
         lapisResponseStreamer.streamData(
             request = request,
             getData = ::getMostRecentCommonAncestorCollection,
