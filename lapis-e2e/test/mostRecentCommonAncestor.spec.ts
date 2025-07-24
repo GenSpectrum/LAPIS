@@ -32,7 +32,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
     expect(result.data[0]).to.be.deep.equal({
       mrcaNode: 'NODE_0000043',
       missingNodeCount: 1,
-      missingFromTree: null,
+      missingFromTree: undefined, // null is converted to undefined in TypeScript
     });
   });
 
