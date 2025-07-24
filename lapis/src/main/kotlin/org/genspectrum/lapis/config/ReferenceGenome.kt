@@ -72,6 +72,7 @@ data class ReferenceSequenceSchema(
     val name: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ReferenceGenome(
     val nucleotideSequences: List<ReferenceSequence>,
     val genes: List<ReferenceSequence>,
@@ -90,6 +91,7 @@ data class ReferenceGenome(
     fun getGeneSequence(gene: String): String = genes.first { it.name == gene }.sequence
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class ReferenceSequence(
     val name: String,
     val sequence: String,
