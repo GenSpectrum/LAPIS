@@ -10,7 +10,7 @@ data class Field(
 fun interface FieldConverter<T> {
     fun convert(source: String): T
 
-    fun validatePhyloTreeFields(source: String) {}
+    fun validatePhyloTreeFields(source: String): T = convert(source)
 }
 
 @Component
@@ -26,7 +26,7 @@ class CaseInsensitiveFieldConverter(
         return Field(cleaned)
     }
 
-    override fun validatePhyloTreeFields(source: String) {
+    override fun validatePhyloTreeFields(source: String): Field {
         val converted = convert(source)
         val validFields = caseInsensitiveFieldsCleaner.getPhyloTreeFields()
         if (converted.fieldName !in validFields) {
@@ -37,5 +37,6 @@ class CaseInsensitiveFieldConverter(
                     )}]",
             )
         }
+        return converted
     }
 }

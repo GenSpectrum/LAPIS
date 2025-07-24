@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
-import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 
 data class PhyloTreeSequenceFiltersRequest(
@@ -21,7 +20,9 @@ data class PhyloTreeSequenceFiltersRequest(
 ) : CommonSequenceFilters
 
 @JsonComponent
-class PhyloTreeSequenceFiltersRequestDeserializer : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
+class PhyloTreeSequenceFiltersRequestDeserializer(
+    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+) : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
@@ -29,8 +30,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer : JsonDeserializer<PhyloTreeSe
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
-        val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)?.asText()
-            ?: throw BadRequestException("$PHYLO_TREE_FIELD_PROPERTY is required")
+        val phyloTreeField = parsePhyloTreeProperty(node, caseInsensitiveFieldConverter)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return PhyloTreeSequenceFiltersRequest(
@@ -39,11 +39,22 @@ class PhyloTreeSequenceFiltersRequestDeserializer : JsonDeserializer<PhyloTreeSe
             parsedCommonFields.aminoAcidMutations,
             parsedCommonFields.nucleotideInsertions,
             parsedCommonFields.aminoAcidInsertions,
-            phyloTreeField,
+            phyloTreeField.fieldName,
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
             printNodesNotInTree = node.get(PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY)?.asBoolean() ?: false,
         )
     }
+}
+
+fun <T> parsePhyloTreeProperty(
+    node: JsonNode,
+    fieldConverter: FieldConverter<T>,
+): T {
+    val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)
+    if (phyloTreeField == null) {
+        "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field"
+    }
+    return fieldConverter.validatePhyloTreeFields(phyloTreeField.asText())
 }

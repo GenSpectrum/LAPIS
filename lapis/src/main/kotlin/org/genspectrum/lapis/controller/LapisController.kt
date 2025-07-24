@@ -937,7 +937,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField,
+            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -990,7 +990,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField,
+            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1046,7 +1046,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField,
+            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
