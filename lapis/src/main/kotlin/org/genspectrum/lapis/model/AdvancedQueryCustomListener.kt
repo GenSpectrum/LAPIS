@@ -34,6 +34,7 @@ import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
@@ -180,6 +181,21 @@ class AdvancedQueryCustomListener(
             }
 
             expressionStack.addLast(StringSearch(field.name, metadataValue))
+            return
+        }
+
+        if (metadataName.endsWith(".PhyloDescendantOf", ignoreCase = true)) {
+            val fieldName = metadataName.substringBeforeLast(".")
+            val field = getFieldOrThrow(fieldName)
+
+            if (field.type !== MetadataType.STRING || !field.phyloTreeNodeIdentifier) {
+                throw BadRequestException(
+                    "Metadata field '${field.name}' of type ${field.type} does not support PhyloDescendantOf queries. ",
+                    null,
+                )
+            }
+
+            expressionStack.addLast(PhyloDescendantOf(field.name, metadataValue))
             return
         }
 

@@ -174,4 +174,8 @@ sealed class SequenceFilterFieldType(
     data class StringSearch(
         val associatedField: SequenceFilterFieldName,
     ) : SequenceFilterFieldType("string")
+
+    data class PhyloDescendantOf(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("string")
 }

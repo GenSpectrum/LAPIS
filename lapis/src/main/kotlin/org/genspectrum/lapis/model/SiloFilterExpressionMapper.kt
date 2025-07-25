@@ -31,6 +31,7 @@ import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -85,6 +86,7 @@ class SiloFilterExpressionMapper(
                 Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
                 Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
                 Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
+                Filter.PhyloDescendantOf -> mapToPhyloDescendantOfFilter(siloColumnName, values)
             }
         }
 
@@ -124,6 +126,10 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
             SequenceFilterFieldType.Boolean -> Pair(field.name, Filter.BooleanEquals)
             SequenceFilterFieldType.AdvancedQuery -> Pair(field.name, Filter.AdvancedQuery)
+            is SequenceFilterFieldType.PhyloDescendantOf -> Pair(
+                type.associatedField,
+                Filter.PhyloDescendantOf,
+            )
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -401,6 +407,20 @@ class SiloFilterExpressionMapper(
             to = findFloatOfFilterType<SequenceFilterFieldType.FloatTo>(values),
         )
 
+    private fun mapToPhyloDescendantOfFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        // TODO: I'm not quite sure what values is here and why it is a list of SequenceFilterValue.
+        if (values.size != 1 || values[0].values.size != 1) {
+            throw BadRequestException(
+                "Expected exactly one value for '$siloColumnName' but got ${values.size} values.",
+            )
+        }
+        val value = values[0].values[0] ?: return True
+        return Maybe(PhyloDescendantOf(siloColumnName, value))
+    }
+
     private fun mapToStringSearchFilters(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
@@ -486,6 +506,7 @@ class SiloFilterExpressionMapper(
         FloatBetween,
         BooleanEquals,
         StringSearch,
+        PhyloDescendantOf,
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage)
