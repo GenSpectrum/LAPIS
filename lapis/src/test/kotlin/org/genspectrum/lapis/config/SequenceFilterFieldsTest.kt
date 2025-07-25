@@ -43,6 +43,8 @@ class SequenceFilterFieldsTest {
         )
     }
 
+    // TODO: add test for phyloTreeNodeIdentifier
+
     @Test
     fun `GIVEN config with a field with lineage index THEN contains a lineage and regex field`() {
         val input = databaseConfigWithFields(

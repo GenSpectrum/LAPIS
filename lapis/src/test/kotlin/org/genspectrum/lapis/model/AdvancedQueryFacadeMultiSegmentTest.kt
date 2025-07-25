@@ -75,6 +75,8 @@ class AdvancedQueryFacadeMultiSegmentTest {
         assertThat(result, equalTo(expectedResult))
     }
 
+    // TODO: add advancedQuery with phyloTreeNodeIdentifier
+
     @Test
     fun `given a complex advanced query with MAYBE THEN map should return the corresponding SiloQuery`() {
         val advancedQuery =

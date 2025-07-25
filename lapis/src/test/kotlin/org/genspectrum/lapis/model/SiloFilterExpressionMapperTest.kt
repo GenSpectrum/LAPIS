@@ -877,6 +877,8 @@ class SiloFilterExpressionMapperTest {
             )
     }
 
+    // TODO: add test for PhyloDescendantOf
+
     private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
         DummySequenceFilters(
             sequenceFilters.mapValues { listOf(it.value) },

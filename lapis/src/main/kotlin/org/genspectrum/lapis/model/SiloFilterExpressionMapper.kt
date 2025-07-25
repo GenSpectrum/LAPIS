@@ -28,10 +28,10 @@ import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
-import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.True
 import org.springframework.stereotype.Component
 import java.time.LocalDate
