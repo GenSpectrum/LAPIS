@@ -102,6 +102,8 @@ describe('The /details endpoint', () => {
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
+  // TODO: add tests that use PhyloDescendantOf in advancedQuery and metadata queries
+
   it('should handle advancedQuery', async () => {
     const urlParams = new URLSearchParams({
       fields: 'primaryKey',
