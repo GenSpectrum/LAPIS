@@ -104,10 +104,10 @@ describe('The /details endpoint', () => {
 
   it('should handle PhyloDescendantOf queries', async () => {
     const urlParams = new URLSearchParams({
-      fields: 'primaryKey',
+      'fields': 'primaryKey',
       'primaryKey.phyloDescendantOf': 'NODE_0000043',
-      orderBy: 'primaryKey',
-      dataFormat: 'csv',
+      'orderBy': 'primaryKey',
+      'dataFormat': 'csv',
     });
 
     const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
