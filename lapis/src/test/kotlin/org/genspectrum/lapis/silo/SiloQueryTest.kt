@@ -753,7 +753,16 @@ class SiloQueryTest {
                         }
                     """,
                 ),
-                // TODO: add test for PhyloDescendantOf
+                Arguments.of(
+                    PhyloDescendantOf("theColumn", "internalNode"),
+                    """
+                        {
+                            "type": "PhyloDescendantOf",
+                            "column": "theColumn",
+                            "internalNode": "internalNode"
+                        }
+                    """,
+                ),
             )
     }
 }

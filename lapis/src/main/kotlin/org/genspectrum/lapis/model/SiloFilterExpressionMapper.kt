@@ -418,7 +418,7 @@ class SiloFilterExpressionMapper(
             )
         }
         val value = values[0].values[0] ?: return True
-        return Maybe(PhyloDescendantOf(siloColumnName, value))
+        return PhyloDescendantOf(siloColumnName, value)
     }
 
     private fun mapToStringSearchFilters(

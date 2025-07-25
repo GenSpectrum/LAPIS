@@ -30,6 +30,7 @@ import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
@@ -874,10 +875,16 @@ class SiloFilterExpressionMapperTest {
                         ),
                     ),
                 ),
+                Arguments.of(
+                    mapOf(
+                        "primaryKey.phylodescendantof" to listOf("innerNode"),
+                    ),
+                    And(
+                        PhyloDescendantOf("primaryKey", "innerNode"),
+                    ),
+                ),
             )
     }
-
-    // TODO: add test for PhyloDescendantOf
 
     private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
         DummySequenceFilters(

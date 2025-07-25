@@ -43,7 +43,43 @@ class SequenceFilterFieldsTest {
         )
     }
 
-    // TODO: add test for phyloTreeNodeIdentifier
+    @Test
+    fun `GIVEN database config w phyloTreeNodeId string THEN contains string, stringSearch and PhyloDescendantOf`() {
+        val input = databaseConfigWithFields(
+            listOf(
+                DatabaseMetadata(
+                    name = "fieldName",
+                    type = MetadataType.STRING,
+                    phyloTreeNodeIdentifier = true,
+                ),
+            ),
+        )
+
+        val underTest = SequenceFilterFields.fromDatabaseConfig(input)
+
+        assertThat(underTest.fields, aMapWithSize(3))
+        assertThat(
+            underTest.fields,
+            hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "fieldname.regex",
+                SequenceFilterField("fieldName.regex", SequenceFilterFieldType.StringSearch("fieldName")),
+            ),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "fieldname.phylodescendantof",
+                SequenceFilterField(
+                    "fieldName.phyloDescendantOf",
+                    SequenceFilterFieldType.PhyloDescendantOf("fieldName"),
+                ), // TODO: figure out what is up with the casing
+            ),
+        )
+    }
 
     @Test
     fun `GIVEN config with a field with lineage index THEN contains a lineage and regex field`() {
