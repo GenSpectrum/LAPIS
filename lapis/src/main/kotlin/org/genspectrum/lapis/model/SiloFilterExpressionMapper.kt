@@ -411,14 +411,13 @@ class SiloFilterExpressionMapper(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
-        // TODO: I'm not quite sure what values is here and why it is a list of SequenceFilterValue.
         if (values.size != 1 || values[0].values.size != 1) {
             throw BadRequestException(
-                "Expected exactly one value for '$siloColumnName' but got ${values.size} values.",
+                "Expected exactly one value for internal node '$siloColumnName' but got ${values.size} values.",
             )
         }
-        val value = values[0].values[0] ?: return True
-        return PhyloDescendantOf(siloColumnName, value)
+        val value = values[0].values[0]
+        return PhyloDescendantOf(siloColumnName, value.toString())
     }
 
     private fun mapToStringSearchFilters(

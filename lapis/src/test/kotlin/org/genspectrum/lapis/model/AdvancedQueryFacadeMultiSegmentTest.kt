@@ -81,7 +81,18 @@ class AdvancedQueryFacadeMultiSegmentTest {
         assertThat(result, equalTo(expectedResult))
     }
 
-    // TODO: add advancedQuery with phyloTreeNodeIdentifier
+    @Test
+    fun `GIVEN advanced query with PhyloDescendantOf in different casing THEN map same`() {
+        val advancedQueryCorrectCasing = "primaryKey.PhyloDescendantOf='internalNodeId'"
+        val advancedQueryRandomCasing = "primaryKey.pHylodescEndantoF='internalNodeId'"
+
+        val resultCorrectCasing = underTest.map(advancedQueryCorrectCasing)
+        val resultRandomCasing = underTest.map(advancedQueryRandomCasing)
+
+        val expectedResult = PhyloDescendantOf("primaryKey", "internalNodeId")
+        assertThat(resultCorrectCasing, equalTo(expectedResult))
+        assertThat(resultRandomCasing, equalTo(expectedResult))
+    }
 
     @Test
     fun `given a complex advanced query with MAYBE THEN map should return the corresponding SiloQuery`() {

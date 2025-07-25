@@ -76,7 +76,7 @@ class SequenceFilterFieldsTest {
                 SequenceFilterField(
                     "fieldName.phyloDescendantOf",
                     SequenceFilterFieldType.PhyloDescendantOf("fieldName"),
-                ), // TODO: figure out what is up with the casing
+                ),
             ),
         )
     }
