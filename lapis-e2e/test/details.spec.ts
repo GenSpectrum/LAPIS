@@ -105,7 +105,7 @@ describe('The /details endpoint', () => {
   it('should handle PhyloDescendantOf queries', async () => {
     const urlParams = new URLSearchParams({
       fields: 'primaryKey',
-      primaryKeyPhyloDescendantOf: 'NODE_0000043',
+      'primaryKey.phyloDescendantOf': 'NODE_0000043',
       orderBy: 'primaryKey',
       dataFormat: 'csv',
     });
@@ -116,7 +116,7 @@ describe('The /details endpoint', () => {
 
     const urlParamsAdvanced = new URLSearchParams({
       fields: 'primaryKey',
-      advancedQuery: 'primaryKey.PhyloDescendantOf=NODE_0000043',
+      advancedquery: 'primaryKey.PhyloDescendantOf=NODE_0000043',
       orderBy: 'primaryKey',
       dataFormat: 'csv',
     });
@@ -129,12 +129,11 @@ describe('The /details endpoint', () => {
     const resultAdvancedText = await resultAdvanced.text();
     expect(resultText).to.be.equal(resultAdvancedText);
 
-    expect(await result.text()).to.be.equal(
+    expect(resultAdvancedText).to.be.equal(
       String.raw`
 primaryKey
 key_2181005
 key_2270139
-key_1408408
     `.trim() + '\n'
     );
   });
