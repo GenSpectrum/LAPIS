@@ -30,6 +30,7 @@ import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
@@ -872,6 +873,14 @@ class SiloFilterExpressionMapperTest {
                             StringSearch("some_metadata", searchExpression = null),
                             StringSearch("some_metadata", searchExpression = "otherRegex"),
                         ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "primaryKey.phylodescendantof" to listOf("innerNode"),
+                    ),
+                    And(
+                        PhyloDescendantOf("primaryKey", "innerNode"),
                     ),
                 ),
             )

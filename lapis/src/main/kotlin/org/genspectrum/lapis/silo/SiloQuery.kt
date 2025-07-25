@@ -374,6 +374,11 @@ data class StringSearch(
     val searchExpression: String?,
 ) : SiloFilterExpression("StringSearch")
 
+data class PhyloDescendantOf(
+    val column: String,
+    val internalNode: String,
+) : SiloFilterExpression("PhyloDescendantOf")
+
 enum class SequenceType {
     @JsonProperty("Fasta")
     UNALIGNED,
