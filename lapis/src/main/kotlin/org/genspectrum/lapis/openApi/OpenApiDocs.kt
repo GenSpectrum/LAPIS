@@ -562,7 +562,7 @@ private fun requestSchemaPhyloTree(requestProperties: Map<SequenceFilterFieldNam
         .properties(
             requestProperties + Pair(
                 PHYLO_TREE_FIELD_PROPERTY,
-                Schema<String>().description(PHYLO_TREE_FIELD_DESCRIPTION),
+                StringSchema().description(PHYLO_TREE_FIELD_DESCRIPTION),
             ) +
                 Pair(
                     PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY,
