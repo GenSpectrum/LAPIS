@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
+import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 
 data class PhyloTreeSequenceFiltersRequest(
@@ -54,7 +55,14 @@ fun <T> parsePhyloTreeProperty(
 ): T {
     val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)
     if (phyloTreeField == null) {
-        "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field"
+        throw BadRequestException(
+            "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field",
+        )
     }
-    return fieldConverter.validatePhyloTreeField(phyloTreeField.asText())
+    if (!phyloTreeField.isTextual) {
+        throw BadRequestException(
+            "$PHYLO_TREE_FIELD_PROPERTY must be a string, but was ${phyloTreeField.nodeType}",
+        )
+    }
+    return fieldConverter.validatePhyloTreeField(phyloTreeField.textValue())
 }
