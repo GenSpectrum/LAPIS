@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 
@@ -32,6 +33,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
         val codec = jsonParser.codec
 
         val phyloTreeField = parsePhyloTreeProperty(node, caseInsensitiveFieldConverter)
+        val printNodesNotInTree = parsePrintNodesNotInTree(node)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return PhyloTreeSequenceFiltersRequest(
@@ -44,7 +46,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
-            printNodesNotInTree = node.get(PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY)?.asBoolean() ?: false,
+            printNodesNotInTree = printNodesNotInTree,
         )
     }
 }
@@ -65,4 +67,15 @@ fun <T> parsePhyloTreeProperty(
         )
     }
     return fieldConverter.validatePhyloTreeField(phyloTreeField.textValue())
+}
+
+fun parsePrintNodesNotInTree(node: JsonNode): Boolean {
+    val printNodesNotInTreeField =
+        node.get(PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY) ?: JsonNodeFactory.instance.booleanNode(false)
+    if (!printNodesNotInTreeField.isBoolean) {
+        throw BadRequestException(
+            "$PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY must be a boolean, but was ${printNodesNotInTreeField.nodeType}",
+        )
+    }
+    return printNodesNotInTreeField.booleanValue()
 }
