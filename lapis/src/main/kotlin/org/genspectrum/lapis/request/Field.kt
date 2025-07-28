@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.stereotype.Component
 
@@ -16,6 +17,7 @@ fun interface FieldConverter<T> {
 @Component
 class CaseInsensitiveFieldConverter(
     private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
+    private val databaseConfig: DatabaseConfig,
 ) : FieldConverter<Field> {
     override fun convert(source: String): Field {
         val cleaned = caseInsensitiveFieldsCleaner.clean(source)
@@ -28,7 +30,7 @@ class CaseInsensitiveFieldConverter(
 
     override fun validatePhyloTreeFields(source: String): Field {
         val converted = convert(source)
-        val validFields = caseInsensitiveFieldsCleaner.getPhyloTreeFields()
+        val validFields = databaseConfig.schema.metadata.filter { it.phyloTreeNodeIdentifier }.map { it.name }
         if (converted.fieldName !in validFields) {
             throw BadRequestException(
                 "Field '${converted.fieldName}' is not a phylo tree field, " +
