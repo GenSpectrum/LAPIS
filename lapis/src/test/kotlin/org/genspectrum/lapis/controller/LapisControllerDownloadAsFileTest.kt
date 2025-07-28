@@ -101,10 +101,10 @@ class LapisControllerDownloadAsFileTest(
         val maybeFields = getFieldsAsJsonPart(scenario.mockData.fields)
         val maybePhyloTreeField = getPhyloTreeFieldAsJsonPart(scenario.mockData.phyloTreeField)
         val request = """
-    {
-      "$DOWNLOAD_AS_FILE_PROPERTY": true
-      $maybeDataFormat $maybeFileBasename $maybeFields $maybePhyloTreeField
-    }
+            {
+            "$DOWNLOAD_AS_FILE_PROPERTY": true
+            $maybeDataFormat $maybeFileBasename $maybeFields $maybePhyloTreeField
+            }
         """.trimIndent()
 
         mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))

@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -25,7 +24,6 @@ private const val DATA_VERSION = "1234"
 @AutoConfigureMockMvc
 class LapisControllerPhyloTreeTest(
     @Autowired private val mockMvc: MockMvc,
-    @Autowired private val objectMapper: ObjectMapper,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel

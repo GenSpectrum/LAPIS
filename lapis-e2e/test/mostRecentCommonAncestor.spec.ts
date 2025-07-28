@@ -32,7 +32,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
     expect(result.data[0]).to.be.deep.equal({
       mrcaNode: 'NODE_0000043',
       missingNodeCount: 1,
-      missingFromTree: undefined, // null is converted to undefined in TypeScript
+      missingFromTree: undefined, // The generated client converts null to undefined
     });
   });
 
@@ -89,7 +89,7 @@ NODE_0000043	1	key_1408408
     );
   });
 
-  it('should throw an error for invalid Maybe request', async () => {
+  it('should throw an error for mostRecentCommonAncestor requests with invalid phyloTreeField', async () => {
     const urlParams = new URLSearchParams({
       phyloTreeField: 'division',
     });
