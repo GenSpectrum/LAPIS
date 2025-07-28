@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
+import org.genspectrum.lapis.config.DatabaseConfig
 
 data class PhyloTreeSequenceFiltersRequest(
     override val sequenceFilters: SequenceFilters,
@@ -24,7 +24,7 @@ data class PhyloTreeSequenceFiltersRequest(
 
 @JsonComponent
 class PhyloTreeSequenceFiltersRequestDeserializer(
-    private val fieldConverter: fieldConverter,
+    private val fieldConverter: CaseInsensitiveFieldConverter,
     private val databaseConfig: DatabaseConfig,
 ) : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
