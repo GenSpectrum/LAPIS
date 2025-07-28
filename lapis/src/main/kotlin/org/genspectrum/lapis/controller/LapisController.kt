@@ -937,7 +937,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
+            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -990,7 +990,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
+            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1046,7 +1046,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeFields(phyloTreeField).fieldName,
+            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1141,7 +1141,7 @@ class LapisController(
     private fun getMostRecentCommonAncestorCollection(
         request: PhyloTreeSequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
-        caseInsensitiveFieldConverter.validatePhyloTreeFields(request.phyloTreeField)
+        caseInsensitiveFieldConverter.validatePhyloTreeField(request.phyloTreeField)
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),

@@ -11,7 +11,7 @@ data class Field(
 fun interface FieldConverter<T> {
     fun convert(source: String): T
 
-    fun validatePhyloTreeFields(source: String): T = convert(source)
+    fun validatePhyloTreeField(source: String): T = convert(source)
 }
 
 @Component
@@ -28,7 +28,7 @@ class CaseInsensitiveFieldConverter(
         return Field(cleaned)
     }
 
-    override fun validatePhyloTreeFields(source: String): Field {
+    override fun validatePhyloTreeField(source: String): Field {
         val converted = convert(source)
         val validFields = databaseConfig.schema.metadata.filter { it.phyloTreeNodeIdentifier }.map { it.name }
         if (converted.fieldName !in validFields) {

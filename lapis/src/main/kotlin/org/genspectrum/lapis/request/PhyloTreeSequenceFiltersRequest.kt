@@ -56,5 +56,5 @@ fun <T> parsePhyloTreeProperty(
     if (phyloTreeField == null) {
         "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field"
     }
-    return fieldConverter.validatePhyloTreeFields(phyloTreeField.asText())
+    return fieldConverter.validatePhyloTreeField(phyloTreeField.asText())
 }
