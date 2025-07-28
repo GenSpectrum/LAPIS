@@ -40,31 +40,6 @@ class SiloQueryTest {
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
-    @Test
-    fun `MRCA query is correctly serialized to JSON`() {
-        val underTest =
-            SiloQuery(SiloAction.mostRecentCommonAncestor("phyloTreeField"), StringEquals("theColumn", "theValue"))
-
-        val result = objectMapper.writeValueAsString(underTest)
-
-        val expected = """
-            {
-                "action": {
-                    "columnName": "phyloTreeField",
-                    "printNodesNotInTree": false,
-                    "randomize": false,
-                    "type": "MostRecentCommonAncestor"
-                },
-                "filterExpression": {
-                    "column": "theColumn",
-                    "value": "theValue",
-                    "type": "StringEquals"
-                }
-            }
-        """
-        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
-    }
-
     @ParameterizedTest(name = "Test SiloAction {1}")
     @MethodSource("getTestSiloActions")
     fun `SiloAction is correctly serialized to JSON`(
@@ -364,6 +339,19 @@ class SiloQueryTest {
                             "randomize": true,
                             "limit": 100,
                             "offset": 50
+                        }
+                    """,
+                ),
+                Arguments.of(
+                    SiloAction.mostRecentCommonAncestor(
+                        "phyloTreeField",
+                    ),
+                    """
+                        {
+                            "columnName": "phyloTreeField",
+                            "printNodesNotInTree": false,
+                            "randomize": false,
+                            "type": "MostRecentCommonAncestor"
                         }
                     """,
                 ),
