@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 
@@ -23,7 +24,8 @@ data class PhyloTreeSequenceFiltersRequest(
 
 @JsonComponent
 class PhyloTreeSequenceFiltersRequestDeserializer(
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+    private val fieldConverter: fieldConverter,
+    private val databaseConfig: DatabaseConfig,
 ) : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -32,7 +34,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
-        val phyloTreeField = parsePhyloTreeProperty(node, caseInsensitiveFieldConverter)
+        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
         val printNodesNotInTree = parsePrintNodesNotInTree(node)
         val parsedCommonFields = parseCommonFields(node, codec)
 
@@ -51,10 +53,11 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
     }
 }
 
-fun <T> parsePhyloTreeProperty(
+fun parsePhyloTreeProperty(
     node: JsonNode,
-    fieldConverter: FieldConverter<T>,
-): T {
+    fieldConverter: FieldConverter<Field>,
+    databaseConfig: DatabaseConfig,
+): Field {
     val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)
     if (phyloTreeField == null) {
         throw BadRequestException(
@@ -66,7 +69,7 @@ fun <T> parsePhyloTreeProperty(
             "$PHYLO_TREE_FIELD_PROPERTY must be a string, but was ${phyloTreeField.nodeType}",
         )
     }
-    return fieldConverter.validatePhyloTreeField(phyloTreeField.textValue())
+    return validatePhyloTreeField(phyloTreeField.textValue(), fieldConverter, databaseConfig)
 }
 
 fun parsePrintNodesNotInTree(node: JsonNode): Boolean {

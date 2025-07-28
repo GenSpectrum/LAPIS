@@ -68,6 +68,7 @@ import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
+import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
@@ -937,7 +938,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -990,7 +991,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1046,7 +1047,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            caseInsensitiveFieldConverter.validatePhyloTreeField(phyloTreeField).fieldName,
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1141,7 +1142,7 @@ class LapisController(
     private fun getMostRecentCommonAncestorCollection(
         request: PhyloTreeSequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
-        caseInsensitiveFieldConverter.validatePhyloTreeField(request.phyloTreeField)
+        validatePhyloTreeField(request.phyloTreeField, caseInsensitiveFieldConverter, databaseConfig)
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
