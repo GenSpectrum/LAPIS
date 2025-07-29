@@ -4,6 +4,7 @@ schema:
   metadata:
     - name: primaryKey
       type: string
+      phyloTreeNodeIdentifier: true
     - name: date
       type: date
     - name: country

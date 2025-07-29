@@ -38,14 +38,17 @@ import org.genspectrum.lapis.openApi.LapisAllAminoAcidSequencesResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisAminoAcidMutationsResponse
 import org.genspectrum.lapis.openApi.LapisDetailsResponse
+import org.genspectrum.lapis.openApi.LapisMostRecentCommonAncestorResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
 import org.genspectrum.lapis.openApi.Limit
+import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.MutationsFields
 import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
+import org.genspectrum.lapis.openApi.PhyloTreeField
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
@@ -60,16 +63,19 @@ import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
+import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
 import org.genspectrum.lapis.response.DetailsCollection
 import org.genspectrum.lapis.response.InsertionsCollection
 import org.genspectrum.lapis.response.LapisResponseStreamer
+import org.genspectrum.lapis.response.MostRecentCommonAncestorCollection
 import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
@@ -893,6 +899,255 @@ class LapisController(
                 false -> request.fields
             },
         )
+
+    @GetMapping(MOST_RECENT_COMMON_ANCESTOR_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
+    @LapisMostRecentCommonAncestorResponse
+    fun getMostRecentCommonAncestorAsJson(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        response: HttpServletResponse,
+    ) {
+        val request = PhyloTreeSequenceFiltersRequest(
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            printNodesNotInTree = printNodesNotInTree,
+        )
+
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
+    }
+
+    @GetMapping(MOST_RECENT_COMMON_ANCESTOR_ROUTE, produces = [TEXT_CSV_VALUE])
+    @StringResponseOperation(
+        operationId = "getMostRecentCommonAncestorAsCsv",
+    )
+    fun getMostRecentCommonAncestorAsCsv(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = PhyloTreeSequenceFiltersRequest(
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            printNodesNotInTree = printNodesNotInTree,
+        )
+
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    @GetMapping(MOST_RECENT_COMMON_ANCESTOR_ROUTE, produces = [TEXT_TSV_VALUE])
+    @StringResponseOperation(
+        operationId = "getMostRecentCommonAncestorAsTsv",
+    )
+    fun getMostRecentCommonAncestorAsTsv(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = PhyloTreeSequenceFiltersRequest(
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            printNodesNotInTree = printNodesNotInTree,
+        )
+
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisMostRecentCommonAncestorResponse
+    @Operation(
+        operationId = "postMostRecentCommonAncestor",
+    )
+    fun postMostRecentCommonAncestorAsJson(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequest,
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Json,
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [TEXT_CSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
+        operationId = "postMostRecentCommonAncestorAsCsv",
+    )
+    fun postMostRecentCommonAncestorAsCsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequest,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = COMMA,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    @PostMapping(
+        MOST_RECENT_COMMON_ANCESTOR_ROUTE,
+        produces = [TEXT_TSV_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @StringResponseOperation(
+        description = MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION,
+        operationId = "postMostRecentCommonAncestorAsTsv",
+    )
+    fun postMostRecentCommonAncestorAsTsv(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequest,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        lapisResponseStreamer.streamData(
+            request = request,
+            getData = ::getMostRecentCommonAncestorCollection,
+            response = response,
+            responseFormat = ResponseFormat.Csv(
+                delimiter = TAB,
+                acceptHeader = httpHeaders.accept,
+            ),
+        )
+    }
+
+    private fun getMostRecentCommonAncestorCollection(
+        request: PhyloTreeSequenceFiltersRequest,
+    ): MostRecentCommonAncestorCollection {
+        validatePhyloTreeField(request.phyloTreeField, caseInsensitiveFieldConverter, databaseConfig)
+        return MostRecentCommonAncestorCollection(
+            records = siloQueryModel.getMostRecentCommonAncestor(request),
+            fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
+        )
+    }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisDetailsResponse

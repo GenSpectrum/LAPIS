@@ -342,6 +342,19 @@ class SiloQueryTest {
                         }
                     """,
                 ),
+                Arguments.of(
+                    SiloAction.mostRecentCommonAncestor(
+                        "phyloTreeField",
+                    ),
+                    """
+                        {
+                            "columnName": "phyloTreeField",
+                            "printNodesNotInTree": false,
+                            "randomize": false,
+                            "type": "MostRecentCommonAncestor"
+                        }
+                    """,
+                ),
             )
 
         @JvmStatic

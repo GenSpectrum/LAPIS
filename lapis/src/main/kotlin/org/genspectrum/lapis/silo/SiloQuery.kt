@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
+import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
 import java.time.LocalDate
@@ -28,6 +29,8 @@ class DetailsDataTypeReference : TypeReference<DetailsData>()
 class InsertionDataTypeReference : TypeReference<InsertionData>()
 
 class SequenceDataTypeReference : TypeReference<SequenceData>()
+
+class MostCommonAncestorDataTypeReference : TypeReference<MostCommonAncestorData>()
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -101,6 +104,15 @@ sealed class SiloAction<ResponseType>(
                 limit = limit,
                 offset = offset,
                 randomize = getRandomize(orderByFields),
+            )
+
+        fun mostRecentCommonAncestor(
+            phyloTreeField: String,
+            printNodesNotInTree: Boolean = false,
+        ): SiloAction<MostCommonAncestorData> =
+            MostRecentCommonAncestorAction(
+                columnName = phyloTreeField,
+                printNodesNotInTree,
             )
 
         fun nucleotideInsertions(
@@ -206,6 +218,18 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
         val type: String = "Insertions"
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class MostRecentCommonAncestorAction(
+        val columnName: String,
+        val printNodesNotInTree: Boolean? = false,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        override val randomize: Boolean? = false,
+    ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
+        val type: String = "MostRecentCommonAncestor"
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

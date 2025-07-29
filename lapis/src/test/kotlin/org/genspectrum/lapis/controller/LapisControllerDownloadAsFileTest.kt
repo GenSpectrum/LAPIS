@@ -10,6 +10,7 @@ import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.AMINO_ACID_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.DETAILS
+import org.genspectrum.lapis.controller.SampleRoute.MOST_RECENT_COMMON_ANCESTOR
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
@@ -72,7 +73,8 @@ class LapisControllerDownloadAsFileTest(
 
         mockMvc.perform(
             getSample("${scenario.endpoint}?$queryString")
-                .withFieldsQuery(scenario.mockData.fields),
+                .withFieldsQuery(scenario.mockData.fields)
+                .withPhyloTreeFieldQuery(scenario.mockData.phyloTreeField),
         )
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
@@ -97,7 +99,13 @@ class LapisControllerDownloadAsFileTest(
             else -> ""
         }
         val maybeFields = getFieldsAsJsonPart(scenario.mockData.fields)
-        val request = """{ "$DOWNLOAD_AS_FILE_PROPERTY": true $maybeDataFormat $maybeFileBasename $maybeFields }"""
+        val maybePhyloTreeField = getPhyloTreeFieldAsJsonPart(scenario.mockData.phyloTreeField)
+        val request = """
+            {
+            "$DOWNLOAD_AS_FILE_PROPERTY": true
+            $maybeDataFormat $maybeFileBasename $maybeFields $maybePhyloTreeField
+            }
+        """.trimIndent()
 
         mockMvc.perform(postSample(scenario.endpoint).content(request).contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -110,11 +118,13 @@ class LapisControllerDownloadAsFileTest(
     @ParameterizedTest(name = "POST form url encoded data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
     fun `POST form url encoded data as file`(scenario: DownloadAsFileScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        val mockData = scenario.mockData
+        mockData.mockWithData(siloQueryModelMock)
 
         val request = postSample(scenario.endpoint)
             .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
-            .withFieldsParam(scenario.mockData.fields)
+            .withFieldsParam(mockData.fields)
+            .withPhyloTreeFieldParam(mockData.phyloTreeField)
             .also {
                 if (scenario.requestedDataFormat != null) {
                     it.param(FORMAT_PROPERTY, scenario.requestedDataFormat)
@@ -167,18 +177,19 @@ class LapisControllerDownloadAsFileTest(
 
     @Test
     fun `GIVEN accept header contains several media types THEN picks the first one that matches`() {
-        val mockDataCollection = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
-        val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.CSV)
+        val mockDataCollection = MockDataForEndpoints.getMockData(MOST_RECENT_COMMON_ANCESTOR_ROUTE)
+        val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.PLAIN_JSON)
         mockData.mockWithData(siloQueryModelMock)
 
         mockMvc.perform(
-            getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
+            getSample("${MOST_RECENT_COMMON_ANCESTOR_ROUTE}?$DOWNLOAD_AS_FILE_PROPERTY=true")
                 .withFieldsQuery(mockDataCollection.fields)
-                .header(ACCEPT, "text/plain,text/csv,application/json"),
+                .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField)
+                .header(ACCEPT, "text/plain,application/json"),
         )
             .andExpect(status().isOk)
             .andExpectAttachmentWithContent(
-                expectedFilename = "aggregated.csv",
+                expectedFilename = "mostRecentCommonAncestor.json",
                 assertFileContentMatches = mockData.assertDataMatches,
             )
     }
@@ -192,6 +203,7 @@ class LapisControllerDownloadAsFileTest(
         mockMvc.perform(
             getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
                 .withFieldsQuery(mockDataCollection.fields)
+                .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField)
                 .header(ACCEPT, "text/plain;q=1,text/csv;q=0.8,text/tab-separated-values;q=0.9"),
         )
             .andExpect(status().isOk)
@@ -249,6 +261,7 @@ fun SampleRoute.getExpectedFilename() =
         ALIGNED_NUCLEOTIDE_SEQUENCES -> "alignedNucleotideSequences"
         ALIGNED_AMINO_ACID_SEQUENCES -> "alignedAminoAcidSequences"
         UNALIGNED_NUCLEOTIDE_SEQUENCES -> "unalignedNucleotideSequences"
+        MOST_RECENT_COMMON_ANCESTOR -> "mostRecentCommonAncestor"
     }
 
 data class DownloadAsFileScenario(
@@ -513,13 +526,18 @@ data class DownloadCompressedFileScenario(
             }
             val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$fileEnding"
             val expectedContentType = getContentTypeForCompressionFormat(compressionFormat)
+            val maybePhyloTreeField = getPhyloTreeFieldAsJsonPart(mockData.phyloTreeField)
+            val maybePhyloTreeFieldParam: String =
+                mockData.phyloTreeField
+                    ?.let { "&phyloTreeField=$it" }
+                    ?: ""
 
             return listOf(
                 DownloadCompressedFileScenario(
                     description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
                     request = getSample(
-                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat",
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat$maybePhyloTreeFieldParam",
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,
@@ -530,7 +548,7 @@ data class DownloadCompressedFileScenario(
                     mockData = mockData,
                     request = getSample(
                         "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
-                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file",
+                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file$maybePhyloTreeFieldParam",
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = "my_file.$dataFileFormat.$fileEnding",
@@ -540,7 +558,7 @@ data class DownloadCompressedFileScenario(
                     description = "POST JSON $endpoint as $compressionFormat ${dataFormat.fileFormat}",
                     mockData = mockData,
                     request = postSample(endpoint).content(
-                        """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" }""",
+                        """{ "$DOWNLOAD_AS_FILE_PROPERTY": true, "$COMPRESSION_PROPERTY": "$compressionFormat" $maybePhyloTreeField}""",
                     )
                         .contentType(APPLICATION_JSON)
                         .header(ACCEPT, acceptHeader),
@@ -553,6 +571,7 @@ data class DownloadCompressedFileScenario(
                     request = postSample(endpoint)
                         .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
                         .param(COMPRESSION_PROPERTY, compressionFormat)
+                        .withPhyloTreeFieldParam(mockData.phyloTreeField)
                         .contentType(APPLICATION_FORM_URLENCODED)
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = expectedFilename,

@@ -32,6 +32,7 @@ const middleware: Middleware = {
   post: async responseContext => {
     if (responseContext.response.status >= 300) {
       const response = responseContext.response.clone();
+      console.log('Request:', responseContext.request);
       console.log('Request URL:', responseContext.url);
       console.log('Response status code:', response.status);
       console.log('Response body:', await response.json());
