@@ -48,7 +48,7 @@ fun validatePhyloTreeField(
     databaseConfig: DatabaseConfig,
 ): Field {
     val converted = fieldConverter.convert(source)
-    val validFields = databaseConfig.schema.metadata.filter { it.phyloTreeNodeIdentifier }.map { it.name }
+    val validFields = databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
     if (converted.fieldName !in validFields) {
         throw BadRequestException(
             "Field '${converted.fieldName}' is not a phylo tree field, " +

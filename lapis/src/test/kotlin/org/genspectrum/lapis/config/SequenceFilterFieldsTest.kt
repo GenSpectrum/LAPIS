@@ -50,7 +50,7 @@ class SequenceFilterFieldsTest {
                 DatabaseMetadata(
                     name = "fieldName",
                     type = MetadataType.STRING,
-                    phyloTreeNodeIdentifier = true,
+                    isPhyloTreeField = true,
                 ),
             ),
         )

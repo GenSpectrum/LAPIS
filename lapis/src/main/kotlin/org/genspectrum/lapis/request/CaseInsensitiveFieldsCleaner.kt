@@ -9,7 +9,7 @@ class CaseInsensitiveFieldsCleaner(
 ) {
     private val fieldsMap = databaseConfig.schema.metadata.map { it.name }.associateBy { it.lowercase() }
 
-    private val phyloTreeFields = databaseConfig.schema.metadata.filter { it.phyloTreeNodeIdentifier }.map { it.name }
+    private val phyloTreeFields = databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
 
     fun clean(fieldName: String) = fieldsMap[fieldName.lowercase()]
 

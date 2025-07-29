@@ -315,7 +315,7 @@ fun buildOpenApiSchema(
                     PHYLO_TREE_FIELD_SCHEMA,
                     fieldsArray(
                         databaseConfig.schema.metadata
-                            .filter { it.phyloTreeNodeIdentifier },
+                            .filter { it.isPhyloTreeField },
                     ),
                 )
                 .addSchemas(
@@ -541,7 +541,7 @@ private fun stringPhyloDescendantOfSchema(associatedField: SequenceFilterFieldNa
         .description(
             "Filter sequences that are descendants of an internal phylogenetic tree node. " +
                 " sequences are identified by their node name $associatedField " +
-                "This query can only be applied to fields that are phyloTreeNodeIdentifiers.",
+                "This query can only be applied to fields that are isPhyloTreeFields.",
         )
 
 private fun stringSchema(type: String) =
