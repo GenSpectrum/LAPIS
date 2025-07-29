@@ -11,6 +11,7 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
+import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.scheduler.DataVersionCacheInvalidator
@@ -245,6 +246,40 @@ class SiloClientTest(
                         "pango_lineage" to TextNode("B.1.1.7"),
                         "qc_value" to DoubleNode(0.94),
                     ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN server returns most recent common ancestor response THEN response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withBody(
+                    """
+{ "mrcaNode": "node", "missingNodeCount": 5, "missingFromTree": "node1,node2,node3,node4,node5" }
+                    """,
+                ),
+        )
+
+        val query = SiloQuery(
+            SiloAction.mostRecentCommonAncestor(
+                phyloTreeField = "phyloTreeField",
+                printNodesNotInTree = true,
+            ),
+            StringEquals("theColumn", "theValue"),
+        )
+        val result = underTest.sendQuery(query).toList()
+
+        assertThat(result, hasSize(1))
+        assertThat(
+            result[0],
+            `is`(
+                MostCommonAncestorData(
+                    mrcaNode = "node",
+                    missingNodeCount = 5,
+                    missingFromTree = "node1,node2,node3,node4,node5",
                 ),
             ),
         )

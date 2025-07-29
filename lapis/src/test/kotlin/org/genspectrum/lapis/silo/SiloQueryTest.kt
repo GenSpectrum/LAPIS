@@ -350,7 +350,6 @@ class SiloQueryTest {
                         {
                             "columnName": "phyloTreeField",
                             "printNodesNotInTree": false,
-                            "randomize": false,
                             "type": "MostRecentCommonAncestor"
                         }
                     """,
