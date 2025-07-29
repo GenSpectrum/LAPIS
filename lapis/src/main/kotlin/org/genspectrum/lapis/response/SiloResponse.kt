@@ -18,7 +18,7 @@ const val COUNT_PROPERTY = "count"
 
 data class AggregationData(
     val count: Int,
-    @Schema(hidden = true) val fields: Map<String, JsonNode>,
+    @param:Schema(hidden = true) val fields: Map<String, JsonNode>,
 )
 
 data class DetailsData(

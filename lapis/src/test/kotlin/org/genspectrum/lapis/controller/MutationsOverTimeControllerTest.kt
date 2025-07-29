@@ -37,8 +37,8 @@ import java.time.LocalDate
 @SpringBootTest
 @AutoConfigureMockMvc
 class NucleotideMutationsOverTimeControllerTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val objectMapper: ObjectMapper,
+    @param:Autowired val mockMvc: MockMvc,
+    @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
     lateinit var modelMock: MutationsOverTimeModel
@@ -209,8 +209,8 @@ class NucleotideMutationsOverTimeControllerTest(
 @SpringBootTest
 @AutoConfigureMockMvc
 class AminoAcidMutationsOverTimeControllerTest(
-    @Autowired val mockMvc: MockMvc,
-    @Autowired val objectMapper: ObjectMapper,
+    @param:Autowired val mockMvc: MockMvc,
+    @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
     lateinit var modelMock: MutationsOverTimeModel

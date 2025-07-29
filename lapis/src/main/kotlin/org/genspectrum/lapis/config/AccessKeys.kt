@@ -8,7 +8,7 @@ import java.io.File
 
 @Component
 class AccessKeysReader(
-    @Value("\${lapis.accessKeys.path:#{null}}") private val accessKeysFile: String?,
+    @param:Value("\${lapis.accessKeys.path:#{null}}") private val accessKeysFile: String?,
     private val yamlObjectMapper: YamlObjectMapper,
 ) {
     fun read(): AccessKeys {

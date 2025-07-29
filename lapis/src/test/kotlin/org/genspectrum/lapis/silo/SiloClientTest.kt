@@ -45,9 +45,9 @@ private const val DATA_VERSION_HEADER = "data-version"
 
 @SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
 class SiloClientTest(
-    @Autowired private val underTest: SiloClient,
-    @Autowired private val requestIdContext: RequestIdContext,
-    @Autowired private val dataVersion: DataVersion,
+    @param:Autowired private val underTest: SiloClient,
+    @param:Autowired private val requestIdContext: RequestIdContext,
+    @param:Autowired private val dataVersion: DataVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
@@ -566,11 +566,11 @@ class SiloClientTest(
 
 @SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
 class SiloClientAndCacheInvalidatorTest(
-    @Autowired private val siloClient: SiloClient,
-    @Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
-    @Autowired private val requestIdContext: RequestIdContext,
-    @Autowired private val dataVersion: DataVersion,
-    @Autowired private val siloVersion: SiloVersion,
+    @param:Autowired private val siloClient: SiloClient,
+    @param:Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
+    @param:Autowired private val requestIdContext: RequestIdContext,
+    @param:Autowired private val dataVersion: DataVersion,
+    @param:Autowired private val siloVersion: SiloVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 

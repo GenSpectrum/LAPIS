@@ -24,7 +24,7 @@ private const val DATA_VERSION = "1234"
 @SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerPhyloTreeTest(
-    @Autowired private val mockMvc: MockMvc,
+    @param:Autowired private val mockMvc: MockMvc,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
