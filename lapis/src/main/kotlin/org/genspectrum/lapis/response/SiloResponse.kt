@@ -55,7 +55,7 @@ class AggregationDataDeserializer : JsonDeserializer<AggregationData>() {
     ): AggregationData {
         val node = p.readValueAsTree<JsonNode>()
         val count = node.get(COUNT_PROPERTY).asInt()
-        val fields = node.fields().asSequence().filter { it.key != COUNT_PROPERTY }.associate { it.key to it.value }
+        val fields = node.properties().asSequence().filter { it.key != COUNT_PROPERTY }.associate { it.key to it.value }
         return AggregationData(count, fields)
     }
 }
