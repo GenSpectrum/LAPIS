@@ -54,13 +54,13 @@ class AdvancedQueryFacadeTest {
         val advancedQuery =
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*' & " +
-                "primaryKey.PhyloDescendantOf='internalNodeId'"
+                "treeKey.PhyloDescendantOf='internalNodeId'"
 
         val result = underTest.map(advancedQuery)
 
         val expectedResult = And(
             PhyloDescendantOf(
-                "primaryKey",
+                "treeKey",
                 "internalNodeId",
             ),
             StringSearch("some_metadata", "^Democratic.*"),

@@ -44,13 +44,13 @@ class AdvancedQueryFacadeMultiSegmentTest {
             "seg1:300G & (seg1:400- | seg1:500B) & !seg1:600 & MAYBE(seg1:700B | seg2:800-) " +
                 "& [3-of: seg1:123A, seg2:234T, seg1:345G] & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*' & " +
-                "primaryKey.PhyloDescendantOf='internalNodeId'"
+                "treeKey.PhyloDescendantOf='internalNodeId'"
 
         val result = underTest.map(advancedQuery)
 
         val expectedResult = And(
             PhyloDescendantOf(
-                "primaryKey",
+                "treeKey",
                 "internalNodeId",
             ),
             StringSearch("some_metadata", "^Democratic.*"),
@@ -83,13 +83,13 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
     @Test
     fun `GIVEN advanced query with PhyloDescendantOf in different casing THEN map same`() {
-        val advancedQueryCorrectCasing = "primaryKey.PhyloDescendantOf='internalNodeId'"
-        val advancedQueryRandomCasing = "primaryKey.pHylodescEndantoF='internalNodeId'"
+        val advancedQueryCorrectCasing = "treeKey.PhyloDescendantOf='internalNodeId'"
+        val advancedQueryRandomCasing = "treeKey.pHylodescEndantoF='internalNodeId'"
 
         val resultCorrectCasing = underTest.map(advancedQueryCorrectCasing)
         val resultRandomCasing = underTest.map(advancedQueryRandomCasing)
 
-        val expectedResult = PhyloDescendantOf("primaryKey", "internalNodeId")
+        val expectedResult = PhyloDescendantOf("treeKey", "internalNodeId")
         assertThat(resultCorrectCasing, equalTo(expectedResult))
         assertThat(resultRandomCasing, equalTo(expectedResult))
     }
