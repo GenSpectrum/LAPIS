@@ -41,7 +41,7 @@ private const val SEGMENT_NAME = "otherSegment"
 )
 @AutoConfigureMockMvc
 class MultiSegmentedSequenceControllerTest(
-    @Autowired val mockMvc: MockMvc,
+    @param:Autowired val mockMvc: MockMvc,
 ) {
     val returnedValue = MockDataForEndpoints
         .sequenceEndpointMockData(SEGMENT_NAME)

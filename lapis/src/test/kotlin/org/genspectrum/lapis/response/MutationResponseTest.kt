@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class MutationResponseTest(
-    @Autowired private val objectMapper: ObjectMapper,
+    @param:Autowired private val objectMapper: ObjectMapper,
 ) {
     @Test
     fun `GIVEN null sequence name THEN is not in serialized json`() {

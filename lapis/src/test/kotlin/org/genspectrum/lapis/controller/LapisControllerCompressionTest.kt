@@ -52,7 +52,7 @@ const val COMPRESSION_FORMAT_ZSTD = "zstd"
 @SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerCompressionTest(
-    @Autowired val mockMvc: MockMvc,
+    @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel

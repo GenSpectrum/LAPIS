@@ -38,7 +38,7 @@ import java.util.stream.Stream
 @SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerCommonFieldsTest(
-    @Autowired val mockMvc: MockMvc,
+    @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel

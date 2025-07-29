@@ -43,7 +43,7 @@ import java.util.stream.Stream
 @SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerTest(
-    @Autowired val mockMvc: MockMvc,
+    @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel

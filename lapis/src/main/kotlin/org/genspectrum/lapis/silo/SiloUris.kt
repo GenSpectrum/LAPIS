@@ -6,7 +6,7 @@ import java.net.URI
 
 @Component
 class SiloUris(
-    @Value("\${silo.url}") private val siloUrl: String,
+    @param:Value("\${silo.url}") private val siloUrl: String,
 ) {
     val query = URI("$siloUrl/query")
     val info = URI("$siloUrl/info")

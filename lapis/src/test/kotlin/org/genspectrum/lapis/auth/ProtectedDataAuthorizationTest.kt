@@ -49,7 +49,7 @@ private const val FORBIDDEN_TO_ACCESS_ENDPOINT_ERROR = """
 @SpringBootTest(properties = ["lapis.databaseConfig.path=src/test/resources/config/protectedDataDatabaseConfig.yaml"])
 @AutoConfigureMockMvc
 class ProtectedDataAuthorizationTest(
-    @Autowired val mockMvc: MockMvc,
+    @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
