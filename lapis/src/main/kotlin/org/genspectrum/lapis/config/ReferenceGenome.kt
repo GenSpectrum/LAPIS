@@ -16,7 +16,6 @@ const val NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE =
     Please specify a reference genome filename using the --$REFERENCE_GENOME_FILENAME_ARGS_NAME argument 
     or the $REFERENCE_GENOME_ENV_VARIABLE_NAME environment variable."""
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 class ReferenceGenomeSchema(
     val nucleotideSequences: List<ReferenceSequenceSchema>,
     val genes: List<ReferenceSequenceSchema>,
@@ -72,7 +71,6 @@ data class ReferenceSequenceSchema(
     val name: String,
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class ReferenceGenome(
     val nucleotideSequences: List<ReferenceSequence>,
     val genes: List<ReferenceSequence>,
@@ -91,7 +89,6 @@ data class ReferenceGenome(
     fun getGeneSequence(gene: String): String = genes.first { it.name == gene }.sequence
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class ReferenceSequence(
     val name: String,
     val sequence: String,
