@@ -112,7 +112,7 @@ sealed class SiloAction<ResponseType>(
         ): SiloAction<MostCommonAncestorData> =
             MostRecentCommonAncestorAction(
                 columnName = phyloTreeField,
-                printNodesNotInTree,
+                printNodesNotInTree = printNodesNotInTree,
             )
 
         fun nucleotideInsertions(
@@ -227,7 +227,7 @@ sealed class SiloAction<ResponseType>(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-        override val randomize: Boolean? = false,
+        override val randomize: Boolean? = null,
     ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
         val type: String = "MostRecentCommonAncestor"
     }

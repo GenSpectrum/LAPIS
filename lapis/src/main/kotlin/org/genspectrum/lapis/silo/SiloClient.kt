@@ -80,7 +80,7 @@ open class CachedSiloClient(
 ) {
     private val httpClient = HttpClient.newHttpClient()
 
-    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !#query.action.randomize")
+    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !(#query.action.randomize ?: false)")
     open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
         sendQuery(query)
             .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
