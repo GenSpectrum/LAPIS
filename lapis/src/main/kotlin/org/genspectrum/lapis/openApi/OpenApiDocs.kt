@@ -522,6 +522,7 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
             Schema<String>().anyOf(
                 listOf(
                     stringPhyloDescendantOfSchema(fieldType.associatedField),
+                    logicalOrArraySchema(stringPhyloDescendantOfSchema(fieldType.associatedField)),
                 ),
             )
 
