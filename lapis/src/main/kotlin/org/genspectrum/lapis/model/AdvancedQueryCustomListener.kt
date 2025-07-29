@@ -188,7 +188,7 @@ class AdvancedQueryCustomListener(
             val fieldName = metadataName.substringBeforeLast(".")
             val field = getFieldOrThrow(fieldName)
 
-            if (field.type !== MetadataType.STRING || !field.phyloTreeNodeIdentifier) {
+            if (field.type !== MetadataType.STRING || !field.isPhyloTreeField) {
                 throw BadRequestException(
                     "Metadata field '${field.name}' of type ${field.type} does not support PhyloDescendantOf queries. ",
                     null,

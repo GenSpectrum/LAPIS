@@ -21,7 +21,7 @@ class DatabaseConfigTest {
         assertThat(
             underTest.schema.metadata,
             containsInAnyOrder(
-                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING, phyloTreeNodeIdentifier = true),
+                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING, isPhyloTreeField = true),
                 DatabaseMetadata(name = "date", type = MetadataType.DATE),
                 DatabaseMetadata(name = "region", type = MetadataType.STRING),
                 DatabaseMetadata(name = "country", type = MetadataType.STRING),

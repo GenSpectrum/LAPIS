@@ -60,7 +60,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
             )
 
-            when (databaseMetadata.phyloTreeNodeIdentifier) {
+            when (databaseMetadata.isPhyloTreeField) {
                 true -> listOf(
                     baseField,
                     regexField,
