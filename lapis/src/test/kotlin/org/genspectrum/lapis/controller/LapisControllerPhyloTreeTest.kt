@@ -43,7 +43,6 @@ class LapisControllerPhyloTreeTest(
             .andExpect(status().isBadRequest)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(jsonPath("\$.detail", startsWith("Required parameter 'phyloTreeField' is not present")))
-
         mockMvc.perform(
             postSample("/mostRecentCommonAncestor")
                 .contentType(MediaType.APPLICATION_JSON)

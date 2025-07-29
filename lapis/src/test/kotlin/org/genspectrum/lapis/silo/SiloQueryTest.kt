@@ -741,6 +741,16 @@ class SiloQueryTest {
                         }
                     """,
                 ),
+                Arguments.of(
+                    PhyloDescendantOf("theColumn", "internalNode"),
+                    """
+                        {
+                            "type": "PhyloDescendantOf",
+                            "column": "theColumn",
+                            "internalNode": "internalNode"
+                        }
+                    """,
+                ),
             )
     }
 }

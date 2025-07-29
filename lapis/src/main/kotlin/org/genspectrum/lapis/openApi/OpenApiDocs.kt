@@ -518,6 +518,14 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
                 ),
             )
 
+        is SequenceFilterFieldType.PhyloDescendantOf ->
+            Schema<String>().anyOf(
+                listOf(
+                    stringPhyloDescendantOfSchema(fieldType.associatedField),
+                    logicalOrArraySchema(stringPhyloDescendantOfSchema(fieldType.associatedField)),
+                ),
+            )
+
         else -> stringSchema(fieldType.openApiType)
     }
 
@@ -526,6 +534,14 @@ private fun stringRegexSchema(associatedField: SequenceFilterFieldName) =
         .description(
             "A regex pattern (subset of PCRE) for filtering '$associatedField'. " +
                 "For details on the syntax, see https://github.com/google/re2/wiki/Syntax.",
+        )
+
+private fun stringPhyloDescendantOfSchema(associatedField: SequenceFilterFieldName) =
+    stringSchema("string")
+        .description(
+            "Filter sequences that are descendants of an internal phylogenetic tree node. " +
+                " sequences are identified by their node name $associatedField " +
+                "This query can only be applied to fields that are phyloTreeNodeIdentifiers.",
         )
 
 private fun stringSchema(type: String) =

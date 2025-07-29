@@ -14,6 +14,7 @@ val dummyDatabaseConfig = DatabaseConfig(
         "test config",
         OpennessLevel.OPEN,
         listOf(
+            DatabaseMetadata("treeKey", MetadataType.STRING, phyloTreeNodeIdentifier = true),
             DatabaseMetadata(DATE_FIELD, MetadataType.DATE),
             DatabaseMetadata(PANGO_LINEAGE_FIELD, MetadataType.STRING, generateLineageIndex = true),
             DatabaseMetadata("some_metadata", MetadataType.STRING),

@@ -55,13 +55,25 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 )
             }
 
-            listOf(
-                baseField,
-                SequenceFilterField(
-                    name = "${databaseMetadata.name}.regex",
-                    type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
-                ),
+            val regexField = SequenceFilterField(
+                name = "${databaseMetadata.name}.regex",
+                type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
             )
+
+            when (databaseMetadata.phyloTreeNodeIdentifier) {
+                true -> listOf(
+                    baseField,
+                    regexField,
+                    SequenceFilterField(
+                        name = "${databaseMetadata.name}.phyloDescendantOf",
+                        type = SequenceFilterFieldType.PhyloDescendantOf(databaseMetadata.name),
+                    ),
+                )
+                else -> listOf(
+                    baseField,
+                    regexField,
+                )
+            }
         }
 
         MetadataType.DATE -> listOf(
@@ -172,6 +184,10 @@ sealed class SequenceFilterFieldType(
     ) : SequenceFilterFieldType("number")
 
     data class StringSearch(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("string")
+
+    data class PhyloDescendantOf(
         val associatedField: SequenceFilterFieldName,
     ) : SequenceFilterFieldType("string")
 }

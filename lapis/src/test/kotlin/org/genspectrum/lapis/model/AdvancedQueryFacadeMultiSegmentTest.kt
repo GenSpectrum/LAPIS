@@ -16,6 +16,7 @@ import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
@@ -42,11 +43,16 @@ class AdvancedQueryFacadeMultiSegmentTest {
         val advancedQuery =
             "seg1:300G & (seg1:400- | seg1:500B) & !seg1:600 & MAYBE(seg1:700B | seg2:800-) " +
                 "& [3-of: seg1:123A, seg2:234T, seg1:345G] & " +
-                "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
+                "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*' & " +
+                "treeKey.PhyloDescendantOf='internalNodeId'"
 
         val result = underTest.map(advancedQuery)
 
         val expectedResult = And(
+            PhyloDescendantOf(
+                "treeKey",
+                "internalNodeId",
+            ),
             StringSearch("some_metadata", "^Democratic.*"),
             LineageEquals(PANGO_LINEAGE_COLUMN, "jn.1", true),
             NOf(
@@ -73,6 +79,19 @@ class AdvancedQueryFacadeMultiSegmentTest {
         )
 
         assertThat(result, equalTo(expectedResult))
+    }
+
+    @Test
+    fun `GIVEN advanced query with PhyloDescendantOf in different casing THEN map same`() {
+        val advancedQueryCorrectCasing = "treeKey.PhyloDescendantOf='internalNodeId'"
+        val advancedQueryRandomCasing = "treeKey.pHylodescEndantoF='internalNodeId'"
+
+        val resultCorrectCasing = underTest.map(advancedQueryCorrectCasing)
+        val resultRandomCasing = underTest.map(advancedQueryRandomCasing)
+
+        val expectedResult = PhyloDescendantOf("treeKey", "internalNodeId")
+        assertThat(resultCorrectCasing, equalTo(expectedResult))
+        assertThat(resultRandomCasing, equalTo(expectedResult))
     }
 
     @Test

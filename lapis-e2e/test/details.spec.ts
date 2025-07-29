@@ -102,6 +102,42 @@ describe('The /details endpoint', () => {
     expect(resultWithLimitAndOffset.data[0]).to.deep.equal(resultWithLimit.data[1]);
   });
 
+  it('should handle PhyloDescendantOf queries', async () => {
+    const urlParams = new URLSearchParams({
+      'fields': 'primaryKey',
+      'primaryKey.phyloDescendantOf': 'NODE_0000043',
+      'orderBy': 'primaryKey',
+      'dataFormat': 'csv',
+    });
+
+    const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
+
+    expect(result.status).to.be.equal(200);
+
+    const urlParamsAdvanced = new URLSearchParams({
+      fields: 'primaryKey',
+      advancedquery: 'primaryKey.PhyloDescendantOf=NODE_0000043',
+      orderBy: 'primaryKey',
+      dataFormat: 'csv',
+    });
+
+    const resultAdvanced = await fetch(basePath + '/sample/details?' + urlParamsAdvanced.toString());
+
+    expect(resultAdvanced.status).to.be.equal(200);
+
+    const resultText = await result.text();
+    const resultAdvancedText = await resultAdvanced.text();
+    expect(resultText).to.be.equal(resultAdvancedText);
+
+    expect(resultAdvancedText).to.be.equal(
+      String.raw`
+primaryKey
+key_2181005
+key_2270139
+    `.trim() + '\n'
+    );
+  });
+
   it('should handle advancedQuery', async () => {
     const urlParams = new URLSearchParams({
       fields: 'primaryKey',
