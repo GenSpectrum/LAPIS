@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.9](https://github.com/GenSpectrum/LAPIS/compare/v0.5.8...v0.5.9) (2025-07-29)
+
+
+### Features
+
+* **lapis:** add mostRecentCommonAncestor endpoint ([#1277](https://github.com/GenSpectrum/LAPIS/issues/1277)) ([e062ebc](https://github.com/GenSpectrum/LAPIS/commit/e062ebccec6f7488a8500d81916111a395067f75))
+* **lapis:** add PhyloDescendantOf filter option ([#1284](https://github.com/GenSpectrum/LAPIS/issues/1284)) ([d5681e0](https://github.com/GenSpectrum/LAPIS/commit/d5681e08808807bb713d11f25bc4916f49b5972a))
+* **lapis:** rename `phyloTreeNodeIdentifier` as `isPhyloTreeField` ([#1291](https://github.com/GenSpectrum/LAPIS/issues/1291)) ([ea4b5ba](https://github.com/GenSpectrum/LAPIS/commit/ea4b5baaf31e910501929424c2aa2b86f07301fb))
+
 ## [0.5.8](https://github.com/GenSpectrum/LAPIS/compare/v0.5.7...v0.5.8) (2025-07-21)
 
 
