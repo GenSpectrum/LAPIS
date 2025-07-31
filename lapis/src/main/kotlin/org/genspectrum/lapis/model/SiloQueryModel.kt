@@ -12,6 +12,7 @@ import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
@@ -203,8 +204,8 @@ class SiloQueryModel(
         }
     }
 
-    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<String> {
-        val data = siloClient.sendQuery(
+    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> {
+        var data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.phyloSubtree(
                     sequenceFilters.phyloTreeField,
@@ -214,9 +215,7 @@ class SiloQueryModel(
             ),
         )
 
-        return data.map {
-            it.subtreeNewick
-        }
+        return data
     }
 
     fun getGenomicSequence(
