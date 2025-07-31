@@ -10,6 +10,7 @@ const val ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/alignedNucleotideSequences"
 const val ALIGNED_AMINO_ACID_SEQUENCES_ROUTE = "/alignedAminoAcidSequences"
 const val UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE = "/unalignedNucleotideSequences"
 const val MOST_RECENT_COMMON_ANCESTOR_ROUTE = "/mostRecentCommonAncestor"
+const val PHYLO_SUBTREE_ROUTE = "/phyloSubtree"
 
 enum class SampleRoute(
     val pathSegment: String,

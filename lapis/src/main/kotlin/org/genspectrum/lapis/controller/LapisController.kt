@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
@@ -41,6 +42,7 @@ import org.genspectrum.lapis.openApi.LapisDetailsResponse
 import org.genspectrum.lapis.openApi.LapisMostRecentCommonAncestorResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
+import org.genspectrum.lapis.openApi.LapisPhyloSubtreeResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.MutationsFields
@@ -1146,6 +1148,53 @@ class LapisController(
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
+        )
+    }
+
+    @GetMapping(PHYLO_SUBTREE_ROUTE, produces = [TEXT_NEWICK_VALUE])
+    @LapisPhyloSubtreeResponse
+    fun getPhyloSubtreeAsNewick(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @Parameter(
+            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
+        )
+        @RequestParam(required = false, defaultValue = "false")
+        printNodesNotInTree: Boolean,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @DataFormat
+        @RequestParam
+        dataFormat: String? = null,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        response: HttpServletResponse,
+    ) {
+        val request = PhyloTreeSequenceFiltersRequest(
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            printNodesNotInTree = printNodesNotInTree,
+        )
+
+        siloQueryModel.getNewick(
+            sequenceFilters = request,
         )
     }
 
