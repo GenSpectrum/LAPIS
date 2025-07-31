@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.HeaderModifyingRequestWrapper
@@ -23,6 +24,25 @@ object DataFormat {
     const val CSV = "CSV"
     const val CSV_WITHOUT_HEADERS = "CSV-WITHOUT-HEADERS"
     const val TSV = "TSV"
+    const val NEWICK = "NEWICK"
+}
+
+enum class TreeDataFormat(
+    val value: String,
+) {
+    NEWICK(DataFormat.NEWICK),
+    ;
+
+    companion object {
+        fun fromAcceptHeaders(acceptHeaders: List<MediaType>): TreeDataFormat {
+            for (acceptHeader in acceptHeaders) {
+                if (TEXT_NEWICK.includes(acceptHeader)) {
+                    return NEWICK
+                }
+            }
+            return NEWICK
+        }
+    }
     const val TSV_ESCAPED = "TSV-ESCAPED"
 }
 
