@@ -8,6 +8,11 @@ const val MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION =
     If sequences included in the filter do not exist in the phylogenetic tree they are ignored and the count 
     is added to the field missingNodeCount. To include these sequences in the response set the `printNodesNotInTree`
      parameter to true."""
+const val PHYLO_SUBTREE_ENDPOINT_DESCRIPTION =
+    """Returns the phylogenetic subtree of sequences matching the filter.
+    If sequences included in the filter do not exist in the phylogenetic tree they are ignored and the count 
+    is added to the field missingNodeCount. To include these sequences in the response set the `printNodesNotInTree`
+     parameter to true."""
 const val AGGREGATED_ENDPOINT_DESCRIPTION =
     """Returns the number of sequences matching the specified sequence filters."""
 const val NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION =

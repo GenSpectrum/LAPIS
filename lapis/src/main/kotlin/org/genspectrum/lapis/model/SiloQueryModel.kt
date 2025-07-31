@@ -203,6 +203,28 @@ class SiloQueryModel(
         }
     }
 
+    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<InsertionResponse> {
+        val data = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.phyloSubtree(
+                    sequenceFilters.phyloTreeField,
+                    sequenceFilters.printNodesNotInTree,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+
+        return data.map {
+            InsertionResponse(
+                insertion = it.insertion,
+                count = it.count,
+                insertedSymbols = it.insertedSymbols,
+                position = it.position,
+                sequenceName = it.sequenceName,
+            )
+        }
+    }
+
     fun getGenomicSequence(
         sequenceFilters: CommonSequenceFilters,
         sequenceType: SequenceType,

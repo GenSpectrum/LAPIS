@@ -30,6 +30,7 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIP
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.PHYLO_SUBTREE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
@@ -54,6 +55,7 @@ const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 const val MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA = "MostRecentCommonAncestorResponse"
+const val PHYLO_SUBTREE_RESPONSE_SCHEMA = "PhyloSubtreeResponse"
 const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
@@ -233,6 +235,14 @@ annotation class LapisDetailsResponse
     content = [Content(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))],
 )
 annotation class LapisMostRecentCommonAncestorResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
+    content = [Content(schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_RESPONSE_SCHEMA"))],
+)
+annotation class LapisPhyloSubtreeResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
