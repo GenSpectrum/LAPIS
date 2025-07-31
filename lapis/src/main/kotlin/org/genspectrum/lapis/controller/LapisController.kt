@@ -1160,11 +1160,6 @@ class LapisController(
         @PhyloTreeField
         @RequestParam
         phyloTreeField: String,
-        @Parameter(
-            description = PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION,
-        )
-        @RequestParam(required = false, defaultValue = "false")
-        printNodesNotInTree: Boolean,
         @NucleotideMutations
         @RequestParam
         nucleotideMutations: List<NucleotideMutation>?,
@@ -1190,7 +1185,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
-            printNodesNotInTree = printNodesNotInTree,
+            printNodesNotInTree = false,
         )
 
         siloQueryModel.getNewick(
