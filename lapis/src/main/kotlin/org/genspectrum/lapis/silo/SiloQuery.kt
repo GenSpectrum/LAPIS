@@ -33,6 +33,8 @@ class SequenceDataTypeReference : TypeReference<SequenceData>()
 
 class MostCommonAncestorDataTypeReference : TypeReference<MostCommonAncestorData>()
 
+class PhyloSubtreeDataTypeReference : TypeReference<PhyloSubtreeData>()
+
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
     val limit: Int?

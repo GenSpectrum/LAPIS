@@ -203,7 +203,7 @@ class SiloQueryModel(
         }
     }
 
-    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<InsertionResponse> {
+    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<String> {
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.phyloSubtree(
@@ -215,13 +215,7 @@ class SiloQueryModel(
         )
 
         return data.map {
-            InsertionResponse(
-                insertion = it.insertion,
-                count = it.count,
-                insertedSymbols = it.insertedSymbols,
-                position = it.position,
-                sequenceName = it.sequenceName,
-            )
+            it.subtreeNewick
         }
     }
 
