@@ -17,4 +17,6 @@ object LapisMediaType {
     const val TEXT_TSV_VALUE = "text/tab-separated-values"
     val TEXT_TSV: MediaType = MediaType.parseMediaType(TEXT_TSV_VALUE)
     const val APPLICATION_YAML_VALUE = "application/yaml"
+    const val TEXT_NEWICK_VALUE = "text/x-nh"
+    val TEXT_NEWICK: MediaType = MediaType.parseMediaType(TEXT_NEWICK_VALUE)
 }

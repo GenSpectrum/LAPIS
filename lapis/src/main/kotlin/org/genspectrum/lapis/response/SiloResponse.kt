@@ -85,6 +85,12 @@ data class MostCommonAncestorData(
     val missingFromTree: String?,
 )
 
+data class PhyloSubtreeData(
+    val subtreeNewick: String,
+    val missingNodeCount: Int,
+    val missingFromTree: String?,
+)
+
 data class SequenceData(
     val map: Map<String, JsonNode>,
 ) : Map<String, JsonNode> by map
