@@ -33,6 +33,7 @@ import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_SUBTREE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
+import org.genspectrum.lapis.controller.TREE_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 import org.springframework.core.annotation.AliasFor
@@ -45,6 +46,7 @@ const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA = "MostRecentCommonAncestorRequest"
+const val PHYLO_SUBTREE_REQUEST_SCHEMA = "PhyloSubtreeRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
 const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
 const val ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AllAminoAcidSequenceRequest"
@@ -80,6 +82,7 @@ const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
 const val SEQUENCES_FORMAT_SCHEMA = "SequencesDataFormat"
+const val TREE_DATA_FORMAT_SCHEMA = "TreeDataFormat"
 const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA = "NucleotideFastaHeaderTemplate"
 const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplate"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
@@ -510,6 +513,14 @@ annotation class DataFormat
     description = SEQUENCES_DATA_FORMAT_DESCRIPTION,
 )
 annotation class SequencesDataFormatParam
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$TREE_DATA_FORMAT_SCHEMA"),
+    description = TREE_DATA_FORMAT_DESCRIPTION,
+)
+annotation class TreeDataFormatParam
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

@@ -50,11 +50,13 @@ import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
+import org.genspectrum.lapis.openApi.PHYLO_SUBTREE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.PhyloTreeField
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
+import org.genspectrum.lapis.openApi.TreeDataFormatParam
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
@@ -1168,7 +1170,7 @@ class LapisController(
         @AminoAcidMutations
         @RequestParam
         aminoAcidMutations: List<AminoAcidMutation>?,
-        @DataFormat
+        @TreeDataFormatParam
         @RequestParam
         dataFormat: String? = null,
         @NucleotideInsertions
@@ -1190,6 +1192,32 @@ class LapisController(
             printNodesNotInTree = false,
         )
 
+        siloQueryModel.getNewick(
+            sequenceFilters = request,
+        )
+            .also {
+                treeStreamer.stream(
+                    treeResponse = it,
+                    response = response,
+                )
+            }
+    }
+
+    @PostMapping(
+        PHYLO_SUBTREE_ROUTE,
+        produces = [TEXT_NEWICK_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisPhyloSubtreeResponse
+    @Operation(
+        operationId = "postPhyloSubtreeAsNewick",
+    )
+    fun postPhyloSubtreeAsNewick(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequest,
+        response: HttpServletResponse,
+    ) {
         siloQueryModel.getNewick(
             sequenceFilters = request,
         )

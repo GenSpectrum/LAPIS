@@ -96,6 +96,8 @@ Alternatively, the data format can be specified by setting the \"Accept\"-header
 When both are specified, the request parameter takes precedence over the header.
 """
 
+const val TREE_DATA_FORMAT_DESCRIPTION = """The format of the phylogenetic tree in the response."""
+
 const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION = """Use this to customize the header of the FASTA file.
 This parameter will be ignored if the data format is not FASTA.
 It supports free-form text, placeholders of the form "{<metadataField>}" to include metadata fields in the header and
