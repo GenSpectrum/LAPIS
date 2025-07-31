@@ -81,6 +81,7 @@ import org.genspectrum.lapis.response.MostRecentCommonAncestorCollection
 import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
+import org.genspectrum.lapis.response.TreeStreamer
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -100,6 +101,7 @@ class LapisController(
     private val requestContext: RequestContext,
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
+    private val treeStreamer: TreeStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -1191,6 +1193,12 @@ class LapisController(
         siloQueryModel.getNewick(
             sequenceFilters = request,
         )
+            .also {
+                treeStreamer.stream(
+                    treeResponse = it,
+                    response = response,
+                )
+            }
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
