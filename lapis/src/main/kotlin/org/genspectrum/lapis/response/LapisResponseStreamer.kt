@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
+import org.genspectrum.lapis.controller.middleware.ESCAPED_ACCEPT_HEADER_PARAMETER
 import org.genspectrum.lapis.controller.middleware.HEADERS_ACCEPT_HEADER_PARAMETER
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.request.CommonSequenceFilters
@@ -33,6 +34,7 @@ class LapisResponseStreamer(
     private val lapisInfoFactory: LapisInfoFactory,
     private val requestContext: RequestContext,
     private val csvWriter: CsvWriter,
+    private val ianaTsvWriter: IanaTsvWriter,
 ) {
     fun <Request : CommonSequenceFilters> streamData(
         request: Request,
@@ -120,8 +122,19 @@ class LapisResponseStreamer(
                 TAB -> TEXT_TSV_VALUE
             },
         )
-        val headersParameter = getHeadersParameter(targetMediaType, responseFormat.acceptHeader)
+        val headersParameter = getMediaTypeParameter(
+            targetMediaType,
+            HEADERS_ACCEPT_HEADER_PARAMETER,
+            responseFormat.acceptHeader,
+        )
         val includeHeaders = headersParameter != "false"
+
+        val escapeParameter = getMediaTypeParameter(
+            targetMediaType,
+            ESCAPED_ACCEPT_HEADER_PARAMETER,
+            responseFormat.acceptHeader,
+        )
+        val escapeNewlines = escapeParameter == "true"
 
         val contentType = when {
             !includeHeaders -> MediaType.TEXT_PLAIN
@@ -133,21 +146,33 @@ class LapisResponseStreamer(
             response.contentType = contentType.toString()
         }
 
-        response.outputStream.use {
-            csvWriter.write(
-                appendable = it.writer(),
-                includeHeaders = includeHeaders,
-                data = data,
-                delimiter = responseFormat.delimiter,
-            )
+        if (escapeNewlines) {
+            response.outputStream.use {
+                ianaTsvWriter.write(
+                    appendable = it.writer(),
+                    includeHeaders = includeHeaders,
+                    data = data,
+                    delimiter = responseFormat.delimiter,
+                )
+            }
+        } else {
+            response.outputStream.use {
+                csvWriter.write(
+                    appendable = it.writer(),
+                    includeHeaders = includeHeaders,
+                    data = data,
+                    delimiter = responseFormat.delimiter,
+                )
+            }
         }
     }
 
-    private fun getHeadersParameter(
+    private fun getMediaTypeParameter(
         targetMediaType: MediaType,
+        parameter: String,
         acceptHeader: List<MediaType>,
     ): String? =
         acceptHeader.find { it.includes(targetMediaType) }
             ?.parameters
-            ?.get(HEADERS_ACCEPT_HEADER_PARAMETER)
+            ?.get(parameter)
 }

@@ -10,6 +10,13 @@ A '200' response code indicates a successful request, while any other code signi
 
 Endpoints typically support returning data in JSON, [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) or
 [TSV](https://en.wikipedia.org/wiki/Tab-separated_values), with JSON being the default.
+
+:::note
+LAPIS returns RFC 4180 compliant TSV and CSV files, which means that cells that contain a new line (or delimiter) are quoted.
+This can cause issues when simply splitting at every occurence of a new line character.
+We also offer the TSV-ESCAPED data format, where new lines and delimiters are escaped instead of quoted (IANA TSV).
+:::
+
 Genomic sequences (such as those from `unalignedNucleotideSequences`, `alignedAminoAcidSequences`, etc.) are provided in the
 [FASTA format](https://en.wikipedia.org/wiki/FASTA_format) by default,
 but can also be requested in JSON or [NDJSON](https://github.com/ndjson/ndjson-spec) format.

@@ -16,12 +16,14 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 const val HEADERS_ACCEPT_HEADER_PARAMETER = "headers"
+const val ESCAPED_ACCEPT_HEADER_PARAMETER = "escaped"
 
 object DataFormat {
     const val JSON = "JSON"
     const val CSV = "CSV"
     const val CSV_WITHOUT_HEADERS = "CSV-WITHOUT-HEADERS"
     const val TSV = "TSV"
+    const val TSV_ESCAPED = "TSV-ESCAPED"
 }
 
 enum class SequencesDataFormat(
@@ -82,6 +84,7 @@ class DataFormatParameterFilter(
             DataFormat.CSV -> LapisMediaType.TEXT_CSV_VALUE
             DataFormat.CSV_WITHOUT_HEADERS -> LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
             DataFormat.TSV -> LapisMediaType.TEXT_TSV_VALUE
+            DataFormat.TSV_ESCAPED -> LapisMediaType.TEXT_TSV_ESCAPED_VALUE
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
             SequencesDataFormat.FASTA.value -> LapisMediaType.TEXT_X_FASTA_VALUE
             SequencesDataFormat.NDJSON.value -> MediaType.APPLICATION_NDJSON_VALUE
