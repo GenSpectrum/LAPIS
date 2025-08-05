@@ -144,7 +144,7 @@ jobs:
           docker compose logs lapisProtected > e2e-logs/lapisProtected.log
           docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
         env:
-          SILO_TAG: latest
+          SILO_TAG: 0.7.8
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Upload logs
