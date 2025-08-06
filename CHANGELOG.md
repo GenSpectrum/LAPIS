@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.11](https://github.com/GenSpectrum/LAPIS/compare/v0.5.10...v0.5.11) (2025-08-06)
+
+
+### Features
+
+* **lapis:** support TSV with escaped special characters ([#1295](https://github.com/GenSpectrum/LAPIS/issues/1295)) ([d2599f2](https://github.com/GenSpectrum/LAPIS/commit/d2599f2894cd5eab0ac902c4fdcc904597cebb77))
+
 ## [0.5.10](https://github.com/GenSpectrum/LAPIS/compare/v0.5.9...v0.5.10) (2025-08-06)
 
 
