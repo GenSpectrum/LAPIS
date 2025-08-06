@@ -10,10 +10,12 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ROUTE
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ROUTE
 import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
 import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.middleware.DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER
@@ -137,7 +139,10 @@ private class ProtectedDataAuthorizationFilter(
             NUCLEOTIDE_INSERTIONS_ROUTE,
             AMINO_ACID_INSERTIONS_ROUTE,
             INFO_ROUTE,
-        ).map { "/sample$it" }
+        ).map { "/sample$it" } + listOf(
+            NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE,
+            AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE,
+        ).map { "/component$it" }
     }
 
     override fun isAuthorizedForEndpoint(request: CachedBodyHttpServletRequest): AuthorizationResult {
