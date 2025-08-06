@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.10](https://github.com/GenSpectrum/LAPIS/compare/v0.5.9...v0.5.10) (2025-08-06)
+
+
+### Bug Fixes
+
+* **lapis:** mutations over time need only aggregatedDataAccessKey ([#1303](https://github.com/GenSpectrum/LAPIS/issues/1303)) ([baadcee](https://github.com/GenSpectrum/LAPIS/commit/baadcee651d7aa9cbbedfccaace654c12c2ec4f7))
+
 ## [0.5.9](https://github.com/GenSpectrum/LAPIS/compare/v0.5.8...v0.5.9) (2025-07-29)
 
 
