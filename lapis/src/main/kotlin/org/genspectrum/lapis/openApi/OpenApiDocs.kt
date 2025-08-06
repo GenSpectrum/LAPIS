@@ -906,7 +906,15 @@ private fun dataFormatSchema() =
         .description(
             DATA_FORMAT_DESCRIPTION,
         )
-        ._enum(listOf(DataFormat.JSON, DataFormat.CSV, DataFormat.CSV_WITHOUT_HEADERS, DataFormat.TSV))
+        ._enum(
+            listOf(
+                DataFormat.JSON,
+                DataFormat.CSV,
+                DataFormat.CSV_WITHOUT_HEADERS,
+                DataFormat.TSV,
+                DataFormat.TSV_ESCAPED,
+            ),
+        )
         ._default(DataFormat.JSON)
 
 private fun sequencesFormatSchema() =

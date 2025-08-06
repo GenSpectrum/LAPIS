@@ -248,6 +248,29 @@ class LapisControllerDataFormatTest(
             .andExpect(content().string(startsWith(scenario.expectedDetailsCsv)))
     }
 
+    @ParameterizedTest(name = "Details data with special chars: {0}")
+    @MethodSource("getEscapingScenarios")
+    fun `returns TSV contains escaped newlines`(scenario: EscapingScenario) {
+        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
+            DetailsData(
+                mapOf(
+                    "primaryKey" to TextNode("key1\tfoo"),
+                    "region" to TextNode("regionLine1\nregionLine2"),
+                ),
+            ),
+        )
+
+        mockMvc.perform(
+            postSample("/details")
+                .content("""{"fields": ["primaryKey", "region"]}""")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(ACCEPT, scenario.header),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", scenario.expectedResponseContentType))
+            .andExpect(content().string(startsWith(scenario.expectedFileContent)))
+    }
+
     @Test
     fun `GIVEN fields = position,mutation WHEN getting nucleotide mutations THEN csv contains only those columns`() {
         every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns Stream.of(
@@ -435,6 +458,23 @@ class LapisControllerDataFormatTest(
                     """.trimIndent(),
                 ),
             )
+
+        @JvmStatic
+        fun getEscapingScenarios() =
+            listOf(
+                EscapingScenario(
+                    description = "GIVEN tsv with escaping THEN newline and tab is escaped",
+                    header = "text/tab-separated-values;escaped=true",
+                    expectedResponseContentType = "text/tab-separated-values;charset=UTF-8",
+                    expectedFileContent = "primaryKey\tregion\nkey1\\tfoo\tregionLine1\\nregionLine2",
+                ),
+                EscapingScenario(
+                    description = "GIVEN csv with escaping THEN newline is escaped but tab is not",
+                    header = "text/csv;escaped=true",
+                    expectedResponseContentType = "text/csv;charset=UTF-8",
+                    expectedFileContent = "primaryKey,region\nkey1\tfoo,regionLine1\\nregionLine2",
+                ),
+            )
     }
 
     data class RequestScenario(
@@ -449,6 +489,15 @@ class LapisControllerDataFormatTest(
         val description: String,
         val fields: List<String>,
         val expectedDetailsCsv: String,
+    ) {
+        override fun toString() = description
+    }
+
+    data class EscapingScenario(
+        val description: String,
+        val header: String,
+        val expectedResponseContentType: String,
+        val expectedFileContent: String,
     ) {
         override fun toString() = description
     }
