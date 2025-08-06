@@ -21,7 +21,7 @@ class CsvWriterTest {
     }
 
     @Test
-    fun `GIVEN data with nulls and special chars THEN output quotes fields`() {
+    fun `GIVEN data with nulls and special chars WHEN using the CsvWriter THEN output quotes fields`() {
         val data = TestRecordCollection(
             headers = listOf("col1", "col2"),
             records = listOf(
