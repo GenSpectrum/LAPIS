@@ -13,8 +13,8 @@ import org.genspectrum.lapis.controller.SampleRoute.DETAILS
 import org.genspectrum.lapis.controller.SampleRoute.MOST_RECENT_COMMON_ANCESTOR
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
-import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.PHYLO_SUBTREE
+import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
@@ -314,7 +314,7 @@ data class DownloadAsFileScenario(
                 requestedDataFormat = null,
                 expectedFilename = "$expectedFilename.nwk",
                 downloadFileBasename = null,
-            )
+            ),
         )
 
         private fun forSequenceEndpointDataFormats(
@@ -527,7 +527,10 @@ data class DownloadCompressedFileScenario(
                     .expecting(SequenceEndpointMockDataCollection.DataFormat.FASTA) to "fasta"
             } else {
                 if (route.serveType == ServeType.NEWICK) {
-                    MockDataForEndpoints.treeEndpointMockData().expecting(TreeEndpointMockDataCollection.DataFormat.NEWICK) to "nwk"
+                    MockDataForEndpoints.treeEndpointMockData().expecting(
+                        TreeEndpointMockDataCollection.DataFormat.NEWICK,
+                    ) to
+                        "nwk"
                 } else {
                     MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
                 }

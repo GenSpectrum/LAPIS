@@ -13,7 +13,6 @@ describe('The /phyloSubtree endpoint', () => {
     const text = await result.text();
     expect(result.status, text).to.equal(200);
     expect(text.split('\n')[0]).to.equal('(key_2270139,key_2181005)NODE_0000043;');
-
   });
 
   it('should return empty string as newick if filter has no nodes', async () => {

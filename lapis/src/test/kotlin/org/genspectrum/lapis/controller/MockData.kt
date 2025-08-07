@@ -201,7 +201,6 @@ data class SequenceEndpointMockDataCollection(
         )
 }
 
-
 data class TreeEndpointMockDataCollection(
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,

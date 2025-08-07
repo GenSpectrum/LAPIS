@@ -32,8 +32,9 @@ enum class SampleRoute(
     ALIGNED_NUCLEOTIDE_SEQUENCES(ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, serveType = ServeType.SEQUENCES),
     ALIGNED_AMINO_ACID_SEQUENCES(ALIGNED_AMINO_ACID_SEQUENCES_ROUTE, serveType = ServeType.SEQUENCES),
     UNALIGNED_NUCLEOTIDE_SEQUENCES(UNALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE, serveType = ServeType.SEQUENCES),
-    PHYLO_SUBTREE(PHYLO_SUBTREE_ROUTE, serveType = ServeType.NEWICK);
+    PHYLO_SUBTREE(PHYLO_SUBTREE_ROUTE, serveType = ServeType.NEWICK),
+    ;
 
-    constructor(pathSegment: String)
-            : this(pathSegment, ServeType.METADATA)
+    constructor(pathSegment: String) :
+        this(pathSegment, ServeType.METADATA)
 }
