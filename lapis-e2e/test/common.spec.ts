@@ -72,7 +72,7 @@ function expectedContentType(type: ServesType): string {
     case 'TREE':
       return 'application/x-nwk;charset=UTF-8';
     case 'METADATA':
-      return 'application/json;charset=UTF-8';
+      return 'application/json';
   }
 }
 
@@ -91,7 +91,7 @@ describe('All endpoints', () => {
     describe(`(${route.pathSegment})`, () => {
       it('should return the data with Content-Disposition when asking for download', async () => {
         const urlParams = new URLSearchParams({ downloadAsFile: 'true' });
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -105,7 +105,7 @@ describe('All endpoints', () => {
 
       it('should return the data with Content-Disposition with custom file name', async () => {
         const urlParams = new URLSearchParams({ downloadAsFile: 'true', downloadFileBasename: 'custom' });
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -119,7 +119,7 @@ describe('All endpoints', () => {
 
       it('should return the lapis data version header', async () => {
         const urlParams = new URLSearchParams();
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
         const response = await get(urlParams);
@@ -196,7 +196,7 @@ describe('All endpoints', () => {
 
       it('should return zstd compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'zstd' });
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -210,7 +210,7 @@ describe('All endpoints', () => {
 
       it('should return zstd compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -224,7 +224,7 @@ describe('All endpoints', () => {
 
       it('should return gzip compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'gzip' });
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -238,7 +238,7 @@ describe('All endpoints', () => {
 
       it('should return gzip compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'primaryKey');
         }
 
@@ -261,7 +261,7 @@ describe('All endpoints', () => {
           pangoLineage: 'B.1.1.7',
           country: 'Switzerland',
         });
-        if (route.pathSegment === '/mostRecentCommonAncestor') {
+        if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           formUrlEncodedData.set('phyloTreeField', 'primaryKey');
         }
 
