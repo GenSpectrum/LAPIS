@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
@@ -144,7 +145,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getMostRecentCommonAncestor(sequenceFilters: PhyloTreeSequenceFiltersRequest) =
+    fun getMostRecentCommonAncestor(sequenceFilters: MRCASequenceFiltersRequest) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.mostRecentCommonAncestor(
@@ -208,8 +209,7 @@ class SiloQueryModel(
         var data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.phyloSubtree(
-                    sequenceFilters.phyloTreeField,
-                    sequenceFilters.printNodesNotInTree,
+                    sequenceFilters.phyloTreeField
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),

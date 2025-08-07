@@ -62,7 +62,7 @@ class LapisControllerPhyloTreeTest(
     fun `GIVEN call to mostRecentCommonAncestor endpoint with miscapitalized PhyloTreeField returns ok`() {
         every {
             siloQueryModelMock.getMostRecentCommonAncestor(
-                phyloTreeSequenceFiltersRequest(
+                mrcaSequenceFiltersRequest(
                     phyloTreeField = "primaryKey",
                     sequenceFilters = emptyMap(),
                 ),

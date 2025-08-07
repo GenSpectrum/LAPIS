@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.controller
 
 import org.genspectrum.lapis.request.Field
+import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
@@ -55,15 +56,32 @@ fun sequenceFiltersRequestWithFields(
 fun phyloTreeSequenceFiltersRequest(
     sequenceFilters: Map<String, String>,
     phyloTreeField: String,
-    printNodesNotInTree: Boolean = false,
 ) = PhyloTreeSequenceFiltersRequest(
     sequenceFilters.mapValues { listOf(it.value) },
     emptyList(),
     emptyList(),
     emptyList(),
     emptyList(),
-    phyloTreeField,
     emptyList(),
+    null,
+    null,
+    phyloTreeField = phyloTreeField
+)
+
+fun mrcaSequenceFiltersRequest(
+    sequenceFilters: Map<String, String>,
+    phyloTreeField: String,
+    printNodesNotInTree: Boolean = false,
+) = MRCASequenceFiltersRequest(
+    sequenceFilters.mapValues { listOf(it.value) },
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    null,
+    null,
+    phyloTreeField = phyloTreeField,
     printNodesNotInTree = printNodesNotInTree,
 )
 
