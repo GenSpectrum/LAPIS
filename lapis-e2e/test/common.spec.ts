@@ -1,50 +1,80 @@
 import { expect } from 'chai';
 import { basePath, expectIsGzipEncoded, expectIsZstdEncoded, sequenceData } from './common';
 
-const routes = [
-  { pathSegment: '/aggregated', servesFasta: false, expectedDownloadFilename: 'aggregated.json' },
+type ServesType = 'SEQUENCES' | 'TREE' | 'METADATA';
+
+interface Route {
+  pathSegment: string;
+  servesType: ServesType;
+  expectedDownloadFilename: string;
+}
+
+const routes: Route[] = [
+  { pathSegment: '/aggregated', servesType: 'METADATA', expectedDownloadFilename: 'aggregated.json' },
   {
     pathSegment: '/mostRecentCommonAncestor',
-    servesFasta: false,
+    servesType: 'METADATA',
     expectedDownloadFilename: 'mostRecentCommonAncestor.json',
   },
-  { pathSegment: '/details', servesFasta: false, expectedDownloadFilename: 'details.json' },
+  { pathSegment: '/details', servesType: 'METADATA', expectedDownloadFilename: 'details.json' },
   {
     pathSegment: '/nucleotideMutations',
-    servesFasta: false,
+    servesType: 'METADATA',
     expectedDownloadFilename: 'nucleotideMutations.json',
   },
   {
     pathSegment: '/aminoAcidMutations',
-    servesFasta: false,
+    servesType: 'METADATA',
     expectedDownloadFilename: 'aminoAcidMutations.json',
   },
   {
     pathSegment: '/nucleotideInsertions',
-    servesFasta: false,
+    servesType: 'METADATA',
     expectedDownloadFilename: 'nucleotideInsertions.json',
   },
   {
     pathSegment: '/aminoAcidInsertions',
-    servesFasta: false,
+    servesType: 'METADATA',
     expectedDownloadFilename: 'aminoAcidInsertions.json',
   },
   {
     pathSegment: '/alignedNucleotideSequences',
-    servesFasta: true,
+    servesType: 'SEQUENCES',
     expectedDownloadFilename: 'alignedNucleotideSequences.fasta',
   },
   {
     pathSegment: '/alignedAminoAcidSequences/S',
-    servesFasta: true,
+    servesType: 'SEQUENCES',
     expectedDownloadFilename: 'alignedAminoAcidSequences.fasta',
   },
   {
     pathSegment: '/unalignedNucleotideSequences',
-    servesFasta: true,
+    servesType: 'SEQUENCES',
     expectedDownloadFilename: 'unalignedNucleotideSequences.fasta',
   },
+  {
+    pathSegment: '/phyloSubtree',
+    servesType: 'TREE',
+    expectedDownloadFilename: 'phyloSubtree.nwk',
+  },
 ];
+
+const extensionMap: Record<ServesType, string> = {
+  SEQUENCES: 'fasta',
+  TREE: 'nwk',
+  METADATA: 'json',
+};
+
+function expectedContentType(type: ServesType): string {
+  switch (type) {
+    case 'SEQUENCES':
+      return 'text/x-fasta;charset=UTF-8';
+    case 'TREE':
+      return 'application/x-nwk;charset=UTF-8';
+    case 'METADATA':
+      return 'application/json;charset=UTF-8';
+  }
+}
 
 describe('All endpoints', () => {
   for (const route of routes) {
@@ -83,7 +113,7 @@ describe('All endpoints', () => {
 
         expect(response.status).equals(200);
         expect(response.headers.get('content-disposition')).equals(
-          `attachment; filename=custom.${route.servesFasta ? 'fasta' : 'json'}`
+          `attachment; filename=custom.${extensionMap[route.servesType]}`
         );
       });
 
@@ -98,7 +128,7 @@ describe('All endpoints', () => {
         expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
       });
 
-      if (route.servesFasta) {
+      if (route.servesType === 'SEQUENCES') {
         it('should return sequences in fasta format', async () => {
           const response = await get(new URLSearchParams({ dataFormat: 'fasta' }));
 
@@ -128,7 +158,8 @@ describe('All endpoints', () => {
           expect(response.status).equals(400);
           expect((await response.json()).error.detail).to.include('Invalid FASTA header template');
         });
-      } else {
+      }
+      if (route.servesType === 'METADATA') {
         it('should return the lapis data version header for CSV data', async () => {
           const urlParams = new URLSearchParams({ dataFormat: 'csv' });
           if (route.pathSegment === '/mostRecentCommonAncestor') {
@@ -145,6 +176,17 @@ describe('All endpoints', () => {
           if (route.pathSegment === '/mostRecentCommonAncestor') {
             urlParams.set('phyloTreeField', 'primaryKey');
           }
+          const response = await get(urlParams);
+
+          expect(response.status).equals(200);
+          expect(response.headers.get('lapis-data-version')).to.match(/\d{10}/);
+        });
+      }
+
+      if (route.servesType === 'TREE') {
+        it('should return the lapis data version header for nwk data', async () => {
+          const urlParams = new URLSearchParams({ dataFormat: 'newick' });
+          urlParams.set('phyloTreeField', 'primaryKey');
           const response = await get(urlParams);
 
           expect(response.status).equals(200);
@@ -175,11 +217,7 @@ describe('All endpoints', () => {
         const response = await get(urlParams, { headers: { 'Accept-Encoding': 'zstd' } });
 
         expect(response.status).equals(200);
-        if (route.servesFasta) {
-          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
-        } else {
-          expect(response.headers.get('content-type')).equals('application/json');
-        }
+        expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(response.headers.get('content-encoding')).equals('zstd');
         expectIsZstdEncoded(await response.arrayBuffer());
       });
@@ -207,14 +245,10 @@ describe('All endpoints', () => {
         const response = await get(urlParams, { headers: { 'Accept-Encoding': 'gzip' } });
 
         expect(response.status).equals(200);
-        if (route.servesFasta) {
-          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
-        } else {
-          expect(response.headers.get('content-type')).equals('application/json');
-        }
+        expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(response.headers.get('content-encoding')).equals('gzip');
 
-        if (route.servesFasta) {
+        if (route.servesType === 'SEQUENCES') {
           expect(await response.text()).to.match(/^>key_/);
         } else {
           const body = await response.json();
@@ -239,15 +273,11 @@ describe('All endpoints', () => {
 
         let body = await response.text();
         expect(response.status, 'body was ' + body).equals(200);
-        if (route.servesFasta) {
-          expect(response.headers.get('content-type')).equals('text/x-fasta;charset=UTF-8');
-        } else {
-          expect(response.headers.get('content-type')).equals('application/json');
-        }
+        expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(body).not.to.be.empty;
       });
 
-      if (!route.servesFasta) {
+      if (route.servesType === 'METADATA') {
         it('should return info', async () => {
           const urlParams = new URLSearchParams();
           if (route.pathSegment === '/mostRecentCommonAncestor') {
