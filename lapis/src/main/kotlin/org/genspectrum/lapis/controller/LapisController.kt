@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
+import org.genspectrum.lapis.controller.middleware.TreeDataFormat
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -1179,6 +1180,7 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val request = PhyloTreeSequenceFiltersRequest(
@@ -1191,6 +1193,8 @@ class LapisController(
             validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = false,
         )
+
+        TreeDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
         siloQueryModel.getNewick(
             sequenceFilters = request,
@@ -1216,8 +1220,10 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_REQUEST_SCHEMA"))
         @RequestBody
         request: PhyloTreeSequenceFiltersRequest,
+        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
+        TreeDataFormat.fromAcceptHeaders(httpHeaders.accept)
         siloQueryModel.getNewick(
             sequenceFilters = request,
         )
