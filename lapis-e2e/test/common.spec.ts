@@ -70,7 +70,7 @@ function expectedContentType(type: ServesType): string {
     case 'SEQUENCES':
       return 'text/x-fasta;charset=UTF-8';
     case 'TREE':
-      return 'application/x-nwk;charset=UTF-8';
+      return 'text/x-nh;charset=UTF-8';
     case 'METADATA':
       return 'application/json';
   }
