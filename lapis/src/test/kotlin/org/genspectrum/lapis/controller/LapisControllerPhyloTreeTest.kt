@@ -37,6 +37,8 @@ class LapisControllerPhyloTreeTest(
         every { lapisInfo.dataVersion } returns DATA_VERSION
     }
 
+    //TODO: extend these tests to the phylo_subtree endpoint
+
     @Test
     fun `GIVEN call to mostRecentCommonAncestor endpoint without PhyloTreeField returns error`() {
         mockMvc.perform(getSample("/mostRecentCommonAncestor"))
