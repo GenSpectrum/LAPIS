@@ -378,6 +378,7 @@ fun buildOpenApiSchema(
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
+                .addSchemas(TREE_DATA_FORMAT_SCHEMA, treeFormatSchema())
                 .addSchemas(
                     NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA,
                     nucleotideFastaHeaderTemplateSchema(databaseConfig),
