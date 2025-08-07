@@ -14,6 +14,7 @@ import org.genspectrum.lapis.controller.SampleRoute.MOST_RECENT_COMMON_ANCESTOR
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.PHYLO_SUBTREE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
@@ -262,6 +263,7 @@ fun SampleRoute.getExpectedFilename() =
         ALIGNED_AMINO_ACID_SEQUENCES -> "alignedAminoAcidSequences"
         UNALIGNED_NUCLEOTIDE_SEQUENCES -> "unalignedNucleotideSequences"
         MOST_RECENT_COMMON_ANCESTOR -> "mostRecentCommonAncestor"
+        PHYLO_SUBTREE -> "phyloSubtree"
     }
 
 data class DownloadAsFileScenario(
@@ -289,12 +291,31 @@ data class DownloadAsFileScenario(
         fun forEndpoint(route: SampleRoute): List<DownloadAsFileScenario> {
             val expectedFilename = route.getExpectedFilename()
 
-            if (route.servesFasta) {
+            if (route.serveType == ServeType.SEQUENCES) {
                 return forSequenceEndpointDataFormats(route, expectedFilename)
+            }
+
+            if (route.serveType == ServeType.NEWICK) {
+                return forNewickEndpointDataFormats(route, expectedFilename)
             }
 
             return forDataFormats(route.pathSegment, expectedFilename)
         }
+
+        private fun forNewickEndpointDataFormats(
+            route: SampleRoute,
+            expectedFilename: String,
+        ) = listOf(
+            DownloadAsFileScenario(
+                endpoint = "${route.pathSegment}",
+                mockData = MockDataForEndpoints.treeEndpointMockData().expecting(
+                    TreeEndpointMockDataCollection.DataFormat.NEWICK,
+                ),
+                requestedDataFormat = null,
+                expectedFilename = "$expectedFilename.nwk",
+                downloadFileBasename = null,
+            )
+        )
 
         private fun forSequenceEndpointDataFormats(
             route: SampleRoute,
@@ -501,11 +522,15 @@ data class DownloadCompressedFileScenario(
             route: SampleRoute,
             compressionFormat: String,
         ): List<DownloadCompressedFileScenario> {
-            val (mockData, dataFileFormat) = if (route.servesFasta) {
+            val (mockData, dataFileFormat) = if (route.serveType == ServeType.SEQUENCES) {
                 MockDataForEndpoints.sequenceEndpointMockData()
                     .expecting(SequenceEndpointMockDataCollection.DataFormat.FASTA) to "fasta"
             } else {
-                MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
+                if (route.serveType == ServeType.NEWICK) {
+                    MockDataForEndpoints.treeEndpointMockData().expecting(TreeEndpointMockDataCollection.DataFormat.NEWICK) to "nwk"
+                } else {
+                    MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
+                }
             }
 
             val endpoint = when (route) {
@@ -514,7 +539,7 @@ data class DownloadCompressedFileScenario(
                 UNALIGNED_NUCLEOTIDE_SEQUENCES -> "${route.pathSegment}/gene1"
                 else -> route.pathSegment
             }
-            val acceptHeader = when (route.servesFasta) {
+            val acceptHeader = when (route.serveType == ServeType.SEQUENCES) {
                 true -> "*/*"
                 false -> dataFormat.acceptHeader
             }

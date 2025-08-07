@@ -251,7 +251,7 @@ sealed class SiloAction<ResponseType>(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-        override val randomize: Boolean? = false,
+        override val randomize: Boolean? = null,
     ) : SiloAction<PhyloSubtreeData>(PhyloSubtreeDataTypeReference(), cacheable = true) {
         val type: String = "PhyloSubtree"
     }

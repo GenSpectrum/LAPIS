@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.model.FastaHeaderTemplate
@@ -19,6 +20,7 @@ import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationResponse
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
@@ -199,6 +201,51 @@ data class SequenceEndpointMockDataCollection(
         )
 }
 
+
+data class TreeEndpointMockDataCollection(
+    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
+    val mockWithData: (SiloQueryModel) -> Unit,
+    val expectedNewick: String,
+    val fields: List<String>?,
+    val phyloTreeField: String? = null,
+) {
+    enum class DataFormat(
+        val fileFormat: String,
+        val acceptHeader: String,
+    ) {
+        NEWICK("nwk", TEXT_NEWICK_VALUE),
+    }
+
+    companion object {
+        inline fun <reified Arg, PhyloSubtreeData> create(
+            crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> Stream<PhyloSubtreeData>,
+            modelData: List<PhyloSubtreeData>,
+            expectedNewick: String,
+            fields: List<String>? = null,
+            phyloTreeField: String? = null,
+        ) = TreeEndpointMockDataCollection(
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
+            expectedNewick,
+            fields,
+            phyloTreeField,
+        )
+    }
+
+    fun expecting(dataFormat: DataFormat) =
+        MockData(
+            mockToReturnEmptyData = mockToReturnEmptyData,
+            mockWithData = mockWithData,
+            assertDataMatches = when (dataFormat) {
+                DataFormat.NEWICK -> {
+                    { assertThat(it, `is`(expectedNewick)) }
+                }
+            },
+            fields = fields,
+            phyloTreeField = phyloTreeField,
+        )
+}
+
 data class MockData(
     val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
     val mockWithData: (SiloQueryModel) -> Unit,
@@ -219,6 +266,21 @@ object MockDataForEndpoints {
             MOST_RECENT_COMMON_ANCESTOR_ROUTE -> mostRecentCommonAncestor
             else -> throw IllegalArgumentException("Test issue: no mock data for endpoint $endpoint")
         }
+
+    fun treeEndpointMockData() =
+        TreeEndpointMockDataCollection.create(
+            siloQueryModelMockCall = { it::getNewick },
+            modelData = listOf(
+                PhyloSubtreeData(
+                    subtreeNewick = "((node1,node2),node3);",
+                    missingNodeCount = 0,
+                    missingFromTree = null,
+                ),
+            ),
+            expectedNewick = "((node1,node2),node3);",
+            fields = listOf("primaryKey"),
+            phyloTreeField = "primaryKey",
+        )
 
     fun sequenceEndpointMockData(sequenceName: String = "main") =
         SequenceEndpointMockDataCollection.create(

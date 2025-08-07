@@ -189,7 +189,7 @@ class LapisControllerCompressionTest(
         @JvmStatic
         val scenarios =
             SampleRoute.entries
-                .filter { !it.servesFasta }
+                .filter { it.serveType == ServeType.METADATA }
                 .flatMap {
                     getRequests(
                         endpoint = it,
