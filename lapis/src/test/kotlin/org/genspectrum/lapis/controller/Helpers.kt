@@ -65,7 +65,7 @@ fun phyloTreeSequenceFiltersRequest(
     emptyList(),
     null,
     null,
-    phyloTreeField = phyloTreeField
+    phyloTreeField = phyloTreeField,
 )
 
 fun mrcaSequenceFiltersRequest(

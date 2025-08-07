@@ -21,7 +21,6 @@ data class PhyloTreeSequenceFiltersRequest(
     val phyloTreeField: String,
 ) : CommonSequenceFilters
 
-
 data class MRCASequenceFiltersRequest(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
@@ -59,7 +58,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
-            phyloTreeField.fieldName
+            phyloTreeField.fieldName,
         )
     }
 }

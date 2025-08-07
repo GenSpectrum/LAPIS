@@ -946,7 +946,11 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField = validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
         lapisResponseStreamer.streamData(
@@ -999,7 +1003,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField =
-            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+                validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1055,7 +1059,11 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField = validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1191,7 +1199,11 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            phyloTreeField = validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
         )
 
         TreeDataFormat.fromAcceptHeaders(httpHeaders.accept)

@@ -209,7 +209,7 @@ class SiloQueryModel(
         var data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.phyloSubtree(
-                    sequenceFilters.phyloTreeField
+                    sequenceFilters.phyloTreeField,
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
