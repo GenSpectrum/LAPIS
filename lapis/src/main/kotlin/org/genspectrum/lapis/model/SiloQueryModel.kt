@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
@@ -12,6 +13,7 @@ import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
@@ -143,7 +145,7 @@ class SiloQueryModel(
             ),
         )
 
-    fun getMostRecentCommonAncestor(sequenceFilters: PhyloTreeSequenceFiltersRequest) =
+    fun getMostRecentCommonAncestor(sequenceFilters: MRCASequenceFiltersRequest) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.mostRecentCommonAncestor(
@@ -201,6 +203,19 @@ class SiloQueryModel(
                 sequenceName = it.sequenceName,
             )
         }
+    }
+
+    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> {
+        var data = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.phyloSubtree(
+                    sequenceFilters.phyloTreeField,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+
+        return data
     }
 
     fun getGenomicSequence(

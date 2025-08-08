@@ -30,8 +30,10 @@ import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIP
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
+import org.genspectrum.lapis.controller.PHYLO_SUBTREE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
+import org.genspectrum.lapis.controller.TREE_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 import org.springframework.core.annotation.AliasFor
@@ -44,6 +46,7 @@ const val REQUEST_SCHEMA_WITH_MIN_PROPORTION = "SequenceFiltersWithMinProportion
 const val AGGREGATED_REQUEST_SCHEMA = "AggregatedPostRequest"
 const val DETAILS_REQUEST_SCHEMA = "DetailsPostRequest"
 const val MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA = "MostRecentCommonAncestorRequest"
+const val PHYLO_SUBTREE_REQUEST_SCHEMA = "PhyloSubtreeRequest"
 const val INSERTIONS_REQUEST_SCHEMA = "InsertionsRequest"
 const val ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AminoAcidSequenceRequest"
 const val ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA = "AllAminoAcidSequenceRequest"
@@ -54,6 +57,7 @@ const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 const val MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA = "MostRecentCommonAncestorResponse"
+const val PHYLO_SUBTREE_RESPONSE_SCHEMA = "PhyloSubtreeResponse"
 const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
@@ -78,6 +82,7 @@ const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
 const val SEQUENCES_FORMAT_SCHEMA = "SequencesDataFormat"
+const val TREE_DATA_FORMAT_SCHEMA = "TreeDataFormat"
 const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA = "NucleotideFastaHeaderTemplate"
 const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplate"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
@@ -233,6 +238,19 @@ annotation class LapisDetailsResponse
     content = [Content(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA"))],
 )
 annotation class LapisMostRecentCommonAncestorResponse
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
+    description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
+    content = [
+        Content(
+            mediaType = LapisMediaType.TEXT_NEWICK_VALUE,
+            schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_RESPONSE_SCHEMA"),
+        ),
+    ],
+)
+annotation class LapisPhyloSubtreeResponse
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
@@ -500,6 +518,14 @@ annotation class DataFormat
     description = SEQUENCES_DATA_FORMAT_DESCRIPTION,
 )
 annotation class SequencesDataFormatParam
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$TREE_DATA_FORMAT_SCHEMA"),
+    description = TREE_DATA_FORMAT_DESCRIPTION,
+)
+annotation class TreeDataFormatParam
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

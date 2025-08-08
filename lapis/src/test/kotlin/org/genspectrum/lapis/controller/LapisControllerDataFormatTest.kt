@@ -343,7 +343,7 @@ class LapisControllerDataFormatTest(
 
     private companion object {
         @JvmStatic
-        val endpoints = SampleRoute.entries.filter { !it.servesFasta }.map { it.pathSegment }
+        val endpoints = SampleRoute.entries.filter { it.serveType == ServeType.METADATA }.map { it.pathSegment }
 
         @JvmStatic
         fun getRequests(dataFormat: String) =

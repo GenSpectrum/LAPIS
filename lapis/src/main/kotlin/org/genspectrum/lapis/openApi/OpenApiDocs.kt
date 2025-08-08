@@ -31,9 +31,11 @@ import org.genspectrum.lapis.controller.OFFSET_DESCRIPTION
 import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.PRINT_NODES_NOT_IN_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
+import org.genspectrum.lapis.controller.TREE_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
+import org.genspectrum.lapis.controller.middleware.TreeDataFormat
 import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
@@ -131,6 +133,17 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
+                    PHYLO_SUBTREE_REQUEST_SCHEMA,
+                    requestSchemaPhyloTree(
+                        getSequenceFiltersWithFormat(
+                            databaseConfig = databaseConfig,
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
+                            dataFormatSchema = treeFormatSchema(),
+                        ),
+                    ),
+                )
+                .addSchemas(
                     INSERTIONS_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
                         getSequenceFiltersWithFormat(
@@ -220,6 +233,17 @@ fun buildOpenApiSchema(
                                 "The response contains the most recent common ancestor of the nodes in the filter.",
                             )
                             .properties(mostRecentCommonAncestorMetadataFieldSchemas()),
+                    ),
+                )
+                .addSchemas(
+                    PHYLO_SUBTREE_RESPONSE_SCHEMA,
+                    lapisArrayResponseSchema(
+                        Schema<String>()
+                            .types(setOf("object"))
+                            .description(
+                                "The response contains the subtree of the nodes in the filter.",
+                            )
+                            .properties(phyloSubtreeFieldSchemas()),
                     ),
                 )
                 .addSchemas(
@@ -354,6 +378,7 @@ fun buildOpenApiSchema(
                 .addSchemas(LIMIT_SCHEMA, limitSchema())
                 .addSchemas(OFFSET_SCHEMA, offsetSchema())
                 .addSchemas(SEQUENCES_FORMAT_SCHEMA, sequencesFormatSchema())
+                .addSchemas(TREE_DATA_FORMAT_SCHEMA, treeFormatSchema())
                 .addSchemas(
                     NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA,
                     nucleotideFastaHeaderTemplateSchema(databaseConfig),
@@ -470,6 +495,12 @@ private fun mostRecentCommonAncestorMetadataFieldSchemas(): Map<String, Schema<*
             .description("The number of nodes in the filter not in the phylogenetic tree."),
         "missingFromTree" to StringSchema()
             .description("The comma-separated list of names of the nodes in the filter not in the phylogenetic tree."),
+    )
+
+private fun phyloSubtreeFieldSchemas(): Map<String, Schema<*>> =
+    mapOf(
+        "subtreeNewick" to StringSchema()
+            .description("The newick representation of the subtree for the nodes in the filter."),
     )
 
 private fun mapToOpenApiType(type: MetadataType): String =
@@ -926,6 +957,16 @@ private fun sequencesFormatSchema() =
                 SequencesDataFormat.FASTA.value,
                 SequencesDataFormat.JSON.value,
                 SequencesDataFormat.NDJSON.value,
+            ),
+        )
+
+private fun treeFormatSchema() =
+    Schema<String>()
+        .types(setOf("string"))
+        .description(TREE_DATA_FORMAT_DESCRIPTION)
+        ._enum(
+            listOf(
+                TreeDataFormat.NEWICK.value,
             ),
         )
 

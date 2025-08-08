@@ -354,6 +354,18 @@ class SiloQueryTest {
                         }
                     """,
                 ),
+                Arguments.of(
+                    SiloAction.phyloSubtree(
+                        "phyloTreeField",
+                    ),
+                    """
+                        {
+                            "columnName": "phyloTreeField",
+                            "printNodesNotInTree": false,
+                            "type": "PhyloSubtree"
+                        }
+                    """,
+                ),
             )
 
         @JvmStatic

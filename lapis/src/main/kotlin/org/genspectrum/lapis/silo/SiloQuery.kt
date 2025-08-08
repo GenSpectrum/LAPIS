@@ -10,6 +10,7 @@ import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import java.time.LocalDate
 
@@ -31,6 +32,8 @@ class InsertionDataTypeReference : TypeReference<InsertionData>()
 class SequenceDataTypeReference : TypeReference<SequenceData>()
 
 class MostCommonAncestorDataTypeReference : TypeReference<MostCommonAncestorData>()
+
+class PhyloSubtreeDataTypeReference : TypeReference<PhyloSubtreeData>()
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -111,6 +114,15 @@ sealed class SiloAction<ResponseType>(
             printNodesNotInTree: Boolean = false,
         ): SiloAction<MostCommonAncestorData> =
             MostRecentCommonAncestorAction(
+                columnName = phyloTreeField,
+                printNodesNotInTree = printNodesNotInTree,
+            )
+
+        fun phyloSubtree(
+            phyloTreeField: String,
+            printNodesNotInTree: Boolean = false,
+        ): SiloAction<PhyloSubtreeData> =
+            PhyloSubtreeAction(
                 columnName = phyloTreeField,
                 printNodesNotInTree = printNodesNotInTree,
             )
@@ -230,6 +242,18 @@ sealed class SiloAction<ResponseType>(
         override val randomize: Boolean? = null,
     ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
         val type: String = "MostRecentCommonAncestor"
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class PhyloSubtreeAction(
+        val columnName: String,
+        val printNodesNotInTree: Boolean? = false,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+        override val randomize: Boolean? = null,
+    ) : SiloAction<PhyloSubtreeData>(PhyloSubtreeDataTypeReference(), cacheable = true) {
+        val type: String = "PhyloSubtree"
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

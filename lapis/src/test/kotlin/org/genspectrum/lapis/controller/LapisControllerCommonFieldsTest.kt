@@ -408,7 +408,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithNucleotideMutationFilter")
     fun `GET endpoint with invalid nucleotide mutation filter`(endpoint: String) {
-        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE || endpoint == PHYLO_SUBTREE_ROUTE) {
             "$endpoint?phyloTreeField=primaryKey&nucleotideMutations=invalidMutation"
         } else {
             "$endpoint?nucleotideMutations=invalidMutation"
@@ -421,7 +421,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotide mutation")
     @MethodSource("getEndpointsWithAminoAcidMutationFilter")
     fun `GET endpoint with invalid amino acid mutation`(endpoint: String) {
-        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE || endpoint == PHYLO_SUBTREE_ROUTE) {
             "$endpoint?phyloTreeField=primaryKey&aminoAcidMutations=invalidMutation"
         } else {
             "$endpoint?aminoAcidMutations=invalidMutation"
@@ -434,7 +434,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid nucleotideInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid nucleotide insertion filter`(endpoint: String) {
-        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE || endpoint == PHYLO_SUBTREE_ROUTE) {
             "$endpoint?phyloTreeField=primaryKey&nucleotideInsertions=invalidInsertion"
         } else {
             "$endpoint?nucleotideInsertions=invalidInsertion"
@@ -447,7 +447,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with invalid aminoAcidInsertion")
     @MethodSource("getEndpointsWithInsertionFilter")
     fun `GET with invalid amino acid insertionFilter`(endpoint: String) {
-        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE || endpoint == PHYLO_SUBTREE_ROUTE) {
             "$endpoint?phyloTreeField=primaryKey&aminoAcidInsertions=invalidInsertion"
         } else {
             "$endpoint?aminoAcidInsertions=invalidInsertion"
@@ -460,7 +460,7 @@ class LapisControllerCommonFieldsTest(
     @ParameterizedTest(name = "GET {0} with non existing field should throw")
     @MethodSource("getEndpointsWithFields")
     fun `GET with non existing field should throw`(endpoint: String) {
-        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE) {
+        val path = if (endpoint == MOST_RECENT_COMMON_ANCESTOR_ROUTE || endpoint == PHYLO_SUBTREE_ROUTE) {
             "$endpoint?phyloTreeField=primaryKey&fields=nonExistingField"
         } else {
             "$endpoint?fields=nonExistingField"

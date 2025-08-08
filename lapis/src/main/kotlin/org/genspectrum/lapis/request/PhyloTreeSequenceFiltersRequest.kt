@@ -15,10 +15,22 @@ data class PhyloTreeSequenceFiltersRequest(
     override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val phyloTreeField: String,
     override val orderByFields: List<OrderByField> = emptyList(),
     override val limit: Int? = null,
     override val offset: Int? = null,
+    val phyloTreeField: String,
+) : CommonSequenceFilters
+
+data class MRCASequenceFiltersRequest(
+    override val sequenceFilters: SequenceFilters,
+    override val nucleotideMutations: List<NucleotideMutation>,
+    override val aminoAcidMutations: List<AminoAcidMutation>,
+    override val nucleotideInsertions: List<NucleotideInsertion>,
+    override val aminoAcidInsertions: List<AminoAcidInsertion>,
+    override val orderByFields: List<OrderByField> = emptyList(),
+    override val limit: Int? = null,
+    override val offset: Int? = null,
+    val phyloTreeField: String,
     val printNodesNotInTree: Boolean = false,
 ) : CommonSequenceFilters
 
@@ -35,7 +47,6 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
         val codec = jsonParser.codec
 
         val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
-        val printNodesNotInTree = parsePrintNodesNotInTree(node)
         val parsedCommonFields = parseCommonFields(node, codec)
 
         return PhyloTreeSequenceFiltersRequest(
@@ -44,10 +55,40 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
             parsedCommonFields.aminoAcidMutations,
             parsedCommonFields.nucleotideInsertions,
             parsedCommonFields.aminoAcidInsertions,
-            phyloTreeField.fieldName,
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
+            phyloTreeField.fieldName,
+        )
+    }
+}
+
+@JsonComponent
+class MRCASequenceFiltersRequestDeserializer(
+    private val fieldConverter: CaseInsensitiveFieldConverter,
+    private val databaseConfig: DatabaseConfig,
+) : JsonDeserializer<MRCASequenceFiltersRequest>() {
+    override fun deserialize(
+        jsonParser: JsonParser,
+        ctxt: DeserializationContext,
+    ): MRCASequenceFiltersRequest {
+        val node = jsonParser.readValueAsTree<JsonNode>()
+        val codec = jsonParser.codec
+
+        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
+        val printNodesNotInTree = parsePrintNodesNotInTree(node)
+        val parsedCommonFields = parseCommonFields(node, codec)
+
+        return MRCASequenceFiltersRequest(
+            parsedCommonFields.sequenceFilters,
+            parsedCommonFields.nucleotideMutations,
+            parsedCommonFields.aminoAcidMutations,
+            parsedCommonFields.nucleotideInsertions,
+            parsedCommonFields.aminoAcidInsertions,
+            parsedCommonFields.orderByFields,
+            parsedCommonFields.limit,
+            parsedCommonFields.offset,
+            phyloTreeField.fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
     }
