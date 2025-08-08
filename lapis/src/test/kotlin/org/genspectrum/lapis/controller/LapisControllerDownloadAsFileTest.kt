@@ -515,25 +515,82 @@ data class DownloadCompressedFileScenario(
                 dataFormat = dataFormat,
                 route = route,
                 compressionFormat = COMPRESSION_FORMAT_ZSTD,
+            ) + scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_GZIP) + scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_ZSTD)
+
+        private fun scenariosForNewick(
+            compressionFormat: String,
+        ): List<DownloadCompressedFileScenario> {
+            val dataFormat = TreeEndpointMockDataCollection.DataFormat.NEWICK
+            val endpoint = PHYLO_SUBTREE.pathSegment
+            val route = PHYLO_SUBTREE
+            val (mockData, dataFileFormat) = MockDataForEndpoints.treeEndpointMockData().expecting(
+                        TreeEndpointMockDataCollection.DataFormat.NEWICK,
+                    ) to "nwk"
+
+            val acceptHeader =  dataFormat.acceptHeader
+
+            val fileEnding = when (compressionFormat) {
+                COMPRESSION_FORMAT_ZSTD -> "zst"
+                COMPRESSION_FORMAT_GZIP -> "gz"
+                else -> throw Exception("Test issue: unknown compression format $compressionFormat")
+            }
+            val expectedFilename = "${route.getExpectedFilename()}.$dataFileFormat.$fileEnding"
+            val expectedContentType = getContentTypeForCompressionFormat(compressionFormat)
+            val maybePhyloTreeFieldParam: String =
+                mockData.phyloTreeField
+                    ?.let { "&phyloTreeField=$it" }
+                    ?: ""
+
+            return listOf(
+                DownloadCompressedFileScenario(
+                    description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    mockData = mockData,
+                    request = getSample(
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat$maybePhyloTreeFieldParam",
+                    )
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = expectedFilename,
+                    expectedContentType = expectedContentType,
+                ),
+                DownloadCompressedFileScenario(
+                    description = "GET $endpoint as $compressionFormat ${dataFormat.fileFormat} with basename",
+                    mockData = mockData,
+                    request = getSample(
+                        "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
+                                "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file$maybePhyloTreeFieldParam",
+                    )
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = "my_file.$dataFileFormat.$fileEnding",
+                    expectedContentType = expectedContentType,
+                ),
+                DownloadCompressedFileScenario(
+                    description = "POST form url encoded $endpoint as $compressionFormat ${dataFormat.fileFormat}",
+                    mockData = mockData,
+                    request = postSample(endpoint)
+                        .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
+                        .param(COMPRESSION_PROPERTY, compressionFormat)
+                        .withPhyloTreeFieldParam(mockData.phyloTreeField)
+                        .contentType(APPLICATION_FORM_URLENCODED)
+                        .header(ACCEPT, acceptHeader),
+                    expectedFilename = expectedFilename,
+                    expectedContentType = expectedContentType,
+                ),
             )
+        }
 
         private fun scenariosFor(
             dataFormat: MockDataCollection.DataFormat,
             route: SampleRoute,
             compressionFormat: String,
         ): List<DownloadCompressedFileScenario> {
+            if (route.serveType == ServeType.NEWICK) {
+                return emptyList()
+            }
             val (mockData, dataFileFormat) = if (route.serveType == ServeType.SEQUENCES) {
                 MockDataForEndpoints.sequenceEndpointMockData()
                     .expecting(SequenceEndpointMockDataCollection.DataFormat.FASTA) to "fasta"
             } else {
-                if (route.serveType == ServeType.NEWICK) {
-                    MockDataForEndpoints.treeEndpointMockData().expecting(
-                        TreeEndpointMockDataCollection.DataFormat.NEWICK,
-                    ) to
-                        "nwk"
-                } else {
-                    MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
-                }
+                MockDataForEndpoints.getMockData(route.pathSegment).expecting(dataFormat) to dataFormat.fileFormat
             }
 
             val endpoint = when (route) {
