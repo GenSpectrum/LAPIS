@@ -21,6 +21,7 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 
 class VariantQueryFacadeTest {
     private val dummyReferenceGenomeSchema = ReferenceGenomeSchema(
@@ -524,6 +525,18 @@ class VariantQueryFacadeTest {
         assertThat(
             result,
             equalTo(LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
+        )
+    }
+
+    @Test
+    fun `given a valid variantQuery with a 'usherTreedescendantOf' expression then returns SILO query`() {
+        val variantQuery = "usherTree.descendantOf:node_1200"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(
+            result,
+            equalTo(PhyloDescendantOf(USHER_TREE_DESCENDANT_COLUMN, "node_1200")),
         )
     }
 

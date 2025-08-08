@@ -5,6 +5,7 @@ import VariantQueryParser.AaInsertionQueryContext
 import VariantQueryParser.AaMutationQueryContext
 import VariantQueryParser.AndContext
 import VariantQueryParser.GisaidCladeNomenclatureContext
+import VariantQueryParser.UsherTreeDescendantQueryContext
 import VariantQueryParser.MaybeContext
 import VariantQueryParser.NOfQueryContext
 import VariantQueryParser.NextcladePangolineageQueryContext
@@ -38,6 +39,7 @@ import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -170,6 +172,11 @@ class VariantQueryCustomListener(
             else -> ctx.text.uppercase()
         }
         expressionStack.addLast(StringEquals(NEXTSTRAIN_CLADE_COLUMN, value))
+    }
+
+    override fun enterUsherTreeDescendantQuery(ctx: UsherTreeDescendantQueryContext) {
+        val value = ctx.name().text
+        expressionStack.addLast(PhyloDescendantOf(USHER_TREE_DESCENDANT_COLUMN, value))
     }
 
     override fun enterGisaidCladeNomenclature(ctx: GisaidCladeNomenclatureContext) {
