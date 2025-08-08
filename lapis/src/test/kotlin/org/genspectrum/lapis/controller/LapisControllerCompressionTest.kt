@@ -499,7 +499,7 @@ private fun getTreeRequests(
             .param("dataFormat", dataFormat.fileFormat)
             .param("compression", compressionFormat)
             .contentType(APPLICATION_FORM_URLENCODED)
-            .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField),
+            .withPhyloTreeFieldParam(mockDataCollection.phyloTreeField),
         compressionFormat = compressionFormat,
         expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
         expectedContentEncoding = null,

@@ -212,7 +212,7 @@ data class TreeEndpointMockDataCollection(
         val fileFormat: String,
         val acceptHeader: String,
     ) {
-        NEWICK("nwk", TEXT_NEWICK_VALUE),
+        NEWICK("NEWICK", TEXT_NEWICK_VALUE),
     }
 
     companion object {
