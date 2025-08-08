@@ -250,6 +250,8 @@ describe('All endpoints', () => {
 
         if (route.servesType === 'SEQUENCES') {
           expect(await response.text()).to.match(/^>key_/);
+        } else if (route.servesType === 'TREE') {
+          expect(await response.text()).to.match(/NODE_\d+;$/);
         } else {
           const body = await response.json();
           expect(body.data).is.an('array');
