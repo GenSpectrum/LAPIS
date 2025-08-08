@@ -5,7 +5,6 @@ import VariantQueryParser.AaInsertionQueryContext
 import VariantQueryParser.AaMutationQueryContext
 import VariantQueryParser.AndContext
 import VariantQueryParser.GisaidCladeNomenclatureContext
-import VariantQueryParser.UsherTreeDescendantQueryContext
 import VariantQueryParser.MaybeContext
 import VariantQueryParser.NOfQueryContext
 import VariantQueryParser.NextcladePangolineageQueryContext
@@ -16,6 +15,7 @@ import VariantQueryParser.NucleotideMutationQueryContext
 import VariantQueryParser.OrContext
 import VariantQueryParser.PangolineageQueryContext
 import VariantQueryParser.PangolineageWithPossibleSublineagesContext
+import VariantQueryParser.UsherTreeDescendantQueryContext
 import org.antlr.v4.runtime.RuleContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
@@ -37,9 +37,9 @@ import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
-import org.genspectrum.lapis.silo.PhyloDescendantOf
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
