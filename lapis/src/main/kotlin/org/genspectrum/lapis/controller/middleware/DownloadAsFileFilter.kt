@@ -78,6 +78,9 @@ class DownloadAsFileFilter(
             }
             return ".fasta"
         }
+        if (matchingRoute?.serveType == ServeType.NEWICK) {
+            return ".nwk"
+        }
         for (acceptHeader in acceptHeaders) {
             if (acceptHeader.equalsTypeAndSubtype(TEXT_TSV)) {
                 return ".tsv"

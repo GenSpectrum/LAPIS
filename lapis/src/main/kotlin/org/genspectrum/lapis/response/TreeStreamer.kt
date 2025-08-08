@@ -26,7 +26,7 @@ class TreeStreamer(
 
         response.outputStream.writer().use { stream ->
             treeResponse.forEach {
-                stream.appendLine(it.subtreeNewick)
+                stream.append(it.subtreeNewick)
             }
         }
     }
