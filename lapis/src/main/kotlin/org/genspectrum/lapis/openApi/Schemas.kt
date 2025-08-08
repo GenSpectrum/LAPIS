@@ -243,9 +243,12 @@ annotation class LapisMostRecentCommonAncestorResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
-    content = [Content(
-        mediaType= LapisMediaType.TEXT_NEWICK_VALUE,
-        schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_RESPONSE_SCHEMA"))],
+    content = [
+        Content(
+            mediaType = LapisMediaType.TEXT_NEWICK_VALUE,
+            schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_RESPONSE_SCHEMA"),
+        ),
+    ],
 )
 annotation class LapisPhyloSubtreeResponse
 

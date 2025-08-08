@@ -515,19 +515,18 @@ data class DownloadCompressedFileScenario(
                 dataFormat = dataFormat,
                 route = route,
                 compressionFormat = COMPRESSION_FORMAT_ZSTD,
-            ) + scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_GZIP) + scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_ZSTD)
+            ) + scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_GZIP) +
+            scenariosForNewick(compressionFormat = COMPRESSION_FORMAT_ZSTD)
 
-        private fun scenariosForNewick(
-            compressionFormat: String,
-        ): List<DownloadCompressedFileScenario> {
+        private fun scenariosForNewick(compressionFormat: String): List<DownloadCompressedFileScenario> {
             val dataFormat = TreeEndpointMockDataCollection.DataFormat.NEWICK
             val endpoint = PHYLO_SUBTREE.pathSegment
             val route = PHYLO_SUBTREE
             val (mockData, dataFileFormat) = MockDataForEndpoints.treeEndpointMockData().expecting(
-                        TreeEndpointMockDataCollection.DataFormat.NEWICK,
-                    ) to "nwk"
+                TreeEndpointMockDataCollection.DataFormat.NEWICK,
+            ) to "nwk"
 
-            val acceptHeader =  dataFormat.acceptHeader
+            val acceptHeader = dataFormat.acceptHeader
 
             val fileEnding = when (compressionFormat) {
                 COMPRESSION_FORMAT_ZSTD -> "zst"
@@ -557,7 +556,7 @@ data class DownloadCompressedFileScenario(
                     mockData = mockData,
                     request = getSample(
                         "$endpoint?$DOWNLOAD_AS_FILE_PROPERTY=true&$COMPRESSION_PROPERTY=$compressionFormat" +
-                                "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file$maybePhyloTreeFieldParam",
+                            "&$DOWNLOAD_FILE_BASENAME_PROPERTY=my_file$maybePhyloTreeFieldParam",
                     )
                         .header(ACCEPT, acceptHeader),
                     expectedFilename = "my_file.$dataFileFormat.$fileEnding",

@@ -5,10 +5,13 @@ import io.mockk.every
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.response.MostCommonAncestorData
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -37,16 +40,16 @@ class LapisControllerPhyloTreeTest(
         every { lapisInfo.dataVersion } returns DATA_VERSION
     }
 
-    //TODO: extend these tests to the phylo_subtree endpoint
-
-    @Test
-    fun `GIVEN call to mostRecentCommonAncestor endpoint without PhyloTreeField returns error`() {
-        mockMvc.perform(getSample("/mostRecentCommonAncestor"))
+    @ParameterizedTest
+    @ValueSource(strings = ["/mostRecentCommonAncestor", "/phyloSubtree"])
+    fun `GIVEN missing phyloTreeField param THEN GET and POST return 400`(endpoint: String) {
+        mockMvc.perform(getSample(endpoint))
             .andExpect(status().isBadRequest)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(jsonPath("\$.detail", startsWith("Required parameter 'phyloTreeField' is not present")))
+            .andExpect(jsonPath("$.detail", startsWith("Required parameter 'phyloTreeField' is not present")))
+
         mockMvc.perform(
-            postSample("/mostRecentCommonAncestor")
+            postSample(endpoint)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""{}"""),
         )
@@ -54,7 +57,7 @@ class LapisControllerPhyloTreeTest(
             .andExpect(header().string("Content-Type", "application/json"))
             .andExpect(
                 jsonPath(
-                    "\$.error.detail",
+                    "$.error.detail",
                     startsWith("phyloTreeField is required and must be a string representing a phylo tree field"),
                 ),
             )
@@ -81,11 +84,32 @@ class LapisControllerPhyloTreeTest(
     }
 
     @Test
-    fun `GIVEN call to mostRecentCommonAncestor endpoint with invalid PhyloTreeField returns 400 error`() {
+    fun `GIVEN call to phyloSubtree endpoint with miscapitalized PhyloTreeField returns ok`() {
+        every {
+            siloQueryModelMock.getNewick(
+                phyloTreeSequenceFiltersRequest(
+                    sequenceFilters = emptyMap(),
+                    phyloTreeField = "primaryKey",
+                ),
+            )
+        } returns Stream.of(
+            PhyloSubtreeData(
+                "(node1,node2)root;",
+                0,
+                "missing",
+            ),
+        )
+        mockMvc.perform(getSample("/phyloSubtree?phyloTreeField=PrImArYkEy"))
+            .andExpect(status().isOk)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["/mostRecentCommonAncestor", "/phyloSubtree"])
+    fun `GIVEN invalid phyloTreeField THEN GET and POST return 400`(endpoint: String) {
         listOf(
-            mockMvc.perform(getSample("/mostRecentCommonAncestor?phyloTreeField=floatValue")),
+            mockMvc.perform(getSample("$endpoint?phyloTreeField=floatValue")),
             mockMvc.perform(
-                postSample("/mostRecentCommonAncestor")
+                postSample(endpoint)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""{"phyloTreeField": "floatValue"}"""),
             ),
