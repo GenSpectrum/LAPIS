@@ -12,20 +12,20 @@ describe('The /phyloSubtree endpoint', () => {
 
     const text = await result.text();
     expect(result.status, text).to.equal(200);
-    expect(text.split('\n')[0]).to.equal('(key_2270139:1e-06,key_2181005:0.00010033)NODE_0000043;');
+    expect(text.trim()).to.equal('(key_2270139:1e-06,key_2181005:0.00010033)NODE_0000043;');
   });
 
   it('should return empty string as newick if filter has no nodes', async () => {
     const urlParams = new URLSearchParams({
       phyloTreeField: 'primaryKey',
-      advancedQuery: 'primaryKey=string',
+      advancedQuery: 'primaryKey=doesNotExist',
     });
 
     const result = await fetch(`${basePath}/sample/phyloSubtree?${urlParams}`);
 
     const text = await result.text();
     expect(result.status, text).to.equal(200);
-    expect(text.split('\n')[0]).to.equal('');
+    expect(text.trim()).to.equal('');
   });
 
   it('should throw an error for phyloSubtree requests with invalid phyloTreeField', async () => {
