@@ -14,6 +14,7 @@ import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.TSV
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
+import org.genspectrum.lapis.controller.SampleRoute.PHYLO_SUBTREE
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -189,7 +190,7 @@ class LapisControllerCompressionTest(
         @JvmStatic
         val scenarios =
             SampleRoute.entries
-                .filter { !it.servesFasta }
+                .filter { it.serveType == ServeType.METADATA }
                 .flatMap {
                     getRequests(
                         endpoint = it,
@@ -241,6 +242,18 @@ class LapisControllerCompressionTest(
                     endpoint = ALIGNED_AMINO_ACID_SEQUENCES.pathSegment,
                     mockDataCollection = MockDataForEndpoints.sequenceEndpointMockDataForAllSequences(),
                     dataFormat = SequenceEndpointMockDataCollection.DataFormat.FASTA,
+                    compressionFormat = COMPRESSION_FORMAT_ZSTD,
+                ) +
+                getTreeRequests(
+                    endpoint = PHYLO_SUBTREE.pathSegment,
+                    mockDataCollection = MockDataForEndpoints.treeEndpointMockData(),
+                    dataFormat = TreeEndpointMockDataCollection.DataFormat.NEWICK,
+                    compressionFormat = COMPRESSION_FORMAT_GZIP,
+                ) +
+                getTreeRequests(
+                    endpoint = PHYLO_SUBTREE.pathSegment,
+                    mockDataCollection = MockDataForEndpoints.treeEndpointMockData(),
+                    dataFormat = TreeEndpointMockDataCollection.DataFormat.NEWICK,
                     compressionFormat = COMPRESSION_FORMAT_ZSTD,
                 )
 
@@ -443,6 +456,63 @@ private fun getFastaRequests(
             .contentType(APPLICATION_FORM_URLENCODED)
             .accept(dataFormat.acceptHeader)
             .header(ACCEPT_ENCODING, compressionFormat),
+        compressionFormat = compressionFormat,
+        expectedContentType = "${dataFormat.acceptHeader};charset=UTF-8",
+        expectedContentEncoding = compressionFormat,
+    ),
+)
+
+private fun getTreeRequests(
+    endpoint: String,
+    mockDataCollection: TreeEndpointMockDataCollection,
+    dataFormat: TreeEndpointMockDataCollection.DataFormat,
+    compressionFormat: String,
+) = listOf(
+    RequestScenario(
+        callDescription = "GET $endpoint as $dataFormat with request parameter",
+        mockData = mockDataCollection.expecting(dataFormat),
+        request = getSample(endpoint)
+            .queryParam("country", "Switzerland")
+            .queryParam("dataFormat", dataFormat.fileFormat)
+            .queryParam("compression", compressionFormat)
+            .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField),
+        compressionFormat = compressionFormat,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
+    ),
+    RequestScenario(
+        callDescription = "GET $endpoint as $dataFormat with accept header",
+        mockData = mockDataCollection.expecting(dataFormat),
+        request = getSample("$endpoint?country=Switzerland")
+            .accept(dataFormat.acceptHeader)
+            .header(ACCEPT_ENCODING, compressionFormat)
+            .withPhyloTreeFieldQuery(mockDataCollection.phyloTreeField),
+        compressionFormat = compressionFormat,
+        expectedContentType = "${dataFormat.acceptHeader};charset=UTF-8",
+        expectedContentEncoding = compressionFormat,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
+        mockData = mockDataCollection.expecting(dataFormat),
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .param("dataFormat", dataFormat.fileFormat)
+            .param("compression", compressionFormat)
+            .contentType(APPLICATION_FORM_URLENCODED)
+            .withPhyloTreeFieldParam(mockDataCollection.phyloTreeField),
+        compressionFormat = compressionFormat,
+        expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+        expectedContentEncoding = null,
+    ),
+    RequestScenario(
+        callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
+        mockData = mockDataCollection.expecting(dataFormat),
+        request = postSample(endpoint)
+            .param("country", "Switzerland")
+            .contentType(APPLICATION_FORM_URLENCODED)
+            .accept(dataFormat.acceptHeader)
+            .header(ACCEPT_ENCODING, compressionFormat)
+            .withPhyloTreeFieldParam(mockDataCollection.phyloTreeField),
         compressionFormat = compressionFormat,
         expectedContentType = "${dataFormat.acceptHeader};charset=UTF-8",
         expectedContentEncoding = compressionFormat,

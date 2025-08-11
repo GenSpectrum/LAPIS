@@ -8,6 +8,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.SampleRoute
+import org.genspectrum.lapis.controller.ServeType
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
@@ -65,7 +66,7 @@ class DownloadAsFileFilter(
             ?.sortedByDescending { it.qualityValue }
             ?: emptyList()
 
-        if (matchingRoute?.servesFasta == true) {
+        if (matchingRoute?.serveType == ServeType.SEQUENCES) {
             for (acceptHeader in acceptHeaders) {
                 if (acceptHeader.equalsTypeAndSubtype(TEXT_X_FASTA)) {
                     return ".fasta"
@@ -76,6 +77,9 @@ class DownloadAsFileFilter(
                 }
             }
             return ".fasta"
+        }
+        if (matchingRoute?.serveType == ServeType.NEWICK) {
+            return ".nwk"
         }
         for (acceptHeader in acceptHeaders) {
             if (acceptHeader.equalsTypeAndSubtype(TEXT_TSV)) {

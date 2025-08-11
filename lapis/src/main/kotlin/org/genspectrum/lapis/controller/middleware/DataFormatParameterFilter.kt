@@ -24,6 +24,13 @@ object DataFormat {
     const val CSV_WITHOUT_HEADERS = "CSV-WITHOUT-HEADERS"
     const val TSV = "TSV"
     const val TSV_ESCAPED = "TSV-ESCAPED"
+    const val NEWICK = "NEWICK"
+}
+
+enum class TreeDataFormat(
+    val value: String,
+) {
+    NEWICK(DataFormat.NEWICK),
 }
 
 enum class SequencesDataFormat(
@@ -88,6 +95,7 @@ class DataFormatParameterFilter(
             DataFormat.JSON -> MediaType.APPLICATION_JSON_VALUE
             SequencesDataFormat.FASTA.value -> LapisMediaType.TEXT_X_FASTA_VALUE
             SequencesDataFormat.NDJSON.value -> MediaType.APPLICATION_NDJSON_VALUE
+            TreeDataFormat.NEWICK.value -> LapisMediaType.TEXT_NEWICK_VALUE
 
             else -> "unknown/unknown"
         }

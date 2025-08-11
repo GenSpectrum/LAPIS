@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
@@ -41,6 +42,7 @@ import org.genspectrum.lapis.openApi.LapisDetailsResponse
 import org.genspectrum.lapis.openApi.LapisMostRecentCommonAncestorResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideInsertionsResponse
 import org.genspectrum.lapis.openApi.LapisNucleotideMutationsResponse
+import org.genspectrum.lapis.openApi.LapisPhyloSubtreeResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.MutationsFields
@@ -48,16 +50,19 @@ import org.genspectrum.lapis.openApi.MutationsOrderByFields
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
 import org.genspectrum.lapis.openApi.Offset
+import org.genspectrum.lapis.openApi.PHYLO_SUBTREE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.PhyloTreeField
 import org.genspectrum.lapis.openApi.PrimitiveFieldFilters
 import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
+import org.genspectrum.lapis.openApi.TreeDataFormatParam
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
+import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -79,6 +84,7 @@ import org.genspectrum.lapis.response.MostRecentCommonAncestorCollection
 import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
+import org.genspectrum.lapis.response.TreeStreamer
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -98,6 +104,7 @@ class LapisController(
     private val requestContext: RequestContext,
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
+    private val treeStreamer: TreeStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -931,17 +938,20 @@ class LapisController(
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequest(
+        val request = MRCASequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
-
         lapisResponseStreamer.streamData(
             request = request,
             getData = ::getMostRecentCommonAncestorCollection,
@@ -984,14 +994,15 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequest(
+        val request = MRCASequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField =
+                validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1040,14 +1051,18 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = PhyloTreeSequenceFiltersRequest(
+        val request = MRCASequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1074,7 +1089,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsJson(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequest,
+        request: MRCASequenceFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -1097,7 +1112,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequest,
+        request: MRCASequenceFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1124,7 +1139,7 @@ class LapisController(
     fun postMostRecentCommonAncestorAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA"))
         @RequestBody
-        request: PhyloTreeSequenceFiltersRequest,
+        request: MRCASequenceFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1140,13 +1155,92 @@ class LapisController(
     }
 
     private fun getMostRecentCommonAncestorCollection(
-        request: PhyloTreeSequenceFiltersRequest,
+        request: MRCASequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
         validatePhyloTreeField(request.phyloTreeField, caseInsensitiveFieldConverter, databaseConfig)
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
         )
+    }
+
+    @GetMapping(PHYLO_SUBTREE_ROUTE, produces = [TEXT_NEWICK_VALUE])
+    @LapisPhyloSubtreeResponse
+    fun getPhyloSubtreeAsNewick(
+        @PrimitiveFieldFilters
+        @RequestParam
+        sequenceFilters: GetRequestSequenceFilters?,
+        @PhyloTreeField
+        @RequestParam
+        phyloTreeField: String,
+        @NucleotideMutations
+        @RequestParam
+        nucleotideMutations: List<NucleotideMutation>?,
+        @AminoAcidMutations
+        @RequestParam
+        aminoAcidMutations: List<AminoAcidMutation>?,
+        @TreeDataFormatParam
+        @RequestParam
+        dataFormat: String? = null,
+        @NucleotideInsertions
+        @RequestParam
+        nucleotideInsertions: List<NucleotideInsertion>?,
+        @AminoAcidInsertions
+        @RequestParam
+        aminoAcidInsertions: List<AminoAcidInsertion>?,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        val request = PhyloTreeSequenceFiltersRequest(
+            sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
+                ?: emptyMap(),
+            nucleotideMutations ?: emptyList(),
+            aminoAcidMutations ?: emptyList(),
+            nucleotideInsertions ?: emptyList(),
+            aminoAcidInsertions ?: emptyList(),
+            phyloTreeField = validatePhyloTreeField(
+                phyloTreeField,
+                caseInsensitiveFieldConverter,
+                databaseConfig,
+            ).fieldName,
+        )
+
+        siloQueryModel.getNewick(
+            sequenceFilters = request,
+        )
+            .also {
+                treeStreamer.stream(
+                    treeResponse = it,
+                    response = response,
+                )
+            }
+    }
+
+    @PostMapping(
+        PHYLO_SUBTREE_ROUTE,
+        produces = [TEXT_NEWICK_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    )
+    @LapisPhyloSubtreeResponse
+    @Operation(
+        operationId = "postPhyloSubtreeAsNewick",
+    )
+    fun postPhyloSubtreeAsNewick(
+        @Parameter(schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_REQUEST_SCHEMA"))
+        @RequestBody
+        request: PhyloTreeSequenceFiltersRequest,
+        @RequestHeader httpHeaders: HttpHeaders,
+        response: HttpServletResponse,
+    ) {
+        siloQueryModel.getNewick(
+            sequenceFilters = request,
+        )
+            .also {
+                treeStreamer.stream(
+                    treeResponse = it,
+                    response = response,
+                )
+            }
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])

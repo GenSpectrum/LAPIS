@@ -10,7 +10,7 @@ Check the [Docker compose file](docker-compose.yml) for an example on how to run
 Use Docker Compose to run SILO and LAPIS:
 
 ```bash
-LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up
+LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up --pull always
 ```
 
 ## Configuration
