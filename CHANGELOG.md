@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.12](https://github.com/GenSpectrum/LAPIS/compare/v0.5.11...v0.5.12) (2025-08-11)
+
+
+### Features
+
+* **lapis:** add phyloSubtree endpoint ([#1293](https://github.com/GenSpectrum/LAPIS/issues/1293)) ([af5f2a3](https://github.com/GenSpectrum/LAPIS/commit/af5f2a383f7d5266575ba32cca578328d625d5db))
+
 ## [0.5.11](https://github.com/GenSpectrum/LAPIS/compare/v0.5.10...v0.5.11) (2025-08-06)
 
 
