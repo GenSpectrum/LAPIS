@@ -12,7 +12,6 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
-import org.genspectrum.lapis.controller.middleware.TreeDataFormat
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SiloQueryModel
@@ -1206,8 +1205,6 @@ class LapisController(
             ).fieldName,
         )
 
-        TreeDataFormat.fromAcceptHeaders(httpHeaders.accept)
-
         siloQueryModel.getNewick(
             sequenceFilters = request,
         )
@@ -1235,7 +1232,6 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        TreeDataFormat.fromAcceptHeaders(httpHeaders.accept)
         siloQueryModel.getNewick(
             sequenceFilters = request,
         )
