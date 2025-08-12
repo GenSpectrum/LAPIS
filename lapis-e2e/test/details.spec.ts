@@ -129,7 +129,7 @@ describe('The /details endpoint', () => {
 
     const urlParamsVariantQuery = new URLSearchParams({
       fields: 'usherTree',
-      variantQuery: 'usherTree.DescendantOf=NODE_0000043',
+      variantQuery: 'usherTree.DescendantOf:NODE_0000043',
       orderBy: 'usherTree',
       dataFormat: 'csv',
     });
