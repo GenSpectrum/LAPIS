@@ -4,6 +4,8 @@ schema:
   metadata:
     - name: primaryKey
       type: string
+    - name: usherTree
+      type: string
       isPhyloTreeField: true
     - name: date
       type: date

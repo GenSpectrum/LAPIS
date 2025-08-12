@@ -92,7 +92,7 @@ describe('All endpoints', () => {
       it('should return the data with Content-Disposition when asking for download', async () => {
         const urlParams = new URLSearchParams({ downloadAsFile: 'true' });
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams);
@@ -106,7 +106,7 @@ describe('All endpoints', () => {
       it('should return the data with Content-Disposition with custom file name', async () => {
         const urlParams = new URLSearchParams({ downloadAsFile: 'true', downloadFileBasename: 'custom' });
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams);
@@ -120,7 +120,7 @@ describe('All endpoints', () => {
       it('should return the lapis data version header', async () => {
         const urlParams = new URLSearchParams();
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
         const response = await get(urlParams);
 
@@ -163,7 +163,7 @@ describe('All endpoints', () => {
         it('should return the lapis data version header for CSV data', async () => {
           const urlParams = new URLSearchParams({ dataFormat: 'csv' });
           if (route.pathSegment === '/mostRecentCommonAncestor') {
-            urlParams.set('phyloTreeField', 'primaryKey');
+            urlParams.set('phyloTreeField', 'usherTree');
           }
           const response = await get(urlParams);
 
@@ -174,7 +174,7 @@ describe('All endpoints', () => {
         it('should return the lapis data version header for TSV data', async () => {
           const urlParams = new URLSearchParams({ dataFormat: 'tsv' });
           if (route.pathSegment === '/mostRecentCommonAncestor') {
-            urlParams.set('phyloTreeField', 'primaryKey');
+            urlParams.set('phyloTreeField', 'usherTree');
           }
           const response = await get(urlParams);
 
@@ -186,7 +186,7 @@ describe('All endpoints', () => {
       if (route.servesType === 'TREE') {
         it('should return the lapis data version header for nwk data', async () => {
           const urlParams = new URLSearchParams({ dataFormat: 'newick' });
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
           const response = await get(urlParams);
 
           expect(response.status).equals(200);
@@ -197,7 +197,7 @@ describe('All endpoints', () => {
       it('should return zstd compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'zstd' });
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams);
@@ -211,7 +211,7 @@ describe('All endpoints', () => {
       it('should return zstd compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams, { headers: { 'Accept-Encoding': 'zstd' } });
@@ -225,7 +225,7 @@ describe('All endpoints', () => {
       it('should return gzip compressed data when asking for compression', async () => {
         const urlParams = new URLSearchParams({ compression: 'gzip' });
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams);
@@ -239,7 +239,7 @@ describe('All endpoints', () => {
       it('should return gzip compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          urlParams.set('phyloTreeField', 'primaryKey');
+          urlParams.set('phyloTreeField', 'usherTree');
         }
 
         const response = await get(urlParams, { headers: { 'Accept-Encoding': 'gzip' } });
@@ -264,7 +264,7 @@ describe('All endpoints', () => {
           country: 'Switzerland',
         });
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
-          formUrlEncodedData.set('phyloTreeField', 'primaryKey');
+          formUrlEncodedData.set('phyloTreeField', 'usherTree');
         }
 
         const response = await fetch(url, {
@@ -283,7 +283,7 @@ describe('All endpoints', () => {
         it('should return info', async () => {
           const urlParams = new URLSearchParams();
           if (route.pathSegment === '/mostRecentCommonAncestor') {
-            urlParams.set('phyloTreeField', 'primaryKey');
+            urlParams.set('phyloTreeField', 'usherTree');
           }
           const response = await get(urlParams);
 

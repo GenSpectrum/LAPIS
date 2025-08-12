@@ -4,7 +4,7 @@ import { basePath, lapisClient } from './common';
 describe('The /phyloSubtree endpoint', () => {
   it('should return a newick', async () => {
     const urlParams = new URLSearchParams({
-      phyloTreeField: 'primaryKey',
+      phyloTreeField: 'usherTree',
       advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139',
     });
 
@@ -17,7 +17,7 @@ describe('The /phyloSubtree endpoint', () => {
 
   it('should return empty string as newick if filter has no nodes', async () => {
     const urlParams = new URLSearchParams({
-      phyloTreeField: 'primaryKey',
+      phyloTreeField: 'usherTree',
       advancedQuery: 'primaryKey=doesNotExist',
     });
 
@@ -39,7 +39,7 @@ describe('The /phyloSubtree endpoint', () => {
     expect(result.headers.get('Content-Type')).equals('application/json');
     const json = await result.json();
     expect(json.error.detail).to.include(
-      "'division' is not a phylo tree field, known phylo tree fields are [primaryKey]"
+      "'division' is not a phylo tree field, known phylo tree fields are [usherTree]"
     );
   });
 });
