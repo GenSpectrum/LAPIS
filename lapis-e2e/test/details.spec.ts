@@ -127,9 +127,22 @@ describe('The /details endpoint', () => {
 
     expect(resultAdvanced.status).to.be.equal(200);
 
+    const urlParamsVariantQuery = new URLSearchParams({
+      fields: 'usherTree',
+      variantQuery: 'usherTree.DescendantOf=NODE_0000043',
+      orderBy: 'usherTree',
+      dataFormat: 'csv',
+    });
+
+    const resultVariantQuery = await fetch(basePath + '/sample/details?' + urlParamsVariantQuery.toString());
+
+    expect(resultVariantQuery.status).to.be.equal(200);
+
     const resultText = await result.text();
     const resultAdvancedText = await resultAdvanced.text();
+    const resultVariantText = await resultVariantQuery.text();
     expect(resultText).to.be.equal(resultAdvancedText);
+    expect(resultText).to.be.equal(resultVariantText);
 
     expect(resultAdvancedText).to.be.equal(
       String.raw`
