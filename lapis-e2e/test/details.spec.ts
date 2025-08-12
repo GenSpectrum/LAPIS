@@ -25,6 +25,7 @@ describe('The /details endpoint', () => {
       division: 'Zürich',
       pangoLineage: 'B.1.617.2',
       primaryKey: undefined,
+      usherTree: undefined,
       qcValue: undefined,
       region: undefined,
       testBooleanColumn: undefined,
@@ -48,6 +49,7 @@ describe('The /details endpoint', () => {
       date: '2021-07-19',
       division: 'Zürich',
       primaryKey: 'key_3128796',
+      usherTree: 'key_3128796',
       pangoLineage: 'B.1.617.2',
       qcValue: 0.96,
       region: 'Europe',
@@ -104,9 +106,9 @@ describe('The /details endpoint', () => {
 
   it('should handle PhyloDescendantOf queries', async () => {
     const urlParams = new URLSearchParams({
-      'fields': 'primaryKey',
-      'primaryKey.phyloDescendantOf': 'NODE_0000043',
-      'orderBy': 'primaryKey',
+      'fields': 'usherTree',
+      'usherTree.phyloDescendantOf': 'NODE_0000043',
+      'orderBy': 'usherTree',
       'dataFormat': 'csv',
     });
 
@@ -115,9 +117,9 @@ describe('The /details endpoint', () => {
     expect(result.status).to.be.equal(200);
 
     const urlParamsAdvanced = new URLSearchParams({
-      fields: 'primaryKey',
-      advancedquery: 'primaryKey.PhyloDescendantOf=NODE_0000043',
-      orderBy: 'primaryKey',
+      fields: 'usherTree',
+      advancedquery: 'usherTree.PhyloDescendantOf=NODE_0000043',
+      orderBy: 'usherTree',
       dataFormat: 'csv',
     });
 
@@ -131,7 +133,7 @@ describe('The /details endpoint', () => {
 
     expect(resultAdvancedText).to.be.equal(
       String.raw`
-primaryKey
+usherTree
 key_2181005
 key_2270139
     `.trim() + '\n'
@@ -196,7 +198,7 @@ Solothurn,B.1,key_1002052
     const result = await fetch(basePath + '/sample/details?' + urlParams.toString());
 
     expect(await result.text()).to.be.equal(
-      'primaryKey,date,region,country,pangoLineage,division,age,qc_value,test_boolean_column\n'
+      'primaryKey,usherTree,date,region,country,pangoLineage,division,age,qc_value,test_boolean_column\n'
     );
   });
 
@@ -227,6 +229,7 @@ Solothurn	B.1	key_1002052
       date: '2021-05-12',
       division: 'Zürich',
       primaryKey: 'key_3578231',
+      usherTree: 'key_3578231',
       pangoLineage: 'P.1',
       qcValue: 0.93,
       region: 'Europe',
@@ -250,6 +253,7 @@ Solothurn	B.1	key_1002052
       date: '2021-07-04',
       division: 'Vaud',
       primaryKey: 'key_3259931',
+      usherTree: 'key_3259931',
       pangoLineage: 'AY.43',
       qcValue: 0.98,
       region: 'Europe',
