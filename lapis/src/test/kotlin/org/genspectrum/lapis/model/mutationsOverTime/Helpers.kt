@@ -19,6 +19,7 @@ import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.True
 import org.genspectrum.lapis.silo.WithDataVersion
 import java.time.LocalDate
 import java.util.stream.Stream
@@ -58,6 +59,7 @@ fun mockSiloCountQuery(
             match { query ->
                 query.action == AGGREGATED_SILO_ACTION &&
                     query.filterExpression is And &&
+                    query.filterExpression.children.count() == 3 &&
                     query.filterExpression.children.contains(mutationFilter) &&
                     query.filterExpression.children.contains(dateBetweenFilter)
             },
@@ -115,11 +117,33 @@ private fun mockSiloCoverageQuery(
             match { query ->
                 query.action == AGGREGATED_SILO_ACTION &&
                     query.filterExpression is And &&
+                    query.filterExpression.children.count() == 3 &&
                     query.filterExpression.children.any {
                         it is Or &&
                             (it).children.all(mutationFilterExpressionFn)
                     } &&
                     query.filterExpression.children.contains(dateBetween)
+            },
+            false,
+        )
+    } answers {
+        WithDataVersion(DUMMY_DATA_VERSION, queryResult)
+    }
+}
+
+fun mockSiloTotalCountQuery(
+    siloClient: SiloClient,
+    dateBetweenFilter: DateBetween,
+    queryResult: Stream<AggregationData>,
+) {
+    every {
+        siloClient.sendQueryAndGetDataVersion<AggregationData>(
+            match { query ->
+                query.action == AGGREGATED_SILO_ACTION &&
+                    query.filterExpression is And &&
+                    query.filterExpression.children.count() == 2 &&
+                    query.filterExpression.children.contains(True) &&
+                    query.filterExpression.children.contains(dateBetweenFilter)
             },
             false,
         )

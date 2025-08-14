@@ -55,6 +55,8 @@ data class MutationsOverTimeCell(
             "the date range. Confirmed deletions (i.e., \"-\") are included.",
     )
     var coverage: Int,
+    @param:Schema(description = "Total number of sequences in the date range.")
+    var totalCount: Int,
 )
 
 @Component
@@ -183,6 +185,7 @@ class MutationsOverTimeModel(
 
         val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
+        val totalsWithDataVersion = sendQuery(baseFilter, dateQuery, null, dateField)
         val dataWithDataVersions = mutations.parallelStream().map { mutation ->
             val countsWithDataVersion = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
             val coverageWithDataVersion = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
@@ -192,6 +195,7 @@ class MutationsOverTimeModel(
                     dateRanges,
                     countsWithDataVersion.queryResult,
                     coverageWithDataVersion.queryResult,
+                    totalsWithDataVersion.queryResult,
                     dateField,
                 )
         }.toList()
@@ -227,7 +231,7 @@ class MutationsOverTimeModel(
     private fun sendQuery(
         baseSiloFilterExpression: SiloFilterExpression,
         dateQuery: SiloFilterExpression,
-        mutationQuery: SiloFilterExpression,
+        mutationQuery: SiloFilterExpression?,
         dateField: String,
     ): WithDataVersion<List<AggregationData>> =
         siloClient.sendQueryAndGetDataVersion(
@@ -239,7 +243,7 @@ class MutationsOverTimeModel(
                     null,
                 ),
                 And(
-                    children = listOf(
+                    children = listOfNotNull(
                         baseSiloFilterExpression,
                         mutationQuery,
                         dateQuery,
@@ -253,9 +257,10 @@ class MutationsOverTimeModel(
         dateRanges: List<DateRange>,
         counts: List<AggregationData>,
         coverage: List<AggregationData>,
+        totals: List<AggregationData>,
         dateField: String,
     ): List<MutationsOverTimeCell> {
-        val result = Array(dateRanges.size) { MutationsOverTimeCell(0, 0) }
+        val result = Array(dateRanges.size) { MutationsOverTimeCell(0, 0, 0) }
 
         counts.forEach { dateCount ->
             val dateString = dateCount.fields[dateField]?.asText()
@@ -267,6 +272,12 @@ class MutationsOverTimeModel(
             val dateStr = cov.fields[dateField]?.asText()
             val index = findDateRangeIndex(dateRanges, dateStr)
             index?.let { result[it] = result[it].copy(coverage = result[it].coverage + cov.count) }
+        }
+
+        totals.forEach { total ->
+            val dateStr = total.fields[dateField]?.asText()
+            val index = findDateRangeIndex(dateRanges, dateStr)
+            index?.let { result[it] = result[it].copy(totalCount = result[it].totalCount + total.count) }
         }
 
         return result.toList()

@@ -59,8 +59,8 @@ class NucleotideMutationsOverTimeControllerTest(
             mutations = listOf("A123T", "A456G"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(
-                listOf(MutationsOverTimeCell(count = 10, coverage = 100)),
-                listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
+                listOf(MutationsOverTimeCell(count = 10, coverage = 100, totalCount = 300)),
+                listOf(MutationsOverTimeCell(count = 5, coverage = 50, totalCount = 300)),
             ),
         )
 
@@ -101,8 +101,10 @@ class NucleotideMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
             .andExpect(jsonPath("$.data.data[0][0].count").value(10))
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
+            .andExpect(jsonPath("$.data.data[0][0].totalCount").value(300))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.data.data[1][0].totalCount").value(300))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
         verify(exactly = 1) { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) }
@@ -125,7 +127,7 @@ class NucleotideMutationsOverTimeControllerTest(
         every { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) } returns MutationsOverTimeResult(
             mutations = listOf("123T"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
-            data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
+            data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2, totalCount = 3))),
         )
 
         val mvcResult = mockMvc.perform(
@@ -231,8 +233,8 @@ class AminoAcidMutationsOverTimeControllerTest(
             mutations = listOf("gene1:A123T", "gene1:A456G"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(
-                listOf(MutationsOverTimeCell(count = 10, coverage = 100)),
-                listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
+                listOf(MutationsOverTimeCell(count = 10, coverage = 100, totalCount = 300)),
+                listOf(MutationsOverTimeCell(count = 5, coverage = 50, totalCount = 300)),
             ),
         )
 
@@ -273,8 +275,10 @@ class AminoAcidMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
             .andExpect(jsonPath("$.data.data[0][0].count").value(10))
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
+            .andExpect(jsonPath("$.data.data[0][0].totalCount").value(300))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.data.data[1][0].totalCount").value(300))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
         verify(exactly = 1) { modelMock.evaluateAminoAcidMutations(any(), any(), any(), any()) }
@@ -297,7 +301,7 @@ class AminoAcidMutationsOverTimeControllerTest(
         every { modelMock.evaluateAminoAcidMutations(any(), any(), any(), any()) } returns MutationsOverTimeResult(
             mutations = listOf("123T"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
-            data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
+            data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2, totalCount = 3))),
         )
 
         val mvcResult = mockMvc.perform(

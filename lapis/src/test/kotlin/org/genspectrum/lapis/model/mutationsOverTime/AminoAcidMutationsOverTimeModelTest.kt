@@ -125,6 +125,15 @@ class AminoAcidMutationsOverTimeModelTest {
                 AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
             ),
         )
+        mockSiloTotalCountQuery(
+            siloQueryClient,
+            DUMMY_DATE_BETWEEN_ALL,
+            Stream.of(
+                AggregationData(10, fields = mapOf("date" to TextNode("2021-06-01"))),
+                AggregationData(11, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(12, fields = mapOf("date" to TextNode("2022-07-01"))),
+            ),
+        )
 
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -142,8 +151,8 @@ class AminoAcidMutationsOverTimeModelTest {
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(1, 5), MutationsOverTimeCell(2, 6)),
-                    listOf(MutationsOverTimeCell(3, 0), MutationsOverTimeCell(4, 2)),
+                    listOf(MutationsOverTimeCell(1, 5, 10), MutationsOverTimeCell(2, 6, 23)),
+                    listOf(MutationsOverTimeCell(3, 0, 10), MutationsOverTimeCell(4, 2, 23)),
                 ),
             ),
         )
@@ -153,6 +162,7 @@ class AminoAcidMutationsOverTimeModelTest {
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
         mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
         mockSiloAminoAcidCoverageQuery(siloQueryClient, "S", 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val mutations = listOf(DUMMY_MUTATION1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -170,7 +180,7 @@ class AminoAcidMutationsOverTimeModelTest {
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(0, 0), MutationsOverTimeCell(0, 0)),
+                    listOf(MutationsOverTimeCell(0, 0, 0), MutationsOverTimeCell(0, 0, 0)),
                 ),
             ),
         )
