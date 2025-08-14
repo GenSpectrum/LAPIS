@@ -183,7 +183,7 @@ class MutationsOverTimeModel(
 
         val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
-        val dataWithDataVersions = mutations.parallelStream().map { mutation ->
+        val dataWithDataVersions = mutations.stream().map { mutation ->
             val countsWithDataVersion = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
             val coverageWithDataVersion = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
 
