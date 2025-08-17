@@ -5,7 +5,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
   it('should return MRCA with missing nodes if specified', async () => {
     const result = await lapisClient.postMostRecentCommonAncestor({
       mostRecentCommonAncestorRequest: {
-        phyloTreeField: 'primaryKey',
+        phyloTreeField: 'usherTree',
         printNodesNotInTree: true,
         advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
       },
@@ -22,7 +22,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
   it('should return MRCA without missing nodes if specified', async () => {
     const result = await lapisClient.postMostRecentCommonAncestor({
       mostRecentCommonAncestorRequest: {
-        phyloTreeField: 'primaryKey',
+        phyloTreeField: 'usherTree',
         printNodesNotInTree: false,
         advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
       },
@@ -39,7 +39,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
   it('should return MRCA as null if filter has no nodes', async () => {
     const result = await lapisClient.postMostRecentCommonAncestor({
       mostRecentCommonAncestorRequest: {
-        phyloTreeField: 'primaryKey',
+        phyloTreeField: 'usherTree',
         printNodesNotInTree: false,
         primaryKey: 'string',
       },
@@ -55,7 +55,7 @@ describe('The /mostRecentCommonAncestor endpoint', () => {
 
   it('should return the data as CSV', async () => {
     const urlParams = new URLSearchParams({
-      phyloTreeField: 'primaryKey',
+      phyloTreeField: 'usherTree',
       dataFormat: 'csv',
       printNodesNotInTree: 'true',
       advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
@@ -73,7 +73,7 @@ NODE_0000043,1,key_1408408
 
   it('should return the data as TSV', async () => {
     const urlParams = new URLSearchParams({
-      phyloTreeField: 'primaryKey',
+      phyloTreeField: 'usherTree',
       dataFormat: 'tsv',
       printNodesNotInTree: 'true',
       advancedQuery: 'primaryKey=key_2181005 OR primaryKey=key_2270139 OR primaryKey=key_1408408',
@@ -100,7 +100,7 @@ NODE_0000043	1	key_1408408
     expect(result.headers.get('Content-Type')).equals('application/json');
     const json = await result.json();
     expect(json.error.detail).to.include(
-      "'division' is not a phylo tree field, known phylo tree fields are [primaryKey]"
+      "'division' is not a phylo tree field, known phylo tree fields are [usherTree]"
     );
   });
 });

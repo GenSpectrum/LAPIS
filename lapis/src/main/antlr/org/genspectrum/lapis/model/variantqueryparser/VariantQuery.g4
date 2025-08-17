@@ -20,6 +20,7 @@ single:
   | nextcladePangolineageQuery
   | nextstrainCladeLineageQuery
   | gisaidCladeLineageQuery
+  | usherTreeDescendantQuery
   ;
 
 nucleotideMutationQuery : nucleotideMutationQueryFirstSymbol? position nucleotideMutationQuerySecondSymbol?;
@@ -79,6 +80,11 @@ gisaidCladePrefix: G I S A I D ':';
 gisaidCladeNomenclature: gisaid_clade_character gisaid_clade_character?;
 gisaid_clade_character: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z;
 
+usherTreeDescendantQuery: usherTreePrefix name;
+name: charOrNumber+;
+usherTreePrefix: U S H E R T R E E DOT D E S C E N D A N T O F ':';
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK;
+
 
 // lexer rules
 
@@ -109,6 +115,7 @@ X: 'X' | 'x';
 Y: 'Y' | 'y';
 Z: 'Z' | 'z';
 MINUS: '-';
+UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 

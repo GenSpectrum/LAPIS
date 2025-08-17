@@ -15,6 +15,7 @@ import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
+import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.StringEquals
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -524,6 +525,18 @@ class VariantQueryFacadeTest {
         assertThat(
             result,
             equalTo(LineageEquals(NEXTCLADE_PANGO_LINEAGE_COLUMN, "jn.1", true)),
+        )
+    }
+
+    @Test
+    fun `given a valid variantQuery with a 'usherTreedescendantOf' expression then returns SILO query`() {
+        val variantQuery = "usherTree.descendantOf:node_1200"
+
+        val result = underTest.map(variantQuery)
+
+        assertThat(
+            result,
+            equalTo(PhyloDescendantOf(USHER_TREE_DESCENDANT_COLUMN, "node_1200")),
         )
     }
 
