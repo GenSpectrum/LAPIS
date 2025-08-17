@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.13](https://github.com/GenSpectrum/LAPIS/compare/v0.5.12...v0.5.13) (2025-08-17)
+
+
+### Features
+
+* **lapis:** add phylo tree queries to variant filters ([#1311](https://github.com/GenSpectrum/LAPIS/issues/1311)) ([26e3096](https://github.com/GenSpectrum/LAPIS/commit/26e30965d4b616524bef68d8aa89f2c51973e862))
+
 ## [0.5.12](https://github.com/GenSpectrum/LAPIS/compare/v0.5.11...v0.5.12) (2025-08-11)
 
 
