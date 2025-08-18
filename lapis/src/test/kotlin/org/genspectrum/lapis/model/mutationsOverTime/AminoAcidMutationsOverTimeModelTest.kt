@@ -26,8 +26,10 @@ import java.util.stream.Stream
 
 private val DUMMY_MUTATION1 = AminoAcidMutation("S", 1, "R")
 private val DUMMY_MUTATION2 = AminoAcidMutation("S", 2, "N")
+private val DUMMY_MUTATION3 = AminoAcidMutation("A", 1, "B")
 private val DUMMY_MUTATION_EQUALS1 = AminoAcidSymbolEquals("S", 1, "R")
 private val DUMMY_MUTATION_EQUALS2 = AminoAcidSymbolEquals("S", 2, "N")
+private val DUMMY_MUTATION_EQUALS3 = AminoAcidSymbolEquals("A", 1, "B")
 
 @SpringBootTest
 class AminoAcidMutationsOverTimeModelTest {
@@ -83,8 +85,7 @@ class AminoAcidMutationsOverTimeModelTest {
         assertThat(result.dateRanges, equalTo(emptyList()))
     }
 
-    @Test
-    fun `given a list of mutations and date ranges, then it returns the count and coverage data`() {
+    private fun commonSetup() {
         mockSiloCountQuery(
             siloQueryClient,
             DUMMY_MUTATION_EQUALS1,
@@ -125,6 +126,11 @@ class AminoAcidMutationsOverTimeModelTest {
                 AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
             ),
         )
+    }
+
+    @Test
+    fun `given a list of mutations and date ranges, then it returns the count and coverage data`() {
+        commonSetup()
 
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -147,6 +153,24 @@ class AminoAcidMutationsOverTimeModelTest {
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `given a list of mutations and date ranges in reverse order, then order is preserved as well`() {
+        commonSetup()
+
+        val mutationsReversed = listOf(DUMMY_MUTATION2, DUMMY_MUTATION1)
+        val dateRangesReversed = listOf(DUMMY_DATE_RANGE2, DUMMY_DATE_RANGE1)
+
+        val result = underTest.evaluateAminoAcidMutations(
+            mutations = mutationsReversed,
+            lapisFilter = DUMMY_LAPIS_FILTER,
+            dateField = DUMMY_DATE_FIELD,
+            dateRanges = dateRangesReversed,
+        )
+
+        assertThat(result.mutations, equalTo(mutationsReversed.map { it.toString(referenceGenome) }))
+        assertThat(result.dateRanges, equalTo(dateRangesReversed))
     }
 
     @Test
