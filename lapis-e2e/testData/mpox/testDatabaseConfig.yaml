@@ -1,0 +1,525 @@
+---
+schema:
+  instanceName: "Mpox Virus"
+  opennessLevel: "OPEN"
+  metadata:
+  - name: "accessionVersion"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "accession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "version"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "submissionId"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "isRevocation"
+    type: "boolean"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "submitter"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "groupName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "groupId"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "submittedAtTimestamp"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "submittedDate"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "releasedAtTimestamp"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "releasedDate"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "dataUseTerms"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "dataUseTermsRestrictedUntil"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "dataUseTermsUrl"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "versionStatus"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "versionComment"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "pipelineVersion"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ampliconPcrPrimerScheme"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ampliconSize"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "anatomicalMaterial"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "anatomicalPart"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "assemblyReferenceGenomeAccession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "authorAffiliations"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "authors"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "bioprojectAccession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "biosampleAccession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "bodyProduct"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "breadthOfCoverage"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "cellLine"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "clade"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "collectionDevice"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "collectionMethod"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "comment"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "completeness"
+    type: "float"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "consensusSequenceSoftwareName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "consensusSequenceSoftwareVersion"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "cultureId"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "dehostingMethod"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "depthOfCoverage"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "diagnosticMeasurementMethod"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "diagnosticMeasurementUnit"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "diagnosticMeasurementValue"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "diagnosticTargetGeneName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "diagnosticTargetPresence"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "displayName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "earliestReleaseDate"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "environmentalMaterial"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "environmentalSite"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "experimentalSpecimenRoleType"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "exposureDetails"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "exposureEvent"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "exposureSetting"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "foodProduct"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "foodProductProperties"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "frameShifts"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "gcaAccession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocAdmin1"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocAdmin2"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocCity"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocCountry"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocLatitude"
+    type: "float"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocLongitude"
+    type: "float"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "geoLocSite"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "gisaidIsolateId"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostAge"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostAgeBin"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostDisease"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostGender"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostHealthOutcome"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostHealthState"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostNameCommon"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostNameScientific"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostOriginCountry"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostRole"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostTaxonId"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "hostVaccinationStatus"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "insdcAccessionBase"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "insdcAccessionFull"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "insdcRawReadsAccession"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "insdcVersion"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "isLabHost"
+    type: "boolean"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "length"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "lineage"
+    type: "string"
+    valuesAreUnique: false
+    generateIndex: true
+    generateLineageIndex: true
+  - name: "ncbiReleaseDate"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ncbiSourceDb"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ncbiSubmitterCountry"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ncbiUpdateDate"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ncbiVirusName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "ncbiVirusTaxId"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "outbreak"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "passageMethod"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "passageNumber"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "presamplingActivity"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "previousInfectionDisease"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "previousInfectionOrganism"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "purposeOfSampling"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "purposeOfSequencing"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "qualityControlDetails"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "qualityControlDetermination"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "qualityControlIssues"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "qualityControlMethodName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "qualityControlMethodVersion"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "rawSequenceDataProcessingMethod"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sampleCollectionDate"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sampleCollectionDateRangeLower"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sampleCollectionDateRangeUpper"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sampleReceivedDate"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sampleType"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencedByContactEmail"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencedByContactName"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencedByOrganization"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencingAssayType"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencingDate"
+    type: "date"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencingInstrument"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "sequencingProtocol"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "signsAndSymptoms"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "specimenCollectorSampleId"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "specimenProcessing"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "specimenProcessingDetails"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "stopCodons"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalAmbiguousNucs"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalDeletedNucs"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalFrameShifts"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalInsertedNucs"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalSnps"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalStopCodons"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "totalUnknownNucs"
+    type: "int"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  - name: "travelHistory"
+    type: "string"
+    valuesAreUnique: false
+    generateLineageIndex: false
+  primaryKey: "accessionVersion"
+  features:
+  - name: "generalizedAdvancedQuery"

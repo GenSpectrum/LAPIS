@@ -1,0 +1,3 @@
+ndjsonInputFilename: 'data.ndjson.zst'
+lineageDefinitionsFilename: 'lineage_definitions.yaml'
+referenceGenomeFilename: reference_genomes.json
