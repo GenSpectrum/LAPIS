@@ -15,11 +15,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
+import java.io.IOException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
+import java.util.concurrent.Executors
 import java.util.stream.Stream
 
 @Component
@@ -78,7 +80,10 @@ open class CachedSiloClient(
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
 ) {
-    private val httpClient = HttpClient.newHttpClient()
+    private val httpClient = HttpClient.newBuilder()
+        // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
+        .executor(Executors.newWorkStealingPool())
+        .build()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !(#query.action.randomize ?: false)")
     open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
@@ -172,9 +177,21 @@ open class CachedSiloClient(
             .build()
 
         val response = try {
-            httpClient.send(request, bodyHandler)
+            try {
+                httpClient.send(request, bodyHandler)
+            } catch (ioException: IOException) {
+                // When sending requests to SILO behind an NGINX, NGINX will send GOAWAY
+                // after 1000 requests through the same connection. The HTTPClient will
+                // retry GET requests (idempotent) but not POST requests. Our POST requests
+                // are idempotent as well, so we can do a retry.
+                if (ioException.message?.contains("GOAWAY") == true) {
+                    httpClient.send(request, bodyHandler) // retry
+                } else {
+                    throw ioException
+                }
+            }
         } catch (exception: Exception) {
-            val message = "Could not connect to silo: " + exception::class.toString() + " " + exception.message
+            val message = "Could not connect to silo: ${exception::class} ${exception.message}"
             throw RuntimeException(message, exception)
         }
 
