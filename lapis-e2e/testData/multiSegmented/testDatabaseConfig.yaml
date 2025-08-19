@@ -13,4 +13,3 @@ schema:
       type: string
       generateIndex: true
   primaryKey: primaryKey
-  dateToSortBy: date

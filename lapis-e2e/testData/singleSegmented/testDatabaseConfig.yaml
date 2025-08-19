@@ -32,5 +32,3 @@ schema:
     - name: sarsCoV2VariantQuery
     - name: generalizedAdvancedQuery
   primaryKey: primaryKey
-  dateToSortBy: date
-  partitionBy: pangoLineage

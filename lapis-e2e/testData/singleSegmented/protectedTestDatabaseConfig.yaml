@@ -31,5 +31,3 @@ schema:
   features:
     - name: sarsCoV2VariantQuery
   primaryKey: primaryKey
-  dateToSortBy: date
-  partitionBy: pangoLineage
