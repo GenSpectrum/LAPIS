@@ -4,6 +4,7 @@ schema:
   metadata:
     - name: primaryKey
       type: string
+      valuesAreUnique: true
     - name: usherTree
       type: string
       isPhyloTreeField: true
@@ -32,5 +33,4 @@ schema:
     - name: sarsCoV2VariantQuery
     - name: generalizedAdvancedQuery
   primaryKey: primaryKey
-  dateToSortBy: date
-  partitionBy: pangoLineage
+defaultNucleotideSequence: main

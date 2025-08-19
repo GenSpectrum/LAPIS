@@ -1,10 +1,14 @@
 package org.genspectrum.lapis.config
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class DatabaseConfig(
     val schema: DatabaseSchema,
+    val defaultNucleotideSequence: String? = null,
+    val defaultAminoAcidSequence: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,6 +25,7 @@ data class DatabaseMetadata(
     val name: String,
     val type: MetadataType,
     val valuesAreUnique: Boolean = false,
+    val generateIndex: Boolean = false,
     val generateLineageIndex: Boolean = false,
     val isPhyloTreeField: Boolean = false,
 )
