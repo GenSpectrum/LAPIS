@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.14](https://github.com/GenSpectrum/LAPIS/compare/v0.5.13...v0.5.14) (2025-08-19)
+
+
+### Features
+
+* **lapis:** ensure order preservation for muts and dateRanges in mutationsOverTime ([#1317](https://github.com/GenSpectrum/LAPIS/issues/1317)) ([8d2c731](https://github.com/GenSpectrum/LAPIS/commit/8d2c73158df5a45856385196168e0500ec99d067))
+
+
+### Bug Fixes
+
+* **lapis:** prevent errors for mutationsOverTime endpoint and potentially other endpoints ([#1322](https://github.com/GenSpectrum/LAPIS/issues/1322)) ([bed930b](https://github.com/GenSpectrum/LAPIS/commit/bed930b7bfeecb85c83b55c5d7c3ad6ea1bdcd57))
+
 ## [0.5.13](https://github.com/GenSpectrum/LAPIS/compare/v0.5.12...v0.5.13) (2025-08-17)
 
 
