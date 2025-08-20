@@ -13,7 +13,6 @@ import java.util.stream.Stream
 @Component
 class TreeStreamer(
     private val dataVersion: DataVersion,
-    private val objectMapper: ObjectMapper,
 ) {
     fun stream(
         treeResponse: Stream<PhyloSubtreeData>,

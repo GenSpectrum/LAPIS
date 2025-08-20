@@ -205,8 +205,8 @@ class SiloQueryModel(
         }
     }
 
-    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> {
-        var data = siloClient.sendQuery(
+    fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> =
+        siloClient.sendQuery(
             SiloQuery(
                 SiloAction.phyloSubtree(
                     sequenceFilters.phyloTreeField,
@@ -214,9 +214,6 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
-
-        return data
-    }
 
     fun getGenomicSequence(
         sequenceFilters: CommonSequenceFilters,
