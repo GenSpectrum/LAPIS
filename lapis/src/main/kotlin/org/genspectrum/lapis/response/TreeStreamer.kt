@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
@@ -13,7 +12,6 @@ import java.util.stream.Stream
 @Component
 class TreeStreamer(
     private val dataVersion: DataVersion,
-    private val objectMapper: ObjectMapper,
 ) {
     fun stream(
         treeResponse: Stream<PhyloSubtreeData>,

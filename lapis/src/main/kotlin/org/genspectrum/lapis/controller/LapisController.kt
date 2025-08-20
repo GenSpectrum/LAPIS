@@ -1188,7 +1188,6 @@ class LapisController(
         @AminoAcidInsertions
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
-        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         val request = PhyloTreeSequenceFiltersRequest(
@@ -1229,7 +1228,6 @@ class LapisController(
         @Parameter(schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_REQUEST_SCHEMA"))
         @RequestBody
         request: PhyloTreeSequenceFiltersRequest,
-        @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
         siloQueryModel.getNewick(
