@@ -1,5 +1,7 @@
 package org.genspectrum.lapis
 
+import com.fasterxml.jackson.core.StreamReadConstraints
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
@@ -29,9 +31,11 @@ import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
@@ -129,5 +133,19 @@ class LapisSpringConfig {
         } catch (e: Exception) {
             log.info { "Failed to read $VERSION_FILE, assuming local version: ${e.message}" }
             LapisVersion("local")
+        }
+
+    @Bean
+    fun streamConstraintsCustomizer(): Jackson2ObjectMapperBuilderCustomizer =
+        Jackson2ObjectMapperBuilderCustomizer { builder: Jackson2ObjectMapperBuilder ->
+            builder.postConfigurer(
+                { objectMapper: ObjectMapper ->
+                    objectMapper.factory.setStreamReadConstraints(
+                        StreamReadConstraints.builder()
+                            .maxStringLength(200_000_000)
+                            .build(),
+                    )
+                },
+            )
         }
 }
