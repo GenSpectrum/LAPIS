@@ -118,11 +118,21 @@ class ExceptionHandler(
                 LapisErrorResponse(
                     error = ProblemDetail.forStatus(httpStatus).also {
                         it.title = title
-                        it.detail = detail
+                        it.detail = truncate(detail, maxLength = 100_000)
                     },
                     info = lapisInfoFactory.create(),
                 ),
             )
+
+    private fun truncate(
+        value: String?,
+        maxLength: Int,
+    ): String? {
+        if (value == null || value.length <= maxLength) {
+            return value
+        }
+        return value.substring(0, maxLength) + "..."
+    }
 }
 
 @Component
