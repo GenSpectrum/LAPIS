@@ -219,7 +219,10 @@ class SiloQueryModel(
             if (exception.message?.contains(Regex("String value length \\(\\d+\\) exceeds the maximum allowed")) ==
                 true
             ) {
-                throw RuntimeException("The requested phylogeny is too large, please filter for a smaller subtree.")
+                throw RuntimeException(
+                    "The requested phylogeny is too large, please filter for a smaller subtree.",
+                    exception,
+                )
             } else {
                 throw exception
             }

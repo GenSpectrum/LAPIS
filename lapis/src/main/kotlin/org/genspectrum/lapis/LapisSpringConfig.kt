@@ -138,14 +138,12 @@ class LapisSpringConfig {
     @Bean
     fun streamConstraintsCustomizer(): Jackson2ObjectMapperBuilderCustomizer =
         Jackson2ObjectMapperBuilderCustomizer { builder: Jackson2ObjectMapperBuilder ->
-            builder.postConfigurer(
-                { objectMapper: ObjectMapper ->
-                    objectMapper.factory.setStreamReadConstraints(
-                        StreamReadConstraints.builder()
-                            .maxStringLength(200_000_000)
-                            .build(),
-                    )
-                },
-            )
+            builder.postConfigurer { objectMapper: ObjectMapper ->
+                objectMapper.factory.setStreamReadConstraints(
+                    StreamReadConstraints.builder()
+                        .maxStringLength(200_000_000)
+                        .build(),
+                )
+            }
         }
 }
