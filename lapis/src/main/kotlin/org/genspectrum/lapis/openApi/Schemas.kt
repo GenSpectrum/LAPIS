@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
@@ -242,6 +243,7 @@ annotation class LapisMostRecentCommonAncestorResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
+    content = [Content(examples = [ExampleObject("(seq1:3,(seq2:2,seq3:1)node2:1)node1:1;")])],
 )
 annotation class LapisPhyloSubtreeResponse
 
