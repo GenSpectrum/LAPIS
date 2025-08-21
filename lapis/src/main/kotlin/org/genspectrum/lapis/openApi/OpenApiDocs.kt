@@ -236,17 +236,6 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(
-                    PHYLO_SUBTREE_RESPONSE_SCHEMA,
-                    lapisArrayResponseSchema(
-                        Schema<String>()
-                            .types(setOf("object"))
-                            .description(
-                                "The response contains the subtree of the nodes in the filter.",
-                            )
-                            .properties(phyloSubtreeFieldSchemas()),
-                    ),
-                )
-                .addSchemas(
                     DETAILS_RESPONSE_SCHEMA,
                     lapisArrayResponseSchema(
                         Schema<String>()
