@@ -45,6 +45,10 @@ data class MutationsOverTimeResult(
             "It should be understood as data[index of mutation][index of date range].",
     )
     var data: List<List<MutationsOverTimeCell>>,
+    @param:Schema(
+        description = "The list of total sample counts per date range",
+    )
+    var totalCountsByDateRange: List<Number>,
 )
 
 data class MutationsOverTimeCell(
@@ -171,6 +175,7 @@ class MutationsOverTimeModel(
                 mutations = mutations.map(mutationToStringFn),
                 dateRanges = dateRanges,
                 data = emptyList(),
+                totalCountsByDateRange = emptyList(),
             )
         }
 
@@ -183,20 +188,28 @@ class MutationsOverTimeModel(
 
         val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
+        val dailyTotalsWithDataVersion = sendQuery(baseFilter, dateQuery, null, dateField)
+        val dailyTotalsDataVersion = dailyTotalsWithDataVersion.dataVersion
+        val totalCountsByDateRange = aggregateDailyCountsIntoDateRanges(
+            dailyTotalsWithDataVersion.queryResult,
+            dateField,
+            dateRanges,
+        )
+
         val dataWithDataVersions = mutations.parallelStream().map { mutation ->
             val countsWithDataVersion = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
             val coverageWithDataVersion = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
 
             listOf(countsWithDataVersion.dataVersion, coverageWithDataVersion.dataVersion) to
-                buildResultRow(
-                    dateRanges,
+                aggregateDailyMutationDataIntoDateRanges(
                     countsWithDataVersion.queryResult,
                     coverageWithDataVersion.queryResult,
                     dateField,
+                    dateRanges,
                 )
         }.toList()
 
-        val dataVersions = dataWithDataVersions.flatMap { it.first }
+        val dataVersions = dataWithDataVersions.flatMap { it.first } + dailyTotalsDataVersion
         if (dataVersions.distinct().size != 1) {
             if (remainingRetries > 0) {
                 return evaluateInternal(
@@ -221,13 +234,14 @@ class MutationsOverTimeModel(
             mutations = mutations.map(mutationToStringFn),
             dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
+            totalCountsByDateRange = totalCountsByDateRange,
         )
     }
 
     private fun sendQuery(
         baseSiloFilterExpression: SiloFilterExpression,
         dateQuery: SiloFilterExpression,
-        mutationQuery: SiloFilterExpression,
+        mutationQuery: SiloFilterExpression?,
         dateField: String,
     ): WithDataVersion<List<AggregationData>> =
         siloClient.sendQueryAndGetDataVersion(
@@ -239,7 +253,7 @@ class MutationsOverTimeModel(
                     null,
                 ),
                 And(
-                    children = listOf(
+                    children = listOfNotNull(
                         baseSiloFilterExpression,
                         mutationQuery,
                         dateQuery,
@@ -249,33 +263,58 @@ class MutationsOverTimeModel(
             setRequestDataVersion = false,
         ).map { it.toList() }
 
-    private fun buildResultRow(
-        dateRanges: List<DateRange>,
+    /**
+     * Builds a result row for one particular mutation.
+     * The date ranges are the 'columns' of the row, there is one cell per date range.
+     * `counts` and `coverage` are data from SILO, for every day in the overall range of dates
+     * defined by the list of date ranges.
+     */
+    private fun aggregateDailyMutationDataIntoDateRanges(
         counts: List<AggregationData>,
         coverage: List<AggregationData>,
         dateField: String,
+        dateRanges: List<DateRange>,
     ): List<MutationsOverTimeCell> {
         val result = Array(dateRanges.size) { MutationsOverTimeCell(0, 0) }
 
         counts.forEach { dateCount ->
-            val dateString = dateCount.fields[dateField]?.asText()
-            val index = findDateRangeIndex(dateRanges, dateString)
+            val index = findDateRangeIndex(dateCount, dateField, dateRanges)
             index?.let { result[it] = result[it].copy(count = result[it].count + dateCount.count) }
         }
 
         coverage.forEach { cov ->
-            val dateStr = cov.fields[dateField]?.asText()
-            val index = findDateRangeIndex(dateRanges, dateStr)
+            val index = findDateRangeIndex(cov, dateField, dateRanges)
             index?.let { result[it] = result[it].copy(coverage = result[it].coverage + cov.count) }
         }
 
         return result.toList()
     }
 
-    private fun findDateRangeIndex(
+    private fun aggregateDailyCountsIntoDateRanges(
+        counts: List<AggregationData>,
+        dateField: String,
         dateRanges: List<DateRange>,
-        dateString: String?,
+    ): List<Number> {
+        val result = Array(dateRanges.size) { 0 }
+
+        counts.forEach { dateCount ->
+            val index = findDateRangeIndex(dateCount, dateField, dateRanges)
+            index?.let { result[it] = result[it] + dateCount.count }
+        }
+
+        return result.toList()
+    }
+
+    /**
+     * Given a datum that has a date inside the dateField, find the index of the dateRange
+     * in the list of dateRanges that this datum belongs to.
+     */
+    private fun findDateRangeIndex(
+        datum: AggregationData,
+        dateField: String,
+        dateRanges: List<DateRange>,
     ): Int? {
+        val dateString = datum.fields[dateField]?.asText()
         if (dateString == null) {
             return null
         }

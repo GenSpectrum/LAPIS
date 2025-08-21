@@ -62,6 +62,7 @@ class NucleotideMutationsOverTimeControllerTest(
                 listOf(MutationsOverTimeCell(count = 10, coverage = 100)),
                 listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
             ),
+            totalCountsByDateRange = listOf(300),
         )
 
         val mutationsSlot = slot<List<NucleotideMutation>>()
@@ -99,6 +100,7 @@ class NucleotideMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.mutations[1]").value("A456G"))
             .andExpect(jsonPath("$.data.dateRanges[0].dateFrom").value("2025-01-01"))
             .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
+            .andExpect(jsonPath("$.data.totalCountsByDateRange[0]").value("300"))
             .andExpect(jsonPath("$.data.data[0][0].count").value(10))
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
@@ -126,6 +128,7 @@ class NucleotideMutationsOverTimeControllerTest(
             mutations = listOf("123T"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
+            totalCountsByDateRange = listOf(300),
         )
 
         val mvcResult = mockMvc.perform(
@@ -234,6 +237,7 @@ class AminoAcidMutationsOverTimeControllerTest(
                 listOf(MutationsOverTimeCell(count = 10, coverage = 100)),
                 listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
             ),
+            totalCountsByDateRange = listOf(300),
         )
 
         val mutationsSlot = slot<List<AminoAcidMutation>>()
@@ -271,6 +275,7 @@ class AminoAcidMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.mutations[1]").value("gene1:A456G"))
             .andExpect(jsonPath("$.data.dateRanges[0].dateFrom").value("2025-01-01"))
             .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
+            .andExpect(jsonPath("$.data.totalCountsByDateRange[0]").value("300"))
             .andExpect(jsonPath("$.data.data[0][0].count").value(10))
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
@@ -298,6 +303,7 @@ class AminoAcidMutationsOverTimeControllerTest(
             mutations = listOf("123T"),
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
+            totalCountsByDateRange = listOf(3),
         )
 
         val mvcResult = mockMvc.perform(

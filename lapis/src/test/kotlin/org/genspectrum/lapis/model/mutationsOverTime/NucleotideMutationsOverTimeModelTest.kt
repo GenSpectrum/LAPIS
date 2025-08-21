@@ -65,6 +65,7 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.mutations, equalTo(emptyList()))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
+        assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
     }
 
     @Test
@@ -81,6 +82,7 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
+        assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
     }
 
     private fun commonSetup() {
@@ -124,6 +126,15 @@ class NucleotideMutationsOverTimeModelTest {
                 AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
             ),
         )
+        mockSiloTotalCountQuery(
+            siloQueryClient,
+            DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.of(
+                AggregationData(10, fields = mapOf("date" to TextNode("2021-06-01"))),
+                AggregationData(11, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(12, fields = mapOf("date" to TextNode("2022-07-01"))),
+            ),
+        )
     }
 
     @Test
@@ -151,6 +162,10 @@ class NucleotideMutationsOverTimeModelTest {
                 ),
             ),
         )
+        assertThat(
+            result.totalCountsByDateRange,
+            equalTo(listOf(10, 23)),
+        )
     }
 
     @Test
@@ -175,6 +190,7 @@ class NucleotideMutationsOverTimeModelTest {
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
         mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
         mockSiloNucleotideCoverageQuery(siloQueryClient, null, 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val mutations = listOf(DUMMY_MUTATION1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -195,6 +211,10 @@ class NucleotideMutationsOverTimeModelTest {
                     listOf(MutationsOverTimeCell(0, 0), MutationsOverTimeCell(0, 0)),
                 ),
             ),
+        )
+        assertThat(
+            result.totalCountsByDateRange,
+            equalTo(listOf(0, 0)),
         )
     }
 
