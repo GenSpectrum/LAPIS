@@ -206,14 +206,27 @@ class SiloQueryModel(
     }
 
     fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> =
-        siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.phyloSubtree(
-                    sequenceFilters.phyloTreeField,
+        try {
+            siloClient.sendQuery(
+                SiloQuery(
+                    SiloAction.phyloSubtree(
+                        sequenceFilters.phyloTreeField,
+                    ),
+                    siloFilterExpressionMapper.map(sequenceFilters),
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
-            ),
-        )
+            )
+        } catch (exception: Exception) {
+            if (exception.message?.contains(Regex("String value length \\(\\d+\\) exceeds the maximum allowed")) ==
+                true
+            ) {
+                throw RuntimeException(
+                    "The requested phylogeny is too large, please filter for a smaller subtree.",
+                    exception,
+                )
+            } else {
+                throw exception
+            }
+        }
 
     fun getGenomicSequence(
         sequenceFilters: CommonSequenceFilters,
