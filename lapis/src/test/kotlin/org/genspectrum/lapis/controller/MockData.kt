@@ -216,14 +216,22 @@ data class TreeEndpointMockDataCollection(
     }
 
     companion object {
-        inline fun <reified Arg, PhyloSubtreeData> create(
+        inline fun <reified Arg> create(
             crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> Stream<PhyloSubtreeData>,
             modelData: List<PhyloSubtreeData>,
             expectedNewick: String,
             fields: List<String>? = null,
             phyloTreeField: String? = null,
         ) = TreeEndpointMockDataCollection(
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
+            { modelMock ->
+                every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.of(
+                    PhyloSubtreeData(
+                        subtreeNewick = "",
+                        missingNodeCount = 0,
+                        missingFromTree = null,
+                    ),
+                )
+            },
             { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
             expectedNewick,
             fields,

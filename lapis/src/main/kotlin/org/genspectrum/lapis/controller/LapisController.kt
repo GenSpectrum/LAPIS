@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
@@ -84,7 +85,7 @@ import org.genspectrum.lapis.response.MostRecentCommonAncestorCollection
 import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
-import org.genspectrum.lapis.response.TreeStreamer
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -104,10 +105,10 @@ class LapisController(
     private val requestContext: RequestContext,
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
-    private val treeStreamer: TreeStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val dataVersion: DataVersion,
 ) {
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
@@ -1189,7 +1190,7 @@ class LapisController(
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
-    ) {
+    ): String {
         val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
@@ -1204,15 +1205,7 @@ class LapisController(
             ).fieldName,
         )
 
-        siloQueryModel.getNewick(
-            sequenceFilters = request,
-        )
-            .also {
-                treeStreamer.stream(
-                    treeResponse = it,
-                    response = response,
-                )
-            }
+        return getNewickSubtree(request, response)
     }
 
     @PostMapping(
@@ -1229,16 +1222,15 @@ class LapisController(
         @RequestBody
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
-    ) {
-        siloQueryModel.getNewick(
-            sequenceFilters = request,
-        )
-            .also {
-                treeStreamer.stream(
-                    treeResponse = it,
-                    response = response,
-                )
-            }
+    ): String = getNewickSubtree(request, response)
+
+    private fun getNewickSubtree(
+        request: PhyloTreeSequenceFiltersRequest,
+        response: HttpServletResponse,
+    ): String {
+        val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
+        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        return treeResponse.toList().first().subtreeNewick
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])

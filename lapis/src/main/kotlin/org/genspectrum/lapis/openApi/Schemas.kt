@@ -57,7 +57,6 @@ const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
 const val MOST_RECENT_COMMON_ANCESTOR_RESPONSE_SCHEMA = "MostRecentCommonAncestorResponse"
-const val PHYLO_SUBTREE_RESPONSE_SCHEMA = "PhyloSubtreeResponse"
 const val NUCLEOTIDE_MUTATIONS_RESPONSE_SCHEMA = "NucleotideMutationsResponse"
 const val AMINO_ACID_MUTATIONS_RESPONSE_SCHEMA = "AminoAcidMutationsResponse"
 const val NUCLEOTIDE_INSERTIONS_RESPONSE_SCHEMA = "NucleotideInsertionsResponse"
@@ -243,12 +242,6 @@ annotation class LapisMostRecentCommonAncestorResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
-    content = [
-        Content(
-            mediaType = LapisMediaType.TEXT_NEWICK_VALUE,
-            schema = Schema(ref = "#/components/schemas/$PHYLO_SUBTREE_RESPONSE_SCHEMA"),
-        ),
-    ],
 )
 annotation class LapisPhyloSubtreeResponse
 
