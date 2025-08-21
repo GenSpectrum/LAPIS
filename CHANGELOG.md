@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.15](https://github.com/GenSpectrum/LAPIS/compare/v0.5.14...v0.5.15) (2025-08-21)
+
+
+### Features
+
+* **lapis:** add example value to /phyloSubtree endpoints docs ([#1337](https://github.com/GenSpectrum/LAPIS/issues/1337)) ([21e659e](https://github.com/GenSpectrum/LAPIS/commit/21e659ecfd8ffe76cb4a415f04c74bb5357bbe14))
+
+
+### Bug Fixes
+
+* **lapis:** fix response schema of /phyloSubtree in OpenAPI spec ([#1336](https://github.com/GenSpectrum/LAPIS/issues/1336)) ([c3c3e75](https://github.com/GenSpectrum/LAPIS/commit/c3c3e75d73a8f3ddec153f62650d529f0ee82ca4))
+* **lapis:** increase maximum string length in JSON parser ([#1332](https://github.com/GenSpectrum/LAPIS/issues/1332)) ([1765428](https://github.com/GenSpectrum/LAPIS/commit/17654285b0b29347fcb89a7c43ebeb42f2b87c25))
+* **lapis:** truncate error details if they are too long ([#1334](https://github.com/GenSpectrum/LAPIS/issues/1334)) ([b51157d](https://github.com/GenSpectrum/LAPIS/commit/b51157d466eca6b9d1a57a8082763e91eb9e63c4))
+
 ## [0.5.14](https://github.com/GenSpectrum/LAPIS/compare/v0.5.13...v0.5.14) (2025-08-19)
 
 
