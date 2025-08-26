@@ -5,6 +5,7 @@ import {
   Middleware,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
+import { MutationsOverTimeControllerApi } from './lapisClient/index';
 import { LapisControllerApi as LapisControllerApiMultiSegmented } from './lapisClientMultiSegmented';
 import { expect } from 'chai';
 
@@ -45,6 +46,9 @@ export const lapisClient = new LapisControllerApi(new Configuration({ basePath }
 export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePath })).withMiddleware(
   middleware
 );
+export const mutOverTimeClient = new MutationsOverTimeControllerApi(
+  new Configuration({ basePath })
+).withMiddleware(middleware);
 export const lapisClientProtected = new LapisControllerApiProtected(
   new ConfigurationProtected({ basePath: basePathProtected })
 ).withMiddleware(middleware);
