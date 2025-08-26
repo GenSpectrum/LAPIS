@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.16](https://github.com/GenSpectrum/LAPIS/compare/v0.5.15...v0.5.16) (2025-08-26)
+
+
+### Features
+
+* **lapis:** mutationsOverTime endpoint: return total sequence count per dateRange ([#1316](https://github.com/GenSpectrum/LAPIS/issues/1316)) ([b29c921](https://github.com/GenSpectrum/LAPIS/commit/b29c9214cd247211e329fb32e82c0889d6fc4d81))
+
 ## [0.5.15](https://github.com/GenSpectrum/LAPIS/compare/v0.5.14...v0.5.15) (2025-08-21)
 
 
