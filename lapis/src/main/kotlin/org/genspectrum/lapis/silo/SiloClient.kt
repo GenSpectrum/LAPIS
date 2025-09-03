@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
@@ -79,10 +80,12 @@ open class CachedSiloClient(
     private val yamlObjectMapper: YamlObjectMapper,
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
+    private val config: DatabaseConfig,
 ) {
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
-        .executor(Executors.newWorkStealingPool())
+        // Use fixed pool with unbounded queue to prevent RejectedExecutionExeceptions
+        .executor(Executors.newFixedThreadPool(config.siloClientThreadCount))
         .build()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !(#query.action.randomize ?: false)")

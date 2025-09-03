@@ -84,3 +84,9 @@ The feature object permits the following fields:
 
 Currently, we support the `sarsCoV2VariantQuery` as well as the `generalizedAdvancedQuery` feature.
 The `sarsCoV2VariantQuery` is a specialized query language for SARS-CoV-2 instances (see [variant queries](../../concepts/variant-query)), while the `generalizedAdvancedQuery` feature can be used for all instances (see [advanced queries](../../concepts/advanced-query)).
+
+## Other configuration
+
+| Key                   | Type | Required | Description                                                      |
+| --------------------- | ---- | -------- | ---------------------------------------------------------------- |
+| siloClientThreadCount | int  | false    | How many threads (connections) the SILO client uses. Default: 64 |
