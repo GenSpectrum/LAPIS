@@ -9,6 +9,7 @@ data class DatabaseConfig(
     val schema: DatabaseSchema,
     val defaultNucleotideSequence: String? = null,
     val defaultAminoAcidSequence: String? = null,
+    val siloClientThreadCount: Int = 64,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
