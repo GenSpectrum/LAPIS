@@ -1,5 +1,7 @@
 import fs from 'fs';
 import { parse } from 'yaml';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export type MetadataType =
     | 'string'
