@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.17](https://github.com/GenSpectrum/LAPIS/compare/v0.5.16...v0.5.17) (2025-09-15)
+
+
+### Bug Fixes
+
+* **lapis:** fix 500 server error in *mutationsOverTime endpoints ([#1357](https://github.com/GenSpectrum/LAPIS/issues/1357)) ([d056d6c](https://github.com/GenSpectrum/LAPIS/commit/d056d6cc075a15c72bd77b3d9991cefe6baf7139))
+
 ## [0.5.16](https://github.com/GenSpectrum/LAPIS/compare/v0.5.15...v0.5.16) (2025-09-03)
 
 
