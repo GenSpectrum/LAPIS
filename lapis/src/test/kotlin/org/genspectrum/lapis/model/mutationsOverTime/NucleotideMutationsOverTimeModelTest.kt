@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -45,10 +46,14 @@ class NucleotideMutationsOverTimeModelTest {
 
     private lateinit var underTest: MutationsOverTimeModel
 
+    @Autowired
+    private lateinit var config: DatabaseConfig
+
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = MutationsOverTimeModel(siloQueryClient, siloFilterExpressionMapper, referenceGenome, dataVersion)
+        underTest =
+            MutationsOverTimeModel(siloQueryClient, siloFilterExpressionMapper, referenceGenome, dataVersion, config)
     }
 
     @Test

@@ -1,6 +1,8 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.annotation.PreDestroy
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -26,6 +28,11 @@ import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
+private const val MUTATION_QUERY_TIMEOUT_SECONDS = 60L
 
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
@@ -67,7 +74,13 @@ class MutationsOverTimeModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
     private val dataVersion: DataVersion,
+    private val config: DatabaseConfig,
 ) {
+    /**
+     * Thread pool used for parallel queries to SILO.
+     */
+    private val threadPool = Executors.newFixedThreadPool(config.siloClientThreadCount)
+
     fun evaluateAminoAcidMutations(
         mutations: List<AminoAcidMutation>,
         dateRanges: List<DateRange>,
@@ -196,18 +209,27 @@ class MutationsOverTimeModel(
             dateRanges,
         )
 
-        val dataWithDataVersions = mutations.parallelStream().map { mutation ->
-            val countsWithDataVersion = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
-            val coverageWithDataVersion = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
+        val tasks = mutations.map { mutation ->
+            Callable {
+                val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
+                val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
+                listOf(counts.dataVersion, coverage.dataVersion) to
+                    aggregateDailyMutationDataIntoDateRanges(
+                        counts.queryResult,
+                        coverage.queryResult,
+                        dateField,
+                        dateRanges,
+                    )
+            }
+        }
 
-            listOf(countsWithDataVersion.dataVersion, coverageWithDataVersion.dataVersion) to
-                aggregateDailyMutationDataIntoDateRanges(
-                    countsWithDataVersion.queryResult,
-                    coverageWithDataVersion.queryResult,
-                    dateField,
-                    dateRanges,
-                )
-        }.toList()
+        val dataWithDataVersions = this.threadPool.invokeAll(
+            tasks,
+            MUTATION_QUERY_TIMEOUT_SECONDS,
+            TimeUnit.SECONDS,
+        ).map {
+            it.get()
+        }
 
         val dataVersions = dataWithDataVersions.flatMap { it.first } + dailyTotalsDataVersion
         if (dataVersions.distinct().size != 1) {
@@ -324,5 +346,13 @@ class MutationsOverTimeModel(
         return dateRanges.indexOfFirst {
             it.containsDate(date)
         }.takeIf { it >= 0 }
+    }
+
+    @PreDestroy
+    fun shutdownThreadPool() {
+        threadPool.shutdown()
+        if (!threadPool.awaitTermination(5, TimeUnit.SECONDS)) {
+            threadPool.shutdownNow()
+        }
     }
 }
