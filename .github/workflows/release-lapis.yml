@@ -52,7 +52,7 @@ jobs:
 
       - name: Wait for Lapis Docs Docker Image
         if: ${{ steps.release.outputs.release_created }}
-        uses: lewagon/wait-on-check-action@v1.4.0
+        uses: lewagon/wait-on-check-action@v1.4.1
         with:
           ref: ${{ github.sha }}
           check-name: Build Docs Docker Image And Run E2E Tests
