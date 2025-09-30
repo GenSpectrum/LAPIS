@@ -7,6 +7,7 @@ import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
+import org.genspectrum.lapis.silo.SiloNotReachableException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
@@ -33,6 +34,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
+/**
+ * Global, last resort exception handler for LAPIS. `@ControllerAdvice`s are applied to all controllers.
+ *
+ * Catches exceptions thrown by controllers (and the code that they use) and returns appropriate HTTP responses.
+ */
 @ControllerAdvice
 class ExceptionHandler(
     private val notFoundView: NotFoundView,
@@ -64,6 +70,13 @@ class ExceptionHandler(
         log.warn(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
 
         return responseEntity(e.statusCode, e.title, e.message)
+    }
+
+    @ExceptionHandler(SiloNotReachableException::class)
+    fun handleSiloNotReachableException(e: SiloNotReachableException): ErrorResponse {
+        log.warn { "Caught SiloNotReachableException: ${e.message}" } // don't log stack trace for this common case
+
+        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
 
     @ExceptionHandler(SiloUnavailableException::class)
