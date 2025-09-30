@@ -34,6 +34,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
+/**
+ * Global, last resort exception handler for LAPIS. `@ControllerAdvice`s are applied to all controllers.
+ *
+ * Catches exceptions thrown by controllers (and the code that they use) and returns appropriate HTTP responses.
+ */
 @ControllerAdvice
 class ExceptionHandler(
     private val notFoundView: NotFoundView,
