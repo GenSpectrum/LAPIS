@@ -17,6 +17,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import java.io.IOException
+import java.net.ConnectException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -193,6 +194,9 @@ open class CachedSiloClient(
                     throw ioException
                 }
             }
+        } catch (connectException: ConnectException) {
+            val message = "Could not connect to silo: ${connectException::class} ${connectException.message}"
+            throw SiloNotReachableException(message)
         } catch (exception: Exception) {
             val message = "Could not connect to silo: ${exception::class} ${exception.message}"
             throw RuntimeException(message, exception)
@@ -240,15 +244,28 @@ open class CachedSiloClient(
         response.headers().firstValue("data-version").orElse("")
 }
 
+/**
+ * Indicates that SILO returned an error response and forwards the status code, error title and message.
+ */
 class SiloException(
     val statusCode: Int,
     val title: String,
     override val message: String,
 ) : Exception(message)
 
+/**
+ * Indicates that SILO is reachable but claims that it's currently unavailable (HTTP 503).
+ */
 class SiloUnavailableException(
     override val message: String,
     val retryAfter: String?,
+) : Exception(message)
+
+/**
+ * Indicates that SILO is not reachable at all (e.g. connection refused).
+ */
+class SiloNotReachableException(
+    override val message: String,
 ) : Exception(message)
 
 data class WithDataVersion<ResponseType>(
