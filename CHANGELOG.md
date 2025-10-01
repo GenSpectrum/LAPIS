@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.18](https://github.com/GenSpectrum/LAPIS/compare/v0.5.17...v0.5.18) (2025-10-01)
+
+
+### Bug Fixes
+
+* **lapis:** also don't log the stack trace when SILO says that it's not available yet ([#1376](https://github.com/GenSpectrum/LAPIS/issues/1376)) ([b4ee14d](https://github.com/GenSpectrum/LAPIS/commit/b4ee14d752c0d0342fd866ac402de585df51d9a4))
+* **lapis:** don't spam the log with stack traces when SILO can't be reached ([#1373](https://github.com/GenSpectrum/LAPIS/issues/1373)) ([0e35d0f](https://github.com/GenSpectrum/LAPIS/commit/0e35d0f2c0dd72058be71b050e97ec710536e9eb))
+
 ## [0.5.17](https://github.com/GenSpectrum/LAPIS/compare/v0.5.16...v0.5.17) (2025-09-15)
 
 
