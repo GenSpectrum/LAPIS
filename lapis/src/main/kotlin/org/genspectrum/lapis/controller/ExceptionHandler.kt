@@ -82,7 +82,7 @@ class ExceptionHandler(
     @ExceptionHandler(SiloUnavailableException::class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     fun handleSiloUnavailableException(e: SiloUnavailableException): ErrorResponse {
-        log.warn(e) { "Caught SiloUnavailableException: ${e.message}" }
+        log.warn { "Caught SiloUnavailableException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header(RETRY_AFTER, e.retryAfter) }
     }
