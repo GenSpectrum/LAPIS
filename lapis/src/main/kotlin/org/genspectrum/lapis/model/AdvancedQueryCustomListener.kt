@@ -202,10 +202,10 @@ class AdvancedQueryCustomListener(
         val field: DatabaseMetadata = getFieldOrThrow(metadataName)
         when (field.type) {
             MetadataType.STRING -> {
-                if (field.generateLineageIndex) {
-                    expressionStack.addLast(mapToLineageFilter(field.name, metadataValue))
-                } else {
+                if (field.generateLineageIndex == null) {
                     expressionStack.addLast(StringEquals(field.name, metadataValue))
+                } else {
+                    expressionStack.addLast(mapToLineageFilter(field.name, metadataValue))
                 }
             }
 
@@ -252,10 +252,10 @@ class AdvancedQueryCustomListener(
         val field: DatabaseMetadata = getFieldOrThrow(metadataName)
         when (field.type) {
             MetadataType.STRING -> {
-                if (field.generateLineageIndex) {
-                    expressionStack.addLast(LineageEquals(field.name, null, false))
-                } else {
+                if (field.generateLineageIndex == null) {
                     expressionStack.addLast(StringEquals(field.name, null))
+                } else {
+                    expressionStack.addLast(LineageEquals(field.name, null, false))
                 }
             }
 

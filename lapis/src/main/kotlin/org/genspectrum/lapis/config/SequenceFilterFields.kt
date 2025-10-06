@@ -44,14 +44,14 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
     when (databaseMetadata.type) {
         MetadataType.STRING -> {
             val baseField = when (databaseMetadata.generateLineageIndex) {
-                true -> SequenceFilterField(
-                    name = databaseMetadata.name,
-                    type = SequenceFilterFieldType.Lineage,
-                )
-
-                false -> SequenceFilterField(
+                null -> SequenceFilterField(
                     name = databaseMetadata.name,
                     type = SequenceFilterFieldType.String,
+                )
+
+                else -> SequenceFilterField(
+                    name = databaseMetadata.name,
+                    type = SequenceFilterFieldType.Lineage,
                 )
             }
 
@@ -69,6 +69,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                         type = SequenceFilterFieldType.PhyloDescendantOf(databaseMetadata.name),
                     ),
                 )
+
                 else -> listOf(
                     baseField,
                     regexField,
