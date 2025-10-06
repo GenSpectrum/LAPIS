@@ -128,7 +128,7 @@ jobs:
           docker compose -f lapis/docker-compose.yml up -d --wait
           cd lapis-e2e && npm run test
         env:
-          SILO_TAG: 0.7.8
+          SILO_TAG: 0.8.5
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Store Logs
@@ -144,7 +144,7 @@ jobs:
           docker compose logs lapisProtected > e2e-logs/lapisProtected.log
           docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
         env:
-          SILO_TAG: 0.7.8
+          SILO_TAG: 0.8.5
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Upload logs
