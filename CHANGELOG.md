@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/GenSpectrum/LAPIS/compare/v0.5.18...v0.6.0) (2025-10-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** make `generateLineageIndex` in the database config a string field
+
+### Features
+
+* **lapis:** make `generateLineageIndex` in the database config a string field ([#1377](https://github.com/GenSpectrum/LAPIS/issues/1377)) ([3f02855](https://github.com/GenSpectrum/LAPIS/commit/3f0285593a5356c647a541b92668fe84bcfa0cd2))
+
 ## [0.5.18](https://github.com/GenSpectrum/LAPIS/compare/v0.5.17...v0.5.18) (2025-10-01)
 
 
