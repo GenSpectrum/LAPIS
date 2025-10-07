@@ -66,6 +66,11 @@ tasks.named('compileTestKotlin') {
     mustRunAfter("generateTestGrammarSource")
 }
 
+tasks.named('runKtlintCheckOverTestSourceSet') {
+    mustRunAfter("generateGrammarSource")
+    mustRunAfter("generateTestGrammarSource")
+}
+
 tasks.named('test') {
     dependsOn generateGrammarSource
     useJUnitPlatform()
