@@ -10,6 +10,7 @@ import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import java.io.IOException
 import java.nio.charset.Charset
 
 @Component
@@ -39,21 +40,62 @@ class SequencesStreamer(
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
-        response.outputStream.writer().use { stream ->
-            sequencesResponse.sequenceData.forEach {
+        // Prefer the servlet-provided writer (respects characterEncoding)
+        val writer = response.writer
+        var wroteAnything = false
+        var count = 0
+
+        fun isClientAbort(t: Throwable?): Boolean {
+            var c = t
+            while (c != null) {
+                val name = c.javaClass.name
+                val msg = c.message?.lowercase()
+                if (name.endsWith("ClientAbortException")) return true
+                if (msg?.contains("broken pipe") == true) return true
+                if (msg?.contains("connection reset by peer") == true) return true
+                c = c.cause
+            }
+            return false
+        }
+
+        try {
+            for (row in sequencesResponse.sequenceData) {
                 for (sequenceName in sequencesResponse.requestedSequenceNames) {
-                    val sequence = it[sequenceName]
-                    if (sequence == null || sequence == NullNode.instance) {
-                        continue
-                    }
+                    val node = row[sequenceName]
+                    if (node == null || node == NullNode.instance) continue
 
                     val fastaHeader = sequencesResponse.fastaHeaderTemplate.fillTemplate(
-                        values = it,
+                        values = row,
                         sequenceName = sequenceName,
                     )
-                    stream.appendLine(">$fastaHeader\n${sequence.asText()}")
+
+                    writer.append('>')
+                    writer.append(fastaHeader)
+                    writer.append('\n')
+                    writer.append(node.asText())
+                    writer.append('\n')
+
+                    wroteAnything = true
+                    if (++count % 500 == 0) writer.flush() // periodic flush to push chunks & detect aborts
                 }
             }
+            writer.flush() // final flush may detect an abort too
+        } catch (ioe: IOException) {
+            // Client went away during write/flush
+            if (isClientAbort(ioe)) {
+                // Log at DEBUG/INFO; treat as normal cancellation
+                // log.debug("Client aborted FASTA stream", ioe)
+            } else {
+                // log.warn("I/O error while streaming FASTA", ioe)
+                // Nothing else we can send; headers are probably committed.
+            }
+        } finally {
+            try {
+                // Close quietly; after an abort close() can also throw
+                writer.close()
+            } catch (_: IOException) { /* swallow */ }
+            // If sequencesResponse holds any resources (cursor/stream), close them here.
+            // e.g. sequencesResponse.close()
         }
     }
 
