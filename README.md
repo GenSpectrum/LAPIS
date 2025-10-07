@@ -23,6 +23,7 @@ Main features include:
 We host LAPIS instances ourselves.
 Note that the documentation and the Swagger UI are tailored to the specific instance.
 You can find documentation of one of our LAPIS instances here:
+
 * Documentation: https://lapis.cov-spectrum.org/open/v2/docs/
 * Swagger UI: https://lapis.cov-spectrum.org/open/v2/swagger-ui/index.html
 
@@ -51,6 +52,7 @@ Higher versions will also work if they are not specified in the table.
 
 | LAPIS  | SILO   |
 |--------|--------|
+| 0.5.19 | 0.9.0  |
 | 0.5.4  | 0.7.0  |
 | 0.3.14 | 0.5.3  |
 | 0.3.13 | 0.5.2  |
@@ -62,7 +64,7 @@ Higher versions will also work if they are not specified in the table.
 ## Repository Structure
 
 * `lapis`: The code for [LAPIS](lapis/README.md).
-* `lapis-docs`: The [documentation website](lapis-docs/README.md) for LAPIS. 
+* `lapis-docs`: The [documentation website](lapis-docs/README.md) for LAPIS.
   It is an optional component that can be hosted alongside LAPIS to provide more comprehensive documentation.
 * `lapis-e2e`: The end-to-end tests for LAPIS.
   Check the tests if you are looking for example queries, e.g. [here](lapis-e2e/test/aggregatedQueries).

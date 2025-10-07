@@ -88,7 +88,7 @@ class SequenceFilterFieldsTest {
                 DatabaseMetadata(
                     name = "pangoLineage",
                     type = MetadataType.STRING,
-                    generateLineageIndex = true,
+                    generateLineageIndex = "lineage",
                 ),
             ),
         )

@@ -12,5 +12,5 @@ schema:
       type: string
     - name: pangoLineage
       type: string
-      generateLineageIndex: true
+      generateLineageIndex: lineage
   primaryKey: primaryKey

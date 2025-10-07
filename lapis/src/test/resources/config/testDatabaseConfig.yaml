@@ -13,7 +13,7 @@ schema:
       type: string
     - name: pangoLineage
       type: string
-      generateLineageIndex: true
+      generateLineageIndex: lineage
     - name: test_boolean_column
       type: boolean
     - name: age

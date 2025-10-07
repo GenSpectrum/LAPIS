@@ -16,7 +16,7 @@ val dummyDatabaseConfig = DatabaseConfig(
         listOf(
             DatabaseMetadata("treeKey", MetadataType.STRING, isPhyloTreeField = true),
             DatabaseMetadata(DATE_FIELD, MetadataType.DATE),
-            DatabaseMetadata(PANGO_LINEAGE_FIELD, MetadataType.STRING, generateLineageIndex = true),
+            DatabaseMetadata(PANGO_LINEAGE_FIELD, MetadataType.STRING, generateLineageIndex = "lineage"),
             DatabaseMetadata("some_metadata", MetadataType.STRING),
             DatabaseMetadata("other_metadata", MetadataType.STRING),
             DatabaseMetadata("floatField", MetadataType.FLOAT),
