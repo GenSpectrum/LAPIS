@@ -16,6 +16,7 @@ import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import java.io.IOException
 import java.nio.charset.Charset
 import java.util.stream.Stream
 
@@ -71,6 +72,7 @@ class LapisResponseStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
+        val dataTypeName = "plain JSON data"
 
         val jsonFactory = objectMapper.factory
         sequenceData.use { inputStream ->
@@ -82,8 +84,10 @@ class LapisResponseStreamer(
                             generator.writeObject(it)
                         }
                         generator.writeEndArray()
+                    } catch (e: IOException) {
+                        log.info { "Client likely disconnected while streaming $dataTypeName" }
                     } catch (e: Exception) {
-                        log.error(e) { "Error streaming plain JSON" }
+                        log.error(e) { "Error streaming $dataTypeName" }
                         throw e
                     }
                 }
@@ -98,6 +102,7 @@ class LapisResponseStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
+        val dataTypeName = "Lapis JSON data"
 
         val jsonFactory = objectMapper.factory
 
@@ -116,8 +121,10 @@ class LapisResponseStreamer(
                         generator.writePOJOField("info", lapisInfoFactory.create())
 
                         generator.writeEndObject()
+                    } catch (e: IOException) {
+                        log.info { "Client likely disconnected while streaming $dataTypeName" }
                     } catch (e: Exception) {
-                        log.error(e) { "Error streaming LapisResponse JSON" }
+                        log.error(e) { "Error streaming $dataTypeName" }
                         throw e
                     }
                 }

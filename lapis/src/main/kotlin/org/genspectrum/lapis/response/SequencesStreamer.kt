@@ -11,6 +11,7 @@ import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import java.io.IOException
 import java.nio.charset.Charset
 
 @Component
@@ -40,6 +41,8 @@ class SequencesStreamer(
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
+        val dataTypeName = "sequence FASTA"
+
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
                 inputStream.forEach {
@@ -57,8 +60,10 @@ class SequencesStreamer(
                         )
                         try {
                             outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
+                        } catch (e: IOException) {
+                            log.info { "Client likely disconnected while streaming $dataTypeName" }
                         } catch (e: Exception) {
-                            log.error(e) { "Error streaming sequence '$sequenceName' with header '$fastaHeader'" }
+                            log.error(e) { "Error streaming $dataTypeName" }
                             throw e
                         }
                     }
@@ -75,6 +80,8 @@ class SequencesStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON, Charset.defaultCharset()).toString()
         }
 
+        val dataTypeName = "sequence JSON"
+
         sequencesResponse.sequenceData.use { inputStream ->
             var isFirstEntry = true
             response.outputStream.writer().use { outputStream ->
@@ -89,8 +96,10 @@ class SequencesStreamer(
                         outputStream.append(objectMapper.writeValueAsString(it))
                     }
                     outputStream.append(']')
+                } catch (e: IOException) {
+                    log.info { "Client likely disconnected while streaming $dataTypeName" }
                 } catch (e: Exception) {
-                    log.error(e) { "Error streaming sequence JSON" }
+                    log.error(e) { "Error streaming sequence $dataTypeName" }
                     throw e
                 }
             }
@@ -104,13 +113,16 @@ class SequencesStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_NDJSON, Charset.defaultCharset()).toString()
         }
+        val dataTypeName = "sequence NDJSON"
 
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
                 try {
                     inputStream.forEach { outputStream.appendLine(objectMapper.writeValueAsString(it)) }
+                } catch (e: IOException) {
+                    log.info { "Client likely disconnected while streaming $dataTypeName" }
                 } catch (e: Exception) {
-                    log.error(e) { "Error streaming sequence NdJson" }
+                    log.error(e) { "Error streaming $dataTypeName" }
                     throw e
                 }
             }

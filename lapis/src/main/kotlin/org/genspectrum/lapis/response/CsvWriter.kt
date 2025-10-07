@@ -2,8 +2,10 @@ package org.genspectrum.lapis.response
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
+import org.genspectrum.lapis.log
 import org.springframework.stereotype.Component
 import java.io.Flushable
+import java.io.IOException
 import java.util.stream.Stream
 
 interface RecordCollection<T> {
@@ -38,10 +40,18 @@ class CsvWriter {
             if (includeHeaders) {
                 it.printRecord(data.getHeader())
             }
-            data.getCsvRecords().use { csvRecordStream ->
-                csvRecordStream.forEach { csvRecord ->
-                    it.printRecord(csvRecord)
+            val dataTypeName = "CSV/TSV data"
+            try {
+                data.getCsvRecords().use { csvRecordStream ->
+                    csvRecordStream.forEach { csvRecord ->
+                        it.printRecord(csvRecord)
+                    }
                 }
+            } catch (e: IOException) {
+                log.info { "Client likely disconnected while streaming $dataTypeName" }
+            } catch (e: Exception) {
+                log.error(e) { "Error writing $dataTypeName" }
+                throw e
             }
         }
     }
@@ -70,9 +80,17 @@ class IanaTsvWriter {
         if (includeHeaders) {
             writeRow(appendable, data.getHeader(), delimiter)
         }
+        val dataTypeName = "Iana CSV/TSV data"
         data.getCsvRecords().use { csvRecordStream ->
-            csvRecordStream.forEach { csvRecord ->
-                writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+            try {
+                csvRecordStream.forEach { csvRecord ->
+                    writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+                }
+            } catch (e: IOException) {
+                log.info { "Client likely disconnected while streaming $dataTypeName" }
+            } catch (e: Exception) {
+                log.error(e) { "Error writing $dataTypeName" }
+                throw e
             }
         }
     }
