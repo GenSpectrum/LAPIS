@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.nio.charset.Charset
+import org.genspectrum.lapis.log
 
 @Component
 class SequencesStreamer(
@@ -81,21 +82,17 @@ class SequencesStreamer(
             }
             writer.flush() // final flush may detect an abort too
         } catch (ioe: IOException) {
-            // Client went away during write/flush
             if (isClientAbort(ioe)) {
-                // Log at DEBUG/INFO; treat as normal cancellation
-                // log.debug("Client aborted FASTA stream", ioe)
+                log.debug("Client aborted FASTA stream", ioe)
             } else {
-                // log.warn("I/O error while streaming FASTA", ioe)
-                // Nothing else we can send; headers are probably committed.
+                log.warn("I/O error while streaming FASTA", ioe)
             }
         } finally {
             try {
-                // Close quietly; after an abort close() can also throw
                 writer.close()
-            } catch (_: IOException) { /* swallow */ }
-            // If sequencesResponse holds any resources (cursor/stream), close them here.
-            // e.g. sequencesResponse.close()
+            } catch (_: IOException) {
+                log.error("I/O error while closing FASTA stream")
+            }
         }
     }
 
