@@ -21,7 +21,7 @@ describe('The /databaseConfig endpoint', () => {
           ...field,
           valuesAreUnique: field.valuesAreUnique ?? false,
           generateIndex: field.generateIndex ?? false,
-          generateLineageIndex: field.generateLineageIndex ?? false,
+          generateLineageIndex: field.generateLineageIndex ?? undefined,
           isPhyloTreeField: field.isPhyloTreeField ?? false,
         })),
       },
