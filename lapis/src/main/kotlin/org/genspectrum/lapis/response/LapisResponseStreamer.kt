@@ -160,7 +160,6 @@ class LapisResponseStreamer(
             response.contentType = contentType.toString()
         }
 
-        // TODO: figure out a way to cancel streaming if the client disconnects
         if (escapeNewlines) {
             response.outputStream.use {
                 ianaTsvWriter.write(
