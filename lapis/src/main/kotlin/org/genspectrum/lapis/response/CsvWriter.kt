@@ -2,6 +2,7 @@ package org.genspectrum.lapis.response
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
+import org.genspectrum.lapis.log
 import org.springframework.stereotype.Component
 import java.io.Flushable
 import java.util.stream.Stream
@@ -38,10 +39,15 @@ class CsvWriter {
             if (includeHeaders) {
                 it.printRecord(data.getHeader())
             }
-            data.getCsvRecords().use { csvRecordStream ->
-                csvRecordStream.forEach { csvRecord ->
-                    it.printRecord(csvRecord)
+            try {
+                data.getCsvRecords().use { csvRecordStream ->
+                    csvRecordStream.forEach { csvRecord ->
+                        it.printRecord(csvRecord)
+                    }
                 }
+            } catch (e: Exception) {
+                log.error(e) { "Error writing Iana CSV/TSV data" }
+                throw e
             }
         }
     }
@@ -71,8 +77,13 @@ class IanaTsvWriter {
             writeRow(appendable, data.getHeader(), delimiter)
         }
         data.getCsvRecords().use { csvRecordStream ->
-            csvRecordStream.forEach { csvRecord ->
-                writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+            try {
+                csvRecordStream.forEach { csvRecord ->
+                    writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+                }
+            } catch (e: Exception) {
+                log.error(e) { "Error writing Iana CSV/TSV data" }
+                throw e
             }
         }
     }
