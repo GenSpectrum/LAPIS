@@ -7,6 +7,7 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.middleware.ESCAPED_ACCEPT_HEADER_PARAMETER
 import org.genspectrum.lapis.controller.middleware.HEADERS_ACCEPT_HEADER_PARAMETER
+import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.response.Delimiter.COMMA
@@ -72,14 +73,20 @@ class LapisResponseStreamer(
         }
 
         val jsonFactory = objectMapper.factory
-
-        response.outputStream.writer().use { stream ->
-            jsonFactory.createGenerator(stream).use { generator ->
-                generator.writeStartArray()
-                sequenceData.forEach {
-                    generator.writeObject(it)
+        sequenceData.use { inputStream ->
+            response.outputStream.writer().use { outputStream ->
+                jsonFactory.createGenerator(outputStream).use { generator ->
+                    try {
+                        generator.writeStartArray()
+                        inputStream.forEach {
+                            generator.writeObject(it)
+                        }
+                        generator.writeEndArray()
+                    } catch (e: Exception) {
+                        log.error(e) { "Error streaming plain JSON" }
+                        throw e
+                    }
                 }
-                generator.writeEndArray()
             }
         }
     }
@@ -94,19 +101,26 @@ class LapisResponseStreamer(
 
         val jsonFactory = objectMapper.factory
 
-        response.outputStream.writer().use { stream ->
-            jsonFactory.createGenerator(stream).use { generator ->
-                generator.writeStartObject()
+        sequenceData.use { inputStream ->
+            response.outputStream.writer().use { outputStream ->
+                jsonFactory.createGenerator(outputStream).use { generator ->
+                    try {
+                        generator.writeStartObject()
 
-                generator.writeArrayFieldStart("data")
-                sequenceData.forEach {
-                    generator.writeObject(it)
+                        generator.writeArrayFieldStart("data")
+                        inputStream.forEach {
+                            generator.writeObject(it)
+                        }
+                        generator.writeEndArray()
+
+                        generator.writePOJOField("info", lapisInfoFactory.create())
+
+                        generator.writeEndObject()
+                    } catch (e: Exception) {
+                        log.error(e) { "Error streaming LapisResponse JSON" }
+                        throw e
+                    }
                 }
-                generator.writeEndArray()
-
-                generator.writePOJOField("info", lapisInfoFactory.create())
-
-                generator.writeEndObject()
             }
         }
     }
@@ -146,6 +160,7 @@ class LapisResponseStreamer(
             response.contentType = contentType.toString()
         }
 
+        // TODO: figure out a way to cancel streaming if the client disconnects
         if (escapeNewlines) {
             response.outputStream.use {
                 ianaTsvWriter.write(
