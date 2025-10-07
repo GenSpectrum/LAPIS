@@ -128,7 +128,7 @@ jobs:
           docker compose -f lapis/docker-compose.yml up -d --wait
           cd lapis-e2e && npm run test
         env:
-          SILO_TAG: 0.8.5
+          SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Store Logs
