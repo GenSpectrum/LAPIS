@@ -20,7 +20,7 @@ services:
     platform: linux/amd64
     ports:
       - "8091:8081"
-    command: api
+    command: api --api-threads-for-http-connections 2
     volumes:
       - ../lapis-e2e/testData/singleSegmented/output:/data
     depends_on:
