@@ -23,12 +23,14 @@ class SequencesStreamer(
         response: HttpServletResponse,
         sequencesDataFormat: SequencesDataFormat,
     ) {
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        sequencesResponse.use { inputStream ->
+            response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
 
-        when (sequencesDataFormat) {
-            SequencesDataFormat.FASTA -> streamFasta(response, sequencesResponse)
-            SequencesDataFormat.JSON -> streamJson(response, sequencesResponse)
-            SequencesDataFormat.NDJSON -> streamNdjson(response, sequencesResponse)
+            when (sequencesDataFormat) {
+                SequencesDataFormat.FASTA -> streamFasta(response, inputStream)
+                SequencesDataFormat.JSON -> streamJson(response, inputStream)
+                SequencesDataFormat.NDJSON -> streamNdjson(response, inputStream)
+            }
         }
     }
 

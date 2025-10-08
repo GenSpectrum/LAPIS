@@ -306,4 +306,8 @@ data class SequencesResponse(
     val sequenceData: Stream<SequenceData>,
     val requestedSequenceNames: List<String>,
     val fastaHeaderTemplate: FastaHeaderTemplate,
-)
+) : AutoCloseable {
+    override fun close() {
+        sequenceData.close()
+    }
+}
