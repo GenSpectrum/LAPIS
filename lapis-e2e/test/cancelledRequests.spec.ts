@@ -34,22 +34,19 @@ describe('Client cancellation robustness', () => {
     const urlAligned = `${basePath}/sample/alignedNucleotideSequences`;
     const url = `${basePath}/sample/unalignedNucleotideSequences`;
 
-    const c1 = new AbortController();
-    const res1 = await fetch(urlAligned, { signal: c1.signal });
-    expect(res1.ok, `HTTP ${res1.status}`).to.equal(true);
-    const p1 = consumeAndAbortOnFirstChunk(res1, c1);
+    const aborts: AbortController[] = [];
+    const pending: Promise<void>[] = [];
 
-    const c2 = new AbortController();
-    const res2 = await fetch(urlAligned, { signal: c2.signal });
-    expect(res2.ok, `HTTP ${res2.status}`).to.equal(true);
-    const p2 = consumeAndAbortOnFirstChunk(res2, c2);
+    for (let i = 0; i < 5; i++) {
+      const c = new AbortController();
+      aborts.push(c);
+      const res = await fetch(urlAligned, { signal: c.signal });
+      expect(res.ok, `HTTP ${res.status}`).to.equal(true);
+      const p = consumeAndAbortOnFirstChunk(res, c);
+      pending.push(p);
+    }
 
-    const c3 = new AbortController();
-    const res3 = await fetch(urlAligned, { signal: c3.signal });
-    expect(res3.ok, `HTTP ${res3.status}`).to.equal(true);
-    const p3 = consumeAndAbortOnFirstChunk(res3, c3);
-
-    await Promise.all([p1, p2, p3]);
+    await Promise.all(pending);
 
     const okRes = await fetch(url);
     expect(okRes.ok, `Expected 2xx, got ${okRes.status}`).to.equal(true);
