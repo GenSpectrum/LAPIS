@@ -46,10 +46,8 @@ class SequencesStreamer(
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
                 inputStream.forEach {
-                    log.info("Processing next sequence entry")
                     for (sequenceName in sequencesResponse.requestedSequenceNames) {
                         val sequence = it[sequenceName]
-                        log.info("Streaming sequence '$sequenceName' with length ${sequence?.asText()?.length ?: 0}")
                         if (sequence == null || sequence == NullNode.instance) {
                             continue
                         }
