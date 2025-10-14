@@ -40,18 +40,12 @@ class CsvWriter {
             if (includeHeaders) {
                 it.printRecord(data.getHeader())
             }
-            val dataTypeName = "CSV/TSV data"
-            try {
+            tryAndLogDisconnect("CSV/TSV data") {
                 data.getCsvRecords().use { csvRecordStream ->
                     csvRecordStream.forEach { csvRecord ->
-                        it.printRecord(csvRecord)
+                        writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
                     }
                 }
-            } catch (e: IOException) {
-                log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-            } catch (e: Exception) {
-                log.error(e) { "Error writing $dataTypeName" }
-                throw e
             }
         }
     }
@@ -80,19 +74,26 @@ class IanaTsvWriter {
         if (includeHeaders) {
             writeRow(appendable, data.getHeader(), delimiter)
         }
-        val dataTypeName = "Iana CSV/TSV data"
-        data.getCsvRecords().use { csvRecordStream ->
-            try {
+        tryAndLogDisconnect("Iana CSV/TSV data") {
+            data.getCsvRecords().use { csvRecordStream ->
                 csvRecordStream.forEach { csvRecord ->
                     writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
                 }
-            } catch (e: IOException) {
-                log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-            } catch (e: Exception) {
-                log.error(e) { "Error writing $dataTypeName" }
-                throw e
             }
         }
+    }
+
+    private fun <T> tryAndLogDisconnect(
+        dataTypeName: String,
+        callback: () -> T,
+    ) = try {
+        callback()
+    } catch (e: IOException) {
+        log.info { "Client likely disconnected while streaming $dataTypeName" }
+        throw e
+    } catch (e: Exception) {
+        log.error(e) { "Error writing $dataTypeName" }
+        throw e
     }
 
     private fun writeRow(
