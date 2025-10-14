@@ -6,12 +6,10 @@ import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
-import org.genspectrum.lapis.log
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import java.io.IOException
 import java.nio.charset.Charset
 
 @Component
@@ -41,28 +39,21 @@ class SequencesStreamer(
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
-        val dataTypeName = "sequence FASTA"
-
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
-                inputStream.forEach {
-                    for (sequenceName in sequencesResponse.requestedSequenceNames) {
-                        val sequence = it[sequenceName]
-                        if (sequence == null || sequence == NullNode.instance) {
-                            continue
-                        }
+                tryAndLogDisconnect("sequence FASTA") {
+                    inputStream.forEach {
+                        for (sequenceName in sequencesResponse.requestedSequenceNames) {
+                            val sequence = it[sequenceName]
+                            if (sequence == null || sequence == NullNode.instance) {
+                                continue
+                            }
 
-                        val fastaHeader = sequencesResponse.fastaHeaderTemplate.fillTemplate(
-                            values = it,
-                            sequenceName = sequenceName,
-                        )
-                        try {
+                            val fastaHeader = sequencesResponse.fastaHeaderTemplate.fillTemplate(
+                                values = it,
+                                sequenceName = sequenceName,
+                            )
                             outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
-                        } catch (e: IOException) {
-                            log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-                        } catch (e: Exception) {
-                            log.error(e) { "Error streaming $dataTypeName" }
-                            throw e
                         }
                     }
                 }
@@ -77,8 +68,6 @@ class SequencesStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_JSON, Charset.defaultCharset()).toString()
         }
-
-        val dataTypeName = "sequence JSON"
 
         sequencesResponse.sequenceData.use { inputStream ->
             var isFirstEntry = true
