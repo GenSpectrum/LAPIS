@@ -48,7 +48,7 @@ class CsvWriter {
                     }
                 }
             } catch (e: IOException) {
-                log.info { "Client likely disconnected while streaming $dataTypeName" }
+                log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
             } catch (e: Exception) {
                 log.error(e) { "Error writing $dataTypeName" }
                 throw e
@@ -87,7 +87,7 @@ class IanaTsvWriter {
                     writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
                 }
             } catch (e: IOException) {
-                log.info { "Client likely disconnected while streaming $dataTypeName" }
+                log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
             } catch (e: Exception) {
                 log.error(e) { "Error writing $dataTypeName" }
                 throw e

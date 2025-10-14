@@ -59,7 +59,7 @@ class SequencesStreamer(
                         try {
                             outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
                         } catch (e: IOException) {
-                            log.info { "Client likely disconnected while streaming $dataTypeName" }
+                            log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
                         } catch (e: Exception) {
                             log.error(e) { "Error streaming $dataTypeName" }
                             throw e
@@ -95,7 +95,7 @@ class SequencesStreamer(
                     }
                     outputStream.append(']')
                 } catch (e: IOException) {
-                    log.info { "Client likely disconnected while streaming $dataTypeName" }
+                    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
                 } catch (e: Exception) {
                     log.error(e) { "Error streaming sequence $dataTypeName" }
                     throw e
@@ -118,7 +118,7 @@ class SequencesStreamer(
                 try {
                     inputStream.forEach { outputStream.appendLine(objectMapper.writeValueAsString(it)) }
                 } catch (e: IOException) {
-                    log.info { "Client likely disconnected while streaming $dataTypeName" }
+                    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
                 } catch (e: Exception) {
                     log.error(e) { "Error streaming $dataTypeName" }
                     throw e

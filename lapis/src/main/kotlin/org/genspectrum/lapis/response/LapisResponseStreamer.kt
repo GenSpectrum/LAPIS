@@ -85,7 +85,7 @@ class LapisResponseStreamer(
                         }
                         generator.writeEndArray()
                     } catch (e: IOException) {
-                        log.info { "Client likely disconnected while streaming $dataTypeName" }
+                        log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
                     } catch (e: Exception) {
                         log.error(e) { "Error streaming $dataTypeName" }
                         throw e
@@ -122,7 +122,7 @@ class LapisResponseStreamer(
 
                         generator.writeEndObject()
                     } catch (e: IOException) {
-                        log.info { "Client likely disconnected while streaming $dataTypeName" }
+                        log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
                     } catch (e: Exception) {
                         log.error(e) { "Error streaming $dataTypeName" }
                         throw e
