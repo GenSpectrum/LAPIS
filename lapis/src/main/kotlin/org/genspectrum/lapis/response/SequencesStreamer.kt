@@ -41,7 +41,7 @@ class SequencesStreamer(
 
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
-                tryAndLogDisconnect("sequence FASTA") {
+                streamAndLogDisconnect("sequence FASTA") {
                     inputStream.forEach {
                         for (sequenceName in sequencesResponse.requestedSequenceNames) {
                             val sequence = it[sequenceName]
@@ -72,7 +72,7 @@ class SequencesStreamer(
         sequencesResponse.sequenceData.use { inputStream ->
             var isFirstEntry = true
             response.outputStream.writer().use { outputStream ->
-                tryAndLogDisconnect("sequence JSON") {
+                streamAndLogDisconnect("sequence JSON") {
                     outputStream.append('[')
                     inputStream.forEach {
                         if (isFirstEntry) {
@@ -98,7 +98,7 @@ class SequencesStreamer(
 
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
-                tryAndLogDisconnect("sequence NDJSON") {
+                streamAndLogDisconnect("sequence NDJSON") {
                     inputStream.forEach { outputStream.appendLine(objectMapper.writeValueAsString(it)) }
                 }
             }

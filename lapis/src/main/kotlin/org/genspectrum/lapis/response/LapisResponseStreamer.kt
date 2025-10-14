@@ -75,7 +75,7 @@ class LapisResponseStreamer(
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
                 jsonFactory.createGenerator(outputStream).use { generator ->
-                    tryAndLogDisconnect("Plain JSON data") {
+                    streamAndLogDisconnect("Plain JSON data") {
                         generator.writeStartArray()
                         inputStream.forEach {
                             generator.writeObject(it)
@@ -100,7 +100,7 @@ class LapisResponseStreamer(
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
                 jsonFactory.createGenerator(outputStream).use { generator ->
-                    tryAndLogDisconnect("Lapis JSON data") {
+                    streamAndLogDisconnect("Lapis JSON data") {
                         generator.writeStartObject()
 
                         generator.writeArrayFieldStart("data")

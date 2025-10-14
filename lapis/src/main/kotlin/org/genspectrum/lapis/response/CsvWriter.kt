@@ -2,10 +2,8 @@ package org.genspectrum.lapis.response
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
-import org.genspectrum.lapis.log
 import org.springframework.stereotype.Component
 import java.io.Flushable
-import java.io.IOException
 import java.util.stream.Stream
 
 interface RecordCollection<T> {
@@ -40,7 +38,7 @@ class CsvWriter {
             if (includeHeaders) {
                 it.printRecord(data.getHeader())
             }
-            tryAndLogDisconnect("CSV/TSV data") {
+            streamAndLogDisconnect("CSV/TSV data") {
                 data.getCsvRecords().use { csvRecordStream ->
                     csvRecordStream.forEach { csvRecord ->
                         it.printRecord(csvRecord)
@@ -74,7 +72,7 @@ class IanaTsvWriter {
         if (includeHeaders) {
             writeRow(appendable, data.getHeader(), delimiter)
         }
-        tryAndLogDisconnect("Iana CSV/TSV data") {
+        streamAndLogDisconnect("Iana CSV/TSV data") {
             data.getCsvRecords().use { csvRecordStream ->
                 csvRecordStream.forEach { csvRecord ->
                     writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
@@ -117,17 +115,4 @@ enum class Delimiter(
 ) {
     COMMA(','),
     TAB('\t'),
-}
-
-fun <T> tryAndLogDisconnect(
-    dataTypeName: String,
-    callback: () -> T,
-) = try {
-    callback()
-} catch (e: IOException) {
-    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-    throw e
-} catch (e: Exception) {
-    log.error(e) { "Error writing $dataTypeName" }
-    throw e
 }
