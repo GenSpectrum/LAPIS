@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/GenSpectrum/LAPIS/compare/v0.6.0...v0.6.1) (2025-10-14)
+
+
+### Bug Fixes
+
+* **lapis:** close connection to SILO if client cancels request to LAPIS ([#1393](https://github.com/GenSpectrum/LAPIS/issues/1393)) ([17012a8](https://github.com/GenSpectrum/LAPIS/commit/17012a8897512532b3f950c474b34fd872a8e0c7))
+
 ## [0.6.0](https://github.com/GenSpectrum/LAPIS/compare/v0.5.18...v0.6.0) (2025-10-07)
 
 
