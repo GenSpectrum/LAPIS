@@ -72,14 +72,17 @@ class LapisResponseStreamer(
         }
 
         val jsonFactory = objectMapper.factory
-
-        response.outputStream.writer().use { stream ->
-            jsonFactory.createGenerator(stream).use { generator ->
-                generator.writeStartArray()
-                sequenceData.forEach {
-                    generator.writeObject(it)
+        sequenceData.use { inputStream ->
+            response.outputStream.writer().use { outputStream ->
+                jsonFactory.createGenerator(outputStream).use { generator ->
+                    streamAndLogDisconnect("Plain JSON data") {
+                        generator.writeStartArray()
+                        inputStream.forEach {
+                            generator.writeObject(it)
+                        }
+                        generator.writeEndArray()
+                    }
                 }
-                generator.writeEndArray()
             }
         }
     }
@@ -94,19 +97,23 @@ class LapisResponseStreamer(
 
         val jsonFactory = objectMapper.factory
 
-        response.outputStream.writer().use { stream ->
-            jsonFactory.createGenerator(stream).use { generator ->
-                generator.writeStartObject()
+        sequenceData.use { inputStream ->
+            response.outputStream.writer().use { outputStream ->
+                jsonFactory.createGenerator(outputStream).use { generator ->
+                    streamAndLogDisconnect("Lapis JSON data") {
+                        generator.writeStartObject()
 
-                generator.writeArrayFieldStart("data")
-                sequenceData.forEach {
-                    generator.writeObject(it)
+                        generator.writeArrayFieldStart("data")
+                        inputStream.forEach {
+                            generator.writeObject(it)
+                        }
+                        generator.writeEndArray()
+
+                        generator.writePOJOField("info", lapisInfoFactory.create())
+
+                        generator.writeEndObject()
+                    }
                 }
-                generator.writeEndArray()
-
-                generator.writePOJOField("info", lapisInfoFactory.create())
-
-                generator.writeEndObject()
             }
         }
     }
