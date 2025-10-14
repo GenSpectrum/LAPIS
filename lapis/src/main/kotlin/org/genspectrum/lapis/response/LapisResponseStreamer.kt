@@ -7,7 +7,6 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.middleware.ESCAPED_ACCEPT_HEADER_PARAMETER
 import org.genspectrum.lapis.controller.middleware.HEADERS_ACCEPT_HEADER_PARAMETER
-import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.response.Delimiter.COMMA
@@ -16,7 +15,6 @@ import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import java.io.IOException
 import java.nio.charset.Charset
 import java.util.stream.Stream
 
@@ -72,23 +70,17 @@ class LapisResponseStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
-        val dataTypeName = "plain JSON data"
 
         val jsonFactory = objectMapper.factory
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
                 jsonFactory.createGenerator(outputStream).use { generator ->
-                    try {
+                    tryAndLogDisconnect("Plain JSON data") {
                         generator.writeStartArray()
                         inputStream.forEach {
                             generator.writeObject(it)
                         }
                         generator.writeEndArray()
-                    } catch (e: IOException) {
-                        log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-                    } catch (e: Exception) {
-                        log.error(e) { "Error streaming $dataTypeName" }
-                        throw e
                     }
                 }
             }
@@ -102,14 +94,13 @@ class LapisResponseStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
-        val dataTypeName = "Lapis JSON data"
 
         val jsonFactory = objectMapper.factory
 
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
                 jsonFactory.createGenerator(outputStream).use { generator ->
-                    try {
+                    tryAndLogDisconnect("Lapis JSON data") {
                         generator.writeStartObject()
 
                         generator.writeArrayFieldStart("data")
@@ -121,11 +112,6 @@ class LapisResponseStreamer(
                         generator.writePOJOField("info", lapisInfoFactory.create())
 
                         generator.writeEndObject()
-                    } catch (e: IOException) {
-                        log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-                    } catch (e: Exception) {
-                        log.error(e) { "Error streaming $dataTypeName" }
-                        throw e
                     }
                 }
             }

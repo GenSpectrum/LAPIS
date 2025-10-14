@@ -43,7 +43,7 @@ class CsvWriter {
             tryAndLogDisconnect("CSV/TSV data") {
                 data.getCsvRecords().use { csvRecordStream ->
                     csvRecordStream.forEach { csvRecord ->
-                        writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+                        it.printRecord(csvRecord)
                     }
                 }
             }
@@ -83,19 +83,6 @@ class IanaTsvWriter {
         }
     }
 
-    private fun <T> tryAndLogDisconnect(
-        dataTypeName: String,
-        callback: () -> T,
-    ) = try {
-        callback()
-    } catch (e: IOException) {
-        log.info { "Client likely disconnected while streaming $dataTypeName" }
-        throw e
-    } catch (e: Exception) {
-        log.error(e) { "Error writing $dataTypeName" }
-        throw e
-    }
-
     private fun writeRow(
         appendable: Appendable,
         cells: List<String>,
@@ -130,4 +117,17 @@ enum class Delimiter(
 ) {
     COMMA(','),
     TAB('\t'),
+}
+
+fun <T> tryAndLogDisconnect(
+    dataTypeName: String,
+    callback: () -> T,
+) = try {
+    callback()
+} catch (e: IOException) {
+    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
+    throw e
+} catch (e: Exception) {
+    log.error(e) { "Error writing $dataTypeName" }
+    throw e
 }

@@ -83,7 +83,7 @@ class SequencesStreamer(
         sequencesResponse.sequenceData.use { inputStream ->
             var isFirstEntry = true
             response.outputStream.writer().use { outputStream ->
-                try {
+                tryAndLogDisconnect("sequence JSON") {
                     outputStream.append('[')
                     inputStream.forEach {
                         if (isFirstEntry) {
@@ -94,11 +94,6 @@ class SequencesStreamer(
                         outputStream.append(objectMapper.writeValueAsString(it))
                     }
                     outputStream.append(']')
-                } catch (e: IOException) {
-                    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-                } catch (e: Exception) {
-                    log.error(e) { "Error streaming sequence $dataTypeName" }
-                    throw e
                 }
             }
         }
@@ -111,17 +106,11 @@ class SequencesStreamer(
         if (response.contentType == null) {
             response.contentType = MediaType(MediaType.APPLICATION_NDJSON, Charset.defaultCharset()).toString()
         }
-        val dataTypeName = "sequence NDJSON"
 
         response.outputStream.writer().use { outputStream ->
             sequencesResponse.sequenceData.use { inputStream ->
-                try {
+                tryAndLogDisconnect("sequence NDJSON") {
                     inputStream.forEach { outputStream.appendLine(objectMapper.writeValueAsString(it)) }
-                } catch (e: IOException) {
-                    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
-                } catch (e: Exception) {
-                    log.error(e) { "Error streaming $dataTypeName" }
-                    throw e
                 }
             }
         }
