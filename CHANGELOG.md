@@ -20,7 +20,7 @@ Backported bug fix of commit described below available as docker image tag [v0.5
 
 ### Bug Fixes
 
-* **lapis:** close connection to SILO if client cancels request to LAPIS ([#1393](https://github.com/GenSpectrum/LAPIS/issues/1393)) ([17012a8](https://github.com/GenSpectrum/LAPIS/commit/17012a8897512532b3f950c474b34fd872a8e0c7))
+* **lapis:** close connection to SILO if client cancels request to LAPIS ([#1393](https://github.com/GenSpectrum/LAPIS/issues/1393)) ([17012a8](https://github.com/GenSpectrum/LAPIS/commit/050d04a5f1abf5cf7f234106d3e5fba00f758632))
 
 ## [0.5.18](https://github.com/GenSpectrum/LAPIS/compare/v0.5.17...v0.5.18) (2025-10-01)
 
