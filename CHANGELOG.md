@@ -11,6 +11,17 @@
 
 * **lapis:** make `generateLineageIndex` in the database config a string field ([#1377](https://github.com/GenSpectrum/LAPIS/issues/1377)) ([3f02855](https://github.com/GenSpectrum/LAPIS/commit/3f0285593a5356c647a541b92668fe84bcfa0cd2))
 
+## [0.5.19](https://github.com/GenSpectrum/LAPIS/compare/v.0.5.18...v0.5.19) (2025-10-15)
+
+
+### Features
+Backported bug fix of commit described below available as docker image tag [v0.5.19](https://github.com/GenSpectrum/LAPIS/pkgs/container/lapis/544882049?tag=v0.5.19)
+
+
+### Bug Fixes
+
+* **lapis:** close connection to SILO if client cancels request to LAPIS ([#1393](https://github.com/GenSpectrum/LAPIS/issues/1393)) ([17012a8](https://github.com/GenSpectrum/LAPIS/commit/17012a8897512532b3f950c474b34fd872a8e0c7))
+
 ## [0.5.18](https://github.com/GenSpectrum/LAPIS/compare/v0.5.17...v0.5.18) (2025-10-01)
 
 
