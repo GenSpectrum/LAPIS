@@ -1,0 +1,120 @@
+name: Manual Backport Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      maintenance_branch:
+        description: Branch containing the backport (e.g. v1.8.x)
+        required: true
+        type: string
+      version:
+        description: Full semver to release (e.g. 1.8.3)
+        required: true
+        type: string
+      release_notes:
+        description: Optional release notes (leave blank to auto)
+        required: false
+        type: string
+
+env:
+  LAPIS_DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
+  DOCS_DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis-docs
+
+jobs:
+  backport-release:
+    name: Create release and publish images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout maintenance branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.maintenance_branch }}
+          fetch-depth: 0
+
+      - name: Parse version
+        id: v
+        run: |
+          V="${{ inputs.version }}"
+          if ! [[ "$V" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "version must be MAJOR.MINOR.PATCH"; exit 1
+          fi
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
+          echo "tag=v$V" >> $GITHUB_OUTPUT
+
+      - name: Create annotated tag for this commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.v.outputs.tag }}" -m "Release ${{ inputs.version }} (backport)"
+          git push origin "${{ steps.v.outputs.tag }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.v.outputs.tag }}
+          target_commitish: ${{ inputs.maintenance_branch }}
+          name: LAPIS ${{ inputs.version }}
+          body: ${{ inputs.release_notes }}
+          generate_release_notes: ${{ inputs.release_notes == '' }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Derive tags identical to your release-please workflow
+      - name: Docker metadata (LAPIS)
+        id: lapis_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.LAPIS_DOCKER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.v.outputs.major }}.${{ steps.v.outputs.minor }}
+            type=raw,value=${{ steps.v.outputs.major }}.${{ steps.v.outputs.minor }}.${{ steps.v.outputs.patch }}
+
+      - name: Build and push LAPIS image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lapis
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.lapis_meta.outputs.tags }}
+          cache-from: type=gha,scope=lapis-${{ inputs.maintenance_branch }}
+          cache-to: type=gha,mode=max,scope=lapis-${{ inputs.maintenance_branch }}
+          build-args: |
+            VERSION=${{ inputs.version }}
+
+      - name: Docker metadata (Docs)
+        id: docs_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCS_DOCKER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.v.outputs.major }}.${{ steps.v.outputs.minor }}
+            type=raw,value=${{ steps.v.outputs.major }}.${{ steps.v.outputs.minor }}.${{ steps.v.outputs.patch }}
+
+      - name: Build and push LAPIS Docs image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lapis-docs
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.docs_meta.outputs.tags }}
+          cache-from: type=gha,scope=lapis-docs-${{ inputs.maintenance_branch }}
+          cache-to: type=gha,mode=max,scope=lapis-docs-${{ inputs.maintenance_branch }}
+          build-args: |
+            VERSION=${{ inputs.version }}
