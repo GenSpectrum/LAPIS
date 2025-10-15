@@ -38,8 +38,12 @@ class CsvWriter {
             if (includeHeaders) {
                 it.printRecord(data.getHeader())
             }
-            for (csvRecord in data.getCsvRecords()) {
-                it.printRecord(csvRecord)
+            streamAndLogDisconnect("CSV/TSV data") {
+                data.getCsvRecords().use { csvRecordStream ->
+                    csvRecordStream.forEach { csvRecord ->
+                        it.printRecord(csvRecord)
+                    }
+                }
             }
         }
     }
@@ -68,8 +72,12 @@ class IanaTsvWriter {
         if (includeHeaders) {
             writeRow(appendable, data.getHeader(), delimiter)
         }
-        data.getCsvRecords().forEach { record ->
-            writeRow(appendable, record.map { it.orEmpty() }, delimiter)
+        streamAndLogDisconnect("Iana CSV/TSV data") {
+            data.getCsvRecords().use { csvRecordStream ->
+                csvRecordStream.forEach { csvRecord ->
+                    writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
+                }
+            }
         }
     }
 

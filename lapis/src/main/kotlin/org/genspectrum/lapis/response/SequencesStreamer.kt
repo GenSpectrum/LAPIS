@@ -39,19 +39,23 @@ class SequencesStreamer(
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
-        response.outputStream.writer().use { stream ->
-            sequencesResponse.sequenceData.forEach {
-                for (sequenceName in sequencesResponse.requestedSequenceNames) {
-                    val sequence = it[sequenceName]
-                    if (sequence == null || sequence == NullNode.instance) {
-                        continue
-                    }
+        response.outputStream.writer().use { outputStream ->
+            sequencesResponse.sequenceData.use { inputStream ->
+                streamAndLogDisconnect("sequence FASTA") {
+                    inputStream.forEach {
+                        for (sequenceName in sequencesResponse.requestedSequenceNames) {
+                            val sequence = it[sequenceName]
+                            if (sequence == null || sequence == NullNode.instance) {
+                                continue
+                            }
 
-                    val fastaHeader = sequencesResponse.fastaHeaderTemplate.fillTemplate(
-                        values = it,
-                        sequenceName = sequenceName,
-                    )
-                    stream.appendLine(">$fastaHeader\n${sequence.asText()}")
+                            val fastaHeader = sequencesResponse.fastaHeaderTemplate.fillTemplate(
+                                values = it,
+                                sequenceName = sequenceName,
+                            )
+                            outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
+                        }
+                    }
                 }
             }
         }
@@ -65,19 +69,22 @@ class SequencesStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON, Charset.defaultCharset()).toString()
         }
 
-        var isFirstEntry = true
-        response.outputStream.writer().use { stream ->
-            stream.append('[')
-            sequencesResponse.sequenceData
-                .forEach {
-                    if (isFirstEntry) {
-                        isFirstEntry = false
-                    } else {
-                        stream.append(',')
+        sequencesResponse.sequenceData.use { inputStream ->
+            var isFirstEntry = true
+            response.outputStream.writer().use { outputStream ->
+                streamAndLogDisconnect("sequence JSON") {
+                    outputStream.append('[')
+                    inputStream.forEach {
+                        if (isFirstEntry) {
+                            isFirstEntry = false
+                        } else {
+                            outputStream.append(',')
+                        }
+                        outputStream.append(objectMapper.writeValueAsString(it))
                     }
-                    stream.append(objectMapper.writeValueAsString(it))
+                    outputStream.append(']')
                 }
-            stream.append(']')
+            }
         }
     }
 
@@ -89,9 +96,12 @@ class SequencesStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_NDJSON, Charset.defaultCharset()).toString()
         }
 
-        response.outputStream.writer().use { stream ->
-            sequencesResponse.sequenceData
-                .forEach { stream.appendLine(objectMapper.writeValueAsString(it)) }
+        response.outputStream.writer().use { outputStream ->
+            sequencesResponse.sequenceData.use { inputStream ->
+                streamAndLogDisconnect("sequence NDJSON") {
+                    inputStream.forEach { outputStream.appendLine(objectMapper.writeValueAsString(it)) }
+                }
+            }
         }
     }
 }
