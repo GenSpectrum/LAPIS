@@ -1,11 +1,11 @@
 {
-  "testCaseName": "an amino acid insertions with stop codon: ins_ORF8:123:*AA",
+  "testCaseName": "an amino acid insertions with stop codon: ins_ORF8:122:*AA",
   "lapisRequest": {
-    "aminoAcidInsertions": ["ins_ORF8:123:*AA"]
+    "aminoAcidInsertions": ["ins_ORF8:122:*AA"]
   },
   "expected": [
     {
-      "count": 1
+      "count": 0
     }
   ]
 }
