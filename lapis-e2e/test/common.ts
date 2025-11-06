@@ -85,11 +85,11 @@ export function expectIsZstdEncoded(arrayBuffer: ArrayBuffer) {
     let readable: string;
     try {
       readable = new TextDecoder('utf-8').decode(arrayBuffer);
+      if (readable.length > 303) {
+        readable = readable.slice(0, 300) + '...';
+      }
     } catch {
-      // fallback to hex representation
-      readable = Array.from(new Uint8Array(arrayBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join(' ');
+      readable = '<no utf-8 decodable content found>';
     }
     throw new Error(`${err}\nArrayBuffer content (for context): ${readable}`);
   }
