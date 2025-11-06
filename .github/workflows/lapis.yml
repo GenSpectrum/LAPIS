@@ -129,7 +129,7 @@ jobs:
           cd lapis-e2e && npm run test
         env:
           SILO_TAG: commit-a1dcc46e52bd5e9d439be49b1acbb50a6898aeb0
-          LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
+          LAPIS_TAG: 0.6.1
 
       - name: Store Logs
         if: ${{ always() }}
@@ -145,7 +145,7 @@ jobs:
           docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
         env:
           SILO_TAG: 0.8.5
-          LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
+          LAPIS_TAG: 0.6.1
 
       - name: Upload logs
         if: ${{ always() }}
