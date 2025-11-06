@@ -77,8 +77,22 @@ export function sequenceData(serverResponse: string) {
 
 export function expectIsZstdEncoded(arrayBuffer: ArrayBuffer) {
   const first4Bytes = new Uint8Array(arrayBuffer).slice(0, 4);
+  const expected = [0x28, 0xb5, 0x2f, 0xfd];
 
-  expect([...first4Bytes]).deep.equals([Number('0x28'), Number('0xb5'), Number('0x2f'), Number('0xfd')]);
+  try {
+    expect([...first4Bytes]).deep.equals(expected);
+  } catch (err) {
+    let readable: string;
+    try {
+      readable = new TextDecoder('utf-8').decode(arrayBuffer);
+    } catch {
+      // fallback to hex representation
+      readable = Array.from(new Uint8Array(arrayBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join(' ');
+    }
+    throw new Error(`${err}\nArrayBuffer content (for context): ${readable}`);
+  }
 }
 
 export function expectIsGzipEncoded(arrayBuffer: ArrayBuffer) {
