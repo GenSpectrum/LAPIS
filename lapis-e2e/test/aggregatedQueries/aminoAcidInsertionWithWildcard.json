@@ -1,11 +1,11 @@
 {
-  "testCaseName": "an amino acid insertions with wildcard: ins_ORF8:122:?",
+  "testCaseName": "an amino acid insertions with wildcard: ins_S:214:?",
   "lapisRequest": {
-    "aminoAcidInsertions": ["ins_ORF8:122:?"]
+    "aminoAcidInsertions": ["ins_S:214:?"]
   },
   "expected": [
     {
-      "count": 0
+      "count": 5
     }
   ]
 }

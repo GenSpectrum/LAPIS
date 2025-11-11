@@ -163,6 +163,20 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.error.detail).to.include('Failed to parse variant query');
   });
 
+  it('should return bad request for invalid insertion index', async () => {
+    const urlParams = new URLSearchParams({
+      aminoAcidInsertions: 'ins_ORF8:123:?',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include(
+      'the requested insertion position (123) is larger than the length of the reference sequence (122)'
+    );
+  });
+
   it('should return bad request when sending multiple values for variant query', async () => {
     const urlParams = new URLSearchParams();
     urlParams.append('variantQuery', '123A');
