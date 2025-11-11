@@ -3,7 +3,18 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -39,7 +50,7 @@ interface CommonActionFields {
     val orderByFields: List<OrderByField>
     val limit: Int?
     val offset: Int?
-    val randomize: Boolean?
+    val randomize: RandomizeConfig?
 }
 
 const val ORDER_BY_RANDOM_FIELD_NAME = "random"
@@ -169,8 +180,12 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
-        private fun getRandomize(orderByFields: List<OrderByField>) =
-            orderByFields.any { it.field == ORDER_BY_RANDOM_FIELD_NAME }
+        private fun getRandomize(orderByFields: List<OrderByField>): RandomizeConfig =
+            if (orderByFields.any { it.field == ORDER_BY_RANDOM_FIELD_NAME }) {
+                RandomizeConfig.Enabled
+            } else {
+                RandomizeConfig.Disabled
+            }
 
         private fun getNonRandomizedOrderByFields(orderByFields: List<OrderByField>) =
             orderByFields.filter { it.field != ORDER_BY_RANDOM_FIELD_NAME }
@@ -180,7 +195,7 @@ sealed class SiloAction<ResponseType>(
     data class AggregatedAction(
         val groupByFields: List<String>,
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<AggregationData>(AggregationDataTypeReference(), cacheable = true) {
@@ -191,7 +206,7 @@ sealed class SiloAction<ResponseType>(
     data class MutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
@@ -203,7 +218,7 @@ sealed class SiloAction<ResponseType>(
     data class AminoAcidMutationsAction(
         val minProportion: Double?,
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
@@ -215,7 +230,7 @@ sealed class SiloAction<ResponseType>(
     data class DetailsAction(
         val fields: List<String> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = false) {
@@ -225,7 +240,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class NucleotideInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
@@ -239,7 +254,7 @@ sealed class SiloAction<ResponseType>(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
     ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
         val type: String = "MostRecentCommonAncestor"
     }
@@ -251,7 +266,7 @@ sealed class SiloAction<ResponseType>(
         override val orderByFields: List<OrderByField> = emptyList(),
         override val limit: Int? = null,
         override val offset: Int? = null,
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
     ) : SiloAction<PhyloSubtreeData>(PhyloSubtreeDataTypeReference(), cacheable = true) {
         val type: String = "PhyloSubtree"
     }
@@ -259,7 +274,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class AminoAcidInsertionsAction(
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
@@ -269,7 +284,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class SequenceAction(
         override val orderByFields: List<OrderByField> = emptyList(),
-        override val randomize: Boolean? = null,
+        override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
         val type: SequenceType,
@@ -409,4 +424,58 @@ enum class SequenceType {
 
     @JsonProperty("FastaAligned")
     ALIGNED,
+}
+
+@JsonSerialize(using = RandomizeConfigSerializer::class)
+@JsonDeserialize(using = RandomizeConfigDeserializer::class)
+sealed class RandomizeConfig {
+    data object Enabled : RandomizeConfig()
+
+    data object Disabled : RandomizeConfig()
+
+    data class WithSeed(
+        val seed: Int,
+    ) : RandomizeConfig()
+}
+
+class RandomizeConfigSerializer : JsonSerializer<RandomizeConfig>() {
+    override fun serialize(
+        value: RandomizeConfig,
+        gen: JsonGenerator,
+        serializers: SerializerProvider,
+    ) {
+        when (value) {
+            is RandomizeConfig.Enabled -> gen.writeBoolean(true)
+            is RandomizeConfig.Disabled -> gen.writeBoolean(false)
+            is RandomizeConfig.WithSeed -> {
+                gen.writeStartObject()
+                gen.writeNumberField("seed", value.seed)
+                gen.writeEndObject()
+            }
+        }
+    }
+}
+
+class RandomizeConfigDeserializer : JsonDeserializer<RandomizeConfig>() {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): RandomizeConfig =
+        when (val token = p.currentToken) {
+            JsonToken.VALUE_TRUE -> RandomizeConfig.Enabled
+            JsonToken.VALUE_FALSE -> RandomizeConfig.Disabled
+            JsonToken.START_OBJECT -> {
+                val node = p.codec.readTree<JsonNode>(p)
+                val seed = node.get("seed")?.asInt()
+                    ?: throw JsonMappingException.from(
+                        p,
+                        "Missing 'seed' field in randomize object",
+                    )
+                RandomizeConfig.WithSeed(seed)
+            }
+            else -> throw JsonMappingException.from(
+                p,
+                "Expected boolean or object for randomize, got $token",
+            )
+        }
 }

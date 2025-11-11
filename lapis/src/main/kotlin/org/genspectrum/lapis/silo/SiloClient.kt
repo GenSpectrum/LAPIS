@@ -93,7 +93,7 @@ open class CachedSiloClient(
         .executor(Executors.newFixedThreadPool(config.siloClientThreadCount))
         .build()
 
-    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !(#query.action.randomize ?: false)")
+    @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && (#query.action.randomize == null || #query.action.randomize.class.simpleName == 'Disabled')")
     open fun <ResponseType> sendCachedQuery(
         query: SiloQuery<ResponseType>,
         checkProtection: Boolean = true,
