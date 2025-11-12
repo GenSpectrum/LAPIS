@@ -30,6 +30,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import java.security.MessageDigest
+import java.time.Instant
 
 @Component
 class DataOpennessAuthorizationFilterFactory(
@@ -159,7 +161,9 @@ private class ProtectedDataAuthorizationFilter(
             return AuthorizationResult.success()
         }
 
-        if (accessKeys.aggregatedDataAccessKeys.contains(accessKey) && endpointServesAggregatedData(request)) {
+        if (getCurrentAccessKeys(accessKeys.aggregatedDataAccessKeys).contains(accessKey) &&
+            endpointServesAggregatedData(request)
+        ) {
             return AuthorizationResult.success()
         }
 
@@ -185,4 +189,24 @@ private class ProtectedDataAuthorizationFilter(
 
     private fun containsOnlyPrimaryKey(fields: List<String>) =
         fields.size == 1 && fields.first() == databaseConfig.schema.primaryKey
+
+    private fun hash(text: String): String {
+        val bytes = text.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
+    private fun getCurrentAccessKeys(baseKey: String): Set<String> {
+        val current = Instant.now().epochSecond
+        return listOf(-3, -2, -1, 0, 1, 2, 3)
+            .map { current + it }
+            .map { hash("$baseKey:$it") }
+            .toSet()
+    }
+
+    private fun getCurrentAccessKeys(baseKeys: List<String>): Set<String> =
+        baseKeys.flatMap {
+            getCurrentAccessKeys(it)
+        }.toSet()
 }
