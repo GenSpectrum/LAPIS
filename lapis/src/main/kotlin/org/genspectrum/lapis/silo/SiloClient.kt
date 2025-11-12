@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.OpennessLevel
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
+import org.genspectrum.lapis.silo.SiloAction.AggregatedAction
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
@@ -40,10 +43,11 @@ class SiloClient(
     fun <ResponseType> sendQueryAndGetDataVersion(
         query: SiloQuery<ResponseType>,
         setRequestDataVersion: Boolean = true,
+        checkProtection: Boolean = true,
     ): WithDataVersion<Stream<ResponseType>> {
         val response = when (query.action.cacheable) {
-            true -> cachedSiloClient.sendCachedQuery(query).map { it.stream() }
-            else -> cachedSiloClient.sendQuery(query)
+            true -> cachedSiloClient.sendCachedQuery(query, checkProtection).map { it.stream() }
+            else -> cachedSiloClient.sendQuery(query, checkProtection)
         }
 
         if (setRequestDataVersion) {
@@ -90,11 +94,35 @@ open class CachedSiloClient(
         .build()
 
     @Cacheable(SILO_QUERY_CACHE_NAME, condition = "#query.action.cacheable && !(#query.action.randomize ?: false)")
-    open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
-        sendQuery(query)
+    open fun <ResponseType> sendCachedQuery(
+        query: SiloQuery<ResponseType>,
+        checkProtection: Boolean = true,
+    ): WithDataVersion<List<ResponseType>> =
+        sendQuery(query, checkProtection)
             .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
 
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
+    fun <ResponseType> sendQuery(
+        query: SiloQuery<ResponseType>,
+        checkProtection: Boolean = true,
+    ): WithDataVersion<Stream<ResponseType>> {
+        // If the data is protected:
+        //   1. If it is an aggregated request asking for more than 3 fields, throw an error.
+        //   2. Check whether the number of sequences matching the filter set. If it is more than 0 but less than 10,
+        //   throw an error. (Exception: it is an aggregated request without any fields.)
+        if (checkProtection && config.schema.opennessLevel == OpennessLevel.PROTECTED) {
+            if (query.action is AggregatedAction && query.action.groupByFields.size > 3) {
+                throw BadRequestException("Unauthorized")
+            }
+            if (!(query.action is AggregatedAction && query.action.groupByFields.isEmpty())) {
+                val countQuery = SiloQuery(SiloAction.aggregated(), query.filterExpression)
+                val countResponseStream = sendQuery(countQuery, false)
+                val countResponse = countResponseStream.queryResult.toList().first()
+                if (countResponse.count in 1..<10) {
+                    throw BadRequestException("Unauthorized")
+                }
+            }
+        }
+
         if (RequestContextHolder.getRequestAttributes() != null) {
             requestContext.cached = false
         }

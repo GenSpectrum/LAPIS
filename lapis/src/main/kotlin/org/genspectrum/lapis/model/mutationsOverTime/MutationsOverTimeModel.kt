@@ -211,8 +211,8 @@ class MutationsOverTimeModel(
 
         val tasks = mutations.map { mutation ->
             Callable {
-                val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
-                val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
+                val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField, false)
+                val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField, false)
                 listOf(counts.dataVersion, coverage.dataVersion) to
                     aggregateDailyMutationDataIntoDateRanges(
                         counts.queryResult,
@@ -265,6 +265,7 @@ class MutationsOverTimeModel(
         dateQuery: SiloFilterExpression,
         mutationQuery: SiloFilterExpression?,
         dateField: String,
+        checkProtection: Boolean = true,
     ): WithDataVersion<List<AggregationData>> =
         siloClient.sendQueryAndGetDataVersion(
             SiloQuery(
@@ -283,6 +284,7 @@ class MutationsOverTimeModel(
                 ),
             ),
             setRequestDataVersion = false,
+            checkProtection,
         ).map { it.toList() }
 
     /**
