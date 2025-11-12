@@ -64,6 +64,7 @@ fun mockSiloCountQuery(
                     query.filterExpression.children.contains(dateBetweenFilter)
             },
             false,
+            false,
         )
     } answers {
         WithDataVersion(DUMMY_DATA_VERSION, queryResult)
@@ -124,6 +125,7 @@ private fun mockSiloCoverageQuery(
                     } &&
                     query.filterExpression.children.contains(dateBetween)
             },
+            false,
             false,
         )
     } answers {
