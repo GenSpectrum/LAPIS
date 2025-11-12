@@ -26,6 +26,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.security.MessageDigest
+import java.time.Instant
 import java.util.stream.Stream
 
 private const val NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR = """
@@ -95,6 +97,15 @@ class ProtectedDataAuthorizationTest(
     }
 
     @Test
+    fun `given too old access key in GET request to protected instance, then access is denied`() {
+        val oldKey = getCurrentAccessKey("testAggregatedDataAccessKey", Instant.now().epochSecond - 10)
+        mockMvc.perform(getSample("$validRoute?accessKey=$oldKey"))
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(NOT_AUTHORIZED_TO_ACCESS_ENDPOINT_ERROR))
+    }
+
+    @Test
     fun `given wrong access key in POST request to protected instance, then access is denied`() {
         mockMvc.perform(postRequestWithBody("""{"accessKey": "invalidKey"}"""))
             .andExpect(status().isForbidden)
@@ -104,8 +115,21 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given valid access key for aggregated data in GET request to protected instance, then access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&field1=value1"),
+            getSample("$validRoute?accessKey=$currentKey&field1=value1"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        verify { siloQueryModelMock.getAggregated(sequenceFilterRequest()) }
+    }
+
+    @Test
+    fun `given 2s old access key for aggregated data in GET request to protected instance, then access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey", Instant.now().epochSecond - 2)
+        mockMvc.perform(
+            getSample("$validRoute?accessKey=$currentKey&field1=value1"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -115,8 +139,9 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given second valid access key for agg data in GET request to protected instance, then access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey2")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey2&field1=value1"),
+            getSample("$validRoute?accessKey=$currentKey&field1=value1"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -126,10 +151,11 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given valid access key for aggregated data in POST request to protected instance, then access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
             postRequestWithBody(
                 """ {
-                    "accessKey": "testAggregatedDataAccessKey",
+                    "accessKey": "$currentKey",
                     "field1": "value1"
                 }""",
             ),
@@ -142,8 +168,9 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given aggregated access key in GET request but filters are too fine-grained, then access is denied`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&$PRIMARY_KEY_FIELD=value"),
+            getSample("$validRoute?accessKey=$currentKey&$PRIMARY_KEY_FIELD=value"),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -152,10 +179,11 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `given aggregated access key in POST request but filters are too fine-grained, then access is denied`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
             postRequestWithBody(
                 """ {
-                    "accessKey": "testAggregatedDataAccessKey",
+                    "accessKey": "$currentKey",
                     "$PRIMARY_KEY_FIELD": "some value"
                 }""",
             ),
@@ -175,8 +203,9 @@ class ProtectedDataAuthorizationTest(
     fun `GIVEN aggregated access key in GET request but request stratifies too fine-grained THEN access is denied`(
         fieldsQueryParameter: String,
     ) {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&$fieldsQueryParameter"),
+            getSample("$validRoute?accessKey=$currentKey&$fieldsQueryParameter"),
         )
             .andExpect(status().isForbidden)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -185,8 +214,9 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `GIVEN aggregated access key in GET request that stratifies non-fine-grained THEN access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=country"),
+            getSample("$validRoute?accessKey=$currentKey&fields=country"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -194,10 +224,11 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `GIVEN aggregated access key in POST request but request stratifies too fine-grained THEN access is denied`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
             postRequestWithBody(
                 """ {
-                    "accessKey": "testAggregatedDataAccessKey",
+                    "accessKey": "$currentKey",
                     "fields": ["$PRIMARY_KEY_FIELD", "country"]
                 }""",
             ),
@@ -209,8 +240,9 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `GIVEN aggregated access key in GET request where fields only contains primary key THEN access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
-            getSample("$validRoute?accessKey=testAggregatedDataAccessKey&fields=$PRIMARY_KEY_FIELD"),
+            getSample("$validRoute?accessKey=$currentKey&fields=$PRIMARY_KEY_FIELD"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -218,10 +250,11 @@ class ProtectedDataAuthorizationTest(
 
     @Test
     fun `GIVEN aggregated access key in POST request where fields only contains primary key THEN access is granted`() {
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
             postRequestWithBody(
                 """ {
-                    "accessKey": "testAggregatedDataAccessKey",
+                    "accessKey": "$currentKey",
                     "fields": ["$PRIMARY_KEY_FIELD"]
                 }""",
             ),
@@ -234,12 +267,13 @@ class ProtectedDataAuthorizationTest(
     fun `GIVEN aggregated accessKey in details request where fields only contains primaryKey THEN access is granted`() {
         every { siloQueryModelMock.getDetails(any()) } returns Stream.empty()
 
+        val currentKey = getCurrentAccessKey("testAggregatedDataAccessKey")
         mockMvc.perform(
             postSample(DETAILS_ROUTE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """{
-                        "accessKey": "testAggregatedDataAccessKey",
+                        "accessKey": "$currentKey",
                         "fields": ["$PRIMARY_KEY_FIELD"]
                     }""",
                 ),
@@ -318,4 +352,16 @@ class ProtectedDataAuthorizationTest(
         postSample(validRoute)
             .contentType(MediaType.APPLICATION_JSON)
             .content(body)
+
+    private fun hash(text: String): String {
+        val bytes = text.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
+    private fun getCurrentAccessKey(
+        baseKey: String,
+        epoch: Long = Instant.now().epochSecond,
+    ): String = hash("$baseKey:$epoch")
 }
