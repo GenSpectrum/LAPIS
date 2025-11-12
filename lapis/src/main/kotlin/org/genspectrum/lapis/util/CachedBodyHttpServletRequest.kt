@@ -88,13 +88,15 @@ class CachedBodyHttpServletRequest private constructor(
     }
 
     fun getStringField(fieldName: String): String? {
-        if (method == HttpMethod.GET.name()) {
-            return parameterMap[fieldName]?.firstOrNull()
+        val parameterValue = parameterMap[fieldName]?.firstOrNull()
+        if (parameterValue != null) {
+            return parameterValue
         }
-
-        val fieldValue = parsedBody[fieldName]
-        if (fieldValue?.isTextual == true) {
-            return fieldValue.asText()
+        if (method != HttpMethod.GET.name()) {
+            val fieldValue = parsedBody[fieldName]
+            if (fieldValue?.isTextual == true) {
+                return fieldValue.asText()
+            }
         }
         return null
     }
