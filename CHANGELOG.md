@@ -18,6 +18,19 @@
 
 * **lapis:** make `generateLineageIndex` in the database config a string field ([#1377](https://github.com/GenSpectrum/LAPIS/issues/1377)) ([3f02855](https://github.com/GenSpectrum/LAPIS/commit/3f0285593a5356c647a541b92668fe84bcfa0cd2))
 
+
+## [0.5.20](https://github.com/GenSpectrum/LAPIS/compare/v0.5.19...v0.5.20) (2025-11-12)
+
+### Features
+
+* **lapis:** for protected data, require &gt;= 10 sequences per request ([97e651c](https://github.com/GenSpectrum/LAPIS/commit/97e651cc32c3ceb9579b8b748fa598d209762b96))
+* **lapis:** automate access key rotation ([2abed81](https://github.com/GenSpectrum/LAPIS/commit/2abed81c66d24fb690679160be588a750ac9c224))
+
+### Bug Fixes
+
+* **lapis:** also regard request parameters for non-GET requests ([aff7eb5](https://github.com/GenSpectrum/LAPIS/commit/aff7eb5ef3bc48f3b79db3ac2f7eefb1f7607327))
+
+
 ## [0.5.19](https://github.com/GenSpectrum/LAPIS/compare/v.0.5.18...v0.5.19) (2025-10-15)
 
 
