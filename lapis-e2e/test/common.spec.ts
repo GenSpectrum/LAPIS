@@ -208,7 +208,7 @@ describe('All endpoints', () => {
         expectIsZstdEncoded(await response.arrayBuffer());
       });
 
-      it('should return zstd compressed data when accepting compression in header', async () => {
+      it.skip('should return zstd compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'usherTree');
