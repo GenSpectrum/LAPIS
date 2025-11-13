@@ -1,4 +1,5 @@
 import {
+  ActuatorApi,
   Configuration,
   InfoControllerApi,
   LapisControllerApi,
@@ -46,6 +47,7 @@ export const lapisClient = new LapisControllerApi(new Configuration({ basePath }
 export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePath })).withMiddleware(
   middleware
 );
+export const actuatorClient = new ActuatorApi(new Configuration({ basePath })).withMiddleware(middleware);
 export const mutOverTimeClient = new MutationsOverTimeControllerApi(
   new Configuration({ basePath })
 ).withMiddleware(middleware);
