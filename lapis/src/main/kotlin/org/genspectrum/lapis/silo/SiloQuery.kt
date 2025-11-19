@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
@@ -62,8 +63,7 @@ sealed class SiloAction<ResponseType>(
     companion object {
         fun aggregated(
             groupByFields: List<String> = emptyList(),
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<AggregationData> =
@@ -77,8 +77,7 @@ sealed class SiloAction<ResponseType>(
 
         fun mutations(
             minProportion: Double? = null,
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
@@ -94,8 +93,7 @@ sealed class SiloAction<ResponseType>(
 
         fun aminoAcidMutations(
             minProportion: Double? = null,
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
@@ -111,8 +109,7 @@ sealed class SiloAction<ResponseType>(
 
         fun details(
             fields: List<String> = emptyList(),
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<DetailsData> =
@@ -143,8 +140,7 @@ sealed class SiloAction<ResponseType>(
             )
 
         fun nucleotideInsertions(
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<InsertionData> =
@@ -156,8 +152,7 @@ sealed class SiloAction<ResponseType>(
             )
 
         fun aminoAcidInsertions(
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<InsertionData> =
@@ -172,8 +167,7 @@ sealed class SiloAction<ResponseType>(
             type: SequenceType,
             sequenceNames: List<String>,
             additionalFields: List<String> = emptyList(),
-            orderByFields: org.genspectrum.lapis.request.OrderBySpec =
-                org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<SequenceData> =
@@ -187,18 +181,18 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
-        private fun getRandomize(orderByFields: org.genspectrum.lapis.request.OrderBySpec): RandomizeConfig =
+        private fun getRandomize(orderByFields: OrderBySpec): RandomizeConfig =
             when (orderByFields) {
-                is org.genspectrum.lapis.request.OrderBySpec.ByFields -> RandomizeConfig.Disabled
-                is org.genspectrum.lapis.request.OrderBySpec.Random ->
+                is OrderBySpec.ByFields -> RandomizeConfig.Disabled
+                is OrderBySpec.Random ->
                     orderByFields.seed?.let { RandomizeConfig.WithSeed(it) }
                         ?: RandomizeConfig.Enabled
             }
 
-        private fun getOrderByFieldsList(orderByFields: org.genspectrum.lapis.request.OrderBySpec): List<OrderByField> =
+        private fun getOrderByFieldsList(orderByFields: OrderBySpec): List<OrderByField> =
             when (orderByFields) {
-                is org.genspectrum.lapis.request.OrderBySpec.ByFields -> orderByFields.fields
-                is org.genspectrum.lapis.request.OrderBySpec.Random -> emptyList()
+                is OrderBySpec.ByFields -> orderByFields.fields
+                is OrderBySpec.Random -> emptyList()
             }
     }
 
