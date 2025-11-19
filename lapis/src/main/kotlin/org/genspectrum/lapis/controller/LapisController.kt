@@ -69,12 +69,12 @@ import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderByValidator
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
-import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
@@ -153,7 +153,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -212,7 +212,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -274,7 +274,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -417,7 +417,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -475,7 +475,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -536,7 +536,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -682,7 +682,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -743,7 +743,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -807,7 +807,7 @@ class LapisController(
             aminoAcidInsertions = aminoAcidInsertions ?: emptyList(),
             fields = fields?.map { MutationsField.fromString(it) } ?: emptyList(),
             minProportion = minProportion,
-            orderByFields = (orderBy ?: emptyList()).toOrderBySpec(),
+            orderByFields = OrderByValidator.validateAndConvert(orderBy),
             limit = limit,
             offset = offset,
         )
@@ -1276,7 +1276,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1331,7 +1331,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1390,7 +1390,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1533,7 +1533,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1588,7 +1588,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1646,7 +1646,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1782,7 +1782,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1837,7 +1837,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -1895,7 +1895,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -2044,7 +2044,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
@@ -2158,7 +2158,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            OrderByValidator.validateAndConvert(orderBy),
             limit,
             offset,
         )
