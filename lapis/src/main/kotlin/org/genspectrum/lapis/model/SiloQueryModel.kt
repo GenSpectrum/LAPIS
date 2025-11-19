@@ -9,6 +9,8 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.toOrderByFields
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -248,7 +250,10 @@ class SiloQueryModel(
                     type = sequenceType,
                     sequenceNames = mapSequenceNames(cleanedSequenceNames, sequenceType),
                     additionalFields = fastaHeaderTemplate.metadataFieldNames,
-                    orderByFields = mapSequenceOrderByFields(sequenceFilters.orderByFields, sequenceType),
+                    orderByFields = mapSequenceOrderByFields(
+                        sequenceFilters.orderByFields.toOrderByFields(),
+                        sequenceType,
+                    ).toOrderBySpec(),
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,
                 ),

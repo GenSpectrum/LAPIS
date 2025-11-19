@@ -12,7 +12,7 @@ data class SequenceFiltersRequest(
     override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    override val orderByFields: List<OrderByField> = emptyList(),
+    override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
     override val limit: Int? = null,
     override val offset: Int? = null,
     val fastaHeaderTemplate: String? = null,

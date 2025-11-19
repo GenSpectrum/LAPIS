@@ -16,7 +16,7 @@ data class SequenceFiltersRequestWithGenes(
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val genes: List<String>,
-    override val orderByFields: List<OrderByField> = emptyList(),
+    override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
     override val limit: Int? = null,
     override val offset: Int? = null,
     val fastaHeaderTemplate: String? = null,
