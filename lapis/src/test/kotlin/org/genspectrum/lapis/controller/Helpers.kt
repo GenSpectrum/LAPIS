@@ -5,11 +5,13 @@ import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithSegments
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.MutationData
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 
@@ -22,7 +24,7 @@ fun sequenceFiltersRequest(
     aminoAcidMutations = emptyList(),
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
-    orderByFields = orderByFields,
+    orderByFields = orderByFields.toOrderBySpec(),
 )
 
 fun mutationProportionsRequest(
@@ -37,7 +39,7 @@ fun mutationProportionsRequest(
     aminoAcidInsertions = emptyList(),
     fields = fields,
     minProportion = minProportion,
-    orderByFields = emptyList(),
+    orderByFields = OrderBySpec.ByFields(emptyList()),
 )
 
 fun sequenceFiltersRequestWithFields(
@@ -50,7 +52,7 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     emptyList(),
     fields.map { Field(it) },
-    emptyList(),
+    OrderBySpec.ByFields(emptyList()),
 )
 
 fun phyloTreeSequenceFiltersRequest(
@@ -62,7 +64,7 @@ fun phyloTreeSequenceFiltersRequest(
     emptyList(),
     emptyList(),
     emptyList(),
-    emptyList(),
+    OrderBySpec.ByFields(emptyList()),
     null,
     null,
     phyloTreeField = phyloTreeField,
@@ -78,7 +80,7 @@ fun mrcaSequenceFiltersRequest(
     emptyList(),
     emptyList(),
     emptyList(),
-    emptyList(),
+    OrderBySpec.ByFields(emptyList()),
     null,
     null,
     phyloTreeField = phyloTreeField,
@@ -95,7 +97,7 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     emptyList(),
     emptyList(),
     fields.map { Field(it) },
-    emptyList(),
+    OrderBySpec.ByFields(emptyList()),
 )
 
 fun sequenceFiltersRequestWithSegments(
@@ -108,7 +110,7 @@ fun sequenceFiltersRequestWithSegments(
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     segments = segments,
-    orderByFields = emptyList(),
+    orderByFields = OrderBySpec.ByFields(emptyList()),
 )
 
 fun sequenceFiltersRequestWithGenes(
@@ -121,7 +123,7 @@ fun sequenceFiltersRequestWithGenes(
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     genes = genes,
-    orderByFields = emptyList(),
+    orderByFields = OrderBySpec.ByFields(emptyList()),
 )
 
 fun mutationData(

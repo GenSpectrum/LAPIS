@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
@@ -82,7 +83,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -116,7 +117,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -150,7 +151,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -184,7 +185,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -217,7 +218,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -249,7 +250,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -285,7 +286,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         limit = 100,
                         offset = 50,
                     ),
@@ -323,7 +324,7 @@ class SiloQueryTest {
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                             OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         limit = 100,
                         offset = 50,
                     ),
