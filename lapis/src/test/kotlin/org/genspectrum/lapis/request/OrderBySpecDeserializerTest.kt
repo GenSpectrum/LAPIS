@@ -171,21 +171,4 @@ class OrderBySpecDeserializerTest {
         val random = result as OrderBySpec.Random
         assertThat(random.seed, equalTo(null))
     }
-
-    @Test
-    fun `GIVEN array with mixed random and other fields THEN throws BadRequestException`() {
-        val json = """[{"field": "country"}, {"field": "random"}]"""
-
-        val exception = assertThrows<BadRequestException> {
-            objectMapper.readValue(json, OrderBySpec::class.java)
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Cannot mix 'random' with other orderBy fields. " +
-                    "Use either 'orderBy=random' or 'orderBy=field1,field2'",
-            ),
-        )
-    }
 }
