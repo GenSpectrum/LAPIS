@@ -306,7 +306,40 @@ key_1002052
   it('should order by random', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {
-        orderBy: [{ field: 'random' }, { field: 'division', type: 'ascending' }],
+        orderBy: [{ field: 'random' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+  });
+
+  it('should order by random (new format)', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: true },
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+  });
+
+  it('should order by random with seed', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random(123)' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+  });
+
+  it('should order by random with seed (new format)', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: 123 },
         fields: ['primaryKey', 'division'],
       },
     });
