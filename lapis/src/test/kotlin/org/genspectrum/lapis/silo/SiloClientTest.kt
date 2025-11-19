@@ -8,6 +8,7 @@ import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
@@ -496,7 +497,7 @@ class SiloClientTest(
             ORDER_BY_RANDOM_FIELD_NAME,
             Order.ASCENDING,
         )
-        val query = SiloQuery(SiloAction.mutations(orderByFields = listOf(orderByRandom)), True)
+        val query = SiloQuery(SiloAction.mutations(orderByFields = listOf(orderByRandom).toOrderBySpec()), True)
         assertThat(query.action.cacheable, `is`(true))
 
         val result = underTest.sendQuery(query).toList()

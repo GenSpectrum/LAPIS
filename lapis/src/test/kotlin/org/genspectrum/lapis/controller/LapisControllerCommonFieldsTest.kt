@@ -14,7 +14,9 @@ import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.CoreMatchers.containsString
@@ -64,7 +66,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    listOf(OrderByField("country", Order.ASCENDING)),
+                    listOf(OrderByField("country", Order.ASCENDING)).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -90,7 +92,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField("country", Order.ASCENDING),
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -122,7 +124,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField("country", Order.ASCENDING),
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -147,7 +149,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.DESCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
                         OrderByField("age", Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -198,7 +200,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                     100,
                 ),
             )
@@ -225,7 +227,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                     100,
                 ),
             )
@@ -258,7 +260,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                     null,
                     5,
                 ),
@@ -286,7 +288,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                     null,
                     5,
                 ),
@@ -324,6 +326,7 @@ class LapisControllerCommonFieldsTest(
                     listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "other_segment")),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -348,6 +351,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     listOf(AminoAcidInsertion(123, "gene1", "ABC"), AminoAcidInsertion(124, "gene2", "DEF")),
                     emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -372,6 +376,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -396,6 +401,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.ByFields(emptyList()),
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))

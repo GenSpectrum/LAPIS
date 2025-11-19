@@ -12,7 +12,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
-import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFilters
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
@@ -897,7 +897,7 @@ class SiloFilterExpressionMapperTest {
         override val aminoAcidMutations: List<AminoAcidMutation> = emptyList(),
         override val nucleotideInsertions: List<NucleotideInsertion> = emptyList(),
         override val aminoAcidInsertions: List<AminoAcidInsertion> = emptyList(),
-        override val orderByFields: List<OrderByField> = emptyList(),
+        override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : CommonSequenceFilters
