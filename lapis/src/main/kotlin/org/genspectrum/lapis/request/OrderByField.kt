@@ -89,6 +89,10 @@ class OrderByFieldsCleaner(
     fun clean(fieldName: String): String = caseInsensitiveFieldsCleaner.clean(fieldName) ?: fieldName
 }
 
+/**
+ * Order by can either be a list of fields or it can be random, with an integer seed
+ * to get deterministic random ordering.
+ */
 sealed class OrderBySpec {
     data class ByFields(
         val fields: List<OrderByField>,
