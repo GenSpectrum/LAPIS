@@ -70,3 +70,35 @@ class OrderByFieldsCleaner(
 ) {
     fun clean(fieldName: String): String = caseInsensitiveFieldsCleaner.clean(fieldName) ?: fieldName
 }
+
+sealed class OrderBySpec {
+    data class ByFields(
+        val fields: List<OrderByField>,
+    ) : OrderBySpec()
+
+    data class Random(
+        val seed: Int?,
+    ) : OrderBySpec()
+}
+
+fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
+    val randomField = find { it.field.startsWith("random") }
+
+    return when {
+        randomField == null -> OrderBySpec.ByFields(this)
+        randomField.field == "random" -> OrderBySpec.Random(seed = null)
+        else -> {
+            // Parse "random(123)" to extract seed
+            val seedPattern = Regex("^random\\((\\d+)\\)$")
+            val match = seedPattern.matchEntire(randomField.field)
+            val seed = match?.groupValues?.get(1)?.toInt()
+            OrderBySpec.Random(seed = seed)
+        }
+    }
+}
+
+fun OrderBySpec.toOrderByFields(): List<OrderByField> =
+    when (this) {
+        is OrderBySpec.ByFields -> fields
+        is OrderBySpec.Random -> emptyList()
+    }
