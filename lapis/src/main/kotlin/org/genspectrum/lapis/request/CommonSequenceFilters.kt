@@ -28,7 +28,7 @@ interface BaseSequenceFilters {
 }
 
 interface CommonSequenceFilters : BaseSequenceFilters {
-    val orderByFields: List<OrderByField>
+    val orderByFields: OrderBySpec
     val limit: Int?
     val offset: Int?
 }
@@ -39,13 +39,11 @@ fun parseCommonFields(
 ): ParsedCommonFields {
     val parsedMutationsAndInsertions = parseMutationsAndInsertions(node, codec)
 
-    val orderByFields = when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
-        null -> emptyList()
-        is ArrayNode -> orderByNode.map { codec.treeToValue(it, OrderByField::class.java) }
-        else -> throw BadRequestException(
-            "orderBy must be an array or null, ${butWas(orderByNode)}",
-        )
-    }
+    val orderByFields =
+        when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
+            null -> OrderBySpec.ByFields(emptyList())
+            else -> codec.treeToValue(orderByNode, OrderBySpec::class.java)
+        }
 
     val limitNode = node.get(LIMIT_PROPERTY)
     val limit = when (limitNode?.nodeType) {
@@ -137,7 +135,7 @@ data class ParsedCommonFields(
     val nucleotideInsertions: List<NucleotideInsertion>,
     val aminoAcidInsertions: List<AminoAcidInsertion>,
     val sequenceFilters: SequenceFilters,
-    val orderByFields: List<OrderByField>,
+    val orderByFields: OrderBySpec,
     val limit: Int?,
     val offset: Int?,
 )
