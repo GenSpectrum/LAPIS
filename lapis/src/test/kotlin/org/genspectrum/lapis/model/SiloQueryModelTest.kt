@@ -111,7 +111,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                OrderBySpec.ByFields(emptyList()),
+                OrderBySpec.EMPTY,
             ),
         )
 
@@ -343,7 +343,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                OrderBySpec.ByFields(emptyList()),
+                OrderBySpec.EMPTY,
             ),
         ).toList()
 
@@ -369,7 +369,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                OrderBySpec.ByFields(emptyList()),
+                OrderBySpec.EMPTY,
             ),
         ).toList()
 
@@ -397,7 +397,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                OrderBySpec.ByFields(emptyList()),
+                OrderBySpec.EMPTY,
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),

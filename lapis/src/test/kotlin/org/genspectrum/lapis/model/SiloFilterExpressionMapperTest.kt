@@ -897,7 +897,7 @@ class SiloFilterExpressionMapperTest {
         override val aminoAcidMutations: List<AminoAcidMutation> = emptyList(),
         override val nucleotideInsertions: List<NucleotideInsertion> = emptyList(),
         override val aminoAcidInsertions: List<AminoAcidInsertion> = emptyList(),
-        override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+        override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : CommonSequenceFilters

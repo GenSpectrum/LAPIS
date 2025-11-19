@@ -19,7 +19,7 @@ data class MutationProportionsRequest(
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val fields: List<MutationsField>,
     val minProportion: Double? = null,
-    override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+    override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
 ) : CommonSequenceFilters {

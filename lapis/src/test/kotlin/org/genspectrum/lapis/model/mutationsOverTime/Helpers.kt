@@ -43,7 +43,7 @@ val DUMMY_DATE_BETWEEN_ALL =
 const val DUMMY_DATE_FIELD = "date"
 val AGGREGATED_SILO_ACTION = SiloAction.aggregated(
     listOf(DUMMY_DATE_FIELD),
-    org.genspectrum.lapis.request.OrderBySpec.ByFields(emptyList()),
+    org.genspectrum.lapis.request.OrderBySpec.EMPTY,
     null,
     null,
 )
