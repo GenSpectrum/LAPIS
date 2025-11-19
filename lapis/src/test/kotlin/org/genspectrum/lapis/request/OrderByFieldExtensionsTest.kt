@@ -1,11 +1,9 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class OrderByFieldExtensionsTest {
     @Test
@@ -90,86 +88,5 @@ class OrderByFieldExtensionsTest {
         assertThat(result, instanceOf(OrderBySpec.Random::class.java))
         val random = result as OrderBySpec.Random
         assertThat(random.seed, equalTo(999))
-    }
-
-    @Test
-    fun `GIVEN list with 'random' and other fields THEN throws BadRequestException`() {
-        val input = listOf(
-            OrderByField("country", Order.ASCENDING),
-            OrderByField("random", Order.ASCENDING),
-        )
-
-        val exception = assertThrows<BadRequestException> {
-            input.toOrderBySpec()
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Cannot mix 'random' with other orderBy fields. " +
-                    "Use either 'orderBy=random' or 'orderBy=field1,field2'",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN list with 'random(123)' and other fields THEN throws BadRequestException`() {
-        val input = listOf(
-            OrderByField("date", Order.DESCENDING),
-            OrderByField("random(123)", Order.ASCENDING),
-        )
-
-        val exception = assertThrows<BadRequestException> {
-            input.toOrderBySpec()
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Cannot mix 'random' with other orderBy fields. " +
-                    "Use either 'orderBy=random' or 'orderBy=field1,field2'",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN list with other fields and 'random' THEN throws BadRequestException`() {
-        val input = listOf(
-            OrderByField("random", Order.ASCENDING),
-            OrderByField("country", Order.ASCENDING),
-        )
-
-        val exception = assertThrows<BadRequestException> {
-            input.toOrderBySpec()
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Cannot mix 'random' with other orderBy fields. " +
-                    "Use either 'orderBy=random' or 'orderBy=field1,field2'",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN list with three fields including 'random' THEN throws BadRequestException`() {
-        val input = listOf(
-            OrderByField("country", Order.ASCENDING),
-            OrderByField("random", Order.ASCENDING),
-            OrderByField("date", Order.DESCENDING),
-        )
-
-        val exception = assertThrows<BadRequestException> {
-            input.toOrderBySpec()
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Cannot mix 'random' with other orderBy fields. " +
-                    "Use either 'orderBy=random' or 'orderBy=field1,field2'",
-            ),
-        )
     }
 }

@@ -347,6 +347,17 @@ key_1002052
     expect(result).to.have.nested.property('data[2].division', 'Aargau');
   });
 
+  it('should order by random even with multiple fields', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random' }, { field: 'division' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+  });
+
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {
     const sequenceQueries = [
       '!400- & (S:222V | S:234A)',
