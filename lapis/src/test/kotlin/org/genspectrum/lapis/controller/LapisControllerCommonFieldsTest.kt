@@ -200,7 +200,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                     100,
                 ),
             )
@@ -227,7 +227,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                     100,
                 ),
             )
@@ -260,7 +260,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                     null,
                     5,
                 ),
@@ -288,7 +288,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                     null,
                     5,
                 ),
@@ -326,7 +326,7 @@ class LapisControllerCommonFieldsTest(
                     listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "other_segment")),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -351,7 +351,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     listOf(AminoAcidInsertion(123, "gene1", "ABC"), AminoAcidInsertion(124, "gene2", "DEF")),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -376,7 +376,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -401,7 +401,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))

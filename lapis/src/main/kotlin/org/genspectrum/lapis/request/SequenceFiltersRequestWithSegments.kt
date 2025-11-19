@@ -16,7 +16,7 @@ data class SequenceFiltersRequestWithSegments(
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
     val segments: List<String>,
-    override val orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+    override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
     val fastaHeaderTemplate: String? = null,

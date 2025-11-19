@@ -39,7 +39,7 @@ fun mutationProportionsRequest(
     aminoAcidInsertions = emptyList(),
     fields = fields,
     minProportion = minProportion,
-    orderByFields = OrderBySpec.ByFields(emptyList()),
+    orderByFields = OrderBySpec.EMPTY,
 )
 
 fun sequenceFiltersRequestWithFields(
@@ -52,7 +52,7 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     emptyList(),
     fields.map { Field(it) },
-    OrderBySpec.ByFields(emptyList()),
+    OrderBySpec.EMPTY,
 )
 
 fun phyloTreeSequenceFiltersRequest(
@@ -64,7 +64,7 @@ fun phyloTreeSequenceFiltersRequest(
     emptyList(),
     emptyList(),
     emptyList(),
-    OrderBySpec.ByFields(emptyList()),
+    OrderBySpec.EMPTY,
     null,
     null,
     phyloTreeField = phyloTreeField,
@@ -80,7 +80,7 @@ fun mrcaSequenceFiltersRequest(
     emptyList(),
     emptyList(),
     emptyList(),
-    OrderBySpec.ByFields(emptyList()),
+    OrderBySpec.EMPTY,
     null,
     null,
     phyloTreeField = phyloTreeField,
@@ -97,7 +97,7 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     emptyList(),
     emptyList(),
     fields.map { Field(it) },
-    OrderBySpec.ByFields(emptyList()),
+    OrderBySpec.EMPTY,
 )
 
 fun sequenceFiltersRequestWithSegments(
@@ -110,7 +110,7 @@ fun sequenceFiltersRequestWithSegments(
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     segments = segments,
-    orderByFields = OrderBySpec.ByFields(emptyList()),
+    orderByFields = OrderBySpec.EMPTY,
 )
 
 fun sequenceFiltersRequestWithGenes(
@@ -123,7 +123,7 @@ fun sequenceFiltersRequestWithGenes(
     nucleotideInsertions = emptyList(),
     aminoAcidInsertions = emptyList(),
     genes = genes,
-    orderByFields = OrderBySpec.ByFields(emptyList()),
+    orderByFields = OrderBySpec.EMPTY,
 )
 
 fun mutationData(

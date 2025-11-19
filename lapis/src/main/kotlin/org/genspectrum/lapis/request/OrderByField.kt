@@ -26,6 +26,10 @@ sealed class OrderBySpec {
     data class Random(
         val seed: Int?,
     ) : OrderBySpec()
+
+    companion object {
+        val EMPTY = ByFields(emptyList())
+    }
 }
 
 /**

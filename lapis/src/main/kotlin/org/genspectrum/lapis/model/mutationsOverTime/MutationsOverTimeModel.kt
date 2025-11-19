@@ -272,7 +272,7 @@ class MutationsOverTimeModel(
             SiloQuery(
                 SiloAction.aggregated(
                     listOf(dateField),
-                    OrderBySpec.ByFields(emptyList()),
+                    OrderBySpec.EMPTY,
                     null,
                     null,
                 ),

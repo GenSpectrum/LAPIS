@@ -63,7 +63,7 @@ sealed class SiloAction<ResponseType>(
     companion object {
         fun aggregated(
             groupByFields: List<String> = emptyList(),
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<AggregationData> =
@@ -77,7 +77,7 @@ sealed class SiloAction<ResponseType>(
 
         fun mutations(
             minProportion: Double? = null,
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
@@ -93,7 +93,7 @@ sealed class SiloAction<ResponseType>(
 
         fun aminoAcidMutations(
             minProportion: Double? = null,
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
@@ -109,7 +109,7 @@ sealed class SiloAction<ResponseType>(
 
         fun details(
             fields: List<String> = emptyList(),
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<DetailsData> =
@@ -140,7 +140,7 @@ sealed class SiloAction<ResponseType>(
             )
 
         fun nucleotideInsertions(
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<InsertionData> =
@@ -152,7 +152,7 @@ sealed class SiloAction<ResponseType>(
             )
 
         fun aminoAcidInsertions(
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<InsertionData> =
@@ -167,7 +167,7 @@ sealed class SiloAction<ResponseType>(
             type: SequenceType,
             sequenceNames: List<String>,
             additionalFields: List<String> = emptyList(),
-            orderByFields: OrderBySpec = OrderBySpec.ByFields(emptyList()),
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
         ): SiloAction<SequenceData> =

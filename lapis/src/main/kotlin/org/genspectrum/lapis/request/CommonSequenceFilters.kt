@@ -41,7 +41,7 @@ fun parseCommonFields(
 
     val orderByFields =
         when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
-            null -> OrderBySpec.ByFields(emptyList())
+            null -> OrderBySpec.EMPTY
             else -> codec.treeToValue(orderByNode, OrderBySpec::class.java)
         }
 
