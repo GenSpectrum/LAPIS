@@ -115,7 +115,7 @@ class OrderBySpecDeserializer(
                     node.map { fieldNode ->
                         deserializeOrderByField(fieldNode, p.codec)
                     }
-                OrderBySpec.ByFields(fields)
+                fields.toOrderBySpec()
             }
             node.isObject && node.has("random") -> {
                 val randomValue = node.get("random")
@@ -147,6 +147,13 @@ class OrderBySpecDeserializer(
 
 fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
     val randomField = find { it.field.startsWith("random") }
+
+    if (randomField != null && this.size > 1) {
+        throw org.genspectrum.lapis.controller.BadRequestException(
+            "Cannot mix 'random' with other orderBy fields. " +
+                "Use either 'orderBy=random' or 'orderBy=field1,field2'",
+        )
+    }
 
     return when {
         randomField == null -> OrderBySpec.ByFields(this)
