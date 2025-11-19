@@ -61,7 +61,24 @@ class OrderByFieldDeserializer(
 class OrderByFieldConverter(
     private val orderByFieldsCleaner: OrderByFieldsCleaner,
 ) : Converter<String, OrderByField> {
-    override fun convert(source: String) = OrderByField(orderByFieldsCleaner.clean(source), Order.ASCENDING)
+    override fun convert(source: String): OrderByField {
+        val field =
+            if (source.startsWith("random")) {
+                // Validate format: must be "random" or "random(<digits>)"
+                val validRandomPattern = Regex("^random(\\(\\d+\\))?$")
+                if (!validRandomPattern.matches(source)) {
+                    throw BadRequestException(
+                        "Invalid random orderBy format: '$source'. " +
+                            "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
+                    )
+                }
+                source // Keep as-is: "random" or "random(123)"
+            } else {
+                orderByFieldsCleaner.clean(source)
+            }
+
+        return OrderByField(field = field, order = Order.ASCENDING)
+    }
 }
 
 @Component
