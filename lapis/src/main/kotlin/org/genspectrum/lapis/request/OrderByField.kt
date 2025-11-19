@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
@@ -96,6 +97,52 @@ sealed class OrderBySpec {
     data class Random(
         val seed: Int?,
     ) : OrderBySpec()
+}
+
+@JsonComponent
+class OrderBySpecDeserializer(
+    private val orderByFieldsCleaner: OrderByFieldsCleaner,
+) : JsonDeserializer<OrderBySpec>() {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): OrderBySpec {
+        val node = p.readValueAsTree<JsonNode>()
+
+        return when {
+            node.isArray -> {
+                val fields =
+                    node.map { fieldNode ->
+                        deserializeOrderByField(fieldNode, p.codec)
+                    }
+                OrderBySpec.ByFields(fields)
+            }
+            node.isObject && node.has("random") -> {
+                val randomValue = node.get("random")
+                val seed =
+                    when {
+                        randomValue.isBoolean && randomValue.asBoolean() -> null
+                        randomValue.isBoolean && !randomValue.asBoolean() ->
+                            throw BadRequestException("random must be true or an integer seed")
+                        randomValue.isInt -> randomValue.asInt()
+                        else -> throw BadRequestException("random must be true or an integer seed")
+                    }
+                OrderBySpec.Random(seed)
+            }
+            else ->
+                throw BadRequestException(
+                    "orderBy must be an array of fields or {random: true|<seed>}",
+                )
+        }
+    }
+
+    private fun deserializeOrderByField(
+        node: JsonNode,
+        codec: ObjectCodec,
+    ): OrderByField {
+        // Use existing OrderByFieldDeserializer logic
+        return codec.treeToValue(node, OrderByField::class.java)
+    }
 }
 
 fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
