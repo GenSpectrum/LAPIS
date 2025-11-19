@@ -149,6 +149,14 @@ class OrderBySpecDeserializer(
     }
 }
 
+/**
+ * Converts a list of fields to order by or an OrderBySpec.
+ * If the list has just a single element and the field name is 'random(123)',
+ * it will convert it into the appropriate OrderBySpec for random ordering with a seed.
+ *
+ * Throws an error if multiple fields are given and one of them is random.
+ * If random sorting should be used, it needs to be the only field.
+ */
 fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
     val randomField = find { it.field.startsWith("random") }
 
