@@ -3,6 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
@@ -62,6 +64,89 @@ class SiloQueryTest {
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
+    @Test
+    fun `GIVEN OrderBySpec Random without seed THEN serializes with randomize true`() {
+        val underTest = SiloAction.aggregated(
+            orderByFields = OrderBySpec.Random(seed = null),
+        )
+
+        val result = objectMapper.writeValueAsString(underTest)
+
+        val expected = """
+            {
+                "type": "Aggregated",
+                "randomize": true
+            }
+        """
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
+    @Test
+    fun `GIVEN OrderBySpec Random with seed THEN serializes with randomize and seed`() {
+        val underTest = SiloAction.aggregated(
+            orderByFields = OrderBySpec.Random(seed = 123),
+        )
+
+        val result = objectMapper.writeValueAsString(underTest)
+
+        val expected = """
+            {
+                "type": "Aggregated",
+                "randomize": {
+                    "seed": 123
+                }
+            }
+        """
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
+    @Test
+    fun `GIVEN OrderBySpec Random with seed 0 THEN serializes with randomize and seed 0`() {
+        val underTest = SiloAction.details(
+            orderByFields = OrderBySpec.Random(seed = 0),
+        )
+
+        val result = objectMapper.writeValueAsString(underTest)
+
+        val expected = """
+            {
+                "type": "Details",
+                "randomize": {
+                    "seed": 0
+                }
+            }
+        """
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
+    @Test
+    fun `GIVEN OrderBySpec ByFields THEN serializes with randomize false`() {
+        val underTest = SiloAction.details(
+            fields = listOf("country", "date"),
+            orderByFields = OrderBySpec.ByFields(
+                listOf(
+                    OrderByField("country", Order.ASCENDING),
+                    OrderByField("date", Order.DESCENDING),
+                ),
+            ),
+        )
+
+        val result = objectMapper.writeValueAsString(underTest)
+
+        val expected = """
+            {
+                "type": "Details",
+                "fields": ["country", "date"],
+                "orderByFields": [
+                    {"field": "country", "order": "ascending"},
+                    {"field": "date", "order": "descending"}
+                ],
+                "randomize": false
+            }
+        """
+        assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
     companion object {
         @JvmStatic
         fun getTestSiloActions() =
@@ -81,8 +166,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -94,7 +178,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -115,8 +199,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -128,7 +211,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -149,8 +232,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -162,7 +244,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -183,8 +265,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -196,7 +277,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -216,8 +297,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -228,7 +308,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -248,8 +328,7 @@ class SiloQueryTest {
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         100,
                         50,
                     ),
@@ -260,7 +339,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -284,8 +363,7 @@ class SiloQueryTest {
                         orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         limit = 100,
                         offset = 50,
                     ),
@@ -298,7 +376,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }
@@ -322,8 +400,7 @@ class SiloQueryTest {
                         orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
-                            OrderByField("random", Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                         limit = 100,
                         offset = 50,
                     ),
@@ -336,7 +413,7 @@ class SiloQueryTest {
                                 {"field": "field3", "order": "ascending"},
                                 {"field": "field4", "order": "descending"}
                             ],
-                            "randomize": true,
+                            "randomize": false,
                             "limit": 100,
                             "offset": 50
                         }

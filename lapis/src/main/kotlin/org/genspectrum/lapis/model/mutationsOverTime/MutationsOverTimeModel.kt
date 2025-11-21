@@ -12,6 +12,7 @@ import org.genspectrum.lapis.model.nucleotideSymbols
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -271,7 +272,7 @@ class MutationsOverTimeModel(
             SiloQuery(
                 SiloAction.aggregated(
                     listOf(dateField),
-                    emptyList(),
+                    OrderBySpec.EMPTY,
                     null,
                     null,
                 ),

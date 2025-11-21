@@ -38,6 +38,7 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithSegments
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.SequenceType
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
@@ -118,7 +119,7 @@ class MultiSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            orderBy ?: emptyList(),
+            (orderBy ?: emptyList()).toOrderBySpec(),
             limit,
             offset,
         )
@@ -236,7 +237,7 @@ class MultiSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            orderBy ?: emptyList(),
+            (orderBy ?: emptyList()).toOrderBySpec(),
             limit,
             offset,
         )
@@ -360,7 +361,7 @@ class MultiSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            orderBy ?: emptyList(),
+            (orderBy ?: emptyList()).toOrderBySpec(),
             limit,
             offset,
         )
@@ -478,7 +479,7 @@ class MultiSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            orderBy ?: emptyList(),
+            (orderBy ?: emptyList()).toOrderBySpec(),
             limit,
             offset,
         )

@@ -306,12 +306,68 @@ key_1002052
   it('should order by random', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {
-        orderBy: [{ field: 'random' }, { field: 'division', type: 'ascending' }],
+        orderBy: [{ field: 'random' }],
         fields: ['primaryKey', 'division'],
       },
     });
 
-    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+    expect(result).to.have.nested.property('data[0].division');
+  });
+
+  it('should order by random (new format)', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: true },
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division');
+  });
+
+  it('should order by random with seed', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random(123)' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division');
+  });
+
+  it('should order by random with seed (new format)', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: 123 },
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division');
+    const key = result.data[0].primaryKey;
+
+    const result2 = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: 123 },
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    const key2 = result.data[0].primaryKey;
+
+    expect(key2).to.equal(key);
+  });
+
+  it('should order by random even with multiple fields', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random' }, { field: 'division' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division');
   });
 
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {

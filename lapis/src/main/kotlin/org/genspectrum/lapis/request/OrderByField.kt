@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
@@ -12,6 +13,78 @@ import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JsonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
+
+/**
+ * Order by can either be a list of fields or it can be random, with an integer seed
+ * to get deterministic random ordering.
+ */
+sealed class OrderBySpec {
+    data class ByFields(
+        val fields: List<OrderByField>,
+    ) : OrderBySpec()
+
+    data class Random(
+        val seed: Int?,
+    ) : OrderBySpec()
+
+    companion object {
+        val EMPTY = ByFields(emptyList())
+    }
+}
+
+/**
+ * Deserializes the `orderByField`s. Supports a list of fields like:
+ * `[{field: country}, {field: date}]`
+ * as well as random:
+ * `{random: true}`
+ * or random with seed:
+ * `{random: 123}`
+ */
+@JsonComponent
+class OrderBySpecDeserializer(
+    private val orderByFieldsCleaner: OrderByFieldsCleaner,
+) : JsonDeserializer<OrderBySpec>() {
+    override fun deserialize(
+        p: JsonParser,
+        ctxt: DeserializationContext,
+    ): OrderBySpec {
+        val node = p.readValueAsTree<JsonNode>()
+
+        return when {
+            node.isArray -> {
+                val fields =
+                    node.map { fieldNode ->
+                        deserializeOrderByField(fieldNode, p.codec)
+                    }
+                fields.toOrderBySpec()
+            }
+            node.isObject && node.has("random") -> {
+                val randomValue = node.get("random")
+                val seed =
+                    when {
+                        randomValue.isBoolean && randomValue.asBoolean() -> null
+                        randomValue.isBoolean && !randomValue.asBoolean() ->
+                            throw BadRequestException("random must be true or an integer seed")
+                        randomValue.isInt -> randomValue.asInt()
+                        else -> throw BadRequestException("random must be true or an integer seed")
+                    }
+                OrderBySpec.Random(seed)
+            }
+            else ->
+                throw BadRequestException(
+                    "orderBy must be an array of fields or {random: true|<seed>}",
+                )
+        }
+    }
+
+    private fun deserializeOrderByField(
+        node: JsonNode,
+        codec: ObjectCodec,
+    ): OrderByField {
+        // Use existing OrderByFieldDeserializer logic
+        return codec.treeToValue(node, OrderByField::class.java)
+    }
+}
 
 data class OrderByField(
     val field: String,
@@ -57,11 +130,33 @@ class OrderByFieldDeserializer(
     }
 }
 
+/**
+ * The `OrderByFieldConverter` converts a list of strings into a list of fields to order by.
+ * It checks that all the fields exist, or are the special string "random" or "random(<seed>)".
+ * The `Converter` is used automatically by Spring in the GET requests.
+ */
 @Component
 class OrderByFieldConverter(
     private val orderByFieldsCleaner: OrderByFieldsCleaner,
 ) : Converter<String, OrderByField> {
-    override fun convert(source: String) = OrderByField(orderByFieldsCleaner.clean(source), Order.ASCENDING)
+    override fun convert(source: String): OrderByField {
+        val field =
+            if (source.startsWith("random")) {
+                // Validate format: must be "random" or "random(<digits>)"
+                val validRandomPattern = Regex("^random(\\(\\d+\\))?$")
+                if (!validRandomPattern.matches(source)) {
+                    throw BadRequestException(
+                        "Invalid random orderBy format: '$source'. " +
+                            "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
+                    )
+                }
+                source // Keep as-is: "random" or "random(123)"
+            } else {
+                orderByFieldsCleaner.clean(source)
+            }
+
+        return OrderByField(field = field, order = Order.ASCENDING)
+    }
 }
 
 @Component
@@ -70,3 +165,30 @@ class OrderByFieldsCleaner(
 ) {
     fun clean(fieldName: String): String = caseInsensitiveFieldsCleaner.clean(fieldName) ?: fieldName
 }
+
+/**
+ * Converts a list of fields to order by or an OrderBySpec.
+ * If the list has any element and the field name is 'random(123)',
+ * it will convert it into the appropriate OrderBySpec for random ordering with a seed.
+ */
+fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
+    val randomField = find { it.field.startsWith("random") }
+
+    return when {
+        randomField == null -> OrderBySpec.ByFields(this)
+        randomField.field == "random" -> OrderBySpec.Random(seed = null)
+        else -> {
+            // Parse "random(123)" to extract seed
+            val seedPattern = Regex("^random\\((\\d+)\\)$")
+            val match = seedPattern.matchEntire(randomField.field)
+            val seed = match?.groupValues?.get(1)?.toInt()
+            OrderBySpec.Random(seed = seed)
+        }
+    }
+}
+
+fun OrderBySpec.toOrderByFields(): List<OrderByField> =
+    when (this) {
+        is OrderBySpec.ByFields -> fields
+        is OrderBySpec.Random -> emptyList()
+    }
