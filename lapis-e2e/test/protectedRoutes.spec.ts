@@ -1,8 +1,14 @@
+import crypto from 'crypto';
 import { expect } from 'chai';
 import { basePathProtected, lapisClientProtected } from './common';
 
 const aggregatedAccessKey = 'testAggregatedDataAccessKey';
 const fullAccessKey = 'testFullAccessKey';
+
+function hashAccessKey(baseKey: string): string {
+  const epoch = Math.floor(Date.now() / 1000);
+  return crypto.createHash('sha256').update(`${baseKey}:${epoch}`).digest('hex');
+}
 
 describe('Protected mode on GET requests', () => {
   it('should deny access, when no access key is provided', async () => {
@@ -33,7 +39,9 @@ describe('Protected mode on GET requests', () => {
   });
 
   it('should deny access, when providing aggregated access key on non aggregated route', async () => {
-    const result = await fetch(`${basePathProtected}/sample/details?accessKey=${aggregatedAccessKey}`);
+    const result = await fetch(
+      `${basePathProtected}/sample/details?accessKey=${hashAccessKey(aggregatedAccessKey)}`
+    );
 
     expect(result.status).equals(403);
     expect(result.headers.get('Content-Type')).equals('application/json;charset=ISO-8859-1');
@@ -46,7 +54,9 @@ describe('Protected mode on GET requests', () => {
   });
 
   it('should grant access, when providing aggregated access key', async () => {
-    const result = await fetch(`${basePathProtected}/sample/aggregated?accessKey=${aggregatedAccessKey}`);
+    const result = await fetch(
+      `${basePathProtected}/sample/aggregated?accessKey=${hashAccessKey(aggregatedAccessKey)}`
+    );
 
     expect(result.status).equals(200);
   });
@@ -82,7 +92,7 @@ describe('Protected mode on POST requests', () => {
 
   it('should deny access, when providing aggregated access key on non aggregated route', async () => {
     const result = lapisClientProtected.postDetails({
-      detailsPostRequest: { accessKey: aggregatedAccessKey },
+      detailsPostRequest: { accessKey: hashAccessKey(aggregatedAccessKey) },
     });
 
     await expectResponseStatusIs(result, 403);
@@ -90,7 +100,7 @@ describe('Protected mode on POST requests', () => {
 
   it('should grant access, when providing aggregated access key', async () => {
     const result = lapisClientProtected.postAggregated({
-      aggregatedPostRequest: { accessKey: aggregatedAccessKey },
+      aggregatedPostRequest: { accessKey: hashAccessKey(aggregatedAccessKey) },
     });
 
     expect(await result).to.be.ok;
