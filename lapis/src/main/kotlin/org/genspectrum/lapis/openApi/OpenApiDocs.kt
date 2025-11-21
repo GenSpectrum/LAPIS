@@ -886,28 +886,55 @@ private fun aminoAcidInsertions() =
         )
 
 private fun orderByPostSchema(orderByFieldsSchema: Schema<*>) =
-    Schema<List<String>>()
-        .types(setOf("array"))
-        .items(
-            Schema<String>().anyOf(
-                listOf(
-                    orderByFieldsSchema,
-                    Schema<OrderByField>()
-                        .types(setOf("object"))
-                        .description("The fields by which the result is ordered with ascending or descending order.")
-                        .required(listOf("field"))
-                        .properties(
-                            mapOf(
-                                "field" to orderByFieldsSchema,
-                                "type" to Schema<String>()
-                                    .types(setOf("string"))
-                                    ._enum(listOf("ascending", "descending"))
-                                    ._default("ascending"),
+    Schema<Any>().oneOf(
+        listOf(
+            // Array of fields format: [{field: "country"}, "date", ...]
+            Schema<List<String>>()
+                .types(setOf("array"))
+                .items(
+                    Schema<String>().anyOf(
+                        listOf(
+                            orderByFieldsSchema,
+                            Schema<OrderByField>()
+                                .types(setOf("object"))
+                                .description(
+                                    "The fields by which the result is ordered with ascending or descending order.",
+                                )
+                                .required(listOf("field"))
+                                .properties(
+                                    mapOf(
+                                        "field" to orderByFieldsSchema,
+                                        "type" to Schema<String>()
+                                            .types(setOf("string"))
+                                            ._enum(listOf("ascending", "descending"))
+                                            ._default("ascending"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+            // Random ordering format: {random: true} or {random: 123}
+            Schema<Any>()
+                .types(setOf("object"))
+                .description(
+                    "Random ordering. Use {random: true} for random order, or {random: <seed>} for " +
+                        "deterministic random order with a specific seed.",
+                )
+                .required(listOf("random"))
+                .properties(
+                    mapOf(
+                        "random" to Schema<Any>().oneOf(
+                            listOf(
+                                Schema<Boolean>().types(setOf("boolean")).description("Set to true for random order"),
+                                Schema<Int>().types(
+                                    setOf("integer"),
+                                ).description("Integer seed for deterministic random order"),
                             ),
                         ),
+                    ),
                 ),
-            ),
-        )
+        ),
+    )
 
 private fun limitSchema() =
     Schema<Int>()
