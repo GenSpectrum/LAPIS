@@ -13,6 +13,15 @@ Use Docker Compose to run SILO and LAPIS:
 LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up --pull always
 ```
 
+### Running your local LAPIS changes
+
+To test local changes to LAPIS, build the Docker image and run it with the compose file:
+
+```bash
+docker build --platform linux/amd64 -t ghcr.io/genspectrum/lapis:local .
+SILO_TAG=latest LAPIS_TAG=local docker compose up --pull missing
+```
+
 ## Configuration
 
 When running LAPIS, you need to pass the following arguments:
