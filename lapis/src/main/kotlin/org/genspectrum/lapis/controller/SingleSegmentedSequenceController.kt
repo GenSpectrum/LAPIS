@@ -106,7 +106,7 @@ class SingleSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            orderBy.toOrderBySpec(),
             limit,
             offset,
         )
@@ -221,7 +221,7 @@ class SingleSegmentedSequenceController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            (orderBy ?: emptyList()).toOrderBySpec(),
+            orderBy.toOrderBySpec(),
             limit,
             offset,
         )

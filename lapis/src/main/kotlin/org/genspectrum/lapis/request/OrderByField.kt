@@ -165,11 +165,13 @@ class OrderByFieldsCleaner(
  * Likewise for just `random` (without seed).
  * Any other input starting with random will cause an error.
  */
-fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
-    val randomField = find { it.field.startsWith("random") }
+fun List<OrderByField>?.toOrderBySpec(): OrderBySpec {
+    val nonNullThis = this.orEmpty()
+
+    val randomField = nonNullThis.find { it.field.startsWith("random") }
 
     return when {
-        randomField == null -> OrderBySpec.ByFields(this)
+        randomField == null -> OrderBySpec.ByFields(nonNullThis)
         randomField.field == "random" -> OrderBySpec.Random(seed = null)
         else -> {
             val seedPattern = Regex("""^random\((\d+)\)$""")
