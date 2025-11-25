@@ -41,9 +41,7 @@ sealed class OrderBySpec {
  * `{random: 123}`
  */
 @JsonComponent
-class OrderBySpecDeserializer(
-    private val orderByFieldsCleaner: OrderByFieldsCleaner,
-) : JsonDeserializer<OrderBySpec>() {
+class OrderBySpecDeserializer : JsonDeserializer<OrderBySpec>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
@@ -109,6 +107,7 @@ class OrderByFieldDeserializer(
         ctxt: DeserializationContext,
     ): OrderByField =
         when (val value = jsonParser.readValueAsTree<JsonNode>()) {
+            // TODO - It seems like maybe here we can't deserialize 'random' fields? Is that an issue?
             is TextNode -> OrderByField(orderByFieldsCleaner.clean(value.asText()), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
             else -> throw BadRequestException("orderByField must be a string or an object")
@@ -142,6 +141,7 @@ class OrderByFieldConverter(
     override fun convert(source: String): OrderByField {
         val field =
             if (source.startsWith("random")) {
+                // validation and conversion happens later on, in `toOrderBySpec`.
                 source
             } else {
                 orderByFieldsCleaner.clean(source)
@@ -160,9 +160,9 @@ class OrderByFieldsCleaner(
 
 /**
  * Converts a list of fields to order by or an OrderBySpec.
- * If the list has any element and the field name is 'random(123)',
+ * If the list has any element and the field name is `random(123)`,
  * it will convert it into the appropriate OrderBySpec for random ordering with a seed.
- * Likewise for just 'random' (without seed).
+ * Likewise for just `random` (without seed).
  * Any other input starting with random will cause an error.
  */
 fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
