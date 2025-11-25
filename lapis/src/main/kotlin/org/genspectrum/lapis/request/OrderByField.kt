@@ -132,7 +132,7 @@ class OrderByFieldDeserializer(
 
 /**
  * The `OrderByFieldConverter` converts a list of strings into a list of fields to order by.
- * It checks that all the fields exist, or are the special string "random" or "random(<seed>)".
+ * It checks that all the fields exist, or start with "random".
  * The `Converter` is used automatically by Spring in the GET requests.
  */
 @Component
@@ -142,15 +142,7 @@ class OrderByFieldConverter(
     override fun convert(source: String): OrderByField {
         val field =
             if (source.startsWith("random")) {
-                // Validate format: must be "random" or "random(<digits>)"
-                val validRandomPattern = Regex("^random(\\(\\d+\\))?$")
-                if (!validRandomPattern.matches(source)) {
-                    throw BadRequestException(
-                        "Invalid random orderBy format: '$source'. " +
-                            "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-                    )
-                }
-                source // Keep as-is: "random" or "random(123)"
+                source
             } else {
                 orderByFieldsCleaner.clean(source)
             }
@@ -170,6 +162,8 @@ class OrderByFieldsCleaner(
  * Converts a list of fields to order by or an OrderBySpec.
  * If the list has any element and the field name is 'random(123)',
  * it will convert it into the appropriate OrderBySpec for random ordering with a seed.
+ * Likewise for just 'random' (without seed).
+ * Any other input starting with random will cause an error.
  */
 fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
     val randomField = find { it.field.startsWith("random") }
@@ -178,10 +172,15 @@ fun List<OrderByField>.toOrderBySpec(): OrderBySpec {
         randomField == null -> OrderBySpec.ByFields(this)
         randomField.field == "random" -> OrderBySpec.Random(seed = null)
         else -> {
-            // Parse "random(123)" to extract seed
-            val seedPattern = Regex("^random\\((\\d+)\\)$")
+            val seedPattern = Regex("""^random\((\d+)\)$""")
             val match = seedPattern.matchEntire(randomField.field)
             val seed = match?.groupValues?.get(1)?.toInt()
+            if (seed == null) {
+                throw BadRequestException(
+                    "Invalid random orderBy format: '${randomField.field}'. " +
+                        "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
+                )
+            }
             OrderBySpec.Random(seed = seed)
         }
     }
