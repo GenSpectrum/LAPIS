@@ -917,8 +917,8 @@ private fun orderByPostSchema(orderByFieldsSchema: Schema<*>) =
             Schema<Any>()
                 .types(setOf("object"))
                 .description(
-                    "Random ordering. Use {random: true} for random order, or {random: <seed>} for " +
-                        "deterministic random order with a specific seed.",
+                    "Random ordering. Use {random: true} for random order, or {random: SEED} for " +
+                        "deterministic random order with a specific seed (where SEED is an integer).",
                 )
                 .required(listOf("random"))
                 .properties(
