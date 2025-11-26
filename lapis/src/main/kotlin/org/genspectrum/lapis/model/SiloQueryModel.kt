@@ -5,12 +5,10 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
-import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
-import org.genspectrum.lapis.request.toOrderByFields
-import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -251,9 +249,9 @@ class SiloQueryModel(
                     sequenceNames = mapSequenceNames(cleanedSequenceNames, sequenceType),
                     additionalFields = fastaHeaderTemplate.metadataFieldNames,
                     orderByFields = mapSequenceOrderByFields(
-                        sequenceFilters.orderByFields.toOrderByFields(),
+                        sequenceFilters.orderByFields,
                         sequenceType,
-                    ).toOrderBySpec(),
+                    ),
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,
                 ),
@@ -280,20 +278,32 @@ class SiloQueryModel(
         }
 
     private fun mapSequenceOrderByFields(
-        orderByFields: List<OrderByField>,
+        orderBySpec: OrderBySpec,
         sequenceType: SequenceType,
-    ) = orderByFields
-        .map { it.copy(field = referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it.field) ?: it.field) }
-        .map {
-            when (sequenceType) {
-                SequenceType.ALIGNED -> it
-                SequenceType.UNALIGNED -> {
-                    when (val sequenceName = referenceGenomeSchema.getNucleotideSequence(it.field)) {
-                        null -> it
-                        else -> it.copy(field = toUnalignedSequenceName(sequenceName.name))
-                    }
-                }
-            }
+    ): OrderBySpec =
+        when (orderBySpec) {
+            is OrderBySpec.ByFields ->
+                OrderBySpec.ByFields(
+                    orderBySpec.fields
+                        .map {
+                            it.copy(
+                                field =
+                                    referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it.field) ?: it.field,
+                            )
+                        }
+                        .map {
+                            when (sequenceType) {
+                                SequenceType.ALIGNED -> it
+                                SequenceType.UNALIGNED -> {
+                                    when (val sequenceName = referenceGenomeSchema.getNucleotideSequence(it.field)) {
+                                        null -> it
+                                        else -> it.copy(field = toUnalignedSequenceName(sequenceName.name))
+                                    }
+                                }
+                            }
+                        },
+                )
+            is OrderBySpec.Random -> orderBySpec
         }
 
     fun getInfo(): InfoData = siloClient.callInfo()

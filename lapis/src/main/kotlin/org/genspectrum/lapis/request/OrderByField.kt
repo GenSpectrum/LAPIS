@@ -187,9 +187,3 @@ fun List<OrderByField>?.toOrderBySpec(): OrderBySpec {
         }
     }
 }
-
-fun OrderBySpec.toOrderByFields(): List<OrderByField> =
-    when (this) {
-        is OrderBySpec.ByFields -> fields
-        is OrderBySpec.Random -> emptyList()
-    }
