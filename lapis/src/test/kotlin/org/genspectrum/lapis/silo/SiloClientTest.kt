@@ -8,6 +8,7 @@ import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -490,7 +491,7 @@ class SiloClientTest(
             response()
                 .withStatusCode(500)
                 .withBody(errorMessage),
-            Times.exactly(1),
+            Times.once(),
         )
 
         val orderByRandom = OrderByField(
@@ -505,6 +506,24 @@ class SiloClientTest(
 
         val exception = assertThrows<SiloException> { underTest.sendQuery(query).toList() }
         assertThat(exception.message, containsString(errorMessage))
+    }
+
+    @Test
+    fun `GIVEN a cacheable action with randomize with seed THEN is cached`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withStatusCode(200)
+                .withBody(""),
+            Times.once(),
+        )
+
+        val query = SiloQuery(SiloAction.mutations(orderByFields = OrderBySpec.Random(123)), True)
+        assertThat(query.action.cacheable, `is`(true))
+
+        val result1 = underTest.sendQuery(query).toList()
+        val result2 = underTest.sendQuery(query).toList()
+
+        assertThat(result1, `is`(result2))
     }
 
     @Test
