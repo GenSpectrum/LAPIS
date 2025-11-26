@@ -332,6 +332,28 @@ class LapisControllerCommonFieldsTest(
     }
 
     @Test
+    fun `POST details with random orderBy (form encoded)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .param("orderBy", "random(123)")
+            .param("orderBy", "age")
+            .param("fields", "country")
+            .contentType(APPLICATION_FORM_URLENCODED)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
     fun `GET aggregated with limit`() {
         every {
             siloQueryModelMock.getAggregated(
