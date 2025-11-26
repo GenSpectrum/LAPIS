@@ -19,9 +19,7 @@ export default defineConfig({
     integrations: [
         starlight({
             title: `LAPIS ${getVersion()}`,
-            social: [
-              { icon: 'github', label: 'GitHub', href: 'https://github.com/GenSpectrum/LAPIS' }
-            ],
+            social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/GenSpectrum/LAPIS' }],
             customCss: ['./src/styles/custom.css'],
             editLink: {
                 baseUrl: 'https://github.com/GenSpectrum/LAPIS/tree/main/lapis-docs/',
@@ -236,6 +234,6 @@ export default defineConfig({
     },
 
     vite: {
-        plugins: [tailwindcss()]
-    }
+        plugins: [tailwindcss()],
+    },
 });
