@@ -3,7 +3,6 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.ObjectCodec
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
@@ -33,7 +32,7 @@ sealed class OrderBySpec {
 }
 
 /**
- * Deserializes the `orderByField`s. Supports a list of fields like:
+ * Deserialize an `OrderBySpec`. Supports a list of fields like:
  * `[{field: country}, {field: date}]`
  * as well as random:
  * `{random: true}`
@@ -52,7 +51,7 @@ class OrderBySpecDeserializer : JsonDeserializer<OrderBySpec>() {
             node.isArray -> {
                 val fields =
                     node.map { fieldNode ->
-                        deserializeOrderByField(fieldNode, p.codec)
+                        p.codec.treeToValue(fieldNode, OrderByField::class.java)
                     }
                 fields.toOrderBySpec()
             }
@@ -73,14 +72,6 @@ class OrderBySpecDeserializer : JsonDeserializer<OrderBySpec>() {
                     "orderBy must be an array of fields or {random: true|<seed>}",
                 )
         }
-    }
-
-    private fun deserializeOrderByField(
-        node: JsonNode,
-        codec: ObjectCodec,
-    ): OrderByField {
-        // Use existing OrderByFieldDeserializer logic
-        return codec.treeToValue(node, OrderByField::class.java)
     }
 }
 
