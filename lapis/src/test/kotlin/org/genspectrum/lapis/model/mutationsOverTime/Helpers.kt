@@ -9,6 +9,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFilters
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
@@ -43,7 +44,7 @@ val DUMMY_DATE_BETWEEN_ALL =
 const val DUMMY_DATE_FIELD = "date"
 val AGGREGATED_SILO_ACTION = SiloAction.aggregated(
     listOf(DUMMY_DATE_FIELD),
-    org.genspectrum.lapis.request.OrderBySpec.EMPTY,
+    OrderBySpec.EMPTY,
     null,
     null,
 )
