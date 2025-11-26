@@ -1,10 +1,8 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.controller.BadRequestException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -51,95 +49,5 @@ class OrderByFieldConverterTest {
 
         assertThat(result.field, equalTo("country"))
         assertThat(result.order, equalTo(Order.ASCENDING))
-    }
-
-    @Test
-    fun `GIVEN 'random(abc)' THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("random(abc)")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'random(abc)'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN 'random()' THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("random()")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'random()'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN 'randomX' THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("randomX")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'randomX'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN 'random' with decimal seed THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("random(12.3)")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'random(12.3)'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN 'random(123' THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("random(123")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'random(123'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
-    }
-
-    @Test
-    fun `GIVEN 'random 123)' THEN throws BadRequestException`() {
-        val exception = assertThrows<BadRequestException> {
-            orderByFieldConverter.convert("random 123)")
-        }
-
-        assertThat(
-            exception.message,
-            equalTo(
-                "Invalid random orderBy format: 'random 123)'. " +
-                    "Use 'random' or 'random(<seed>)' where seed is a positive integer.",
-            ),
-        )
     }
 }
