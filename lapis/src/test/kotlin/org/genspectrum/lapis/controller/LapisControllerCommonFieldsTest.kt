@@ -10,6 +10,7 @@ import org.genspectrum.lapis.controller.SampleRoute.DETAILS
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.Order
@@ -18,6 +19,7 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
@@ -187,6 +189,146 @@ class LapisControllerCommonFieldsTest(
                     containsString("orderByField must have a string property \"field\""),
                 ),
             )
+    }
+
+    @Test
+    fun `GET details with random orderBy`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random&fields=country"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `POST details with random orderBy (old format, extra ignored field)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": [{ "field": "random" }, { "field": "age" }],
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `POST details with random orderBy (new format)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": { "random": true },
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `GET details with random orderBy with seed`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random(123)&orderBy=age&fields=country"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST details with random orderBy with seed (old format, extra ignored field)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": [{ "field": "random(123)" }, { "field": "age"}],
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST details with random orderBy with seed (new format)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": { "random": 123 },
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
     }
 
     @Test
