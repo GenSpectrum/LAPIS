@@ -63,7 +63,8 @@ If empty, only the overall count is returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
-    Fields specified here must either be \"count\" or also be present in \"fields\"."""
+    Fields specified here must either be \"count\" or also be present in \"fields\".
+    You can also use \"random\" or \"random(SEED)\" where SEED is an integer."""
 const val DETAILS_FIELDS_DESCRIPTION =
     """The fields that the response items should contain.
 If empty, all fields are returned.
@@ -81,7 +82,8 @@ If empty, all fields are returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
 """
 const val DETAILS_ORDER_BY_FIELDS_DESCRIPTION =
-    """The fields of the response to order by. Fields specified here must also be present in \"fields\"."""
+    """The fields of the response to order by. Fields specified here must also be present in \"fields\".
+    You can also use \"random\" or \"random(SEED)\" where SEED is an integer."""
 const val LIMIT_DESCRIPTION = """The maximum number of entries to return in the response"""
 const val OFFSET_DESCRIPTION =
     """The offset of the first entry to return in the response. 
@@ -127,4 +129,14 @@ const val AMINO_ACID_MUTATION_DESCRIPTION = """
 A amino acid mutation in the format "\<gene\>:\<position\>\<toSymbol\>?".  
 If the toSymbol is not provided, the statement means "has any mutation at the given position". 
 $MAYBE_DESCRIPTION
+"""
+
+const val MUTATIONS_ORDER_BY_FIELDS_DESCRIPTION = """
+The fields of the response to order by.
+You can also use \"random\" or \"random(SEED)\" where SEED is an integer.
+"""
+
+const val INSERTIONS_ORDER_BY_FIELDS_DESCRIPTION = """
+The fields of the response to order by.
+You can also use \"random\" or \"random(SEED)\" where SEED is an integer.
 """

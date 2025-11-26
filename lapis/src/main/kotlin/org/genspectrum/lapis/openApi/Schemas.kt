@@ -21,12 +21,14 @@ import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.INSERTIONS_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.LapisMediaType
 import org.genspectrum.lapis.controller.MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.MUTATIONS_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.MUTATIONS_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_ENDPOINT_DESCRIPTION
@@ -429,7 +431,7 @@ annotation class DetailsOrderByFields
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$MUTATIONS_ORDER_BY_FIELDS_SCHEMA"),
-    description = "The fields of the response to order by.",
+    description = MUTATIONS_ORDER_BY_FIELDS_DESCRIPTION,
 )
 annotation class MutationsOrderByFields
 
@@ -437,7 +439,7 @@ annotation class MutationsOrderByFields
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$INSERTIONS_ORDER_BY_FIELDS_SCHEMA"),
-    description = "The fields of the response to order by.",
+    description = INSERTIONS_ORDER_BY_FIELDS_DESCRIPTION,
 )
 annotation class InsertionsOrderByFields
 
