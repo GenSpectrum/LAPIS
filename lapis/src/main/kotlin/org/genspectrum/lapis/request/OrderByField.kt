@@ -98,7 +98,6 @@ class OrderByFieldDeserializer(
         ctxt: DeserializationContext,
     ): OrderByField =
         when (val value = jsonParser.readValueAsTree<JsonNode>()) {
-            // TODO - It seems like maybe here we can't deserialize 'random' fields? Is that an issue?
             is TextNode -> OrderByField(orderByFieldsCleaner.clean(value.asText()), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
             else -> throw BadRequestException("orderByField must be a string or an object")
