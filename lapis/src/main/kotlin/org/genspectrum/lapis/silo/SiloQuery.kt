@@ -4,16 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
@@ -432,7 +425,6 @@ enum class SequenceType {
 }
 
 @JsonSerialize(using = RandomizeConfigSerializer::class)
-@JsonDeserialize(using = RandomizeConfigDeserializer::class)
 sealed class RandomizeConfig {
     data object Enabled : RandomizeConfig()
 
@@ -459,28 +451,4 @@ class RandomizeConfigSerializer : JsonSerializer<RandomizeConfig>() {
             }
         }
     }
-}
-
-class RandomizeConfigDeserializer : JsonDeserializer<RandomizeConfig>() {
-    override fun deserialize(
-        p: JsonParser,
-        ctxt: DeserializationContext,
-    ): RandomizeConfig =
-        when (val token = p.currentToken) {
-            JsonToken.VALUE_TRUE -> RandomizeConfig.Enabled
-            JsonToken.VALUE_FALSE -> RandomizeConfig.Disabled
-            JsonToken.START_OBJECT -> {
-                val node = p.codec.readTree<JsonNode>(p)
-                val seed = node.get("seed")?.asInt()
-                    ?: throw JsonMappingException.from(
-                        p,
-                        "Missing 'seed' field in randomize object",
-                    )
-                RandomizeConfig.WithSeed(seed)
-            }
-            else -> throw JsonMappingException.from(
-                p,
-                "Expected boolean or object for randomize, got $token",
-            )
-        }
 }
