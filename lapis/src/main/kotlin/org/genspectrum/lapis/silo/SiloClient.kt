@@ -97,7 +97,9 @@ open class CachedSiloClient(
         SILO_QUERY_CACHE_NAME,
         condition =
             "#query.action.cacheable && " +
-                "(#query.action.randomize == null || #query.action.randomize.class.simpleName == 'Disabled')",
+                "(#query.action.randomize == null || " +
+                "#query.action.randomize.class.simpleName == 'Disabled' || " +
+                "#query.action.randomize.class.simpleName == 'WithSeed')",
     )
     open fun <ResponseType> sendCachedQuery(
         query: SiloQuery<ResponseType>,
