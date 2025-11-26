@@ -333,7 +333,7 @@ key_1002052
       },
     });
 
-    expect(result).to.have.nested.property('data[0].division');
+    expect(result).to.have.nested.property('data[0].division', 'Schwyz');
   });
 
   it('should order by random with seed (new format)', async () => {
@@ -344,19 +344,7 @@ key_1002052
       },
     });
 
-    expect(result).to.have.nested.property('data[0].division');
-    const key = result.data[0].primaryKey;
-
-    const result2 = await lapisClient.postDetails({
-      detailsPostRequest: {
-        orderBy: { random: 123 },
-        fields: ['primaryKey', 'division'],
-      },
-    });
-
-    const key2 = result.data[0].primaryKey;
-
-    expect(key2).to.equal(key);
+    expect(result).to.have.nested.property('data[0].division', 'Schwyz');
   });
 
   it('should order by random even with multiple fields', async () => {
