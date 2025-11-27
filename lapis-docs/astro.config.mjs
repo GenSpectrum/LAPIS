@@ -2,8 +2,9 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import react from '@astrojs/react';
 
-import tailwind from '@astrojs/tailwind';
 import fs from 'fs';
+
+import tailwindcss from '@tailwindcss/vite';
 
 function getVersion() {
     try {
@@ -18,9 +19,7 @@ export default defineConfig({
     integrations: [
         starlight({
             title: `LAPIS ${getVersion()}`,
-            social: {
-                github: 'https://github.com/GenSpectrum/LAPIS',
-            },
+            social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/GenSpectrum/LAPIS' }],
             customCss: ['./src/styles/custom.css'],
             editLink: {
                 baseUrl: 'https://github.com/GenSpectrum/LAPIS/tree/main/lapis-docs/',
@@ -218,17 +217,23 @@ export default defineConfig({
             ],
         }),
         react(),
-        tailwind(),
     ],
+
     // Process images with sharp: https://docs.astro.build/en/guides/assets/#using-sharp
     image: {
         service: {
             entrypoint: 'astro/assets/services/sharp',
         },
     },
+
     base: process.env.BASE_URL,
     site: process.env.ASTRO_SITE,
+
     server: {
         allowedHosts: true,
+    },
+
+    vite: {
+        plugins: [tailwindcss()],
     },
 });
