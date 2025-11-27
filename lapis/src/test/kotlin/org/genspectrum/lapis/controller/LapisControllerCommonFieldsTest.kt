@@ -10,12 +10,16 @@ import org.genspectrum.lapis.controller.SampleRoute.DETAILS
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.Matchers
@@ -64,7 +68,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    listOf(OrderByField("country", Order.ASCENDING)),
+                    listOf(OrderByField("country", Order.ASCENDING)).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -90,7 +94,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField("country", Order.ASCENDING),
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -122,7 +126,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField("country", Order.ASCENDING),
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.ASCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -147,7 +151,7 @@ class LapisControllerCommonFieldsTest(
                         OrderByField(FIELD_WITH_ONLY_LOWERCASE_LETTERS, Order.DESCENDING),
                         OrderByField(FIELD_WITH_UPPERCASE_LETTER, Order.ASCENDING),
                         OrderByField("age", Order.ASCENDING),
-                    ),
+                    ).toOrderBySpec(),
                 ),
             )
         } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
@@ -188,6 +192,168 @@ class LapisControllerCommonFieldsTest(
     }
 
     @Test
+    fun `GET details with random orderBy`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random&fields=country"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `POST details with random orderBy (old format, extra ignored field)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": [{ "field": "random" }, { "field": "age" }],
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `POST details with random orderBy (new format)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = null) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": { "random": true },
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
+    fun `GET details with random orderBy with seed`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random(123)&orderBy=age&fields=country"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST details with random orderBy with seed (old format, extra ignored field)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": [{ "field": "random(123)" }, { "field": "age"}],
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST details with random orderBy with seed (new format)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .content(
+                """
+                {
+                    "orderBy": { "random": 123 },
+                    "fields": ["country"]
+                }
+                """.trimIndent(),
+            )
+            .contentType(APPLICATION_JSON)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
+    }
+
+    @Test
+    fun `POST details with random orderBy (form encoded)`() {
+        every {
+            siloQueryModelMock.getDetails(
+                match {
+                    it.orderByFields == OrderBySpec.Random(seed = 123) &&
+                        it.fields == listOf(Field("country"))
+                },
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+
+        val request = postSample(DETAILS_ROUTE)
+            .param("orderBy", "random(123)")
+            .param("orderBy", "age")
+            .param("fields", "country")
+            .contentType(APPLICATION_FORM_URLENCODED)
+
+        mockMvc.perform(request)
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].country").exists())
+    }
+
+    @Test
     fun `GET aggregated with limit`() {
         every {
             siloQueryModelMock.getAggregated(
@@ -198,7 +364,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.EMPTY,
                     100,
                 ),
             )
@@ -225,7 +391,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.EMPTY,
                     100,
                 ),
             )
@@ -258,7 +424,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.EMPTY,
                     null,
                     5,
                 ),
@@ -286,7 +452,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
-                    emptyList(),
+                    OrderBySpec.EMPTY,
                     null,
                     5,
                 ),
@@ -324,6 +490,7 @@ class LapisControllerCommonFieldsTest(
                     listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "other_segment")),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -348,6 +515,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     listOf(AminoAcidInsertion(123, "gene1", "ABC"), AminoAcidInsertion(124, "gene2", "DEF")),
                     emptyList(),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -372,6 +540,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
@@ -396,6 +565,7 @@ class LapisControllerCommonFieldsTest(
                     emptyList(),
                     emptyList(),
                     emptyList(),
+                    OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(AggregationData(5, emptyMap()))

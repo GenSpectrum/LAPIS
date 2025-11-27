@@ -306,12 +306,34 @@ key_1002052
   it('should order by random', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {
-        orderBy: [{ field: 'random' }, { field: 'division', type: 'ascending' }],
+        orderBy: { random: true },
         fields: ['primaryKey', 'division'],
       },
     });
 
-    expect(result).to.have.nested.property('data[2].division', 'Aargau');
+    expect(result).to.have.nested.property('data[0].division');
+  });
+
+  it('should order by random with seed', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: { random: 123 },
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division', 'Schwyz');
+  });
+
+  it('should order by random even with multiple fields', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        orderBy: [{ field: 'random' }, { field: 'division' }],
+        fields: ['primaryKey', 'division'],
+      },
+    });
+
+    expect(result).to.have.nested.property('data[0].division');
   });
 
   it('variantQuery and advancedQuery should be the same for sequence and regex intersections and unions', async () => {

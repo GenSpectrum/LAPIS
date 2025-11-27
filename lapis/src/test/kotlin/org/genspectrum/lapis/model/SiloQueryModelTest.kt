@@ -17,8 +17,10 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
+import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionData
@@ -109,6 +111,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
+                OrderBySpec.EMPTY,
             ),
         )
 
@@ -340,7 +343,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                emptyList(),
+                OrderBySpec.EMPTY,
             ),
         ).toList()
 
@@ -366,7 +369,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                emptyList(),
+                OrderBySpec.EMPTY,
             ),
         ).toList()
 
@@ -394,7 +397,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                emptyList(),
+                OrderBySpec.EMPTY,
             ),
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf("someSequenceName"),
@@ -456,7 +459,7 @@ class SiloQueryModelTest {
                         orderByFields = listOf(
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
-                        ),
+                        ).toOrderBySpec(),
                     ),
                     True,
                 ),
