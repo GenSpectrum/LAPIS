@@ -36,19 +36,26 @@ LAPIS will throw an error if you try to order by a field that is not in the resp
 
 ### Random ordering
 
-You can also get a random - seeded or unseeded - order of results, which is useful in combination with `limit` to take random samples from the data.
+You can also get a random order of results, which is useful in combination with `limit` to take random samples from the data.
 
 ```http
-GET /sample/aggregated?orderBy=random
+GET /sample/details?orderBy=random
 ```
 
-or with seed:
+You can also provide a _seed_ value that controls how the random order is created. Given the same seed (and [data version](../concepts/data-versions)), the results will always be returned in the same order.
 
 ```http
-GET /sample/aggregated?orderBy=random(42)
+GET /sample/details?orderBy=random(42)
 ```
 
 The seed (42 in the example above) needs to be an integer.
+
+The same order will also be applied across query types. That can, for example, be used to get the metadata and sequences of the same random subsample:
+
+```http
+GET /sample/details?orderBy=random(42)&limit=100
+GET /sample/unalignedNucleotideSequences?orderBy=random(42)&limit=100
+```
 
 :::note
 When you use random ordering, any other `orderBy` field will be ignored by LAPIS.
@@ -57,7 +64,7 @@ When you use random ordering, any other `orderBy` field will be ignored by LAPIS
 With a POST request, specify random like this:
 
 ```http
-POST /sample/aggregated
+POST /sample/details
 
 {
     "orderBy": {
