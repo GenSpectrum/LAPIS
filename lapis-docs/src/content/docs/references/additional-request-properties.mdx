@@ -30,14 +30,58 @@ POST /sample/aggregated
 }
 ```
 
-:::note
-You can also specify `random` as the field name to get the results in a random order.
-It will act as a tiebreaker if it is provided along with other `orderBy` fields.
-:::
-
 :::caution
 LAPIS will throw an error if you try to order by a field that is not in the response.
 :::
+
+### Random ordering
+
+You can also get a random order of results, which is useful in combination with `limit` to take random samples from the data.
+
+```http
+GET /sample/details?orderBy=random
+```
+
+You can also provide a _seed_ value that controls how the random order is created. Given the same seed (and [data version](../concepts/data-versions)), the results will always be returned in the same order.
+
+```http
+GET /sample/details?orderBy=random(42)
+```
+
+The seed (42 in the example above) needs to be an integer.
+
+The same order will also be applied across query types. That can, for example, be used to get the metadata and sequences of the same random subsample:
+
+```http
+GET /sample/details?orderBy=random(42)&limit=100
+GET /sample/unalignedNucleotideSequences?orderBy=random(42)&limit=100
+```
+
+:::note
+When you use random ordering, any other `orderBy` field will be ignored by LAPIS.
+:::
+
+With a POST request, specify random like this:
+
+```http
+POST /sample/details
+
+{
+    "orderBy": {
+        "random": true
+    }
+}
+```
+
+or with seed:
+
+```http
+{
+    "orderBy": {
+        "random": 42
+    }
+}
+```
 
 ## Pagination
 
