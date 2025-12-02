@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.2](https://github.com/GenSpectrum/LAPIS/compare/v0.6.1...v0.6.2) (2025-12-02)
+
+
+### Features
+
+* **lapis:** automate access key rotation ([#1429](https://github.com/GenSpectrum/LAPIS/issues/1429)) ([edbcfa7](https://github.com/GenSpectrum/LAPIS/commit/edbcfa7dcbcf0371d7d436edd84ec0dff6cca768))
+* **lapis:** for protected data, require &gt;= 10 sequences per request ([#1428](https://github.com/GenSpectrum/LAPIS/issues/1428)) ([4f4c429](https://github.com/GenSpectrum/LAPIS/commit/4f4c42941fb14aca10146babfea39c9f6543a898))
+* **lapis:** support random with seed ([#1426](https://github.com/GenSpectrum/LAPIS/issues/1426)) ([0773dcd](https://github.com/GenSpectrum/LAPIS/commit/0773dcdbe3dafbc1c7b13df4fb0480279a00e442))
+
+
+### Bug Fixes
+
+* **lapis-e2e:** fix invalid insertion indices ([#1421](https://github.com/GenSpectrum/LAPIS/issues/1421)) ([53f2dab](https://github.com/GenSpectrum/LAPIS/commit/53f2dab2529fbed05a1a26c7560914c69b7bf606))
+* **lapis:** also regard request parameters for non-GET requests ([#1427](https://github.com/GenSpectrum/LAPIS/issues/1427)) ([4c8cf32](https://github.com/GenSpectrum/LAPIS/commit/4c8cf328359b3e97487623af107609bb93cd2cf2))
+
 ## [0.6.1](https://github.com/GenSpectrum/LAPIS/compare/v0.6.0...v0.6.1) (2025-10-14)
 
 
