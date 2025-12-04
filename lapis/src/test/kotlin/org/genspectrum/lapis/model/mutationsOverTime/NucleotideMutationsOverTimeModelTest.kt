@@ -59,6 +59,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of mutations, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = emptyList<NucleotideMutation>()
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
         val result = underTest.evaluateNucleotideMutations(
@@ -77,6 +78,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = emptyList<DateRange>()
         val result = underTest.evaluateNucleotideMutations(
@@ -94,6 +96,7 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     private fun commonSetup() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         mockSiloCountQuery(
             siloQueryClient,
             DUMMY_MUTATION_EQUALS1,
