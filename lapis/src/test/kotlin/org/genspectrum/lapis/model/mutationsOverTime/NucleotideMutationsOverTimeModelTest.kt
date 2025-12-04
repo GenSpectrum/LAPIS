@@ -17,6 +17,7 @@ import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -71,6 +72,7 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test
@@ -88,6 +90,7 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     private fun commonSetup() {
@@ -171,6 +174,7 @@ class NucleotideMutationsOverTimeModelTest {
             result.totalCountsByDateRange,
             equalTo(listOf(10, 23)),
         )
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test
