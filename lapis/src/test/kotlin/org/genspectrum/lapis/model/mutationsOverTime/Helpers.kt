@@ -12,8 +12,10 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequenceFilters
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
+import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
@@ -48,6 +50,18 @@ val AGGREGATED_SILO_ACTION = SiloAction.aggregated(
     null,
     null,
 )
+
+fun mockSiloCallInfo(
+    siloClient: SiloClient,
+    dataVersion: DataVersion,
+) {
+    every {
+        siloClient.callInfo()
+    } answers {
+        dataVersion.dataVersion = DUMMY_DATA_VERSION
+        InfoData(DUMMY_DATA_VERSION, null)
+    }
+}
 
 fun mockSiloCountQuery(
     siloClient: SiloClient,
