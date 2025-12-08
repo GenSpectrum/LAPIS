@@ -87,6 +87,16 @@ host.regex='.*bos.*'
 
 For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
 
+Boolean fields can be queried using `true` and `false` (again case-insensitive) values, for example:
+
+```
+isLabHost=true
+```
+
+```
+isLabHost=false
+```
+
 ### Boolean operators
 
 The query language understands Boolean logic. Expressions can be connected with `&` (and), `|` (or) and `!` (not).
