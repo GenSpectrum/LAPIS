@@ -5,6 +5,7 @@ description: Generalized advanced queries
 
 import { OnlyIf } from '../../../components/OnlyIf.tsx';
 import { hasFeature } from '../../../config.ts';
+import { Aside } from '@astrojs/starlight/components';
 
 {/* prettier-ignore */}
 <OnlyIf condition={!hasFeature('generalizedAdvancedQuery')}>
@@ -14,17 +15,15 @@ It must be enabled in the `features` section of the database configuration by th
 :::
 </OnlyIf>
 
-For those readers familiar with the [variant query](../concepts/variant-query) feature advanced queries can be
-seen a superset of variant queries, in which not only variant information can be queried but also metadata information.
+<Aside type='note' title='TLDR'>
+    Advanced queries can be used to __filter sequences and metadata__ and can be passed to the server through the
+    __query parameter `advancedQuery`__. Compared to standard filters, advanced queries allow for __more complex
+    combinations of filters__.
+</Aside>
 
 Advanced queries should allow an arbitrary combination of filters. Standard LAPIS filters take the form
 `filter1 AND filter2 AND ... filterN` but they cannot query for more custom cases such as `filter1 OR (filter2 AND NOT filter3)`,
 the advanced queries feature allows such combinations and the creation of more custom queries.
-
-Advanced queries can be used to filter sequences and metadata and can be passed to the server through the query parameter
-`advancedQuery`. Don't forget to encode/escape the query correctly (in JavaScript, this can be done with the
-[encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
-function)!
 
 The formal specification of the query language is available
 [here](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/src/main/antlr/org/genspectrum/lapis/model/advancedqueryparser/AdvancedQuery.g4)
@@ -34,7 +33,15 @@ The respective
 [unit test](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/src/test/kotlin/org/genspectrum/lapis/model/AdvancedQueryFacadeTest.kt)
 provides a full list of possible atomic queries.
 
+:::tip
+For those readers familiar with the [CoV-Spectrum variant query](../concepts/variant-query) feature, advanced queries can be
+seen a superset of variant queries, in which not only variant information can be queried but also metadata information.
+:::
+
 ## Features
+
+Advanced queries are case-insensitive. All operators and field names can be written in upper or lower case.
+Only the values of metadata fields are case-sensitive.
 
 ### Variant Queries
 
@@ -55,7 +62,7 @@ Note that if the metadata field does not only contain letters and numbers it mus
 country='United States of America'
 ```
 
-To search for empty fields (fields that are `null`) use the `ISNULL` operator:
+To search for empty fields (fields that are `null`) use the `IsNull` operator:
 
 ```
 IsNull(host)
@@ -71,7 +78,7 @@ date>=2021-01-01
 date<=2021-12-31
 ```
 
-For string fields we also allow regex search. To use the regex substring search on a metadata field you must append `.regex` to the end of the metadata field name
+For string fields we also allow regex search. To use the regex substring search on a metadata string field you must append `.regex` to the end of the metadata field name
 and enclose the query in single quotes:
 
 ```
@@ -79,29 +86,6 @@ host.regex='.*bos.*'
 ```
 
 For regex searches the advanced queries use the [google/re2](https://github.com/google/re2/wiki/Syntax) regex syntax.
-
-:::note
-Depending on which tool you use to make curl queries the single quotes might need to be escaped. For example SwaggerUI will reformat:
-
-```
-{
-  "advancedQuery": "country.regex='Basel{1,2}'"
-}
-```
-
-as:
-
-```bash
-curl -X POST \
-  'http://localhost:8096/sample/details' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "advancedQuery": "country.regex='\''Basel\{1,2\}'\''"
-}'
-```
-
-:::
 
 ### Boolean operators
 
@@ -112,6 +96,19 @@ Parentheses `(` and `)` can be used to define the order of the operations.
 We also add a custom syntax `N-of` and `exactly-N-of` to match sequences for which at least or exactly `N` out of a list of expressions are fulfilled.
 
 ## Examples
+
+Variant queries can be sent in GET and POST requests just like standard filters.
+
+- GET: https://lapis.cov-spectrum.org/open/v2/sample/aggregated?advancedQuery=501T%20and%20country=Switzerland
+
+- POST:
+    ```bash
+    curl -X POST "https://lapis.cov-spectrum.org/open/v2/sample/aggregated" \
+          -H "Content-Type: application/json" \
+          -d '{"advancedQuery": "501T and country=Switzerland"}'
+    ```
+
+Some example queries that can be plugged into the `advancedQuery` parameter:
 
 - Get the sequences with the nucleotide mutation 300G, without a deletion at position 400 and either the AA change S:123T
   or the AA change S:234A:
@@ -143,3 +140,9 @@ We also add a custom syntax `N-of` and `exactly-N-of` to match sequences for whi
     ```
     [exactly-2-of: 123A & 234T, !234T, S:345- | S:346-, [2-of: 222T, 333G, 444A, 555C]]
     ```
+
+:::note
+Don't forget to encode/escape the query correctly. In JavaScript, this can be done with the
+[encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
+function.
+:::
