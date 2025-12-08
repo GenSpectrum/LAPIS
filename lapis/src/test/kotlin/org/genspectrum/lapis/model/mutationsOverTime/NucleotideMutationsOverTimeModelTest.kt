@@ -17,6 +17,7 @@ import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -58,6 +59,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of mutations, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = emptyList<NucleotideMutation>()
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
         val result = underTest.evaluateNucleotideMutations(
@@ -71,10 +73,12 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = emptyList<DateRange>()
         val result = underTest.evaluateNucleotideMutations(
@@ -88,9 +92,11 @@ class NucleotideMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     private fun commonSetup() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         mockSiloCountQuery(
             siloQueryClient,
             DUMMY_MUTATION_EQUALS1,
@@ -171,6 +177,7 @@ class NucleotideMutationsOverTimeModelTest {
             result.totalCountsByDateRange,
             equalTo(listOf(10, 23)),
         )
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test

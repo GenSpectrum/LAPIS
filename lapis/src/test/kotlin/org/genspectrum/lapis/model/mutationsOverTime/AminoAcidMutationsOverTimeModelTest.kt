@@ -17,6 +17,7 @@ import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,10 +28,8 @@ import java.util.stream.Stream
 
 private val DUMMY_MUTATION1 = AminoAcidMutation("S", 1, "R")
 private val DUMMY_MUTATION2 = AminoAcidMutation("S", 2, "N")
-private val DUMMY_MUTATION3 = AminoAcidMutation("A", 1, "B")
 private val DUMMY_MUTATION_EQUALS1 = AminoAcidSymbolEquals("S", 1, "R")
 private val DUMMY_MUTATION_EQUALS2 = AminoAcidSymbolEquals("S", 2, "N")
-private val DUMMY_MUTATION_EQUALS3 = AminoAcidSymbolEquals("A", 1, "B")
 
 @SpringBootTest
 class AminoAcidMutationsOverTimeModelTest {
@@ -60,6 +59,7 @@ class AminoAcidMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of mutations, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = emptyList<AminoAcidMutation>()
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
         val result = underTest.evaluateAminoAcidMutations(
@@ -73,10 +73,12 @@ class AminoAcidMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = emptyList<DateRange>()
         val result = underTest.evaluateAminoAcidMutations(
@@ -90,9 +92,11 @@ class AminoAcidMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     private fun commonSetup() {
+        mockSiloCallInfo(siloQueryClient, dataVersion)
         mockSiloCountQuery(
             siloQueryClient,
             DUMMY_MUTATION_EQUALS1,
@@ -173,6 +177,7 @@ class AminoAcidMutationsOverTimeModelTest {
             result.totalCountsByDateRange,
             equalTo(listOf(10, 23)),
         )
+        assertThat(dataVersion.dataVersion, notNullValue())
     }
 
     @Test

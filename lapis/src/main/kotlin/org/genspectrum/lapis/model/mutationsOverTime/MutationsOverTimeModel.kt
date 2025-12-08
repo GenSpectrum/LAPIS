@@ -185,6 +185,7 @@ class MutationsOverTimeModel(
         coverageQueryFn: (mutation: T) -> SiloFilterExpression,
     ): MutationsOverTimeResult {
         if (mutations.isEmpty() || dateRanges.isEmpty()) {
+            siloClient.callInfo() // populates dataVersion.dataVersion
             return MutationsOverTimeResult(
                 mutations = mutations.map(mutationToStringFn),
                 dateRanges = dateRanges,

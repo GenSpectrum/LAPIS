@@ -61,6 +61,9 @@ class SiloClient(
         return response
     }
 
+    /**
+     * returns the info object and sets the dataVersion.dataVersion.
+     */
     fun callInfo(): InfoData {
         log.info { "Calling SILO info" }
 
