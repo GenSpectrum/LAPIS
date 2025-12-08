@@ -82,6 +82,7 @@ describe('The /mutationsOverTime endpoint', () => {
     expect(result.data.data).to.have.lengthOf(0);
     expect(result.data.dateRanges).to.have.lengthOf(0);
     expect(result.data.mutations).to.have.lengthOf(4);
+    expect(result.info.dataVersion).to.exist;
   });
 
   it('if downloadAsFile is true, the content disposition is set to attachment', async () => {
