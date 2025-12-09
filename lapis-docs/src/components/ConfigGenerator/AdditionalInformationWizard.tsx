@@ -66,7 +66,7 @@ const MetadataDropDown: FC<MetadataDropDownProps> = ({ name, filterByType }) => 
                 <label className='label'>
                     <div className='label w-64'>{sentenceCase(name)}</div>
                     <select
-                        className='select select-bordered w-full'
+                        className='select'
                         onChange={handleChange}
                         defaultValue={config[name]}
                     >
