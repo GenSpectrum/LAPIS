@@ -94,6 +94,15 @@ Both `&` and `AND` are recognized as `and`, `|` and `OR` are recognized as `or`,
 Parentheses `(` and `)` can be used to define the order of the operations.
 
 We also add a custom syntax `N-of` and `exactly-N-of` to match sequences for which at least or exactly `N` out of a list of expressions are fulfilled.
+The syntax is as follows, where `expr1`, ..., `expr5` are any valid expressions:
+
+```
+[3-of: expr1, expr2, expr3, expr4, expr5]
+```
+
+```
+[exactly-2-of: expr1, expr2, expr3, expr4]
+```
 
 ## Examples
 
