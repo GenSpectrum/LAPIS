@@ -14,33 +14,33 @@
         "e2e": "playwright test"
     },
     "dependencies": {
-        "@astrojs/react": "^4.2.1",
-        "@astrojs/starlight": "^0.36.3",
+        "@astrojs/react": "^4.4.2",
+        "@astrojs/starlight": "^0.37.0",
         "@astrojs/starlight-tailwind": "^4.0.2",
         "@tailwindcss/vite": "^4.1.17",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
-        "astro": "^5.14.4",
+        "astro": "^5.16.4",
         "change-case": "^5.4.4",
-        "daisyui": "^5.5.5",
-        "js-yaml": "^4.1.0",
+        "daisyui": "^5.5.8",
+        "js-yaml": "^4.1.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "sharp": "^0.33.5",
-        "swagger-ui": "^5.20.1",
-        "swagger-ui-react": "^5.20.1",
+        "sharp": "^0.34.5",
+        "swagger-ui": "^5.30.3",
+        "swagger-ui-react": "^5.30.3",
         "tailwindcss": "^4.1.17",
-        "yaml": "^2.7.0",
+        "yaml": "^2.8.2",
         "zod": "^3.24.2"
     },
     "devDependencies": {
-        "@astrojs/check": "^0.9.4",
-        "@playwright/test": "^1.51.1",
+        "@astrojs/check": "^0.9.6",
+        "@playwright/test": "^1.57.0",
         "@types/js-yaml": "^4.0.9",
         "@types/node": "^22.13.13",
-        "@types/swagger-ui": "^3.52.4",
-        "prettier": "^3.5.3",
+        "@types/swagger-ui": "^5.21.1",
+        "prettier": "^3.7.4",
         "prettier-plugin-astro": "^0.14.1",
-        "typescript": "^5.8.2"
+        "typescript": "^5.9.3"
     }
 }
