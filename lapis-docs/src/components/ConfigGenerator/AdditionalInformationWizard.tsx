@@ -65,11 +65,7 @@ const MetadataDropDown: FC<MetadataDropDownProps> = ({ name, filterByType }) => 
             <div className='form-control w-full'>
                 <label className='label'>
                     <div className='label w-64'>{sentenceCase(name)}</div>
-                    <select
-                        className='select select-bordered w-full'
-                        onChange={handleChange}
-                        defaultValue={config[name]}
-                    >
+                    <select className='select' onChange={handleChange} defaultValue={config[name]}>
                         {options.map((option) => (
                             <option key={option.name} value={option.name}>
                                 {option.name}
