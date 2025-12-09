@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.3](https://github.com/GenSpectrum/LAPIS/compare/v0.6.2...v0.6.3) (2025-12-09)
+
+
+### Features
+
+* **lapis-docs:** give examples for boolean queries ([#1470](https://github.com/GenSpectrum/LAPIS/issues/1470)) ([d211119](https://github.com/GenSpectrum/LAPIS/commit/d2111196232166329093b688ec6f65569087e083))
+* **lapis-docs:** improve advanced queries docs ([#1468](https://github.com/GenSpectrum/LAPIS/issues/1468)) ([6df0ed0](https://github.com/GenSpectrum/LAPIS/commit/6df0ed0e39e8c2dac143cf5078bd856a9d5cf41e))
+* **lapis-docs:** mention n-of syntax earlier ([#1471](https://github.com/GenSpectrum/LAPIS/issues/1471)) ([d327c74](https://github.com/GenSpectrum/LAPIS/commit/d327c7494b51e8ecdcdbb5e2b7639bbde8e4456b))
+
+
+### Bug Fixes
+
+* **lapis:** always return a data version ([#1467](https://github.com/GenSpectrum/LAPIS/issues/1467)) ([57e1cfa](https://github.com/GenSpectrum/LAPIS/commit/57e1cfa21cbe5374eaef365eeabb55ef90b5164b))
+
 ## [0.6.2](https://github.com/GenSpectrum/LAPIS/compare/v0.6.1...v0.6.2) (2025-12-02)
 
 
