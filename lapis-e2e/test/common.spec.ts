@@ -208,9 +208,7 @@ describe('All endpoints', () => {
         expectIsZstdEncoded(await response.arrayBuffer());
       });
 
-      // TODO - These tests are failing in CI, so we're excluding them for now.
-      // Issue for it: https://github.com/GenSpectrum/LAPIS/issues/1423
-      it.skip('should return zstd compressed data when accepting compression in header', async () => {
+      it('should return zstd compressed data when accepting compression in header', async () => {
         const urlParams = new URLSearchParams();
         if (route.pathSegment === '/mostRecentCommonAncestor' || route.pathSegment === '/phyloSubtree') {
           urlParams.set('phyloTreeField', 'usherTree');
@@ -221,7 +219,16 @@ describe('All endpoints', () => {
         expect(response.status).equals(200);
         expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(response.headers.get('content-encoding')).equals('zstd');
-        expectIsZstdEncoded(await response.arrayBuffer());
+
+        // fetch automatically decompresses zstd responses as of node 24
+        if (route.servesType === 'SEQUENCES') {
+          expect(await response.text()).to.match(/^>key_/);
+        } else if (route.servesType === 'TREE') {
+          expect(await response.text()).to.match(/NODE_\d+;$/);
+        } else {
+          const body = await response.json();
+          expect(body.data).is.an('array');
+        }
       });
 
       it('should return gzip compressed data when asking for compression', async () => {
