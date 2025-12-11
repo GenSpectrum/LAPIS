@@ -219,7 +219,16 @@ describe('All endpoints', () => {
         expect(response.status).equals(200);
         expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(response.headers.get('content-encoding')).equals('zstd');
-        expectIsZstdEncoded(await response.arrayBuffer());
+
+        // fetch automatically decompresses zstd responses as of node 24
+        if (route.servesType === 'SEQUENCES') {
+          expect(await response.text()).to.match(/^>key_/);
+        } else if (route.servesType === 'TREE') {
+          expect(await response.text()).to.match(/NODE_\d+;$/);
+        } else {
+          const body = await response.json();
+          expect(body.data).is.an('array');
+        }
       });
 
       it('should return gzip compressed data when asking for compression', async () => {
