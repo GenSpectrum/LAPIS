@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.response.AggregationData
@@ -32,7 +33,8 @@ private val DUMMY_MUTATION_EQUALS1 = AminoAcidSymbolEquals("S", 1, "R")
 private val DUMMY_MUTATION_EQUALS2 = AminoAcidSymbolEquals("S", 2, "N")
 
 @SpringBootTest
-class AminoAcidMutationsOverTimeModelTest {
+class
+AminoAcidMutationsOverTimeModelTest {
     @MockK
     private lateinit var siloQueryClient: SiloClient
 
@@ -45,6 +47,9 @@ class AminoAcidMutationsOverTimeModelTest {
     @Autowired
     private lateinit var dataVersion: DataVersion
 
+    @Autowired
+    private lateinit var advancedQueryFacade: AdvancedQueryFacade
+
     private lateinit var underTest: MutationsOverTimeModel
 
     @Autowired
@@ -53,8 +58,14 @@ class AminoAcidMutationsOverTimeModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest =
-            MutationsOverTimeModel(siloQueryClient, siloFilterExpressionMapper, referenceGenome, dataVersion, config)
+        underTest = MutationsOverTimeModel(
+            siloClient = siloQueryClient,
+            siloFilterExpressionMapper = siloFilterExpressionMapper,
+            referenceGenome = referenceGenome,
+            dataVersion = dataVersion,
+            advancedQueryFacade = advancedQueryFacade,
+            config = config,
+        )
     }
 
     @Test

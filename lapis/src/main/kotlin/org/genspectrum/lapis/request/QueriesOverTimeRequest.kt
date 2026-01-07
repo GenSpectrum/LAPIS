@@ -29,7 +29,7 @@ data class QueriesOverTimeRequest(
 )
 
 data class QueryOverTimeItem(
-    val displayLabel: String?,
+    val displayLabel: String? = null,
     val countQuery: String,
     val coverageQuery: String,
 )
