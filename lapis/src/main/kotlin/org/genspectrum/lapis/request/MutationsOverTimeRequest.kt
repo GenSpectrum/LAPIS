@@ -21,6 +21,20 @@ data class AminoAcidMutationsOverTimeRequest(
     val dateField: String,
 )
 
+data class QueriesOverTimeRequest(
+    val filters: MutationsOverTimeRequestFilters,
+    val queries: List<QueryOverTimeItem>,
+    val dateRanges: List<DateRange>,
+    val dateField: String,
+)
+
+data class QueryOverTimeItem(
+    val displayLabel: String?,
+    val countQuery: String,
+    val coverageQuery: String,
+)
+
+// TODO: fix schema
 data class MutationsOverTimeRequestFilters(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
