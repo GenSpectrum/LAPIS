@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.deletionSymbols
@@ -13,6 +14,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.QueryOverTimeItem
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -75,12 +77,31 @@ class MutationsOverTimeModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
     private val dataVersion: DataVersion,
-    private val config: DatabaseConfig,
+    private val advancedQueryFacade: AdvancedQueryFacade,
+    config: DatabaseConfig,
 ) {
     /**
      * Thread pool used for parallel queries to SILO.
      */
     private val threadPool = Executors.newFixedThreadPool(config.siloClientThreadCount)
+
+    fun evaluateQueriesOverTime(
+        queries: List<QueryOverTimeItem>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+        remainingRetries: Int = 1,
+    ): MutationsOverTimeResult =
+        evaluateInternal(
+            queryItems = queries,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
+            mutationToStringFn = { query -> query.displayLabel ?: query.countQuery },
+            countQueryFn = { query -> advancedQueryFacade.map(query.countQuery) },
+            coverageQueryFn = { query -> advancedQueryFacade.map(query.coverageQuery) },
+        )
 
     fun evaluateAminoAcidMutations(
         mutations: List<AminoAcidMutation>,

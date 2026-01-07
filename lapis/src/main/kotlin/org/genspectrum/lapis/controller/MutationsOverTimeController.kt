@@ -9,6 +9,7 @@ import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.openApi.MUTATIONS_OVER_TIME_REQUEST_SCHEMA
 import org.genspectrum.lapis.request.AminoAcidMutationsOverTimeRequest
 import org.genspectrum.lapis.request.NucleotideMutationsOverTimeRequest
+import org.genspectrum.lapis.request.QueriesOverTimeRequest
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.response.MutationsOverTimeResponse
 import org.genspectrum.lapis.silo.DataVersion
@@ -62,6 +63,26 @@ class MutationsOverTimeController(
     ): ResponseEntity<MutationsOverTimeResponse> {
         val data = mutationsOverTimeModel.evaluateAminoAcidMutations(
             request.includeMutations,
+            request.dateRanges,
+            request.filters,
+            request.dateField,
+        )
+        return createMutationsOverTimeResponse(data)
+    }
+
+    @PostMapping(
+        "/queriesOverTime",
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    @Operation(description = MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION)
+    fun postQueriesOverTime(
+//        @Parameter(schema = Schema(ref = "#/components/schemas/$MUTATIONS_OVER_TIME_REQUEST_SCHEMA"))
+        @RequestBody
+        request: QueriesOverTimeRequest,
+    ): ResponseEntity<MutationsOverTimeResponse> {
+        val data = mutationsOverTimeModel.evaluateQueriesOverTime(
+            request.queries,
             request.dateRanges,
             request.filters,
             request.dateField,
