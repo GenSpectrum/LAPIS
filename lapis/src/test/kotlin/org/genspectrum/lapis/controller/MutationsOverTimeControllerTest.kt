@@ -8,7 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeCell
-import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeModel
+import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
@@ -41,7 +41,7 @@ class NucleotideMutationsOverTimeControllerTest(
     @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
-    lateinit var modelMock: MutationsOverTimeModel
+    lateinit var modelMock: QueriesOverTimeModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -216,7 +216,7 @@ class AminoAcidMutationsOverTimeControllerTest(
     @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
-    lateinit var modelMock: MutationsOverTimeModel
+    lateinit var modelMock: QueriesOverTimeModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion

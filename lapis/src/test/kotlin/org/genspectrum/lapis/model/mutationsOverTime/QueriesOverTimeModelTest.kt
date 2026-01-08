@@ -65,7 +65,7 @@ class QueriesOverTimeModelTest {
     @Autowired
     private lateinit var advancedQueryFacade: AdvancedQueryFacade
 
-    private lateinit var underTest: MutationsOverTimeModel
+    private lateinit var underTest: QueriesOverTimeModel
 
     @Autowired
     private lateinit var config: DatabaseConfig
@@ -73,7 +73,7 @@ class QueriesOverTimeModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = MutationsOverTimeModel(
+        underTest = QueriesOverTimeModel(
             siloClient = siloQueryClient,
             siloFilterExpressionMapper = siloFilterExpressionMapper,
             referenceGenome = referenceGenome,
