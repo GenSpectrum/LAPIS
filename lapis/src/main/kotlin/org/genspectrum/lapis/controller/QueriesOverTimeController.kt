@@ -8,6 +8,7 @@ import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
 import org.genspectrum.lapis.openApi.MUTATIONS_OVER_TIME_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.QUERIES_OVER_TIME_REQUEST_SCHEMA
 import org.genspectrum.lapis.request.AminoAcidMutationsOverTimeRequest
 import org.genspectrum.lapis.request.NucleotideMutationsOverTimeRequest
 import org.genspectrum.lapis.request.QueriesOverTimeRequest
@@ -78,7 +79,7 @@ class QueriesOverTimeController(
     )
     @Operation(description = QUERIES_OVER_TIME_ENDPOINT_DESCRIPTION)
     fun postQueriesOverTime(
-//        @Parameter(schema = Schema(ref = "#/components/schemas/$MUTATIONS_OVER_TIME_REQUEST_SCHEMA"))
+        @Parameter(schema = Schema(ref = "#/components/schemas/$QUERIES_OVER_TIME_REQUEST_SCHEMA"))
         @RequestBody
         request: QueriesOverTimeRequest,
     ): ResponseEntity<QueriesOverTimeResponse<QueriesOverTimeResult>> {

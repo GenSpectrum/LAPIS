@@ -8,8 +8,8 @@ import io.mockk.slot
 import io.mockk.verify
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeCell
-import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
+import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation

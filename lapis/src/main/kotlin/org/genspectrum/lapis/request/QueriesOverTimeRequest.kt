@@ -44,7 +44,6 @@ data class QueryOverTimeItem(
     val coverageQuery: String,
 )
 
-// TODO: fix schema
 data class QueriesOverTimeRequestFilters(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
