@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 
 const val NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE = "/nucleotideMutationsOverTime"
 const val AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE = "/aminoAcidMutationsOverTime"
+const val QUERIES_OVER_TIME_ROUTE = "/queriesOverTime"
 
 @RestController
 @RequestMapping("/component")
@@ -73,7 +74,7 @@ class QueriesOverTimeController(
     }
 
     @PostMapping(
-        "/queriesOverTime",
+        QUERIES_OVER_TIME_ROUTE,
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
