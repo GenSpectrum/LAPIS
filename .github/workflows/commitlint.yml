@@ -32,4 +32,7 @@ jobs:
 
       - name: Lint PR title
         run: |
-          echo "${{ github.event.pull_request.title }}" | npx commitlint --verbose
+          cat << 'EOF' > pr_title.txt
+          ${{ github.event.pull_request.title }}
+          EOF
+          npx commitlint --verbose < pr_title.txt
