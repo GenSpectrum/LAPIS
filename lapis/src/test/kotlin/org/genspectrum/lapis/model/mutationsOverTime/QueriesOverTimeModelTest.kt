@@ -6,18 +6,19 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
-import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.QueryOverTimeItem
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.SiloClient
+import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -27,13 +28,28 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.stream.Stream
 
-private val DUMMY_MUTATION1 = NucleotideMutation(null, 1, "T")
-private val DUMMY_MUTATION2 = NucleotideMutation(null, 2, "G")
-private val DUMMY_MUTATION_EQUALS1 = NucleotideSymbolEquals(null, 1, "T")
-private val DUMMY_MUTATION_EQUALS2 = NucleotideSymbolEquals(null, 2, "G")
+private val DUMMY_QUERY_ITEM_1 = QueryOverTimeItem(
+    displayLabel = "my label",
+    countQuery = "main:1T & country=Switzerland",
+    coverageQuery = "!main:1N",
+)
+private val DUMMY_QUERY_ITEM_2 = QueryOverTimeItem(
+    countQuery = "other_segment:2G & country=Germany",
+    coverageQuery = "!other_segment:2N",
+)
+private val DUMMY_FILTER_1 = And(
+    StringEquals("country", "Switzerland"),
+    NucleotideSymbolEquals("main", 1, "T"),
+)
+private val DUMMY_FILTER_COVERAGE_1 = Not(NucleotideSymbolEquals("main", 1, "N"))
+private val DUMMY_FILTER_2 = And(
+    StringEquals("country", "Germany"),
+    NucleotideSymbolEquals("other_segment", 2, "G"),
+)
+private val DUMMY_FILTER_COVERAGE_2 = Not(NucleotideSymbolEquals("other_segment", 2, "N"))
 
 @SpringBootTest
-class NucleotideMutationsOverTimeModelTest {
+class QueriesOverTimeModelTest {
     @MockK
     private lateinit var siloQueryClient: SiloClient
 
@@ -68,18 +84,17 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given an empty list of mutations, then it returns an empty list`() {
+    fun `GIVEN an empty list of queries THEN it returns an empty list`() {
         mockSiloCallInfo(siloQueryClient, dataVersion)
-        val mutations = emptyList<NucleotideMutation>()
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutations,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = emptyList(),
             dateRanges = dateRanges,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.mutations, equalTo(emptyList()))
+        assertThat(result.queries, equalTo(emptyList()))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
@@ -87,18 +102,16 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given an empty list of date ranges, then it returns an empty list`() {
+    fun `GIVEN an empty list of date ranges THEN it returns an empty list`() {
         mockSiloCallInfo(siloQueryClient, dataVersion)
-        val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
-        val dateRanges = emptyList<DateRange>()
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutations,
-            dateRanges = dateRanges,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = listOf(QueryOverTimeItem("label", "123", "!123")),
+            dateRanges = emptyList(),
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.queries, equalTo(listOf("label")))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
@@ -108,44 +121,42 @@ class NucleotideMutationsOverTimeModelTest {
     private fun commonSetup() {
         mockSiloCallInfo(siloQueryClient, dataVersion)
         mockSiloCountQuery(
-            siloQueryClient,
-            DUMMY_MUTATION_EQUALS1,
-            DUMMY_DATE_BETWEEN_ALL,
-            Stream.of(
+            siloClient = siloQueryClient,
+            mutationFilter = DUMMY_FILTER_1,
+            dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.of(
                 AggregationData(1, fields = mapOf("date" to TextNode("2021-06-01"))),
                 AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
             ),
         )
         mockSiloCountQuery(
-            siloQueryClient,
-            DUMMY_MUTATION_EQUALS2,
-            DUMMY_DATE_BETWEEN_ALL,
-            Stream.of(
+            siloClient = siloQueryClient,
+            mutationFilter = DUMMY_FILTER_2,
+            dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.of(
                 AggregationData(3, fields = mapOf("date" to TextNode("2021-06-01"))),
                 AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
                 AggregationData(2, fields = mapOf("date" to TextNode("2022-07-01"))),
             ),
         )
-        mockSiloNucleotideCoverageQuery(
-            siloQueryClient,
-            null,
-            1,
-            DUMMY_DATE_BETWEEN_ALL,
-            Stream.of(
+        mockSiloCoverageQuery(
+            siloClient = siloQueryClient,
+            dateBetween = DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.of(
                 AggregationData(5, fields = mapOf("date" to TextNode("2021-06-01"))),
                 AggregationData(6, fields = mapOf("date" to TextNode("2022-06-01"))),
             ),
+            coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_1 },
         )
-        mockSiloNucleotideCoverageQuery(
-            siloQueryClient,
-            null,
-            2,
-            DUMMY_DATE_BETWEEN_ALL,
-            Stream.of(
+        mockSiloCoverageQuery(
+            siloClient = siloQueryClient,
+            dateBetween = DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.of(
                 AggregationData(0, fields = mapOf("date" to TextNode("2021-06-01"))),
                 AggregationData(1, fields = mapOf("date" to TextNode("2022-06-01"))),
                 AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
             ),
+            coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_2 },
         )
         mockSiloTotalCountQuery(
             siloQueryClient,
@@ -159,27 +170,27 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given a list of mutations and date ranges, then it returns the count and coverage data`() {
+    fun `GIVEN a list of queries and date ranges THEN it returns the count and coverage data`() {
         commonSetup()
 
-        val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
+        val queries = listOf(DUMMY_QUERY_ITEM_1, DUMMY_QUERY_ITEM_2)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
 
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutations,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = queries,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRanges,
         )
 
-        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.queries, equalTo(listOf("my label", "other_segment:2G & country=Germany")))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(1, 5), MutationsOverTimeCell(2, 6)),
-                    listOf(MutationsOverTimeCell(3, 0), MutationsOverTimeCell(4, 2)),
+                    listOf(QueryOverTimeCell(1, 5), QueryOverTimeCell(2, 6)),
+                    listOf(QueryOverTimeCell(3, 0), QueryOverTimeCell(4, 2)),
                 ),
             ),
         )
@@ -191,46 +202,51 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given a list of mutations and date ranges in reverse order, then the order is preserved`() {
+    fun `GIVEN a list of queries and date ranges in reverse order THEN the order is preserved`() {
         commonSetup()
 
-        val mutationsReversed = listOf(DUMMY_MUTATION2, DUMMY_MUTATION1)
+        val queriesReversed = listOf(DUMMY_QUERY_ITEM_2, DUMMY_QUERY_ITEM_1)
         val dateRangesReversed = listOf(DUMMY_DATE_RANGE2, DUMMY_DATE_RANGE1)
 
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutationsReversed,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = queriesReversed,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRangesReversed,
         )
 
-        assertThat(result.mutations, equalTo(mutationsReversed.map { it.toString(referenceGenome) }))
+        assertThat(result.queries, equalTo(listOf("other_segment:2G & country=Germany", "my label")))
         assertThat(result.dateRanges, equalTo(dateRangesReversed))
     }
 
     @Test
-    fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
-        mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloNucleotideCoverageQuery(siloQueryClient, null, 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+    fun `GIVEN a list of queries and date ranges and no data for a mutation THEN it returns zero`() {
+        mockSiloCountQuery(siloQueryClient, DUMMY_FILTER_1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockSiloCoverageQuery(
+            siloClient = siloQueryClient,
+            dateBetween = DUMMY_DATE_BETWEEN_ALL,
+            queryResult = Stream.empty(),
+            coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_1 },
+        )
         mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
-        val mutations = listOf(DUMMY_MUTATION1)
+        val queries = listOf(DUMMY_QUERY_ITEM_1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
 
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutations,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = queries,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRanges,
         )
 
-        assertThat(result.mutations, equalTo(mutations.map { it.toString(referenceGenome) }))
+        assertThat(result.queries, equalTo(listOf("my label")))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(0, 0), MutationsOverTimeCell(0, 0)),
+                    listOf(QueryOverTimeCell(0, 0), QueryOverTimeCell(0, 0)),
                 ),
             ),
         )
@@ -241,7 +257,7 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given one data version change, then it succeeds`() {
+    fun `GIVEN one data version change THEN it succeeds`() {
         var callCount = 0
         every {
             siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false, any())
@@ -255,11 +271,11 @@ class NucleotideMutationsOverTimeModelTest {
             )
         }
 
-        val mutations = listOf(DUMMY_MUTATION1)
+        val queries = listOf(DUMMY_QUERY_ITEM_1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1)
 
-        val result = underTest.evaluateNucleotideMutations(
-            mutations = mutations,
+        val result = underTest.evaluateQueriesOverTime(
+            queries = queries,
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
             dateRanges = dateRanges,
@@ -269,7 +285,7 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     @Test
-    fun `given more than once data version change, then it throws`() {
+    fun `GIVEN more than once data version change THEN it throws`() {
         var callCount = 0
         every {
             siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false, any())
@@ -283,33 +299,17 @@ class NucleotideMutationsOverTimeModelTest {
             )
         }
 
-        val mutations = listOf(DUMMY_MUTATION1)
+        val queries = listOf(DUMMY_QUERY_ITEM_1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1)
 
         val exception = assertThrows<RuntimeException> {
-            underTest.evaluateNucleotideMutations(
-                mutations = mutations,
+            underTest.evaluateQueriesOverTime(
+                queries = queries,
                 lapisFilter = DUMMY_LAPIS_FILTER,
                 dateField = DUMMY_DATE_FIELD,
                 dateRanges = dateRanges,
             )
         }
         assertThat(exception.message, containsString("data has been updated multiple times"))
-    }
-
-    @Test
-    fun `given a maybe() query, then it throws`() {
-        val mutations = listOf(NucleotideMutation(null, 1, "T", maybe = true))
-        val dateRanges = listOf(DUMMY_DATE_RANGE1)
-
-        val exception = assertThrows<BadRequestException> {
-            underTest.evaluateNucleotideMutations(
-                mutations = mutations,
-                lapisFilter = DUMMY_LAPIS_FILTER,
-                dateField = DUMMY_DATE_FIELD,
-                dateRanges = dateRanges,
-            )
-        }
-        assertThat(exception.message, `is`("Invalid mutation in includeMutations – maybe() is not allowed: maybe(A1T)"))
     }
 }

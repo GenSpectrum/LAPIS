@@ -4,17 +4,19 @@ import {
   InfoControllerApi,
   LapisControllerApi,
   Middleware,
+  QueriesOverTimeControllerApi,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
-import { MutationsOverTimeControllerApi } from './lapisClient/index';
-import { LapisControllerApi as LapisControllerApiMultiSegmented } from './lapisClientMultiSegmented';
+import {
+  LapisControllerApi as LapisControllerApiMultiSegmented,
+  MultiSegmentedSequenceControllerApi,
+} from './lapisClientMultiSegmented';
 import { expect } from 'chai';
 
 import {
-  LapisControllerApi as LapisControllerApiProtected,
   Configuration as ConfigurationProtected,
+  LapisControllerApi as LapisControllerApiProtected,
 } from './lapisClientProtected';
-import { MultiSegmentedSequenceControllerApi } from './lapisClientMultiSegmented';
 
 export const basePath = 'http://localhost:8090';
 export const basePathProtected = 'http://localhost:8092';
@@ -48,7 +50,7 @@ export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePat
   middleware
 );
 export const actuatorClient = new ActuatorApi(new Configuration({ basePath })).withMiddleware(middleware);
-export const mutOverTimeClient = new MutationsOverTimeControllerApi(
+export const queriesOverTimeClient = new QueriesOverTimeControllerApi(
   new Configuration({ basePath })
 ).withMiddleware(middleware);
 export const lapisClientProtected = new LapisControllerApiProtected(

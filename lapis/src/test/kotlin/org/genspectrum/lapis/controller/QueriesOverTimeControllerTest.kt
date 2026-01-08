@@ -8,11 +8,14 @@ import io.mockk.slot
 import io.mockk.verify
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeCell
-import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
+import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
+import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
+import org.genspectrum.lapis.model.mutationsOverTime.QueryOverTimeCell
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
+import org.genspectrum.lapis.request.QueryOverTimeItem
 import org.genspectrum.lapis.silo.DataVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -36,12 +39,192 @@ import java.time.LocalDate
 
 @SpringBootTest
 @AutoConfigureMockMvc
+class QueriesOverTimeControllerTest(
+    @param:Autowired val mockMvc: MockMvc,
+    @param:Autowired val objectMapper: ObjectMapper,
+) {
+    @MockkBean
+    lateinit var modelMock: QueriesOverTimeModel
+
+    @MockkBean
+    lateinit var dataVersion: DataVersion
+
+    private val route = "/component/queriesOverTime"
+
+    @BeforeEach
+    fun setup() {
+        every { dataVersion.dataVersion } returns "1234"
+    }
+
+    @Test
+    fun `POST queriesOverTime returns expected response`() {
+        val resultMock = QueriesOverTimeResult(
+            queries = listOf("my label", "A456G"),
+            dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
+            data = listOf(
+                listOf(QueryOverTimeCell(count = 10, coverage = 100)),
+                listOf(QueryOverTimeCell(count = 5, coverage = 50)),
+            ),
+            totalCountsByDateRange = listOf(300),
+        )
+
+        val queriesSlot = slot<List<QueryOverTimeItem>>()
+        val dateRangesSlot = slot<List<DateRange>>()
+        val filtersSlot = slot<BaseSequenceFilters>()
+        val dateFieldSlot = slot<String>()
+
+        every {
+            modelMock.evaluateQueriesOverTime(
+                queries = capture(queriesSlot),
+                dateRanges = capture(dateRangesSlot),
+                lapisFilter = capture(filtersSlot),
+                dateField = capture(dateFieldSlot),
+            )
+        } returns resultMock
+
+        mockMvc.perform(
+            post(route)
+                .content(
+                    """{
+                        "filters": {
+                            "country":"Switzerland"
+                        },
+                        "queries": [
+                            { "displayLabel": "my label", "countQuery": "123T", "coverageQuery": "123T coverage" },
+                            { "countQuery": "456G", "coverageQuery": "456G coverage" }
+                         ],
+                        "dateRanges": [{"dateFrom": "2025-01-01", "dateTo": "2025-01-31"}],
+                        "dateField": "date"
+                    }
+                    """.trimIndent(),
+                )
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().stringValues("Lapis-Data-Version", "1234"))
+            .andExpect(jsonPath("$.data.queries[0]").value("my label"))
+            .andExpect(jsonPath("$.data.queries[1]").value("A456G"))
+            .andExpect(jsonPath("$.data.dateRanges[0].dateFrom").value("2025-01-01"))
+            .andExpect(jsonPath("$.data.dateRanges[0].dateTo").value("2025-01-31"))
+            .andExpect(jsonPath("$.data.totalCountsByDateRange[0]").value("300"))
+            .andExpect(jsonPath("$.data.data[0][0].count").value(10))
+            .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
+            .andExpect(jsonPath("$.data.data[1][0].count").value(5))
+            .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.info.dataVersion").value(1234))
+
+        verify(exactly = 1) { modelMock.evaluateQueriesOverTime(any(), any(), any(), any()) }
+        assertThat(dateFieldSlot.captured, `is`("date"))
+        assertThat(queriesSlot.captured, hasSize(2))
+        assertThat(queriesSlot.captured[0].displayLabel, `is`("my label"))
+        assertThat(queriesSlot.captured[0].countQuery, `is`("123T"))
+        assertThat(queriesSlot.captured[0].coverageQuery, `is`("123T coverage"))
+        assertThat(queriesSlot.captured[1].displayLabel, `is`(nullValue()))
+        assertThat(queriesSlot.captured[1].countQuery, `is`("456G"))
+        assertThat(queriesSlot.captured[1].coverageQuery, `is`("456G coverage"))
+        assertThat(dateRangesSlot.captured, hasSize(1))
+        assertThat(dateRangesSlot.captured.first().dateFrom, `is`(LocalDate.parse("2025-01-01")))
+        assertThat(dateRangesSlot.captured.first().dateTo, `is`(LocalDate.parse("2025-01-31")))
+        assertThat(filtersSlot.captured.sequenceFilters["country"], `is`(listOf("Switzerland")))
+    }
+
+    @Test
+    fun `POST queriesOverTime compresses result with zstd when requested`() {
+        every { modelMock.evaluateQueriesOverTime(any(), any(), any(), any()) } returns QueriesOverTimeResult(
+            queries = listOf("123T"),
+            dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
+            data = listOf(listOf(QueryOverTimeCell(count = 1, coverage = 2))),
+            totalCountsByDateRange = listOf(300),
+        )
+
+        val mvcResult = mockMvc.perform(
+            post(route)
+                .content(
+                    """{
+                        "filters": {
+                            "country":"Switzerland"
+                        },
+                        "queries": [
+                            { "countQuery": "123T", "coverageQuery": "123T coverage" }
+                         ],
+                        "dateRanges": [{"dateFrom": "2025-01-01", "dateTo": "2025-01-31"}],
+                        "dateField": "date",
+                        "compression": "zstd",
+                        "downloadAsFile": true,
+                        "downloadFileBasename": "my-favorite-mutations"
+                    }
+                    """.trimIndent(),
+                )
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(header().string("Content-Type", "application/zstd"))
+            .andExpect(
+                header().string(
+                    "Content-Disposition",
+                    containsString("attachment; filename=my-favorite-mutations.json.zst"),
+                ),
+            )
+            .andReturn()
+
+        val decompressed = ZstdInputStream(ByteArrayInputStream(mvcResult.response.contentAsByteArray))
+            .readBytes()
+            .toString(StandardCharsets.UTF_8)
+
+        assert(decompressed.contains("\"coverage\":2"))
+    }
+
+    @Test
+    fun `invalid queries returns bad request`() {
+        mockMvc.perform(
+            post(route)
+                .content(
+                    """{
+                        "filters": {
+                            "country":"Switzerland"
+                        },
+                        "queries": ["123T"],
+                        "dateRanges":[{"dateFrom":"2020-01-01","dateTo":"2020-06-30"}],
+                        "dateField":"collectionDate"
+                    }
+                    """.trimIndent(),
+                )
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to read request")))
+    }
+
+    @Test
+    fun `invalid dateRanges returns bad request`() {
+        mockMvc.perform(
+            post(route)
+                .content(
+                    """{
+                        "filters": {
+                            "country":"Switzerland"
+                        },
+                        "includeMutations": ["123"],
+                        "dateRanges": "2025-01-01",
+                        "dateField":"date"
+                    }
+                    """.trimIndent(),
+                )
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail").value(containsString("Failed to read request")))
+    }
+}
+
+@SpringBootTest
+@AutoConfigureMockMvc
 class NucleotideMutationsOverTimeControllerTest(
     @param:Autowired val mockMvc: MockMvc,
     @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
-    lateinit var modelMock: MutationsOverTimeModel
+    lateinit var modelMock: QueriesOverTimeModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -216,7 +399,7 @@ class AminoAcidMutationsOverTimeControllerTest(
     @param:Autowired val objectMapper: ObjectMapper,
 ) {
     @MockkBean
-    lateinit var modelMock: MutationsOverTimeModel
+    lateinit var modelMock: QueriesOverTimeModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion

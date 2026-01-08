@@ -71,15 +71,15 @@ fun mockSiloCountQuery(
 ) {
     every {
         siloClient.sendQueryAndGetDataVersion<AggregationData>(
-            match { query ->
+            query = match { query ->
                 query.action == AGGREGATED_SILO_ACTION &&
                     query.filterExpression is And &&
                     query.filterExpression.children.count() == 3 &&
                     query.filterExpression.children.contains(mutationFilter) &&
                     query.filterExpression.children.contains(dateBetweenFilter)
             },
-            false,
-            false,
+            setRequestDataVersion = false,
+            checkProtection = false,
         )
     } answers {
         WithDataVersion(DUMMY_DATA_VERSION, queryResult)
@@ -96,11 +96,14 @@ fun mockSiloNucleotideCoverageQuery(
     siloClient,
     dateBetween,
     queryResult,
-    { child ->
-        child is NucleotideSymbolEquals &&
-            child.sequenceName == sequenceName &&
-            child.position == position &&
-            child.symbol in (nucleotideSymbols + deletionSymbols).map { it.toString() }
+    {
+        it is Or &&
+            (it).children.all { child ->
+                child is NucleotideSymbolEquals &&
+                    child.sequenceName == sequenceName &&
+                    child.position == position &&
+                    child.symbol in (nucleotideSymbols + deletionSymbols).map { symbol -> symbol.toString() }
+            }
     },
 )
 
@@ -114,34 +117,34 @@ fun mockSiloAminoAcidCoverageQuery(
     siloClient,
     dateBetween,
     queryResult,
-    { child ->
-        child is AminoAcidSymbolEquals &&
-            child.sequenceName == sequenceName &&
-            child.position == position &&
-            child.symbol in (aaSymbols + deletionSymbols).map { it.toString() }
+    {
+        it is Or &&
+            (it).children.all { child ->
+                child is AminoAcidSymbolEquals &&
+                    child.sequenceName == sequenceName &&
+                    child.position == position &&
+                    child.symbol in (aaSymbols + deletionSymbols).map { symbol -> symbol.toString() }
+            }
     },
 )
 
-private fun mockSiloCoverageQuery(
+fun mockSiloCoverageQuery(
     siloClient: SiloClient,
     dateBetween: DateBetween,
     queryResult: Stream<AggregationData>,
-    mutationFilterExpressionFn: (SiloFilterExpression) -> Boolean,
+    coverageFilterExpressionFn: (SiloFilterExpression) -> Boolean,
 ) {
     every {
         siloClient.sendQueryAndGetDataVersion<AggregationData>(
-            match { query ->
+            query = match { query ->
                 query.action == AGGREGATED_SILO_ACTION &&
                     query.filterExpression is And &&
                     query.filterExpression.children.count() == 3 &&
-                    query.filterExpression.children.any {
-                        it is Or &&
-                            (it).children.all(mutationFilterExpressionFn)
-                    } &&
+                    query.filterExpression.children.any(coverageFilterExpressionFn) &&
                     query.filterExpression.children.contains(dateBetween)
             },
-            false,
-            false,
+            setRequestDataVersion = false,
+            checkProtection = false,
         )
     } answers {
         WithDataVersion(DUMMY_DATA_VERSION, queryResult)
