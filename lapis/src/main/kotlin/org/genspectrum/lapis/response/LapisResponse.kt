@@ -3,7 +3,6 @@ package org.genspectrum.lapis.response
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import io.swagger.v3.oas.annotations.media.Schema
-import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_EXAMPLE
 import org.genspectrum.lapis.openApi.LAPIS_DATA_VERSION_RESPONSE_DESCRIPTION
 import org.genspectrum.lapis.openApi.LAPIS_INFO_DESCRIPTION
