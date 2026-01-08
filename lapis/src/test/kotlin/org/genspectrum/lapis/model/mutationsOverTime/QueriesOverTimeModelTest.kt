@@ -94,7 +94,7 @@ class QueriesOverTimeModelTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.mutations, equalTo(emptyList()))
+        assertThat(result.queries, equalTo(emptyList()))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
@@ -111,7 +111,7 @@ class QueriesOverTimeModelTest {
             dateField = DUMMY_DATE_FIELD,
         )
 
-        assertThat(result.mutations, equalTo(listOf("label")))
+        assertThat(result.queries, equalTo(listOf("label")))
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
@@ -183,14 +183,14 @@ class QueriesOverTimeModelTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.mutations, equalTo(listOf("my label", "other_segment:2G & country=Germany")))
+        assertThat(result.queries, equalTo(listOf("my label", "other_segment:2G & country=Germany")))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(1, 5), MutationsOverTimeCell(2, 6)),
-                    listOf(MutationsOverTimeCell(3, 0), MutationsOverTimeCell(4, 2)),
+                    listOf(QueryOverTimeCell(1, 5), QueryOverTimeCell(2, 6)),
+                    listOf(QueryOverTimeCell(3, 0), QueryOverTimeCell(4, 2)),
                 ),
             ),
         )
@@ -215,7 +215,7 @@ class QueriesOverTimeModelTest {
             dateRanges = dateRangesReversed,
         )
 
-        assertThat(result.mutations, equalTo(listOf("other_segment:2G & country=Germany", "my label")))
+        assertThat(result.queries, equalTo(listOf("other_segment:2G & country=Germany", "my label")))
         assertThat(result.dateRanges, equalTo(dateRangesReversed))
     }
 
@@ -240,13 +240,13 @@ class QueriesOverTimeModelTest {
             dateRanges = dateRanges,
         )
 
-        assertThat(result.mutations, equalTo(listOf("my label")))
+        assertThat(result.queries, equalTo(listOf("my label")))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(
             result.data,
             equalTo(
                 listOf(
-                    listOf(MutationsOverTimeCell(0, 0), MutationsOverTimeCell(0, 0)),
+                    listOf(QueryOverTimeCell(0, 0), QueryOverTimeCell(0, 0)),
                 ),
             ),
         )
