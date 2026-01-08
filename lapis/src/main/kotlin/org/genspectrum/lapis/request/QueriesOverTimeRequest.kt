@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
+import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.springframework.boot.jackson.JsonComponent
 
@@ -29,8 +30,17 @@ data class QueriesOverTimeRequest(
 )
 
 data class QueryOverTimeItem(
+    @param:Schema(
+        description = "A display label to be used in the result table. Defaults to the 'countQuery' if not provided.",
+    )
     val displayLabel: String? = null,
+    @param:Schema(
+        description = "An advanced query to compute the count in each date range.",
+    )
     val countQuery: String,
+    @param:Schema(
+        description = "An advanced query to compute the coverage in each date range.",
+    )
     val coverageQuery: String,
 )
 

@@ -73,8 +73,8 @@ data class InsertionResponse(
     val sequenceName: String?,
 )
 
-data class MutationsOverTimeResponse(
-    val data: MutationsOverTimeResult,
+data class QueriesOverTimeResponse<T>(
+    val data: T,
     val info: LapisInfo,
 )
 
