@@ -1,9 +1,9 @@
 import { expect } from 'chai';
-import { mutOverTimeClient } from './common';
+import { queriesOverTimeClient } from './common';
 
 describe('The /mutationsOverTime endpoint', () => {
   it('returns a response with the correct dimensions etc.', async () => {
-    const result = await mutOverTimeClient.postNucleotideMutationsOverTime({
+    const result = await queriesOverTimeClient.postNucleotideMutationsOverTime({
       mutationsOverTimeRequest: {
         filters: {
           country: 'Switzerland',
@@ -40,7 +40,7 @@ describe('The /mutationsOverTime endpoint', () => {
   });
 
   it('returns an empty response if no mutations are given', async () => {
-    const result = await mutOverTimeClient.postNucleotideMutationsOverTime({
+    const result = await queriesOverTimeClient.postNucleotideMutationsOverTime({
       mutationsOverTimeRequest: {
         filters: {
           country: 'Switzerland',
@@ -69,7 +69,7 @@ describe('The /mutationsOverTime endpoint', () => {
   });
 
   it('returns an empty response if no date ranges are given', async () => {
-    const result = await mutOverTimeClient.postNucleotideMutationsOverTime({
+    const result = await queriesOverTimeClient.postNucleotideMutationsOverTime({
       mutationsOverTimeRequest: {
         filters: {
           country: 'Switzerland',
@@ -86,7 +86,7 @@ describe('The /mutationsOverTime endpoint', () => {
   });
 
   it('if downloadAsFile is true, the content disposition is set to attachment', async () => {
-    const result = await mutOverTimeClient.postNucleotideMutationsOverTimeRaw({
+    const result = await queriesOverTimeClient.postNucleotideMutationsOverTimeRaw({
       mutationsOverTimeRequest: {
         filters: {
           country: 'Switzerland',
@@ -102,7 +102,7 @@ describe('The /mutationsOverTime endpoint', () => {
   });
 
   it('if downloadFileBasename is set, it is present in the headers', async () => {
-    const result = await mutOverTimeClient.postNucleotideMutationsOverTimeRaw({
+    const result = await queriesOverTimeClient.postNucleotideMutationsOverTimeRaw({
       mutationsOverTimeRequest: {
         filters: {
           country: 'Switzerland',

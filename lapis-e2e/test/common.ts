@@ -1,17 +1,17 @@
 import {
-  ActuatorApi,
-  Configuration,
-  InfoControllerApi,
-  LapisControllerApi,
-  Middleware,
-  SingleSegmentedSequenceControllerApi,
+    ActuatorApi,
+    Configuration,
+    InfoControllerApi,
+    LapisControllerApi,
+    Middleware,
+    QueriesOverTimeControllerApi,
+    SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
-import { MutationsOverTimeControllerApi } from './lapisClient/index';
 import {
-  LapisControllerApi as LapisControllerApiMultiSegmented,
-  MultiSegmentedSequenceControllerApi,
+    LapisControllerApi as LapisControllerApiMultiSegmented,
+    MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
-import { expect } from 'chai';
+import {expect} from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
@@ -44,7 +44,7 @@ export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePat
   middleware
 );
 export const actuatorClient = new ActuatorApi(new Configuration({ basePath })).withMiddleware(middleware);
-export const mutOverTimeClient = new MutationsOverTimeControllerApi(
+export const queriesOverTimeClient = new QueriesOverTimeControllerApi(
   new Configuration({ basePath })
 ).withMiddleware(middleware);
 export const lapisClientMultiSegmented = new LapisControllerApiMultiSegmented(
