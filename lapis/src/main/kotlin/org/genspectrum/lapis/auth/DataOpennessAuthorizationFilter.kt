@@ -17,6 +17,7 @@ import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_INSERTIONS_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_ROUTE
+import org.genspectrum.lapis.controller.QUERIES_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.middleware.DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER
 import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
@@ -144,6 +145,7 @@ private class ProtectedDataAuthorizationFilter(
         ).map { "/sample$it" } + listOf(
             NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE,
             AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE,
+            QUERIES_OVER_TIME_ROUTE,
         ).map { "/component$it" }
     }
 
