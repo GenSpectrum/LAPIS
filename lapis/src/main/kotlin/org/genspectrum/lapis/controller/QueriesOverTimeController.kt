@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
-import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
+import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.openApi.MUTATIONS_OVER_TIME_REQUEST_SCHEMA
 import org.genspectrum.lapis.request.AminoAcidMutationsOverTimeRequest
 import org.genspectrum.lapis.request.NucleotideMutationsOverTimeRequest
@@ -25,8 +25,8 @@ const val AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE = "/aminoAcidMutationsOverTime"
 
 @RestController
 @RequestMapping("/component")
-class MutationsOverTimeController(
-    val mutationsOverTimeModel: MutationsOverTimeModel,
+class QueriesOverTimeController(
+    val queriesOverTimeModel: QueriesOverTimeModel,
     val lapisInfoFactory: LapisInfoFactory,
     val dataVersion: DataVersion,
 ) {
@@ -41,7 +41,7 @@ class MutationsOverTimeController(
         @RequestBody
         request: NucleotideMutationsOverTimeRequest,
     ): ResponseEntity<MutationsOverTimeResponse> {
-        val data = mutationsOverTimeModel.evaluateNucleotideMutations(
+        val data = queriesOverTimeModel.evaluateNucleotideMutations(
             request.includeMutations,
             request.dateRanges,
             request.filters,
@@ -61,7 +61,7 @@ class MutationsOverTimeController(
         @RequestBody
         request: AminoAcidMutationsOverTimeRequest,
     ): ResponseEntity<MutationsOverTimeResponse> {
-        val data = mutationsOverTimeModel.evaluateAminoAcidMutations(
+        val data = queriesOverTimeModel.evaluateAminoAcidMutations(
             request.includeMutations,
             request.dateRanges,
             request.filters,
@@ -81,7 +81,7 @@ class MutationsOverTimeController(
         @RequestBody
         request: QueriesOverTimeRequest,
     ): ResponseEntity<MutationsOverTimeResponse> {
-        val data = mutationsOverTimeModel.evaluateQueriesOverTime(
+        val data = queriesOverTimeModel.evaluateQueriesOverTime(
             request.queries,
             request.dateRanges,
             request.filters,

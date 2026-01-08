@@ -35,7 +35,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-private const val MUTATION_QUERY_TIMEOUT_SECONDS = 60L
+private const val QUERY_TIMEOUT_SECONDS = 60L
 
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
@@ -72,7 +72,7 @@ data class MutationsOverTimeCell(
 )
 
 @Component
-class MutationsOverTimeModel(
+class QueriesOverTimeModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
@@ -249,7 +249,7 @@ class MutationsOverTimeModel(
 
         val dataWithDataVersions = this.threadPool.invokeAll(
             tasks,
-            MUTATION_QUERY_TIMEOUT_SECONDS,
+            QUERY_TIMEOUT_SECONDS,
             TimeUnit.SECONDS,
         ).map {
             it.get()
