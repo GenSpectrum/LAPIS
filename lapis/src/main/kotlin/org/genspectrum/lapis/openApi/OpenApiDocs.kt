@@ -194,7 +194,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     MUTATIONS_OVER_TIME_REQUEST_SCHEMA,
-                    requestSchemaForMutationsOverTime( sequenceFilterFields),
+                    requestSchemaForMutationsOverTime(sequenceFilterFields),
                 )
                 .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
@@ -642,9 +642,7 @@ private fun requestSchemaWithGenes(
                 Pair(FASTA_HEADER_TEMPLATE_PROPERTY, aminoAcidFastaHeaderTemplateSchema(databaseConfig)),
         )
 
-private fun requestSchemaForMutationsOverTime(
-    sequenceFilterFields: SequenceFilterFields,
-): Schema<*> =
+private fun requestSchemaForMutationsOverTime(sequenceFilterFields: SequenceFilterFields): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
         .description("Request schema for fetching mutations over time.")
