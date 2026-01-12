@@ -136,13 +136,6 @@ Optionally set this to return the response compressed in the specified format.
 Alternatively, you can set the '$ACCEPT_ENCODING' header to the respective value.
 """
 
-const val ACCESS_KEY_DESCRIPTION =
-    """
-An access key that grants access to the protected data that this instance serves.
-There are two types or access keys: One only grants access to aggregated data,
-the other also grants access to detailed data.
-"""
-
 const val SEGMENTS_DESCRIPTION =
     "List of segments to retrieve sequences for. If not provided, all segments will be returned."
 

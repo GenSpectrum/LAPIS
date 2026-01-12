@@ -171,22 +171,6 @@ class MutationProportionsRequestTest {
                     ),
                 ),
                 Arguments.of(
-                    """
-                    {
-                        "accessKey": "some access key"                
-                    }
-                    """,
-                    MutationProportionsRequest(
-                        sequenceFilters = emptyMap(),
-                        nucleotideMutations = emptyList(),
-                        aminoAcidMutations = emptyList(),
-                        nucleotideInsertions = emptyList(),
-                        aminoAcidInsertions = emptyList(),
-                        fields = emptyList(),
-                        minProportion = DEFAULT_MIN_PROPORTION,
-                    ),
-                ),
-                Arguments.of(
                     "{}",
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),

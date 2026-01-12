@@ -195,21 +195,6 @@ class SequenceFiltersRequestWithFieldsTest {
                     ),
                 ),
                 Arguments.of(
-                    """
-                    {
-                        "accessKey": "some access key"                
-                    }
-                    """,
-                    SequenceFiltersRequestWithFields(
-                        emptyMap(),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                    ),
-                ),
-                Arguments.of(
                     "{}",
                     SequenceFiltersRequestWithFields(
                         emptyMap(),

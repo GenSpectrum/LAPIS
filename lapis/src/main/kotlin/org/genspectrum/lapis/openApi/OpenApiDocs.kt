@@ -13,7 +13,6 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.DatabaseSchema
 import org.genspectrum.lapis.config.MetadataType
-import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFieldName
@@ -36,7 +35,6 @@ import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.controller.middleware.TreeDataFormat
-import org.genspectrum.lapis.request.ACCESS_KEY_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidInsertion
@@ -78,7 +76,7 @@ fun buildOpenApiSchema(
                     Schema<String>()
                         .types(setOf("object"))
                         .description("valid filters for sequence data")
-                        .properties(computePrimitiveFieldFilters(databaseConfig, sequenceFilterFields)),
+                        .properties(computePrimitiveFieldFilters(sequenceFilterFields)),
                 )
                 .addSchemas(
                     REQUEST_SCHEMA_WITH_MIN_PROPORTION,
@@ -87,7 +85,6 @@ fun buildOpenApiSchema(
                         .description("valid filters for sequence data")
                         .properties(
                             getSequenceFiltersWithFormat(
-                                databaseConfig = databaseConfig,
                                 sequenceFilterFields = sequenceFilterFields,
                                 orderByFieldsSchema = mutationsOrderByFieldsEnum(),
                                 dataFormatSchema = dataFormatSchema(),
@@ -99,7 +96,6 @@ fun buildOpenApiSchema(
                     AGGREGATED_REQUEST_SCHEMA,
                     requestSchemaWithFields(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = aggregatedOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
@@ -112,7 +108,6 @@ fun buildOpenApiSchema(
                     DETAILS_REQUEST_SCHEMA,
                     requestSchemaWithFields(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
@@ -125,7 +120,6 @@ fun buildOpenApiSchema(
                     MOST_RECENT_COMMON_ANCESTOR_REQUEST_SCHEMA,
                     requestSchemaPhyloTree(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
@@ -136,7 +130,6 @@ fun buildOpenApiSchema(
                     PHYLO_SUBTREE_REQUEST_SCHEMA,
                     requestSchemaPhyloTree(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = detailsOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = treeFormatSchema(),
@@ -147,7 +140,6 @@ fun buildOpenApiSchema(
                     INSERTIONS_REQUEST_SCHEMA,
                     requestSchemaForCommonSequenceFilters(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = insertionsOrderByFieldsEnum(),
                             dataFormatSchema = dataFormatSchema(),
@@ -158,7 +150,6 @@ fun buildOpenApiSchema(
                     ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
                     aminoAcidSequencesRequestSchema(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
@@ -170,7 +161,6 @@ fun buildOpenApiSchema(
                     ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaWithGenes(
                         requestProperties = getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = aminoAcidSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
@@ -183,7 +173,6 @@ fun buildOpenApiSchema(
                     NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA,
                     nucleotideSequencesRequestSchema(
                         getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
@@ -195,7 +184,6 @@ fun buildOpenApiSchema(
                     ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA,
                     requestSchemaWithSegment(
                         requestProperties = getSequenceFiltersWithFormat(
-                            databaseConfig = databaseConfig,
                             sequenceFilterFields = sequenceFilterFields,
                             orderByFieldsSchema = nucleotideSequenceOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = sequencesFormatSchema(),
@@ -206,7 +194,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     MUTATIONS_OVER_TIME_REQUEST_SCHEMA,
-                    requestSchemaForMutationsOverTime(databaseConfig, sequenceFilterFields),
+                    requestSchemaForMutationsOverTime( sequenceFilterFields),
                 )
                 .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
@@ -377,30 +365,27 @@ fun buildOpenApiSchema(
         )
 
 private fun getSequenceFiltersWithFormat(
-    databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
     orderByFieldsSchema: Schema<Any>,
     dataFormatSchema: Schema<*>,
 ): Map<SequenceFilterFieldName, Schema<*>> =
-    getSequenceFilters(databaseConfig, sequenceFilterFields, orderByFieldsSchema) +
+    getSequenceFilters(sequenceFilterFields, orderByFieldsSchema) +
         Pair(FORMAT_PROPERTY, dataFormatSchema)
 
 private fun getSequenceFilters(
-    databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
     orderByFieldsSchema: Schema<*>,
 ): Map<SequenceFilterFieldName, Schema<*>> =
-    getBaseSequenceFilters(databaseConfig, sequenceFilterFields) +
+    getBaseSequenceFilters(sequenceFilterFields) +
         Pair(ORDER_BY_PROPERTY, orderByPostSchema(orderByFieldsSchema)) +
         Pair(LIMIT_PROPERTY, limitSchema()) +
         Pair(OFFSET_PROPERTY, offsetSchema()) +
         getCompressionAndDownloadSchema()
 
 private fun getBaseSequenceFilters(
-    databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
 ): Map<SequenceFilterFieldName, Schema<*>> =
-    computePrimitiveFieldFilters(databaseConfig, sequenceFilterFields) +
+    computePrimitiveFieldFilters(sequenceFilterFields) +
         Pair(NUCLEOTIDE_MUTATIONS_PROPERTY, nucleotideMutations()) +
         Pair(AMINO_ACID_MUTATIONS_PROPERTY, aminoAcidMutations()) +
         Pair(NUCLEOTIDE_INSERTIONS_PROPERTY, nucleotideInsertions()) +
@@ -428,15 +413,8 @@ fun compressionSchema(): Schema<*> =
         ._enum(Compression.entries.map { it.value })
 
 private fun computePrimitiveFieldFilters(
-    databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
-): Map<SequenceFilterFieldName, Schema<Any>> =
-    when (databaseConfig.schema.opennessLevel) {
-        OpennessLevel.PROTECTED -> primitiveSequenceFilterFieldSchemas(sequenceFilterFields) +
-            (ACCESS_KEY_PROPERTY to accessKeySchema())
-
-        else -> primitiveSequenceFilterFieldSchemas(sequenceFilterFields)
-    }
+): Map<SequenceFilterFieldName, Schema<Any>> = primitiveSequenceFilterFieldSchemas(sequenceFilterFields)
 
 private fun lapisResponseSchema(dataSchema: Schema<Any>) =
     Schema<Any>().types(setOf("object"))
@@ -665,7 +643,6 @@ private fun requestSchemaWithGenes(
         )
 
 private fun requestSchemaForMutationsOverTime(
-    databaseConfig: DatabaseConfig,
     sequenceFilterFields: SequenceFilterFields,
 ): Schema<*> =
     Schema<Any>()
@@ -677,9 +654,7 @@ private fun requestSchemaForMutationsOverTime(
                     Schema<Any>()
                         .types(setOf("object"))
                         .description("Sequence filters")
-                        .properties(
-                            getBaseSequenceFilters(databaseConfig, sequenceFilterFields),
-                        ),
+                        .properties(getBaseSequenceFilters(sequenceFilterFields)),
             ) +
                 getCompressionAndDownloadSchema() +
                 mapOf(
@@ -713,8 +688,6 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
     } + mapOf(
         COUNT_PROPERTY to IntegerSchema().description("The number of sequences matching the filters."),
     )
-
-fun accessKeySchema(): Schema<Any> = StringSchema().description(ACCESS_KEY_DESCRIPTION)
 
 private fun nucleotideMutationProportionSchema() =
     mapOf(
