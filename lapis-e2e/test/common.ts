@@ -6,12 +6,12 @@ import {
   Middleware,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
-import {MutationsOverTimeControllerApi} from './lapisClient/index';
+import { MutationsOverTimeControllerApi } from './lapisClient/index';
 import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
-  MultiSegmentedSequenceControllerApi
+  MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
