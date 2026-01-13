@@ -4,9 +4,8 @@ import { z } from 'zod';
 export type ConfigType = 'SILO' | 'Pathoplexus';
 
 export const LAPIS_OPENNESS_OPEN = 'OPEN';
-export const LAPIS_OPENNESS_PROTECTED = 'PROTECTED';
 
-export const opennessLevelSchema = z.enum([LAPIS_OPENNESS_OPEN, LAPIS_OPENNESS_PROTECTED]);
+export const opennessLevelSchema = z.enum([LAPIS_OPENNESS_OPEN]);
 export type OpennessLevel = z.infer<typeof opennessLevelSchema>;
 
 export const metadataTypeSchema = z.enum([

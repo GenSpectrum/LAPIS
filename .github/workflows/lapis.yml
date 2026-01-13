@@ -141,7 +141,6 @@ jobs:
           docker compose logs siloMultisegmented > e2e-logs/siloMultisegmented.log
           docker compose logs siloPreprocessingMultisegmented > e2e-logs/siloPreprocessingMultisegmented.log
           docker compose logs lapisOpen > e2e-logs/lapisOpen.log
-          docker compose logs lapisProtected > e2e-logs/lapisProtected.log
           docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
         env:
           SILO_TAG: 0.8.5

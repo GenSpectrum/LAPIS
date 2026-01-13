@@ -3,7 +3,6 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.databind.node.JsonNodeType
 
 const val FORMAT_PROPERTY = "dataFormat"
-const val ACCESS_KEY_PROPERTY = "accessKey"
 const val MIN_PROPORTION_PROPERTY = "minProportion"
 const val FIELDS_PROPERTY = "fields"
 const val NUCLEOTIDE_MUTATIONS_PROPERTY = "nucleotideMutations"
@@ -24,7 +23,6 @@ const val PHYLO_TREE_FIELD_PROPERTY = "phyloTreeField"
 
 val SPECIAL_REQUEST_PROPERTY_TYPES = mapOf(
     FORMAT_PROPERTY to JsonNodeType.STRING,
-    ACCESS_KEY_PROPERTY to JsonNodeType.STRING,
     MIN_PROPORTION_PROPERTY to JsonNodeType.NUMBER,
     FIELDS_PROPERTY to JsonNodeType.ARRAY,
     NUCLEOTIDE_MUTATIONS_PROPERTY to JsonNodeType.ARRAY,

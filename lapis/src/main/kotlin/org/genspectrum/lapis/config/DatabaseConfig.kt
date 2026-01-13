@@ -57,16 +57,4 @@ enum class OpennessLevel {
      * The data served by this instance is fully open and may be shared with anyone.
      */
     OPEN,
-
-    /**
-     * The data served by this instance must not be disclosed to everyone.
-     *
-     * Two access keys can be configured:
-     *
-     * One access key permits access to aggregated data. The aggregated data must be such that one cannot deduce
-     * information about the data of the individual sequences.
-     *
-     * The other access key permits access to the full data.
-     */
-    PROTECTED,
 }

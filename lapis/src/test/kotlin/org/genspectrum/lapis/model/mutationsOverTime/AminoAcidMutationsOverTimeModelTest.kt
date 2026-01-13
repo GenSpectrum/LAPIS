@@ -231,7 +231,7 @@ class AminoAcidMutationsOverTimeModelTest {
     fun `given one data version change, then it succeeds`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false, any())
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = if (callCount++ == 0) "1" else "2"
             WithDataVersion(
@@ -259,7 +259,7 @@ class AminoAcidMutationsOverTimeModelTest {
     fun `given more than once data version change, then it throws`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false, any())
+            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = (callCount++).toString()
             WithDataVersion(

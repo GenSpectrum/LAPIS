@@ -74,22 +74,3 @@ services:
         source: ../lapis-e2e/testData/multiSegmented/reference_genomes.json
         target: /workspace/reference_genomes.json
         read_only: true
-
-  lapisProtected:
-    image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
-    platform: linux/amd64
-    ports:
-      - "8092:8080"
-    command: --silo.url=http://silo:8081 --lapis.accessKeys.path=/workspace/access_keys.yaml
-    volumes:
-      - type: bind
-        source: ../lapis-e2e/testData/singleSegmented/protectedTestDatabaseConfig.yaml
-        target: /workspace/database_config.yaml
-        read_only: true
-      - type: bind
-        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
-        target: /workspace/reference_genomes.json
-        read_only: true
-      - type: bind
-        source: ./src/test/resources/config/testAccessKeys.yaml
-        target: /workspace/access_keys.yaml

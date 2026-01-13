@@ -135,9 +135,3 @@ To generate the OpenApi docs for an instance with multi-segmented reference geno
 ```bash
 ./gradlew generateOpenApiDocs -Psegmented=true
 ```
-
-To generate the OpenApi docs for a protected instance run
-```bash
-./gradlew generateOpenApiDocs -PopennessLevel=protected
-```
-
