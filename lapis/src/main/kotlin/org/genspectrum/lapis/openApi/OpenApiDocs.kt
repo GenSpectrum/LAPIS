@@ -198,7 +198,7 @@ fun buildOpenApiSchema(
                 )
                 .addSchemas(
                     QUERIES_OVER_TIME_REQUEST_SCHEMA,
-                    requestSchemaForQueriesOverTime(databaseConfig, sequenceFilterFields),
+                    requestSchemaForQueriesOverTime(sequenceFilterFields),
                 )
                 .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
@@ -672,10 +672,7 @@ private fun requestSchemaForMutationsOverTime(sequenceFilterFields: SequenceFilt
                 ),
         )
 
-private fun requestSchemaForQueriesOverTime(
-    databaseConfig: DatabaseConfig,
-    sequenceFilterFields: SequenceFilterFields,
-): Schema<*> =
+private fun requestSchemaForQueriesOverTime(sequenceFilterFields: SequenceFilterFields): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
         .description("Request schema for fetching queries over time.")
@@ -685,9 +682,7 @@ private fun requestSchemaForQueriesOverTime(
                     Schema<Any>()
                         .types(setOf("object"))
                         .description("Sequence filters")
-                        .properties(
-                            getBaseSequenceFilters(databaseConfig, sequenceFilterFields),
-                        ),
+                        .properties(getBaseSequenceFilters(sequenceFilterFields)),
             ) +
                 getCompressionAndDownloadSchema() +
                 mapOf(
