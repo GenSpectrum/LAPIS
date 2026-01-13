@@ -1,17 +1,17 @@
 import {
-    ActuatorApi,
-    Configuration,
-    InfoControllerApi,
-    LapisControllerApi,
-    Middleware,
-    QueriesOverTimeControllerApi,
-    SingleSegmentedSequenceControllerApi,
+  ActuatorApi,
+  Configuration,
+  InfoControllerApi,
+  LapisControllerApi,
+  Middleware,
+  QueriesOverTimeControllerApi,
+  SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
 import {
-    LapisControllerApi as LapisControllerApiMultiSegmented,
-    MultiSegmentedSequenceControllerApi,
+  LapisControllerApi as LapisControllerApiMultiSegmented,
+  MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
