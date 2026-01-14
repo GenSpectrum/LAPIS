@@ -125,7 +125,10 @@ Creating a release means:
 ### Commit Messages
 
 The changelog and the version number are determined by the commit messages.
-Therefore, commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+Therefore, commit messages on the `main` branch should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+Since we squash-merge pull requests, the PR title should also follow conventional commits
+(because it will become the commit message of the squashed commit).
+
 Also refer to the Release Please documentation for more information on how to write commit messages.
 If you want to indicate a breaking change, you can use the `BREAKING CHANGE` keyword in the commit message,
 followed by the description of the breaking change.
