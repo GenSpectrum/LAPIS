@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.deletionSymbols
@@ -13,6 +14,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.QueryOverTimeItem
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -33,7 +35,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-private const val MUTATION_QUERY_TIMEOUT_SECONDS = 60L
+private const val QUERY_TIMEOUT_SECONDS = 60L
 
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
@@ -69,18 +71,87 @@ data class MutationsOverTimeCell(
     var coverage: Int,
 )
 
+@Schema(
+    description = "The result in tabular format with queries as rows (outer array) and date ranges as " +
+        "columns (inner array).",
+)
+data class QueriesOverTimeResult(
+    @param:Schema(
+        description = "The 'displayLabel's of the supplied queries",
+    )
+    var queries: List<String>,
+    @param:Schema(
+        description = "The list of requested date ranges",
+    )
+    var dateRanges: List<DateRange>,
+    @param:Schema(
+        description = "A 2D array of query counts and coverage. " +
+            "It should be understood as data[index of query][index of date range].",
+    )
+    var data: List<List<QueryOverTimeCell>>,
+    @param:Schema(
+        description = "The list of total sample counts per date range",
+    )
+    var totalCountsByDateRange: List<Number>,
+) {
+    fun toMutationsOverTimeResult() =
+        MutationsOverTimeResult(
+            mutations = queries,
+            dateRanges = dateRanges,
+            data = data.map { row ->
+                row.map { cell ->
+                    MutationsOverTimeCell(
+                        count = cell.count,
+                        coverage = cell.coverage,
+                    )
+                }
+            },
+            totalCountsByDateRange = totalCountsByDateRange,
+        )
+}
+
+data class QueryOverTimeCell(
+    @param:Schema(description = "Number of sequences that match the 'countQuery' in the date range")
+    var count: Int,
+    @param:Schema(
+        description = "Number of sequences that match the 'coverageQuery' in the date range. " +
+            "The query should be picked such that this number is the count of sequences that have a non-ambiguous " +
+            "symbol at the positions of interest.",
+    )
+    var coverage: Int,
+)
+
 @Component
-class MutationsOverTimeModel(
+class QueriesOverTimeModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
     private val dataVersion: DataVersion,
-    private val config: DatabaseConfig,
+    private val advancedQueryFacade: AdvancedQueryFacade,
+    config: DatabaseConfig,
 ) {
     /**
      * Thread pool used for parallel queries to SILO.
      */
     private val threadPool = Executors.newFixedThreadPool(config.siloClientThreadCount)
+
+    fun evaluateQueriesOverTime(
+        queries: List<QueryOverTimeItem>,
+        dateRanges: List<DateRange>,
+        lapisFilter: BaseSequenceFilters,
+        dateField: String,
+        remainingRetries: Int = 1,
+    ): QueriesOverTimeResult =
+        evaluateInternal(
+            queryItems = queries,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
+            mutationToStringFn = { query -> query.displayLabel ?: query.countQuery },
+            countQueryFn = { query -> advancedQueryFacade.map(query.countQuery) },
+            coverageQueryFn = { query -> advancedQueryFacade.map(query.coverageQuery) },
+        )
 
     fun evaluateAminoAcidMutations(
         mutations: List<AminoAcidMutation>,
@@ -98,7 +169,7 @@ class MutationsOverTimeModel(
             }
         }
         return evaluateInternal(
-            mutations = mutations,
+            queryItems = mutations,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
             dateField = dateField,
@@ -107,6 +178,7 @@ class MutationsOverTimeModel(
             countQueryFn = { mutation ->
                 when (mutation.symbol) {
                     null -> HasAminoAcidMutation(mutation.gene, mutation.position)
+
                     else -> AminoAcidSymbolEquals(
                         mutation.gene,
                         mutation.position,
@@ -125,7 +197,7 @@ class MutationsOverTimeModel(
                     },
                 )
             },
-        )
+        ).toMutationsOverTimeResult()
     }
 
     fun evaluateNucleotideMutations(
@@ -144,7 +216,7 @@ class MutationsOverTimeModel(
             }
         }
         return evaluateInternal(
-            mutations = mutations,
+            queryItems = mutations,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
             dateField = dateField,
@@ -153,6 +225,7 @@ class MutationsOverTimeModel(
             countQueryFn = { mutation ->
                 when (mutation.symbol) {
                     null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
+
                     else -> NucleotideSymbolEquals(
                         mutation.sequenceName,
                         mutation.position,
@@ -171,35 +244,34 @@ class MutationsOverTimeModel(
                     },
                 )
             },
-        )
+        ).toMutationsOverTimeResult()
     }
 
     fun <T> evaluateInternal(
-        mutations: List<T>,
+        queryItems: List<T>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-        mutationToStringFn: (mutation: T) -> String,
-        countQueryFn: (mutation: T) -> SiloFilterExpression,
-        coverageQueryFn: (mutation: T) -> SiloFilterExpression,
-    ): MutationsOverTimeResult {
-        if (mutations.isEmpty() || dateRanges.isEmpty()) {
+        mutationToStringFn: (queryItem: T) -> String,
+        countQueryFn: (queryItem: T) -> SiloFilterExpression,
+        coverageQueryFn: (queryItem: T) -> SiloFilterExpression,
+    ): QueriesOverTimeResult {
+        if (queryItems.isEmpty() || dateRanges.isEmpty()) {
             siloClient.callInfo() // populates dataVersion.dataVersion
-            return MutationsOverTimeResult(
-                mutations = mutations.map(mutationToStringFn),
+            return QueriesOverTimeResult(
+                queries = queryItems.map(mutationToStringFn),
                 dateRanges = dateRanges,
                 data = emptyList(),
                 totalCountsByDateRange = emptyList(),
             )
         }
 
-        val dateQuery =
-            DateBetween(
-                column = dateField,
-                from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
-                to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
-            )
+        val dateQuery = DateBetween(
+            column = dateField,
+            from = dateRanges.mapNotNull { it.dateFrom }.minOrNull(),
+            to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
+        )
 
         val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
 
@@ -211,7 +283,7 @@ class MutationsOverTimeModel(
             dateRanges,
         )
 
-        val tasks = mutations.map { mutation ->
+        val tasks = queryItems.map { mutation ->
             Callable {
                 val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
                 val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
@@ -227,7 +299,7 @@ class MutationsOverTimeModel(
 
         val dataWithDataVersions = this.threadPool.invokeAll(
             tasks,
-            MUTATION_QUERY_TIMEOUT_SECONDS,
+            QUERY_TIMEOUT_SECONDS,
             TimeUnit.SECONDS,
         ).map {
             it.get()
@@ -237,14 +309,14 @@ class MutationsOverTimeModel(
         if (dataVersions.distinct().size != 1) {
             if (remainingRetries > 0) {
                 return evaluateInternal(
-                    mutations,
-                    dateRanges,
-                    lapisFilter,
-                    dateField,
-                    remainingRetries - 1,
-                    mutationToStringFn,
-                    countQueryFn,
-                    coverageQueryFn,
+                    queryItems = queryItems,
+                    dateRanges = dateRanges,
+                    lapisFilter = lapisFilter,
+                    dateField = dateField,
+                    remainingRetries = remainingRetries - 1,
+                    mutationToStringFn = mutationToStringFn,
+                    countQueryFn = countQueryFn,
+                    coverageQueryFn = coverageQueryFn,
                 )
             }
             throw RuntimeException(
@@ -254,8 +326,8 @@ class MutationsOverTimeModel(
         }
         dataVersion.dataVersion = dataVersions.first()
 
-        return MutationsOverTimeResult(
-            mutations = mutations.map(mutationToStringFn),
+        return QueriesOverTimeResult(
+            queries = queryItems.map(mutationToStringFn),
             dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
             totalCountsByDateRange = totalCountsByDateRange,
@@ -298,8 +370,8 @@ class MutationsOverTimeModel(
         coverage: List<AggregationData>,
         dateField: String,
         dateRanges: List<DateRange>,
-    ): List<MutationsOverTimeCell> {
-        val result = Array(dateRanges.size) { MutationsOverTimeCell(0, 0) }
+    ): List<QueryOverTimeCell> {
+        val result = Array(dateRanges.size) { QueryOverTimeCell(0, 0) }
 
         counts.forEach { dateCount ->
             val index = findDateRangeIndex(dateCount, dateField, dateRanges)
@@ -338,10 +410,7 @@ class MutationsOverTimeModel(
         dateField: String,
         dateRanges: List<DateRange>,
     ): Int? {
-        val dateString = datum.fields[dateField]?.asText()
-        if (dateString == null) {
-            return null
-        }
+        val dateString = datum.fields[dateField]?.asText() ?: return null
 
         val date = LocalDate.parse(dateString)
 

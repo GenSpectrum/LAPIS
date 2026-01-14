@@ -197,6 +197,10 @@ fun buildOpenApiSchema(
                     requestSchemaForMutationsOverTime(sequenceFilterFields),
                 )
                 .addSchemas(
+                    QUERIES_OVER_TIME_REQUEST_SCHEMA,
+                    requestSchemaForQueriesOverTime(sequenceFilterFields),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisArrayResponseSchema(
                         Schema<String>()
@@ -663,19 +667,68 @@ private fun requestSchemaForMutationsOverTime(sequenceFilterFields: SequenceFilt
                                 .description("Mutation to include"),
                         )
                         .description("List of mutations to include"),
-                    "dateRanges" to ArraySchema()
-                        .items(
-                            ObjectSchema()
-                                .addProperty("dateFrom", StringSchema().example("2025-05-12"))
-                                .addProperty("dateTo", StringSchema().example("2025-06-12"))
-                                .description("Date range in which to aggregate mutation data."),
-                        )
-                        .description("List of date ranges for aggregation."),
-                    "dateField" to StringSchema()
-                        .example("date")
-                        .description("Metadata field name containing the date"),
+                    "dateRanges" to dateRangesSchema(),
+                    "dateField" to dateFieldSchema(),
                 ),
         )
+
+private fun requestSchemaForQueriesOverTime(sequenceFilterFields: SequenceFilterFields): Schema<*> =
+    Schema<Any>()
+        .types(setOf("object"))
+        .description("Request schema for fetching queries over time.")
+        .properties(
+            mapOf(
+                "filters" to
+                    Schema<Any>()
+                        .types(setOf("object"))
+                        .description("Sequence filters")
+                        .properties(getBaseSequenceFilters(sequenceFilterFields)),
+            ) +
+                getCompressionAndDownloadSchema() +
+                mapOf(
+                    "queries" to queryOverTimeItemsSchema(),
+                    "dateRanges" to dateRangesSchema(),
+                    "dateField" to dateFieldSchema(),
+                ),
+        )
+
+private fun queryOverTimeItemsSchema() =
+    ArraySchema()
+        .items(
+            Schema<Any>()
+                .types(setOf("object"))
+                .properties(
+                    mapOf(
+                        "displayLabel" to StringSchema()
+                            .description(
+                                "A display label to be used in the result table. " +
+                                    "Defaults to the 'countQuery' if not provided.",
+                            ),
+                        "countQuery" to StringSchema()
+                            .example("gene1:123G AND 456G")
+                            .description("An advanced query to compute the count in each date range."),
+                        "coverageQuery" to StringSchema()
+                            .example("!gene1:123N AND !456N")
+                            .description("An advanced query to compute the coverage in each date range."),
+                    ),
+                ),
+        )
+        .description("List of queries to evaluate in each date range.")
+
+private fun dateRangesSchema() =
+    ArraySchema()
+        .items(
+            ObjectSchema()
+                .addProperty("dateFrom", StringSchema().example("2025-05-12"))
+                .addProperty("dateTo", StringSchema().example("2025-06-12"))
+                .description("Date range in which to aggregate mutation data."),
+        )
+        .description("List of date ranges for aggregation.")
+
+private fun dateFieldSchema() =
+    StringSchema()
+        .example("date")
+        .description("Metadata field name containing the date")
 
 private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilterFieldName, Schema<Any>>) =
     filterProperties.mapValues { (_, schema) ->

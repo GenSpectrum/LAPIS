@@ -4,9 +4,9 @@ import {
   InfoControllerApi,
   LapisControllerApi,
   Middleware,
+  QueriesOverTimeControllerApi,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
-import { MutationsOverTimeControllerApi } from './lapisClient/index';
 import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
   MultiSegmentedSequenceControllerApi,
@@ -44,7 +44,7 @@ export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePat
   middleware
 );
 export const actuatorClient = new ActuatorApi(new Configuration({ basePath })).withMiddleware(middleware);
-export const mutOverTimeClient = new MutationsOverTimeControllerApi(
+export const queriesOverTimeClient = new QueriesOverTimeControllerApi(
   new Configuration({ basePath })
 ).withMiddleware(middleware);
 export const lapisClientMultiSegmented = new LapisControllerApiMultiSegmented(

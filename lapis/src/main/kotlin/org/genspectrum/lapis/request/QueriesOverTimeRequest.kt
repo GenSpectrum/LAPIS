@@ -4,24 +4,47 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
+import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.springframework.boot.jackson.JsonComponent
 
 data class NucleotideMutationsOverTimeRequest(
-    val filters: MutationsOverTimeRequestFilters,
+    val filters: QueriesOverTimeRequestFilters,
     val includeMutations: List<NucleotideMutation>,
     val dateRanges: List<DateRange>,
     val dateField: String,
 )
 
 data class AminoAcidMutationsOverTimeRequest(
-    val filters: MutationsOverTimeRequestFilters,
+    val filters: QueriesOverTimeRequestFilters,
     val includeMutations: List<AminoAcidMutation>,
     val dateRanges: List<DateRange>,
     val dateField: String,
 )
 
-data class MutationsOverTimeRequestFilters(
+data class QueriesOverTimeRequest(
+    val filters: QueriesOverTimeRequestFilters,
+    val queries: List<QueryOverTimeItem>,
+    val dateRanges: List<DateRange>,
+    val dateField: String,
+)
+
+data class QueryOverTimeItem(
+    @param:Schema(
+        description = "A display label to be used in the result table. Defaults to the 'countQuery' if not provided.",
+    )
+    val displayLabel: String? = null,
+    @param:Schema(
+        description = "An advanced query to compute the count in each date range.",
+    )
+    val countQuery: String,
+    @param:Schema(
+        description = "An advanced query to compute the coverage in each date range.",
+    )
+    val coverageQuery: String,
+)
+
+data class QueriesOverTimeRequestFilters(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aminoAcidMutations: List<AminoAcidMutation>,
@@ -30,17 +53,17 @@ data class MutationsOverTimeRequestFilters(
 ) : BaseSequenceFilters
 
 @JsonComponent
-class MutationsOverTimeRequestFiltersDeserializer : JsonDeserializer<MutationsOverTimeRequestFilters>() {
+class QueriesOverTimeRequestFiltersDeserializer : JsonDeserializer<QueriesOverTimeRequestFilters>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
-    ): MutationsOverTimeRequestFilters {
+    ): QueriesOverTimeRequestFilters {
         val node = jsonParser.readValueAsTree<JsonNode>()
         val codec = jsonParser.codec
 
         val parsedCommonFields = parseCommonFields(node, codec)
 
-        return MutationsOverTimeRequestFilters(
+        return QueriesOverTimeRequestFilters(
             parsedCommonFields.sequenceFilters,
             parsedCommonFields.nucleotideMutations,
             parsedCommonFields.aminoAcidMutations,

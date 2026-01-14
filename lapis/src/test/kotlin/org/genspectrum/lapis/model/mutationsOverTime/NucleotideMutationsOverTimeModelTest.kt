@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
@@ -45,7 +46,10 @@ class NucleotideMutationsOverTimeModelTest {
     @Autowired
     private lateinit var dataVersion: DataVersion
 
-    private lateinit var underTest: MutationsOverTimeModel
+    @Autowired
+    private lateinit var advancedQueryFacade: AdvancedQueryFacade
+
+    private lateinit var underTest: QueriesOverTimeModel
 
     @Autowired
     private lateinit var config: DatabaseConfig
@@ -53,8 +57,14 @@ class NucleotideMutationsOverTimeModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest =
-            MutationsOverTimeModel(siloQueryClient, siloFilterExpressionMapper, referenceGenome, dataVersion, config)
+        underTest = QueriesOverTimeModel(
+            siloClient = siloQueryClient,
+            siloFilterExpressionMapper = siloFilterExpressionMapper,
+            referenceGenome = referenceGenome,
+            dataVersion = dataVersion,
+            advancedQueryFacade = advancedQueryFacade,
+            config = config,
+        )
     }
 
     @Test
