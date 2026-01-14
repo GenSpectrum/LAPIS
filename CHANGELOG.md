@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.4](https://github.com/GenSpectrum/LAPIS/compare/v0.6.3...v0.6.4) (2026-01-14)
+
+
+### Features
+
+* **lapis:** add new endpoint `/component/queriesOverTime` ([#1496](https://github.com/GenSpectrum/LAPIS/issues/1496)) ([6a9597c](https://github.com/GenSpectrum/LAPIS/commit/6a9597cda9a114568e020336ad6549abef9b3c2d))
+* **lapis:** remove `protected` OpennessLevel ([#1499](https://github.com/GenSpectrum/LAPIS/issues/1499)) ([f1d24c5](https://github.com/GenSpectrum/LAPIS/commit/f1d24c585a45c5c45013bc9dd231e1b0e0ded244))
+
 ## [0.6.3](https://github.com/GenSpectrum/LAPIS/compare/v0.6.2...v0.6.3) (2025-12-09)
 
 
