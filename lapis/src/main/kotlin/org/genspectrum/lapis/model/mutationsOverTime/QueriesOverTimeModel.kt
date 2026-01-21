@@ -59,6 +59,11 @@ data class MutationsOverTimeResult(
         description = "The list of total sample counts per date range",
     )
     var totalCountsByDateRange: List<Number>,
+    @param:Schema(
+        description = "Aggregated statistics per mutation, summed across all date ranges. " +
+            "One entry per mutation in the same order as the mutations array.",
+    )
+    var overallStatisticsByMutation: List<OverallStatistics>,
 )
 
 data class MutationsOverTimeCell(
@@ -93,6 +98,11 @@ data class QueriesOverTimeResult(
         description = "The list of total sample counts per date range",
     )
     var totalCountsByDateRange: List<Number>,
+    @param:Schema(
+        description = "Aggregated statistics per query, summed across all date ranges. " +
+            "One entry per query in the same order as the queries array.",
+    )
+    var overallStatisticsByQuery: List<OverallStatistics>,
 ) {
     fun toMutationsOverTimeResult() =
         MutationsOverTimeResult(
@@ -107,6 +117,7 @@ data class QueriesOverTimeResult(
                 }
             },
             totalCountsByDateRange = totalCountsByDateRange,
+            overallStatisticsByMutation = overallStatisticsByQuery,
         )
 }
 
@@ -119,6 +130,15 @@ data class QueryOverTimeCell(
             "symbol at the positions of interest.",
     )
     var coverage: Int,
+)
+
+data class OverallStatistics(
+    @param:Schema(description = "Total count across all date ranges")
+    var count: Int,
+    @param:Schema(description = "Total coverage across all date ranges")
+    var coverage: Int,
+    @param:Schema(description = "Proportion (count / coverage). Omitted if coverage is 0.")
+    var proportion: Double?,
 )
 
 @Component
@@ -264,6 +284,7 @@ class QueriesOverTimeModel(
                 dateRanges = dateRanges,
                 data = emptyList(),
                 totalCountsByDateRange = emptyList(),
+                overallStatisticsByQuery = emptyList(),
             )
         }
 
@@ -326,11 +347,14 @@ class QueriesOverTimeModel(
         }
         dataVersion.dataVersion = dataVersions.first()
 
+        val overallStats = computeOverallStatistics(dataWithDataVersions.map { it.second })
+
         return QueriesOverTimeResult(
             queries = queryItems.map(mutationToStringFn),
             dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
             totalCountsByDateRange = totalCountsByDateRange,
+            overallStatisticsByQuery = overallStats,
         )
     }
 
@@ -417,6 +441,23 @@ class QueriesOverTimeModel(
         return dateRanges.indexOfFirst {
             it.containsDate(date)
         }.takeIf { it >= 0 }
+    }
+
+    /**
+     * Aggregates statistics across all date ranges for each query/mutation.
+     * For each row in the data (representing a mutation/query), sums up the counts and coverage
+     * across all columns (representing date ranges).
+     */
+    private fun computeOverallStatistics(data: List<List<QueryOverTimeCell>>): List<OverallStatistics> {
+        return data.map { row ->
+            val totalCount = row.sumOf { it.count }
+            val totalCoverage = row.sumOf { it.coverage }
+            OverallStatistics(
+                count = totalCount,
+                coverage = totalCoverage,
+                proportion = if (totalCoverage > 0) totalCount.toDouble() / totalCoverage else null,
+            )
+        }
     }
 
     @PreDestroy

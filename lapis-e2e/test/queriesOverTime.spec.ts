@@ -41,6 +41,10 @@ describe('The /mutationsOverTime endpoint', () => {
         ],
       ],
       totalCountsByDateRange: [22, 77, 0],
+      overallStatisticsByQuery: [
+        { count: 58, coverage: 95, proportion: 58 / 95 },
+        { count: 1, coverage: 95, proportion: 1 / 95 },
+      ],
     });
   });
 
@@ -79,6 +83,14 @@ describe('The /mutationsOverTime endpoint', () => {
       { count: 58, coverage: 62 },
       { count: 14, coverage: 14 },
     ]);
+
+    expect(result.data.overallStatisticsByMutation).to.have.lengthOf(4);
+    const c241tStats = result.data.overallStatisticsByMutation![3];
+    expect(c241tStats).to.deep.equal({
+      count: 92,
+      coverage: 96,
+      proportion: 92 / 96,
+    });
   });
 
   it('returns an empty response if no mutations are given', async () => {
@@ -108,6 +120,7 @@ describe('The /mutationsOverTime endpoint', () => {
     expect(result.data.data).to.have.lengthOf(0);
     expect(result.data.dateRanges).to.have.lengthOf(3);
     expect(result.data.mutations).to.have.lengthOf(0);
+    expect(result.data.overallStatisticsByMutation).to.have.lengthOf(0);
   });
 
   it('returns an empty response if no date ranges are given', async () => {
@@ -124,6 +137,7 @@ describe('The /mutationsOverTime endpoint', () => {
     expect(result.data.data).to.have.lengthOf(0);
     expect(result.data.dateRanges).to.have.lengthOf(0);
     expect(result.data.mutations).to.have.lengthOf(4);
+    expect(result.data.overallStatisticsByMutation).to.have.lengthOf(0);
     expect(result.info.dataVersion).to.exist;
   });
 

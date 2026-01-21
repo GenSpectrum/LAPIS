@@ -9,6 +9,7 @@ import io.mockk.verify
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeCell
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
+import org.genspectrum.lapis.model.mutationsOverTime.OverallStatistics
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueryOverTimeCell
@@ -66,6 +67,10 @@ class QueriesOverTimeControllerTest(
                 listOf(QueryOverTimeCell(count = 5, coverage = 50)),
             ),
             totalCountsByDateRange = listOf(300),
+            overallStatisticsByQuery = listOf(
+                OverallStatistics(count = 10, coverage = 100, proportion = 0.1),
+                OverallStatistics(count = 5, coverage = 50, proportion = 0.1),
+            ),
         )
 
         val queriesSlot = slot<List<QueryOverTimeItem>>()
@@ -111,6 +116,12 @@ class QueriesOverTimeControllerTest(
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[0].count").value(10))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[0].coverage").value(100))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[0].proportion").value(0.1))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[1].count").value(5))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[1].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByQuery[1].proportion").value(0.1))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
         verify(exactly = 1) { modelMock.evaluateQueriesOverTime(any(), any(), any(), any()) }
@@ -135,6 +146,7 @@ class QueriesOverTimeControllerTest(
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(QueryOverTimeCell(count = 1, coverage = 2))),
             totalCountsByDateRange = listOf(300),
+            overallStatisticsByQuery = listOf(OverallStatistics(count = 1, coverage = 2, proportion = 0.5)),
         )
 
         val mvcResult = mockMvc.perform(
@@ -246,6 +258,10 @@ class NucleotideMutationsOverTimeControllerTest(
                 listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
             ),
             totalCountsByDateRange = listOf(300),
+            overallStatisticsByMutation = listOf(
+                OverallStatistics(count = 10, coverage = 100, proportion = 0.1),
+                OverallStatistics(count = 5, coverage = 50, proportion = 0.1),
+            ),
         )
 
         val mutationsSlot = slot<List<NucleotideMutation>>()
@@ -288,6 +304,12 @@ class NucleotideMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].count").value(10))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].coverage").value(100))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].proportion").value(0.1))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].count").value(5))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].proportion").value(0.1))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
         verify(exactly = 1) { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) }
@@ -312,6 +334,7 @@ class NucleotideMutationsOverTimeControllerTest(
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
             totalCountsByDateRange = listOf(300),
+            overallStatisticsByMutation = listOf(OverallStatistics(count = 1, coverage = 2, proportion = 0.5)),
         )
 
         val mvcResult = mockMvc.perform(
@@ -421,6 +444,10 @@ class AminoAcidMutationsOverTimeControllerTest(
                 listOf(MutationsOverTimeCell(count = 5, coverage = 50)),
             ),
             totalCountsByDateRange = listOf(300),
+            overallStatisticsByMutation = listOf(
+                OverallStatistics(count = 10, coverage = 100, proportion = 0.1),
+                OverallStatistics(count = 5, coverage = 50, proportion = 0.1),
+            ),
         )
 
         val mutationsSlot = slot<List<AminoAcidMutation>>()
@@ -463,6 +490,12 @@ class AminoAcidMutationsOverTimeControllerTest(
             .andExpect(jsonPath("$.data.data[0][0].coverage").value(100))
             .andExpect(jsonPath("$.data.data[1][0].count").value(5))
             .andExpect(jsonPath("$.data.data[1][0].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].count").value(10))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].coverage").value(100))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[0].proportion").value(0.1))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].count").value(5))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].coverage").value(50))
+            .andExpect(jsonPath("$.data.overallStatisticsByMutation[1].proportion").value(0.1))
             .andExpect(jsonPath("$.info.dataVersion").value(1234))
 
         verify(exactly = 1) { modelMock.evaluateAminoAcidMutations(any(), any(), any(), any()) }
@@ -487,6 +520,7 @@ class AminoAcidMutationsOverTimeControllerTest(
             dateRanges = listOf(DateRange(LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-31"))),
             data = listOf(listOf(MutationsOverTimeCell(count = 1, coverage = 2))),
             totalCountsByDateRange = listOf(3),
+            overallStatisticsByMutation = listOf(OverallStatistics(count = 1, coverage = 2, proportion = 0.5)),
         )
 
         val mvcResult = mockMvc.perform(

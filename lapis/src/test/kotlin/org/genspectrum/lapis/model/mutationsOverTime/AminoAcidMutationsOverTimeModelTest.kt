@@ -84,6 +84,7 @@ AminoAcidMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(dateRanges))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(result.overallStatisticsByMutation, equalTo(emptyList()))
         assertThat(dataVersion.dataVersion, notNullValue())
     }
 
@@ -103,6 +104,7 @@ AminoAcidMutationsOverTimeModelTest {
         assertThat(result.data, equalTo(emptyList()))
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
+        assertThat(result.overallStatisticsByMutation, equalTo(emptyList()))
         assertThat(dataVersion.dataVersion, notNullValue())
     }
 
@@ -188,6 +190,15 @@ AminoAcidMutationsOverTimeModelTest {
             result.totalCountsByDateRange,
             equalTo(listOf(10, 23)),
         )
+        assertThat(
+            result.overallStatisticsByMutation,
+            equalTo(
+                listOf(
+                    OverallStatistics(count = 3, coverage = 11, proportion = 3.0 / 11.0),
+                    OverallStatistics(count = 7, coverage = 2, proportion = 7.0 / 2.0),
+                ),
+            ),
+        )
         assertThat(dataVersion.dataVersion, notNullValue())
     }
 
@@ -236,6 +247,14 @@ AminoAcidMutationsOverTimeModelTest {
             ),
         )
         assertThat(result.totalCountsByDateRange, equalTo(listOf(0, 0)))
+        assertThat(
+            result.overallStatisticsByMutation,
+            equalTo(
+                listOf(
+                    OverallStatistics(count = 0, coverage = 0, proportion = null),
+                ),
+            ),
+        )
     }
 
     @Test
