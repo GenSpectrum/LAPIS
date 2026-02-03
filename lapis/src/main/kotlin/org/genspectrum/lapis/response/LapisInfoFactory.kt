@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.response
 
 import jakarta.servlet.http.HttpServletRequest
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -11,6 +10,7 @@ import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.stereotype.Component
 import java.net.URI
+import kotlin.time.Clock
 
 @Component
 class LapisInfoFactory(
