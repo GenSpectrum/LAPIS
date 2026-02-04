@@ -44,6 +44,9 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat'
 
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: "org.mockito"
     }
