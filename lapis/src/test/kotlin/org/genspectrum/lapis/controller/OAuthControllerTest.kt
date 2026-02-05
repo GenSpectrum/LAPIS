@@ -9,6 +9,7 @@ import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -48,6 +49,13 @@ class OAuthControllerTest(
     @BeforeEach
     fun setup() {
         every { dataVersion.dataVersion } returns "1234"
+    }
+
+    @ParameterizedTest(name = "GIVEN no access token WHEN I request {0} THEN returns success")
+    @ValueSource(strings = ["/swagger-ui/index.html", "/api-docs", "/api-docs.yaml", "/actuator", "/actuator/caches"])
+    fun `GIVEN no access token WHEN I request publicly available resource THEN returns success`(path: String) {
+        mockMvc.perform(get(path))
+            .andExpect(status().isOk)
     }
 
     @ParameterizedTest(name = "GIVEN no access token WHEN I request {0} THEN return 401 unauthorized")
