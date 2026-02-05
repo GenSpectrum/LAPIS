@@ -40,6 +40,7 @@ class OAuthConfig {
             log.info { "No $AUTH_URL_PROPERTY provided, skipping authentication for all endpoints" }
             return httpSecurity
                 .authorizeHttpRequests { it.anyRequest().permitAll() }
+                .csrf { it.disable() }
                 .build()
         }
 
