@@ -6,7 +6,6 @@ import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.NESTED_JSO
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.silo.DataVersion
 import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.empty
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -22,7 +21,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.security.interfaces.RSAPublicKey
 
@@ -35,6 +33,12 @@ import java.security.interfaces.RSAPublicKey
 class OAuthControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
+    @TestConfiguration
+    class PublicJwtKeyConfig {
+        @Bean
+        fun jwtDecoder(): NimbusJwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
+    }
+
     @MockkBean
     lateinit var siloQueryModelMock: SiloQueryModel
 
@@ -43,9 +47,7 @@ class OAuthControllerTest(
 
     @BeforeEach
     fun setup() {
-        every {
-            dataVersion.dataVersion
-        } returns "1234"
+        every { dataVersion.dataVersion } returns "1234"
     }
 
     @ParameterizedTest(name = "GIVEN no access token WHEN I request {0} THEN return 401 unauthorized")
@@ -72,13 +74,14 @@ class OAuthControllerTest(
             .andExpect(header().string("WWW-Authenticate", containsString("Bearer error=\"invalid_token\"")))
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "GIVEN valid access token WHEN I request {0} THEN returns success")
     @MethodSource("getScenarios")
-    fun `TODO`(route: SampleRoute) {
+    fun `GIVEN valid access token WHEN I request THEN returns success`(route: SampleRoute) {
         when (route.serveType) {
-            ServeType.SEQUENCES -> TODO()
+            ServeType.SEQUENCES -> MockDataForEndpoints.sequenceEndpointMockDataForAllSequences()
+                .mockToReturnEmptyData(siloQueryModelMock)
 
-            ServeType.NEWICK -> TODO()
+            ServeType.NEWICK -> MockDataForEndpoints.treeEndpointMockData().mockToReturnEmptyData(siloQueryModelMock)
 
             ServeType.METADATA -> MockDataForEndpoints.getMockData(route.pathSegment).expecting(NESTED_JSON)
                 .mockToReturnEmptyData(siloQueryModelMock)
@@ -90,7 +93,7 @@ class OAuthControllerTest(
                 .withAuth(validJwt),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data").value(empty<Any>()))
+            .andExpect(header().string("LAPIS-Data-Version", "1234"))
 
         mockMvc.perform(
             post("/sample${route.pathSegment}")
@@ -99,17 +102,11 @@ class OAuthControllerTest(
                 .withAuth(validJwt),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data").value(empty<Any>()))
+            .andExpect(header().string("LAPIS-Data-Version", "1234"))
     }
 
     private companion object {
         @JvmStatic
         fun getScenarios() = SampleRoute.entries
-    }
-
-    @TestConfiguration
-    class PublicJwtKeyConfig {
-        @Bean
-        fun jwtDecoder(): NimbusJwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
     }
 }

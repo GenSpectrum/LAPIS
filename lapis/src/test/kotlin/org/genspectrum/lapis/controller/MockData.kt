@@ -224,15 +224,11 @@ data class TreeEndpointMockDataCollection(
             phyloTreeField: String? = null,
         ) = TreeEndpointMockDataCollection(
             { modelMock ->
-                every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.of(
-                    PhyloSubtreeData(
-                        subtreeNewick = "",
-                        missingNodeCount = 0,
-                        missingFromTree = null,
-                    ),
-                )
+                every { siloQueryModelMockCall(modelMock)(any()) } answers {
+                    Stream.of(PhyloSubtreeData(subtreeNewick = "", missingNodeCount = 0, missingFromTree = null))
+                }
             },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
             expectedNewick,
             fields,
             phyloTreeField,
