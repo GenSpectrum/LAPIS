@@ -2,7 +2,7 @@ package org.genspectrum.lapis
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -20,8 +20,6 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.access.DelegatingAccessDeniedHandler
 import org.springframework.security.web.csrf.CsrfException
 
-private const val AUTH_URL_PROPERTY = "spring.security.oauth2.resourceserver.jwt.jwk-set-uri"
-
 @Configuration
 @EnableWebSecurity
 class OAuthConfig {
@@ -34,41 +32,46 @@ class OAuthConfig {
     @Bean
     fun securityFilterChain(
         httpSecurity: HttpSecurity,
-        @Value("\${$AUTH_URL_PROPERTY:#{null}}") authUrlProperty: String?,
+        resourceServerProperties: OAuth2ResourceServerProperties,
     ): SecurityFilterChain {
-        if (authUrlProperty == null) {
-            log.info { "No $AUTH_URL_PROPERTY provided, skipping authentication for all endpoints" }
+        val useJwtAuth =
+            !resourceServerProperties.jwt.jwkSetUri.isNullOrBlank() ||
+                !resourceServerProperties.jwt.issuerUri.isNullOrBlank() ||
+                resourceServerProperties.jwt.publicKeyLocation != null
+
+        if (useJwtAuth) {
+            log.info { "Configuring JWT authentication for endpoints" }
+
             return httpSecurity
-                .authorizeHttpRequests { it.anyRequest().permitAll() }
+                .authorizeHttpRequests { auth ->
+                    auth.requestMatchers(
+                        "/",
+                        "/favicon.ico",
+                        "/error/**",
+                        "/actuator/**",
+                        "/api-docs**",
+                        "/api-docs/**",
+                        "/swagger-ui/**",
+                    ).permitAll()
+                    auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
+                    auth.anyRequest().authenticated()
+                }
+                // we don't need CSRF protection since LAPIS doesn't have state, and we don't send the token in the cookies
                 .csrf { it.disable() }
+                .oauth2ResourceServer { oauth2 ->
+                    oauth2.jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(
+                            LoggingAuthenticationEntryPoint(BearerTokenAuthenticationEntryPoint()),
+                        )
+                        .accessDeniedHandler(LoggingAccessDeniedHandler(defaultAccessDeniedHandler))
+                }
                 .build()
         }
 
-        log.info { "Configuring authentication for endpoints, using $AUTH_URL_PROPERTY=$authUrlProperty" }
-
+        log.info { "No auth configuration provided, skipping authentication for all endpoints" }
         return httpSecurity
-            .authorizeHttpRequests { auth ->
-                auth.requestMatchers(
-                    "/",
-                    "/favicon.ico",
-                    "/error/**",
-                    "/actuator/**",
-                    "/api-docs**",
-                    "/api-docs/**",
-                    "/swagger-ui/**",
-                ).permitAll()
-                auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
-                auth.anyRequest().authenticated()
-            }
-            // we don't need CSRF protection since LAPIS doesn't have state, and we don't send the token in the cookies
+            .authorizeHttpRequests { it.anyRequest().permitAll() }
             .csrf { it.disable() }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt(Customizer.withDefaults())
-                    .authenticationEntryPoint(
-                        LoggingAuthenticationEntryPoint(BearerTokenAuthenticationEntryPoint()),
-                    )
-                    .accessDeniedHandler(LoggingAccessDeniedHandler(defaultAccessDeniedHandler))
-            }
             .build()
     }
 }
