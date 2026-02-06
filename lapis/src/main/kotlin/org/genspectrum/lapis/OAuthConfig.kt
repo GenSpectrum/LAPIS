@@ -60,6 +60,8 @@ class OAuthConfig {
                 auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
                 auth.anyRequest().authenticated()
             }
+            // we don't need CSRF protection since LAPIS doesn't have state, and we don't send the token in the cookies
+            .csrf { it.disable() }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt(Customizer.withDefaults())
                     .authenticationEntryPoint(

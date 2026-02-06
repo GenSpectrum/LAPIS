@@ -7,6 +7,7 @@ import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
+import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.DataVersion
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +24,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.security.interfaces.RSAPublicKey
@@ -73,9 +73,11 @@ class OAuthTest(
                 .andExpect(header().string("WWW-Authenticate", "Bearer"))
         }
 
-        mockMvc.perform(post(scenario.path))
-            .andExpect(status().isForbidden)
-            .andExpect(content().string(""))
+        if (scenario.supportsPost) {
+            mockMvc.perform(post(scenario.path))
+                .andExpect(status().isUnauthorized)
+                .andExpect(header().string("WWW-Authenticate", "Bearer"))
+        }
     }
 
     @ParameterizedTest(name = "GIVEN invalid access token WHEN I request {0} THEN return 401 unauthorized")
@@ -87,9 +89,11 @@ class OAuthTest(
                 .andExpect(header().string("WWW-Authenticate", containsString("Bearer error=\"invalid_token\"")))
         }
 
-        mockMvc.perform(post(scenario.path).withAuth("invalidToken"))
-            .andExpect(status().isUnauthorized)
-            .andExpect(header().string("WWW-Authenticate", containsString("Bearer error=\"invalid_token\"")))
+        if (scenario.supportsPost) {
+            mockMvc.perform(post(scenario.path).withAuth("invalidToken"))
+                .andExpect(status().isUnauthorized)
+                .andExpect(header().string("WWW-Authenticate", containsString("Bearer error=\"invalid_token\"")))
+        }
     }
 
     @ParameterizedTest(name = "GIVEN valid access token WHEN I request {0} THEN returns success")
@@ -104,14 +108,14 @@ class OAuthTest(
                     .withAuth(validJwt),
             )
                 .andExpect(status().isOk)
-                .andExpect(header().string("LAPIS-Data-Version", "1234"))
         }
 
-        mockMvc.perform(
-            post(scenario.path)
-                .contentType(APPLICATION_JSON)
-                .content(
-                    """
+        if (scenario.supportsPost) {
+            mockMvc.perform(
+                post(scenario.path)
+                    .contentType(APPLICATION_JSON)
+                    .content(
+                        """
                     { 
                         "phyloTreeField": "primaryKey",
                         "filters": [],
@@ -120,12 +124,12 @@ class OAuthTest(
                         "dateField": "",
                         "includeMutations": []
                     }
-                    """.trimIndent(),
-                )
-                .withAuth(validJwt),
-        )
-            .andExpect(status().isOk)
-            .andExpect(header().string("LAPIS-Data-Version", "1234"))
+                        """.trimIndent(),
+                    )
+                    .withAuth(validJwt),
+            )
+                .andExpect(status().isOk)
+        }
     }
 
     private companion object {
@@ -178,8 +182,31 @@ class OAuthTest(
                         queriesOverTimeModelMock.evaluateAminoAcidMutations(any(), any(), any(), any(), any())
                     } returns emptyMutationsOverTimeResult
                 },
+            ) + ProtectedRouteScenario(
+                path = "/sample$INFO_ROUTE",
+                supportsPost = false,
+                setupModelMock = { siloQueryModelMock, _ ->
+                    every {
+                        siloQueryModelMock.getInfo()
+                    } returns InfoData(dataVersion = "dataVersion", siloVersion = "siloVersion")
+                },
+            ) + ProtectedRouteScenario(
+                path = "/sample$DATABASE_CONFIG_ROUTE",
+                supportsPost = false,
+                setupModelMock = { _, _ -> },
+            ) + ProtectedRouteScenario(
+                path = "/sample$LINEAGE_DEFINITION_ROUTE/pangeLineage",
+                supportsPost = false,
+                setupModelMock = { siloQueryModelMock, _ ->
+                    every {
+                        siloQueryModelMock.getLineageDefinition(any())
+                    } returns emptyMap()
+                },
+            ) + ProtectedRouteScenario(
+                path = "/sample$REFERENCE_GENOME_ROUTE",
+                supportsPost = false,
+                setupModelMock = { _, _ -> },
             )
-        // TODO info endpoint?
     }
 }
 
@@ -193,5 +220,6 @@ private val emptyMutationsOverTimeResult = MutationsOverTimeResult(
 data class ProtectedRouteScenario(
     val path: String,
     val supportsGet: Boolean = true,
+    val supportsPost: Boolean = true,
     val setupModelMock: (SiloQueryModel, QueriesOverTimeModel) -> Unit,
 )
