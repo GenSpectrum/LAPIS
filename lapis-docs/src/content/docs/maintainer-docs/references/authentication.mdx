@@ -1,0 +1,82 @@
+---
+title: Authentication
+description: Configure OAuth 2.0 authentication for LAPIS
+---
+
+LAPIS supports optional OAuth 2.0 authentication to protect your API endpoints.
+This allows you to require valid JWT tokens for access to LAPIS data.
+
+## Overview
+
+LAPIS uses Spring Security's OAuth 2.0 Resource Server support to validate JWT tokens.
+Also see https://docs.spring.io/spring-security/reference/reactive/oauth2/resource-server/jwt.html for further details.
+
+When authentication is enabled, clients must include a valid JWT token in the `Authorization` header:
+
+```bash
+curl -H "Authorization: Bearer <token>" https://lapis.example.com/sample/aggregated
+```
+
+## Configuration Methods
+
+To enable authentication, set one of the following Spring properties when starting LAPIS.
+LAPIS supports three methods for JWT validation:
+
+### 1. JWK Set URI (Recommended)
+
+Specify the URL where LAPIS can fetch the public keys used to verify JWT signatures:
+
+**Example with Keycloak:**
+```bash
+--spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://keycloak.example.com/realms/lapis/protocol/openid-connect/certs
+```
+
+**When to use:**
+- You know the exact JWK Set endpoint URL
+- You want explicit control over the key source
+- Fastest startup (no auto-discovery needed)
+
+### 2. Issuer URI
+
+Specify the OAuth 2.0 issuer URI,
+and LAPIS will auto-discover the JWK Set URI via the `.well-known/openid-configuration` endpoint:
+
+**Example with Keycloak:**
+```bash
+--spring.security.oauth2.resourceserver.jwt.issuer-uri=https://keycloak.example.com/realms/lapis
+```
+
+**When to use:**
+- You want LAPIS to auto-discover OAuth configuration
+- Your identity provider follows OpenID Connect standards
+
+### 3. Public Key File
+
+For testing or air-gapped environments, you can provide a PEM-encoded RSA public key file:
+
+```bash
+--spring.security.oauth2.resourceserver.jwt.public-key-location=/path/to/public_key.pem
+```
+
+**When to use:**
+- Testing and development
+- Air-gapped deployments
+- Static key infrastructure
+
+**Public key format (RSA 2048-bit or higher):**
+```
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+-----END PUBLIC KEY-----
+```
+
+## Docker Example
+
+Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/docker-compose.yml)
+that includes an example of how to configure LAPIS with Keycloak for testing.
+
+## Additional Resources
+
+- [Spring Security OAuth 2.0 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html)
+- [JWT.io - JWT Debugger](https://jwt.io/)
+- [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
