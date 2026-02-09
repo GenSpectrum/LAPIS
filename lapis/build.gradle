@@ -139,7 +139,7 @@ openApi {
         ]
         
         if (auth == "true") {
-            bootRunArgs.add("--spring.security.oauth2.resourceserver.jwt.public-key-location=file:$rootDir/../lapis-e2e/testData/oauth-keys/public_key.pem")
+            bootRunArgs.add("--spring.security.oauth2.resourceserver.jwt.public-key-location=file:$rootDir/../lapis-e2e/testData/oauth-keys/test_public_key.pem")
         }
         
         args.set(bootRunArgs)
