@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.media.NumberSchema
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.media.StringSchema
+import io.swagger.v3.oas.models.security.SecurityScheme
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.DatabaseSchema
@@ -71,6 +72,15 @@ fun buildOpenApiSchema(
     OpenAPI()
         .components(
             Components()
+                .addSecuritySchemes(
+                    "bearerAuth",
+                    SecurityScheme()
+                        .name("bearerAuth")
+                        .type(SecurityScheme.Type.HTTP)
+                        .`in`(SecurityScheme.In.HEADER)
+                        .scheme("bearer")
+                        .bearerFormat("JWT"),
+                )
                 .addSchemas(
                     PRIMITIVE_FIELD_FILTERS_SCHEMA,
                     Schema<String>()

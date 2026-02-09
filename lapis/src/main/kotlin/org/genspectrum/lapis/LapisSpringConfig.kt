@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.HeaderParameter
+import io.swagger.v3.oas.models.security.SecurityRequirement
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -29,9 +30,11 @@ import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -68,6 +71,24 @@ class LapisSpringConfig {
                 )
             }
             operation
+        }
+
+    @Bean
+    fun securityCustomizer(resourceServerProperties: OAuth2ResourceServerProperties) =
+        OpenApiCustomizer { openApi ->
+            val useJwtAuth =
+                !resourceServerProperties.jwt.jwkSetUri.isNullOrBlank() ||
+                    !resourceServerProperties.jwt.issuerUri.isNullOrBlank() ||
+                    resourceServerProperties.jwt.publicKeyLocation != null
+
+            if (useJwtAuth) {
+                // Add global security requirement to all operations
+                openApi.paths?.values?.forEach { pathItem ->
+                    pathItem.readOperations()?.forEach { operation ->
+                        operation.addSecurityItem(SecurityRequirement().addList("bearerAuth"))
+                    }
+                }
+            }
         }
 
     @Bean
