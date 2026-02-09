@@ -20,6 +20,16 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.access.DelegatingAccessDeniedHandler
 import org.springframework.security.web.csrf.CsrfException
 
+val PUBLIC_ROUTES = arrayOf(
+    "/",
+    "/favicon.ico",
+    "/error/**",
+    "/actuator/**",
+    "/api-docs**",
+    "/api-docs/**",
+    "/swagger-ui/**",
+)
+
 @Configuration
 @EnableWebSecurity
 class OAuthConfig {
@@ -34,25 +44,12 @@ class OAuthConfig {
         httpSecurity: HttpSecurity,
         resourceServerProperties: OAuth2ResourceServerProperties,
     ): SecurityFilterChain {
-        val useJwtAuth =
-            !resourceServerProperties.jwt.jwkSetUri.isNullOrBlank() ||
-                !resourceServerProperties.jwt.issuerUri.isNullOrBlank() ||
-                resourceServerProperties.jwt.publicKeyLocation != null
-
-        if (useJwtAuth) {
+        if (resourceServerProperties.isConfiguredToUseAuth()) {
             log.info { "Configuring JWT authentication for endpoints" }
 
             return httpSecurity
                 .authorizeHttpRequests { auth ->
-                    auth.requestMatchers(
-                        "/",
-                        "/favicon.ico",
-                        "/error/**",
-                        "/actuator/**",
-                        "/api-docs**",
-                        "/api-docs/**",
-                        "/swagger-ui/**",
-                    ).permitAll()
+                    auth.requestMatchers(*PUBLIC_ROUTES).permitAll()
                     auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
                     auth.anyRequest().authenticated()
                 }
@@ -75,6 +72,11 @@ class OAuthConfig {
             .build()
     }
 }
+
+fun OAuth2ResourceServerProperties.isConfiguredToUseAuth(): Boolean =
+    !this.jwt.jwkSetUri.isNullOrBlank() ||
+        !this.jwt.issuerUri.isNullOrBlank() ||
+        this.jwt.publicKeyLocation != null
 
 class LoggingAuthenticationEntryPoint(
     private val entryPoint: AuthenticationEntryPoint,

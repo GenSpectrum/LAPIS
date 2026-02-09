@@ -27,6 +27,7 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
+import org.genspectrum.lapis.openApi.SECURITY_SCHEMA_NAME
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
@@ -76,18 +77,16 @@ class LapisSpringConfig {
     @Bean
     fun securityCustomizer(resourceServerProperties: OAuth2ResourceServerProperties) =
         OpenApiCustomizer { openApi ->
-            val useJwtAuth =
-                !resourceServerProperties.jwt.jwkSetUri.isNullOrBlank() ||
-                    !resourceServerProperties.jwt.issuerUri.isNullOrBlank() ||
-                    resourceServerProperties.jwt.publicKeyLocation != null
+            if (resourceServerProperties.isConfiguredToUseAuth()) {
+                val publicRoutesToIgnore = PUBLIC_ROUTES.map { it.trimEnd('/', '*') }.filter { it.isNotEmpty() }
 
-            if (useJwtAuth) {
-                // Add global security requirement to all operations
-                openApi.paths?.values?.forEach { pathItem ->
-                    pathItem.readOperations()?.forEach { operation ->
-                        operation.addSecurityItem(SecurityRequirement().addList("bearerAuth"))
+                openApi.paths
+                    .filterKeys { !publicRoutesToIgnore.any { publicRoute -> it.startsWith(publicRoute) } }
+                    .forEach { (_, pathItem) ->
+                        pathItem.readOperations()?.forEach { operation ->
+                            operation.addSecurityItem(SecurityRequirement().addList(SECURITY_SCHEMA_NAME))
+                        }
                     }
-                }
             }
         }
 

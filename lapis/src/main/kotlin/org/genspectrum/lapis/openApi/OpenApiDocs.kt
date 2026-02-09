@@ -64,6 +64,8 @@ import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 
+const val SECURITY_SCHEMA_NAME = "bearerAuth"
+
 fun buildOpenApiSchema(
     sequenceFilterFields: SequenceFilterFields,
     databaseConfig: DatabaseConfig,
@@ -73,9 +75,9 @@ fun buildOpenApiSchema(
         .components(
             Components()
                 .addSecuritySchemes(
-                    "bearerAuth",
+                    SECURITY_SCHEMA_NAME,
                     SecurityScheme()
-                        .name("bearerAuth")
+                        .name(SECURITY_SCHEMA_NAME)
                         .type(SecurityScheme.Type.HTTP)
                         .`in`(SecurityScheme.In.HEADER)
                         .scheme("bearer")

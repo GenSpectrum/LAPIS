@@ -97,12 +97,14 @@ openApi {
     outputDir.set(file("$rootDir"))
 
     def segmented = project.hasProperty("segmented") ? project.segmented : "false"
+    def auth = project.hasProperty("auth") ? project.auth : "false"
 
-    def getCustomOutputFileName = { segmented_ ->
+    def getCustomOutputFileName = { segmented_, auth_ ->
+        def authSuffix = auth_ == "true" ? "-with-auth" : ""
         if (segmented_ == "true") {
-            return "lapis-openapi-multi-segmented.json"
+            return "lapis-openapi-multi-segmented${authSuffix}.json"
         } else {
-            return "lapis-openapi-single-segmented.json"
+            return "lapis-openapi-single-segmented${authSuffix}.json"
         }
     }
 
@@ -122,7 +124,7 @@ openApi {
         }
     }
 
-    def customOutputFileName = getCustomOutputFileName(segmented)
+    def customOutputFileName = getCustomOutputFileName(segmented, auth)
     def customLapisConfig = getCustomLapisConfig(segmented)
     def referenceGenomeFilename = getReferenceGenomeFilename(segmented)
 
@@ -130,10 +132,16 @@ openApi {
     apiDocsUrl.set("http://localhost:8080/api-docs")
 
     customBootRun {
-        args.set([
+        def bootRunArgs = [
                 "--silo.url=does.not.matter.here",
                 "--lapis.databaseConfig.path=$customLapisConfig",
                 "--referenceGenomeFilename=$referenceGenomeFilename",
-        ])
+        ]
+        
+        if (auth == "true") {
+            bootRunArgs.add("--spring.security.oauth2.resourceserver.jwt.public-key-location=file:$rootDir/../lapis-e2e/testData/oauth-keys/public_key.pem")
+        }
+        
+        args.set(bootRunArgs)
     }
 }

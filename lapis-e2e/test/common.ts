@@ -11,10 +11,12 @@ import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
   MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
+import { LapisControllerApi as LapisControllerApiWithAuth } from './lapisClientWithAuth';
 import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
+export const basePathWithPublicKeyAuth = 'http://localhost:8095';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -58,6 +60,11 @@ export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenc
 export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceControllerApi(
   new Configuration({ basePath: basePathMultiSegmented })
 ).withMiddleware(middleware);
+
+export const lapisClientWithPublicKeyAuth = ({ accessToken }: { accessToken?: string }) =>
+  new LapisControllerApiWithAuth(
+    new Configuration({ basePath: basePathWithPublicKeyAuth, accessToken })
+  ).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {
   const lines = serverResponse.split('\n').filter(line => line.length > 0);
