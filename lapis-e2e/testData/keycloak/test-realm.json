@@ -1,4 +1,5 @@
 {
+  "comment": "Do not use this in production. It is insecure and just enough for short lived Keycloak instances for testing.",
   "realm": "test-realm",
   "enabled": true,
   "clients": [

@@ -7,12 +7,12 @@ import {
 } from './common';
 
 // This token was created with the test private keys in testData/oauth-keys
-const validToken =
+const validTokenForPublicKey =
   'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJsYXBpcy1hcGkiLCJpc3MiOiJsYXBpcy10ZXN0In0.Xu50CdL21tWvzfBE_BuQ-BPKx6C8Dj0EDaW5skK1IrYwRwpsKrocDc_l_51gDy_sYylJV1M3JYfhSMum_4e-iVpoGbRvf2J-T-yQD5oC-IKE27b2g6vXmFrbSottD4GHeUnn2Xh5aFrPyPu5SmF-_Vhfc2W-kqVE-zjxCj3uf28aHesV77FuvnXob9pZJjGHP-xyKfxqD88u5HunEor-YT1H-3Z3_aRazZis9kDDADa-4PLoDiYpfLMEaO4PMeIHN5412qhuOcwOmA28dNKmiJT9ye9osb2VLzDe9fl_CakJpkjlXF9D-_4Of81Q2X-BCOGPOnxHAXb6JrNBr_SWaQ';
 
 describe('LAPIS that requires authentication', () => {
   const configs = [
-    { name: 'via public key', basePath: basePathWithPublicKeyAuth, fetchToken: () => validToken },
+    { name: 'via public key', basePath: basePathWithPublicKeyAuth, fetchToken: () => validTokenForPublicKey },
     {
       name: 'via Keycloak jwk-set-uri',
       basePath: basePathWithJwkSetUriAuth,
