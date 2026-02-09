@@ -94,3 +94,22 @@ services:
         source: ../lapis-e2e/testData/oauth-keys/public_key.pem
         target: /workspace/public_key.pem
         read_only: true
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    platform: linux/amd64
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HTTP_PORT=8080
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "8180:8080"
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - type: bind
+        source: ../lapis-e2e/testData/keycloak/test-realm.json
+        target: /opt/keycloak/data/import/test-realm.json
+        read_only: true
