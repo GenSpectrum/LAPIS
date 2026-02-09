@@ -18,6 +18,7 @@ export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
 export const basePathWithPublicKeyAuth = 'http://localhost:8095';
 export const basePathWithJwkSetUriAuth = 'http://localhost:8096';
+export const basePathWithIssuerUriAuth = 'http://localhost:8097';
 
 const middleware: Middleware = {
   onError: errorContext => {

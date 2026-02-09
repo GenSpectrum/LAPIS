@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { basePathWithJwkSetUriAuth, basePathWithPublicKeyAuth, lapisClientWithAuth } from './common';
+import {
+  basePathWithIssuerUriAuth,
+  basePathWithJwkSetUriAuth,
+  basePathWithPublicKeyAuth,
+  lapisClientWithAuth,
+} from './common';
 
 // This token was created with the test private keys in testData/oauth-keys
 const validToken =
@@ -11,6 +16,11 @@ describe('LAPIS that requires authentication', () => {
     {
       name: 'via Keycloak jwk-set-uri',
       basePath: basePathWithJwkSetUriAuth,
+      fetchToken: fetchTokenFromKeycloak,
+    },
+    {
+      name: 'via Keycloak issuer-uri',
+      basePath: basePathWithIssuerUriAuth,
       fetchToken: fetchTokenFromKeycloak,
     },
   ];

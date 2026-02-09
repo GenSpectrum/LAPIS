@@ -2,7 +2,7 @@
   <configuration default="false" name="LapisOpen" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ALTERNATIVE_JRE_PATH" value="21" />
     <module name="lapis.main" />
-    <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8091 --lapis.databaseConfig.path=lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=lapis-e2e/testData/singleSegmented/reference_genomes.json --server.port=8090 --spring.security.oauth2.resourceserver.jwt.public-key-location=file:./lapis-e2e/testData/oauth-keys/public_key.pem" />
+    <option name="PROGRAM_PARAMETERS" value="--silo.url=http://localhost:8091 --lapis.databaseConfig.path=lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=lapis-e2e/testData/singleSegmented/reference_genomes.json --server.port=8090 --spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8180/realms/test-realm" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="org.genspectrum.lapis.LapisApplicationKt" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <method v="2">
