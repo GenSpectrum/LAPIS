@@ -6,8 +6,10 @@ Minimal Keycloak realm configuration for testing OAuth integration in LAPIS.
 **Client:** `lapis-client` (public client)  
 **User:** `test-user` / `test123`
 
-Use 
+Use
+
 ```shell
 ./get-token.sh
 ```
+
 to obtain a JWT token for testing.

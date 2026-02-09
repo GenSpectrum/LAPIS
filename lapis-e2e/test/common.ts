@@ -17,6 +17,7 @@ import { expect } from 'chai';
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
 export const basePathWithPublicKeyAuth = 'http://localhost:8095';
+export const basePathWithJwkSetUriAuth = 'http://localhost:8096';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -61,10 +62,8 @@ export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceC
   new Configuration({ basePath: basePathMultiSegmented })
 ).withMiddleware(middleware);
 
-export const lapisClientWithPublicKeyAuth = ({ accessToken }: { accessToken?: string }) =>
-  new LapisControllerApiWithAuth(
-    new Configuration({ basePath: basePathWithPublicKeyAuth, accessToken })
-  ).withMiddleware(middleware);
+export const lapisClientWithAuth = ({ basePath, accessToken }: { basePath: string; accessToken?: string }) =>
+  new LapisControllerApiWithAuth(new Configuration({ basePath, accessToken })).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {
   const lines = serverResponse.split('\n').filter(line => line.length > 0);

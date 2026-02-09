@@ -80,7 +80,7 @@ services:
     platform: linux/amd64
     ports:
       - "8095:8080"
-    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=/workspace/public_key.pem
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=/workspace/test_public_key.pem
     volumes:
       - type: bind
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
@@ -91,8 +91,8 @@ services:
         target: /workspace/reference_genomes.json
         read_only: true
       - type: bind
-        source: ../lapis-e2e/testData/oauth-keys/public_key.pem
-        target: /workspace/public_key.pem
+        source: ../lapis-e2e/testData/oauth-keys/test_public_key.pem
+        target: /workspace/test_public_key.pem
         read_only: true
 
   lapisOpenJwkSetUri:
