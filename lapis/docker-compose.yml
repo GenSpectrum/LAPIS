@@ -95,6 +95,22 @@ services:
         target: /workspace/public_key.pem
         read_only: true
 
+  lapisOpenJwkSetUri:
+    image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+    platform: linux/amd64
+    ports:
+      - "8096:8080"
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
+    volumes:
+      - type: bind
+        source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
+        target: /workspace/database_config.yaml
+        read_only: true
+      - type: bind
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
+        target: /workspace/reference_genomes.json
+        read_only: true
+
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     platform: linux/amd64
@@ -113,3 +129,9 @@ services:
         source: ../lapis-e2e/testData/keycloak/test-realm.json
         target: /opt/keycloak/data/import/test-realm.json
         read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s

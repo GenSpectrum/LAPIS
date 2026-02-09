@@ -1,163 +1,26 @@
 {
-  "realm": "lapis-test",
+  "realm": "test-realm",
   "enabled": true,
-  "displayName": "LAPIS Test Realm",
-  "accessTokenLifespan": 3600,
-  "ssoSessionIdleTimeout": 36000,
-  "ssoSessionMaxLifespan": 36000,
   "clients": [
     {
       "clientId": "lapis-client",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": true,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "serviceAccountsEnabled": false,
-      "authorizationServicesEnabled": false,
       "protocol": "openid-connect",
       "redirectUris": ["*"],
-      "webOrigins": ["*"],
-      "defaultClientScopes": ["profile", "email", "roles"],
-      "optionalClientScopes": ["address", "phone"]
-    },
-    {
-      "clientId": "lapis-service",
-      "enabled": true,
-      "publicClient": false,
-      "secret": "test-secret-key-change-in-production",
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": true,
-      "authorizationServicesEnabled": false,
-      "protocol": "openid-connect",
-      "redirectUris": ["*"],
-      "webOrigins": ["*"],
-      "defaultClientScopes": ["profile", "email", "roles"],
-      "optionalClientScopes": ["address", "phone"]
+      "webOrigins": ["*"]
     }
   ],
   "users": [
     {
       "username": "test-user",
       "enabled": true,
-      "email": "test@lapis.test",
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "User",
       "credentials": [
         {
           "type": "password",
           "value": "test123",
           "temporary": false
-        }
-      ],
-      "realmRoles": ["user"],
-      "clientRoles": {
-        "lapis-client": ["read", "write"]
-      }
-    },
-    {
-      "username": "admin-user",
-      "enabled": true,
-      "email": "admin@lapis.test",
-      "emailVerified": true,
-      "firstName": "Admin",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["admin"],
-      "clientRoles": {
-        "lapis-client": ["read", "write", "admin"]
-      }
-    },
-    {
-      "username": "read-only-user",
-      "enabled": true,
-      "email": "reader@lapis.test",
-      "emailVerified": true,
-      "firstName": "Reader",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "read123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user"],
-      "clientRoles": {
-        "lapis-client": ["read"]
-      }
-    }
-  ],
-  "roles": {
-    "realm": [
-      {
-        "name": "user",
-        "description": "Standard user role"
-      },
-      {
-        "name": "admin",
-        "description": "Administrator role"
-      }
-    ],
-    "client": {
-      "lapis-client": [
-        {
-          "name": "read",
-          "description": "Read access"
-        },
-        {
-          "name": "write",
-          "description": "Write access"
-        },
-        {
-          "name": "admin",
-          "description": "Administrative access"
-        }
-      ]
-    }
-  },
-  "clientScopes": [
-    {
-      "name": "roles",
-      "description": "OpenID Connect scope for add user roles to the access token",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "true",
-        "display.on.consent.screen": "true"
-      },
-      "protocolMappers": [
-        {
-          "name": "client roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-client-role-mapper",
-          "consentRequired": false,
-          "config": {
-            "multivalued": "true",
-            "user.attribute": "foo",
-            "access.token.claim": "true",
-            "claim.name": "resource_access.${client_id}.roles",
-            "jsonType.label": "String"
-          }
-        },
-        {
-          "name": "realm roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "consentRequired": false,
-          "config": {
-            "multivalued": "true",
-            "user.attribute": "foo",
-            "access.token.claim": "true",
-            "claim.name": "realm_access.roles",
-            "jsonType.label": "String"
-          }
         }
       ]
     }
