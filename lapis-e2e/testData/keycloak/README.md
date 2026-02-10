@@ -1,6 +1,8 @@
 # Keycloak Test Configuration
 
 Minimal Keycloak realm configuration for testing OAuth integration in LAPIS.
+Do not use this configuration in production.
+It is insecure and just enough for short-lived Keycloak instances for testing.
 
 **Realm:** `test-realm`  
 **Client:** `lapis-client` (public client)  
