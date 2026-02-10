@@ -142,6 +142,10 @@ jobs:
           docker compose logs siloPreprocessingMultisegmented > e2e-logs/siloPreprocessingMultisegmented.log
           docker compose logs lapisOpen > e2e-logs/lapisOpen.log
           docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
+          docker compose logs lapisOpenPublicKey > e2e-logs/lapisOpenPublicKey.log
+          docker compose logs lapisOpenJwkSetUri > e2e-logs/lapisOpenJwkSetUri.log
+          docker compose logs lapisOpenIssuerUri > e2e-logs/lapisOpenIssuerUri.log
+          docker compose logs keycloak > e2e-logs/keycloak.log
         env:
           SILO_TAG: 0.8.5
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
