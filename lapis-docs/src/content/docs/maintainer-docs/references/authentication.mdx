@@ -59,7 +59,7 @@ and LAPIS will auto-discover the JWK Set URI via the `.well-known/openid-configu
 For testing or air-gapped environments, you can provide a PEM-encoded RSA public key file:
 
 ```bash
---spring.security.oauth2.resourceserver.jwt.public-key-location=/path/to/public_key.pem
+--spring.security.oauth2.resourceserver.jwt.public-key-location=file:/path/to/public_key.pem
 ```
 
 **When to use:**

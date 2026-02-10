@@ -75,12 +75,12 @@ services:
         target: /workspace/reference_genomes.json
         read_only: true
 
-  lapisOpenPublicKey:
+  lapisPublicKey:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
     platform: linux/amd64
     ports:
       - "8095:8080"
-    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=/workspace/test_public_key.pem
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=file:/workspace/test_public_key.pem
     volumes:
       - type: bind
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
@@ -95,7 +95,7 @@ services:
         target: /workspace/test_public_key.pem
         read_only: true
 
-  lapisOpenJwkSetUri:
+  lapisJwkSetUri:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
     platform: linux/amd64
     ports:
@@ -116,7 +116,7 @@ services:
       keycloak:
         condition: service_healthy
 
-  lapisOpenIssuerUri:
+  lapisIssuerUri:
     image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
     platform: linux/amd64
     ports:
