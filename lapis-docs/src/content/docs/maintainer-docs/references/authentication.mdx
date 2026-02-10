@@ -27,11 +27,13 @@ LAPIS supports three methods for JWT validation:
 Specify the URL where LAPIS can fetch the public keys used to verify JWT signatures:
 
 **Example with Keycloak:**
+
 ```bash
 --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://keycloak.example.com/realms/lapis/protocol/openid-connect/certs
 ```
 
 **When to use:**
+
 - You know the exact JWK Set endpoint URL
 - You want explicit control over the key source
 - Fastest startup (no auto-discovery needed)
@@ -42,11 +44,13 @@ Specify the OAuth 2.0 issuer URI,
 and LAPIS will auto-discover the JWK Set URI via the `.well-known/openid-configuration` endpoint:
 
 **Example with Keycloak:**
+
 ```bash
 --spring.security.oauth2.resourceserver.jwt.issuer-uri=https://keycloak.example.com/realms/lapis
 ```
 
 **When to use:**
+
 - You want LAPIS to auto-discover OAuth configuration
 - Your identity provider follows OpenID Connect standards
 
@@ -59,11 +63,13 @@ For testing or air-gapped environments, you can provide a PEM-encoded RSA public
 ```
 
 **When to use:**
+
 - Testing and development
 - Air-gapped deployments
 - Static key infrastructure
 
 **Public key format (RSA 2048-bit or higher):**
+
 ```
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
