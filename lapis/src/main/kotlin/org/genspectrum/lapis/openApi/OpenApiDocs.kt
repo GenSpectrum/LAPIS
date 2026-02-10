@@ -201,6 +201,22 @@ fun buildOpenApiSchema(
                     requestSchemaForQueriesOverTime(sequenceFilterFields),
                 )
                 .addSchemas(
+                    QUERY_PARSE_REQUEST_SCHEMA,
+                    Schema<Any>()
+                        .types(setOf("object"))
+                        .description("Request schema for parsing advanced queries.")
+                        .required(listOf("queries"))
+                        .properties(
+                            mapOf(
+                                "queries" to ArraySchema()
+                                    .items(StringSchema())
+                                    .description(
+                                        "A list of advanced query strings to parse into SILO filter expressions.",
+                                    ),
+                            ),
+                        ),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisArrayResponseSchema(
                         Schema<String>()
