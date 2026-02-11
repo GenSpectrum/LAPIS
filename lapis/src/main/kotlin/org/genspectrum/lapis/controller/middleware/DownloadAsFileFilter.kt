@@ -44,13 +44,15 @@ class DownloadAsFileFilter(
                 .build()
                 .toString()
 
-            // Extract filename* part and combine with plain filename
+            // Extract filename* part and combine with ASCII-only plain filename
             val filenameStar = springDisposition
                 .substringAfter("filename*=")
                 .substringBefore(";")
                 .ifEmpty { springDisposition.substringAfter("filename*=") }
 
-            response.setHeader(CONTENT_DISPOSITION, "attachment; filename=$filename; filename*=$filenameStar")
+            val asciiFilename = toAsciiFilename(filename)
+
+            response.setHeader(CONTENT_DISPOSITION, "attachment; filename=$asciiFilename; filename*=$filenameStar")
         }
         filterChain.doFilter(reReadableRequest, response)
     }
@@ -106,5 +108,9 @@ class DownloadAsFileFilter(
             }
         }
         return ".json"
+    }
+
+    private fun toAsciiFilename(filename: String): String {
+        return filename.filter { it.code < 128 }
     }
 }

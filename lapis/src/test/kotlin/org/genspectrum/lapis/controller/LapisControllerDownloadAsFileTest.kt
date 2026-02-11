@@ -243,7 +243,13 @@ class LapisControllerDownloadAsFileTest(
             .substringBefore(";")
             .ifEmpty { springDisposition.substringAfter("filename*=") }
 
-        return "attachment; filename=$filename; filename*=$filenameStar"
+        val asciiFilename = toAsciiFilename(filename)
+
+        return "attachment; filename=$asciiFilename; filename*=$filenameStar"
+    }
+
+    private fun toAsciiFilename(filename: String): String {
+        return filename.filter { it.code < 128 }
     }
 
     private companion object {
