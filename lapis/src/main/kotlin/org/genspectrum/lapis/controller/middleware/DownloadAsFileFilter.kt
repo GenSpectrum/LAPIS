@@ -13,8 +13,10 @@ import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.springframework.core.annotation.Order
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
+import java.nio.charset.StandardCharsets
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -35,7 +37,20 @@ class DownloadAsFileFilter(
         val downloadAsFile = reReadableRequest.getBooleanField(DOWNLOAD_AS_FILE_PROPERTY) ?: false
         if (downloadAsFile) {
             val filename = getFilename(reReadableRequest)
-            response.setHeader(CONTENT_DISPOSITION, "attachment; filename=$filename")
+
+            // Use Spring to generate RFC 5987 encoded filename*
+            val springDisposition = ContentDisposition.attachment()
+                .filename(filename, StandardCharsets.UTF_8)
+                .build()
+                .toString()
+
+            // Extract filename* part and combine with plain filename
+            val filenameStar = springDisposition
+                .substringAfter("filename*=")
+                .substringBefore(";")
+                .ifEmpty { springDisposition.substringAfter("filename*=") }
+
+            response.setHeader(CONTENT_DISPOSITION, "attachment; filename=$filename; filename*=$filenameStar")
         }
         filterChain.doFilter(reReadableRequest, response)
     }

@@ -21,6 +21,8 @@ import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
+import org.springframework.http.ContentDisposition
+import java.nio.charset.StandardCharsets
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -230,7 +232,19 @@ class LapisControllerDownloadAsFileTest(
             .apply(assertFileContentMatches)
     }
 
-    private fun attachmentWithFilename(filename: String) = "attachment; filename=$filename"
+    private fun attachmentWithFilename(filename: String): String {
+        val springDisposition = ContentDisposition.attachment()
+            .filename(filename, StandardCharsets.UTF_8)
+            .build()
+            .toString()
+
+        val filenameStar = springDisposition
+            .substringAfter("filename*=")
+            .substringBefore(";")
+            .ifEmpty { springDisposition.substringAfter("filename*=") }
+
+        return "attachment; filename=$filename; filename*=$filenameStar"
+    }
 
     private companion object {
         @JvmStatic

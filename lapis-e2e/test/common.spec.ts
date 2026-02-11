@@ -99,7 +99,7 @@ describe('All endpoints', () => {
 
         expect(response.status).equals(200);
         expect(response.headers.get('content-disposition')).equals(
-          `attachment; filename=${route.expectedDownloadFilename}`
+          `attachment; filename=${route.expectedDownloadFilename}; filename*=UTF-8''${route.expectedDownloadFilename}`
         );
       });
 
@@ -113,7 +113,7 @@ describe('All endpoints', () => {
 
         expect(response.status).equals(200);
         expect(response.headers.get('content-disposition')).equals(
-          `attachment; filename=custom.${extensionMap[route.servesType]}`
+          `attachment; filename=custom.${extensionMap[route.servesType]}; filename*=UTF-8''custom.${extensionMap[route.servesType]}`
         );
       });
 
