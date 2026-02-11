@@ -37,6 +37,12 @@ import java.util.concurrent.TimeUnit
 
 private const val QUERY_TIMEOUT_SECONDS = 60L
 
+data class ParsedQueryItem(
+    val displayLabel: String,
+    val countQuery: SiloFilterExpression,
+    val coverageQuery: SiloFilterExpression,
+)
+
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
         "columns (inner array).",
@@ -141,17 +147,26 @@ class QueriesOverTimeModel(
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-    ): QueriesOverTimeResult =
-        evaluateInternal(
-            queryItems = queries,
+    ): QueriesOverTimeResult {
+        val parsedQueries = queries.map { query ->
+            ParsedQueryItem(
+                displayLabel = query.displayLabel ?: query.countQuery,
+                countQuery = advancedQueryFacade.map(query.countQuery),
+                coverageQuery = advancedQueryFacade.map(query.coverageQuery),
+            )
+        }
+
+        return evaluateInternal(
+            queryItems = parsedQueries,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
             dateField = dateField,
             remainingRetries = remainingRetries,
-            mutationToStringFn = { query -> query.displayLabel ?: query.countQuery },
-            countQueryFn = { query -> advancedQueryFacade.map(query.countQuery) },
-            coverageQueryFn = { query -> advancedQueryFacade.map(query.coverageQuery) },
+            mutationToStringFn = { it.displayLabel },
+            countQueryFn = { it.countQuery },
+            coverageQueryFn = { it.coverageQuery },
         )
+    }
 
     fun evaluateAminoAcidMutations(
         mutations: List<AminoAcidMutation>,
@@ -285,6 +300,9 @@ class QueriesOverTimeModel(
 
         val tasks = queryItems.map { mutation ->
             Callable {
+                // below we're doing the countQueryFn thing which converts our string to a SiloExpr. This is when we find out htat it doesn't work
+                // I think it would maybe be better to do this conversion earlier, so we can exit earlier.
+                // The parsing is also fast so it should be fine I think.
                 val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
                 val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
                 listOf(counts.dataVersion, coverage.dataVersion) to
