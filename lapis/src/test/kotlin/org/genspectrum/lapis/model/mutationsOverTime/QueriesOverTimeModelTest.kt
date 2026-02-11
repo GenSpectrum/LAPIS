@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.QueryOverTimeItem
@@ -116,6 +117,20 @@ class QueriesOverTimeModelTest {
         assertThat(result.dateRanges, equalTo(emptyList()))
         assertThat(result.totalCountsByDateRange, equalTo(emptyList()))
         assertThat(dataVersion.dataVersion, notNullValue())
+    }
+
+    @Test
+    fun `GIVEN invalid query string THEN throws BadRequestException not ExecutionException`() {
+        val exception = assertThrows<BadRequestException> {
+            underTest.evaluateQueriesOverTime(
+                queries = listOf(QueryOverTimeItem("label", "foobar", "main:123T")),
+                dateRanges = listOf(DateRange(null, null)),
+                lapisFilter = DUMMY_LAPIS_FILTER,
+                dateField = DUMMY_DATE_FIELD,
+            )
+        }
+
+        assertThat(exception.message, containsString("Failed to parse advanced query"))
     }
 
     private fun commonSetup() {
