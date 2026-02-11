@@ -105,7 +105,7 @@ class QueriesOverTimeModelTest {
     fun `GIVEN an empty list of date ranges THEN it returns an empty list`() {
         mockSiloCallInfo(siloQueryClient, dataVersion)
         val result = underTest.evaluateQueriesOverTime(
-            queries = listOf(QueryOverTimeItem("label", "123", "!123")),
+            queries = listOf(QueryOverTimeItem("label", "main:123T", "!main:123N")),
             dateRanges = emptyList(),
             lapisFilter = DUMMY_LAPIS_FILTER,
             dateField = DUMMY_DATE_FIELD,
