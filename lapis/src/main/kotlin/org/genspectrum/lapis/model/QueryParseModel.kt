@@ -19,12 +19,11 @@ class QueryParseModel(
         return queries.map { query ->
             try {
                 val filter = advancedQueryFacade.map(query)
-                ParsedQueryResult(filter = filter, error = null)
+                ParsedQueryResult.Success(filter = filter)
             } catch (e: BadRequestException) {
-                ParsedQueryResult(filter = null, error = e.message)
+                ParsedQueryResult.Failure(error = e.message ?: "Unknown error")
             } catch (e: Exception) {
-                ParsedQueryResult(
-                    filter = null,
+                ParsedQueryResult.Failure(
                     error = "Unexpected error parsing query: ${e.message}",
                 )
             }

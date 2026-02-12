@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.silo.SiloFilterExpression
 
@@ -9,14 +10,22 @@ data class QueryParseResponse(
     val info: LapisInfo,
 )
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ParsedQueryResult(
-    @param:Schema(
-        description = "The parsed SILO filter expression. Null if parsing failed.",
-    )
-    val filter: SiloFilterExpression? = null,
-    @param:Schema(
-        description = "Error message if parsing failed. Null if parsing succeeded.",
-    )
-    val error: String? = null,
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ParsedQueryResult.Success::class, name = "success"),
+    JsonSubTypes.Type(value = ParsedQueryResult.Failure::class, name = "failure"),
 )
+sealed interface ParsedQueryResult {
+
+    @Schema(description = "Successful query parse result")
+    data class Success(
+        @field:Schema(description = "The parsed SILO filter expression")
+        val filter: SiloFilterExpression,
+    ) : ParsedQueryResult
+
+    @Schema(description = "Failed query parse result")
+    data class Failure(
+        @field:Schema(description = "Error message describing why parsing failed")
+        val error: String,
+    ) : ParsedQueryResult
+}
