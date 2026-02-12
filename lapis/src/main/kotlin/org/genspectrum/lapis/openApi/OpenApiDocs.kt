@@ -36,6 +36,7 @@ import org.genspectrum.lapis.controller.middleware.Compression
 import org.genspectrum.lapis.controller.middleware.DataFormat
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.controller.middleware.TreeDataFormat
+import org.genspectrum.lapis.isConfiguredToUseAuth
 import org.genspectrum.lapis.request.AMINO_ACID_INSERTIONS_PROPERTY
 import org.genspectrum.lapis.request.AMINO_ACID_MUTATIONS_PROPERTY
 import org.genspectrum.lapis.request.AminoAcidInsertion
@@ -63,6 +64,7 @@ import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 
 const val SECURITY_SCHEMA_NAME = "bearerAuth"
 
@@ -70,19 +72,23 @@ fun buildOpenApiSchema(
     sequenceFilterFields: SequenceFilterFields,
     databaseConfig: DatabaseConfig,
     referenceGenomeSchema: ReferenceGenomeSchema,
+    resourceServerProperties: OAuth2ResourceServerProperties,
 ): OpenAPI =
     OpenAPI()
         .components(
             Components()
-                .addSecuritySchemes(
-                    SECURITY_SCHEMA_NAME,
-                    SecurityScheme()
-                        .name(SECURITY_SCHEMA_NAME)
-                        .type(SecurityScheme.Type.HTTP)
-                        .`in`(SecurityScheme.In.HEADER)
-                        .scheme("bearer")
-                        .bearerFormat("JWT"),
-                )
+                .also {
+                    if (resourceServerProperties.isConfiguredToUseAuth()) {
+                        it.addSecuritySchemes(
+                            SECURITY_SCHEMA_NAME,
+                            SecurityScheme()
+                                .name(SECURITY_SCHEMA_NAME)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT"),
+                        )
+                    }
+                }
                 .addSchemas(
                     PRIMITIVE_FIELD_FILTERS_SCHEMA,
                     Schema<String>()

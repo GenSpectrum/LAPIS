@@ -55,7 +55,8 @@ class LapisSpringConfig {
         sequenceFilterFields: SequenceFilterFields,
         databaseConfig: DatabaseConfig,
         referenceGenomeSchema: ReferenceGenomeSchema,
-    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema)
+        resourceServerProperties: OAuth2ResourceServerProperties,
+    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema, resourceServerProperties)
 
     @Bean
     fun headerCustomizer() =
