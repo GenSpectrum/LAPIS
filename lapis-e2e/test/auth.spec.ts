@@ -100,7 +100,7 @@ async function fetchTokenFromKeycloakViaContainer() {
   const execAsync = promisify(exec);
 
   // Fetch token from within the Docker network using the internal Keycloak hostname
-  const command = `docker exec lapis-lapisIssuerUri-1 wget -q -O - --post-data='grant_type=password&client_id=lapis-client&username=test-user&password=test123' --header='Content-Type: application/x-www-form-urlencoded' http://keycloak:8080/realms/test-realm/protocol/openid-connect/token`;
+  const command = `docker compose exec -T lapisIssuerUri wget -q -O - --post-data='grant_type=password&client_id=lapis-client&username=test-user&password=test123' --header='Content-Type: application/x-www-form-urlencoded' http://keycloak:8080/realms/test-realm/protocol/openid-connect/token`;
 
   try {
     const { stdout } = await execAsync(command);
