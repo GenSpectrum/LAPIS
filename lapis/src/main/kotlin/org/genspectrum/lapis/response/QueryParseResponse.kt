@@ -16,7 +16,6 @@ data class QueryParseResponse(
     JsonSubTypes.Type(value = ParsedQueryResult.Failure::class, name = "failure"),
 )
 sealed interface ParsedQueryResult {
-
     @Schema(description = "Successful query parse result")
     data class Success(
         @field:Schema(description = "The parsed SILO filter expression")

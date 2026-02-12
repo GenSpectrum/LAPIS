@@ -1,11 +1,8 @@
 package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.model.QueryParseModel
-import org.genspectrum.lapis.openApi.QUERY_PARSE_REQUEST_SCHEMA
 import org.genspectrum.lapis.request.QueryParseRequest
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.response.QueryParseResponse
@@ -33,7 +30,6 @@ class QueryController(
     )
     @Operation(description = QUERY_PARSE_ENDPOINT_DESCRIPTION)
     fun postParse(
-        @Parameter(schema = Schema(ref = "#/components/schemas/$QUERY_PARSE_REQUEST_SCHEMA"))
         @RequestBody
         request: QueryParseRequest,
     ): ResponseEntity<QueryParseResponse> {
