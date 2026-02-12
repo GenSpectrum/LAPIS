@@ -21,11 +21,14 @@ fun generateContentDisposition(filename: String): String {
         .build()
         .toString()
 
-    // Extract filename* part from Spring's output
-    val filenameStar = springDisposition
-        .substringAfter("filename*=")
-        .substringBefore(";")
-        .ifEmpty { springDisposition.substringAfter("filename*=") }
+    // Extract filename* part from Spring's output using a robust regex
+    val filenameStar = Regex("""filename\*=([^;]+)""")
+        .find(springDisposition)
+        ?.groupValues
+        ?.get(1)
+        ?: throw IllegalStateException(
+            "Spring ContentDisposition does not contain a valid filename* parameter: $springDisposition",
+        )
 
     // Filter to ASCII-only for plain filename parameter
     val asciiFilename = toAsciiFilename(filename)
