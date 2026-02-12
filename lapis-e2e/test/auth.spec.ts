@@ -27,7 +27,7 @@ describe('LAPIS that requires authentication', () => {
 
   for (let { name, basePath, fetchToken } of configs) {
     describe(name, () => {
-      it('should reject call with without token', async () => {
+      it('should reject call without token', async () => {
         const result = await fetch(basePath + '/sample/aggregated');
 
         expect(result.status).to.equal(401);
