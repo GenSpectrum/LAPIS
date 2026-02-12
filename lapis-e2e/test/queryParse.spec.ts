@@ -50,11 +50,7 @@ describe('The /query/parse endpoint', () => {
   });
 
   it('should handle multiple queries with mixed results', async () => {
-    const { response, data } = await postQueries([
-      'country = Switzerland',
-      'bad query',
-      'age >= 30',
-    ]);
+    const { response, data } = await postQueries(['country = Switzerland', 'bad query', 'age >= 30']);
 
     expect(response.status).to.equal(200);
     expect(data).to.have.property('data');
