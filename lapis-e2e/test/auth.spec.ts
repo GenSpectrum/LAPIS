@@ -5,6 +5,8 @@ import {
   basePathWithPublicKeyAuth,
   lapisClientWithAuth,
 } from './common';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 // This token was created with the test private keys in testData/oauth-keys
 const validTokenForPublicKey =
@@ -99,11 +101,15 @@ async function fetchTokenFromKeycloakViaContainer() {
   const { promisify } = await import('util');
   const execAsync = promisify(exec);
 
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const composeDir = path.resolve(__dirname, '../../lapis');
+
   // Fetch token from within the Docker network using the internal Keycloak hostname
   const command = `docker compose exec -T lapisIssuerUri wget -q -O - --post-data='grant_type=password&client_id=lapis-client&username=test-user&password=test123' --header='Content-Type: application/x-www-form-urlencoded' http://keycloak:8080/realms/test-realm/protocol/openid-connect/token`;
 
   try {
-    const { stdout } = await execAsync(command);
+    const { stdout } = await execAsync(command, { cwd: composeDir });
     const data = JSON.parse(stdout);
     return data.access_token;
   } catch (error) {
