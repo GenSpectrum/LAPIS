@@ -5,6 +5,18 @@ description: A reference list of valid symbols
 
 This page lists valid symbols for nucleotides and amino acids.
 
+## Usage in Mutations
+
+All symbols listed below (including ambiguity codes) can be used in both the "from" and "to" positions of mutation queries.
+
+**Examples:**
+- `A123T` - Standard nucleotide mutation from adenine to thymine at position 123
+- `N123T` - Mutation from any nucleotide (N) to thymine at position 123
+- `S:X501Y` - Amino acid mutation from any amino acid (X) to tyrosine at position 501 in gene S
+- `S:N501Y` - Amino acid mutation from asparagine to tyrosine at position 501 in gene S
+
+This applies to all query types, including standard filters, variant queries, and advanced queries.
+
 ## Nucleotides
 
 | Symbol | Meaning           | Ambiguous Symbol |

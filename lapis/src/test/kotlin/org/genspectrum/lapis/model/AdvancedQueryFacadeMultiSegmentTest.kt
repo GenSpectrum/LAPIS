@@ -589,4 +589,24 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
         assertThat(result, equalTo(expectedResult))
     }
+
+    @Test
+    fun `ambiguous nucleotide from symbol in multi-segmented genome`() {
+        val result = underTest.map("seg1:N123A")
+
+        assertThat(
+            result,
+            equalTo(NucleotideSymbolEquals(sequenceName = "seg1", position = 123, symbol = "A")),
+        )
+    }
+
+    @Test
+    fun `ambiguous amino acid from symbol in multi-segmented genome`() {
+        val result = underTest.map("S:X501Y")
+
+        assertThat(
+            result,
+            equalTo(AminoAcidSymbolEquals(sequenceName = "S", position = 501, symbol = "Y")),
+        )
+    }
 }

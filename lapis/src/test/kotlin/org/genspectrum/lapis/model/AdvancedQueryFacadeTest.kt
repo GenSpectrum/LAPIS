@@ -34,6 +34,7 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
@@ -879,6 +880,34 @@ class AdvancedQueryFacadeTest {
                 ),
             ),
         )
+
+        @JvmStatic
+        fun ambiguityCodeFromSymbolTestCases() =
+            listOf(
+                // All nucleotide ambiguity codes (IUPAC standard)
+                Arguments.of("M123A", NucleotideSymbolEquals(null, 123, "A")),
+                Arguments.of("R456T", NucleotideSymbolEquals(null, 456, "T")),
+                Arguments.of("W789G", NucleotideSymbolEquals(null, 789, "G")),
+                Arguments.of("S100C", NucleotideSymbolEquals(null, 100, "C")),
+                Arguments.of("Y200A", NucleotideSymbolEquals(null, 200, "A")),
+                Arguments.of("K300T", NucleotideSymbolEquals(null, 300, "T")),
+                Arguments.of("V400G", NucleotideSymbolEquals(null, 400, "G")),
+                Arguments.of("H500C", NucleotideSymbolEquals(null, 500, "C")),
+                Arguments.of("D600A", NucleotideSymbolEquals(null, 600, "A")),
+                Arguments.of("B700T", NucleotideSymbolEquals(null, 700, "T")),
+                Arguments.of("N800G", NucleotideSymbolEquals(null, 800, "G")),
+                // Amino acid ambiguity code (X) - including the specific failing case from issue #1064
+                Arguments.of("S:X501Y", AminoAcidSymbolEquals("S", 501, "Y")),
+                Arguments.of("ORF1a:X200A", AminoAcidSymbolEquals("ORF1a", 200, "A")),
+                // Special symbols (deletion and query)
+                Arguments.of("-123A", NucleotideSymbolEquals(null, 123, "A")),
+                Arguments.of(".456T", NucleotideSymbolEquals(null, 456, "T")),
+                Arguments.of("S:-100Y", AminoAcidSymbolEquals("S", 100, "Y")),
+                Arguments.of("S:.200A", AminoAcidSymbolEquals("S", 200, "A")),
+                // Backward compatibility - non-ambiguous from symbols should still work
+                Arguments.of("A123T", NucleotideSymbolEquals(null, 123, "T")),
+                Arguments.of("S:N501Y", AminoAcidSymbolEquals("S", 501, "Y")),
+            )
     }
 
     @ParameterizedTest(name = "valid query: {0}")
@@ -904,6 +933,33 @@ class AdvancedQueryFacadeTest {
         assertThat(
             exception.message,
             `is`("Failed to parse advanced query (line 1:36): no viable alternative at input 'thisIsInvalid'."),
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("ambiguityCodeFromSymbolTestCases")
+    fun `ambiguity codes in from symbol position`(
+        query: String,
+        expected: SiloFilterExpression,
+    ) {
+        val result = underTest.map(query)
+        assertThat(result, equalTo(expected))
+    }
+
+    @Test
+    fun `complex query with ambiguous from symbols`() {
+        val query = "S:X501Y & ORF1a:X200A & N123T"
+        val result = underTest.map(query)
+
+        assertThat(
+            result,
+            equalTo(
+                And(
+                    NucleotideSymbolEquals(null, 123, "T"),
+                    AminoAcidSymbolEquals("ORF1a", 200, "A"),
+                    AminoAcidSymbolEquals("S", 501, "Y"),
+                ),
+            ),
         )
     }
 }

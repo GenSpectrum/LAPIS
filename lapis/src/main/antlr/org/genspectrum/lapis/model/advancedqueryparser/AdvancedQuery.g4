@@ -53,7 +53,7 @@ and_: AND | '&';
 position: NUMBER;
 
 singleSegmentedMutationQuery : singleSegmentedMutationQueryFirstSymbol? position singleSegmentedMutationQuerySecondSymbol?;
-singleSegmentedMutationQueryFirstSymbol: nucleotideSymbol;
+singleSegmentedMutationQueryFirstSymbol: possibleAmbiguousNucleotideSymbol;
 singleSegmentedMutationQuerySecondSymbol: possibleAmbiguousNucleotideSymbol;
 nucleotideSymbol: A | C | G | T;
 ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
@@ -70,7 +70,7 @@ nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
 namedMutationQuery: name ':' mutationQueryFirstSymbol? position mutationQuerySecondSymbol?;
-mutationQueryFirstSymbol: nucleotideSymbol | aaSymbol;
+mutationQueryFirstSymbol: possibleAmbiguousNucleotideSymbol | possiblyAmbiguousAaSymbol;
 mutationQuerySecondSymbol: nucleotideSymbol | ambiguousNucleotideSymbol | aaSymbol | ambiguousAaSymbol;
 aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
 ambiguousAaSymbol: X | MINUS | DOT;
