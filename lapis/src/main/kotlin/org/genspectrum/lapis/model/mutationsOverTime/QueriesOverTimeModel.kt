@@ -37,12 +37,6 @@ import java.util.concurrent.TimeUnit
 
 private const val QUERY_TIMEOUT_SECONDS = 60L
 
-data class ParsedQueryItem(
-    val displayLabel: String,
-    val countQuery: SiloFilterExpression,
-    val coverageQuery: SiloFilterExpression,
-)
-
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
         "columns (inner array).",
@@ -255,7 +249,7 @@ class QueriesOverTimeModel(
         ).toMutationsOverTimeResult()
     }
 
-    fun evaluateInternal(
+    private fun evaluateInternal(
         queryItems: List<ParsedQueryItem>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
@@ -429,3 +423,12 @@ class QueriesOverTimeModel(
         }
     }
 }
+
+/**
+ * Helper class that's used with evaluateInternal.
+ */
+private data class ParsedQueryItem(
+    val displayLabel: String,
+    val countQuery: SiloFilterExpression,
+    val coverageQuery: SiloFilterExpression,
+)
