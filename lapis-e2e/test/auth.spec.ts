@@ -21,7 +21,7 @@ describe('LAPIS that requires authentication', () => {
     {
       name: 'via Keycloak issuer-uri',
       basePath: basePathWithIssuerUriAuth,
-      fetchToken: fetchTokenFromKeycloak,
+      fetchToken: fetchTokenFromKeycloakViaContainer,
     },
   ];
 
@@ -77,4 +77,36 @@ async function fetchTokenFromKeycloak() {
   }
   const data = await response.json();
   return data.access_token;
+}
+
+/**
+ * Fetches a JWT token from Keycloak via the Docker container network.
+ *
+ * This is necessary for issuer-uri authentication because:
+ * 1. Keycloak sets the JWT 'iss' (issuer) claim based on the URL used to request the token
+ * 2. When accessed from host via localhost:8180, tokens get iss: "http://localhost:8180/realms/test-realm"
+ * 3. When accessed from container via keycloak:8080, tokens get iss: "http://keycloak:8080/realms/test-realm"
+ * 4. LAPIS is configured with issuer-uri=http://keycloak:8080/realms/test-realm (internal Docker hostname)
+ * 5. Spring Security validates that the token's 'iss' claim matches the configured issuer-uri
+ *
+ * By fetching the token from within the container network, we ensure the 'iss' claim matches
+ * what LAPIS expects, allowing issuer validation to succeed.
+ *
+ * Note: jwk-set-uri authentication doesn't have this issue because it doesn't validate the issuer claim.
+ */
+async function fetchTokenFromKeycloakViaContainer() {
+  const { exec } = await import('child_process');
+  const { promisify } = await import('util');
+  const execAsync = promisify(exec);
+
+  // Fetch token from within the Docker network using the internal Keycloak hostname
+  const command = `docker exec lapis-lapisIssuerUri-1 wget -q -O - --post-data='grant_type=password&client_id=lapis-client&username=test-user&password=test123' --header='Content-Type: application/x-www-form-urlencoded' http://keycloak:8080/realms/test-realm/protocol/openid-connect/token`;
+
+  try {
+    const { stdout } = await execAsync(command);
+    const data = JSON.parse(stdout);
+    return data.access_token;
+  } catch (error) {
+    throw new Error(`Failed to fetch token from container: ${error}`);
+  }
 }
