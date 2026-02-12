@@ -58,6 +58,11 @@ class ContentDispositionUtilsTest {
                     "data.json.gz",
                     "attachment; filename=data.json.gz; filename*=UTF-8''data.json.gz",
                 ),
+                Arguments.of(
+                    "filename with semicolon",
+                    "file;name.json",
+                    "attachment; filename=filename.json; filename*=UTF-8''file%3Bname.json",
+                ),
             )
 
         @JvmStatic
@@ -69,6 +74,8 @@ class ContentDispositionUtilsTest {
                 Arguments.of("Preserve space", "my file.csv", "my file.csv"),
                 Arguments.of("Mixed content", "file_测试_2024.json", "file__2024.json"),
                 Arguments.of("Remove double quotes", "file\"name.json", "filename.json"),
+                Arguments.of("Remove semicolon", "file;name.json", "filename.json"),
+                Arguments.of("Remove backslash", "file\\name.json", "filename.json"),
                 Arguments.of("Remove carriage return", "file\rname.json", "filename.json"),
                 Arguments.of("Remove newline", "file\nname.json", "filename.json"),
                 Arguments.of("Remove all three", "file\"\r\nname.json", "filename.json"),

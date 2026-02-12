@@ -21,7 +21,6 @@ fun generateContentDisposition(filename: String): String {
         .build()
         .toString()
 
-    // Extract filename* part from Spring's output using a robust regex
     val filenameStar = Regex("""filename\*=([^;]+)""")
         .find(springDisposition)
         ?.groupValues
