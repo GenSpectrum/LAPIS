@@ -21,6 +21,7 @@ import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
+import org.genspectrum.lapis.util.generateContentDisposition
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -230,7 +231,7 @@ class LapisControllerDownloadAsFileTest(
             .apply(assertFileContentMatches)
     }
 
-    private fun attachmentWithFilename(filename: String) = "attachment; filename=$filename"
+    private fun attachmentWithFilename(filename: String): String = generateContentDisposition(filename)
 
     private companion object {
         @JvmStatic

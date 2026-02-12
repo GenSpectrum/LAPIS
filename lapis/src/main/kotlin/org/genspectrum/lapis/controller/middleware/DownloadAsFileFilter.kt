@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.ServeType
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
+import org.genspectrum.lapis.util.generateContentDisposition
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
@@ -35,7 +36,8 @@ class DownloadAsFileFilter(
         val downloadAsFile = reReadableRequest.getBooleanField(DOWNLOAD_AS_FILE_PROPERTY) ?: false
         if (downloadAsFile) {
             val filename = getFilename(reReadableRequest)
-            response.setHeader(CONTENT_DISPOSITION, "attachment; filename=$filename")
+            val contentDisposition = generateContentDisposition(filename)
+            response.setHeader(CONTENT_DISPOSITION, contentDisposition)
         }
         filterChain.doFilter(reReadableRequest, response)
     }
