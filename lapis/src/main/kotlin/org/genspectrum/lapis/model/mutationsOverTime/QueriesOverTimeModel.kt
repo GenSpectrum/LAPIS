@@ -141,17 +141,23 @@ class QueriesOverTimeModel(
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-    ): QueriesOverTimeResult =
-        evaluateInternal(
-            queryItems = queries,
+    ): QueriesOverTimeResult {
+        val parsedQueries = queries.map { query ->
+            ParsedQueryItem(
+                displayLabel = query.displayLabel ?: query.countQuery,
+                countQuery = advancedQueryFacade.map(query.countQuery),
+                coverageQuery = advancedQueryFacade.map(query.coverageQuery),
+            )
+        }
+
+        return evaluateInternal(
+            queryItems = parsedQueries,
             dateRanges = dateRanges,
             lapisFilter = lapisFilter,
             dateField = dateField,
             remainingRetries = remainingRetries,
-            mutationToStringFn = { query -> query.displayLabel ?: query.countQuery },
-            countQueryFn = { query -> advancedQueryFacade.map(query.countQuery) },
-            coverageQueryFn = { query -> advancedQueryFacade.map(query.coverageQuery) },
         )
+    }
 
     fun evaluateAminoAcidMutations(
         mutations: List<AminoAcidMutation>,
@@ -160,34 +166,24 @@ class QueriesOverTimeModel(
         dateField: String,
         remainingRetries: Int = 1,
     ): MutationsOverTimeResult {
-        for (mutation in mutations) {
+        val parsedQueries = mutations.map { mutation ->
             if (mutation.maybe) {
                 throw BadRequestException(
                     "Invalid mutation in includeMutations – maybe() is not allowed: " +
                         mutation.toString(referenceGenome),
                 )
             }
-        }
-        return evaluateInternal(
-            queryItems = mutations,
-            dateRanges = dateRanges,
-            lapisFilter = lapisFilter,
-            dateField = dateField,
-            remainingRetries = remainingRetries,
-            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
-            countQueryFn = { mutation ->
-                when (mutation.symbol) {
+            ParsedQueryItem(
+                displayLabel = mutation.toString(referenceGenome),
+                countQuery = when (mutation.symbol) {
                     null -> HasAminoAcidMutation(mutation.gene, mutation.position)
-
                     else -> AminoAcidSymbolEquals(
                         mutation.gene,
                         mutation.position,
                         mutation.symbol,
                     )
-                }
-            },
-            coverageQueryFn = { mutation ->
-                Or(
+                },
+                coverageQuery = Or(
                     (aaSymbols + deletionSymbols).map {
                         AminoAcidSymbolEquals(
                             sequenceName = mutation.gene,
@@ -195,8 +191,16 @@ class QueriesOverTimeModel(
                             symbol = it.toString(),
                         )
                     },
-                )
-            },
+                ),
+            )
+        }
+
+        return evaluateInternal(
+            queryItems = parsedQueries,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
         ).toMutationsOverTimeResult()
     }
 
@@ -207,34 +211,24 @@ class QueriesOverTimeModel(
         dateField: String,
         remainingRetries: Int = 1,
     ): MutationsOverTimeResult {
-        for (mutation in mutations) {
+        val parsedQueries = mutations.map { mutation ->
             if (mutation.maybe) {
                 throw BadRequestException(
                     "Invalid mutation in includeMutations – maybe() is not allowed: " +
                         mutation.toString(referenceGenome),
                 )
             }
-        }
-        return evaluateInternal(
-            queryItems = mutations,
-            dateRanges = dateRanges,
-            lapisFilter = lapisFilter,
-            dateField = dateField,
-            remainingRetries = remainingRetries,
-            mutationToStringFn = { mutation -> mutation.toString(referenceGenome) },
-            countQueryFn = { mutation ->
-                when (mutation.symbol) {
+            ParsedQueryItem(
+                displayLabel = mutation.toString(referenceGenome),
+                countQuery = when (mutation.symbol) {
                     null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
-
                     else -> NucleotideSymbolEquals(
                         mutation.sequenceName,
                         mutation.position,
                         mutation.symbol,
                     )
-                }
-            },
-            coverageQueryFn = { mutation ->
-                Or(
+                },
+                coverageQuery = Or(
                     (nucleotideSymbols + deletionSymbols).map {
                         NucleotideSymbolEquals(
                             sequenceName = mutation.sequenceName,
@@ -242,25 +236,30 @@ class QueriesOverTimeModel(
                             symbol = it.toString(),
                         )
                     },
-                )
-            },
+                ),
+            )
+        }
+
+        return evaluateInternal(
+            queryItems = parsedQueries,
+            dateRanges = dateRanges,
+            lapisFilter = lapisFilter,
+            dateField = dateField,
+            remainingRetries = remainingRetries,
         ).toMutationsOverTimeResult()
     }
 
-    fun <T> evaluateInternal(
-        queryItems: List<T>,
+    private fun evaluateInternal(
+        queryItems: List<ParsedQueryItem>,
         dateRanges: List<DateRange>,
         lapisFilter: BaseSequenceFilters,
         dateField: String,
         remainingRetries: Int = 1,
-        mutationToStringFn: (queryItem: T) -> String,
-        countQueryFn: (queryItem: T) -> SiloFilterExpression,
-        coverageQueryFn: (queryItem: T) -> SiloFilterExpression,
     ): QueriesOverTimeResult {
         if (queryItems.isEmpty() || dateRanges.isEmpty()) {
             siloClient.callInfo() // populates dataVersion.dataVersion
             return QueriesOverTimeResult(
-                queries = queryItems.map(mutationToStringFn),
+                queries = queryItems.map { it.displayLabel },
                 dateRanges = dateRanges,
                 data = emptyList(),
                 totalCountsByDateRange = emptyList(),
@@ -283,10 +282,10 @@ class QueriesOverTimeModel(
             dateRanges,
         )
 
-        val tasks = queryItems.map { mutation ->
+        val tasks = queryItems.map { queryItem ->
             Callable {
-                val counts = sendQuery(baseFilter, dateQuery, countQueryFn(mutation), dateField)
-                val coverage = sendQuery(baseFilter, dateQuery, coverageQueryFn(mutation), dateField)
+                val counts = sendQuery(baseFilter, dateQuery, queryItem.countQuery, dateField)
+                val coverage = sendQuery(baseFilter, dateQuery, queryItem.coverageQuery, dateField)
                 listOf(counts.dataVersion, coverage.dataVersion) to
                     aggregateDailyMutationDataIntoDateRanges(
                         counts.queryResult,
@@ -314,9 +313,6 @@ class QueriesOverTimeModel(
                     lapisFilter = lapisFilter,
                     dateField = dateField,
                     remainingRetries = remainingRetries - 1,
-                    mutationToStringFn = mutationToStringFn,
-                    countQueryFn = countQueryFn,
-                    coverageQueryFn = coverageQueryFn,
                 )
             }
             throw RuntimeException(
@@ -327,7 +323,7 @@ class QueriesOverTimeModel(
         dataVersion.dataVersion = dataVersions.first()
 
         return QueriesOverTimeResult(
-            queries = queryItems.map(mutationToStringFn),
+            queries = queryItems.map { it.displayLabel },
             dateRanges = dateRanges,
             data = dataWithDataVersions.map { it.second },
             totalCountsByDateRange = totalCountsByDateRange,
@@ -427,3 +423,12 @@ class QueriesOverTimeModel(
         }
     }
 }
+
+/**
+ * Helper class that's used with evaluateInternal.
+ */
+private data class ParsedQueryItem(
+    val displayLabel: String,
+    val countQuery: SiloFilterExpression,
+    val coverageQuery: SiloFilterExpression,
+)
