@@ -45,4 +45,7 @@ fun generateContentDisposition(filename: String): String {
  * - "données.json" → "donnes.json" (é removed)
  * - "测试.json" → ".json" (Chinese characters removed)
  */
-fun toAsciiFilename(filename: String): String = filename.filter { it.code < 128 }
+fun toAsciiFilename(filename: String): String =
+    filename.filter {
+        it.code in 32..126 && it !in setOf(';', '"', '\\')
+    }
