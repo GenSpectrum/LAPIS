@@ -165,3 +165,104 @@ Don't forget to encode/escape the query correctly. In JavaScript, this can be do
 [encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
 function.
 :::
+
+## Validating Queries
+
+LAPIS provides a `/query/parse` endpoint that allows you to validate and parse advanced queries without executing them. This is useful for:
+
+- Validating query syntax before sending data requests
+- Understanding how LAPIS interprets your query
+- Debugging complex queries
+
+### Endpoint
+
+`POST /query/parse`
+
+### Request Format
+
+```json
+{
+  "queries": ["query1", "query2", ...]
+}
+```
+
+### Response Format
+
+The endpoint returns a discriminated union for each query. Each result has a `type` field that indicates whether parsing succeeded or failed.
+
+**Success case:**
+
+```json
+{
+  "data": [
+    {
+      "type": "success",
+      "filter": {
+        "type": "StringEquals",
+        "column": "country",
+        "value": "USA"
+      }
+    }
+  ],
+  "info": { ... }
+}
+```
+
+**Failure case:**
+
+```json
+{
+  "data": [
+    {
+      "type": "failure",
+      "error": "Parse error at position 8: unexpected token"
+    }
+  ],
+  "info": { ... }
+}
+```
+
+### Example
+
+Validate multiple queries in a single request:
+
+```bash
+curl -X POST "https://lapis.cov-spectrum.org/open/v2/query/parse" \
+  -H "Content-Type: application/json" \
+  -d '{"queries": ["country=USA & 501T", "invalid!!!"]}'
+```
+
+Response:
+
+```json
+{
+  "data": [
+    {
+      "type": "success",
+      "filter": {
+        "type": "And",
+        "children": [
+          {
+            "type": "StringEquals",
+            "column": "country",
+            "value": "USA"
+          },
+          {
+            "type": "NucleotideSymbolEquals",
+            "sequenceName": "main",
+            "position": 501,
+            "symbol": "T"
+          }
+        ]
+      }
+    },
+    {
+      "type": "failure",
+      "error": "Parse error: unexpected input"
+    }
+  ],
+  "info": { ... }
+}
+```
+
+The endpoint processes multiple queries in a single request, returning results for each query independently. Valid queries show the parsed filter structure, while invalid queries return descriptive error messages.
