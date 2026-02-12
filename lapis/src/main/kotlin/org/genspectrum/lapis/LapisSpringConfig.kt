@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
 
@@ -79,10 +80,12 @@ class LapisSpringConfig {
     fun securityCustomizer(resourceServerProperties: OAuth2ResourceServerProperties) =
         OpenApiCustomizer { openApi ->
             if (resourceServerProperties.isConfiguredToUseAuth()) {
-                val publicRoutesToIgnore = PUBLIC_ROUTES.map { it.trimEnd('/', '*') }.filter { it.isNotEmpty() }
+                val pathMatcher = AntPathMatcher()
 
                 openApi.paths
-                    .filterKeys { !publicRoutesToIgnore.any { publicRoute -> it.startsWith(publicRoute) } }
+                    .filterKeys { path ->
+                        PUBLIC_ROUTES.none { pattern -> pathMatcher.match(pattern, path) }
+                    }
                     .forEach { (_, pathItem) ->
                         pathItem.readOperations()?.forEach { operation ->
                             operation.addSecurityItem(SecurityRequirement().addList(SECURITY_SCHEMA_NAME))
