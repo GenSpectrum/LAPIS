@@ -281,24 +281,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given amino acid mutation expression without second symbol THEN should return HasAminoAcidMutation`() {
-        val advancedQuery = "S:N501"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
-    }
-
-    @Test
-    fun `given amino acid mutation expression without any symbol THEN should return HasAminoAcidMutation`() {
-        val advancedQuery = "S:501"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
-    }
-
-    @Test
     fun `given a valid advancedQuery with a 'AA insertion' expression THEN returns SILO query`() {
         val advancedQuery = "ins_S:501:EPE"
 
@@ -853,12 +835,22 @@ class AdvancedQueryFacadeTest {
                     query = "S:501Y",
                     expected = AminoAcidSymbolEquals("S", 501, "Y"),
                 ),
+                ValidTestCase(
+                    description = "amino acid mutation without 'to' symbol",
+                    query = "S:N501",
+                    expected = HasAminoAcidMutation("S", 501),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation without any symbol",
+                    query = "S:501",
+                    expected = HasAminoAcidMutation("S", 501),
+                ),
             ),
             invalid = listOf(
                 InvalidTestCase(
                     description = "amino acid mutation with invalid gene",
                     query = "invalidGene:501Y",
-                    expected = "invalidGene is not a known segment or gene"
+                    expected = "invalidGene is not a known segment or gene",
                 ),
             ),
         )
