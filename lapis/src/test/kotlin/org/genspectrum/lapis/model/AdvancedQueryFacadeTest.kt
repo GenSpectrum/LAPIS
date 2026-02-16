@@ -1,8 +1,5 @@
 package org.genspectrum.lapis.model
 
-import org.checkerframework.checker.units.qual.A
-import org.checkerframework.checker.units.qual.C
-import org.checkerframework.checker.units.qual.K
 import org.genspectrum.lapis.PANGO_LINEAGE_FIELD
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
@@ -37,7 +34,6 @@ import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
@@ -915,6 +911,11 @@ class AdvancedQueryFacadeTest {
                     expected = "extraneous input '.'",
                 ),
             ),
+        )
+
+        private val insertionCases = TestCaseCollection(
+            valid = TODO(),
+            invalid = TODO(),
         )
     }
 
