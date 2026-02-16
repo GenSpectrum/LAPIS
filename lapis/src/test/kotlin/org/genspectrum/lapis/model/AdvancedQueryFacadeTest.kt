@@ -900,10 +900,10 @@ class AdvancedQueryFacadeTest {
                 Arguments.of("S:X501Y", AminoAcidSymbolEquals("S", 501, "Y")),
                 Arguments.of("ORF1a:X200A", AminoAcidSymbolEquals("ORF1a", 200, "A")),
                 // Special symbols (deletion and query)
-                Arguments.of("-123A", NucleotideSymbolEquals(null, 123, "A")),
-                Arguments.of(".456T", NucleotideSymbolEquals(null, 456, "T")),
-                Arguments.of("S:-100Y", AminoAcidSymbolEquals("S", 100, "Y")),
-                Arguments.of("S:.200A", AminoAcidSymbolEquals("S", 200, "A")),
+                Arguments.of("A123-", NucleotideSymbolEquals(null, 123, "-")),
+                Arguments.of("T456.", NucleotideSymbolEquals(null, 456, ".")),
+                Arguments.of("S:Y100-", AminoAcidSymbolEquals("S", 100, "-")),
+                Arguments.of("S:A200.", AminoAcidSymbolEquals("S", 200, ".")),
                 // Backward compatibility - non-ambiguous from symbols should still work
                 Arguments.of("A123T", NucleotideSymbolEquals(null, 123, "T")),
                 Arguments.of("S:N501Y", AminoAcidSymbolEquals("S", 501, "Y")),
