@@ -281,15 +281,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given amino acid mutation expression without invalid gene THEN throw error`() {
-        val advancedQuery = "invalidGene:501Y"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
-
-        assertThat(exception.message, `is`("invalidGene is not a known segment or gene"))
-    }
-
-    @Test
     fun `given amino acid mutation expression without second symbol THEN should return HasAminoAcidMutation`() {
         val advancedQuery = "S:N501"
 
@@ -863,7 +854,13 @@ class AdvancedQueryFacadeTest {
                     expected = AminoAcidSymbolEquals("S", 501, "Y"),
                 ),
             ),
-            invalid = listOf(),
+            invalid = listOf(
+                InvalidTestCase(
+                    description = "amino acid mutation with invalid gene",
+                    query = "invalidGene:501Y",
+                    expected = "invalidGene is not a known segment or gene"
+                ),
+            ),
         )
 
         @JvmStatic
