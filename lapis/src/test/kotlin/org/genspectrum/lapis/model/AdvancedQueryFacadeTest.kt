@@ -1,5 +1,8 @@
 package org.genspectrum.lapis.model
 
+import org.checkerframework.checker.units.qual.A
+import org.checkerframework.checker.units.qual.C
+import org.checkerframework.checker.units.qual.K
 import org.genspectrum.lapis.PANGO_LINEAGE_FIELD
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
@@ -800,26 +803,65 @@ class AdvancedQueryFacadeTest {
 
         private val mutationCases = TestCaseCollection(
             valid = listOf(
+                *listOf('A', 'C', 'G', 'T', 'M', 'R', 'W', 'S', 'Y', 'K', 'V', 'H', 'D', 'B', 'N').map { base ->
+                    ValidTestCase(
+                        description = "nucleotide mutation with symbol '$base'",
+                        query = "${base}300$base",
+                        expected = NucleotideSymbolEquals(null, 300, "$base"),
+                    )
+                }.toTypedArray(),
                 ValidTestCase(
-                    description = "single nucleotide mutation 300G",
-                    query = "300G",
-                    expected = NucleotideSymbolEquals(null, 300, "G"),
+                    description = "nucleotide mutation with symbol '-'",
+                    query = "A300-",
+                    expected = NucleotideSymbolEquals(null, 300, "-"),
                 ),
                 ValidTestCase(
-                    description = "single nucleotide mutation with 'from'",
+                    description = "nucleotide mutation with symbol '.'",
+                    query = "A300.",
+                    expected = NucleotideSymbolEquals(null, 300, "."),
+                ),
+                ValidTestCase(
+                    description = "nucleotide mutation without 'from'",
                     query = "A300G",
                     expected = NucleotideSymbolEquals(null, 300, "G"),
                 ),
                 ValidTestCase(
-                    description = "mutation with position only",
+                    description = "nucleotide mutation with position only",
                     query = "400",
                     expected = HasNucleotideMutation(null, 400),
                 ),
-                ValidTestCase(
-                    description = "amino acid mutation S:N501Y",
-                    query = "S:N501Y",
-                    expected = AminoAcidSymbolEquals("S", 501, "Y"),
-                ),
+                *listOf(
+                    'A',
+                    'R',
+                    'N',
+                    'D',
+                    'C',
+                    'E',
+                    'Q',
+                    'G',
+                    'H',
+                    'I',
+                    'L',
+                    'K',
+                    'M',
+                    'F',
+                    'P',
+                    'S',
+                    'T',
+                    'W',
+                    'Y',
+                    'V',
+                    '*',
+                    'B',
+                    'Z',
+                    'X',
+                ).map { base ->
+                    ValidTestCase(
+                        description = "amino acid mutation with symbol '$base'",
+                        query = "S:${base}300$base",
+                        expected = AminoAcidSymbolEquals("S", 300, "$base"),
+                    )
+                }.toTypedArray(),
                 ValidTestCase(
                     description = "amino acid mutation with lower case",
                     query = "S:n501y",
@@ -852,36 +894,28 @@ class AdvancedQueryFacadeTest {
                     query = "invalidGene:501Y",
                     expected = "invalidGene is not a known segment or gene",
                 ),
+                InvalidTestCase(
+                    description = "'-' in nucleotide 'from' position is invalid",
+                    query = "-300A",
+                    expected = "no viable alternative at input '-300A'",
+                ),
+                InvalidTestCase(
+                    description = "'.' in nucleotide 'from' position is invalid",
+                    query = ".300A",
+                    expected = "no viable alternative at input '.300A'",
+                ),
+                InvalidTestCase(
+                    description = "'-' in amino acid 'from' position is invalid",
+                    query = "S:-300A",
+                    expected = "extraneous input '-'",
+                ),
+                InvalidTestCase(
+                    description = "'.' in amino acid 'from' position is invalid",
+                    query = "S:.300A",
+                    expected = "extraneous input '.'",
+                ),
             ),
         )
-
-        @JvmStatic
-        fun ambiguityCodeFromSymbolTestCases() =
-            listOf(
-                // All nucleotide ambiguity codes (IUPAC standard)
-                Arguments.of("M123A", NucleotideSymbolEquals(null, 123, "A")),
-                Arguments.of("R456T", NucleotideSymbolEquals(null, 456, "T")),
-                Arguments.of("W789G", NucleotideSymbolEquals(null, 789, "G")),
-                Arguments.of("S100C", NucleotideSymbolEquals(null, 100, "C")),
-                Arguments.of("Y200A", NucleotideSymbolEquals(null, 200, "A")),
-                Arguments.of("K300T", NucleotideSymbolEquals(null, 300, "T")),
-                Arguments.of("V400G", NucleotideSymbolEquals(null, 400, "G")),
-                Arguments.of("H500C", NucleotideSymbolEquals(null, 500, "C")),
-                Arguments.of("D600A", NucleotideSymbolEquals(null, 600, "A")),
-                Arguments.of("B700T", NucleotideSymbolEquals(null, 700, "T")),
-                Arguments.of("N800G", NucleotideSymbolEquals(null, 800, "G")),
-                // Amino acid ambiguity code (X) - including the specific failing case from issue #1064
-                Arguments.of("S:X501Y", AminoAcidSymbolEquals("S", 501, "Y")),
-                Arguments.of("ORF1a:X200A", AminoAcidSymbolEquals("ORF1a", 200, "A")),
-                // Special symbols (deletion and query)
-                Arguments.of("A123-", NucleotideSymbolEquals(null, 123, "-")),
-                Arguments.of("T456.", NucleotideSymbolEquals(null, 456, ".")),
-                Arguments.of("S:Y100-", AminoAcidSymbolEquals("S", 100, "-")),
-                Arguments.of("S:A200.", AminoAcidSymbolEquals("S", 200, ".")),
-                // Backward compatibility - non-ambiguous from symbols should still work
-                Arguments.of("A123T", NucleotideSymbolEquals(null, 123, "T")),
-                Arguments.of("S:N501Y", AminoAcidSymbolEquals("S", 501, "Y")),
-            )
     }
 
     @ParameterizedTest(name = "valid query: {0}")
@@ -908,16 +942,6 @@ class AdvancedQueryFacadeTest {
             exception.message,
             `is`("Failed to parse advanced query (line 1:36): no viable alternative at input 'thisIsInvalid'."),
         )
-    }
-
-    @ParameterizedTest
-    @MethodSource("ambiguityCodeFromSymbolTestCases")
-    fun `ambiguity codes in from symbol position`(
-        query: String,
-        expected: SiloFilterExpression,
-    ) {
-        val result = underTest.map(query)
-        assertThat(result, equalTo(expected))
     }
 }
 
