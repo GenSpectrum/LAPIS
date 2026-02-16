@@ -281,15 +281,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given amino acid mutation expression without first symbol THEN should map to AminoAcidSymbolEquals`() {
-        val advancedQuery = "S:501Y"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
-    }
-
-    @Test
     fun `given amino acid mutation expression without invalid gene THEN throw error`() {
         val advancedQuery = "invalidGene:501Y"
 
@@ -865,6 +856,11 @@ class AdvancedQueryFacadeTest {
                     description = "amino acid mutation with lower case gene",
                     query = "orf1a:N501Y",
                     expected = AminoAcidSymbolEquals("ORF1a", 501, "Y"),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation without 'from'",
+                    query = "S:501Y",
+                    expected = AminoAcidSymbolEquals("S", 501, "Y"),
                 ),
             ),
             invalid = listOf(),
