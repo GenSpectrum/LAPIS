@@ -57,7 +57,6 @@ const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
 const val ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "AllNucleotideSequenceRequest"
 const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 const val QUERIES_OVER_TIME_REQUEST_SCHEMA = "QueriesOverTimeRequest"
-const val QUERY_PARSE_REQUEST_SCHEMA = "QueryParseRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
