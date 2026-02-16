@@ -127,19 +127,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a single entry THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "300G"
-        val advancedQueryWithFrom = "A300G"
-
-        val result = underTest.map(advancedQuery)
-        val resultWithFrom = underTest.map(advancedQueryWithFrom)
-
-        val expectedResult = NucleotideSymbolEquals(null, 300, "G")
-        assertThat(result, equalTo(expectedResult))
-        assertThat(resultWithFrom, equalTo(expectedResult))
-    }
-
-    @Test
     fun `given a advancedQuery with mutation with position only THEN returns HasNucleotideMutation filter`() {
         val advancedQuery = "400"
 
@@ -462,7 +449,8 @@ class AdvancedQueryFacadeTest {
                 maybeCases.valid +
                 notCases.valid +
                 andCases.valid +
-                metadataEqualsCases.valid
+                metadataEqualsCases.valid +
+                mutationCases.valid
 
         @JvmStatic
         fun invalidQueryProvider() =
@@ -493,7 +481,8 @@ class AdvancedQueryFacadeTest {
                 maybeCases.invalid +
                 notCases.invalid +
                 andCases.invalid +
-                metadataEqualsCases.invalid
+                metadataEqualsCases.invalid +
+                mutationCases.invalid
 
         private val regexCases = TestCaseCollection(
             valid = listOf(
@@ -879,6 +868,22 @@ class AdvancedQueryFacadeTest {
                     "'notAFloat' is not a valid float",
                 ),
             ),
+        )
+
+        private val mutationCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "single nucleotide mutation 300G",
+                    query = "300G",
+                    expected = NucleotideSymbolEquals(null, 300, "G"),
+                ),
+                ValidTestCase(
+                    description = "single nucleotide mutation with 'from'",
+                    query = "A300G",
+                    expected = NucleotideSymbolEquals(null, 300, "G"),
+                ),
+            ),
+            invalid = listOf(),
         )
 
         @JvmStatic
