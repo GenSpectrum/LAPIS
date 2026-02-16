@@ -127,15 +127,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with mutation with position only THEN returns HasNucleotideMutation filter`() {
-        val advancedQuery = "400"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasNucleotideMutation(null, 400)))
-    }
-
-    @Test
     fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding SiloQuery`() {
         val advancedQuery = "300G | 400-"
 
@@ -881,6 +872,11 @@ class AdvancedQueryFacadeTest {
                     description = "single nucleotide mutation with 'from'",
                     query = "A300G",
                     expected = NucleotideSymbolEquals(null, 300, "G"),
+                ),
+                ValidTestCase(
+                    description = "mutation with position only",
+                    query = "400",
+                    expected = HasNucleotideMutation(null, 400),
                 ),
             ),
             invalid = listOf(),
