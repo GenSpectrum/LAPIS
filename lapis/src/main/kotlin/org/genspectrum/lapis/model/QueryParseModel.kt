@@ -13,7 +13,7 @@ class QueryParseModel(
     fun parseQueries(queries: List<String>): List<ParsedQueryResult> {
         try {
             siloClient.callInfo() // populates dataVersion.dataVersion
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // If callInfo fails, continue with null dataVersion
         }
         return queries.map { query ->
