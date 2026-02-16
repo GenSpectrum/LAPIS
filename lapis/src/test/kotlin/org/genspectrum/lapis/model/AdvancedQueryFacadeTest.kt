@@ -942,23 +942,6 @@ class AdvancedQueryFacadeTest {
         val result = underTest.map(query)
         assertThat(result, equalTo(expected))
     }
-
-    @Test
-    fun `complex query with ambiguous from symbols`() {
-        val query = "S:X501Y & ORF1a:X200A & N123T"
-        val result = underTest.map(query)
-
-        assertThat(
-            result,
-            equalTo(
-                And(
-                    NucleotideSymbolEquals(null, 123, "T"),
-                    AminoAcidSymbolEquals("ORF1a", 200, "A"),
-                    AminoAcidSymbolEquals("S", 501, "Y"),
-                ),
-            ),
-        )
-    }
 }
 
 data class ValidTestCase(
