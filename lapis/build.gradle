@@ -97,7 +97,7 @@ openApi {
     outputDir.set(file("$rootDir"))
 
     def segmented = project.hasProperty("segmented") ? project.segmented : "false"
-    def auth = project.hasProperty("auth") ? project.auth : "false"
+    def auth = project.findProperty("auth") ?: "false"
 
     def getCustomOutputFileName = { segmented_, auth_ ->
         def authSuffix = auth_ == "true" ? "-with-auth" : ""
