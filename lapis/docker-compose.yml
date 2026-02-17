@@ -1,23 +1,41 @@
+x-lapis-common: &lapis-common
+  image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
+  platform: linux/amd64
+
+x-silo-common: &silo-common
+  image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+  platform: linux/amd64
+
+x-database-config-volume: &database-config-volume
+  type: bind
+  target: /workspace/database_config.yaml
+  read_only: true
+
+x-reference-genomes-volume: &reference-genomes-volume
+  type: bind
+  target: /workspace/reference_genomes.json
+  read_only: true
+
+x-silo-depends-on: &silo-depends-on
+  silo:
+    condition: service_started
+  keycloak:
+    condition: service_healthy
+
 services:
   lapisOpen:
-    image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
-    platform: linux/amd64
+    <<: *lapis-common
     ports:
       - "8090:8080"
     command: --silo.url=http://silo:8081
     volumes:
-      - type: bind
+      - <<: *database-config-volume
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
-        target: /workspace/database_config.yaml
-        read_only: true
-      - type: bind
+      - <<: *reference-genomes-volume
         source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
-        target: /workspace/reference_genomes.json
-        read_only: true
 
   silo:
-    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    platform: linux/amd64
+    <<: *silo-common
     ports:
       - "8091:8081"
     command: api
@@ -28,8 +46,7 @@ services:
         condition: service_completed_successfully
 
   siloPreprocessing:
-    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    platform: linux/amd64
+    <<: *silo-common
     command: preprocessing
     volumes:
       - ../lapis-e2e/testData/singleSegmented:/preprocessing/input
@@ -38,8 +55,7 @@ services:
       - ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml:/preprocessing/input/database_config.yaml
 
   siloMultisegmented:
-    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    platform: linux/amd64
+    <<: *silo-common
     ports:
       - "8093:8081"
     command: api
@@ -50,8 +66,7 @@ services:
         condition: service_completed_successfully
 
   siloPreprocessingMultisegmented:
-    image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
-    platform: linux/amd64
+    <<: *silo-common
     command: preprocessing
     volumes:
       - ../lapis-e2e/testData/multiSegmented:/preprocessing/input
@@ -60,17 +75,75 @@ services:
       - ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml:/preprocessing/input/database_config.yaml
 
   lapisMultiSegmented:
-    image: ghcr.io/genspectrum/lapis:${LAPIS_TAG}
-    platform: linux/amd64
+    <<: *lapis-common
     ports:
       - "8094:8080"
     command: --silo.url=http://siloMultisegmented:8081
     volumes:
-      - type: bind
+      - <<: *database-config-volume
         source: ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml
-        target: /workspace/database_config.yaml
-        read_only: true
-      - type: bind
+      - <<: *reference-genomes-volume
         source: ../lapis-e2e/testData/multiSegmented/reference_genomes.json
-        target: /workspace/reference_genomes.json
+
+  lapisPublicKey:
+    <<: *lapis-common
+    ports:
+      - "8095:8080"
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=file:/workspace/test_public_key.pem
+    volumes:
+      - <<: *database-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
+      - <<: *reference-genomes-volume
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
+      - type: bind
+        source: ../lapis-e2e/testData/oauth-keys/test_public_key.pem
+        target: /workspace/test_public_key.pem
         read_only: true
+
+  lapisJwkSetUri:
+    <<: *lapis-common
+    ports:
+      - "8096:8080"
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
+    volumes:
+      - <<: *database-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
+      - <<: *reference-genomes-volume
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
+    depends_on: *silo-depends-on
+
+  lapisIssuerUri:
+    <<: *lapis-common
+    ports:
+      - "8097:8080"
+    command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.issuer-uri=http://keycloak:8080/realms/test-realm
+    volumes:
+      - <<: *database-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
+      - <<: *reference-genomes-volume
+        source: ../lapis-e2e/testData/singleSegmented/reference_genomes.json
+    depends_on: *silo-depends-on
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    platform: linux/amd64
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HTTP_PORT=8080
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "8180:8080"
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - type: bind
+        source: ../lapis-e2e/testData/keycloak/test-realm.json
+        target: /opt/keycloak/data/import/test-realm.json
+        read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 5s
+      timeout: 2s
+      retries: 20

@@ -11,10 +11,23 @@ import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
   MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
+import { LapisControllerApi as LapisControllerApiWithAuth } from './lapisClientWithAuth';
 import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
+/**
+ * has auth configured via a "hardcoded" public key file
+ */
+export const basePathWithPublicKeyAuth = 'http://localhost:8095';
+/**
+ * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.jwk-set-uri
+ */
+export const basePathWithJwkSetUriAuth = 'http://localhost:8096';
+/**
+ * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.issuer-uri
+ */
+export const basePathWithIssuerUriAuth = 'http://localhost:8097';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -58,6 +71,9 @@ export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenc
 export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceControllerApi(
   new Configuration({ basePath: basePathMultiSegmented })
 ).withMiddleware(middleware);
+
+export const lapisClientWithAuth = ({ basePath, accessToken }: { basePath: string; accessToken?: string }) =>
+  new LapisControllerApiWithAuth(new Configuration({ basePath, accessToken })).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {
   const lines = serverResponse.split('\n').filter(line => line.length > 0);

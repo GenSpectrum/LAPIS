@@ -135,13 +135,11 @@ jobs:
         if: ${{ always() }}
         run: |
           cd lapis
-          mkdir p e2e-logs
-          docker compose logs silo > e2e-logs/silo.log
-          docker compose logs siloPreprocessing > e2e-logs/siloPreprocessing.log
-          docker compose logs siloMultisegmented > e2e-logs/siloMultisegmented.log
-          docker compose logs siloPreprocessingMultisegmented > e2e-logs/siloPreprocessingMultisegmented.log
-          docker compose logs lapisOpen > e2e-logs/lapisOpen.log
-          docker compose logs lapisMultiSegmented > e2e-logs/lapisMultiSegmented.log
+          mkdir -p e2e-logs
+          for service in silo siloPreprocessing siloMultisegmented siloPreprocessingMultisegmented \
+                         lapisOpen lapisMultiSegmented lapisPublicKey lapisJwkSetUri lapisIssuerUri keycloak; do
+            docker compose logs "$service" > "e2e-logs/${service}.log"
+          done
         env:
           SILO_TAG: 0.8.5
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}

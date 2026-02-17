@@ -59,8 +59,8 @@ data class MockDataCollection(
             fields: List<String>? = null,
             phyloTreeField: String? = null,
         ) = MockDataCollection(
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.empty() },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { Stream.empty() } },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
             expectedJson,
             expectedCsv,
             expectedTsv,
@@ -143,7 +143,7 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                     )
-                } returns getSequencesResponse()
+                } answers { getSequencesResponse() }
             },
             mockWithData = { modelMock ->
                 every {
@@ -154,7 +154,7 @@ data class SequenceEndpointMockDataCollection(
                         any(),
                         any(),
                     )
-                } returns getSequencesResponse()
+                } answers { getSequencesResponse() }
             },
             expectedFasta = expectedFasta,
             expectedJson = expectedJson,
@@ -224,15 +224,11 @@ data class TreeEndpointMockDataCollection(
             phyloTreeField: String? = null,
         ) = TreeEndpointMockDataCollection(
             { modelMock ->
-                every { siloQueryModelMockCall(modelMock)(any()) } returns Stream.of(
-                    PhyloSubtreeData(
-                        subtreeNewick = "",
-                        missingNodeCount = 0,
-                        missingFromTree = null,
-                    ),
-                )
+                every { siloQueryModelMockCall(modelMock)(any()) } answers {
+                    Stream.of(PhyloSubtreeData(subtreeNewick = "", missingNodeCount = 0, missingFromTree = null))
+                }
             },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } returns modelData.stream() },
+            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
             expectedNewick,
             fields,
             phyloTreeField,

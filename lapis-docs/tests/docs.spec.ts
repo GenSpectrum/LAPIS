@@ -52,6 +52,7 @@ const conceptsPages = prependToRelativeUrl(
         { title: 'Advanced query', relativeUrl: '/advanced-query' },
         { title: 'String search', relativeUrl: '/string-search' },
         { title: 'Request Id', relativeUrl: '/request-id' },
+        { title: 'Authentication', relativeUrl: '/authentication' },
     ],
     '/concepts',
 );
@@ -87,6 +88,7 @@ const maintainerDocsPages = prependToRelativeUrl(
                 { title: 'Reference Genomes', relativeUrl: '/reference-genomes' },
                 { title: 'Starting SILO and LAPIS', relativeUrl: '/starting-silo-and-lapis' },
                 { title: 'Preprocessing', relativeUrl: '/preprocessing' },
+                { title: 'Authentication', relativeUrl: '/authentication' },
             ],
             '/references',
         ),

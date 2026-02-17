@@ -1,0 +1,28 @@
+{
+  "realm": "test-realm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "lapis-client",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "test-user",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

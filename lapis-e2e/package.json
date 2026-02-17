@@ -10,8 +10,12 @@
     "generateLapisClientMultiSegmented": "npm run runOpenApiGeneratorMultiSegmented && npm run copyGeneratedFilesMultiSegmented && npm run cleanUpGeneratedFilesMultiSegmented",
     "runOpenApiGeneratorMultiSegmented": "openapi-generator-cli generate -i ../lapis/lapis-openapi-multi-segmented.json -g typescript-fetch -o generated-sources-multi-segmented",
     "copyGeneratedFilesMultiSegmented": "mkdir -p test/lapisClientMultiSegmented && cp generated-sources-multi-segmented/index.ts generated-sources-multi-segmented/runtime.ts test/lapisClientMultiSegmented && cp -r generated-sources-multi-segmented/apis generated-sources-multi-segmented/models test/lapisClientMultiSegmented",
+    "generateLapisClientWithAuth": "npm run runOpenApiGeneratorWithAuth && npm run copyGeneratedFilesWithAuth && npm run cleanUpGeneratedFilesWithAuth",
+    "runOpenApiGeneratorWithAuth": "openapi-generator-cli generate -i ../lapis/lapis-openapi-single-segmented-with-auth.json -g typescript-fetch -o generated-sources-with-auth",
+    "copyGeneratedFilesWithAuth": "mkdir -p test/lapisClientWithAuth && cp generated-sources-with-auth/index.ts generated-sources-with-auth/runtime.ts test/lapisClientWithAuth && cp -r generated-sources-with-auth/apis generated-sources-with-auth/models test/lapisClientWithAuth",
     "cleanUpGeneratedFiles": "rm -rf generated-sources",
     "cleanUpGeneratedFilesMultiSegmented": "rm -rf generated-sources-multi-segmented",
+    "cleanUpGeneratedFilesWithAuth": "rm -rf generated-sources-with-auth",
     "check-format": "prettier --check .",
     "format": "prettier --write ."
   },

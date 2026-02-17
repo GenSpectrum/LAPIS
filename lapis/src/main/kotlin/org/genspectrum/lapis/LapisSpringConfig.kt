@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.HeaderParameter
+import io.swagger.v3.oas.models.security.SecurityRequirement
 import mu.KotlinLogging
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -26,17 +27,21 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
+import org.genspectrum.lapis.openApi.SECURITY_SCHEMA_NAME
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import java.io.File
 
@@ -51,7 +56,8 @@ class LapisSpringConfig {
         sequenceFilterFields: SequenceFilterFields,
         databaseConfig: DatabaseConfig,
         referenceGenomeSchema: ReferenceGenomeSchema,
-    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema)
+        resourceServerProperties: OAuth2ResourceServerProperties,
+    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema, resourceServerProperties)
 
     @Bean
     fun headerCustomizer() =
@@ -68,6 +74,27 @@ class LapisSpringConfig {
                 )
             }
             operation
+        }
+
+    /**
+     * Adds authentication to data access API endpoints, if this LAPIS instance is configured to use authentication.
+     */
+    @Bean
+    fun securityCustomizer(resourceServerProperties: OAuth2ResourceServerProperties) =
+        OpenApiCustomizer { openApi ->
+            if (resourceServerProperties.isConfiguredToUseAuth()) {
+                val pathMatcher = AntPathMatcher()
+
+                openApi.paths
+                    .filterKeys { path ->
+                        PUBLIC_ROUTES.none { pattern -> pathMatcher.match(pattern, path) }
+                    }
+                    .forEach { (_, pathItem) ->
+                        pathItem.readOperations()?.forEach { operation ->
+                            operation.addSecurityItem(SecurityRequirement().addList(SECURITY_SCHEMA_NAME))
+                        }
+                    }
+            }
         }
 
     @Bean

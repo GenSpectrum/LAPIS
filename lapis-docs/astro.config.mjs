@@ -122,6 +122,10 @@ export default defineConfig({
                             label: 'Request Id',
                             link: '/concepts/request-id',
                         },
+                        {
+                            label: 'Authentication',
+                            link: '/concepts/authentication',
+                        },
                     ],
                 },
                 {
@@ -187,6 +191,10 @@ export default defineConfig({
                                 {
                                     label: 'Preprocessing',
                                     link: '/maintainer-docs/references/preprocessing',
+                                },
+                                {
+                                    label: 'Authentication',
+                                    link: '/maintainer-docs/references/authentication',
                                 },
                             ],
                         },
