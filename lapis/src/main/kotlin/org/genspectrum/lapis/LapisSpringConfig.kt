@@ -76,6 +76,9 @@ class LapisSpringConfig {
             operation
         }
 
+    /**
+     * Adds authentication to data access API endpoints, if this LAPIS instance is configured to use authentication.
+     */
     @Bean
     fun securityCustomizer(resourceServerProperties: OAuth2ResourceServerProperties) =
         OpenApiCustomizer { openApi ->
