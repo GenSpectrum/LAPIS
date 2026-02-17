@@ -16,8 +16,17 @@ import { expect } from 'chai';
 
 export const basePath = 'http://localhost:8090';
 export const basePathMultiSegmented = 'http://localhost:8094';
+/**
+ * has auth configured via a "hardcoded" public key file
+ */
 export const basePathWithPublicKeyAuth = 'http://localhost:8095';
+/**
+ * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.jwk-set-uri
+ */
 export const basePathWithJwkSetUriAuth = 'http://localhost:8096';
+/**
+ * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.issuer-uri
+ */
 export const basePathWithIssuerUriAuth = 'http://localhost:8097';
 
 const middleware: Middleware = {
