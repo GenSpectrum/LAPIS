@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.5](https://github.com/GenSpectrum/LAPIS/compare/v0.6.4...v0.6.5) (2026-02-17)
+
+
+### Features
+
+* **lapis:** make it possible to protect a LAPIS instance by OAuth to require user login before accessing the data ([#1521](https://github.com/GenSpectrum/LAPIS/issues/1521)) ([5f9d764](https://github.com/GenSpectrum/LAPIS/commit/5f9d76414ae1f34d29fc0bf177ca2b582a240067)), closes [#251](https://github.com/GenSpectrum/LAPIS/issues/251)
+* **lapis:** support `filename*` with UTF-8 character encoding ([#1532](https://github.com/GenSpectrum/LAPIS/issues/1532)) ([b375e8a](https://github.com/GenSpectrum/LAPIS/commit/b375e8ae39f95da310d059dcc615b765755d99e0))
+
+
+### Bug Fixes
+
+* **lapis:** throw 'bad request' error when queries are malformed ([#1534](https://github.com/GenSpectrum/LAPIS/issues/1534)) ([786a6ca](https://github.com/GenSpectrum/LAPIS/commit/786a6caab6b383b21a3c32743f7e932bbf653034))
+
 ## [0.6.4](https://github.com/GenSpectrum/LAPIS/compare/v0.6.3...v0.6.4) (2026-01-14)
 
 
