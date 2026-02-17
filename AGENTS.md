@@ -36,12 +36,12 @@ docs(lapis-docs): update API reference
 
 ## Technology Stack
 
-- **Kotlin:** 2.3.0, JVM target 21
-- **Spring Boot:** 3.5.6
-- **Gradle:** 9.3.1
-- **ANTLR:** 4.13.2 (for query parsing)
+- **Kotlin:**
+- **Spring Boot:**
+- **Gradle:**
+- **ANTLR:** (for query parsing)
 - **Testing:** JUnit 5, MockK, Spring MockMvc, Mocha, Chai
-- **OpenAPI:** Springdoc 2.8.13
+- **OpenAPI:** Springdoc
 - **Caching:** Caffeine
 - **Node.js Projects:** npm for lapis-e2e and lapis-docs
 - **Documentation:** Astro (static site generator)

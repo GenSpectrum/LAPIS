@@ -203,14 +203,17 @@ LAPIS usually runs on localhost:8090
 - YAML file defines metadata fields
 - Determines available sequence filters
 - Influences OpenAPI spec generation
-- Example location: `src/main/resources/database.yaml`
+- Config file path is provided via the `--lapis.databaseConfig.path` argument when starting the service
+- Example configs: see the test database configs under `lapis-e2e/testData/` in the repo
 
 ### Caching
 
 - Uses Caffeine cache for performance
 - Caches aggregated, mutation, and insertion queries
 - Cache is cleared when SILO data version changes
-- Configuration in `org.genspectrum.lapis.config.CacheConfig`
+- Configuration:
+    - Cache provider and Caffeine spec are defined in `application.properties`
+    - Cache usage/behavior is controlled via Spring cache annotations (e.g., in SILO services and scheduler classes)
 
 ### Multi-segmented Genomes
 
