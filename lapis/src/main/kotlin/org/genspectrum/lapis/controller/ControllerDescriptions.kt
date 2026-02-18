@@ -148,3 +148,11 @@ const val INSERTIONS_ORDER_BY_FIELDS_DESCRIPTION = """
 The fields of the response to order by.
 You can also use \"random\" or \"random(SEED)\" where SEED is an integer.
 """
+
+const val QUERY_PARSE_ENDPOINT_DESCRIPTION = """
+Parses a list of advanced query strings into SILO filter expressions.
+Returns partial results: successfully parsed queries will have a "filter" field,
+while failed queries will have an "error" field with the error message.
+The endpoint returns HTTP 200 OK even when some queries fail to parse.
+Only malformed request structure (e.g., invalid JSON) will result in HTTP 400 Bad Request.
+"""
