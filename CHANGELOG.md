@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6](https://github.com/GenSpectrum/LAPIS/compare/v0.6.5...v0.6.6) (2026-02-18)
+
+
+### Features
+
+* new query parse endpoint ([#1531](https://github.com/GenSpectrum/LAPIS/issues/1531)) ([03cdd6a](https://github.com/GenSpectrum/LAPIS/commit/03cdd6a519242be6ccf61ed45a114493351cf09b))
+
 ## [0.6.5](https://github.com/GenSpectrum/LAPIS/compare/v0.6.4...v0.6.5) (2026-02-17)
 
 
