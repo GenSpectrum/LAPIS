@@ -810,7 +810,7 @@ class AdvancedQueryFacadeTest {
                     expected = AminoAcidInsertionContains(1234, allAllowedAminoAcidSymbols, "S"),
                 ),
                 ValidTestCase(
-                    description = " insertion with lower case symbols",
+                    description = "nucleotide insertion with lower case symbols",
                     query = "ins_1234:gAG",
                     expected = NucleotideInsertionContains(1234, "GAG", null),
                 ),
