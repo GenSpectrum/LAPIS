@@ -20,6 +20,7 @@ import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
@@ -160,10 +161,10 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
     @Test
     fun `given a advancedQuery with an invalid amino acid mutation THEN throw error`() {
-        val nucMutation = "S:300B"
+        val nucMutation = "S:300J"
 
         val exceptionNuc = assertThrows<BadRequestException> { underTest.map(nucMutation) }
-        assertThat(exceptionNuc.message, `is`("Invalid amino acid symbol: B"))
+        assertThat(exceptionNuc.message, containsString("extraneous input 'J'"))
     }
 
     @Test
@@ -176,10 +177,10 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
     @Test
     fun `given a advancedQuery with an invalid amino acid insertion THEN throw error`() {
-        val nucMutation = "ins_S:300:GB"
+        val nucMutation = "ins_S:300:JG"
 
         val exceptionNuc = assertThrows<BadRequestException> { underTest.map(nucMutation) }
-        assertThat(exceptionNuc.message, `is`("Invalid amino acid symbol: B"))
+        assertThat(exceptionNuc.message, containsString("extraneous input 'J'"))
     }
 
     @Test
