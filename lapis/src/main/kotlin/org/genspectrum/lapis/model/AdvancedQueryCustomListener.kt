@@ -411,9 +411,9 @@ class AdvancedQueryCustomListener(
             is String -> {
                 // As the set of ambiguous aa and nuc mutations is disjoint, we need to check if the mutation is valid
                 mutatedTo?.first()?.let { validateAminoAcidSymbol(it) }
-                val expression = when (val aaSymbol = mutatedTo) {
+                val expression = when (mutatedTo) {
                     null -> HasAminoAcidMutation(gene, position)
-                    else -> AminoAcidSymbolEquals(gene, position, aaSymbol.uppercase())
+                    else -> AminoAcidSymbolEquals(gene, position, mutatedTo.uppercase())
                 }
                 expressionStack.addLast(expression)
                 return
@@ -424,9 +424,9 @@ class AdvancedQueryCustomListener(
             is String -> {
                 // As nucleotide mutations are a subset of amino acid mutations, we need to check if the mutation is valid
                 mutatedTo?.first()?.let { validateNucleotideSymbol(it) }
-                val expression = when (val nucSymbol = mutatedTo) {
+                val expression = when (mutatedTo) {
                     null -> HasNucleotideMutation(segmentName, position)
-                    else -> NucleotideSymbolEquals(segmentName, position, nucSymbol.uppercase())
+                    else -> NucleotideSymbolEquals(segmentName, position, mutatedTo.uppercase())
                 }
                 expressionStack.addLast(expression)
                 return

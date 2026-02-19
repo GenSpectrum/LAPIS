@@ -126,28 +126,6 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a single entry THEN returns the corresponding SiloQuery`() {
-        val advancedQuery = "300G"
-        val advancedQueryWithFrom = "A300G"
-
-        val result = underTest.map(advancedQuery)
-        val resultWithFrom = underTest.map(advancedQueryWithFrom)
-
-        val expectedResult = NucleotideSymbolEquals(null, 300, "G")
-        assertThat(result, equalTo(expectedResult))
-        assertThat(resultWithFrom, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `given a advancedQuery with mutation with position only THEN returns HasNucleotideMutation filter`() {
-        val advancedQuery = "400"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasNucleotideMutation(null, 400)))
-    }
-
-    @Test
     fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding SiloQuery`() {
         val advancedQuery = "300G | 400-"
 
@@ -265,168 +243,6 @@ class AdvancedQueryFacadeTest {
         assertThat(result, equalTo(expectedResult))
     }
 
-    @Test
-    fun `given a advancedQuery with a 'Insertion' expression THEN returns SILO query`() {
-        val advancedQuery = "ins_1234:GAG"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
-    }
-
-    @Test
-    fun `given a advancedQuery with a 'Insertion' expression with lower case letters THEN returns SILO query`() {
-        val advancedQuery = "ins_1234:gAG"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
-    }
-
-    @Test
-    fun `given a advancedQuery with a 'Insertion' expression with casing letters THEN returns SILO query`() {
-        val advancedQuery = "iNs_1234:gAG"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "GAG", null)))
-    }
-
-    @Test
-    fun `given a advancedQuery with a 'Insertion' with wildcard expression THEN returns SILO query`() {
-        val advancedQuery = "ins_1234:G?A?G"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(NucleotideInsertionContains(1234, "G.*A.*G", null)))
-    }
-
-    @Test
-    fun `given amino acid mutation expression THEN should map to AminoAcidSymbolEquals`() {
-        val advancedQuery = "S:N501Y"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
-    }
-
-    @Test
-    fun `given amino acid mutation expression with lower case letters THEN should map to AminoAcidSymbolEquals`() {
-        val advancedQuery = "S:n501y"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
-    }
-
-    @Test
-    fun `given amino acid mutation expression with gene lower case letters THEN should map to AminoAcidSymbolEquals`() {
-        val advancedQuery = "orf1a:N501Y"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidSymbolEquals("ORF1a", 501, "Y")))
-    }
-
-    @Test
-    fun `given amino acid mutation expression without first symbol THEN should map to AminoAcidSymbolEquals`() {
-        val advancedQuery = "S:501Y"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidSymbolEquals("S", 501, "Y")))
-    }
-
-    @Test
-    fun `given amino acid mutation expression without invalid gene THEN throw error`() {
-        val advancedQuery = "invalidGene:501Y"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
-
-        assertThat(exception.message, `is`("invalidGene is not a known segment or gene"))
-    }
-
-    @Test
-    fun `given amino acid mutation expression without second symbol THEN should return HasAminoAcidMutation`() {
-        val advancedQuery = "S:N501"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
-    }
-
-    @Test
-    fun `given amino acid mutation expression without any symbol THEN should return HasAminoAcidMutation`() {
-        val advancedQuery = "S:501"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(HasAminoAcidMutation("S", 501)))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression THEN returns SILO query`() {
-        val advancedQuery = "ins_S:501:EPE"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "S")))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a stop codon expression THEN returns SILO query`() {
-        val advancedQuery = "ins_S:501:A*C"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "A\\*C", "S")))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case THEN returns SILO query`() {
-        val advancedQuery = "ins_ORF1a:501:ePe"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "ORF1a")))
-    }
-
-    @Test
-    fun `given an invalid advancedQuery with an invalid gene return error`() {
-        val advancedQuery = "ins_invalidGene:501:EPE"
-
-        val exception = assertThrows<BadRequestException> { underTest.map(advancedQuery) }
-
-        assertThat(exception.message, `is`("invalidGene is not a known segment or gene"))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case gene THEN returns SILO query`() {
-        val advancedQuery = "ins_orF1a:501:EPE"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "EPE", "ORF1a")))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a 'AA insertion' with wildcard THEN returns SILO query`() {
-        val advancedQuery = "ins_S:501:E?E?"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*E.*", "S")))
-    }
-
-    @Test
-    fun `given a valid advancedQuery with a 'AA insertion' with stop codon and wildcard THEN returns SILO query`() {
-        val advancedQuery = "ins_S:501:E?*E"
-
-        val result = underTest.map(advancedQuery)
-
-        assertThat(result, equalTo(AminoAcidInsertionContains(501, "E.*\\*E", "S")))
-    }
-
     companion object {
         @JvmStatic
         fun validQueryProvider() =
@@ -461,7 +277,9 @@ class AdvancedQueryFacadeTest {
                 maybeCases.valid +
                 notCases.valid +
                 andCases.valid +
-                metadataEqualsCases.valid
+                metadataEqualsCases.valid +
+                mutationCases.valid +
+                insertionCases.valid
 
         @JvmStatic
         fun invalidQueryProvider() =
@@ -492,7 +310,9 @@ class AdvancedQueryFacadeTest {
                 maybeCases.invalid +
                 notCases.invalid +
                 andCases.invalid +
-                metadataEqualsCases.invalid
+                metadataEqualsCases.invalid +
+                mutationCases.invalid +
+                insertionCases.invalid
 
         private val regexCases = TestCaseCollection(
             valid = listOf(
@@ -876,6 +696,175 @@ class AdvancedQueryFacadeTest {
                     "invalid float",
                     "floatField=notAFloat",
                     "'notAFloat' is not a valid float",
+                ),
+            ),
+        )
+
+        private val mutationCases = TestCaseCollection(
+            valid = listOf(
+                *(nucleotideSymbols + ambiguousNucleotideSymbols).map { base ->
+                    ValidTestCase(
+                        description = "nucleotide mutation with symbol '$base'",
+                        query = "${base}300$base",
+                        expected = NucleotideSymbolEquals(null, 300, "$base"),
+                    )
+                }.toTypedArray(),
+                ValidTestCase(
+                    description = "nucleotide mutation with symbol '-'",
+                    query = "A300-",
+                    expected = NucleotideSymbolEquals(null, 300, "-"),
+                ),
+                ValidTestCase(
+                    description = "nucleotide mutation with symbol '.'",
+                    query = "A300.",
+                    expected = NucleotideSymbolEquals(null, 300, "."),
+                ),
+                ValidTestCase(
+                    description = "nucleotide mutation without 'from'",
+                    query = "A300G",
+                    expected = NucleotideSymbolEquals(null, 300, "G"),
+                ),
+                ValidTestCase(
+                    description = "nucleotide mutation with position only",
+                    query = "400",
+                    expected = HasNucleotideMutation(null, 400),
+                ),
+                *(aaSymbols + ambiguousAaSymbols).map { base ->
+                    ValidTestCase(
+                        description = "amino acid mutation with symbol '$base'",
+                        query = "S:${base}300$base",
+                        expected = AminoAcidSymbolEquals("S", 300, "$base"),
+                    )
+                }.toTypedArray(),
+                ValidTestCase(
+                    description = "amino acid mutation with lower case",
+                    query = "S:n501y",
+                    expected = AminoAcidSymbolEquals("S", 501, "Y"),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation with lower case gene",
+                    query = "orf1a:N501Y",
+                    expected = AminoAcidSymbolEquals("ORF1a", 501, "Y"),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation without 'from'",
+                    query = "S:501Y",
+                    expected = AminoAcidSymbolEquals("S", 501, "Y"),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation without 'to' symbol",
+                    query = "S:N501",
+                    expected = HasAminoAcidMutation("S", 501),
+                ),
+                ValidTestCase(
+                    description = "amino acid mutation without any symbol",
+                    query = "S:501",
+                    expected = HasAminoAcidMutation("S", 501),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
+                    description = "amino acid mutation with invalid gene",
+                    query = "invalidGene:501Y",
+                    expected = "invalidGene is not a known segment or gene",
+                ),
+                InvalidTestCase(
+                    description = "'-' in nucleotide 'from' position is invalid",
+                    query = "-300A",
+                    expected = "no viable alternative at input '-300A'",
+                ),
+                InvalidTestCase(
+                    description = "'.' in nucleotide 'from' position is invalid",
+                    query = ".300A",
+                    expected = "no viable alternative at input '.300A'",
+                ),
+                InvalidTestCase(
+                    description = "'-' in amino acid 'from' position is invalid",
+                    query = "S:-300A",
+                    expected = "extraneous input '-'",
+                ),
+                InvalidTestCase(
+                    description = "'.' in amino acid 'from' position is invalid",
+                    query = "S:.300A",
+                    expected = "extraneous input '.'",
+                ),
+            ),
+        )
+
+        private val allAllowedNucleotideSymbols =
+            (nucleotideSymbols + ambiguousNucleotideSymbols).joinToString(separator = "")
+        private val allAllowedAminoAcidSymbols = (aaSymbols + ambiguousAaSymbols)
+            .filter { it != '*' } // '*' is tested separately because it requires special handling
+            .joinToString(separator = "")
+
+        private val insertionCases = TestCaseCollection(
+            valid = listOf(
+                ValidTestCase(
+                    description = "nucleotide insertion with all allowed symbols",
+                    query = "ins_1234:$allAllowedNucleotideSymbols",
+                    expected = NucleotideInsertionContains(1234, allAllowedNucleotideSymbols, null),
+                ),
+                ValidTestCase(
+                    description = "amino acid insertion with all allowed symbols",
+                    query = "ins_S:1234:$allAllowedAminoAcidSymbols",
+                    expected = AminoAcidInsertionContains(1234, allAllowedAminoAcidSymbols, "S"),
+                ),
+                ValidTestCase(
+                    description = "nucleotide insertion with lower case symbols",
+                    query = "ins_1234:gAG",
+                    expected = NucleotideInsertionContains(1234, "GAG", null),
+                ),
+                ValidTestCase(
+                    description = "insertion with mixed case ins_ prefix",
+                    query = "iNs_1234:gAG",
+                    expected = NucleotideInsertionContains(1234, "GAG", null),
+                ),
+                ValidTestCase(
+                    description = "insertion with wildcard symbols",
+                    query = "ins_1234:G?A?G",
+                    expected = NucleotideInsertionContains(1234, "G.*A.*G", null),
+                ),
+                ValidTestCase(
+                    description = "amino acid insertion with stop codon",
+                    query = "ins_S:501:A*C",
+                    expected = AminoAcidInsertionContains(501, "A\\*C", "S"),
+                ),
+                ValidTestCase(
+                    description = "amino acid insertion with stop codon and wildcard",
+                    query = "ins_S:501:E?*E",
+                    expected = AminoAcidInsertionContains(501, "E.*\\*E", "S"),
+                ),
+                ValidTestCase(
+                    description = "amino acid insertion with lower case gene name",
+                    query = "ins_orF1a:501:EPE",
+                    expected = AminoAcidInsertionContains(501, "EPE", "ORF1a"),
+                ),
+            ),
+            invalid = listOf(
+                InvalidTestCase(
+                    description = "nucleotide insertion with deletion symbol",
+                    query = "ins_501:A-A",
+                    expected = "mismatched input '-'",
+                ),
+                InvalidTestCase(
+                    description = "nucleotide insertion with '.' symbol",
+                    query = "ins_501:A.A",
+                    expected = "mismatched input '.'",
+                ),
+                InvalidTestCase(
+                    description = "amino acid insertion with invalid gene",
+                    query = "ins_invalidGene:501:EPE",
+                    expected = "invalidGene is not a known segment or gene",
+                ),
+                InvalidTestCase(
+                    description = "amino acid insertion with deletion symbol",
+                    query = "ins_S:501:A-A",
+                    expected = "mismatched input '-'",
+                ),
+                InvalidTestCase(
+                    description = "amino acid insertion with '.' symbol",
+                    query = "ins_S:501:A.A",
+                    expected = "mismatched input '.'",
                 ),
             ),
         )

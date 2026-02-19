@@ -30,7 +30,7 @@ val aaSymbols = setOf(
     'V',
     '*',
 )
-val ambiguousAaSymbols = setOf('X')
+val ambiguousAaSymbols = setOf('B', 'Z', 'X')
 val allAaQuerySymbols = aaSymbols + ambiguousAaSymbols + deletionSymbols + querySymbols
 
 fun validateNucleotideSymbol(c: Char) {
