@@ -105,6 +105,45 @@ Segments: $segmentNames
 
         val geneNames = referenceGenomeSchema.genes.joinToString(", ") { it.name }
 
+        val filterExamples = buildString {
+            val stringFields = databaseConfig.schema.metadata.filter { it.type == MetadataType.STRING }
+            if (stringFields.isNotEmpty()) {
+                val field = stringFields.first().name
+                appendLine("- **String fields**: Use exact or regex match.")
+                appendLine("  Examples: `\"$field\": \"someValue\"`, `\"$field.regex\": \"^startsWithThis*\"`")
+            }
+
+            val dateFields = databaseConfig.schema.metadata.filter { it.type == MetadataType.DATE }
+            if (dateFields.isNotEmpty()) {
+                val field = dateFields.first().name
+                appendLine(
+                    "- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `\"${field}From\": \"2023-01-01\", \"${field}To\": \"2023-12-31\"`",
+                )
+            }
+
+            val intFields = databaseConfig.schema.metadata.filter { it.type == MetadataType.INT }
+            if (intFields.isNotEmpty()) {
+                val field = intFields.first().name
+                appendLine(
+                    "- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `\"$field\": 42` or `\"${field}From\": 10, \"${field}To\": 50`",
+                )
+            }
+
+            val floatFields = databaseConfig.schema.metadata.filter { it.type == MetadataType.FLOAT }
+            if (floatFields.isNotEmpty()) {
+                val field = floatFields.first().name
+                appendLine(
+                    "- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `\"$field\": 0.95` or `\"${field}From\": 0.8, \"${field}To\": 1.0`",
+                )
+            }
+
+            val boolFields = databaseConfig.schema.metadata.filter { it.type == MetadataType.BOOLEAN }
+            if (boolFields.isNotEmpty()) {
+                val field = boolFields.first().name
+                appendLine("- **Boolean fields**: Use `true` or `false`. Example: `\"$field\": true`")
+            }
+        }
+
         return """
 ## Instance Configuration
 
@@ -113,6 +152,14 @@ Segments: $segmentNames
 The following metadata fields are available for filtering on this instance:
 
 $metadataFields
+
+### How to Filter by Metadata Fields
+
+You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
+
+$filterExamples
+You can combine multiple filters in a single query. All filters are combined with AND logic.
+All exact filters also support filtering for `null`.
 
 ### Genes and Segments
 
@@ -237,9 +284,11 @@ All sample endpoints also support GET requests with query parameters.
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
+```json
 {
   "fields": ["$stringField"]
 }
+```
 
 Returns count of sequences grouped by $stringField values.
 
@@ -248,11 +297,13 @@ Returns count of sequences grouped by $stringField values.
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
+```json
 {
   "${dateField}From": "2023-01-01",
   "${dateField}To": "2023-12-31",
   "fields": ["$dateField"]
 }
+```
 
 Returns sequences within the specified date range, grouped by date.
 
@@ -261,10 +312,12 @@ Returns sequences within the specified date range, grouped by date.
 POST ${getSampleLink(DETAILS)}
 Content-Type: application/json
 
+```json
 {
   "nucleotideMutations": ["C123T"],
   "limit": 10
 }
+```
 
 Returns up to 10 sequences with the C123T nucleotide mutation.
 
@@ -273,11 +326,13 @@ Returns up to 10 sequences with the C123T nucleotide mutation.
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
+```json
 {
   "nucleotideMutations": ["C123T"],
   "aminoAcidMutations": ["S:484K", "S:484E"],
   "fields": ["$stringField"]
 }
+```
 
 Returns sequences with C123T mutation AND either S:484K OR S:484E amino acid mutation, grouped by $stringField.
 
@@ -286,11 +341,13 @@ Returns sequences with C123T mutation AND either S:484K OR S:484E amino acid mut
 POST ${getSampleLink(ALIGNED_AMINO_ACID_SEQUENCES)}
 Content-Type: application/json
 
+```json
 {
   "genes": ["$firstGene"],
   "$stringField": "someValue",
   "limit": 5
 }
+```
 
 Returns up to 5 aligned amino acid sequences for the $firstGene gene.
 
@@ -299,10 +356,12 @@ Returns up to 5 aligned amino acid sequences for the $firstGene gene.
 POST ${getSampleLink(NUCLEOTIDE_MUTATIONS)}
 Content-Type: application/json
 
+```json
 {
   "$stringField": "someValue",
   "minProportion": 0.05
 }
+```
 
 Returns all nucleotide mutations appearing in at least 5% of sequences matching the filter.
             """.trimIndent()
