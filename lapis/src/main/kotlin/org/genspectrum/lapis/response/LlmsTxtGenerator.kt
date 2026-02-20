@@ -12,14 +12,37 @@ class LlmsTxtGenerator(
     @Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
 ) {
     fun generate(): String {
-        // TODO: Implement dynamic llms.txt generation
-        // This will be implemented in a separate step
-        return """
-            # LAPIS - ${databaseConfig.schema.instanceName}
-            
-            > LAPIS (Lightweight API for Sequences) instance for ${databaseConfig.schema.instanceName}.
-            
-            TODO: Add complete llms.txt content generation
-        """.trimIndent()
+        val sections = mutableListOf<String>()
+
+        sections.add(generateHeader())
+        // TODO: Add more sections
+
+        return sections.joinToString("\n\n")
     }
+
+    private fun generateHeader(): String {
+        val instanceName = databaseConfig.schema.instanceName
+        val metadataCount = databaseConfig.schema.metadata.size
+        val geneCount = referenceGenomeSchema.genes.size
+
+        return buildString {
+            appendLine("# LAPIS - $instanceName")
+            appendLine()
+            appendLine("> LAPIS (Lightweight API for Sequences) instance for $instanceName.")
+            appendLine("> Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.")
+            appendLine()
+            append("This instance contains data for $instanceName with $metadataCount metadata fields and $geneCount genes")
+            if (!referenceGenomeSchema.isSingleSegmented()) {
+                append(" across ${referenceGenomeSchema.nucleotideSequences.size} segments")
+            }
+            append(".")
+        }.trimEnd()
+    }
+
+    private fun getDocsUrl(path: String): String =
+        if (lapisDocsUrl.isNotBlank()) {
+            "$lapisDocsUrl/$path"
+        } else {
+            "https://github.com/GenSpectrum/LAPIS/blob/main/lapis-docs/src/content/docs/$path.md"
+        }
 }
