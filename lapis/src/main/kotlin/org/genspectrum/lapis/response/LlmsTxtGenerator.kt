@@ -3,6 +3,7 @@ package org.genspectrum.lapis.response
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.QUERIES_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
@@ -108,8 +109,8 @@ Genes: $geneNames
             
 ### Phylogenetic Analysis
 
-- [${getSampleUrl(MOST_RECENT_COMMON_ANCESTOR)}](${getSampleUrl(MOST_RECENT_COMMON_ANCESTOR)}): Find most recent common ancestor for queried sequences
-- [${getSampleUrl(PHYLO_SUBTREE)}](${getSampleUrl(PHYLO_SUBTREE)}): Get phylogenetic subtree in Newick format
+- ${markdownLink(getSampleUrl(MOST_RECENT_COMMON_ANCESTOR))}: Find most recent common ancestor for queried sequences
+- ${markdownLink(getSampleUrl(PHYLO_SUBTREE))}: Get phylogenetic subtree in Newick format
             """.trimIndent()
         } else {
             ""
@@ -120,32 +121,34 @@ Genes: $geneNames
 
 ### Data Retrieval
 
-- [${getSampleUrl(AGGREGATED)}](${getSampleUrl(AGGREGATED)}): Count and group sequences by metadata and mutations
-- [${getSampleUrl(DETAILS)}](${getSampleUrl(DETAILS)}): Retrieve detailed metadata for matching sequences
-- [${getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES)}](${getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES)}): Get aligned nucleotide sequences in FASTA format
-- [${getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES)}](${getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES)}): Get unaligned nucleotide sequences
-- [${getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES)}/{gene}](${getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES)}): Get aligned amino acid sequences for a specific gene
+- ${markdownLink(getSampleUrl(AGGREGATED))}: Count and group sequences by metadata and mutations
+- ${markdownLink(getSampleUrl(DETAILS))}: Retrieve detailed metadata for matching sequences
+- ${markdownLink(getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES))}: Get aligned nucleotide sequences in FASTA format
+- ${markdownLink(getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES))}: Get unaligned nucleotide sequences
+- ${markdownLink(getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES) + "/{gene}")}: Get aligned amino acid sequences for a specific gene
 
 ### Mutation Analysis
 
-- [${getSampleUrl(NUCLEOTIDE_MUTATIONS)}](${getSampleUrl(NUCLEOTIDE_MUTATIONS)}): List nucleotide mutations with their proportions
-- [${getSampleUrl(AMINO_ACID_MUTATIONS)}](${getSampleUrl(AMINO_ACID_MUTATIONS)}): List amino acid mutations with their proportions
-- [${getSampleUrl(NUCLEOTIDE_INSERTIONS)}](${getSampleUrl(NUCLEOTIDE_INSERTIONS)}): List nucleotide insertions
-- [${getSampleUrl(AMINO_ACID_INSERTIONS)}](${getSampleUrl(AMINO_ACID_INSERTIONS)}): List amino acid insertions
+- ${markdownLink(getSampleUrl(NUCLEOTIDE_MUTATIONS))}: List nucleotide mutations with their proportions
+- ${markdownLink(getSampleUrl(AMINO_ACID_MUTATIONS))}: List amino acid mutations with their proportions
+- ${markdownLink(getSampleUrl(NUCLEOTIDE_INSERTIONS))}: List nucleotide insertions
+- ${markdownLink(getSampleUrl(AMINO_ACID_INSERTIONS))}: List amino acid insertions
 
 ### Time Series
 
-- [/sample/queriesOverTime](${getDocsUrl("concepts/queries-over-time")}): Query results aggregated over time
+- ${markdownLink("/sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
 $phylogeneticSection
 
 ### Utility
 
-- [/sample/info](${getDocsUrl("references/introduction")}): Get instance information and versions
-- [/sample/getDatabaseConfig](${getDocsUrl("references/database-configuration")}): Retrieve the complete database configuration
+- ${markdownLink("/sample/info")}: Get instance information and versions
+- ${markdownLink("/sample/getDatabaseConfig")}: Retrieve the complete database configuration
 
 All endpoints support both GET and POST methods. POST requests accept JSON or form-encoded data.
             """.trimIndent()
     }
+
+    private fun markdownLink(href: String, name: String = href): String = """[$name]($href)"""
 
     private fun getSampleUrl(route: SampleRoute): String = "sample${route.pathSegment}"
 
