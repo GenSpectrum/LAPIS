@@ -116,6 +116,8 @@ Genes: $geneNames
             ""
         }
 
+        val aminoAcidSequencePerGeneLink = getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES) + "/{gene}"
+
         return """
 ## API Endpoints
 
@@ -125,7 +127,8 @@ Genes: $geneNames
 - ${markdownLink(getSampleUrl(DETAILS))}: Retrieve detailed metadata for matching sequences
 - ${markdownLink(getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES))}: Get aligned nucleotide sequences in FASTA format
 - ${markdownLink(getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES))}: Get unaligned nucleotide sequences
-- ${markdownLink(getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES) + "/{gene}")}: Get aligned amino acid sequences for a specific gene
+- ${markdownLink(getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES))}: Get aligned amino acid sequences for a selection of genes
+- ${markdownLink(aminoAcidSequencePerGeneLink)}: Get aligned amino acid sequences for a specific gene
 
 ### Mutation Analysis
 
@@ -136,19 +139,22 @@ Genes: $geneNames
 
 ### Time Series
 
-- ${markdownLink("/sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
+- ${markdownLink("sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
 $phylogeneticSection
 
 ### Utility
 
-- ${markdownLink("/sample/info")}: Get instance information and versions
-- ${markdownLink("/sample/getDatabaseConfig")}: Retrieve the complete database configuration
+- ${markdownLink("sample/info")}: Get instance information and versions
+- ${markdownLink("sample/getDatabaseConfig")}: Retrieve the complete database configuration
 
 All endpoints support both GET and POST methods. POST requests accept JSON or form-encoded data.
             """.trimIndent()
     }
 
-    private fun markdownLink(href: String, name: String = href): String = """[$name]($href)"""
+    private fun markdownLink(
+        href: String,
+        name: String = href,
+    ): String = """[$name]($href)"""
 
     private fun getSampleUrl(route: SampleRoute): String = "sample${route.pathSegment}"
 
