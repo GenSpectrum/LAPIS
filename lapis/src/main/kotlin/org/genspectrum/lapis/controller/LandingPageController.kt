@@ -51,4 +51,7 @@ class LandingPageController(
         links
             .map { (title, url) -> """<li><a href="$url">$title</a></li>""" }
             .joinToString("")
+
+    @RequestMapping("/llms.txt", produces = [MediaType.TEXT_PLAIN_VALUE])
+    fun llmsTxt() = "Hello World!"
 }
