@@ -34,6 +34,11 @@ docs(lapis-docs): update API reference
 
 **Enforcement:** PR titles are validated via commitlint in CI
 
+The commit messages on main (i.e. PR titles) are used to generate the changelog.
+Never manually edit the changelog or add tags to commits.
+The release process is automated via Release Please,
+which creates Git tags and Docker image tags based on the commit messages when a release PR is merged.
+
 ## Technology Stack
 
 - **Kotlin:**
