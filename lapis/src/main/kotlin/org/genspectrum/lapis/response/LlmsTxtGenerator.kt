@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component
 class LlmsTxtGenerator(
     private val databaseConfig: DatabaseConfig,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-    @Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
+    @param:Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
 ) {
     fun generate(): String {
         val sections = mutableListOf<String>()
@@ -38,7 +38,6 @@ class LlmsTxtGenerator(
         sections.add(generateInstanceConfigurationSection())
         sections.add(generateApiEndpointsSection())
         sections.add(generateQueryExamplesSection())
-        // TODO: Add more sections
 
         return sections.joinToString("\n\n")
     }
@@ -54,6 +53,16 @@ class LlmsTxtGenerator(
             ""
         }
 
+        val docsLink = if (lapisDocsUrl.isEmpty()) {
+            ""
+        } else {
+            """
+            If you need more detailed information than mentioned in this file, 
+            refer to the ${mdLink(lapisDocsUrl, "LAPIS docs")}.
+
+            """.trimIndent()
+        }
+
         return """
 # LAPIS - $instanceName
 
@@ -61,6 +70,12 @@ class LlmsTxtGenerator(
 > Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
 
 This instance contains data for $instanceName with $metadataCount metadata fields and $geneCount genes$segmentInfo.
+
+The LAPIS code is open source and available at https://github.com/GenSpectrum/LAPIS.
+LAPIS is a convenience API around SILO, a high-performance query engine for genomic sequences.
+The code is available at https://github.com/GenSpectrum/LAPIS-SILO.
+
+$docsLink
             """.trimIndent()
     }
 
@@ -299,11 +314,4 @@ Returns all nucleotide mutations appearing in at least 5% of sequences matching 
     ): String = """[$name]($href)"""
 
     private fun getSampleLink(route: SampleRoute): String = "sample${route.pathSegment}"
-
-    private fun getDocsUrl(path: String): String =
-        if (lapisDocsUrl.isNotBlank()) {
-            "$lapisDocsUrl/$path"
-        } else {
-            "https://github.com/GenSpectrum/LAPIS/blob/main/lapis-docs/src/content/docs/$path.md"
-        }
 }
