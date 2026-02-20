@@ -34,12 +34,12 @@ class LlmsTxtGenerator(
         }
 
         return """
-                # LAPIS - $instanceName
-                
-                > LAPIS (Lightweight API for Sequences) instance for $instanceName.
-                > Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
-                
-                This instance contains data for $instanceName with $metadataCount metadata fields and $geneCount genes$segmentInfo.
+# LAPIS - $instanceName
+
+> LAPIS (Lightweight API for Sequences) instance for $instanceName.
+> Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
+
+This instance contains data for $instanceName with $metadataCount metadata fields and $geneCount genes$segmentInfo.
             """.trimIndent()
     }
 
@@ -60,30 +60,30 @@ class LlmsTxtGenerator(
         } else {
             val segmentNames = referenceGenomeSchema.nucleotideSequences.joinToString(", ") { it.name }
             """
-                This instance uses a multi-segmented genome with ${referenceGenomeSchema.nucleotideSequences.size} segments:
-                
-                Segments: $segmentNames
-                
+This instance uses a multi-segmented genome with ${referenceGenomeSchema.nucleotideSequences.size} segments:
+
+Segments: $segmentNames
+
             """.trimIndent()
         }
 
         val geneNames = referenceGenomeSchema.genes.joinToString(", ") { it.name }
 
         return """
-                ## Instance Configuration
-                
-                ### Metadata Fields
-                
-                The following metadata fields are available for filtering on this instance:
-                
-                $metadataFields
-                
-                ### Genes and Segments
-                
-                $segmentInfo
-                Available genes for amino acid queries:
-                
-                Genes: $geneNames
+## Instance Configuration
+
+### Metadata Fields
+
+The following metadata fields are available for filtering on this instance:
+
+$metadataFields
+
+### Genes and Segments
+
+$segmentInfo
+Available genes for amino acid queries:
+
+Genes: $geneNames
             """.trimIndent()
     }
 
