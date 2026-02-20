@@ -128,15 +128,18 @@ Genes: $geneNames
 ## API Endpoints
 
 The OpenAPI spec is available at ${mdLink("api-docs")}.
-Refer to that if you need more details on an endpoints.
+Refer to that if you need more details on an endpoint.
 
 ### Data Retrieval and Mutation Analysis 
+
+These are the primary entrypoints for analyzing the data in this LAPIS instance.
 
 These endpoints are available as GET or POST.
 Prefer POST since it allows more flexible requests.
 Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
 
-Those are the primary entrypoints for analyzing the data in this LAPIS instance.
+Every endpoint accepts filters on metadata fields and mutations.
+Use these to narrow down the sequences that are included in the results.
 
 - ${mdLink(getSampleLink(AGGREGATED))}: Count and group sequences by metadata and mutations.
   This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
