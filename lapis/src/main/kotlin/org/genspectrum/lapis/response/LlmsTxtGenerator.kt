@@ -123,6 +123,13 @@ Genes: $geneNames
         return """
 ## API Endpoints
 
+Most endpoints are available as GET or POST.
+Prefer POST since it allows more flexible requests.
+Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
+
+The OpenAPI spec is available at ${markdownLink("api-docs")}.
+Refer to that if you need more details on an endpoints.
+
 ### Data Retrieval
 
 - ${markdownLink(getSampleUrl(AGGREGATED))}: Count and group sequences by metadata and mutations
@@ -141,7 +148,8 @@ Genes: $geneNames
 
 ### Time Series
 
-These endpoints are mainly built for specialized display components that show time series data in a tabular form. 
+These endpoints are mainly built for specialized display components that show time series data in a tabular form.
+These endpoints only accept POST.
 
 - ${markdownLink("sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
 - ${markdownLink("sample/$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE")}: Query nucleotide mutations aggregated over time
