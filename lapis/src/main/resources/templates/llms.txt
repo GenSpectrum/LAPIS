@@ -1,0 +1,107 @@
+# LAPIS API - [(${instanceName})]
+
+LAPIS (Lightweight API for Sequences) is a web API for querying genomic sequences and metadata.
+This instance serves data for [(${instanceName})].
+
+## This Instance
+
+**Instance Name:** [(${instanceName})]
+**Metadata Fields:** [(${metadataFields})]
+**Genes:** [(${genes})]
+[# th:if="${!segments.isEmpty()}"]**Segments:** [(${segments})]
+[/]
+## Essential Endpoints
+
+All endpoints are under `/sample/`:
+
+- `GET|POST /sample/aggregated` - Count and group sequences by metadata fields
+- `GET|POST /sample/details` - Retrieve full metadata for matching sequences
+- `GET|POST /sample/nucleotideMutations` - Find nucleotide mutations with counts and proportions
+- `GET|POST /sample/aminoAcidMutations` - Find amino acid mutations with counts and proportions
+- `GET|POST /sample/alignedNucleotideSequences` - Download aligned sequences in FASTA format
+- `GET|POST /sample/alignedAminoAcidSequences/{gene}` - Download aligned gene sequences
+- `GET /sample/info` - Get LAPIS version, data version, and instance info
+- `POST /query/parse` - Validate and parse advanced query syntax
+
+## Query Parameters
+
+**Filtering:**
+- Use any metadata field as filter (e.g., `country=Ghana`, `date>=2021-01-01`)
+- `nucleotideMutations` - Array of mutations (e.g., `A123T`, `main:G234C`)
+- `aminoAcidMutations` - Array of mutations (e.g., `S:501Y`, `ORF1a:3456K`)
+- `nucleotideInsertions` - Array of insertions (e.g., `ins_123:ATT`)
+- `aminoAcidInsertions` - Array of insertions (e.g., `ins_S:123:EPE`)
+- `advancedQuery` - Boolean logic combining filters (POST only)
+
+**Formatting and Pagination:**
+- `fields` - Metadata fields to include/group by (comma-separated or array)
+- `orderBy` - Sort results: `fieldName` (ascending), `fieldName.desc` (descending), `random`
+- `limit` - Maximum results to return
+- `offset` - Skip first N results
+- `dataFormat` - Response format: `json` (default), `csv`, `tsv`, `fasta`
+- `compression` - Compress response: `gzip`, `zstd`
+- `downloadAsFile` - Trigger browser download with filename
+
+## Filter Syntax
+
+**Nucleotide Mutations:** `[segment:]position[from]to`
+- Examples: `123T`, `main:A123T`, `G456-` (deletion), `789.` (reference)
+
+**Amino Acid Mutations:** `gene:position[to]`
+- Examples: `S:501Y`, `ORF1a:3456`, `N:203-` (deletion)
+
+**Insertions:** `ins_[segment|gene]:position:sequence`
+- Examples: `ins_123:ATT`, `ins_S:214:EPE`
+
+**Advanced Queries (POST only):**
+- Boolean operators: `&` (AND), `|` (OR), `!` (NOT)
+- Example: `country=Ghana & (S:501Y | S:484K) & !date<2021-01-01`
+- Use `/query/parse` endpoint to validate complex queries
+
+## Quick Examples
+
+**GET - Basic aggregation:**
+`GET /sample/aggregated?fields=country,date&region=Africa&limit=100`
+
+**POST - Filter by mutations:**
+```
+POST /sample/details
+{"nucleotideMutations": ["A123T", "G456C"], "country": "Switzerland", "dataFormat": "csv"}
+```
+
+**POST - Advanced query:**
+```
+POST /sample/aggregated
+{"advancedQuery": "country=Ghana & (S:501Y | S:484K)", "fields": ["date"]}
+```
+
+## Response Structure
+
+All responses follow this wrapper format:
+```
+{
+  "data": [...],
+  "info": {
+    "dataVersion": "2024-01-15T10:30:00Z",
+    "requestId": "uuid",
+    "lapisVersion": "0.6.0"
+  }
+}
+```
+
+**Important:** Use the `lapis-data-version` response header to ensure consistency across multiple requests.
+
+## Additional Resources
+
+- [Swagger UI](/swagger-ui/index.html) - Interactive API testing
+- [OpenAPI Spec (JSON)](/api-docs)
+- [OpenAPI Spec (YAML)](/api-docs.yaml)
+[# th:if="${!docsUrl.isEmpty()}"]- [Documentation]([(${docsUrl})])
+[/]- [GitHub](https://github.com/GenSpectrum/LAPIS)
+
+## Notes
+
+- Filters and fields are instance-specific based on database configuration
+- Check `/sample/databaseConfig` for full configuration details
+- Check `/sample/referenceGenome` for reference genome structure
+- Some instances may require OAuth authentication (check with unauthenticated request)
