@@ -127,24 +127,24 @@ Genes: $geneNames
         return """
 ## API Endpoints
 
-Most endpoints are available as GET or POST.
-Prefer POST since it allows more flexible requests.
-Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
-
 The OpenAPI spec is available at ${markdownLink("api-docs")}.
 Refer to that if you need more details on an endpoints.
 
-### Data Retrieval
+### Data Retrieval and Mutation Analysis 
 
-- ${markdownLink(getSampleUrl(AGGREGATED))}: Count and group sequences by metadata and mutations
+These endpoints are available as GET or POST.
+Prefer POST since it allows more flexible requests.
+Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
+
+Those are the primary entrypoints for analyzing the data in this LAPIS instance.
+
+- ${markdownLink(getSampleUrl(AGGREGATED))}: Count and group sequences by metadata and mutations.
+  This is similar to a "select count(*) from ... group by <a> where <b>" SQL query.
 - ${markdownLink(getSampleUrl(DETAILS))}: Retrieve detailed metadata for matching sequences
 - ${markdownLink(getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES))}: Get aligned nucleotide sequences in FASTA format
 - ${markdownLink(getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES))}: Get unaligned nucleotide sequences
 - ${markdownLink(getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES))}: Get aligned amino acid sequences for a selection of genes
 - ${markdownLink(aminoAcidSequencePerGeneLink)}: Get aligned amino acid sequences for a specific gene
-
-### Mutation Analysis
-
 - ${markdownLink(getSampleUrl(NUCLEOTIDE_MUTATIONS))}: List nucleotide mutations with their proportions
 - ${markdownLink(getSampleUrl(AMINO_ACID_MUTATIONS))}: List amino acid mutations with their proportions
 - ${markdownLink(getSampleUrl(NUCLEOTIDE_INSERTIONS))}: List nucleotide insertions
