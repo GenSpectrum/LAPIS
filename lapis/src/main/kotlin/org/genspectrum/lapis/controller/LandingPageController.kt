@@ -24,6 +24,7 @@ class LandingPageController(
         put("Swagger UI", "swagger-ui/index.html")
         put("OpenAPI specification JSON", "api-docs")
         put("OpenAPI specification YAML", "api-docs.yaml")
+        put("llms.txt - instructions for LLM agents how to use LAPIS", "llms.txt")
         put("GitHub", "https://github.com/GenSpectrum/LAPIS")
     }
 
