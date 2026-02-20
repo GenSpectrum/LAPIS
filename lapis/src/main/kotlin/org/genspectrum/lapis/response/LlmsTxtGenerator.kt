@@ -115,19 +115,19 @@ Genes: $geneNames
             
 ### Phylogenetic Analysis
 
-- ${markdownLink(getSampleUrl(MOST_RECENT_COMMON_ANCESTOR))}: Find most recent common ancestor for queried sequences
-- ${markdownLink(getSampleUrl(PHYLO_SUBTREE))}: Get phylogenetic subtree in Newick format
+- ${mdLink(getSampleLink(MOST_RECENT_COMMON_ANCESTOR))}: Find most recent common ancestor for queried sequences.
+  Identifies the MRCA node in the phylogenetic tree that contains all sequences matching your filters. Useful for understanding evolutionary relationships.
+- ${mdLink(getSampleLink(PHYLO_SUBTREE))}: Get phylogenetic subtree in Newick format.
+  Returns a subtree containing only the sequences matching your filters. The subtree is in Newick format and can be visualized in phylogenetic tree viewers.
             """.trimIndent()
         } else {
             ""
         }
 
-        val aminoAcidSequencePerGeneLink = getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES) + "/{gene}"
-
         return """
 ## API Endpoints
 
-The OpenAPI spec is available at ${markdownLink("api-docs")}.
+The OpenAPI spec is available at ${mdLink("api-docs")}.
 Refer to that if you need more details on an endpoints.
 
 ### Data Retrieval and Mutation Analysis 
@@ -138,50 +138,72 @@ Use GET when you want to have links that are easy to share since all their param
 
 Those are the primary entrypoints for analyzing the data in this LAPIS instance.
 
-- ${markdownLink(getSampleUrl(AGGREGATED))}: Count and group sequences by metadata and mutations.
-  This is similar to a "select count(*) from ... group by <a> where <b>" SQL query.
-- ${markdownLink(getSampleUrl(DETAILS))}: Retrieve detailed metadata for matching sequences
-- ${markdownLink(getSampleUrl(ALIGNED_NUCLEOTIDE_SEQUENCES))}: Get aligned nucleotide sequences in FASTA format
-- ${markdownLink(getSampleUrl(UNALIGNED_NUCLEOTIDE_SEQUENCES))}: Get unaligned nucleotide sequences
-- ${markdownLink(getSampleUrl(ALIGNED_AMINO_ACID_SEQUENCES))}: Get aligned amino acid sequences for a selection of genes
-- ${markdownLink(aminoAcidSequencePerGeneLink)}: Get aligned amino acid sequences for a specific gene
-- ${markdownLink(getSampleUrl(NUCLEOTIDE_MUTATIONS))}: List nucleotide mutations with their proportions
-- ${markdownLink(getSampleUrl(AMINO_ACID_MUTATIONS))}: List amino acid mutations with their proportions
-- ${markdownLink(getSampleUrl(NUCLEOTIDE_INSERTIONS))}: List nucleotide insertions
-- ${markdownLink(getSampleUrl(AMINO_ACID_INSERTIONS))}: List amino acid insertions
+- ${mdLink(getSampleLink(AGGREGATED))}: Count and group sequences by metadata and mutations.
+  This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
+- ${mdLink(getSampleLink(DETAILS))}:
+  Returns the actual metadata values for sequences that match your filters. Use this to get individual sequence records.
+  Similar to a "select <fields ?? *> from ... where <filters>" SQL query.
+- ${mdLink(getSampleLink(ALIGNED_NUCLEOTIDE_SEQUENCES))}:
+  Returns nucleotide sequences aligned to the reference genome in FASTA format.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- ${mdLink(getSampleLink(UNALIGNED_NUCLEOTIDE_SEQUENCES))}:
+  Returns raw nucleotide sequences without alignment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- ${mdLink(getSampleLink(ALIGNED_AMINO_ACID_SEQUENCES))}:
+  Returns translated protein sequences for multiple genes at once.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- ${mdLink(getSampleLink(ALIGNED_AMINO_ACID_SEQUENCES) + "/{gene}")}:
+  Returns translated protein sequences for a single gene. Specify the gene name in the URL path.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- ${mdLink(getSampleLink(NUCLEOTIDE_MUTATIONS))}: List nucleotide mutations with their proportions.
+  Shows which nucleotide mutations appear in your filtered sequences and how frequently.
+  Example: "C123T appears in 45% of sequences that match <filters>".
+- ${mdLink(getSampleLink(AMINO_ACID_MUTATIONS))}: List amino acid mutations with their proportions.
+  Shows which amino acid mutations appear in your filtered sequences and how frequently.
+  Example: "S:484K appears in 30% of sequences that match <filters>".
+- ${mdLink(getSampleLink(NUCLEOTIDE_INSERTIONS))}: List nucleotide insertions.
+  Shows how often which insertion of nucleotides occurred in the nucleotide sequence(s) for the given filters.
+- ${mdLink(getSampleLink(AMINO_ACID_INSERTIONS))}: List amino acid insertions.
+  Shows how often which insertion of amino acids occurred in the amino acid sequences for the given filters.
 
 ### Time Series
 
 These endpoints are mainly built for specialized display components that show time series data in a tabular form.
+Useful for tracking trends over time.
 These endpoints only accept POST.
 
-- ${markdownLink("sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
-- ${markdownLink("sample/$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE")}: Query nucleotide mutations aggregated over time
-- ${markdownLink("sample/$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE")}: Query amino acid mutations aggregated over time
+- ${mdLink("sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time.
+  Shows how many sequences match your filters for each time period (e.g., daily, weekly).
+- ${mdLink("sample/$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE")}: Query nucleotide mutations aggregated over time.
+  Shows how mutation frequencies change over time. Useful for tracking the emergence and spread of specific mutations.
+- ${mdLink("sample/$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE")}: Query amino acid mutations aggregated over time.
+  Shows how amino acid mutation frequencies change over time.
 $phylogeneticSection
 
 ### Info
 
-- ${markdownLink("info$INFO_ROUTE")}: Get instance information and versions.
-- ${markdownLink("info$DATABASE_CONFIG_ROUTE")}: Retrieve the complete database configuration.
-  Contains mostly the complete metadata schema and a few other things that are relevant for LAPIS and/or SILO.
-- ${markdownLink("info$REFERENCE_GENOME_ROUTE")}: Retrieve the complete reference genome.
-  Beware, this contains large sequences in the response. Only do use this if you need the actual reference sequences.
-- ${markdownLink("info$LINEAGE_DEFINITION_ROUTE/{column}")}:
+- ${mdLink("info$INFO_ROUTE")}: Get instance information and versions.
+  Useful for debugging or confirming you're connected to the right instance.
+- ${mdLink("info$DATABASE_CONFIG_ROUTE")}: Retrieve the complete database configuration.
+  Contains the complete metadata schema and configuration. Use this to discover what fields are available for filtering.
+- ${mdLink("info$REFERENCE_GENOME_ROUTE")}: Retrieve the complete reference genome.
+  Returns the full reference genome sequences. Warning: Large response.
+  Only use when you need the actual reference sequences.
+- ${mdLink("info$LINEAGE_DEFINITION_ROUTE/{column}")}: 
   Retrieve the lineage definition file for a specific metadata column.
-  This is useful for understanding the lineage hierarchy and parent-child relationships in the data.
-  This file is also usually quite large.
+  Returns lineage hierarchy and parent-child relationships. Useful for understanding lineage classifications.
+  Warning: Usually quite large.
 
 All endpoints support both GET and POST methods. POST requests accept JSON or form-encoded data.
             """.trimIndent()
     }
 
-    private fun markdownLink(
+    private fun mdLink(
         href: String,
         name: String = href,
     ): String = """[$name]($href)"""
 
-    private fun getSampleUrl(route: SampleRoute): String = "sample${route.pathSegment}"
+    private fun getSampleLink(route: SampleRoute): String = "sample${route.pathSegment}"
 
     private fun getDocsUrl(path: String): String =
         if (lapisDocsUrl.isNotBlank()) {
