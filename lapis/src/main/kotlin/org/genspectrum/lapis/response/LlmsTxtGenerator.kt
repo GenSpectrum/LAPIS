@@ -103,6 +103,8 @@ Segments: $segmentNames
             """.trimIndent()
         }
 
+        // TODO: advanced queries, mutation queries
+
         val geneNames = referenceGenomeSchema.genes.joinToString(", ") { it.name }
 
         val filterExamples = buildString {
