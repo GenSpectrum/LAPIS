@@ -4,8 +4,12 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.DATABASE_CONFIG_ROUTE
+import org.genspectrum.lapis.controller.INFO_ROUTE
+import org.genspectrum.lapis.controller.LINEAGE_DEFINITION_ROUTE
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.QUERIES_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.REFERENCE_GENOME_ROUTE
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_AMINO_ACID_SEQUENCES
@@ -156,10 +160,17 @@ These endpoints only accept POST.
 - ${markdownLink("sample/$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE")}: Query amino acid mutations aggregated over time
 $phylogeneticSection
 
-### Utility
+### Info
 
-- ${markdownLink("sample/info")}: Get instance information and versions
-- ${markdownLink("sample/getDatabaseConfig")}: Retrieve the complete database configuration
+- ${markdownLink("info$INFO_ROUTE")}: Get instance information and versions.
+- ${markdownLink("info$DATABASE_CONFIG_ROUTE")}: Retrieve the complete database configuration.
+  Contains mostly the complete metadata schema and a few other things that are relevant for LAPIS and/or SILO.
+- ${markdownLink("info$REFERENCE_GENOME_ROUTE")}: Retrieve the complete reference genome.
+  Beware, this contains large sequences in the response. Only do use this if you need the actual reference sequences.
+- ${markdownLink("info$LINEAGE_DEFINITION_ROUTE/{column}")}:
+  Retrieve the lineage definition file for a specific metadata column.
+  This is useful for understanding the lineage hierarchy and parent-child relationships in the data.
+  This file is also usually quite large.
 
 All endpoints support both GET and POST methods. POST requests accept JSON or form-encoded data.
             """.trimIndent()
