@@ -5,11 +5,13 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ResponseBody
 
 @Hidden
-@RestController
+@Controller
 class LandingPageController(
     @Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
     private val databaseConfig: DatabaseConfig,
@@ -25,154 +27,34 @@ class LandingPageController(
         put("GitHub", "https://github.com/GenSpectrum/LAPIS")
     }
 
-    @RequestMapping("/", produces = [MediaType.TEXT_HTML_VALUE])
-    fun helloHtml() =
-        """
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>LAPIS - ${databaseConfig.schema.instanceName}</title>
-        </head>
-        <body>
-            <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
-            Welcome to the LAPIS instance for ${databaseConfig.schema.instanceName}.
-            You can find more information on the following pages:
-            <ul>
-                ${getHtmlLinkItems()}
-            </ul>
-        </body>
-        </html>
-        """.trimIndent()
+    @GetMapping("/", produces = [MediaType.TEXT_HTML_VALUE])
+    fun indexHtml(model: Model): String {
+        populateModel(model)
+        return "index"
+    }
 
-    @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun helloJson() = links + ("Instance name" to databaseConfig.schema.instanceName)
+    @GetMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    fun indexJson() = links + ("Instance name" to databaseConfig.schema.instanceName)
 
-    private fun getHtmlLinkItems() =
-        links
-            .map { (title, url) -> """<li><a href="$url">$title</a></li>""" }
-            .joinToString("")
+    @GetMapping("/llms.txt", produces = [MediaType.TEXT_PLAIN_VALUE])
+    fun llmsTxt(model: Model): String {
+        populateModel(model)
+        return "llms.txt"
+    }
 
-    @RequestMapping("/llms.txt", produces = [MediaType.TEXT_PLAIN_VALUE])
-    fun llmsTxt() = buildLlmsTxt()
-
-    private fun buildLlmsTxt(): String {
-        val instanceName = databaseConfig.schema.instanceName
-        val metadataFields = databaseConfig.schema.metadata.joinToString(", ") { it.name }
-        val genes = referenceGenomeSchema.getGeneNames().joinToString(", ")
-        val segments = if (!referenceGenomeSchema.isSingleSegmented()) {
-            referenceGenomeSchema.getNucleotideSequenceNames().joinToString(", ")
-        } else {
-            ""
-        }
-
-        return """
-            # LAPIS API - $instanceName
-
-LAPIS (Lightweight API for Sequences) is a web API for querying genomic sequences and metadata.
-This instance serves data for $instanceName.
-
-## This Instance
-
-**Instance Name:** $instanceName
-**Metadata Fields:** $metadataFields
-**Genes:** $genes${if (segments.isNotEmpty()) "\n**Segments:** $segments" else ""}
-
-## Essential Endpoints
-
-All endpoints are under `/sample/`:
-
-- `GET|POST /sample/aggregated` - Count and group sequences by metadata fields
-- `GET|POST /sample/details` - Retrieve full metadata for matching sequences
-- `GET|POST /sample/nucleotideMutations` - Find nucleotide mutations with counts and proportions
-- `GET|POST /sample/aminoAcidMutations` - Find amino acid mutations with counts and proportions
-- `GET|POST /sample/alignedNucleotideSequences` - Download aligned sequences in FASTA format
-- `GET|POST /sample/alignedAminoAcidSequences/{gene}` - Download aligned gene sequences
-- `GET /sample/info` - Get LAPIS version, data version, and instance info
-- `POST /query/parse` - Validate and parse advanced query syntax
-
-## Query Parameters
-
-**Filtering:**
-- Use any metadata field as filter (e.g., `country=Ghana`, `date>=2021-01-01`)
-- `nucleotideMutations` - Array of mutations (e.g., `A123T`, `main:G234C`)
-- `aminoAcidMutations` - Array of mutations (e.g., `S:501Y`, `ORF1a:3456K`)
-- `nucleotideInsertions` - Array of insertions (e.g., `ins_123:ATT`)
-- `aminoAcidInsertions` - Array of insertions (e.g., `ins_S:123:EPE`)
-- `advancedQuery` - Boolean logic combining filters (POST only)
-
-**Formatting and Pagination:**
-- `fields` - Metadata fields to include/group by (comma-separated or array)
-- `orderBy` - Sort results: `fieldName` (ascending), `fieldName.desc` (descending), `random`
-- `limit` - Maximum results to return
-- `offset` - Skip first N results
-- `dataFormat` - Response format: `json` (default), `csv`, `tsv`, `fasta`
-- `compression` - Compress response: `gzip`, `zstd`
-- `downloadAsFile` - Trigger browser download with filename
-
-## Filter Syntax
-
-**Nucleotide Mutations:** `[segment:]position[from]to`
-- Examples: `123T`, `main:A123T`, `G456-` (deletion), `789.` (reference)
-
-**Amino Acid Mutations:** `gene:position[to]`
-- Examples: `S:501Y`, `ORF1a:3456`, `N:203-` (deletion)
-
-**Insertions:** `ins_[segment|gene]:position:sequence`
-- Examples: `ins_123:ATT`, `ins_S:214:EPE`
-
-**Advanced Queries (POST only):**
-- Boolean operators: `&` (AND), `|` (OR), `!` (NOT)
-- Example: `country=Ghana & (S:501Y | S:484K) & !date<2021-01-01`
-- Use `/query/parse` endpoint to validate complex queries
-
-## Quick Examples
-
-**GET - Basic aggregation:**
-`GET /sample/aggregated?fields=country,date&region=Africa&limit=100`
-
-**POST - Filter by mutations:**
-```
-POST /sample/details
-{"nucleotideMutations": ["A123T", "G456C"], "country": "Switzerland", "dataFormat": "csv"}
-```
-
-**POST - Advanced query:**
-```
-POST /sample/aggregated
-{"advancedQuery": "country=Ghana & (S:501Y | S:484K)", "fields": ["date"]}
-```
-
-## Response Structure
-
-All responses follow this wrapper format:
-```
-{
-  "data": [...],
-  "info": {
-    "dataVersion": "2024-01-15T10:30:00Z",
-    "requestId": "uuid",
-    "lapisVersion": "0.6.0"
-  }
-}
-```
-
-**Important:** Use the `lapis-data-version` response header to ensure consistency across multiple requests.
-
-## Additional Resources
-
-- **Swagger UI:** swagger-ui/index.html - Interactive API testing
-- **OpenAPI Spec (JSON):** api-docs
-- **OpenAPI Spec (YAML):** api-docs.yaml${if (lapisDocsUrl.isNotBlank()) "\n- **Documentation:** $lapisDocsUrl" else ""}
-- **GitHub:** https://github.com/GenSpectrum/LAPIS
-
-## Notes
-
-- Filters and fields are instance-specific based on database configuration
-- Check `/sample/databaseConfig` for full configuration details
-- Check `/sample/referenceGenome` for reference genome structure
-- Some instances may require OAuth authentication (check with unauthenticated request)
-            """.trimIndent()
+    private fun populateModel(model: Model) {
+        model.addAttribute("instanceName", databaseConfig.schema.instanceName)
+        model.addAttribute("metadataFields", databaseConfig.schema.metadata.joinToString(", ") { it.name })
+        model.addAttribute("genes", referenceGenomeSchema.getGeneNames().joinToString(", "))
+        model.addAttribute(
+            "segments",
+            if (!referenceGenomeSchema.isSingleSegmented()) {
+                referenceGenomeSchema.getNucleotideSequenceNames().joinToString(", ")
+            } else {
+                ""
+            },
+        )
+        model.addAttribute("docsUrl", lapisDocsUrl)
     }
 }
