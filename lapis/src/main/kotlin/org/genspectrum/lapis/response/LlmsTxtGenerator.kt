@@ -3,6 +3,8 @@ package org.genspectrum.lapis.response
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.QUERIES_OVER_TIME_ROUTE
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
@@ -139,7 +141,11 @@ Genes: $geneNames
 
 ### Time Series
 
+These endpoints are mainly built for specialized display components that show time series data in a tabular form. 
+
 - ${markdownLink("sample/$QUERIES_OVER_TIME_ROUTE")}: Query results aggregated over time
+- ${markdownLink("sample/$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE")}: Query nucleotide mutations aggregated over time
+- ${markdownLink("sample/$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE")}: Query amino acid mutations aggregated over time
 $phylogeneticSection
 
 ### Utility
