@@ -283,10 +283,10 @@ All sample endpoints also support GET requests with query parameters.
 
 ### Example 1: Count sequences by a metadata field
 
+```
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
-```json
 {
   "fields": ["$stringField"]
 }
@@ -296,10 +296,10 @@ Returns count of sequences grouped by $stringField values.
 
 ### Example 2: Filter by date range
 
+```
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
-```json
 {
   "${dateField}From": "2023-01-01",
   "${dateField}To": "2023-12-31",
@@ -311,10 +311,10 @@ Returns sequences within the specified date range, grouped by date.
 
 ### Example 3: Find sequences with specific mutation
 
+```
 POST ${getSampleLink(DETAILS)}
 Content-Type: application/json
 
-```json
 {
   "nucleotideMutations": ["C123T"],
   "limit": 10
@@ -325,10 +325,10 @@ Returns up to 10 sequences with the C123T nucleotide mutation.
 
 ### Example 4: Complex mutation filter with Boolean logic
 
+```
 POST ${getSampleLink(AGGREGATED)}
 Content-Type: application/json
 
-```json
 {
   "nucleotideMutations": ["C123T"],
   "aminoAcidMutations": ["S:484K", "S:484E"],
@@ -340,10 +340,10 @@ Returns sequences with C123T mutation AND either S:484K OR S:484E amino acid mut
 
 ### Example 5: Get sequences for a specific gene
 
+```
 POST ${getSampleLink(ALIGNED_AMINO_ACID_SEQUENCES)}
 Content-Type: application/json
 
-```json
 {
   "genes": ["$firstGene"],
   "$stringField": "someValue",
@@ -355,10 +355,10 @@ Returns up to 5 aligned amino acid sequences for the $firstGene gene.
 
 ### Example 6: Analyze mutation proportions
 
+```
 POST ${getSampleLink(NUCLEOTIDE_MUTATIONS)}
 Content-Type: application/json
 
-```json
 {
   "$stringField": "someValue",
   "minProportion": 0.05
