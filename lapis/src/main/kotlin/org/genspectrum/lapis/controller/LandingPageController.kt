@@ -2,6 +2,7 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Hidden
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -65,13 +66,21 @@ class LandingPageController(
         model.addAttribute("instanceName", databaseConfig.schema.instanceName)
         model.addAttribute("metadataCount", databaseConfig.schema.metadata.size)
 
-        model.addAttribute("segmentCount", referenceGenomeSchema.nucleotideSequences.size)
+        model.addAttribute("isSingleSegmented", referenceGenomeSchema.isSingleSegmented())
         model.addAttribute("segmentNames", referenceGenomeSchema.getNucleotideSequenceNames())
         model.addAttribute("geneNames", referenceGenomeSchema.getGeneNames())
 
-        model.addAttribute("metadataFields", emptyList<Map<String, String>>())
+        model.addAttribute("metadataFields", databaseConfig.schema.metadata)
+        model.addAttribute("stringField", getFirstFieldOfType(MetadataType.STRING))
+        model.addAttribute("dateField", getFirstFieldOfType(MetadataType.DATE))
+        model.addAttribute("intField", getFirstFieldOfType(MetadataType.INT))
+        model.addAttribute("floatField", getFirstFieldOfType(MetadataType.FLOAT))
+        model.addAttribute("booleanField", getFirstFieldOfType(MetadataType.BOOLEAN))
         model.addAttribute("filterExamples", emptyList<String>())
         model.addAttribute("hasPhyloTreeField", databaseConfig.schema.metadata.any { it.isPhyloTreeField })
         model.addAttribute("queryExamples", emptyList<Map<String, String>>())
     }
+
+    private fun getFirstFieldOfType(metadataType: MetadataType): String? =
+        databaseConfig.schema.metadata.firstOrNull { it.type == metadataType }?.name
 }

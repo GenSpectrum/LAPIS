@@ -25,8 +25,21 @@ The following metadata fields are available for filtering on this instance:
 
 You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
 
-[# th:each="example : ${filterExamples}"]
-- [(${example})]
+[# th:if="${stringField != null}"]
+- **String fields**: Use exact or regex match.
+  Examples: `"${stringField}": "someValue"`, `"${stringField}.regex": "^startsWithThis*"`
+[/]
+[# th:if="${dateField != null}"]
+- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"${dateField}From": "2023-01-01", "${dateField}To": "2023-12-31"`
+[/]
+[# th:if="${intField != null}"]
+- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"${intField}": 42` or `"${intField}From": 10, "${intField}To": 50`
+[/]
+[# th:if="${floatField != null}"]
+- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"${floatField}": 0.95` or `"${floatField}From": 0.8, "${floatField}To": 1.0`
+[/]
+[# th:if="${booleanField != null}"]
+- **Boolean fields**: Use `true` or `false`. Example: `"${booleanField}": true`
 [/]
 
 You can combine multiple filters in a single query. All filters are combined with AND logic.
@@ -34,11 +47,10 @@ All exact filters also support filtering for `null`.
 
 ### Genes and Segments
 
-[# th:if="${segmentCount > 1}"]
+[# th:if="${!isSingleSegmented}"]
 This instance uses a multi-segmented genome with [(${segmentCount})] segments:
 
 Segments: [# th:each="segment, iterStat : ${segmentNames}"][(${segment})][(${!iterStat.last ? ', ' : ''})][/]
-
 [/]
 Available genes for amino acid queries:
 
