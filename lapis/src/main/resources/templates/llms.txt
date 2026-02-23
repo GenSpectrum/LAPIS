@@ -36,14 +36,12 @@ You can combine multiple filters in a single query. All filters are combined wit
 All exact filters also support filtering for `null`.
 
 ### Genes and Segments
-[# th:if="${!isSingleSegmented}"]
-This instance uses a multi-segmented genome with [(${segmentCount})] segments:
-
-Segments: [# th:each="segment, iterStat : ${segmentNames}"][(${segment})][(${!iterStat.last ? ', ' : ''})][/]
+[# th:unless="${isSingleSegmented}"]
+This instance uses a multi-segmented genome with [(${segmentCount})] segments: [# th:each="segment, iterStat : ${segmentNames}"][(${segment})][(${!iterStat.last ? ', ' : ''})][/]
+[/][# th:if="${isSingleSegmented}"]
+This instance uses a single-segmented genome.
 [/]
-Available genes for amino acid queries:
-
-Segments: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
+Available genes for amino acid queries: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
 
 ## API Endpoints
 
