@@ -64,12 +64,13 @@ class LandingPageController(
         // For now, provide minimal data to make tests pass
         model.addAttribute("instanceName", databaseConfig.schema.instanceName)
         model.addAttribute("metadataCount", databaseConfig.schema.metadata.size)
-        model.addAttribute("geneCount", referenceGenomeSchema.genes.size)
+
         model.addAttribute("segmentCount", referenceGenomeSchema.nucleotideSequences.size)
+        model.addAttribute("segmentNames", referenceGenomeSchema.getNucleotideSequenceNames())
+        model.addAttribute("geneNames", referenceGenomeSchema.getGeneNames())
+
         model.addAttribute("metadataFields", emptyList<Map<String, String>>())
         model.addAttribute("filterExamples", emptyList<String>())
-        model.addAttribute("segmentNames", "")
-        model.addAttribute("geneNames", "")
         model.addAttribute("hasPhyloTreeField", databaseConfig.schema.metadata.any { it.isPhyloTreeField })
         model.addAttribute("queryExamples", emptyList<Map<String, String>>())
     }

@@ -3,7 +3,7 @@
 > LAPIS (Lightweight API for Sequences) instance for [(${instanceName})].
 > Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
 
-This instance contains data for [(${instanceName})] with [(${metadataCount})] metadata fields and [(${geneCount})] genes[# th:if="${segmentCount > 1}"] across [(${segmentCount})] segments[/].
+This instance contains data for [(${instanceName})].
 
 The LAPIS code is open source and available at https://github.com/GenSpectrum/LAPIS.
 LAPIS is a convenience API around SILO, a high-performance query engine for genomic sequences.
@@ -37,12 +37,12 @@ All exact filters also support filtering for `null`.
 [# th:if="${segmentCount > 1}"]
 This instance uses a multi-segmented genome with [(${segmentCount})] segments:
 
-Segments: [(${segmentNames})]
+Segments: [# th:each="segment, iterStat : ${segmentNames}"][(${segment})][(${!iterStat.last ? ', ' : ''})][/]
 
 [/]
 Available genes for amino acid queries:
 
-Genes: [(${geneNames})]
+Segments: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
 
 ## API Endpoints
 
