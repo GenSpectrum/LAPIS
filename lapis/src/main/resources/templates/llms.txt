@@ -91,7 +91,7 @@ Every endpoint also accepts:
 
 The response is usually a JSON object that contains:
 - `data`: an array of result entries, if the query was successful.
-- `error`: an error message, if the query failed.
+- `error`: an error message, if the query failed. The message should usually give you an idea of what went wrong with your request.
 - `info`: additional information about the LAPIS instance.
   The `dataVersion` field can be used to check if the underlying data has been updated since your last query.
 
@@ -254,3 +254,28 @@ Content-Type: application/json
 ```
 
 Returns all nucleotide mutations appearing in at least 5% of sequences matching the filter.
+[# th:if="${dateField != null}"]
+### Order results by multiple fields
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "fields": ["[(${dateField})]", "[(${stringField})]"],
+  "orderBy": [
+    {"field": "count", "type": "ascending"},
+    {"field": "[(${dateField})]", "type": "ascending"},
+    {"field": "[(${stringField})]", "type": "descending"}
+  ]
+}
+```
+
+Returns aggregated results grouped by [(${dateField})] and [(${stringField})], sorted first by ascending `count`, then by date (oldest first), then by [(${stringField})] (Z to A).
+The `orderBy` parameter accepts an array of objects, each with a `field` (must be in the response) and `type` (`ascending` or `descending`).
+
+GET requests only accept a plain array of field names for `orderBy`, and they will be sorted in ascending order:
+```
+GET sample/aggregated?fields=[(${dateField})]&orderBy=[(${dateField})]&orderBy=count
+```
+[/]
