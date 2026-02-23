@@ -8,8 +8,7 @@ This instance contains data for [(${instanceName})].
 The LAPIS code is open source and available at https://github.com/GenSpectrum/LAPIS.
 LAPIS is a convenience API around SILO, a high-performance query engine for genomic sequences.
 The code is available at https://github.com/GenSpectrum/LAPIS-SILO.
-
-
+[# th:unless="${docsUrl.isEmpty()}"]If you need more detailed information than mentioned in this file, refer to the [LAPIS docs]([(${docsUrl})]).[/]
 
 ## Instance Configuration
 
@@ -79,6 +78,22 @@ Use GET when you want to have links that are easy to share since all their param
 
 Every endpoint accepts filters on metadata fields and mutations.
 Use these to narrow down the sequences that are included in the results.
+
+Every endpoint also accepts:
+- `limit`: Maximum number of result entries to return.
+  This is especially useful for endpoints that return large responses otherwise.
+- `offset`: Number of result entries to skip before starting to return results.
+  Use this for pagination in combination with `limit`.
+- `orderBy`: A list of fields that are contained in the response data that should be sorted by.
+- `dataFormat`: By default, sequence endpoints return FASTA, the other endpoints return JSON.
+  You can change this with the `dataFormat` parameter. Consult the OpenAPI spec for which formats are supported for which endpoints.
+- `compression`: Can be used to enable response compression (`gzip` or `zstd`).
+
+The response is usually a JSON object that contains:
+- `data`: an array of result entries, if the query was successful.
+- `error`: an error message, if the query failed.
+- `info`: additional information about the LAPIS instance.
+  The `dataVersion` field can be used to check if the underlying data has been updated since your last query.
 
 - [sample/aggregated](sample/aggregated): Count and group sequences by metadata and mutations.
   This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
@@ -220,6 +235,11 @@ Content-Type: application/json
 ```
 
 Returns up to 5 aligned amino acid sequences for the E gene.
+
+The equivalent GET request would be:
+```
+GET sample/alignedAminoAcidSequences?genes=[(${firstGene})]&limit=5&[(${stringField})]=someValue
+```
 
 ### Example 6: Analyze mutation proportions
 

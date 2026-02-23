@@ -51,10 +51,8 @@ class LandingPageController(
     }
 
     private fun populateLlmsModel(model: Model) {
-        // TODO: Implement full llms.txt data population
-        // For now, provide minimal data to make tests pass
         model.addAttribute("instanceName", databaseConfig.schema.instanceName)
-        model.addAttribute("metadataCount", databaseConfig.schema.metadata.size)
+        model.addAttribute("docsUrl", lapisDocsUrl)
 
         model.addAttribute("isSingleSegmented", referenceGenomeSchema.isSingleSegmented())
         model.addAttribute("segmentNames", referenceGenomeSchema.getNucleotideSequenceNames())
