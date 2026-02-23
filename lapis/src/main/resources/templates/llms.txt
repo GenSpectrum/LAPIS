@@ -46,7 +46,7 @@ Genes: [(${geneNames})]
 
 ## API Endpoints
 
-The OpenAPI spec is available at [(${apiDocsLink})].
+The OpenAPI spec is available at [api-docs](api-docs).
 Refer to that if you need more details on an endpoint.
 
 ### Data Retrieval and Mutation Analysis
@@ -60,12 +60,33 @@ Use GET when you want to have links that are easy to share since all their param
 Every endpoint accepts filters on metadata fields and mutations.
 Use these to narrow down the sequences that are included in the results.
 
-[# th:each="endpoint : ${dataRetrievalEndpoints}"]
-- [(${endpoint.link})]: [(${endpoint.description})]
-[# th:if="${endpoint.details != null}"]
-  [(${endpoint.details})]
-[/]
-[/]
+- [sample/aggregated](sample/aggregated): Count and group sequences by metadata and mutations.
+  This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
+- [sample/details](sample/details):
+  Returns the actual metadata values for sequences that match your filters. Use this to get individual sequence records.
+  Similar to a "select <fields ?? *> from ... where <filters>" SQL query.
+- [sample/alignedNucleotideSequences](sample/alignedNucleotideSequences):
+  Returns nucleotide sequences aligned to the reference genome in FASTA format.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/unalignedNucleotideSequences](sample/unalignedNucleotideSequences):
+  Returns raw nucleotide sequences without alignment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedAminoAcidSequences](sample/alignedAminoAcidSequences):
+  Returns translated protein sequences for multiple genes at once.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedAminoAcidSequences/{gene}](sample/alignedAminoAcidSequences/{gene}):
+  Returns translated protein sequences for a single gene. Specify the gene name in the URL path.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/nucleotideMutations](sample/nucleotideMutations): List nucleotide mutations with their proportions.
+  Shows which nucleotide mutations appear in your filtered sequences and how frequently.
+  Example: "C123T appears in 45% of sequences that match <filters>".
+- [sample/aminoAcidMutations](sample/aminoAcidMutations): List amino acid mutations with their proportions.
+  Shows which amino acid mutations appear in your filtered sequences and how frequently.
+  Example: "S:484K appears in 30% of sequences that match <filters>".
+- [sample/nucleotideInsertions](sample/nucleotideInsertions): List nucleotide insertions.
+  Shows how often which insertion of nucleotides occurred in the nucleotide sequence(s) for the given filters.
+- [sample/aminoAcidInsertions](sample/aminoAcidInsertions): List amino acid insertions.
+  Shows how often which insertion of amino acids occurred in the amino acid sequences for the given filters.
 
 ### Time Series
 
@@ -73,32 +94,37 @@ These endpoints are mainly built for specialized display components that show ti
 Useful for tracking trends over time.
 These endpoints only accept POST.
 
-[# th:each="endpoint : ${timeSeriesEndpoints}"]
-- [(${endpoint.link})]: [(${endpoint.description})]
-[# th:if="${endpoint.details != null}"]
-  [(${endpoint.details})]
-[/]
-[/]
-[# th:if="${hasPhyloTreeField}"]
+- [sample//queriesOverTime](sample//queriesOverTime): Query results aggregated over time.
+  Shows how many sequences match your filters for each time period (e.g., daily, weekly).
+- [sample//nucleotideMutationsOverTime](sample//nucleotideMutationsOverTime): Query nucleotide mutations aggregated over time.
+  Shows how mutation frequencies change over time. Useful for tracking the emergence and spread of specific mutations.
+- [sample//aminoAcidMutationsOverTime](sample//aminoAcidMutationsOverTime): Query amino acid mutations aggregated over time.
+  Shows how amino acid mutation frequencies change over time.
 
+[# th:if="${hasPhyloTreeField}"]
 ### Phylogenetic Analysis
 
-[# th:each="endpoint : ${phyloEndpoints}"]
-- [(${endpoint.link})]: [(${endpoint.description})]
-[# th:if="${endpoint.details != null}"]
-  [(${endpoint.details})]
+- [sample/mostRecentCommonAncestor](sample/mostRecentCommonAncestor): Find most recent common ancestor for queried sequences.
+  Identifies the MRCA node in the phylogenetic tree that contains all sequences matching your filters. Useful for understanding evolutionary relationships.
+- [sample/phyloSubtree](sample/phyloSubtree): Get phylogenetic subtree in Newick format.
+  Returns a subtree containing only the sequences matching your filters. The subtree is in Newick format and can be visualized in phylogenetic tree viewers.
 [/]
 [/]
 [/]
 
 ### Info
 
-[# th:each="endpoint : ${infoEndpoints}"]
-- [(${endpoint.link})]: [(${endpoint.description})]
-[# th:if="${endpoint.details != null}"]
-  [(${endpoint.details})]
-[/]
-[/]
+- [info/info](info/info): Get instance information and versions.
+  Useful for debugging or confirming you're connected to the right instance.
+- [info/databaseConfig](info/databaseConfig): Retrieve the complete database configuration.
+  Contains the complete metadata schema and configuration. Use this to discover what fields are available for filtering.
+- [info/referenceGenome](info/referenceGenome): Retrieve the complete reference genome.
+  Returns the full reference genome sequences. Warning: Large response.
+  Only use when you need the actual reference sequences.
+- [info/lineageDefinition/{column}](info/lineageDefinition/{column}):
+  Retrieve the lineage definition file for a specific metadata column.
+  Returns lineage hierarchy and parent-child relationships. Useful for understanding lineage classifications.
+  Warning: Usually quite large.
 
 ## Query Examples
 
@@ -115,20 +141,4 @@ Content-Type: application/json
 
 [(${example.description})]
 
-[/]
-
-## Core Concepts
-
-Understanding these concepts will help you construct effective queries:
-
-[# th:each="concept : ${coreConcepts}"]
-- [(${concept.link})]: [(${concept.description})]
-[/]
-
-## Optional
-
-Additional resources for advanced use cases:
-
-[# th:each="resource : ${optionalResources}"]
-- [(${resource.link})]: [(${resource.description})]
 [/]
