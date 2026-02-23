@@ -41,5 +41,6 @@ class LandingPageControllerTest(
             .andExpect(status().isOk)
             .andExpect(content().contentType("text/plain;charset=UTF-8"))
             .andExpect(content().string(startsWith("# LAPIS")))
+            .andReturn().response.contentAsString.also { print(it) }
     }
 }

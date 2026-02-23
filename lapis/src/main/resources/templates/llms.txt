@@ -109,8 +109,6 @@ These endpoints only accept POST.
 - [sample/phyloSubtree](sample/phyloSubtree): Get phylogenetic subtree in Newick format.
   Returns a subtree containing only the sequences matching your filters. The subtree is in Newick format and can be visualized in phylogenetic tree viewers.
 [/]
-[/]
-[/]
 
 ### Info
 

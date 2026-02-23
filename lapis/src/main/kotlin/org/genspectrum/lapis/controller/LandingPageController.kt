@@ -58,7 +58,7 @@ class LandingPageController(
         )
         model.addAttribute("docsUrl", lapisDocsUrl)
     }
-    
+
     private fun populateLlmsModel(model: Model) {
         // TODO: Implement full llms.txt data population
         // For now, provide minimal data to make tests pass
@@ -70,7 +70,7 @@ class LandingPageController(
         model.addAttribute("filterExamples", emptyList<String>())
         model.addAttribute("segmentNames", "")
         model.addAttribute("geneNames", "")
-        model.addAttribute("hasPhyloTreeField", false)
+        model.addAttribute("hasPhyloTreeField", databaseConfig.schema.metadata.any { it.isPhyloTreeField })
         model.addAttribute("queryExamples", emptyList<Map<String, String>>())
     }
 }
