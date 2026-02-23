@@ -1,107 +1,134 @@
-# LAPIS API - [(${instanceName})]
+# LAPIS - [(${instanceName})]
 
-LAPIS (Lightweight API for Sequences) is a web API for querying genomic sequences and metadata.
-This instance serves data for [(${instanceName})].
+> LAPIS (Lightweight API for Sequences) instance for [(${instanceName})].
+> Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
 
-## This Instance
+This instance contains data for [(${instanceName})] with [(${metadataCount})] metadata fields and [(${geneCount})] genes[# th:if="${segmentCount > 1}"] across [(${segmentCount})] segments[/].
 
-**Instance Name:** [(${instanceName})]
-**Metadata Fields:** [(${metadataFields})]
-**Genes:** [(${genes})]
-[# th:if="${!segments.isEmpty()}"]**Segments:** [(${segments})]
+The LAPIS code is open source and available at https://github.com/GenSpectrum/LAPIS.
+LAPIS is a convenience API around SILO, a high-performance query engine for genomic sequences.
+The code is available at https://github.com/GenSpectrum/LAPIS-SILO.
+
+
+
+## Instance Configuration
+
+### Metadata Fields
+
+The following metadata fields are available for filtering on this instance:
+
+[# th:each="field : ${metadataFields}"]
+- **[(${field.name})]** ([(${field.type})])
 [/]
-## Essential Endpoints
 
-All endpoints are under `/sample/`:
+### How to Filter by Metadata Fields
 
-- `GET|POST /sample/aggregated` - Count and group sequences by metadata fields
-- `GET|POST /sample/details` - Retrieve full metadata for matching sequences
-- `GET|POST /sample/nucleotideMutations` - Find nucleotide mutations with counts and proportions
-- `GET|POST /sample/aminoAcidMutations` - Find amino acid mutations with counts and proportions
-- `GET|POST /sample/alignedNucleotideSequences` - Download aligned sequences in FASTA format
-- `GET|POST /sample/alignedAminoAcidSequences/{gene}` - Download aligned gene sequences
-- `GET /sample/info` - Get LAPIS version, data version, and instance info
-- `POST /query/parse` - Validate and parse advanced query syntax
+You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
 
-## Query Parameters
+[# th:each="example : ${filterExamples}"]
+- [(${example})]
+[/]
 
-**Filtering:**
-- Use any metadata field as filter (e.g., `country=Ghana`, `date>=2021-01-01`)
-- `nucleotideMutations` - Array of mutations (e.g., `A123T`, `main:G234C`)
-- `aminoAcidMutations` - Array of mutations (e.g., `S:501Y`, `ORF1a:3456K`)
-- `nucleotideInsertions` - Array of insertions (e.g., `ins_123:ATT`)
-- `aminoAcidInsertions` - Array of insertions (e.g., `ins_S:123:EPE`)
-- `advancedQuery` - Boolean logic combining filters (POST only)
+You can combine multiple filters in a single query. All filters are combined with AND logic.
+All exact filters also support filtering for `null`.
 
-**Formatting and Pagination:**
-- `fields` - Metadata fields to include/group by (comma-separated or array)
-- `orderBy` - Sort results: `fieldName` (ascending), `fieldName.desc` (descending), `random`
-- `limit` - Maximum results to return
-- `offset` - Skip first N results
-- `dataFormat` - Response format: `json` (default), `csv`, `tsv`, `fasta`
-- `compression` - Compress response: `gzip`, `zstd`
-- `downloadAsFile` - Trigger browser download with filename
+### Genes and Segments
 
-## Filter Syntax
+[# th:if="${segmentCount > 1}"]
+This instance uses a multi-segmented genome with [(${segmentCount})] segments:
 
-**Nucleotide Mutations:** `[segment:]position[from]to`
-- Examples: `123T`, `main:A123T`, `G456-` (deletion), `789.` (reference)
+Segments: [(${segmentNames})]
 
-**Amino Acid Mutations:** `gene:position[to]`
-- Examples: `S:501Y`, `ORF1a:3456`, `N:203-` (deletion)
+[/]
+Available genes for amino acid queries:
 
-**Insertions:** `ins_[segment|gene]:position:sequence`
-- Examples: `ins_123:ATT`, `ins_S:214:EPE`
+Genes: [(${geneNames})]
 
-**Advanced Queries (POST only):**
-- Boolean operators: `&` (AND), `|` (OR), `!` (NOT)
-- Example: `country=Ghana & (S:501Y | S:484K) & !date<2021-01-01`
-- Use `/query/parse` endpoint to validate complex queries
+## API Endpoints
 
-## Quick Examples
+The OpenAPI spec is available at [(${apiDocsLink})].
+Refer to that if you need more details on an endpoint.
 
-**GET - Basic aggregation:**
-`GET /sample/aggregated?fields=country,date&region=Africa&limit=100`
+### Data Retrieval and Mutation Analysis
 
-**POST - Filter by mutations:**
-```
-POST /sample/details
-{"nucleotideMutations": ["A123T", "G456C"], "country": "Switzerland", "dataFormat": "csv"}
-```
+These are the primary entrypoints for analyzing the data in this LAPIS instance.
 
-**POST - Advanced query:**
-```
-POST /sample/aggregated
-{"advancedQuery": "country=Ghana & (S:501Y | S:484K)", "fields": ["date"]}
-```
+These endpoints are available as GET or POST.
+Prefer POST since it allows more flexible requests.
+Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
 
-## Response Structure
+Every endpoint accepts filters on metadata fields and mutations.
+Use these to narrow down the sequences that are included in the results.
 
-All responses follow this wrapper format:
-```
-{
-  "data": [...],
-  "info": {
-    "dataVersion": "2024-01-15T10:30:00Z",
-    "requestId": "uuid",
-    "lapisVersion": "0.6.0"
-  }
-}
-```
+[# th:each="endpoint : ${dataRetrievalEndpoints}"]
+- [(${endpoint.link})]: [(${endpoint.description})]
+[# th:if="${endpoint.details != null}"]
+  [(${endpoint.details})]
+[/]
+[/]
 
-**Important:** Use the `lapis-data-version` response header to ensure consistency across multiple requests.
+### Time Series
 
-## Additional Resources
+These endpoints are mainly built for specialized display components that show time series data in a tabular form.
+Useful for tracking trends over time.
+These endpoints only accept POST.
 
-- [Swagger UI](/swagger-ui/index.html) - Interactive API testing
-- [OpenAPI Spec (JSON)](/api-docs)
-- [OpenAPI Spec (YAML)](/api-docs.yaml)
-[# th:if="${!docsUrl.isEmpty()}"]- [Documentation]([(${docsUrl})])
-[/]- [GitHub](https://github.com/GenSpectrum/LAPIS)
+[# th:each="endpoint : ${timeSeriesEndpoints}"]
+- [(${endpoint.link})]: [(${endpoint.description})]
+[# th:if="${endpoint.details != null}"]
+  [(${endpoint.details})]
+[/]
+[/]
+[# th:if="${hasPhyloTreeField}"]
 
-## Notes
+### Phylogenetic Analysis
 
-- Filters and fields are instance-specific based on database configuration
-- Check `/sample/databaseConfig` for full configuration details
-- Check `/sample/referenceGenome` for reference genome structure
-- Some instances may require OAuth authentication (check with unauthenticated request)
+[# th:each="endpoint : ${phyloEndpoints}"]
+- [(${endpoint.link})]: [(${endpoint.description})]
+[# th:if="${endpoint.details != null}"]
+  [(${endpoint.details})]
+[/]
+[/]
+[/]
+
+### Info
+
+[# th:each="endpoint : ${infoEndpoints}"]
+- [(${endpoint.link})]: [(${endpoint.description})]
+[# th:if="${endpoint.details != null}"]
+  [(${endpoint.details})]
+[/]
+[/]
+
+## Query Examples
+
+These examples demonstrate common query patterns using POST requests with JSON payloads.
+All sample endpoints also support GET requests with query parameters.
+
+[# th:each="example : ${queryExamples}"]
+### [(${example.title})]
+
+POST [(${example.endpoint})]
+Content-Type: application/json
+
+[(${example.body})]
+
+[(${example.description})]
+
+[/]
+
+## Core Concepts
+
+Understanding these concepts will help you construct effective queries:
+
+[# th:each="concept : ${coreConcepts}"]
+- [(${concept.link})]: [(${concept.description})]
+[/]
+
+## Optional
+
+Additional resources for advanced use cases:
+
+[# th:each="resource : ${optionalResources}"]
+- [(${resource.link})]: [(${resource.description})]
+[/]

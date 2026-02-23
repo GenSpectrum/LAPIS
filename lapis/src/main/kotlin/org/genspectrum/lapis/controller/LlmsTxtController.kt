@@ -15,6 +15,6 @@ import org.springframework.web.bind.annotation.RestController
 class LlmsTxtController(
     private val llmsTxtGenerator: LlmsTxtGenerator,
 ) {
-    @GetMapping("/llms.txt", produces = ["text/plain; charset=UTF-8"])
+    @GetMapping("/llms.txt2", produces = ["text/plain; charset=UTF-8"])
     fun getLlmsTxt(): String = llmsTxtGenerator.generate()
 }

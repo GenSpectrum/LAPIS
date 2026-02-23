@@ -34,4 +34,12 @@ class LandingPageControllerTest(
             .andExpect(content().contentType("$TEXT_HTML_VALUE;charset=UTF-8"))
             .andExpect(content().string(startsWith("<!DOCTYPE html>")))
     }
+
+    @Test
+    fun `WHEN calling llms txt endpoint THEN returns 200 OK`() {
+        mockMvc.perform(get("/llms.txt"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("text/plain;charset=UTF-8"))
+            .andExpect(content().string(startsWith("# LAPIS")))
+    }
 }
