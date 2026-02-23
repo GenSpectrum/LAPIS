@@ -26,7 +26,8 @@ The following metadata fields are available for filtering on this instance:
 You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
 
 [# th:if="${stringField != null}"]- **String fields**: Use exact or regex match.
-  Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`[/]
+  You an also supply an array - the fields will be combined with locial OR.
+  Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`, `"[(${stringField})]": ["someValue", "orOtherValue"]`[/]
 [# th:if="${dateField != null}"]- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`[/]
 [# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${intField})]": 42` or `"[(${intField})]From": 10, "[(${intField})]To": 50`[/]
 [# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${floatField})]": 0.95` or `"[(${floatField})]From": 0.8, "[(${floatField})]To": 1.0`[/]
@@ -42,6 +43,26 @@ This instance uses a multi-segmented genome with [(${segmentCount})] segments: [
 This instance uses a single-segmented genome.
 [/]
 Available genes for amino acid queries: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
+
+### How to Filter by Mutations
+
+You can filter sequences by nucleotide and amino acid mutations.
+
+**Nucleotide mutations:**
+- **Point mutations**: Specify position and substitution. Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123T"]` (position 123 changed to thymine)
+- **Deletions**: Use `-` for deleted bases. Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123-"]`
+- **Insertions**: Use `nucleotideInsertions` filter. Example: `"nucleotideInsertions": ["ins_[(${segmentMutationPrefix})]123:AAA"]` (3 adenines inserted after position 123)
+- **Maybe mutations**: Query ambiguous positions. This will also match when there is an ambiguity symbol at this position that could include the mutation.
+ Example: `"nucleotideMutations": ["MAYBE([(${segmentMutationPrefix})]123T)"]`
+
+**Amino acid mutations:**
+- **Point mutations**: Specify gene, position, and substitution. Example: `"aminoAcidMutations": ["[(${firstGene})]:484K"]` ([(${firstGene})] position 484, lysine)
+- **Deletions**: Example: `"aminoAcidMutations": ["[(${firstGene})]:69-"]`
+- **Insertions**: Use `aminoAcidInsertions` filter. Example: `"aminoAcidInsertions": ["ins_[(${firstGene})]:214:EPE"]` (EPE inserted after position 214 in [(${firstGene})])
+- supports "maybe" with the same syntax as nucleotide mutations.
+
+**Boolean logic:** Multiple mutations in arrays are combined with AND.
+Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123T", "[(${segmentMutationPrefix})]456A"]` (both mutations required)
 
 ## API Endpoints
 
