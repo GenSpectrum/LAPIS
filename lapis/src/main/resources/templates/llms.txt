@@ -25,28 +25,17 @@ The following metadata fields are available for filtering on this instance:
 
 You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
 
-[# th:if="${stringField != null}"]
-- **String fields**: Use exact or regex match.
-  Examples: `"${stringField}": "someValue"`, `"${stringField}.regex": "^startsWithThis*"`
-[/]
-[# th:if="${dateField != null}"]
-- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"${dateField}From": "2023-01-01", "${dateField}To": "2023-12-31"`
-[/]
-[# th:if="${intField != null}"]
-- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"${intField}": 42` or `"${intField}From": 10, "${intField}To": 50`
-[/]
-[# th:if="${floatField != null}"]
-- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"${floatField}": 0.95` or `"${floatField}From": 0.8, "${floatField}To": 1.0`
-[/]
-[# th:if="${booleanField != null}"]
-- **Boolean fields**: Use `true` or `false`. Example: `"${booleanField}": true`
-[/]
+[# th:if="${stringField != null}"]- **String fields**: Use exact or regex match.
+  Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`[/]
+[# th:if="${dateField != null}"]- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`[/]
+[# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${intField})]": 42` or `"[(${intField})]From": 10, "[(${intField})]To": 50`[/]
+[# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${floatField})]": 0.95` or `"[(${floatField})]From": 0.8, "[(${floatField})]To": 1.0`[/]
+[# th:if="${booleanField != null}"]- **Boolean fields**: Use `true` or `false`. Example: `"[(${booleanField})]": true`[/]
 
 You can combine multiple filters in a single query. All filters are combined with AND logic.
 All exact filters also support filtering for `null`.
 
 ### Genes and Segments
-
 [# th:if="${!isSingleSegmented}"]
 This instance uses a multi-segmented genome with [(${segmentCount})] segments:
 
@@ -106,11 +95,11 @@ These endpoints are mainly built for specialized display components that show ti
 Useful for tracking trends over time.
 These endpoints only accept POST.
 
-- [sample//queriesOverTime](sample//queriesOverTime): Query results aggregated over time.
+- [sample/queriesOverTime](sample/queriesOverTime): Query results aggregated over time.
   Shows how many sequences match your filters for each time period (e.g., daily, weekly).
-- [sample//nucleotideMutationsOverTime](sample//nucleotideMutationsOverTime): Query nucleotide mutations aggregated over time.
+- [sample/nucleotideMutationsOverTime](sample/nucleotideMutationsOverTime): Query nucleotide mutations aggregated over time.
   Shows how mutation frequencies change over time. Useful for tracking the emergence and spread of specific mutations.
-- [sample//aminoAcidMutationsOverTime](sample//aminoAcidMutationsOverTime): Query amino acid mutations aggregated over time.
+- [sample/aminoAcidMutationsOverTime](sample/aminoAcidMutationsOverTime): Query amino acid mutations aggregated over time.
   Shows how amino acid mutation frequencies change over time.
 
 [# th:if="${hasPhyloTreeField}"]
@@ -141,14 +130,88 @@ These endpoints only accept POST.
 These examples demonstrate common query patterns using POST requests with JSON payloads.
 All sample endpoints also support GET requests with query parameters.
 
-[# th:each="example : ${queryExamples}"]
-### [(${example.title})]
+### Count sequences by a metadata field
 
-POST [(${example.endpoint})]
+```
+POST sample/aggregated
 Content-Type: application/json
 
-[(${example.body})]
+{
+  "fields": ["[(${stringField})]"]
+}
+```
 
-[(${example.description})]
+Returns count of sequences grouped by [(${stringField})] values.
+[# th:if="${dateField != null}"]
+### Filter by date range
 
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "[(${dateField})]From": "2023-01-01",
+  "[(${dateField})]To": "2023-12-31",
+  "fields": ["[(${dateField})]"]
+}
+```
+
+Returns sequences within the specified date range, grouped by date.
 [/]
+### Find sequences with specific mutation
+
+```
+POST sample/details
+Content-Type: application/json
+
+{
+  "nucleotideMutations": ["[[(${segmentMutationPrefix})]]123T"],
+  "limit": 10
+}
+```
+
+Returns up to 10 sequences with the [[(${segmentMutationPrefix})]]123T nucleotide mutation.
+
+### Complex mutation filter with Boolean logic
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "nucleotideMutations": ["[[(${segmentMutationPrefix})]]123T"],
+  "aminoAcidMutations": ["[(${firstGene})]:484K", "[(${firstGene})]:484E"],
+  "fields": ["[(${stringField})]"]
+}
+```
+
+Returns sequences with [[(${segmentMutationPrefix})]]123T mutation AND either [(${firstGene})]:484K OR [(${firstGene})]:484E amino acid mutation, grouped by [(${stringField})].
+
+### Get sequences for a specific gene
+
+```
+POST sample/alignedAminoAcidSequences
+Content-Type: application/json
+
+{
+  "genes": ["[(${firstGene})]"],
+  "[(${stringField})]": "someValue",
+  "limit": 5
+}
+```
+
+Returns up to 5 aligned amino acid sequences for the E gene.
+
+### Example 6: Analyze mutation proportions
+
+```
+POST sample/nucleotideMutations
+Content-Type: application/json
+
+{
+  "[(${stringField})]": "someValue",
+  "minProportion": 0.05
+}
+```
+
+Returns all nucleotide mutations appearing in at least 5% of sequences matching the filter.

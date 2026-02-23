@@ -47,16 +47,6 @@ class LandingPageController(
 
     private fun populateModel(model: Model) {
         model.addAttribute("instanceName", databaseConfig.schema.instanceName)
-        model.addAttribute("metadataFields", databaseConfig.schema.metadata.joinToString(", ") { it.name })
-        model.addAttribute("genes", referenceGenomeSchema.getGeneNames().joinToString(", "))
-        model.addAttribute(
-            "segments",
-            if (!referenceGenomeSchema.isSingleSegmented()) {
-                referenceGenomeSchema.getNucleotideSequenceNames().joinToString(", ")
-            } else {
-                ""
-            },
-        )
         model.addAttribute("docsUrl", lapisDocsUrl)
     }
 
@@ -69,6 +59,11 @@ class LandingPageController(
         model.addAttribute("isSingleSegmented", referenceGenomeSchema.isSingleSegmented())
         model.addAttribute("segmentNames", referenceGenomeSchema.getNucleotideSequenceNames())
         model.addAttribute("geneNames", referenceGenomeSchema.getGeneNames())
+        model.addAttribute("firstGene", referenceGenomeSchema.getGeneNames().firstOrNull())
+        model.addAttribute(
+            "segmentMutationPrefix",
+            referenceGenomeSchema.getNucleotideSequenceNames().firstOrNull()?.let { "$it:" },
+        )
 
         model.addAttribute("metadataFields", databaseConfig.schema.metadata)
         model.addAttribute("stringField", getFirstFieldOfType(MetadataType.STRING))
@@ -76,11 +71,12 @@ class LandingPageController(
         model.addAttribute("intField", getFirstFieldOfType(MetadataType.INT))
         model.addAttribute("floatField", getFirstFieldOfType(MetadataType.FLOAT))
         model.addAttribute("booleanField", getFirstFieldOfType(MetadataType.BOOLEAN))
-        model.addAttribute("filterExamples", emptyList<String>())
         model.addAttribute("hasPhyloTreeField", databaseConfig.schema.metadata.any { it.isPhyloTreeField })
-        model.addAttribute("queryExamples", emptyList<Map<String, String>>())
     }
 
     private fun getFirstFieldOfType(metadataType: MetadataType): String? =
-        databaseConfig.schema.metadata.firstOrNull { it.type == metadataType }?.name
+        databaseConfig.schema.metadata
+            .firstOrNull { it.type == metadataType && it.name != databaseConfig.schema.primaryKey }
+            ?.name
+            ?: databaseConfig.schema.metadata.firstOrNull { it.type == metadataType }?.name
 }
