@@ -8,6 +8,7 @@ const advancedQueryFiles = fs.readdirSync(queriesPath).filter(f => f.endsWith('.
 
 type VariantQueryRequest = {
   requestName: string;
+  description?: string;
   lapisRequest: AggregatedPostRequest;
   expected: AggregatedResponse[];
 };
