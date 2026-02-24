@@ -5,9 +5,9 @@ import {
   LapisControllerApi,
   Middleware,
   QueriesOverTimeControllerApi,
+  QueryControllerApi,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
-import { QueryControllerApi } from './lapisClient/index';
 import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
   MultiSegmentedSequenceControllerApi,
