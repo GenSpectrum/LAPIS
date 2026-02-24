@@ -1,0 +1,60 @@
+{
+  "testCaseName": "Maybe operator includes ambiguous symbols",
+  "description": "Tests that maybe(C2453T) matches both T mutations and N ambiguous symbols",
+  "requests": [
+    {
+      "requestName": "C2453T mutation",
+      "lapisRequest": {
+        "advancedQuery": "C2453T"
+      },
+      "expected": [
+        { "count": 6 }
+      ]
+    },
+    {
+      "requestName": "C2453N ambiguous symbol",
+      "lapisRequest": {
+        "advancedQuery": "C2453N"
+      },
+      "expected": [
+        { "count": 4 }
+      ]
+    },
+    {
+      "requestName": "maybe(C2453T) - includes both T and N",
+      "lapisRequest": {
+        "advancedQuery": "maybe(C2453T)"
+      },
+      "expected": [
+        { "count": 10 }
+      ]
+    },
+    {
+      "requestName": "C2453C - reference base",
+      "lapisRequest": {
+        "advancedQuery": "C2453C"
+      },
+      "expected": [
+        { "count": 90 }
+      ]
+    },
+    {
+      "requestName": "not C2453C - all mutations (T and N)",
+      "lapisRequest": {
+        "advancedQuery": "!C2453C"
+      },
+      "expected": [
+        { "count": 10 }
+      ]
+    },
+    {
+      "requestName": "not maybe(C2453C) - only T mutation",
+      "lapisRequest": {
+        "advancedQuery": "!maybe(C2453C)"
+      },
+      "expected": [
+        { "count": 6 }
+      ]
+    }
+  ]
+}
