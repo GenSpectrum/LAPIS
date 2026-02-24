@@ -7,18 +7,14 @@
       "lapisRequest": {
         "advancedQuery": "C2453T | C913T"
       },
-      "expected": [
-        { "count": 50 }
-      ]
+      "expected": [{ "count": 50 }]
     },
     {
       "requestName": "Explicitly query for non-T coverage at positions",
       "lapisRequest": {
         "advancedQuery": "!C2453N & !C2453T & !C913N & !C913T"
       },
-      "expected": [
-        { "count": 45 }
-      ]
+      "expected": [{ "count": 45 }]
     },
     {
       "requestName": "Not maybe either position has T (excludes T and N at both positions)",
@@ -26,18 +22,14 @@
       "lapisRequest": {
         "advancedQuery": "!maybe(C2453T | C913T)"
       },
-      "expected": [
-        { "count": 45 }
-      ]
+      "expected": [{ "count": 45 }]
     },
     {
       "requestName": "q | !maybe(q) - coverage of all positions (2453, 913)",
       "lapisRequest": {
         "advancedQuery": "(C2453T | C913T) | !maybe(C2453T | C913T)"
       },
-      "expected": [
-        { "count": 95 }
-      ]
+      "expected": [{ "count": 95 }]
     },
     {
       "requestName": "Exclude N at both positions (naive coverage query)",
@@ -45,18 +37,14 @@
       "lapisRequest": {
         "advancedQuery": "!C2453N & !C913N"
       },
-      "expected": [
-        { "count": 92 }
-      ]
+      "expected": [{ "count": 92 }]
     },
     {
       "requestName": "First position N, second position T",
       "lapisRequest": {
         "advancedQuery": "C2453N & C913T"
       },
-      "expected": [
-        { "count": 3 }
-      ]
+      "expected": [{ "count": 3 }]
     }
   ]
 }

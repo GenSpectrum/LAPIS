@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient } from './common';
+import { lapisClient } from './common';
 import fs from 'fs';
 import { AggregatedPostRequest, AggregatedResponse } from './lapisClient';
 
@@ -53,7 +53,7 @@ describe('Advanced Variant Query Tests', function () {
           } catch (error) {
             throw new Error(
               `Variant query test failed for '${testCase.testCaseName}' ` +
-              `at request '${request.requestName}': ${error instanceof Error ? error.message : String(error)}`
+                `at request '${request.requestName}': ${error instanceof Error ? error.message : String(error)}`
             );
           }
         }
