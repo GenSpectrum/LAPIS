@@ -32,8 +32,6 @@ function filterUndefinedValues(response: AggregatedResponse): AggregatedResponse
 }
 
 describe('Advanced Variant Query Tests', function () {
-  this.timeout(10000); // Set timeout to 10 seconds for all tests in this suite
-
   advancedQueryFiles
     .map(file => JSON.parse(fs.readFileSync(`${queriesPath}/${file}`).toString()))
     .forEach((testCase: VariantQueryTestCase) => {
