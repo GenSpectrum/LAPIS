@@ -96,17 +96,28 @@ The response is usually a JSON object that contains:
 - `info`: additional information about the LAPIS instance.
   The `dataVersion` field can be used to check if the underlying data has been updated since your last query.
 
+Endpoints:
 - [sample/aggregated](sample/aggregated): Count and group sequences by metadata and mutations.
   This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
 - [sample/details](sample/details):
   Returns the actual metadata values for sequences that match your filters. Use this to get individual sequence records.
   Similar to a "select <fields ?? *> from ... where <filters>" SQL query.
 - [sample/alignedNucleotideSequences](sample/alignedNucleotideSequences):
-  Returns nucleotide sequences aligned to the reference genome in FASTA format.
+  [# th:if="${isSingleSegmented}"]Returns nucleotide sequences aligned to the reference genome in FASTA format.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+  [# th:unless="${isSingleSegmented}"]Returns nucleotide sequences aligned to the reference genome in FASTA format for multiple segments at once.
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedNucleotideSequences/{segment}](sample/alignedNucleotideSequences/{segment}):
+  Returns nucleotide sequences aligned to the reference genome in FASTA format for a single segment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
 - [sample/unalignedNucleotideSequences](sample/unalignedNucleotideSequences):
-  Returns raw nucleotide sequences without alignment.
+  [# th:if="${isSingleSegmented}"]Returns raw nucleotide sequences without alignment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+  [# th:unless="${isSingleSegmented}"]Returns raw nucleotide sequences in FASTA format for multiple segments at once.
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedNucleotideSequences/{segment}](sample/alignedNucleotideSequences/{segment}):
+  Returns raw nucleotide sequences in FASTA format for a single segment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
 - [sample/alignedAminoAcidSequences](sample/alignedAminoAcidSequences):
   Returns translated protein sequences for multiple genes at once.
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
