@@ -54,10 +54,9 @@ position: NUMBER;
 
 singleSegmentedMutationQuery : singleSegmentedMutationQueryFirstSymbol? position singleSegmentedMutationQuerySecondSymbol?;
 singleSegmentedMutationQueryFirstSymbol: nucleotideSymbol;
-singleSegmentedMutationQuerySecondSymbol: possibleAmbiguousNucleotideSymbol;
-nucleotideSymbol: A | C | G | T;
-ambiguousNucleotideSymbol: M | R | W | S | Y | K | V | H | D | B | N | MINUS | DOT;
-possibleAmbiguousNucleotideSymbol: nucleotideSymbol | ambiguousNucleotideSymbol;
+singleSegmentedMutationQuerySecondSymbol: nucleotideSymbol | specialSymbolsInMutationTo;
+nucleotideSymbol: A | C | G | T | M | R | W | S | Y | K | V | H | D | B | N;
+specialSymbolsInMutationTo: MINUS | DOT;
 
 nOfQuery: '[' nOfMatchExactly? nOfNumberOfMatchers nOfOfKeyword nOfExprs ']';
 nOfOfKeyword: '-' O F ':';
@@ -66,18 +65,16 @@ nOfNumberOfMatchers: NUMBER+;
 nOfExprs: expr (',' expr)*;
 
 nucleotideInsertionQuery: insertionKeyword position ':' nucleotideInsertionSymbol+;
-nucleotideInsertionSymbol: possibleAmbiguousNucleotideSymbol | '?';
+nucleotideInsertionSymbol: nucleotideSymbol | '?';
 insertionKeyword: I N S '_';
 
 namedMutationQuery: name ':' mutationQueryFirstSymbol? position mutationQuerySecondSymbol?;
 mutationQueryFirstSymbol: nucleotideSymbol | aaSymbol;
-mutationQuerySecondSymbol: nucleotideSymbol | ambiguousNucleotideSymbol | aaSymbol | ambiguousAaSymbol;
-aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK;
-ambiguousAaSymbol: X | MINUS | DOT;
-possiblyAmbiguousAaSymbol: aaSymbol | ambiguousAaSymbol;
+mutationQuerySecondSymbol: nucleotideSymbol | aaSymbol | specialSymbolsInMutationTo;
+aaSymbol: A | R | N | D | C | E | Q | G | H | I | L | K | M | F | P | S | T | W | Y | V | ASTERISK | B | Z | X;
 
 namedInsertionQuery: insertionKeyword name ':' position ':' namedInsertionSymbol+;
-namedInsertionSymbol: possibleAmbiguousNucleotideSymbol | possiblyAmbiguousAaSymbol | '?';
+namedInsertionSymbol: nucleotideSymbol | aaSymbol | '?';
 
 metadataGreaterThanEqualQuery: name '>=' name;
 metadataLessThanEqualQuery: name '<=' name;
