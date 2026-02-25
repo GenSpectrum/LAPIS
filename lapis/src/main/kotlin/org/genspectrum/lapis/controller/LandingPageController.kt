@@ -65,6 +65,12 @@ class LandingPageController(
 
         model.addAttribute("metadataFields", databaseConfig.schema.metadata)
         model.addAttribute("stringField", getFirstFieldOfType(MetadataType.STRING))
+        model.addAttribute(
+            "lineageField",
+            databaseConfig.schema.metadata
+                .firstOrNull { it.generateLineageIndex != null }
+                ?.name,
+        )
         model.addAttribute("dateField", getFirstFieldOfType(MetadataType.DATE))
         model.addAttribute("intField", getFirstFieldOfType(MetadataType.INT))
         model.addAttribute("floatField", getFirstFieldOfType(MetadataType.FLOAT))

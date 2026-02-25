@@ -17,7 +17,7 @@ The code is available at https://github.com/GenSpectrum/LAPIS-SILO.
 The following metadata fields are available for filtering on this instance:
 
 [# th:each="field : ${metadataFields}"]
-- **[(${field.name})]** ([(${field.type})])
+- **[(${field.name})]** ([(${field.type})][# th:if="${field.generateLineageIndex != null}"], lineage index generated[/]):
 [/]
 
 ### How to Filter by Metadata Fields
@@ -27,6 +27,7 @@ You can use metadata fields as filter parameters in your queries. The filter syn
 [# th:if="${stringField != null}"]- **String fields**: Use exact or regex match.
   You an also supply an array - the fields will be combined with locial OR.
   Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`, `"[(${stringField})]": ["someValue", "orOtherValue"]`[/]
+[# th:if="${lineageField != null}"]- **Lineage fields**: For string fields that also have a lineage index, you can filter for exact matches (`"[(${lineageField})]": "lineage"`) or including sublineages (`"[(${lineageField})]": "lineage*"`).[/]
 [# th:if="${dateField != null}"]- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`[/]
 [# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${intField})]": 42` or `"[(${intField})]From": 10, "[(${intField})]To": 50`[/]
 [# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${floatField})]": 0.95` or `"[(${floatField})]From": 0.8, "[(${floatField})]To": 1.0`[/]
