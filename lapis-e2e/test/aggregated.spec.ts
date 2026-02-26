@@ -4,7 +4,7 @@ import fs from 'fs';
 import { AggregatedPostRequest, AggregatedResponse } from './lapisClient';
 
 const queriesPath = __dirname + '/aggregatedQueries';
-const aggregatedQueryFiles = fs.readdirSync(queriesPath);
+const aggregatedQueryFiles = fs.readdirSync(queriesPath).filter(f => f.endsWith('.json'));
 
 function getAggregated(params?: URLSearchParams) {
   const aggregatedEndpoint = '/sample/aggregated';
