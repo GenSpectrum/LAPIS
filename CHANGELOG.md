@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.7](https://github.com/GenSpectrum/LAPIS/compare/v0.6.6...v0.6.7) (2026-02-26)
+
+
+### Features
+
+* **lapis-e2e:** add more testing for advanced variant queries ([#1558](https://github.com/GenSpectrum/LAPIS/issues/1558)) ([192b634](https://github.com/GenSpectrum/LAPIS/commit/192b634b8e0f0a56410ddba81cbda3afd6ad6250))
+* **lapis:** add `llms.txt` - instructions for LLM agents that use a LAPIS instance ([#1553](https://github.com/GenSpectrum/LAPIS/issues/1553)) ([ef6494c](https://github.com/GenSpectrum/LAPIS/commit/ef6494c4e25e278292b3608a3efc5a7670c34eb3))
+
+
+### Bug Fixes
+
+* **lapis:** advanced queries: allow ambiguous mutation symbols in "mutation from", disallow `.` and `-` in insertions ([#1549](https://github.com/GenSpectrum/LAPIS/issues/1549)) ([244a289](https://github.com/GenSpectrum/LAPIS/commit/244a28993dbd185be94f522ea4e11d404fb64147))
+
 ## [0.6.6](https://github.com/GenSpectrum/LAPIS/compare/v0.6.5...v0.6.6) (2026-02-18)
 
 
