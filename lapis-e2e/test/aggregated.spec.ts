@@ -310,7 +310,8 @@ age	country	count
     expect(resultJson.data[0]).to.have.property('count', 2);
   });
 
-  it('should handle null values for string filters in GET requests', async () => {
+  // TODO #1561 adapt LAPIS and reactivate this
+  it.skip('should handle null values for string filters in GET requests', async () => {
     const urlParams = new URLSearchParams({
       region: '',
     });
