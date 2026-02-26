@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Hidden
 @Controller
 class LandingPageController(
-    @Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
+    @param:Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
     private val databaseConfig: DatabaseConfig,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
