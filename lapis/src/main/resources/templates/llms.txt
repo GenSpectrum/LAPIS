@@ -25,7 +25,7 @@ The following metadata fields are available for filtering on this instance:
 You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
 
 [# th:if="${stringField != null}"]- **String fields**: Use exact or regex match.
-  You an also supply an array - the fields will be combined with locial OR.
+  You can also supply an array - the fields will be combined with logical OR.
   Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`, `"[(${stringField})]": ["someValue", "orOtherValue"]`[/]
 [# th:if="${lineageField != null}"]- **Lineage fields**: For string fields that also have a lineage index, you can filter for exact matches (`"[(${lineageField})]": "lineage"`) or including sublineages (`"[(${lineageField})]": "lineage*"`).[/]
 [# th:if="${dateField != null}"]- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`[/]
