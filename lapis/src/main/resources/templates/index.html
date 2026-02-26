@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'LAPIS - ' + ${instanceName}">LAPIS</title>
+</head>
+<body>
+    <h1 th:text="'LAPIS - ' + ${instanceName}">LAPIS</h1>
+    <p th:text="'Welcome to the LAPIS instance for ' + ${instanceName} + '.'">Welcome to LAPIS.</p>
+    <p>You can find more information on the following pages:</p>
+    <ul>
+        <li th:if="${!docsUrl.isEmpty()}"><a th:href="${docsUrl}">Documentation</a></li>
+        <li><a href="swagger-ui/index.html">Swagger UI</a></li>
+        <li><a href="api-docs">OpenAPI specification JSON</a></li>
+        <li><a href="api-docs.yaml">OpenAPI specification YAML</a></li>
+        <li><a href="https://github.com/GenSpectrum/LAPIS">GitHub</a></li>
+        <li><a href="llms.txt">llms.txt</a> - API guide for AI agents (and maybe also humans)</li>
+    </ul>
+</body>
+</html>

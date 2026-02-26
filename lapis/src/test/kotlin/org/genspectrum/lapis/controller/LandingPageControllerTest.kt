@@ -1,5 +1,7 @@
 package org.genspectrum.lapis.controller
 
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,5 +35,14 @@ class LandingPageControllerTest(
             .andExpect(status().isOk)
             .andExpect(content().contentType("$TEXT_HTML_VALUE;charset=UTF-8"))
             .andExpect(content().string(startsWith("<!DOCTYPE html>")))
+    }
+
+    @Test
+    fun `WHEN calling llms txt endpoint THEN returns 200 OK`() {
+        mockMvc.perform(get("/llms.txt"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("text/plain;charset=UTF-8"))
+            .andExpect(content().string(startsWith("# LAPIS")))
+            .andExpect(content().string(not(containsString("$")))) // dollars hint at broken Thymeleaf template
     }
 }

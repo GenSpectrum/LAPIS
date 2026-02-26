@@ -1,0 +1,293 @@
+# LAPIS - [(${instanceName})]
+
+> LAPIS (Lightweight API for Sequences) instance for [(${instanceName})].
+> Query genomic sequence data with powerful mutation filters, metadata combinations, and Boolean logic.
+
+This instance contains data for [(${instanceName})].
+
+The LAPIS code is open source and available at https://github.com/GenSpectrum/LAPIS.
+LAPIS is a convenience API around SILO, a high-performance query engine for genomic sequences.
+The code is available at https://github.com/GenSpectrum/LAPIS-SILO.
+[# th:unless="${docsUrl.isEmpty()}"]If you need more detailed information than mentioned in this file, refer to the [LAPIS docs]([(${docsUrl})]).[/]
+
+## Instance Configuration
+
+### Metadata Fields
+
+The following metadata fields are available for filtering on this instance:
+
+[# th:each="field : ${metadataFields}"]
+- **[(${field.name})]** ([(${field.type})][# th:if="${field.generateLineageIndex != null}"], lineage index generated[/]):
+[/]
+
+### How to Filter by Metadata Fields
+
+You can use metadata fields as filter parameters in your queries. The filter syntax depends on the field type:
+
+[# th:if="${stringField != null}"]- **String fields**: Use exact or regex match.
+  You can also supply an array - the fields will be combined with logical OR.
+  Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`, `"[(${stringField})]": ["someValue", "orOtherValue"]`[/]
+[# th:if="${lineageField != null}"]- **Lineage fields**: For string fields that also have a lineage index, you can filter for exact matches (`"[(${lineageField})]": "lineage"`) or including sublineages (`"[(${lineageField})]": "lineage*"`).[/]
+[# th:if="${dateField != null}"]- **Date fields**: Use `From` and `To` suffixes for ranges. Example: `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`[/]
+[# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${intField})]": 42` or `"[(${intField})]From": 10, "[(${intField})]To": 50`[/]
+[# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. Example: `"[(${floatField})]": 0.95` or `"[(${floatField})]From": 0.8, "[(${floatField})]To": 1.0`[/]
+[# th:if="${booleanField != null}"]- **Boolean fields**: Use `true` or `false`. Example: `"[(${booleanField})]": true`[/]
+
+You can combine multiple filters in a single query. All filters are combined with AND logic.
+All exact filters also support filtering for `null`.
+
+### Genes and Segments
+[# th:unless="${isSingleSegmented}"]
+This instance uses a multi-segmented genome with [(${segmentCount})] segments: [# th:each="segment, iterStat : ${segmentNames}"][(${segment})][(${!iterStat.last ? ', ' : ''})][/]
+[/][# th:if="${isSingleSegmented}"]
+This instance uses a single-segmented genome.
+[/]
+Available genes for amino acid queries: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
+
+### How to Filter by Mutations
+
+You can filter sequences by nucleotide and amino acid mutations.
+
+**Nucleotide mutations:**
+- **Point mutations**: Specify position and substitution. Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123T"]` (position 123 changed to thymine)
+- **Deletions**: Use `-` for deleted bases. Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123-"]`
+- **Insertions**: Use `nucleotideInsertions` filter. Example: `"nucleotideInsertions": ["ins_[(${segmentMutationPrefix})]123:AAA"]` (3 adenines inserted after position 123)
+- **Maybe mutations**: Query ambiguous positions. This will also match when there is an ambiguity symbol at this position that could include the mutation.
+ Example: `"nucleotideMutations": ["MAYBE([(${segmentMutationPrefix})]123T)"]`
+
+**Amino acid mutations:**
+- **Point mutations**: Specify gene, position, and substitution. Example: `"aminoAcidMutations": ["[(${firstGene})]:484K"]` ([(${firstGene})] position 484, lysine)
+- **Deletions**: Example: `"aminoAcidMutations": ["[(${firstGene})]:69-"]`
+- **Insertions**: Use `aminoAcidInsertions` filter. Example: `"aminoAcidInsertions": ["ins_[(${firstGene})]:214:EPE"]` (EPE inserted after position 214 in [(${firstGene})])
+- supports "maybe" with the same syntax as nucleotide mutations.
+
+**Boolean logic:** Multiple mutations in arrays are combined with AND.
+Example: `"nucleotideMutations": ["[(${segmentMutationPrefix})]123T", "[(${segmentMutationPrefix})]456A"]` (both mutations required)
+
+## API Endpoints
+
+The OpenAPI spec is available at [api-docs](api-docs).
+Refer to that if you need more details on an endpoint.
+
+### Data Retrieval and Mutation Analysis
+
+These are the primary entrypoints for analyzing the data in this LAPIS instance.
+
+These endpoints are available as GET or POST.
+Prefer POST since it allows more flexible requests.
+Use GET when you want to have links that are easy to share since all their parameters can be passed as query parameters.
+
+Every endpoint accepts filters on metadata fields and mutations.
+Use these to narrow down the sequences that are included in the results.
+
+Every endpoint also accepts:
+- `limit`: Maximum number of result entries to return.
+  This is especially useful for endpoints that return large responses otherwise.
+- `offset`: Number of result entries to skip before starting to return results.
+  Use this for pagination in combination with `limit`.
+- `orderBy`: A list of fields that are contained in the response data that should be sorted by.
+- `dataFormat`: By default, sequence endpoints return FASTA, the other endpoints return JSON.
+  You can change this with the `dataFormat` parameter. Consult the OpenAPI spec for which formats are supported for which endpoints.
+- `compression`: Can be used to enable response compression (`gzip` or `zstd`).
+
+The response is usually a JSON object that contains:
+- `data`: an array of result entries, if the query was successful.
+- `error`: an error message, if the query failed. The message should usually give you an idea of what went wrong with your request.
+- `info`: additional information about the LAPIS instance.
+  The `dataVersion` field can be used to check if the underlying data has been updated since your last query.
+
+Endpoints:
+- [sample/aggregated](sample/aggregated): Count and group sequences by metadata and mutations.
+  This is similar to a "select count(*) from ... group by <fields> where <filters>" SQL query.
+- [sample/details](sample/details):
+  Returns the actual metadata values for sequences that match your filters. Use this to get individual sequence records.
+  Similar to a "select <fields ?? *> from ... where <filters>" SQL query.
+- [sample/alignedNucleotideSequences](sample/alignedNucleotideSequences):
+  [# th:if="${isSingleSegmented}"]Returns nucleotide sequences aligned to the reference genome in FASTA format.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+  [# th:unless="${isSingleSegmented}"]Returns nucleotide sequences aligned to the reference genome in FASTA format for multiple segments at once.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedNucleotideSequences/{segment}](sample/alignedNucleotideSequences/{segment}):
+  Returns nucleotide sequences aligned to the reference genome in FASTA format for a single segment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+- [sample/unalignedNucleotideSequences](sample/unalignedNucleotideSequences):
+  [# th:if="${isSingleSegmented}"]Returns raw nucleotide sequences without alignment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+  [# th:unless="${isSingleSegmented}"]Returns raw nucleotide sequences in FASTA format for multiple segments at once.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/unalignedNucleotideSequences/{segment}](sample/unalignedNucleotideSequences/{segment}):
+  Returns raw nucleotide sequences in FASTA format for a single segment.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
+- [sample/alignedAminoAcidSequences](sample/alignedAminoAcidSequences):
+  Returns translated protein sequences for multiple genes at once.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/alignedAminoAcidSequences/{gene}](sample/alignedAminoAcidSequences/{gene}):
+  Returns translated protein sequences for a single gene. Specify the gene name in the URL path.
+  Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
+- [sample/nucleotideMutations](sample/nucleotideMutations): List nucleotide mutations with their proportions.
+  Shows which nucleotide mutations appear in your filtered sequences and how frequently.
+  Example: "C123T appears in 45% of sequences that match <filters>".
+- [sample/aminoAcidMutations](sample/aminoAcidMutations): List amino acid mutations with their proportions.
+  Shows which amino acid mutations appear in your filtered sequences and how frequently.
+  Example: "S:484K appears in 30% of sequences that match <filters>".
+- [sample/nucleotideInsertions](sample/nucleotideInsertions): List nucleotide insertions.
+  Shows how often which insertion of nucleotides occurred in the nucleotide sequence(s) for the given filters.
+- [sample/aminoAcidInsertions](sample/aminoAcidInsertions): List amino acid insertions.
+  Shows how often which insertion of amino acids occurred in the amino acid sequences for the given filters.
+
+### Time Series
+
+These endpoints are mainly built for specialized display components that show time series data in a tabular form.
+Useful for tracking trends over time.
+These endpoints only accept POST.
+
+- [sample/queriesOverTime](sample/queriesOverTime): Query results aggregated over time.
+  Shows how many sequences match your filters for each time period (e.g., daily, weekly).
+- [sample/nucleotideMutationsOverTime](sample/nucleotideMutationsOverTime): Query nucleotide mutations aggregated over time.
+  Shows how mutation frequencies change over time. Useful for tracking the emergence and spread of specific mutations.
+- [sample/aminoAcidMutationsOverTime](sample/aminoAcidMutationsOverTime): Query amino acid mutations aggregated over time.
+  Shows how amino acid mutation frequencies change over time.
+
+[# th:if="${hasPhyloTreeField}"]
+### Phylogenetic Analysis
+
+- [sample/mostRecentCommonAncestor](sample/mostRecentCommonAncestor): Find most recent common ancestor for queried sequences.
+  Identifies the MRCA node in the phylogenetic tree that contains all sequences matching your filters. Useful for understanding evolutionary relationships.
+- [sample/phyloSubtree](sample/phyloSubtree): Get phylogenetic subtree in Newick format.
+  Returns a subtree containing only the sequences matching your filters. The subtree is in Newick format and can be visualized in phylogenetic tree viewers.
+[/]
+
+### Info
+
+- [info/info](info/info): Get instance information and versions.
+  Useful for debugging or confirming you're connected to the right instance.
+- [info/databaseConfig](info/databaseConfig): Retrieve the complete database configuration.
+  Contains the complete metadata schema and configuration. Use this to discover what fields are available for filtering.
+- [info/referenceGenome](info/referenceGenome): Retrieve the complete reference genome.
+  Returns the full reference genome sequences. Warning: Large response.
+  Only use when you need the actual reference sequences.
+- [info/lineageDefinition/{column}](info/lineageDefinition/{column}):
+  Retrieve the lineage definition file for a specific metadata column.
+  Returns lineage hierarchy and parent-child relationships. Useful for understanding lineage classifications.
+  Warning: Usually quite large.
+
+## Query Examples
+
+These examples demonstrate common query patterns using POST requests with JSON payloads.
+All sample endpoints also support GET requests with query parameters.
+
+### Count sequences by a metadata field
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "fields": ["[(${stringField})]"]
+}
+```
+
+Returns count of sequences grouped by [(${stringField})] values.
+[# th:if="${dateField != null}"]
+### Filter by date range
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "[(${dateField})]From": "2023-01-01",
+  "[(${dateField})]To": "2023-12-31",
+  "fields": ["[(${dateField})]"]
+}
+```
+
+Returns sequences within the specified date range, grouped by date.
+[/]
+### Find sequences with specific mutation
+
+```
+POST sample/details
+Content-Type: application/json
+
+{
+  "nucleotideMutations": ["[[(${segmentMutationPrefix})]]123T"],
+  "limit": 10
+}
+```
+
+Returns up to 10 sequences with the [[(${segmentMutationPrefix})]]123T nucleotide mutation.
+
+### Complex mutation filter with Boolean logic
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "nucleotideMutations": ["[[(${segmentMutationPrefix})]]123T"],
+  "aminoAcidMutations": ["[(${firstGene})]:484K", "[(${firstGene})]:484E"],
+  "fields": ["[(${stringField})]"]
+}
+```
+
+Returns sequences with [[(${segmentMutationPrefix})]]123T mutation AND either [(${firstGene})]:484K OR [(${firstGene})]:484E amino acid mutation, grouped by [(${stringField})].
+
+### Get sequences for a specific gene
+
+```
+POST sample/alignedAminoAcidSequences
+Content-Type: application/json
+
+{
+  "genes": ["[(${firstGene})]"],
+  "[(${stringField})]": "someValue",
+  "limit": 5
+}
+```
+
+Returns up to 5 aligned amino acid sequences for the [(${firstGene})] gene.
+
+The equivalent GET request would be:
+```
+GET sample/alignedAminoAcidSequences?genes=[(${firstGene})]&limit=5&[(${stringField})]=someValue
+```
+
+### Example 6: Analyze mutation proportions
+
+```
+POST sample/nucleotideMutations
+Content-Type: application/json
+
+{
+  "[(${stringField})]": "someValue",
+  "minProportion": 0.05
+}
+```
+
+Returns all nucleotide mutations appearing in at least 5% of sequences matching the filter.
+[# th:if="${dateField != null}"]
+### Order results by multiple fields
+
+```
+POST sample/aggregated
+Content-Type: application/json
+
+{
+  "fields": ["[(${dateField})]", "[(${stringField})]"],
+  "orderBy": [
+    {"field": "count", "type": "ascending"},
+    {"field": "[(${dateField})]", "type": "ascending"},
+    {"field": "[(${stringField})]", "type": "descending"}
+  ]
+}
+```
+
+Returns aggregated results grouped by [(${dateField})] and [(${stringField})], sorted first by ascending `count`, then by date (oldest first), then by [(${stringField})] (Z to A).
+The `orderBy` parameter accepts an array of objects, each with a `field` (must be in the response) and `type` (`ascending` or `descending`).
+
+GET requests only accept a plain array of field names for `orderBy`, and they will be sorted in ascending order:
+```
+GET sample/aggregated?fields=[(${dateField})]&orderBy=[(${dateField})]&orderBy=count
+```
+[/]
