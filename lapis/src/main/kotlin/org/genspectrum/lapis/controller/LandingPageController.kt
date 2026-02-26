@@ -56,6 +56,7 @@ class LandingPageController(
 
         model.addAttribute("isSingleSegmented", referenceGenomeSchema.isSingleSegmented())
         model.addAttribute("segmentNames", referenceGenomeSchema.getNucleotideSequenceNames())
+        model.addAttribute("segmentCount", referenceGenomeSchema.getNucleotideSequenceNames().size)
         model.addAttribute("geneNames", referenceGenomeSchema.getGeneNames())
         model.addAttribute("firstGene", referenceGenomeSchema.getGeneNames().firstOrNull())
         model.addAttribute(

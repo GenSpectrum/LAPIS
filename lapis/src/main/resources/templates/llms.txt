@@ -115,7 +115,7 @@ Endpoints:
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
   [# th:unless="${isSingleSegmented}"]Returns raw nucleotide sequences in FASTA format for multiple segments at once.
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.
-- [sample/alignedNucleotideSequences/{segment}](sample/alignedNucleotideSequences/{segment}):
+- [sample/unalignedNucleotideSequences/{segment}](sample/unalignedNucleotideSequences/{segment}):
   Returns raw nucleotide sequences in FASTA format for a single segment.
   Usually used by users who want to download the sequences for offline analysis. Not recommended for large result sets.[/]
 - [sample/alignedAminoAcidSequences](sample/alignedAminoAcidSequences):
@@ -246,7 +246,7 @@ Content-Type: application/json
 }
 ```
 
-Returns up to 5 aligned amino acid sequences for the E gene.
+Returns up to 5 aligned amino acid sequences for the [(${firstGene})] gene.
 
 The equivalent GET request would be:
 ```
