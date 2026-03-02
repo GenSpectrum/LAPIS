@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
-import org.genspectrum.lapis.config.SequenceFilterField
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
@@ -60,8 +59,7 @@ class SiloFilterExpressionMapper(
         val allowedSequenceFiltersWithType = sequenceFilters
             .sequenceFilters
             .map { (key, values) ->
-                val nullableField = allowedSequenceFilterFields.fields[key.lowercase(Locale.US)]
-                val (filterExpressionId, type) = mapToFilterExpressionIdentifier(nullableField, key)
+                val (filterExpressionId, type) = mapToFilterExpressionIdentifier(key)
                 filterExpressionId to SequenceFilterValue(type, values, key)
             }
             .groupBy({ it.first }, { it.second })
@@ -106,9 +104,10 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToFilterExpressionIdentifier(
-        field: SequenceFilterField?,
         key: SequenceFilterFieldName,
     ): Pair<Pair<SequenceFilterFieldName, Filter>, SequenceFilterFieldType> {
+        val field = allowedSequenceFilterFields.fields[key.lowercase(Locale.US)]
+
         val type = field?.type
         val filterExpressionId = when (type) {
             is SequenceFilterFieldType.DateFrom -> Pair(type.associatedField, Filter.DateBetween)
