@@ -26,6 +26,8 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.IsNotNull
+import org.genspectrum.lapis.silo.IsNull
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
@@ -930,6 +932,78 @@ class SiloFilterExpressionMapperTest {
                     And(
                         PhyloDescendantOf("primaryKey", "innerNode"),
                     ),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.isNull" to listOf("true")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.isNull" to listOf("")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.isNull" to listOf("false")),
+                    And(IsNotNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("intField.isNull" to listOf("true")),
+                    And(IsNull("intField")),
+                ),
+                Arguments.of(
+                    mapOf("intField.isNull" to listOf("")),
+                    And(IsNull("intField")),
+                ),
+                Arguments.of(
+                    mapOf("intField.isNull" to listOf("false")),
+                    And(IsNotNull("intField")),
+                ),
+                Arguments.of(
+                    mapOf("floatField.isNull" to listOf("true")),
+                    And(IsNull("floatField")),
+                ),
+                Arguments.of(
+                    mapOf("floatField.isNull" to listOf("")),
+                    And(IsNull("floatField")),
+                ),
+                Arguments.of(
+                    mapOf("floatField.isNull" to listOf("false")),
+                    And(IsNotNull("floatField")),
+                ),
+                Arguments.of(
+                    mapOf("test_boolean_column.isNull" to listOf("true")),
+                    And(IsNull("test_boolean_column")),
+                ),
+                Arguments.of(
+                    mapOf("test_boolean_column.isNull" to listOf("")),
+                    And(IsNull("test_boolean_column")),
+                ),
+                Arguments.of(
+                    mapOf("test_boolean_column.isNull" to listOf("false")),
+                    And(IsNotNull("test_boolean_column")),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage.isNull" to listOf("true")),
+                    And(IsNull("pangoLineage")),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage.isNull" to listOf("")),
+                    And(IsNull("pangoLineage")),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage.isNull" to listOf("false")),
+                    And(IsNotNull("pangoLineage")),
+                ),
+                Arguments.of(
+                    mapOf("date.isNull" to listOf("true")),
+                    And(IsNull("date")),
+                ),
+                Arguments.of(
+                    mapOf("date.isNull" to listOf("")),
+                    And(IsNull("date")),
+                ),
+                Arguments.of(
+                    mapOf("date.isNull" to listOf("false")),
+                    And(IsNotNull("date")),
                 ),
             )
 
