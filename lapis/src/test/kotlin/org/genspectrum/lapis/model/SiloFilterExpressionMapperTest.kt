@@ -255,23 +255,65 @@ class SiloFilterExpressionMapperTest {
                     expectedErrorMessage = "'invalid query key' is not a valid sequence filter key. Valid keys are:",
                 ),
                 InvalidFilterScenario(
-                    description = "string field and its corresponding regex field",
+                    description = "pango lineage and its corresponding isNull field",
                     filterParameters = getSequenceFilters(
                         mapOf(
-                            "some_metadata" to "some value",
-                            "some_metadata.regex" to "some other value",
+                            "pangoLineage" to SOME_VALUE,
+                            "pangoLineage.isNull" to "true",
                         ),
                     ),
-                    expectedErrorMessage = "Cannot filter for string regex 'some_metadata.regex' " +
-                        "and string equals 'some_metadata' for the same field.",
+                    expectedErrorMessage =
+                        "Cannot filter for field 'pangoLineage' and 'pangoLineage.isNull' at the same time.",
                 ),
             ) +
+                invalidStringFilterScenarios +
                 invalidDateFilterScenarios +
                 invalidIntFilterScenarios +
                 invalidFloatFilterScenarios +
                 invalidBooleanFilterScenarios +
                 invalidAdvancedAndVariantQueryScenarios +
                 filterParametersWithMultipleValues
+
+        val invalidStringFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "string field and its corresponding regex field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata" to "some value",
+                        "some_metadata.regex" to "some other value",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for string regex 'some_metadata.regex' " +
+                    "and string equals 'some_metadata' for the same field.",
+            ),
+            InvalidFilterScenario(
+                description = "string field and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata" to "some value",
+                        "some_metadata.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'some_metadata' and 'some_metadata.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "string regex and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata.regex" to "some value",
+                        "some_metadata.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'some_metadata.regex' and 'some_metadata.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "isNull field with non-boolean value",
+                filterParameters = getSequenceFilters(mapOf("some_metadata.isNull" to "not a boolean")),
+                expectedErrorMessage = "'not_a_boolean' is not a valid boolean value for 'some_metadata.isNull'",
+            ),
+        )
 
         val invalidDateFilterScenarios = listOf(
             InvalidFilterScenario(
@@ -309,6 +351,36 @@ class SiloFilterExpressionMapperTest {
                     ),
                 ),
                 expectedErrorMessage = "Cannot filter by exact date field 'date' and by date range field 'dateTo'.",
+            ),
+            InvalidFilterScenario(
+                description = "date and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "date" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'date' and 'date.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "dateFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "dateFrom" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'dateFrom' and 'date.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "dateTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "dateTo" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'dateTo' and 'date.isNull' at the same time.",
             ),
         )
 
@@ -350,6 +422,36 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage =
                     "Cannot filter by exact int field 'intField' and by int range field 'intFieldTo'.",
             ),
+            InvalidFilterScenario(
+                description = "intField and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intField" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intField' and 'intField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "intFieldFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intFieldFrom" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intFieldFrom' and 'intField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "intFieldTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intFieldTo" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intFieldTo' and 'intField.isNull' at the same time.",
+            ),
         )
 
         val invalidFloatFilterScenarios = listOf(
@@ -390,6 +492,38 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage =
                     "Cannot filter by exact float field 'floatField' and by float range field 'floatFieldTo'.",
             ),
+            InvalidFilterScenario(
+                description = "floatField and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatField" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'floatField' and 'floatField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "floatFieldFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatFieldFrom" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'floatFieldFrom' and 'floatField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "floatFieldTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatFieldTo" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'floatFieldTo' and 'floatField.isNull' at the same time.",
+            ),
         )
 
         val invalidBooleanFilterScenarios = listOf(
@@ -397,6 +531,16 @@ class SiloFilterExpressionMapperTest {
                 description = "boolean field with non-boolean value",
                 filterParameters = getSequenceFilters(mapOf("test_boolean_column" to "not a boolean")),
                 expectedErrorMessage = "'not a boolean' is not a valid boolean.",
+            ),
+            InvalidFilterScenario(
+                description = "boolean field and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "test_boolean_column" to "true",
+                        "test_boolean_column.isNull" to "true",
+                    ),
+                ),
+                "Cannot filter for field 'test_boolean_column' and 'test_boolean_column.isNull' at the same time.",
             ),
         )
 
