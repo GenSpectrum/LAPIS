@@ -28,7 +28,7 @@ val dummySequenceFilterFields = SequenceFilterFields.fromDatabaseConfig(
             instanceName = "dummy",
             opennessLevel = OpennessLevel.OPEN,
             metadata = listOf(
-                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING),
+                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING, isPhyloTreeField = true),
                 DatabaseMetadata(name = DATE_FIELD, type = MetadataType.DATE),
                 DatabaseMetadata(
                     name = PANGO_LINEAGE_FIELD,

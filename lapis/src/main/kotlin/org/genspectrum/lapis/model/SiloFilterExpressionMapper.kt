@@ -22,6 +22,8 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.IsNotNull
+import org.genspectrum.lapis.silo.IsNull
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
@@ -85,6 +87,7 @@ class SiloFilterExpressionMapper(
                 Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
                 Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
                 Filter.PhyloDescendantOf -> mapToPhyloDescendantOfFilter(siloColumnName, values)
+                Filter.IsNull -> mapToIsNullOrNotFilter(siloColumnName, values)
             }
         }
 
@@ -125,10 +128,8 @@ class SiloFilterExpressionMapper(
             is SequenceFilterFieldType.FloatTo -> Pair(type.associatedField, Filter.FloatBetween)
             SequenceFilterFieldType.Boolean -> Pair(field.name, Filter.BooleanEquals)
             SequenceFilterFieldType.AdvancedQuery -> Pair(field.name, Filter.AdvancedQuery)
-            is SequenceFilterFieldType.PhyloDescendantOf -> Pair(
-                type.associatedField,
-                Filter.PhyloDescendantOf,
-            )
+            is SequenceFilterFieldType.PhyloDescendantOf -> Pair(type.associatedField, Filter.PhyloDescendantOf)
+            is SequenceFilterFieldType.IsNull -> Pair(type.associatedField, Filter.IsNull)
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
@@ -200,6 +201,21 @@ class SiloFilterExpressionMapper(
                 throw BadRequestException(
                     "Cannot filter for string regex '${stringEqualsFilterForSameColumn[0].originalKey}' " +
                         "and string equals '$stringSearchColumnName' for the same field.",
+                )
+            }
+        }
+
+        val isNullFilters = allowedSequenceFiltersWithType.keys.filter { it.second == Filter.IsNull }
+        for ((isNullColumnName, _) in isNullFilters) {
+            val conflictingFilters = allowedSequenceFiltersWithType.keys.filter {
+                it.first == isNullColumnName && it.second != Filter.IsNull
+            }
+
+            if (conflictingFilters.isNotEmpty()) {
+                val conflictingFilter = allowedSequenceFiltersWithType[conflictingFilters[0]]!![0]
+                throw BadRequestException(
+                    "Cannot filter for field '${conflictingFilter.originalKey}' " +
+                        "and '$isNullColumnName.isNull' at the same time.",
                 )
             }
         }
@@ -424,6 +440,24 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ) = Or(values[0].values.map { StringSearch(siloColumnName, it) })
 
+    private fun mapToIsNullOrNotFilter(
+        siloColumnName: SequenceFilterFieldName,
+        values: List<SequenceFilterValue>,
+    ): SiloFilterExpression {
+        val isNullValue = when (val value = extractSingleFilterValue(values[0])) {
+            // since in GET requests the query string `?field.isNull&` should work
+            "" -> true
+
+            else -> value?.toBooleanStrictOrNull()
+                ?: throw BadRequestException("'$value' is not a valid boolean value for '${values[0].originalKey}'")
+        }
+
+        return when (isNullValue) {
+            true -> IsNull(siloColumnName)
+            false -> IsNotNull(siloColumnName)
+        }
+    }
+
     private inline fun <reified T : SequenceFilterFieldType> findFloatOfFilterType(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Double? {
@@ -505,6 +539,7 @@ class SiloFilterExpressionMapper(
         BooleanEquals,
         StringSearch,
         PhyloDescendantOf,
+        IsNull,
     }
 
     private val variantQueryTypes = listOf(Filter.PangoLineage)

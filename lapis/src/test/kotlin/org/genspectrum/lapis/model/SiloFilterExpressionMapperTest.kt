@@ -313,7 +313,7 @@ class SiloFilterExpressionMapperTest {
             InvalidFilterScenario(
                 description = "isNull field with non-boolean value",
                 filterParameters = getSequenceFilters(mapOf("some_metadata.isNull" to "not a boolean")),
-                expectedErrorMessage = "'not_a_boolean' is not a valid boolean value for 'some_metadata.isNull'",
+                expectedErrorMessage = "'not a boolean' is not a valid boolean value for 'some_metadata.isNull'",
             ),
         )
 
