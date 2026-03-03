@@ -59,7 +59,7 @@ fun parseCommonFields(
         else -> throw BadRequestException("offset must be a number or null, ${butWas(offsetNode)}")
     }
 
-    val sequenceFilters = parseSequenceFilters(node, codec)
+    val sequenceFilters = parseSequenceFilters(node)
 
     return ParsedCommonFields(
         nucleotideMutations = parsedMutationsAndInsertions.nucleotideMutations,
@@ -119,7 +119,6 @@ fun parseMutationsAndInsertions(
 
 fun parseSequenceFilters(
     node: JsonNode,
-    codec: ObjectCodec,
     fieldsToExclude: Set<String> = SPECIAL_REQUEST_PROPERTIES,
 ): SequenceFilters =
     node.properties()
