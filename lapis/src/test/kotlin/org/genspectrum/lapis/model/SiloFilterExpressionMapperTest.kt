@@ -943,7 +943,11 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(
-                    mapOf("some_metadata.isNull" to listOf("")),
+                    mapOf("some_metadata.ISNULL" to listOf("true")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.iSnUll" to listOf("true")),
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(
@@ -955,19 +959,11 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("intField")),
                 ),
                 Arguments.of(
-                    mapOf("intField.isNull" to listOf("")),
-                    And(IsNull("intField")),
-                ),
-                Arguments.of(
                     mapOf("intField.isNull" to listOf("false")),
                     And(IsNotNull("intField")),
                 ),
                 Arguments.of(
                     mapOf("floatField.isNull" to listOf("true")),
-                    And(IsNull("floatField")),
-                ),
-                Arguments.of(
-                    mapOf("floatField.isNull" to listOf("")),
                     And(IsNull("floatField")),
                 ),
                 Arguments.of(
@@ -979,10 +975,6 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("test_boolean_column")),
                 ),
                 Arguments.of(
-                    mapOf("test_boolean_column.isNull" to listOf("")),
-                    And(IsNull("test_boolean_column")),
-                ),
-                Arguments.of(
                     mapOf("test_boolean_column.isNull" to listOf("false")),
                     And(IsNotNull("test_boolean_column")),
                 ),
@@ -991,19 +983,11 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("pangoLineage")),
                 ),
                 Arguments.of(
-                    mapOf("pangoLineage.isNull" to listOf("")),
-                    And(IsNull("pangoLineage")),
-                ),
-                Arguments.of(
                     mapOf("pangoLineage.isNull" to listOf("false")),
                     And(IsNotNull("pangoLineage")),
                 ),
                 Arguments.of(
                     mapOf("date.isNull" to listOf("true")),
-                    And(IsNull("date")),
-                ),
-                Arguments.of(
-                    mapOf("date.isNull" to listOf("")),
                     And(IsNull("date")),
                 ),
                 Arguments.of(

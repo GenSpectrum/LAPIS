@@ -444,13 +444,9 @@ class SiloFilterExpressionMapper(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
-        val isNullValue = when (val value = extractSingleFilterValue(values[0])) {
-            // since in GET requests the query string `?field.isNull&` should work
-            "" -> true
-
-            else -> value?.toBooleanStrictOrNull()
-                ?: throw BadRequestException("'$value' is not a valid boolean value for '${values[0].originalKey}'")
-        }
+        val value = extractSingleFilterValue(values[0])
+        val isNullValue = value?.toBooleanStrictOrNull()
+            ?: throw BadRequestException("'$value' is not a valid boolean value for '${values[0].originalKey}'")
 
         return when (isNullValue) {
             true -> IsNull(siloColumnName)
