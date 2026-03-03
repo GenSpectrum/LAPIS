@@ -416,6 +416,14 @@ data class PhyloDescendantOf(
     val internalNode: String,
 ) : SiloFilterExpression("PhyloDescendantOf")
 
+data class IsNull(
+    val column: String,
+) : SiloFilterExpression("IsNull")
+
+data class IsNotNull(
+    val column: String,
+) : SiloFilterExpression("IsNotNull")
+
 enum class SequenceType {
     @JsonProperty("Fasta")
     UNALIGNED,
