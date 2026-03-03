@@ -652,6 +652,11 @@ class SiloFilterExpressionMapperTest {
                 filterParameters = DummySequenceFilters(mapOf("floatFieldFrom" to listOf("0.1", "0.2"))),
                 expectedErrorMessage = "Expected exactly one value for 'floatFieldFrom' but got 2 values.",
             ),
+            InvalidFilterScenario(
+                description = "multiple isNull values",
+                filterParameters = DummySequenceFilters(mapOf("floatField.isNull" to listOf("true", "false"))),
+                expectedErrorMessage = "Expected exactly one value for 'floatField.isNull' but got 2 values.",
+            ),
         )
 
         @JvmStatic
