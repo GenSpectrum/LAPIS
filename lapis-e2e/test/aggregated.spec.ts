@@ -314,7 +314,7 @@ age	country	count
     expect((await resultForNotNull.json()).data[0]).to.have.property('count', 98);
   });
 
-  it.skip('should handle null values for string filters in GET requests', async () => {
+  it('should handle null values for string filters in GET requests', async () => {
     const resultForEmptyString = await getAggregated(new URLSearchParams({ region: '' }));
 
     expect(resultForEmptyString.status).equals(200);
@@ -323,7 +323,7 @@ age	country	count
     const resultForNull = await getAggregated(new URLSearchParams({ ['region.isNull']: 'true' }));
 
     expect(resultForNull.status).equals(200);
-    expect((await resultForNull.json()).data[0]).to.have.property('count', 0);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 1);
 
     const resultForNotNull = await getAggregated(new URLSearchParams({ ['region.isNull']: 'false' }));
 
