@@ -275,64 +275,72 @@ age	country	count
   });
 
   it('should handle null values for boolean filters in GET requests', async () => {
-    const urlParams = new URLSearchParams({
-      test_boolean_column: '',
-    });
+    const resultForNull = await getAggregated(
+      new URLSearchParams({ ['test_boolean_column.isNull']: 'true' })
+    );
 
-    const result = await getAggregated(urlParams);
+    expect(resultForNull.status).equals(200);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 33);
 
-    expect(result.status).equals(200);
-    const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 33);
+    const resultForNotNull = await getAggregated(
+      new URLSearchParams({ ['test_boolean_column.isNull']: 'false' })
+    );
+
+    expect(resultForNotNull.status).equals(200);
+    expect((await resultForNotNull.json()).data[0]).to.have.property('count', 67);
   });
 
   it('should handle null values for int filters in GET requests', async () => {
-    const urlParams = new URLSearchParams({
-      age: '',
-    });
+    const resultForNull = await getAggregated(new URLSearchParams({ ['age.isNull']: 'true' }));
 
-    const result = await getAggregated(urlParams);
+    expect(resultForNull.status).equals(200);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 2);
 
-    expect(result.status).equals(200);
-    const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 2);
+    const resultForNotNull = await getAggregated(new URLSearchParams({ ['age.isNull']: 'false' }));
+
+    expect(resultForNotNull.status).equals(200);
+    expect((await resultForNotNull.json()).data[0]).to.have.property('count', 98);
   });
 
   it('should handle null values for float filters in GET requests', async () => {
-    const urlParams = new URLSearchParams({
-      qc_value: '',
-    });
+    const resultForNull = await getAggregated(new URLSearchParams({ ['qc_value.isNull']: 'true' }));
 
-    const result = await getAggregated(urlParams);
+    expect(resultForNull.status).equals(200);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 2);
 
-    expect(result.status).equals(200);
-    const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 2);
+    const resultForNotNull = await getAggregated(new URLSearchParams({ ['qc_value.isNull']: 'false' }));
+
+    expect(resultForNotNull.status).equals(200);
+    expect((await resultForNotNull.json()).data[0]).to.have.property('count', 98);
   });
 
-  // TODO #1561 adapt LAPIS and reactivate this
   it.skip('should handle null values for string filters in GET requests', async () => {
-    const urlParams = new URLSearchParams({
-      region: '',
-    });
+    const resultForEmptyString = await getAggregated(new URLSearchParams({ region: '' }));
 
-    const result = await getAggregated(urlParams);
+    expect(resultForEmptyString.status).equals(200);
+    expect((await resultForEmptyString.json()).data[0]).to.have.property('count', 0);
 
-    expect(result.status).equals(200);
-    const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 1);
+    const resultForNull = await getAggregated(new URLSearchParams({ ['region.isNull']: 'true' }));
+
+    expect(resultForNull.status).equals(200);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 0);
+
+    const resultForNotNull = await getAggregated(new URLSearchParams({ ['region.isNull']: 'false' }));
+
+    expect(resultForNotNull.status).equals(200);
+    expect((await resultForNotNull.json()).data[0]).to.have.property('count', 99);
   });
 
   it('should throw for null values for pango lineage filters in GET requests', async () => {
-    const urlParams = new URLSearchParams({
-      pangoLineage: '',
-    });
+    const resultForNull = await getAggregated(new URLSearchParams({ ['pangoLineage.isNull']: 'true' }));
 
-    const result = await getAggregated(urlParams);
+    expect(resultForNull.status).equals(200);
+    expect((await resultForNull.json()).data[0]).to.have.property('count', 1);
 
-    expect(result.status).equals(200);
-    const resultJson = await result.json();
-    expect(resultJson.data[0]).to.have.property('count', 1);
+    const resultForNotNull = await getAggregated(new URLSearchParams({ ['pangoLineage.isNull']: 'false' }));
+
+    expect(resultForNotNull.status).equals(200);
+    expect((await resultForNotNull.json()).data[0]).to.have.property('count', 99);
   });
 
   it('should correctly handle string search filters in GET requests', async () => {
