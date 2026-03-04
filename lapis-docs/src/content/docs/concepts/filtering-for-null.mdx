@@ -1,0 +1,37 @@
+---
+title: Filtering for null
+description: Filtering for null
+---
+
+LAPIS allows users to filter for `null` in the metadata.
+You can either filter for `null` values for for non-`null` values:
+
+## Examples
+
+Get the number of sequences where the `stringField` field is `null`:
+
+```
+GET /sample/aggregated?stringField.isNull=true
+```
+
+```
+POST /sample/aggregated
+
+{
+  "stringField.isNull": true
+}
+```
+
+Get the number of sequences where the `stringField` field is not `null`:
+
+```
+GET /sample/aggregated?stringField.isNull=false
+```
+
+```
+POST /sample/aggregated
+
+{
+  "stringField.isNull": false
+}
+```
