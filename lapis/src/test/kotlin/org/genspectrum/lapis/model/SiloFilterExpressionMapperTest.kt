@@ -976,7 +976,7 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(
-                    mapOf("SOME_metadata.ISNULL" to listOf("true")),
+                    mapOf("SOME_metadata.ISNULL" to listOf("TRUE")),
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(

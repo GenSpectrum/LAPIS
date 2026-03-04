@@ -453,7 +453,7 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
         val value = extractSingleFilterValue(values[0])
-        val isNullValue = value?.toBooleanStrictOrNull()
+        val isNullValue = value?.lowercase(Locale.US)?.toBooleanStrictOrNull()
             ?: throw BadRequestException("'$value' is not a valid boolean value for '${values[0].originalKey}'")
 
         return when (isNullValue) {

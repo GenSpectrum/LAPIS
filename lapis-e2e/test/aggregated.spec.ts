@@ -331,7 +331,7 @@ age	country	count
     expect((await resultForNotNull.json()).data[0]).to.have.property('count', 99);
   });
 
-  it('should throw for null values for pango lineage filters in GET requests', async () => {
+  it('should handle null values for pango lineage filters in GET requests', async () => {
     const resultForNull = await getAggregated(new URLSearchParams({ ['pangoLineage.isNull']: 'true' }));
 
     expect(resultForNull.status).equals(200);
