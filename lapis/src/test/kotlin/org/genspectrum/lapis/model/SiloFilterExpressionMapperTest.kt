@@ -278,6 +278,11 @@ class SiloFilterExpressionMapperTest {
 
         val invalidStringFilterScenarios = listOf(
             InvalidFilterScenario(
+                description = "string field regex that is null",
+                filterParameters = DummySequenceFilters(mapOf("some_metadata.regex" to listOf(null))),
+                expectedErrorMessage = "String search value for 'some_metadata.regex' must not be null",
+            ),
+            InvalidFilterScenario(
                 description = "string field and its corresponding regex field",
                 filterParameters = getSequenceFilters(
                     mapOf(
@@ -322,6 +327,11 @@ class SiloFilterExpressionMapperTest {
                 description = "invalid date value",
                 filterParameters = getSequenceFilters(mapOf("date" to "this is not a date")),
                 expectedErrorMessage = "date 'this is not a date' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "empty date value",
+                filterParameters = getSequenceFilters(mapOf("date" to "")),
+                expectedErrorMessage = "date '' is not a valid date",
             ),
             InvalidFilterScenario(
                 description = "invalid dateTo value",
@@ -391,6 +401,11 @@ class SiloFilterExpressionMapperTest {
                 description = "int field with non-int value",
                 filterParameters = getSequenceFilters(mapOf("intField" to "not a number")),
                 expectedErrorMessage = "intField 'not a number' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "int field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intField" to "")),
+                expectedErrorMessage = "intField '' is not a valid integer",
             ),
             InvalidFilterScenario(
                 description = "intFrom field with non-int value",
@@ -463,6 +478,11 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage = "floatField 'not a number' is not a valid float",
             ),
             InvalidFilterScenario(
+                description = "float field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatField" to "")),
+                expectedErrorMessage = "floatField '' is not a valid float",
+            ),
+            InvalidFilterScenario(
                 description = "floatFrom field with non-float value",
                 filterParameters = getSequenceFilters(mapOf("floatFieldFrom" to "not a number")),
                 expectedErrorMessage = "floatFieldFrom 'not a number' is not a valid float",
@@ -533,6 +553,11 @@ class SiloFilterExpressionMapperTest {
                 description = "boolean field with non-boolean value",
                 filterParameters = getSequenceFilters(mapOf("test_boolean_column" to "not a boolean")),
                 expectedErrorMessage = "'not a boolean' is not a valid boolean.",
+            ),
+            InvalidFilterScenario(
+                description = "boolean field with empty value",
+                filterParameters = getSequenceFilters(mapOf("test_boolean_column" to "")),
+                expectedErrorMessage = "'' is not a valid boolean.",
             ),
             InvalidFilterScenario(
                 description = "boolean field and its corresponding isNull field",
@@ -677,8 +702,12 @@ class SiloFilterExpressionMapperTest {
                         "some_metadata" to listOf(null),
                     ),
                     And(
-                        Or(StringEquals("some_metadata", null)),
+                        Or(IsNull(column = "some_metadata")),
                     ),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata" to listOf("")),
+                    And(Or(StringEquals(column = "some_metadata", value = ""))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3")),
@@ -686,11 +715,11 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("")),
-                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(LineageEquals("pangoLineage", "", includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf(null)),
-                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(IsNull(column = "pangoLineage"))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3*")),
@@ -719,6 +748,10 @@ class SiloFilterExpressionMapperTest {
                         "date" to listOf("2021-06-03"),
                     ),
                     And(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3))),
+                ),
+                Arguments.of(
+                    mapOf("date" to listOf(null)),
+                    And(IsNull(column = "date")),
                 ),
                 Arguments.of(
                     mapOf(
@@ -792,13 +825,7 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "intField" to listOf(null),
                     ),
-                    And(IntEquals("intField", null)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "intField" to listOf(""),
-                    ),
-                    And(IntEquals("intField", null)),
+                    And(IsNull(column = "intField")),
                 ),
                 Arguments.of(
                     mapOf(
@@ -846,7 +873,7 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "floatField" to listOf(null),
                     ),
-                    And(FloatEquals("floatField", null)),
+                    And(IsNull("floatField")),
                 ),
                 Arguments.of(
                     mapOf(
@@ -914,18 +941,18 @@ class SiloFilterExpressionMapperTest {
                         Or(
                             BooleanEquals("test_boolean_column", true),
                             BooleanEquals("test_boolean_column", false),
-                            BooleanEquals("test_boolean_column", null),
+                            IsNull(column = "test_boolean_column"),
                         ),
                     ),
                 ),
                 Arguments.of(
                     mapOf(
-                        "some_metadata.regex" to listOf("someRegex", null, "otherRegex"),
+                        "some_metadata.regex" to listOf("someRegex", "", "otherRegex"),
                     ),
                     And(
                         Or(
                             StringSearch("some_metadata", searchExpression = "someRegex"),
-                            StringSearch("some_metadata", searchExpression = null),
+                            StringSearch("some_metadata", searchExpression = ""),
                             StringSearch("some_metadata", searchExpression = "otherRegex"),
                         ),
                     ),
@@ -943,7 +970,7 @@ class SiloFilterExpressionMapperTest {
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(
-                    mapOf("some_metadata.ISNULL" to listOf("true")),
+                    mapOf("SOME_metadata.ISNULL" to listOf("true")),
                     And(IsNull("some_metadata")),
                 ),
                 Arguments.of(

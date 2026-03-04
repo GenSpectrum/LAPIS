@@ -408,7 +408,7 @@ data class FloatBetween(
 
 data class StringSearch(
     val column: String,
-    val searchExpression: String?,
+    val searchExpression: String,
 ) : SiloFilterExpression("StringSearch")
 
 data class PhyloDescendantOf(

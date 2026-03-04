@@ -224,19 +224,26 @@ class SiloFilterExpressionMapper(
     private fun mapToStringEqualsFilters(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ) = Or(values[0].values.map { StringEquals(siloColumnName, it) })
+    ) = Or(
+        values[0].values.map {
+            when (it) {
+                null -> IsNull(column = siloColumnName)
+                else -> StringEquals(column = siloColumnName, value = it)
+            }
+        },
+    )
 
     private fun mapToBooleanEqualsFilters(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ) = Or(
         values[0].values.map {
-            if (it.isNullOrBlank()) {
-                return@map BooleanEquals(siloColumnName, null)
+            if (it == null) {
+                return@map IsNull(column = siloColumnName)
             }
             val value = try {
                 it.lowercase().toBooleanStrict()
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 throw BadRequestException("'$it' is not a valid boolean.")
             }
             BooleanEquals(siloColumnName, value)
@@ -278,7 +285,7 @@ class SiloFilterExpressionMapper(
     private fun mapToDateBetweenFilter(
         siloColumnName: String,
         values: List<SequenceFilterValue>,
-    ): DateBetween {
+    ): SiloFilterExpression {
         val (exactDateFilters, dateRangeFilters) = values.partition { (fieldType, _) ->
             fieldType == SequenceFilterFieldType.Date
         }
@@ -291,12 +298,10 @@ class SiloFilterExpressionMapper(
         }
 
         if (exactDateFilters.isNotEmpty()) {
-            val date = getAsDate(exactDateFilters[0])
-            return DateBetween(
-                siloColumnName,
-                from = date,
-                to = date,
-            )
+            return when (val date = getAsDate(exactDateFilters[0])) {
+                null -> IsNull(column = siloColumnName)
+                else -> DateBetween(column = siloColumnName, from = date, to = date)
+            }
         }
 
         return DateBetween(
@@ -315,11 +320,7 @@ class SiloFilterExpressionMapper(
 
     private fun getAsDate(sequenceFilterValue: SequenceFilterValue?): LocalDate? {
         val (_, values, originalKey) = sequenceFilterValue ?: return null
-        val value = extractSingleFilterValue(values, originalKey)
-
-        if (value.isNullOrBlank()) {
-            return null
-        }
+        val value = extractSingleFilterValue(values, originalKey) ?: return null
 
         try {
             return LocalDate.parse(value)
@@ -334,7 +335,7 @@ class SiloFilterExpressionMapper(
     ) = Or(
         values[0].values.map {
             when {
-                it.isNullOrBlank() -> LineageEquals(column, null, includeSublineages = false)
+                it == null -> IsNull(column = column)
                 it.endsWith(".*") -> LineageEquals(column, it.substringBeforeLast(".*"), includeSublineages = true)
                 it.endsWith('*') -> LineageEquals(column, it.substringBeforeLast('*'), includeSublineages = true)
                 it.endsWith('.') -> throw BadRequestException(
@@ -351,9 +352,8 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
         val value = extractSingleFilterValue(values[0])
-        if (value.isNullOrBlank()) {
-            return IntEquals(siloColumnName, null)
-        }
+            ?: return IsNull(column = siloColumnName)
+
         try {
             return IntEquals(siloColumnName, value.toInt())
         } catch (exception: NumberFormatException) {
@@ -369,9 +369,8 @@ class SiloFilterExpressionMapper(
         values: List<SequenceFilterValue>,
     ): SiloFilterExpression {
         val value = extractSingleFilterValue(values[0])
-        if (value.isNullOrBlank()) {
-            return FloatEquals(siloColumnName, null)
-        }
+            ?: return IsNull(column = siloColumnName)
+
         try {
             return FloatEquals(siloColumnName, value.toDouble())
         } catch (exception: NumberFormatException) {
@@ -438,7 +437,20 @@ class SiloFilterExpressionMapper(
     private fun mapToStringSearchFilters(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ) = Or(values[0].values.map { StringSearch(siloColumnName, it) })
+    ): Or {
+        val filterValue = values[0]
+        return Or(
+            filterValue.values.map {
+                StringSearch(
+                    column = siloColumnName,
+                    searchExpression = it
+                        ?: throw BadRequestException(
+                            "String search value for '${filterValue.originalKey}' must not be null",
+                        ),
+                )
+            },
+        )
+    }
 
     private fun mapToIsNullOrNotFilter(
         siloColumnName: SequenceFilterFieldName,
