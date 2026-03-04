@@ -29,10 +29,17 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, aMapWithSize(3))
         assertThat(
             underTest.fields,
             hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "fieldname.isnull",
+                SequenceFilterField("fieldName.isNull", SequenceFilterFieldType.IsNull("fieldName")),
+            ),
         )
         assertThat(
             underTest.fields,
@@ -57,10 +64,17 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(3))
+        assertThat(underTest.fields, aMapWithSize(4))
         assertThat(
             underTest.fields,
             hasEntry("fieldname", SequenceFilterField("fieldName", SequenceFilterFieldType.String)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "fieldname.isnull",
+                SequenceFilterField("fieldName.isNull", SequenceFilterFieldType.IsNull("fieldName")),
+            ),
         )
         assertThat(
             underTest.fields,
@@ -95,10 +109,17 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(2))
+        assertThat(underTest.fields, aMapWithSize(3))
         assertThat(
             underTest.fields,
             hasEntry("pangolineage", SequenceFilterField("pangoLineage", SequenceFilterFieldType.Lineage)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "pangolineage.isnull",
+                SequenceFilterField("pangoLineage.isNull", SequenceFilterFieldType.IsNull("pangoLineage")),
+            ),
         )
         assertThat(
             underTest.fields,
@@ -115,10 +136,17 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(3))
+        assertThat(underTest.fields, aMapWithSize(4))
         assertThat(
             underTest.fields,
             hasEntry("datefield", SequenceFilterField("dateField", SequenceFilterFieldType.Date)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "datefield.isnull",
+                SequenceFilterField("dateField.isNull", SequenceFilterFieldType.IsNull("dateField")),
+            ),
         )
         assertThat(
             underTest.fields,
@@ -139,8 +167,15 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(3))
+        assertThat(underTest.fields, aMapWithSize(4))
         assertThat(underTest.fields, hasEntry("intfield", SequenceFilterField("intField", SequenceFilterFieldType.Int)))
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "intfield.isnull",
+                SequenceFilterField("intField.isNull", SequenceFilterFieldType.IsNull("intField")),
+            ),
+        )
         assertThat(
             underTest.fields,
             hasEntry("intfieldfrom", SequenceFilterField("intFieldFrom", SequenceFilterFieldType.IntFrom("intField"))),
@@ -157,10 +192,17 @@ class SequenceFilterFieldsTest {
 
         val underTest = SequenceFilterFields.fromDatabaseConfig(input)
 
-        assertThat(underTest.fields, aMapWithSize(3))
+        assertThat(underTest.fields, aMapWithSize(4))
         assertThat(
             underTest.fields,
             hasEntry("floatfield", SequenceFilterField("floatField", SequenceFilterFieldType.Float)),
+        )
+        assertThat(
+            underTest.fields,
+            hasEntry(
+                "floatfield.isnull",
+                SequenceFilterField("floatField.isNull", SequenceFilterFieldType.IsNull("floatField")),
+            ),
         )
         assertThat(
             underTest.fields,
