@@ -339,9 +339,19 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage = "dateTo 'this is not a date' is not a valid date",
             ),
             InvalidFilterScenario(
+                description = "empty dateTo value",
+                filterParameters = getSequenceFilters(mapOf("dateTo" to "")),
+                expectedErrorMessage = "dateTo '' is not a valid date",
+            ),
+            InvalidFilterScenario(
                 description = "invalid dateFrom value",
                 filterParameters = getSequenceFilters(mapOf("dateFrom" to "this is not a date")),
                 expectedErrorMessage = "dateFrom 'this is not a date' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "empty dateFrom value",
+                filterParameters = getSequenceFilters(mapOf("dateFrom" to "")),
+                expectedErrorMessage = "dateFrom '' is not a valid date",
             ),
             InvalidFilterScenario(
                 description = "date and dateFrom at the same time",
@@ -413,9 +423,19 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage = "intFieldFrom 'not a number' is not a valid integer",
             ),
             InvalidFilterScenario(
+                description = "intFrom field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intFieldFrom" to "")),
+                expectedErrorMessage = "intFieldFrom '' is not a valid integer",
+            ),
+            InvalidFilterScenario(
                 description = "intTo field with non-int value",
                 filterParameters = getSequenceFilters(mapOf("intFieldTo" to "not a number")),
                 expectedErrorMessage = "intFieldTo 'not a number' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "intTo field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intFieldTo" to "")),
+                expectedErrorMessage = "intFieldTo '' is not a valid integer",
             ),
             InvalidFilterScenario(
                 description = "int and intFrom at the same time",
@@ -488,9 +508,19 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage = "floatFieldFrom 'not a number' is not a valid float",
             ),
             InvalidFilterScenario(
+                description = "floatFrom field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldFrom" to "")),
+                expectedErrorMessage = "floatFieldFrom '' is not a valid float",
+            ),
+            InvalidFilterScenario(
                 description = "floatTo field with non-float value",
                 filterParameters = getSequenceFilters(mapOf("floatFieldTo" to "not a number")),
                 expectedErrorMessage = "floatFieldTo 'not a number' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "floatTo field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldTo" to "")),
+                expectedErrorMessage = "floatFieldTo '' is not a valid float",
             ),
             InvalidFilterScenario(
                 description = "float and floatFrom at the same time",
@@ -835,12 +865,6 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
-                        "intFieldFrom" to listOf(""),
-                    ),
-                    And(IntBetween("intField", null, null)),
-                ),
-                Arguments.of(
-                    mapOf(
                         "intFieldFrom" to listOf(null),
                     ),
                     And(IntBetween("intField", null, null)),
@@ -850,12 +874,6 @@ class SiloFilterExpressionMapperTest {
                         "intFieldTo" to listOf("42"),
                     ),
                     And(IntBetween("intField", null, 42)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "intFieldTo" to listOf(""),
-                    ),
-                    And(IntBetween("intField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -883,12 +901,6 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
-                        "floatFieldFrom" to listOf(""),
-                    ),
-                    And(FloatBetween("floatField", null, null)),
-                ),
-                Arguments.of(
-                    mapOf(
                         "floatFieldFrom" to listOf(null),
                     ),
                     And(FloatBetween("floatField", null, null)),
@@ -898,12 +910,6 @@ class SiloFilterExpressionMapperTest {
                         "floatFieldTo" to listOf("42.45"),
                     ),
                     And(FloatBetween("floatField", null, 42.45)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "floatFieldTo" to listOf(""),
-                    ),
-                    And(FloatBetween("floatField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(

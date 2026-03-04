@@ -395,11 +395,7 @@ class SiloFilterExpressionMapper(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Int? {
         val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
-        val value = extractSingleFilterValue(values, originalKey)
-
-        if (value.isNullOrBlank()) {
-            return null
-        }
+        val value = extractSingleFilterValue(values, originalKey) ?: return null
 
         try {
             return value.toInt()
@@ -470,11 +466,7 @@ class SiloFilterExpressionMapper(
         dateRangeFilters: List<SequenceFilterValue>,
     ): Double? {
         val (_, values, originalKey) = dateRangeFilters.find { (type, _, _) -> type is T } ?: return null
-        val value = extractSingleFilterValue(values, originalKey)
-
-        if (value.isNullOrBlank()) {
-            return null
-        }
+        val value = extractSingleFilterValue(values, originalKey) ?: return null
 
         try {
             return value.toDouble()
