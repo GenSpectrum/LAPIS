@@ -546,6 +546,13 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
                 ),
             )
 
+        is SequenceFilterFieldType.IsNull -> {
+            BooleanSchema().description(
+                "Set to `true` to filter for sequences where `${fieldType.associatedField}` is null, " +
+                    "set to `false` to filter for sequences where `${fieldType.associatedField}` is not null",
+            )
+        }
+
         else -> stringSchema(fieldType.openApiType)
     }
 

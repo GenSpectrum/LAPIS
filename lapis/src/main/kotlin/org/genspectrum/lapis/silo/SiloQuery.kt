@@ -408,13 +408,21 @@ data class FloatBetween(
 
 data class StringSearch(
     val column: String,
-    val searchExpression: String?,
+    val searchExpression: String,
 ) : SiloFilterExpression("StringSearch")
 
 data class PhyloDescendantOf(
     val column: String,
     val internalNode: String,
 ) : SiloFilterExpression("PhyloDescendantOf")
+
+data class IsNull(
+    val column: String,
+) : SiloFilterExpression("IsNull")
+
+data class IsNotNull(
+    val column: String,
+) : SiloFilterExpression("IsNotNull")
 
 enum class SequenceType {
     @JsonProperty("Fasta")

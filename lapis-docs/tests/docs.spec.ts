@@ -51,6 +51,7 @@ const conceptsPages = prependToRelativeUrl(
         { title: 'Variant query', relativeUrl: '/variant-query' },
         { title: 'Advanced query', relativeUrl: '/advanced-query' },
         { title: 'String search', relativeUrl: '/string-search' },
+        { title: 'Filtering for null', relativeUrl: '/filtering-for-null' },
         { title: 'Request Id', relativeUrl: '/request-id' },
         { title: 'Authentication', relativeUrl: '/authentication' },
     ],

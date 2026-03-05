@@ -119,6 +119,10 @@ export default defineConfig({
                             link: '/concepts/string-search',
                         },
                         {
+                            label: 'Filtering for null',
+                            link: '/concepts/filtering-for-null',
+                        },
+                        {
                             label: 'Request Id',
                             link: '/concepts/request-id',
                         },

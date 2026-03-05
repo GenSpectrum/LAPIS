@@ -60,20 +60,20 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 type = SequenceFilterFieldType.StringSearch(databaseMetadata.name),
             )
 
+            val isNullField = getIsNullField(databaseMetadata)
+
             when (databaseMetadata.isPhyloTreeField) {
                 true -> listOf(
                     baseField,
                     regexField,
+                    isNullField,
                     SequenceFilterField(
                         name = "${databaseMetadata.name}.phyloDescendantOf",
                         type = SequenceFilterFieldType.PhyloDescendantOf(databaseMetadata.name),
                     ),
                 )
 
-                else -> listOf(
-                    baseField,
-                    regexField,
-                )
+                else -> listOf(baseField, regexField, isNullField)
             }
         }
 
@@ -87,6 +87,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = "${databaseMetadata.name}To",
                 type = SequenceFilterFieldType.DateTo(databaseMetadata.name),
             ),
+            getIsNullField(databaseMetadata),
         )
 
         MetadataType.INT -> listOf(
@@ -99,6 +100,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = "${databaseMetadata.name}To",
                 type = SequenceFilterFieldType.IntTo(databaseMetadata.name),
             ),
+            getIsNullField(databaseMetadata),
         )
 
         MetadataType.FLOAT -> listOf(
@@ -111,6 +113,7 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = "${databaseMetadata.name}To",
                 type = SequenceFilterFieldType.FloatTo(databaseMetadata.name),
             ),
+            getIsNullField(databaseMetadata),
         )
 
         MetadataType.BOOLEAN -> listOf(
@@ -118,8 +121,15 @@ private fun mapToSequenceFilterField(databaseMetadata: DatabaseMetadata) =
                 name = databaseMetadata.name,
                 type = SequenceFilterFieldType.Boolean,
             ),
+            getIsNullField(databaseMetadata),
         )
     }
+
+private fun getIsNullField(databaseMetadata: DatabaseMetadata) =
+    SequenceFilterField(
+        name = "${databaseMetadata.name}.isNull",
+        type = SequenceFilterFieldType.IsNull(databaseMetadata.name),
+    )
 
 const val VARIANT_QUERY_FIELD = "variantQuery"
 const val ADVANCED_QUERY_FIELD = "advancedQuery"
@@ -191,4 +201,8 @@ sealed class SequenceFilterFieldType(
     data class PhyloDescendantOf(
         val associatedField: SequenceFilterFieldName,
     ) : SequenceFilterFieldType("string")
+
+    data class IsNull(
+        val associatedField: SequenceFilterFieldName,
+    ) : SequenceFilterFieldType("boolean")
 }

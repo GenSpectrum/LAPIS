@@ -9,6 +9,7 @@ import org.genspectrum.lapis.dummyDatabaseConfig
 import org.genspectrum.lapis.dummySequenceFilterFields
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -25,6 +26,8 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.IsNotNull
+import org.genspectrum.lapis.silo.IsNull
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NucleotideInsertionContains
@@ -56,16 +59,12 @@ class SiloFilterExpressionMapperTest {
     private val underTest =
         SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
 
-    @Test
-    fun `given invalid filter key then throws exception`() {
-        val filterParameter = getSequenceFilters(mapOf("invalid query key" to SOME_VALUE))
+    @ParameterizedTest(name = "GIVEN {0} THEN throws exception")
+    @MethodSource("getInvalidFilterScenarios")
+    fun `GIVEN invalid filters THEN throws exception`(scenario: InvalidFilterScenario) {
+        val exception = assertThrows<BadRequestException> { underTest.map(scenario.filterParameters) }
 
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-
-        assertThat(
-            exception.message,
-            containsString("'invalid query key' is not a valid sequence filter key. Valid keys are:"),
-        )
+        assertThat(exception.message, containsString(scenario.expectedErrorMessage))
     }
 
     @Test
@@ -108,178 +107,6 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(DummySequenceFilters(filterParameter))
 
         assertThat(result, equalTo(expectedResult))
-    }
-
-    @Test
-    fun `given invalid date then should throw an exception`() {
-        val filterParameter = getSequenceFilters(mapOf("date" to "this is not a date"))
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("date 'this is not a date' is not a valid date"))
-    }
-
-    @Test
-    fun `given invalid dateTo then should throw an exception`() {
-        val filterParameter = getSequenceFilters(mapOf("dateTo" to "this is not a date"))
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("dateTo 'this is not a date' is not a valid date"))
-    }
-
-    @Test
-    fun `given invalid dateFrom then should throw an exception`() {
-        val filterParameter = getSequenceFilters(mapOf("dateFrom" to "this is not a date either"))
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("dateFrom 'this is not a date either' is not a valid date"))
-    }
-
-    @Test
-    fun `given date and dateFrom then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "date" to "2021-06-03",
-                "dateFrom" to "2021-06-03",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("Cannot filter by exact date field 'date' and by date range field 'dateFrom'."),
-        )
-    }
-
-    @Test
-    fun `given date and dateTo then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "date" to "2021-06-03",
-                "dateTo" to "2021-06-03",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("Cannot filter by exact date field 'date' and by date range field 'dateTo'."),
-        )
-    }
-
-    @Test
-    fun `given int field with non-int value then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "intField" to "not a number",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("intField 'not a number' is not a valid integer"),
-        )
-    }
-
-    @Test
-    fun `given intTo field with non-int value then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "intFieldTo" to "not a number",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("intFieldTo 'not a number' is not a valid integer"),
-        )
-    }
-
-    @Test
-    fun `given float field with non-float value then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "floatField" to "not a number",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("floatField 'not a number' is not a valid float"),
-        )
-    }
-
-    @Test
-    fun `given floatTo field with non-float value then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "floatFieldTo" to "not a number",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("floatFieldTo 'not a number' is not a valid float"),
-        )
-    }
-
-    @Test
-    fun `given int and intFrom then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "intField" to "42",
-                "intFieldFrom" to "43",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldFrom'."),
-        )
-    }
-
-    @Test
-    fun `given int and intTo then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "intFieldTo" to "43",
-                "intField" to "42",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("Cannot filter by exact int field 'intField' and by int range field 'intFieldTo'."),
-        )
-    }
-
-    @Test
-    fun `given float and floatFrom then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "floatField" to "42.1",
-                "floatFieldFrom" to "42.3",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString(
-                "Cannot filter by exact float field 'floatField' and by float range field 'floatFieldFrom'.",
-            ),
-        )
-    }
-
-    @Test
-    fun `given float and floatTo then should throw an exception`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "floatFieldTo" to "42.3",
-                "floatField" to "42.1",
-            ),
-        )
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("Cannot filter by exact float field 'floatField' and by float range field 'floatFieldTo'."),
-        )
     }
 
     @Test
@@ -399,52 +226,7 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
-    fun `given a query with an empty variantQuery then it should throw an error`() {
-        val filterParameter = getSequenceFilters(mapOf("variantQuery" to ""))
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery must not be empty"))
-    }
-
-    @Test
-    fun `GIVEN a query with empty variantQueries array THEN it should throw a bad request error`() {
-        val filterParameter = DummySequenceFilters(
-            mapOf("variantQuery" to emptyList()),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery must have exactly one value, found 0 values."))
-    }
-
-    @Test
-    fun `GIVEN a query with multiple variantQueries THEN it should throw a bad request error`() {
-        val filterParameter = DummySequenceFilters(
-            mapOf("variantQuery" to listOf("A123T", "C123T")),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(exception.message, containsString("variantQuery must have exactly one value, found 2 values."))
-    }
-
-    @Test
-    fun `given a query with a variantQuery alongside nucleotide mutations then it should throw an error`() {
-        val filterParameter = DummySequenceFilters(
-            mapOf("variantQuery" to listOf("A123T")),
-            listOf(NucleotideMutation(null, 123, null)),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("variantQuery filter cannot be used with other variant filters such as: "),
-        )
-    }
-
-    @Test
-    fun `given a query with a advancedQuery alongside nucleotide mutations then it should throw an error`() {
+    fun `given a query with a advancedQuery alongside nucleotide mutations then it returns mapped query`() {
         val filterParameter = DummySequenceFilters(
             mapOf("advancedQuery" to listOf("sequenceName:A124T")),
             listOf(NucleotideMutation("sequenceName", 123, "T")),
@@ -465,142 +247,470 @@ class SiloFilterExpressionMapperTest {
         )
     }
 
-    @Test
-    fun `given a query with a advancedQuery and a variantQuery then it should throw an error`() {
-        val filterParameter = DummySequenceFilters(
-            mapOf("advancedQuery" to listOf("A123T"), "variantQuery" to listOf("A123T")),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-            emptyList(),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("variantQuery filter cannot be used with advancedQuery filter"),
-        )
-    }
-
-    @Test
-    fun `given a query with a variantQuery alongside amino acid mutations then it should throw an error`() {
-        val filterParameter = DummySequenceFilters(
-            mapOf("variantQuery" to listOf("A123T")),
-            emptyList(),
-            listOf(AminoAcidMutation("gene", 123, null)),
-            emptyList(),
-            emptyList(),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("variantQuery filter cannot be used with other variant filters such as: "),
-        )
-    }
-
-    @Test
-    fun `given a query with a variantQuery alongside pangoLineage filter then it should throw an error`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "pangoLineage" to "A.1.2.3",
-                "variantQuery" to "A123T",
-            ),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("variantQuery filter cannot be used with other variant filters such as: "),
-        )
-    }
-
-    @Test
-    fun `GIVEN a boolean equals with non-boolean value THEN should throw an error`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "test_boolean_column" to "not a boolean",
-            ),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString("'not a boolean' is not a valid boolean."),
-        )
-    }
-
-    @ParameterizedTest
-    @MethodSource("getFilterParametersWithMultipleValues")
-    fun `GIVEN multiple value for date field THEN throws an error`(
-        sequenceFilters: SequenceFilters,
-        expectedErrorMessage: String,
-    ) {
-        val exception = assertThrows<BadRequestException> { underTest.map(DummySequenceFilters(sequenceFilters)) }
-
-        assertThat(
-            exception.message,
-            containsString(expectedErrorMessage),
-        )
-    }
-
-    @Test
-    fun `GIVEN value for string field and its corresponding regex field THEN throws error`() {
-        val filterParameter = getSequenceFilters(
-            mapOf(
-                "some_metadata" to "some value",
-                "some_metadata.regex" to "some other value",
-            ),
-        )
-
-        val exception = assertThrows<BadRequestException> { underTest.map(filterParameter) }
-        assertThat(
-            exception.message,
-            containsString(
-                "Cannot filter for string regex 'some_metadata.regex' " +
-                    "and string equals 'some_metadata' for the same field.",
-            ),
-        )
-    }
-
     companion object {
         @JvmStatic
+        fun getInvalidFilterScenarios() =
+            listOf(
+                InvalidFilterScenario(
+                    description = "invalid query key",
+                    filterParameters = getSequenceFilters(mapOf("invalid query key" to SOME_VALUE)),
+                    expectedErrorMessage = "'invalid query key' is not a valid sequence filter key. Valid keys are:",
+                ),
+                InvalidFilterScenario(
+                    description = "pango lineage and its corresponding isNull field",
+                    filterParameters = getSequenceFilters(
+                        mapOf(
+                            "pangoLineage" to SOME_VALUE,
+                            "pangoLineage.isNull" to "true",
+                        ),
+                    ),
+                    expectedErrorMessage =
+                        "Cannot filter for field 'pangoLineage' and 'pangoLineage.isNull' at the same time.",
+                ),
+            ) +
+                invalidStringFilterScenarios +
+                invalidDateFilterScenarios +
+                invalidIntFilterScenarios +
+                invalidFloatFilterScenarios +
+                invalidBooleanFilterScenarios +
+                invalidAdvancedAndVariantQueryScenarios +
+                filterParametersWithMultipleValues
+
+        val invalidStringFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "string field regex that is null",
+                filterParameters = DummySequenceFilters(mapOf("some_metadata.regex" to listOf(null))),
+                expectedErrorMessage = "String search value for 'some_metadata.regex' must not be null",
+            ),
+            InvalidFilterScenario(
+                description = "string field and its corresponding regex field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata" to "some value",
+                        "some_metadata.regex" to "some other value",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for string regex 'some_metadata.regex' " +
+                    "and string equals 'some_metadata' for the same field.",
+            ),
+            InvalidFilterScenario(
+                description = "string field and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata" to "some value",
+                        "some_metadata.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'some_metadata' and 'some_metadata.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "string regex and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "some_metadata.regex" to "some value",
+                        "some_metadata.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'some_metadata.regex' and 'some_metadata.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "isNull field with non-boolean value",
+                filterParameters = getSequenceFilters(mapOf("some_metadata.isNull" to "not a boolean")),
+                expectedErrorMessage = "'not a boolean' is not a valid boolean value for 'some_metadata.isNull'",
+            ),
+        )
+
+        val invalidDateFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "invalid date value",
+                filterParameters = getSequenceFilters(mapOf("date" to "this is not a date")),
+                expectedErrorMessage = "date 'this is not a date' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "empty date value",
+                filterParameters = getSequenceFilters(mapOf("date" to "")),
+                expectedErrorMessage = "date '' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "invalid dateTo value",
+                filterParameters = getSequenceFilters(mapOf("dateTo" to "this is not a date")),
+                expectedErrorMessage = "dateTo 'this is not a date' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "empty dateTo value",
+                filterParameters = getSequenceFilters(mapOf("dateTo" to "")),
+                expectedErrorMessage = "dateTo '' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "invalid dateFrom value",
+                filterParameters = getSequenceFilters(mapOf("dateFrom" to "this is not a date")),
+                expectedErrorMessage = "dateFrom 'this is not a date' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "empty dateFrom value",
+                filterParameters = getSequenceFilters(mapOf("dateFrom" to "")),
+                expectedErrorMessage = "dateFrom '' is not a valid date",
+            ),
+            InvalidFilterScenario(
+                description = "date and dateFrom at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "date" to "2021-06-03",
+                        "dateFrom" to "2021-06-03",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter by exact date field 'date' and by date range field 'dateFrom'.",
+            ),
+            InvalidFilterScenario(
+                description = "date and dateTo at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "date" to "2021-06-03",
+                        "dateTo" to "2021-06-03",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter by exact date field 'date' and by date range field 'dateTo'.",
+            ),
+            InvalidFilterScenario(
+                description = "date and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "date" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'date' and 'date.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "dateFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "dateFrom" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'dateFrom' and 'date.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "dateTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "dateTo" to "2021-06-03",
+                        "date.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'dateTo' and 'date.isNull' at the same time.",
+            ),
+        )
+
+        val invalidIntFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "int field with non-int value",
+                filterParameters = getSequenceFilters(mapOf("intField" to "not a number")),
+                expectedErrorMessage = "intField 'not a number' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "int field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intField" to "")),
+                expectedErrorMessage = "intField '' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "intFrom field with non-int value",
+                filterParameters = getSequenceFilters(mapOf("intFieldFrom" to "not a number")),
+                expectedErrorMessage = "intFieldFrom 'not a number' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "intFrom field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intFieldFrom" to "")),
+                expectedErrorMessage = "intFieldFrom '' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "intTo field with non-int value",
+                filterParameters = getSequenceFilters(mapOf("intFieldTo" to "not a number")),
+                expectedErrorMessage = "intFieldTo 'not a number' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "intTo field with empty value",
+                filterParameters = getSequenceFilters(mapOf("intFieldTo" to "")),
+                expectedErrorMessage = "intFieldTo '' is not a valid integer",
+            ),
+            InvalidFilterScenario(
+                description = "int and intFrom at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intField" to "42",
+                        "intFieldFrom" to "43",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter by exact int field 'intField' and by int range field 'intFieldFrom'.",
+            ),
+            InvalidFilterScenario(
+                description = "int and intTo at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intField" to "42",
+                        "intFieldTo" to "43",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter by exact int field 'intField' and by int range field 'intFieldTo'.",
+            ),
+            InvalidFilterScenario(
+                description = "intField and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intField" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intField' and 'intField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "intFieldFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intFieldFrom" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intFieldFrom' and 'intField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "intFieldTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "intFieldTo" to "42",
+                        "intField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'intFieldTo' and 'intField.isNull' at the same time.",
+            ),
+        )
+
+        val invalidFloatFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "float field with non-float value",
+                filterParameters = getSequenceFilters(mapOf("floatField" to "not a number")),
+                expectedErrorMessage = "floatField 'not a number' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "float field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatField" to "")),
+                expectedErrorMessage = "floatField '' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "floatFrom field with non-float value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldFrom" to "not a number")),
+                expectedErrorMessage = "floatFieldFrom 'not a number' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "floatFrom field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldFrom" to "")),
+                expectedErrorMessage = "floatFieldFrom '' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "floatTo field with non-float value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldTo" to "not a number")),
+                expectedErrorMessage = "floatFieldTo 'not a number' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "floatTo field with empty value",
+                filterParameters = getSequenceFilters(mapOf("floatFieldTo" to "")),
+                expectedErrorMessage = "floatFieldTo '' is not a valid float",
+            ),
+            InvalidFilterScenario(
+                description = "float and floatFrom at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatField" to "42.5",
+                        "floatFieldFrom" to "43.5",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter by exact float field 'floatField' and by float range field 'floatFieldFrom'.",
+            ),
+            InvalidFilterScenario(
+                description = "float and floatTo at the same time",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatField" to "42.5",
+                        "floatFieldTo" to "43.5",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter by exact float field 'floatField' and by float range field 'floatFieldTo'.",
+            ),
+            InvalidFilterScenario(
+                description = "floatField and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatField" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage = "Cannot filter for field 'floatField' and 'floatField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "floatFieldFrom and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatFieldFrom" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'floatFieldFrom' and 'floatField.isNull' at the same time.",
+            ),
+            InvalidFilterScenario(
+                description = "floatFieldTo and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "floatFieldTo" to "42.5",
+                        "floatField.isNull" to "true",
+                    ),
+                ),
+                expectedErrorMessage =
+                    "Cannot filter for field 'floatFieldTo' and 'floatField.isNull' at the same time.",
+            ),
+        )
+
+        val invalidBooleanFilterScenarios = listOf(
+            InvalidFilterScenario(
+                description = "boolean field with non-boolean value",
+                filterParameters = getSequenceFilters(mapOf("test_boolean_column" to "not a boolean")),
+                expectedErrorMessage = "'not a boolean' is not a valid boolean.",
+            ),
+            InvalidFilterScenario(
+                description = "boolean field with empty value",
+                filterParameters = getSequenceFilters(mapOf("test_boolean_column" to "")),
+                expectedErrorMessage = "'' is not a valid boolean.",
+            ),
+            InvalidFilterScenario(
+                description = "boolean field and its corresponding isNull field",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "test_boolean_column" to "true",
+                        "test_boolean_column.isNull" to "true",
+                    ),
+                ),
+                "Cannot filter for field 'test_boolean_column' and 'test_boolean_column.isNull' at the same time.",
+            ),
+        )
+
+        val invalidAdvancedAndVariantQueryScenarios = listOf(
+            InvalidFilterScenario(
+                description = "empty variantQuery",
+                filterParameters = getSequenceFilters(mapOf("variantQuery" to "")),
+                expectedErrorMessage = "variantQuery must not be empty",
+            ),
+            InvalidFilterScenario(
+                description = "empty variantQueries array",
+                filterParameters = DummySequenceFilters(mapOf("variantQuery" to emptyList())),
+                expectedErrorMessage = "variantQuery must have exactly one value, found 0 values.",
+            ),
+            InvalidFilterScenario(
+                description = "variantQueries array",
+                filterParameters = DummySequenceFilters(mapOf("variantQuery" to listOf("A123T", "C123T"))),
+                expectedErrorMessage = "variantQuery must have exactly one value, found 2 values.",
+            ),
+            InvalidFilterScenario(
+                description = "variantQuery alongside nucleotide mutations",
+                filterParameters = DummySequenceFilters(
+                    mapOf("variantQuery" to listOf("A123T")),
+                    listOf(NucleotideMutation(null, 123, null)),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                ),
+                expectedErrorMessage = "variantQuery filter cannot be used with other variant filters such as: ",
+            ),
+            InvalidFilterScenario(
+                description = "variantQuery alongside amino acid mutations",
+                filterParameters = DummySequenceFilters(
+                    mapOf("variantQuery" to listOf("A123T")),
+                    emptyList(),
+                    listOf(AminoAcidMutation("gene", 123, null)),
+                    emptyList(),
+                    emptyList(),
+                ),
+                expectedErrorMessage = "variantQuery filter cannot be used with other variant filters such as: ",
+            ),
+            InvalidFilterScenario(
+                description = "variantQuery alongside pangoLineage filter",
+                filterParameters = getSequenceFilters(
+                    mapOf(
+                        "pangoLineage" to "A.1.2.3",
+                        "variantQuery" to "A123T",
+                    ),
+                ),
+                expectedErrorMessage = "variantQuery filter cannot be used with other variant filters such as: ",
+            ),
+            InvalidFilterScenario(
+                description = "advancedQuery and variantQuery",
+                filterParameters = DummySequenceFilters(
+                    mapOf(
+                        "advancedQuery" to listOf("A123T"),
+                        "variantQuery" to listOf("A123T"),
+                    ),
+                ),
+                expectedErrorMessage = "variantQuery filter cannot be used with advancedQuery filter",
+            ),
+        )
+
         val filterParametersWithMultipleValues = listOf(
-            Arguments.of(
-                mapOf(DATE_FIELD to listOf("2021-06-03", "2021-06-04")),
-                "Expected exactly one value for '$DATE_FIELD' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple $DATE_FIELD values",
+                filterParameters = DummySequenceFilters(mapOf(DATE_FIELD to listOf("2021-06-03", "2021-06-04"))),
+                expectedErrorMessage = "Expected exactly one value for '$DATE_FIELD' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("dateTo" to listOf("2021-06-03", "2021-06-04")),
-                "Expected exactly one value for 'dateTo' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple dateTo values",
+                filterParameters = DummySequenceFilters(mapOf("dateTo" to listOf("2021-06-03", "2021-06-04"))),
+                expectedErrorMessage = "Expected exactly one value for 'dateTo' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("dateFrom" to listOf("2021-06-03", "2021-06-04")),
-                "Expected exactly one value for 'dateFrom' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple dateFrom values",
+                filterParameters = DummySequenceFilters(mapOf("dateFrom" to listOf("2021-06-03", "2021-06-04"))),
+                expectedErrorMessage = "Expected exactly one value for 'dateFrom' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("intField" to listOf("1", "2")),
-                "Expected exactly one value for 'intField' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple intField values",
+                filterParameters = DummySequenceFilters(mapOf("intField" to listOf("1", "2"))),
+                expectedErrorMessage = "Expected exactly one value for 'intField' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("intFieldTo" to listOf("1", "2")),
-                "Expected exactly one value for 'intFieldTo' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple intFieldTo values",
+                filterParameters = DummySequenceFilters(mapOf("intFieldTo" to listOf("1", "2"))),
+                expectedErrorMessage = "Expected exactly one value for 'intFieldTo' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("intFieldFrom" to listOf("1", "2")),
-                "Expected exactly one value for 'intFieldFrom' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple intFieldFrom values",
+                filterParameters = DummySequenceFilters(mapOf("intFieldFrom" to listOf("1", "2"))),
+                expectedErrorMessage = "Expected exactly one value for 'intFieldFrom' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("floatField" to listOf("0.1", "0.2")),
-                "Expected exactly one value for 'floatField' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple floatField values",
+                filterParameters = DummySequenceFilters(mapOf("floatField" to listOf("0.1", "0.2"))),
+                expectedErrorMessage = "Expected exactly one value for 'floatField' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("floatFieldTo" to listOf("0.1", "0.2")),
-                "Expected exactly one value for 'floatFieldTo' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple floatFieldTo values",
+                filterParameters = DummySequenceFilters(mapOf("floatFieldTo" to listOf("0.1", "0.2"))),
+                expectedErrorMessage = "Expected exactly one value for 'floatFieldTo' but got 2 values.",
             ),
-            Arguments.of(
-                mapOf("floatFieldFrom" to listOf("0.1", "0.2")),
-                "Expected exactly one value for 'floatFieldFrom' but got 2 values.",
+            InvalidFilterScenario(
+                description = "multiple floatFieldFrom values",
+                filterParameters = DummySequenceFilters(mapOf("floatFieldFrom" to listOf("0.1", "0.2"))),
+                expectedErrorMessage = "Expected exactly one value for 'floatFieldFrom' but got 2 values.",
+            ),
+            InvalidFilterScenario(
+                description = "multiple isNull values",
+                filterParameters = DummySequenceFilters(mapOf("floatField.isNull" to listOf("true", "false"))),
+                expectedErrorMessage = "Expected exactly one value for 'floatField.isNull' but got 2 values.",
             ),
         )
 
@@ -622,8 +732,12 @@ class SiloFilterExpressionMapperTest {
                         "some_metadata" to listOf(null),
                     ),
                     And(
-                        Or(StringEquals("some_metadata", null)),
+                        Or(IsNull(column = "some_metadata")),
                     ),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata" to listOf("")),
+                    And(Or(StringEquals(column = "some_metadata", value = ""))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3")),
@@ -631,11 +745,11 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("")),
-                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(LineageEquals("pangoLineage", "", includeSublineages = false))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf(null)),
-                    And(Or(LineageEquals("pangoLineage", null, includeSublineages = false))),
+                    And(Or(IsNull(column = "pangoLineage"))),
                 ),
                 Arguments.of(
                     mapOf("pangoLineage" to listOf("A.1.2.3*")),
@@ -664,6 +778,10 @@ class SiloFilterExpressionMapperTest {
                         "date" to listOf("2021-06-03"),
                     ),
                     And(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3))),
+                ),
+                Arguments.of(
+                    mapOf("date" to listOf(null)),
+                    And(IsNull(column = "date")),
                 ),
                 Arguments.of(
                     mapOf(
@@ -737,25 +855,13 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "intField" to listOf(null),
                     ),
-                    And(IntEquals("intField", null)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "intField" to listOf(""),
-                    ),
-                    And(IntEquals("intField", null)),
+                    And(IsNull(column = "intField")),
                 ),
                 Arguments.of(
                     mapOf(
                         "intFieldFrom" to listOf("42"),
                     ),
                     And(IntBetween("intField", 42, null)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "intFieldFrom" to listOf(""),
-                    ),
-                    And(IntBetween("intField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -768,12 +874,6 @@ class SiloFilterExpressionMapperTest {
                         "intFieldTo" to listOf("42"),
                     ),
                     And(IntBetween("intField", null, 42)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "intFieldTo" to listOf(""),
-                    ),
-                    And(IntBetween("intField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -791,19 +891,13 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "floatField" to listOf(null),
                     ),
-                    And(FloatEquals("floatField", null)),
+                    And(IsNull("floatField")),
                 ),
                 Arguments.of(
                     mapOf(
                         "floatFieldFrom" to listOf("42.45"),
                     ),
                     And(FloatBetween("floatField", 42.45, null)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "floatFieldFrom" to listOf(""),
-                    ),
-                    And(FloatBetween("floatField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -816,12 +910,6 @@ class SiloFilterExpressionMapperTest {
                         "floatFieldTo" to listOf("42.45"),
                     ),
                     And(FloatBetween("floatField", null, 42.45)),
-                ),
-                Arguments.of(
-                    mapOf(
-                        "floatFieldTo" to listOf(""),
-                    ),
-                    And(FloatBetween("floatField", null, null)),
                 ),
                 Arguments.of(
                     mapOf(
@@ -859,18 +947,18 @@ class SiloFilterExpressionMapperTest {
                         Or(
                             BooleanEquals("test_boolean_column", true),
                             BooleanEquals("test_boolean_column", false),
-                            BooleanEquals("test_boolean_column", null),
+                            IsNull(column = "test_boolean_column"),
                         ),
                     ),
                 ),
                 Arguments.of(
                     mapOf(
-                        "some_metadata.regex" to listOf("someRegex", null, "otherRegex"),
+                        "some_metadata.regex" to listOf("someRegex", "", "otherRegex"),
                     ),
                     And(
                         Or(
                             StringSearch("some_metadata", searchExpression = "someRegex"),
-                            StringSearch("some_metadata", searchExpression = null),
+                            StringSearch("some_metadata", searchExpression = ""),
                             StringSearch("some_metadata", searchExpression = "otherRegex"),
                         ),
                     ),
@@ -883,13 +971,69 @@ class SiloFilterExpressionMapperTest {
                         PhyloDescendantOf("primaryKey", "innerNode"),
                     ),
                 ),
+                Arguments.of(
+                    mapOf("some_metadata.isNull" to listOf("true")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("SOME_metadata.ISNULL" to listOf("TRUE")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.iSnUll" to listOf("true")),
+                    And(IsNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("some_metadata.isNull" to listOf("false")),
+                    And(IsNotNull("some_metadata")),
+                ),
+                Arguments.of(
+                    mapOf("intField.isNull" to listOf("true")),
+                    And(IsNull("intField")),
+                ),
+                Arguments.of(
+                    mapOf("intField.isNull" to listOf("false")),
+                    And(IsNotNull("intField")),
+                ),
+                Arguments.of(
+                    mapOf("floatField.isNull" to listOf("true")),
+                    And(IsNull("floatField")),
+                ),
+                Arguments.of(
+                    mapOf("floatField.isNull" to listOf("false")),
+                    And(IsNotNull("floatField")),
+                ),
+                Arguments.of(
+                    mapOf("test_boolean_column.isNull" to listOf("true")),
+                    And(IsNull("test_boolean_column")),
+                ),
+                Arguments.of(
+                    mapOf("test_boolean_column.isNull" to listOf("false")),
+                    And(IsNotNull("test_boolean_column")),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage.isNull" to listOf("true")),
+                    And(IsNull("pangoLineage")),
+                ),
+                Arguments.of(
+                    mapOf("pangoLineage.isNull" to listOf("false")),
+                    And(IsNotNull("pangoLineage")),
+                ),
+                Arguments.of(
+                    mapOf("date.isNull" to listOf("true")),
+                    And(IsNull("date")),
+                ),
+                Arguments.of(
+                    mapOf("date.isNull" to listOf("false")),
+                    And(IsNotNull("date")),
+                ),
+            )
+
+        private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
+            DummySequenceFilters(
+                sequenceFilters.mapValues { listOf(it.value) },
             )
     }
-
-    private fun getSequenceFilters(sequenceFilters: Map<String, String>) =
-        DummySequenceFilters(
-            sequenceFilters.mapValues { listOf(it.value) },
-        )
 
     data class DummySequenceFilters(
         override val sequenceFilters: SequenceFilters,
@@ -901,4 +1045,12 @@ class SiloFilterExpressionMapperTest {
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : CommonSequenceFilters
+
+    data class InvalidFilterScenario(
+        val description: String,
+        val filterParameters: BaseSequenceFilters,
+        val expectedErrorMessage: String,
+    ) {
+        override fun toString() = description
+    }
 }
