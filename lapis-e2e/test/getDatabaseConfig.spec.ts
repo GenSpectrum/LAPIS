@@ -19,7 +19,6 @@ describe('The /databaseConfig endpoint', () => {
         ...databaseConfigFromFile.schema,
         metadata: databaseConfigFromFile.schema.metadata.map(field => ({
           ...field,
-          valuesAreUnique: field.valuesAreUnique ?? false,
           generateIndex: field.generateIndex ?? false,
           generateLineageIndex: field.generateLineageIndex ?? undefined,
           isPhyloTreeField: field.isPhyloTreeField ?? false,
