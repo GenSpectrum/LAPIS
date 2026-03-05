@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.8](https://github.com/GenSpectrum/LAPIS/compare/v0.6.7...v0.6.8) (2026-03-05)
+
+
+### Bug Fixes
+
+* **lapis:** reliably serve whole llms.txt - only flush the response when it did compress ([#1576](https://github.com/GenSpectrum/LAPIS/issues/1576)) ([5745897](https://github.com/GenSpectrum/LAPIS/commit/574589716cc48cdf18420aaba9cbf57734357992))
+
 ## [0.6.7](https://github.com/GenSpectrum/LAPIS/compare/v0.6.6...v0.6.7) (2026-03-03)
 
 
