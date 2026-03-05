@@ -169,11 +169,13 @@ class CompressionFilter(
             maybeCompressingResponse,
         )
 
-        try {
-            maybeCompressingResponse.outputStream.flush()
-            maybeCompressingResponse.outputStream.close()
-        } catch (e: IOException) {
-            log.debug { "Failed to flush and close the compressing output stream: ${e.message}" }
+        if (maybeCompressingResponse is CompressingResponse) {
+            try {
+                maybeCompressingResponse.outputStream.flush()
+                maybeCompressingResponse.outputStream.close()
+            } catch (e: IOException) {
+                log.debug { "Failed to flush and close the compressing output stream: ${e.message}" }
+            }
         }
     }
 
