@@ -25,7 +25,6 @@ data class DatabaseSchema(
 data class DatabaseMetadata(
     val name: String,
     val type: MetadataType,
-    val valuesAreUnique: Boolean = false,
     val generateIndex: Boolean = false,
     val generateLineageIndex: String? = null,
     val isPhyloTreeField: Boolean = false,

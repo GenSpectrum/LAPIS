@@ -4,7 +4,6 @@ schema:
   metadata:
     - name: primaryKey
       type: string
-      valuesAreUnique: true
     - name: usherTree
       type: string
       isPhyloTreeField: true
