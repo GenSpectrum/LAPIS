@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/GenSpectrum/LAPIS/compare/v0.6.8...v0.7.0) (2026-03-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** Before: `?region=` would match null regions. After: `?region.isNull=true` matches null regions, `?region=` matches empty string regions. Empty strings are treated as such, before `intFrom=` would filter for unbounded `int`.
+
+### Features
+
+* **lapis:** add explicit `xxx.isNull` filters that let users filter for `null` or non-`null`, don't treat `""` as `null` in filters anymore ([#1574](https://github.com/GenSpectrum/LAPIS/issues/1574)) ([68eb461](https://github.com/GenSpectrum/LAPIS/commit/68eb4615f107f135c1ffcfbafc1f3bc656040262))
+
+
+### Bug Fixes
+
+* **lapis:** remove unnecessary field `valuesAreUnique` from database config ([#1577](https://github.com/GenSpectrum/LAPIS/issues/1577)) ([2067441](https://github.com/GenSpectrum/LAPIS/commit/2067441841c4469eb68f00d40757aa4863d1bc35)), closes [#1573](https://github.com/GenSpectrum/LAPIS/issues/1573)
+
 ## [0.6.8](https://github.com/GenSpectrum/LAPIS/compare/v0.6.7...v0.6.8) (2026-03-05)
 
 
