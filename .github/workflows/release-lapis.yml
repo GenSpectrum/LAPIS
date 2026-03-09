@@ -61,7 +61,7 @@ jobs:
       - name: Docker metadata
         if: ${{ steps.release.outputs.release_created }}
         id: dockerMetadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.LAPIS_DOCKER_IMAGE_NAME }}
           tags: |
@@ -84,7 +84,7 @@ jobs:
       - name: Docs Docker metadata
         if: ${{ steps.release.outputs.release_created }}
         id: docsDockerMetadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.DOCS_DOCKER_IMAGE_NAME }}
           tags: |
