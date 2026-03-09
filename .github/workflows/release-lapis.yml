@@ -70,7 +70,7 @@ jobs:
 
       - name: Build and push LAPIS image
         if: ${{ steps.release.outputs.release_created }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./lapis
           tags: ${{ steps.dockerMetadata.outputs.tags }}
@@ -93,7 +93,7 @@ jobs:
 
       - name: Build and push LAPIS Docs image
         if: ${{ steps.release.outputs.release_created }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./lapis-docs
           push: true
