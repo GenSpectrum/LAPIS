@@ -40,7 +40,7 @@ jobs:
 
       - name: Set up Docker Buildx
         if: ${{ steps.release.outputs.release_created }}
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GitHub Container Registry
         if: ${{ steps.release.outputs.release_created }}
