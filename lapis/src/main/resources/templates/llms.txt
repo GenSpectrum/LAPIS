@@ -177,7 +177,7 @@ These endpoints only accept POST.
 
 - [query/parse](query/parse): Validate advanced query syntax without executing the query.
   Accepts POST with `{"queries": ["query1", "query2"], "doFullValidation": false}`.
-  When `doFullValidation` is true, validates mutation positions against actual sequence lengths and database constraints.
+  When `doFullValidation` is true, actually executes the query and validates mutation positions against actual sequence lengths and database constraints.
   Returns success/failure for each query with parse errors or filter structure.
 
 ## Query Examples
