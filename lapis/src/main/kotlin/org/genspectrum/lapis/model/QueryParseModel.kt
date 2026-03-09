@@ -56,7 +56,7 @@ class QueryParseModel(
         val query = SiloQuery(
             action = SiloAction.aggregated(
                 groupByFields = emptyList(),
-                limit = 0, // make it as minimal as possible
+                limit = 1,
             ),
             filterExpression = filter,
         )

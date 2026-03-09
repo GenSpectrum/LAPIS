@@ -134,4 +134,77 @@ describe('The /query/parse endpoint', () => {
 
     expect(response.status).to.equal(400);
   });
+
+  describe('doFullValidation parameter', () => {
+    const queryWithInvalidMutationPosition = 'A999999T';
+
+    it('should accept valid query with doFullValidation=true', async () => {
+      const { data } = await queryClient.postParse({
+        queryParseRequest: {
+          queries: ['A100T'],
+          doFullValidation: true,
+        },
+      });
+
+      expect(data).to.be.an('array').with.lengthOf(1);
+      expect(data[0]).to.have.property('type', 'success');
+      expect(data[0]).to.have.property('filter');
+    });
+
+    it('should reject mutation with out-of-bounds position when doFullValidation=true', async () => {
+      const { data } = await queryClient.postParse({
+        queryParseRequest: {
+          queries: [queryWithInvalidMutationPosition],
+          doFullValidation: true,
+        },
+      });
+
+      expect(data).to.be.an('array').with.lengthOf(1);
+      expect(data[0]).to.have.property('type', 'failure');
+      expect(data[0]).to.have.property('error');
+      expect(data[0]).to.not.have.property('filter');
+
+      const failure = data[0] as Failure;
+      expect(failure.error).to.include('out of bounds 999999 > 29903');
+    });
+
+    it('should accept mutation with out-of-bounds position when doFullValidation=false', async () => {
+      const { data: dataWithoutFullValidation } = await queryClient.postParse({
+        queryParseRequest: {
+          queries: [queryWithInvalidMutationPosition],
+          doFullValidation: false,
+        },
+      });
+      expect(dataWithoutFullValidation[0]).to.have.property('type', 'success');
+    });
+
+    it('should accept mutation with out-of-bounds position when doFullValidation is not set', async () => {
+      const { data: dataWithoutFullValidation } = await queryClient.postParse({
+        queryParseRequest: {
+          queries: [queryWithInvalidMutationPosition],
+        },
+      });
+      expect(dataWithoutFullValidation[0]).to.have.property('type', 'success');
+    });
+
+    it('should handle mixed valid and invalid queries with doFullValidation=true', async () => {
+      const { data } = await queryClient.postParse({
+        queryParseRequest: {
+          queries: ['country = Switzerland', queryWithInvalidMutationPosition, 'age >= 30'],
+          doFullValidation: true,
+        },
+      });
+
+      expect(data).to.be.an('array').with.lengthOf(3);
+
+      expect(data[0]).to.have.property('type', 'success');
+      expect(data[0]).to.have.property('filter');
+
+      expect(data[1]).to.have.property('type', 'failure');
+      expect(data[1]).to.have.property('error');
+
+      expect(data[2]).to.have.property('type', 'success');
+      expect(data[2]).to.have.property('filter');
+    });
+  });
 });
