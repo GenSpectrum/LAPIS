@@ -242,20 +242,37 @@ class QueryControllerTest(
     }
 
     @Test
-    fun `doFullValidation true fails when SILO rejects query with invalid field`() {
+    fun `doFullValidation true returns failure when SILO rejects query`() {
         every {
             siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any())
         } throws SiloException(400, "Bad Request", "Unknown field: invalidField")
 
         mockMvc.perform(
             post(route)
-                .content("""{"queries": ["invalidField = 'value'"], "doFullValidation": true}""")
+                .content("""{"queries": ["main:123456789T"], "doFullValidation": true}""")
                 .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.data[0].type").value("failure"))
             .andExpect(jsonPath("$.data[0].filter").doesNotExist())
             .andExpect(jsonPath("$.data[0].error").value(containsString("invalidField")))
+    }
+
+    @Test
+    fun `doFullValidation true returns failure when SILO throws 500 error`() {
+        every {
+            siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any())
+        } throws SiloException(500, "Internal Server Error", "Something unexpected happened")
+
+        mockMvc.perform(
+            post(route)
+                .content("""{"queries": ["main:123"], "doFullValidation": true}""")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.data[0].type").value("failure"))
+            .andExpect(jsonPath("$.data[0].filter").doesNotExist())
+            .andExpect(jsonPath("$.data[0].error").value(containsString("Unexpected error parsing query.")))
     }
 
     @Test

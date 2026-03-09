@@ -43,7 +43,10 @@ class QueryParseModel(
                 try {
                     validateAgainstSilo(filter)
                 } catch (e: SiloException) {
-                    return ParsedQueryResult.Failure(error = e.message)
+                    if (e.statusCode in 400..<500) {
+                        return ParsedQueryResult.Failure(error = e.message)
+                    }
+                    throw e
                 }
             }
 
