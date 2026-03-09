@@ -34,7 +34,9 @@ You can use metadata fields as filter parameters in your queries. The filter syn
 [# th:if="${booleanField != null}"]- **Boolean fields**: Use `true` or `false`. Example: `"[(${booleanField})]": true`[/]
 
 You can combine multiple filters in a single query. All filters are combined with AND logic.
-All exact filters also support filtering for `null`.
+All exact filters also support filtering for `null`:
+- `"[(${stringField})].isNull": true` filters for `null` values.
+- `"[(${stringField})].isNull": false` filters for non-`null` values.
 
 ### Genes and Segments
 [# th:unless="${isSingleSegmented}"]

@@ -32,6 +32,19 @@ describe('The /details endpoint', () => {
     });
   });
 
+  it('should fetch the correct key for "isNull" filter', async () => {
+    const result = await lapisClient.postDetails({
+      detailsPostRequest: {
+        ageIsNull: true,
+        fields: ['primaryKey'],
+        orderBy: ['primaryKey'],
+      },
+    });
+
+    expect(result.data[0].primaryKey).to.equal('key_1748243');
+    expect(result.data[1].primaryKey).to.equal('key_3016465');
+  });
+
   it('should return details with all fields when no explicit fields were specified', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {

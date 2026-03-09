@@ -1,7 +1,13 @@
 package org.genspectrum.lapis
 
-import org.genspectrum.lapis.config.SequenceFilterField
-import org.genspectrum.lapis.config.SequenceFilterFieldType
+import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.DatabaseFeature
+import org.genspectrum.lapis.config.DatabaseMetadata
+import org.genspectrum.lapis.config.DatabaseSchema
+import org.genspectrum.lapis.config.GENERALIZED_ADVANCED_QUERY_FEATURE
+import org.genspectrum.lapis.config.MetadataType
+import org.genspectrum.lapis.config.OpennessLevel
+import org.genspectrum.lapis.config.SARS_COV2_VARIANT_QUERY_FEATURE
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
@@ -16,28 +22,32 @@ const val DATE_FIELD = "date"
 const val FIELD_WITH_UPPERCASE_LETTER = PANGO_LINEAGE_FIELD
 const val FIELD_WITH_ONLY_LOWERCASE_LETTERS = DATE_FIELD
 
-val dummySequenceFilterFields = SequenceFilterFields(
-    mapOf(
-        "primaryKey.PhyloDescendantOf" to SequenceFilterFieldType.PhyloDescendantOf(PRIMARY_KEY_FIELD),
-        DATE_FIELD to SequenceFilterFieldType.Date,
-        "dateTo" to SequenceFilterFieldType.DateTo(DATE_FIELD),
-        "dateFrom" to SequenceFilterFieldType.DateFrom(DATE_FIELD),
-        PANGO_LINEAGE_FIELD to SequenceFilterFieldType.Lineage,
-        "some_metadata" to SequenceFilterFieldType.String,
-        "some_metadata.regex" to SequenceFilterFieldType.StringSearch("some_metadata"),
-        "other_metadata" to SequenceFilterFieldType.String,
-        "variantQuery" to SequenceFilterFieldType.VariantQuery,
-        "advancedQuery" to SequenceFilterFieldType.AdvancedQuery,
-        "intField" to SequenceFilterFieldType.Int,
-        "intFieldTo" to SequenceFilterFieldType.IntTo("intField"),
-        "intFieldFrom" to SequenceFilterFieldType.IntFrom("intField"),
-        "floatField" to SequenceFilterFieldType.Float,
-        "floatFieldTo" to SequenceFilterFieldType.FloatTo("floatField"),
-        "floatFieldFrom" to SequenceFilterFieldType.FloatFrom("floatField"),
-        "test_boolean_column" to SequenceFilterFieldType.Boolean,
-    )
-        .map { (name, type) -> name.lowercase() to SequenceFilterField(name, type) }
-        .toMap(),
+val dummySequenceFilterFields = SequenceFilterFields.fromDatabaseConfig(
+    DatabaseConfig(
+        schema = DatabaseSchema(
+            instanceName = "dummy",
+            opennessLevel = OpennessLevel.OPEN,
+            metadata = listOf(
+                DatabaseMetadata(name = PRIMARY_KEY_FIELD, type = MetadataType.STRING, isPhyloTreeField = true),
+                DatabaseMetadata(name = DATE_FIELD, type = MetadataType.DATE),
+                DatabaseMetadata(
+                    name = PANGO_LINEAGE_FIELD,
+                    type = MetadataType.STRING,
+                    generateLineageIndex = "lineageIndex",
+                ),
+                DatabaseMetadata(name = "some_metadata", type = MetadataType.STRING),
+                DatabaseMetadata(name = "other_metadata", type = MetadataType.STRING),
+                DatabaseMetadata(name = "intField", type = MetadataType.INT),
+                DatabaseMetadata(name = "floatField", type = MetadataType.FLOAT),
+                DatabaseMetadata(name = "test_boolean_column", type = MetadataType.BOOLEAN),
+            ),
+            primaryKey = PRIMARY_KEY_FIELD,
+            features = listOf(
+                DatabaseFeature(name = SARS_COV2_VARIANT_QUERY_FEATURE),
+                DatabaseFeature(name = GENERALIZED_ADVANCED_QUERY_FEATURE),
+            ),
+        ),
+    ),
 )
 
 class ConstantsFulfillAssumptionsThatTheirNameSuggestsTest {

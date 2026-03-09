@@ -815,6 +815,24 @@ class SiloQueryTest {
                         }
                     """,
                 ),
+                Arguments.of(
+                    IsNull(column = "theColumn"),
+                    """
+                        {
+                            "type": "IsNull",
+                            "column": "theColumn"
+                        }
+                    """,
+                ),
+                Arguments.of(
+                    IsNotNull(column = "theColumn"),
+                    """
+                        {
+                            "type": "IsNotNull",
+                            "column": "theColumn"
+                        }
+                    """,
+                ),
             )
     }
 }
