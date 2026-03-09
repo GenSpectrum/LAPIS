@@ -33,7 +33,10 @@ class QueryController(
         @RequestBody
         request: QueryParseRequest,
     ): ResponseEntity<QueryParseResponse> {
-        val data = queryParseModel.parseQueries(request.queries)
+        val data = queryParseModel.parseQueries(
+            queries = request.queries,
+            doFullValidation = request.doFullValidation,
+        )
         return ResponseEntity
             .ok()
             .header(LAPIS_DATA_VERSION, dataVersion.dataVersion)
