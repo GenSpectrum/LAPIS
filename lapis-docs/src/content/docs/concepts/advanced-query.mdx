@@ -182,9 +182,28 @@ LAPIS provides a `/query/parse` endpoint that allows you to validate and parse a
 
 ```json
 {
-  "queries": ["query1", "query2", ...]
+  "queries": ["query1", "query2", ...],
+  "doFullValidation": false
 }
 ```
+
+**Parameters:**
+
+- `queries` (required): An array of query strings to validate
+- `doFullValidation` (optional, default: `false`): Controls the depth of validation
+    - When `false`: Only validates query syntax and metadata field names (fast)
+    - When `true`:
+      Performs full validation against SILO, including mutation positions and gene names (more thorough but slower)
+
+**Use `doFullValidation: true` when:**
+
+- Validating user-submitted queries to be sure that they will execute successfully
+- One-off validation of queries before storing them for later use
+
+**Use `doFullValidation: false` when:**
+
+- Quickly checking syntax during query construction (e.g. for immediate feedback when a user types a query in a UI)
+- Only need to verify basic structure
 
 ### Response Format
 
