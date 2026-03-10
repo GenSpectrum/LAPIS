@@ -9,7 +9,7 @@ fun <T> streamAndLogDisconnect(
 ) = try {
     callback()
 } catch (e: IOException) {
-    log.info { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
+    log.info(e) { "Client likely disconnected while streaming $dataTypeName: ${e.message}" }
     throw e
 } catch (e: Exception) {
     log.error(e) { "Error writing $dataTypeName" }
