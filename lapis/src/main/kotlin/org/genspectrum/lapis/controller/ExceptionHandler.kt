@@ -227,6 +227,6 @@ class AddForbiddenToOpenApiDocsHelper(
 ) : Exception(message)
 
 class BadRequestException(
-    message: String,
+    override val message: String,
     cause: Throwable? = null,
 ) : Exception(message, cause)

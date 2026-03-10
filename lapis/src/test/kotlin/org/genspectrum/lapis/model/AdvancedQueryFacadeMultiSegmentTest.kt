@@ -188,7 +188,12 @@ class AdvancedQueryFacadeMultiSegmentTest {
         val nucMutation = "invalidGene:300T"
 
         val exceptionNuc = assertThrows<BadRequestException> { underTest.map(nucMutation) }
-        assertThat(exceptionNuc.message, `is`("invalidGene is not a known segment or gene"))
+        assertThat(
+            exceptionNuc.message,
+            `is`(
+                "invalidGene is not a known segment or gene, known segments are [seg1, seg2], known genes are [S, ORF1a]",
+            ),
+        )
     }
 
     @Test

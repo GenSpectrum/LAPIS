@@ -433,7 +433,11 @@ class AdvancedQueryCustomListener(
             }
         }
 
-        throw BadRequestException("$name is not a known segment or gene", null)
+        throw BadRequestException(
+            "$name is not a known segment or gene, " +
+                "known segments are ${referenceGenomeSchema.getNucleotideSequenceNames()}, " +
+                "known genes are ${referenceGenomeSchema.getGeneNames()}",
+        )
     }
 
     override fun enterNamedInsertionQuery(ctx: NamedInsertionQueryContext) {
