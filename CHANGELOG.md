@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/GenSpectrum/LAPIS/compare/v0.7.0...v0.7.1) (2026-03-10)
+
+
+### Features
+
+* **lapis:** `/query/parse` endpoint: add optional parameter  `doFullValidation` to make sure that the query will execute successfully ([#1581](https://github.com/GenSpectrum/LAPIS/issues/1581)) ([2db897d](https://github.com/GenSpectrum/LAPIS/commit/2db897dab5789ef44928a34a409fc13269b342f8))
+
 ## [0.7.0](https://github.com/GenSpectrum/LAPIS/compare/v0.6.8...v0.7.0) (2026-03-09)
 
 
