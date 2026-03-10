@@ -5,8 +5,8 @@
   "description": "Utility for the LAPIS repository",
   "type": "module",
   "devDependencies": {
-    "@commitlint/cli": "^20.4.2",
-    "@commitlint/config-conventional": "^20.4.2",
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
     "@commitlint/types": "^20.0.0",
     "release-please": "^17.3.0"
   },
