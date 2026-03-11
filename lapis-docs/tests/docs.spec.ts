@@ -41,19 +41,19 @@ const referencesPages = prependToRelativeUrl(
 
 const conceptsPages = prependToRelativeUrl(
     [
+        { title: 'Authentication', relativeUrl: '/authentication' },
+        { title: 'Request methods: GET and POST', relativeUrl: '/request-methods' },
+        { title: 'Response format', relativeUrl: '/response-format' },
         { title: 'Data versions', relativeUrl: '/data-versions' },
+        { title: 'Request ID', relativeUrl: '/request-id' },
         { title: 'Mutation filters', relativeUrl: '/mutation-filters' },
         { title: 'Insertion filters', relativeUrl: '/insertion-filters' },
         { title: 'Ambiguous symbols', relativeUrl: '/ambiguous-symbols' },
         { title: 'Pango lineage query', relativeUrl: '/pango-lineage-query' },
-        { title: 'Request methods: GET and POST', relativeUrl: '/request-methods' },
-        { title: 'Response format', relativeUrl: '/response-format' },
         { title: 'Variant query', relativeUrl: '/variant-query' },
         { title: 'Advanced query', relativeUrl: '/advanced-query' },
         { title: 'String search', relativeUrl: '/string-search' },
         { title: 'Filtering for null', relativeUrl: '/filtering-for-null' },
-        { title: 'Request Id', relativeUrl: '/request-id' },
-        { title: 'Authentication', relativeUrl: '/authentication' },
     ],
     '/concepts',
 );
