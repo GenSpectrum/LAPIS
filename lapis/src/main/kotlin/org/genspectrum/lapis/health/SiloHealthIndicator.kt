@@ -12,34 +12,31 @@ class SiloHealthIndicator(
     private val cachedSiloClient: CachedSiloClient,
 ) : HealthIndicator {
     override fun health(): Health =
-        try {
-            val info = cachedSiloClient.callInfo()
-            Health
-                .up()
-                .withDetail("dataVersion", info.dataVersion)
-                .withDetail("siloVersion", info.siloVersion ?: "unknown")
-                .build()
-        } catch (e: SiloNotReachableException) {
-            Health
-                .down()
-                .withDetail("error", "SILO not reachable")
-                .withDetail("message", e.message)
-                .withException(e)
-                .build()
-        } catch (e: SiloUnavailableException) {
-            Health
-                .down()
-                .withDetail("error", "SILO unavailable (HTTP 503)")
-                .withDetail("message", e.message)
-                .withDetail("retryAfter", e.retryAfter)
-                .withException(e)
-                .build()
-        } catch (e: Exception) {
-            Health
-                .down()
-                .withDetail("error", "Unexpected error checking SILO")
-                .withDetail("message", e.message)
-                .withException(e)
-                .build()
-        }
+        Health
+            .up() // LAPIS should always be "up", independent of SILO.
+            .let {
+                try {
+                    val info = cachedSiloClient.callInfo()
+                    it
+                        .withDetail("dataVersion", info.dataVersion)
+                        .withDetail("siloVersion", info.siloVersion ?: "unknown")
+                } catch (e: SiloNotReachableException) {
+                    it
+                        .withDetail("siloStatus", "DOWN")
+                        .withDetail("error", "SILO not reachable")
+                        .withDetail("message", e.message)
+                } catch (e: SiloUnavailableException) {
+                    it
+                        .withDetail("siloStatus", "DOWN")
+                        .withDetail("error", "SILO unavailable (HTTP 503)")
+                        .withDetail("message", e.message)
+                        .withDetail("retryAfter", e.retryAfter)
+                } catch (e: Exception) {
+                    it
+                        .withDetail("siloStatus", "DOWN")
+                        .withDetail("error", "Unexpected error checking SILO")
+                        .withDetail("message", e.message)
+                }
+            }
+            .build()
 }
