@@ -79,24 +79,8 @@ export default defineConfig({
                     label: 'Concepts',
                     items: [
                         {
-                            label: 'Data versions',
-                            link: '/concepts/data-versions',
-                        },
-                        {
-                            label: 'Mutation filters',
-                            link: '/concepts/mutation-filters',
-                        },
-                        {
-                            label: 'Insertion filters',
-                            link: '/concepts/insertion-filters',
-                        },
-                        {
-                            label: 'Ambiguous symbols',
-                            link: '/concepts/ambiguous-symbols',
-                        },
-                        {
-                            label: 'Pango lineage query',
-                            link: '/concepts/pango-lineage-query',
+                            label: 'Authentication',
+                            link: '/concepts/authentication',
                         },
                         {
                             label: 'Request methods: GET and POST',
@@ -107,28 +91,49 @@ export default defineConfig({
                             link: '/concepts/response-format',
                         },
                         {
-                            label: 'Variant query',
-                            link: '/concepts/variant-query',
+                            label: 'Data versions',
+                            link: '/concepts/data-versions',
                         },
                         {
-                            label: 'Advanced query',
-                            link: '/concepts/advanced-query',
-                        },
-                        {
-                            label: 'String search',
-                            link: '/concepts/string-search',
-                        },
-                        {
-                            label: 'Filtering for null',
-                            link: '/concepts/filtering-for-null',
-                        },
-                        {
-                            label: 'Request Id',
+                            label: 'Request ID',
                             link: '/concepts/request-id',
                         },
                         {
-                            label: 'Authentication',
-                            link: '/concepts/authentication',
+                            label: 'Filters',
+                            items: [
+                                {
+                                    label: 'Mutation filters',
+                                    link: '/concepts/mutation-filters',
+                                },
+                                {
+                                    label: 'Insertion filters',
+                                    link: '/concepts/insertion-filters',
+                                },
+                                {
+                                    label: 'Ambiguous symbols',
+                                    link: '/concepts/ambiguous-symbols',
+                                },
+                                {
+                                    label: 'Pango lineage query',
+                                    link: '/concepts/pango-lineage-query',
+                                },
+                                {
+                                    label: 'Variant query',
+                                    link: '/concepts/variant-query',
+                                },
+                                {
+                                    label: 'Advanced query',
+                                    link: '/concepts/advanced-query',
+                                },
+                                {
+                                    label: 'String search',
+                                    link: '/concepts/string-search',
+                                },
+                                {
+                                    label: 'Filtering for null',
+                                    link: '/concepts/filtering-for-null',
+                                },
+                            ],
                         },
                     ],
                 },
