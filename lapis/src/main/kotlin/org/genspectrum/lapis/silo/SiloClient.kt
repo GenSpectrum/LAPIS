@@ -23,6 +23,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
+import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.stream.Stream
 
@@ -139,7 +140,14 @@ open class CachedSiloClient(
     }
 
     fun callInfo(): InfoData {
-        val response = send(siloUris.info, BodyHandlers.ofString(), ::tryToReadSiloErrorFromString) { it.GET() }
+        val response = send(
+            uri = siloUris.info,
+            bodyHandler = BodyHandlers.ofString(),
+            tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
+        ) {
+            it.timeout(Duration.ofMillis(100)) // this should never take long, make sure we don't block anything else
+            it.GET()
+        }
 
         return InfoData(
             dataVersion = getDataVersion(response),
