@@ -32,3 +32,20 @@ AAACG
 A filter for the mutation `3G` returns only the sequence `AAGCG`, as it is the only sequence with the symbol `G` at position 3.
 The filter `MAYBE(3G)` however also considers that the sequences `AARCG` and `AANCG` **may** have the symbol `G` at position 3,
 because the symbols `R` and `N` can represent Guanine.
+
+### `MAYBE` and `NOT`
+
+In advanced queries, you can also filter for sequences that do not have a certain mutation.
+Ambiguous symbols and negation (`not` or `!`) can sometimes seem a bit unintuitive.
+When querying for sequences that do _not_ have - for example - a G at position 3, should that include ambiguous sequences or not?
+
+When querying for `!3G` the result includes sequences that might not have a G, i.e. also sequences with `N` or `R` at position 3.
+
+Using `!MAYBE(3G)` gives us the set of sequences that _definitely_ don't have a G at 3; they have a symbol that cannot represent G.
+
+#### Example
+
+Consider the same sequences as above.
+
+`3G` returns only `AAGCG` and `!3G` returns the four other sequences.
+`!MAYBE(3G)` will only return the two `AAACG` sequences, because only for these we know that 3 is definitely not a G.
