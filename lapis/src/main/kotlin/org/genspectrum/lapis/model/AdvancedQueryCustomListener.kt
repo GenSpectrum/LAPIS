@@ -50,6 +50,10 @@ class AdvancedQueryCustomListener(
     ParseTreeListener {
     private val expressionStack = ArrayDeque<SiloFilterExpression>()
 
+    companion object {
+        private val ESCAPE_SEQUENCE_REGEX = Regex("""\\(.)""")
+    }
+
     private val metadataFieldsByName = databaseConfig.schema.metadata
         .associateBy { it.name.lowercase(Locale.US) }
 
@@ -166,7 +170,7 @@ class AdvancedQueryCustomListener(
 
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
         val metadataName = ctx.name().text
-        val metadataValue = ctx.value().text.trim('\'').replace(Regex("""\\(.)"""), "$1")
+        val metadataValue = ctx.value().text.trim('\'').replace(ESCAPE_SEQUENCE_REGEX, "$1")
 
         if (metadataName.endsWith(".regex", ignoreCase = true)) {
             val fieldName = metadataName.substringBeforeLast(".")
