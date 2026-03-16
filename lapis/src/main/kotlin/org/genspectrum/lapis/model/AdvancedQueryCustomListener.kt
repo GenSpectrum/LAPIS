@@ -166,7 +166,7 @@ class AdvancedQueryCustomListener(
 
     override fun enterMetadataQuery(ctx: AdvancedQueryParser.MetadataQueryContext) {
         val metadataName = ctx.name().text
-        val metadataValue = ctx.value().text.trim('\'')
+        val metadataValue = ctx.value().text.trim('\'').replace(Regex("""\\(.)"""), "$1")
 
         if (metadataName.endsWith(".regex", ignoreCase = true)) {
             val fieldName = metadataName.substringBeforeLast(".")

@@ -121,7 +121,7 @@ MINUS: '-';
 UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
-QUOTED_STRING: '\'' (~['\r\n])* '\'';  // matches all strings with quotes, except if they contain a newline
+QUOTED_STRING: '\'' ( '\\' . | ~['\\\r\n] )* '\'';  // matches all strings with quotes, supports \' to escape a single quote
 AND: ' ' A N D ' '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
 OR: ' ' O R ' ';
 NOT: N O T ' ';

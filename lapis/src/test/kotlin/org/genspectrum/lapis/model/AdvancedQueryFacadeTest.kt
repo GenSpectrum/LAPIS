@@ -318,7 +318,7 @@ class AdvancedQueryFacadeTest {
             valid = listOf(
                 ValidTestCase(
                     description = "regex",
-                    query = "some_metadata.regex='Basel\\{1,2\\}'",
+                    query = "some_metadata.regex='Basel\\\\{1,2\\\\}'",
                     expected = StringSearch("some_metadata", "Basel\\{1,2\\}"),
                 ),
                 ValidTestCase(
@@ -335,6 +335,11 @@ class AdvancedQueryFacadeTest {
                     description = "mixed case regex",
                     query = "some_metadata.ReGeX='value'",
                     expected = StringSearch("some_metadata", "value"),
+                ),
+                ValidTestCase(
+                    description = "regex with escaped single quote in value",
+                    query = "some_metadata.regex='it\\'s'",
+                    expected = StringSearch("some_metadata", "it's"),
                 ),
             ),
             invalid = listOf(
@@ -616,6 +621,16 @@ class AdvancedQueryFacadeTest {
                     expected = StringEquals("some_metadata", "Democratic Republic of the Congo"),
                 ),
                 ValidTestCase(
+                    description = "string equals with escaped single quote in value",
+                    query = "some_metadata='Côte d\\'Ivoire'",
+                    expected = StringEquals("some_metadata", "Côte d'Ivoire"),
+                ),
+                ValidTestCase(
+                    description = "string equals with escaped backslash in value",
+                    query = "some_metadata='back\\\\slash'",
+                    expected = StringEquals("some_metadata", "back\\slash"),
+                ),
+                ValidTestCase(
                     "boolean with = true",
                     "test_boolean_column=true",
                     BooleanEquals("test_boolean_column", true),
@@ -643,7 +658,7 @@ class AdvancedQueryFacadeTest {
             ),
             invalid = listOf(
                 InvalidTestCase(
-                    description = "string equals where value contains single quotes",
+                    description = "string equals where value contains unescaped single quote",
                     query = "some_metadata='some'value'",
                     expected = "Failed to parse advanced query (line 1:20): mismatched input 'v'",
                 ),
