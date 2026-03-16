@@ -900,6 +900,25 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
+    fun `GIVEN a query with a newline in the string value THEN document observed behaviour`() {
+        // Newlines inside a quoted string are excluded by the QUOTED_STRING grammar rule (~[\r\n]).
+        // However, ANTLR's WHITESPACE rule (which skips \r, \n, \t, space) takes priority, so the
+        // newline breaks out of the QUOTED_STRING token early. The parser then picks up the
+        // remaining text ('line2') as the value, silently ignoring 'line1'.
+        val result = underTest.map("some_metadata='line1\nline2'")
+        assertThat(result, equalTo(StringEquals("some_metadata", "line2")))
+    }
+
+    @Test
+    fun `GIVEN a query with an escaped newline in the string value THEN document observed behaviour`() {
+        // Escaping a newline (\<newline>) is excluded by the grammar (the escape alternative only
+        // allows '\\' ~[\r\n]). The same WHITESPACE-skipping behaviour applies: the newline breaks
+        // out of the QUOTED_STRING token and the remaining text ('line2') becomes the value.
+        val result = underTest.map("some_metadata='line1\\\nline2'")
+        assertThat(result, equalTo(StringEquals("some_metadata", "line2")))
+    }
+
+    @Test
     fun `GIVEN an invalid advanced query THEN throw bad request exception`() {
         val advancedQuery = "PangoLineage=jn.1* AND thisIsInvalid"
 
