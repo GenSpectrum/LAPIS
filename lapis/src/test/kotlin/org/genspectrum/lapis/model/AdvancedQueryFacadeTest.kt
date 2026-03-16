@@ -631,6 +631,20 @@ class AdvancedQueryFacadeTest {
                     expected = StringEquals("some_metadata", "back\\slash"),
                 ),
                 ValidTestCase(
+                    // ANTLR's WHITESPACE rule skips newlines outside of tokens
+                    description = "string equals with newline in value without quotes",
+                    query = "some_metadata=line1\nline2",
+                    expected = StringEquals("some_metadata", "line1line2"),
+                ),
+                ValidTestCase(
+                    // Newlines are permitted inside quoted strings and treated as literal characters.
+                    // ANTLR's WHITESPACE rule skips newlines outside of tokens, but inside
+                    // QUOTED_STRING the newline is consumed by the token rule first.
+                    description = "string equals with newline in value",
+                    query = "some_metadata='line1\nline2'",
+                    expected = StringEquals("some_metadata", "line1\nline2"),
+                ),
+                ValidTestCase(
                     "boolean with = true",
                     "test_boolean_column=true",
                     BooleanEquals("test_boolean_column", true),
@@ -897,25 +911,6 @@ class AdvancedQueryFacadeTest {
     fun `test invalid advanced queries`(testCase: InvalidTestCase) {
         val exception = assertThrows<BadRequestException> { underTest.map(testCase.query) }
         assertThat(exception.message, containsString(testCase.expected))
-    }
-
-    @Test
-    fun `GIVEN a query with a newline in the string value THEN document observed behaviour`() {
-        // Newlines inside a quoted string are excluded by the QUOTED_STRING grammar rule (~[\r\n]).
-        // However, ANTLR's WHITESPACE rule (which skips \r, \n, \t, space) takes priority, so the
-        // newline breaks out of the QUOTED_STRING token early. The parser then picks up the
-        // remaining text ('line2') as the value, silently ignoring 'line1'.
-        val result = underTest.map("some_metadata='line1\nline2'")
-        assertThat(result, equalTo(StringEquals("some_metadata", "line2")))
-    }
-
-    @Test
-    fun `GIVEN a query with an escaped newline in the string value THEN document observed behaviour`() {
-        // Escaping a newline (\<newline>) is excluded by the grammar (the escape alternative only
-        // allows '\\' ~[\r\n]). The same WHITESPACE-skipping behaviour applies: the newline breaks
-        // out of the QUOTED_STRING token and the remaining text ('line2') becomes the value.
-        val result = underTest.map("some_metadata='line1\\\nline2'")
-        assertThat(result, equalTo(StringEquals("some_metadata", "line2")))
     }
 
     @Test
