@@ -62,6 +62,19 @@ Note that if the metadata field does not only contain letters and numbers it mus
 country='United States of America'
 ```
 
+To include a literal single quote inside a quoted value, escape it with a backslash. To include a literal backslash, escape it as `\\`:
+
+```
+country='Côte d\'Ivoire'
+```
+
+When using regex-based operators (for example `field.regex='…'`),
+remember that backslash is also the escape character inside quoted strings.
+Regex patterns that require a literal backslash, including standard regex escape sequences such as `\d`, `\w`,
+or escaped metacharacters like `\{`, must therefore use doubled backslashes in the query.
+For example, write `field.regex='Basel\\{1,2\\}'` in the query language to obtain the regex pattern `Basel\{1,2\}`,
+and `field.regex='\\d+'` to obtain the pattern `\d+`.
+
 To search for empty fields (fields that are `null`) use the `IsNull` operator:
 
 ```
