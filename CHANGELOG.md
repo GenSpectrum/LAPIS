@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/GenSpectrum/LAPIS/compare/v0.7.1...v0.7.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* **lapis:** set a low timeout on calling SILO info so that the health endpoint doesn't block if SILO doesn't respond ([#1593](https://github.com/GenSpectrum/LAPIS/issues/1593)) ([c501e9d](https://github.com/GenSpectrum/LAPIS/commit/c501e9db1105cff390e03a0ea2b1ba1ea953d89c))
+
 ## [0.7.1](https://github.com/GenSpectrum/LAPIS/compare/v0.7.0...v0.7.1) (2026-03-10)
 
 
