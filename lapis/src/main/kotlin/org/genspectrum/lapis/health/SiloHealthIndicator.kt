@@ -19,21 +19,21 @@ class SiloHealthIndicator(
                 try {
                     val info = cachedSiloClient.callInfo()
                     it
-                        .withDetail("siloStatus", Status.UP.code)
+                        .withDetail("siloStatus", Status.UP)
                         .withDetail("dataVersion", info.dataVersion)
                         .withDetail("siloVersion", info.siloVersion ?: "unknown")
                 } catch (_: SiloNotReachableException) {
                     it
-                        .withDetail("siloStatus", Status.DOWN.code)
+                        .withDetail("siloStatus", Status.DOWN)
                         .withDetail("error", "SILO not reachable")
                 } catch (e: SiloUnavailableException) {
                     it
-                        .withDetail("siloStatus", Status.DOWN.code)
+                        .withDetail("siloStatus", Status.DOWN)
                         .withDetail("error", "SILO unavailable (HTTP 503)")
                         .withDetail("retryAfter", e.retryAfter)
                 } catch (_: Exception) {
                     it
-                        .withDetail("siloStatus", Status.DOWN.code)
+                        .withDetail("siloStatus", Status.DOWN)
                         .withDetail("error", "Unexpected error checking SILO")
                 }
             }
