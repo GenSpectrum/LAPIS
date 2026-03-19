@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.8.0](https://github.com/GenSpectrum/LAPIS/compare/v0.7.2...v0.8.0) (2026-03-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** Backslash is now an escape character inside quoted strings. In regex queries that use `\` as a regex escape, you'll need to pass `\\` now, e.g. before: `division.regex=Basel\{1,2\}` -> after: `division.regex=Basel\\{1,2\\}`
+
+### Features
+
+* **lapis:** support escaping single quotes in advanced query string values ([#1599](https://github.com/GenSpectrum/LAPIS/issues/1599)) ([88d59e9](https://github.com/GenSpectrum/LAPIS/commit/88d59e9c8a0ea8a5b232b0bb651a110d3a665905))
+
+
+### Bug Fixes
+
+* **lapis:** health check: consider LAPIS "UP" even when SILO is down ([#1594](https://github.com/GenSpectrum/LAPIS/issues/1594)) ([b9abdf9](https://github.com/GenSpectrum/LAPIS/commit/b9abdf951fc8636afe52e78e41a07b91dbb1c2a1))
+
 ## [0.7.2](https://github.com/GenSpectrum/LAPIS/compare/v0.7.1...v0.7.2) (2026-03-16)
 
 
