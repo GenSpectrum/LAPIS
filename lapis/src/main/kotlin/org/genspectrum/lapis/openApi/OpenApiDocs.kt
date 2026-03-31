@@ -536,6 +536,16 @@ private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
             )
         }
 
+        SequenceFilterFieldType.Date -> {
+            val fieldSchema = stringSchema(fieldType.openApiType)
+            Schema<String>().anyOf(
+                listOf(
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
+                ),
+            )
+        }
+
         SequenceFilterFieldType.Lineage -> {
             val fieldSchema = stringSchema(fieldType.openApiType)
                 .description(

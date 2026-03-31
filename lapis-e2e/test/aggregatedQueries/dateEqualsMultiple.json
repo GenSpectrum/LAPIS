@@ -1,0 +1,11 @@
+{
+  "testCaseName": "date equals with multiple values",
+  "lapisRequest": {
+    "date": ["2021-05-08", "2021-01-20"]
+  },
+  "expected": [
+    {
+      "count": 6
+    }
+  ]
+}

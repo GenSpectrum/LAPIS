@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.DATE_FIELD
 import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
@@ -663,11 +662,6 @@ class SiloFilterExpressionMapperTest {
 
         val filterParametersWithMultipleValues = listOf(
             InvalidFilterScenario(
-                description = "multiple $DATE_FIELD values",
-                filterParameters = DummySequenceFilters(mapOf(DATE_FIELD to listOf("2021-06-03", "2021-06-04"))),
-                expectedErrorMessage = "Expected exactly one value for '$DATE_FIELD' but got 2 values.",
-            ),
-            InvalidFilterScenario(
                 description = "multiple dateTo values",
                 filterParameters = DummySequenceFilters(mapOf("dateTo" to listOf("2021-06-03", "2021-06-04"))),
                 expectedErrorMessage = "Expected exactly one value for 'dateTo' but got 2 values.",
@@ -767,11 +761,11 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "date" to listOf("2021-06-03"),
                     ),
-                    And(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3))),
+                    And(Or(DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)))),
                 ),
                 Arguments.of(
                     mapOf("date" to listOf(null)),
-                    And(IsNull(column = "date")),
+                    And(Or(IsNull(column = "date"))),
                 ),
                 Arguments.of(
                     mapOf(
@@ -812,6 +806,28 @@ class SiloFilterExpressionMapperTest {
                     And(
                         DateBetween("date", from = null, to = LocalDate.of(2021, 6, 3)),
                         Or(StringEquals("some_metadata", "ABC")),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "date" to listOf("2021-06-03", "2021-06-04"),
+                    ),
+                    And(
+                        Or(
+                            DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)),
+                            DateBetween("date", from = LocalDate.of(2021, 6, 4), to = LocalDate.of(2021, 6, 4)),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "date" to listOf("2021-06-03", null),
+                    ),
+                    And(
+                        Or(
+                            DateBetween("date", from = LocalDate.of(2021, 6, 3), to = LocalDate.of(2021, 6, 3)),
+                            IsNull(column = "date"),
+                        ),
                     ),
                 ),
                 Arguments.of(

@@ -298,10 +298,14 @@ class SiloFilterExpressionMapper(
         }
 
         if (exactDateFilters.isNotEmpty()) {
-            return when (val date = getAsDate(exactDateFilters[0])) {
-                null -> IsNull(column = siloColumnName)
-                else -> DateBetween(column = siloColumnName, from = date, to = date)
-            }
+            return Or(
+                exactDateFilters[0].values.map {
+                    when (val date = parseDate(it, exactDateFilters[0].originalKey)) {
+                        null -> IsNull(column = siloColumnName)
+                        else -> DateBetween(column = siloColumnName, from = date, to = date)
+                    }
+                },
+            )
         }
 
         return DateBetween(
@@ -321,7 +325,14 @@ class SiloFilterExpressionMapper(
     private fun getAsDate(sequenceFilterValue: SequenceFilterValue?): LocalDate? {
         val (_, values, originalKey) = sequenceFilterValue ?: return null
         val value = extractSingleFilterValue(values, originalKey) ?: return null
+        return parseDate(value, originalKey)
+    }
 
+    private fun parseDate(
+        value: String?,
+        originalKey: String,
+    ): LocalDate? {
+        value ?: return null
         try {
             return LocalDate.parse(value)
         } catch (exception: DateTimeParseException) {
