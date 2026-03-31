@@ -17,7 +17,9 @@ export function getFilters(config: Config) {
                 {
                     name: metadata.name,
                     type: metadata.type,
-                    description: `Filters the "${metadata.name}" column" with exact match`,
+                    description:
+                        `Filters the "${metadata.name}" column with exact match. ` +
+                        `You can also supply an array of values - they will be combined with logical OR.`,
                 },
                 {
                     name: `${metadata.name}From`,
@@ -36,7 +38,9 @@ export function getFilters(config: Config) {
             const stringDescription = {
                 name: metadata.name,
                 type: metadata.type,
-                description: `Filters the "${metadata.name}" column" with exact match`,
+                description:
+                    `Filters the "${metadata.name}" column" with exact match. ` +
+                    `You can also supply an array of values - they will be combined with logical OR.`,
             };
 
             const allowRegexSearchDescription = {
