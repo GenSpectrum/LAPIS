@@ -350,36 +350,44 @@ class SiloFilterExpressionMapper(
     private fun mapToIntEqualsFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
-        val value = extractSingleFilterValue(values[0])
-            ?: return IsNull(column = siloColumnName)
+    ): SiloFilterExpression =
+        Or(
+            values[0].values.map {
+                when (it) {
+                    null -> IsNull(column = siloColumnName)
 
-        try {
-            return IntEquals(siloColumnName, value.toInt())
-        } catch (exception: NumberFormatException) {
-            throw BadRequestException(
-                "$siloColumnName '$value' is not a valid integer: ${exception.message}",
-                exception,
-            )
-        }
-    }
+                    else -> try {
+                        IntEquals(siloColumnName, it.toInt())
+                    } catch (exception: NumberFormatException) {
+                        throw BadRequestException(
+                            "$siloColumnName '$it' is not a valid integer: ${exception.message}",
+                            exception,
+                        )
+                    }
+                }
+            },
+        )
 
     private fun mapToFloatEqualsFilter(
         siloColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
-        val value = extractSingleFilterValue(values[0])
-            ?: return IsNull(column = siloColumnName)
+    ): SiloFilterExpression =
+        Or(
+            values[0].values.map {
+                when (it) {
+                    null -> IsNull(column = siloColumnName)
 
-        try {
-            return FloatEquals(siloColumnName, value.toDouble())
-        } catch (exception: NumberFormatException) {
-            throw BadRequestException(
-                "$siloColumnName '$value' is not a valid float: ${exception.message}",
-                exception,
-            )
-        }
-    }
+                    else -> try {
+                        FloatEquals(siloColumnName, it.toDouble())
+                    } catch (exception: NumberFormatException) {
+                        throw BadRequestException(
+                            "$siloColumnName '$it' is not a valid float: ${exception.message}",
+                            exception,
+                        )
+                    }
+                }
+            },
+        )
 
     private fun mapToIntBetweenFilter(
         siloColumnName: SequenceFilterFieldName,

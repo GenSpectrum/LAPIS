@@ -678,11 +678,6 @@ class SiloFilterExpressionMapperTest {
                 expectedErrorMessage = "Expected exactly one value for 'dateFrom' but got 2 values.",
             ),
             InvalidFilterScenario(
-                description = "multiple intField values",
-                filterParameters = DummySequenceFilters(mapOf("intField" to listOf("1", "2"))),
-                expectedErrorMessage = "Expected exactly one value for 'intField' but got 2 values.",
-            ),
-            InvalidFilterScenario(
                 description = "multiple intFieldTo values",
                 filterParameters = DummySequenceFilters(mapOf("intFieldTo" to listOf("1", "2"))),
                 expectedErrorMessage = "Expected exactly one value for 'intFieldTo' but got 2 values.",
@@ -691,11 +686,6 @@ class SiloFilterExpressionMapperTest {
                 description = "multiple intFieldFrom values",
                 filterParameters = DummySequenceFilters(mapOf("intFieldFrom" to listOf("1", "2"))),
                 expectedErrorMessage = "Expected exactly one value for 'intFieldFrom' but got 2 values.",
-            ),
-            InvalidFilterScenario(
-                description = "multiple floatField values",
-                filterParameters = DummySequenceFilters(mapOf("floatField" to listOf("0.1", "0.2"))),
-                expectedErrorMessage = "Expected exactly one value for 'floatField' but got 2 values.",
             ),
             InvalidFilterScenario(
                 description = "multiple floatFieldTo values",
@@ -849,13 +839,13 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "intField" to listOf("42"),
                     ),
-                    And(IntEquals("intField", 42)),
+                    And(Or(IntEquals("intField", 42))),
                 ),
                 Arguments.of(
                     mapOf(
                         "intField" to listOf(null),
                     ),
-                    And(IsNull(column = "intField")),
+                    And(Or(IsNull(column = "intField"))),
                 ),
                 Arguments.of(
                     mapOf(
@@ -885,13 +875,13 @@ class SiloFilterExpressionMapperTest {
                     mapOf(
                         "floatField" to listOf("42.45"),
                     ),
-                    And(FloatEquals("floatField", 42.45)),
+                    And(Or(FloatEquals("floatField", 42.45))),
                 ),
                 Arguments.of(
                     mapOf(
                         "floatField" to listOf(null),
                     ),
-                    And(IsNull("floatField")),
+                    And(Or(IsNull("floatField"))),
                 ),
                 Arguments.of(
                     mapOf(
@@ -916,6 +906,50 @@ class SiloFilterExpressionMapperTest {
                         "floatFieldTo" to listOf(null),
                     ),
                     And(FloatBetween("floatField", null, null)),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intField" to listOf("1", "2"),
+                    ),
+                    And(
+                        Or(
+                            IntEquals("intField", 1),
+                            IntEquals("intField", 2),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "intField" to listOf("1", null),
+                    ),
+                    And(
+                        Or(
+                            IntEquals("intField", 1),
+                            IsNull(column = "intField"),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatField" to listOf("0.1", "0.2"),
+                    ),
+                    And(
+                        Or(
+                            FloatEquals("floatField", 0.1),
+                            FloatEquals("floatField", 0.2),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    mapOf(
+                        "floatField" to listOf("0.1", null),
+                    ),
+                    And(
+                        Or(
+                            FloatEquals("floatField", 0.1),
+                            IsNull(column = "floatField"),
+                        ),
+                    ),
                 ),
                 Arguments.of(
                     mapOf(

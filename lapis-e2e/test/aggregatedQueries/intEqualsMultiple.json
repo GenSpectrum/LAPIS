@@ -1,0 +1,11 @@
+{
+  "testCaseName": "int equals with multiple values",
+  "lapisRequest": {
+    "age": [51, 52]
+  },
+  "expected": [
+    {
+      "count": 15
+    }
+  ]
+}
