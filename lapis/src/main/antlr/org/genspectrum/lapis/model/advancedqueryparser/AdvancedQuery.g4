@@ -122,7 +122,7 @@ UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 QUOTED_STRING: '\'' ( '\\' . | ~['\\] )* '\'';  // matches all strings with quotes, supports backslash escaping (e.g. \' for a literal single quote, \\ for a literal backslash)
-UNICODE_LETTER: [\p{L}] ; // matches non-ASCII Unicode letters and combining marks (e.g. umlauts, accented characters)
+UNICODE_LETTER: [\p{Letter}] ; // matches non-ASCII Unicode letters and combining marks (e.g. umlauts, accented characters)
 AND: ' ' A N D ' '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
 OR: ' ' O R ' ';
 NOT: N O T ' ';
