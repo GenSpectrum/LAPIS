@@ -341,6 +341,11 @@ class AdvancedQueryFacadeTest {
                     query = "some_metadata.regex='it\\'s'",
                     expected = StringSearch("some_metadata", "it's"),
                 ),
+                ValidTestCase(
+                    description = "unquoted regex with non-ASCII characters",
+                    query = "some_metadata.regex=Graubünden",
+                    expected = StringSearch("some_metadata", "Graubünden"),
+                ),
             ),
             invalid = listOf(
                 InvalidTestCase(
@@ -626,6 +631,41 @@ class AdvancedQueryFacadeTest {
                     expected = StringEquals("some_metadata", "Côte d'Ivoire"),
                 ),
                 ValidTestCase(
+                    description = "string equals with unquoted umlaut (ü)",
+                    query = "some_metadata=Zürich",
+                    expected = StringEquals("some_metadata", "Zürich"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted accented character (â)",
+                    query = "some_metadata=Neuchâtel",
+                    expected = StringEquals("some_metadata", "Neuchâtel"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted cedilla (ç)",
+                    query = "some_metadata=Français",
+                    expected = StringEquals("some_metadata", "Français"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted tilde-n (ñ)",
+                    query = "some_metadata=España",
+                    expected = StringEquals("some_metadata", "España"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted Cyrillic characters",
+                    query = "some_metadata=Москва",
+                    expected = StringEquals("some_metadata", "Москва"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted Chinese characters",
+                    query = "some_metadata=北京",
+                    expected = StringEquals("some_metadata", "北京"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted mixed ASCII and non-ASCII",
+                    query = "some_metadata=Graubünden",
+                    expected = StringEquals("some_metadata", "Graubünden"),
+                ),
+                ValidTestCase(
                     description = "string equals with escaped backslash in value",
                     query = "some_metadata='back\\\\slash'",
                     expected = StringEquals("some_metadata", "back\\slash"),
@@ -726,6 +766,16 @@ class AdvancedQueryFacadeTest {
                     "floatField=notAFloat",
                     "'notAFloat' is not a valid float",
                 ),
+                InvalidTestCase(
+                    description = "non-ASCII field name",
+                    query = "divïsion=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
+                InvalidTestCase(
+                    description = "non-ASCII field name with regex suffix",
+                    query = "divïsion.regex=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
             ),
         )
 
@@ -796,6 +846,11 @@ class AdvancedQueryFacadeTest {
                     description = "amino acid mutation with invalid gene",
                     query = "invalidGene:501Y",
                     expected = "invalidGene is not a known segment or gene",
+                ),
+                InvalidTestCase(
+                    description = "named mutation with non-ASCII gene/segment name",
+                    query = "Ñ:123A",
+                    expected = "Ñ is not a known segment or gene",
                 ),
                 InvalidTestCase(
                     description = "'-' in nucleotide 'from' position is invalid",
