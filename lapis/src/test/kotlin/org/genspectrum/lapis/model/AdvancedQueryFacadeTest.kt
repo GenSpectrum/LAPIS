@@ -766,6 +766,16 @@ class AdvancedQueryFacadeTest {
                     "floatField=notAFloat",
                     "'notAFloat' is not a valid float",
                 ),
+                InvalidTestCase(
+                    description = "non-ASCII field name",
+                    query = "divïsion=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
+                InvalidTestCase(
+                    description = "non-ASCII field name with regex suffix",
+                    query = "divïsion.regex=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
             ),
         )
 
@@ -836,6 +846,11 @@ class AdvancedQueryFacadeTest {
                     description = "amino acid mutation with invalid gene",
                     query = "invalidGene:501Y",
                     expected = "invalidGene is not a known segment or gene",
+                ),
+                InvalidTestCase(
+                    description = "named mutation with non-ASCII gene/segment name",
+                    query = "Ñ:123A",
+                    expected = "Ñ is not a known segment or gene",
                 ),
                 InvalidTestCase(
                     description = "'-' in nucleotide 'from' position is invalid",
