@@ -190,7 +190,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
       const errorResponse = await response.json();
       expect(errorResponse.error.detail).to.match(
-        /Error from SILO: The table does not contain the field 'unknownGene'/
+        /Error from SILO: The table does not contain the field unknownGene/
       );
     });
 
