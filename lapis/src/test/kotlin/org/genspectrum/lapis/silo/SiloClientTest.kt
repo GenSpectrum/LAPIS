@@ -37,6 +37,7 @@ import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpResponse.response
 import org.mockserver.model.MediaType
+import org.mockserver.model.MediaType.parse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -81,12 +82,14 @@ class SiloClientTest(
     fun `GIVEN server returns aggregated response THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-                        {"count": 6,"division": "Aargau"}
-                        {"count": 8,"division": "Basel-Land"}
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf("count" to 6L, "division" to "Aargau"),
+                            mapOf("count" to 8L, "division" to "Basel-Land"),
+                        ),
+                    ),
                 ),
         )
 
@@ -109,12 +112,32 @@ class SiloClientTest(
     fun `GIVEN server returns mutations response THEN response can be deserialized`(action: SiloAction<MutationData>) {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-{"count": 51,"mutation": "C3037T","mutationFrom": "C","mutationTo": "T","position": 3037,"proportion": 1,"sequenceName": "main","coverage":100}
-{"count": 52,"mutation": "C14408T","mutationFrom": "C","mutationTo": "T","position": 14408,"proportion": 1,"sequenceName": "main","coverage":101}
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf(
+                                "mutation" to "C3037T",
+                                "mutationFrom" to "C",
+                                "mutationTo" to "T",
+                                "sequenceName" to "main",
+                                "position" to 3037,
+                                "proportion" to 1.0,
+                                "coverage" to 100,
+                                "count" to 51,
+                            ),
+                            mapOf(
+                                "mutation" to "C14408T",
+                                "mutationFrom" to "C",
+                                "mutationTo" to "T",
+                                "sequenceName" to "main",
+                                "position" to 14408,
+                                "proportion" to 1.0,
+                                "coverage" to 101,
+                                "count" to 52,
+                            ),
+                        ),
+                    ),
                 ),
         )
 
@@ -153,13 +176,15 @@ class SiloClientTest(
     fun `GIVEN server returns sequence data THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-                        {"primaryKey": "key1","someSequenceName": "ABCD"}
-                        {"primaryKey": "key2","someSequenceName": "DEFG"}
-                        {"primaryKey": "key3","someSequenceName": null}
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf("primaryKey" to "key1", "someSequenceName" to "ABCD"),
+                            mapOf("primaryKey" to "key2", "someSequenceName" to "DEFG"),
+                            mapOf("primaryKey" to "key3", "someSequenceName" to null),
+                        ),
+                    ),
                 ),
         )
 
@@ -184,18 +209,20 @@ class SiloClientTest(
     fun `GIVEN server returns unaligned sequence data THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-                        {"primaryKey": "key1","unaligned_someSequenceName": "ABCD"}
-                        {"primaryKey": "key2","unaligned_someSequenceName": "DEFG"}
-                        {"primaryKey": "key3","unaligned_someSequenceName": null}
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf("primaryKey" to "key1", "unaligned_someSequenceName" to "ABCD"),
+                            mapOf("primaryKey" to "key2", "unaligned_someSequenceName" to "DEFG"),
+                            mapOf("primaryKey" to "key3", "unaligned_someSequenceName" to null),
+                        ),
+                    ),
                 ),
         )
 
         val query = SiloQuery(
-            SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
+            SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("unaligned_someSequenceName")),
             StringEquals("theColumn", "theValue"),
         )
         val result = underTest.sendQuery(query).toList()
@@ -215,12 +242,26 @@ class SiloClientTest(
     fun `GIVEN server returns details response THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-{ "age": 50, "country": "Switzerland", "date": "2021-02-23", "pango_lineage": "B.1.1.7", "qc_value": 0.95 }
-{ "age": 54, "country": "Switzerland", "date": "2021-03-19", "pango_lineage": "B.1.1.7", "qc_value": 0.94 }
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf(
+                                "age" to 50,
+                                "country" to "Switzerland",
+                                "date" to "2021-02-23",
+                                "pango_lineage" to "B.1.1.7",
+                                "qc_value" to 0.95,
+                            ),
+                            mapOf(
+                                "age" to 54,
+                                "country" to "Switzerland",
+                                "date" to "2021-03-19",
+                                "pango_lineage" to "B.1.1.7",
+                                "qc_value" to 0.94,
+                            ),
+                        ),
+                    ),
                 ),
         )
 
@@ -257,11 +298,17 @@ class SiloClientTest(
     fun `GIVEN server returns most recent common ancestor response THEN response can be deserialized`() {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-{ "mrcaNode": "node", "missingNodeCount": 5, "missingFromTree": "node1,node2,node3,node4,node5" }
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf(
+                                "mrcaNode" to "node",
+                                "missingNodeCount" to 5,
+                                "missingFromTree" to "node1,node2,node3,node4,node5",
+                            ),
+                        ),
+                    ),
                 ),
         )
 
@@ -294,12 +341,26 @@ class SiloClientTest(
     ) {
         expectQueryRequestAndRespondWith(
             response()
-                .withContentType(MediaType.APPLICATION_JSON_UTF_8)
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
                 .withBody(
-                    """
-{ "count": 1, "insertedSymbols": "SGE", "position": 143, "insertion": "ins_S:247:SGE", "sequenceName": "S" }
-{ "count": 2, "insertedSymbols": "EPE", "position": 214, "insertion": "ins_S:214:EPE", "sequenceName": "S" }
-                    """,
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf(
+                                "count" to 1,
+                                "insertedSymbols" to "SGE",
+                                "position" to 143,
+                                "insertion" to "ins_S:247:SGE",
+                                "sequenceName" to "S",
+                            ),
+                            mapOf(
+                                "count" to 2,
+                                "insertedSymbols" to "EPE",
+                                "position" to 214,
+                                "insertion" to "ins_S:214:EPE",
+                                "sequenceName" to "S",
+                            ),
+                        ),
+                    ),
                 ),
         )
 
@@ -370,7 +431,7 @@ class SiloClientTest(
         )
 
         val exception = assertThrows<RuntimeException> { underTest.sendQuery(someQuery).toList() }
-        assertThat(exception.message, containsString("Could not parse response from silo"))
+        assertThat(exception.message, containsString("Could not parse Arrow IPC response from SILO"))
     }
 
     @Test
@@ -415,9 +476,7 @@ class SiloClientTest(
         val errorMessage = "make this fail so that we see a difference on the second call"
 
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withBody(""),
+            emptyArrowResponse(),
             Times.exactly(1),
         )
         expectQueryRequestAndRespondWith(
@@ -439,9 +498,7 @@ class SiloClientTest(
         query: SiloQuery<*>,
     ) {
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withBody(""),
+            emptyArrowResponse(),
             Times.once(),
         )
 
@@ -460,10 +517,8 @@ class SiloClientTest(
         )
 
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withHeader(DATA_VERSION_HEADER, dataVersionValue)
-                .withBody(""),
+            emptyArrowResponse()
+                .withHeader(DATA_VERSION_HEADER, dataVersionValue),
             Times.once(),
         )
 
@@ -482,9 +537,7 @@ class SiloClientTest(
     fun `GIVEN a cacheable action with randomize=true THEN is not cached`() {
         val errorMessage = "This error should appear"
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withBody(""),
+            emptyArrowResponse(),
             Times.once(),
         )
         expectQueryRequestAndRespondWith(
@@ -511,9 +564,7 @@ class SiloClientTest(
     @Test
     fun `GIVEN a cacheable action with randomize with seed THEN is cached`() {
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withBody(""),
+            emptyArrowResponse(),
             Times.once(),
         )
 
@@ -687,10 +738,8 @@ class SiloClientAndCacheInvalidatorTest(
 
     private fun assertThatResultIsCachedOnSecondRequest() {
         expectQueryRequestAndRespondWith(
-            response()
-                .withStatusCode(200)
-                .withHeader(DATA_VERSION_HEADER, firstDataVersion)
-                .withBody(""),
+            emptyArrowResponse()
+                .withHeader(DATA_VERSION_HEADER, firstDataVersion),
             Times.once(),
         )
 
@@ -739,11 +788,18 @@ private fun expectQueryRequestAndRespondWith(
                 .withMethod("POST")
                 .withPath("/query")
                 .withContentType(MediaType.APPLICATION_JSON)
-                .withHeader("X-Request-Id", REQUEST_ID_VALUE),
+                .withHeader("X-Request-Id", REQUEST_ID_VALUE)
+                .withHeader("Accept", ARROW_STREAM_MEDIA_TYPE),
             times,
         )
         .respond(httpResponse)
 }
+
+private fun emptyArrowResponse() =
+    response()
+        .withStatusCode(200)
+        .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
+        .withBody(buildArrowIpcStream(emptyList()))
 
 private fun expectInfoCallAndReturnDataVersion(
     dataVersion: String,

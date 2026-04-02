@@ -3,6 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.apache.arrow.memory.RootAllocator
+import org.apache.arrow.vector.ipc.ArrowStreamReader
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.log
@@ -17,6 +19,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import java.io.IOException
+import java.io.InputStream
 import java.net.ConnectException
 import java.net.URI
 import java.net.http.HttpClient
@@ -26,6 +29,7 @@ import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.stream.Stream
+import java.util.stream.StreamSupport
 
 @Component
 class SiloClient(
@@ -77,6 +81,7 @@ class SiloClient(
 }
 
 const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
+const val ARROW_STREAM_MEDIA_TYPE = "application/vnd.apache.arrow.stream"
 
 @Component
 open class CachedSiloClient(
@@ -116,27 +121,46 @@ open class CachedSiloClient(
 
         val response = send(
             uri = siloUris.query,
-            bodyHandler = BodyHandlers.ofLines(),
-            tryToReadSiloErrorFromBody = { tryToReadSiloErrorFromString(it.findFirst().orElse("")) },
+            bodyHandler = BodyHandlers.ofInputStream(),
+            tryToReadSiloErrorFromBody = { tryToReadSiloErrorFromString(it.readBytes().toString(Charsets.UTF_8)) },
         ) {
             it.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.ACCEPT, ARROW_STREAM_MEDIA_TYPE)
                 .POST(HttpRequest.BodyPublishers.ofString(queryJson))
         }
 
         return WithDataVersion(
-            queryResult = response.body()
-                .filter { it.isNotBlank() }
-                .map {
-                    try {
-                        objectMapper.readValue(it, query.action.typeReference)
-                    } catch (exception: Exception) {
-                        val message = "Could not parse response from silo: " +
-                            exception::class.toString() + " " + exception.message + " - NDJSON line: " + it
-                        throw RuntimeException(message, exception)
-                    }
-                },
+            queryResult = parseArrowStream(response.body(), query.action.arrowConverter),
             dataVersion = getDataVersion(response),
         )
+    }
+
+    private fun <ResponseType> parseArrowStream(
+        inputStream: InputStream,
+        converter: ArrowRowConverter<ResponseType>,
+    ): Stream<ResponseType> {
+        val allocator = RootAllocator()
+        val reader = ArrowStreamReader(inputStream, allocator)
+
+        val batches = generateSequence {
+            try {
+                if (reader.loadNextBatch()) reader.vectorSchemaRoot else null
+            } catch (exception: Exception) {
+                val message = "Could not parse Arrow IPC response from SILO: " +
+                    exception::class.toString() + " " + exception.message
+                throw RuntimeException(message, exception)
+            }
+        }
+
+        val rowSequence = batches.flatMap { root ->
+            (0 until root.rowCount).asSequence().map { rowIndex -> converter(root, rowIndex) }
+        }
+
+        return StreamSupport.stream(rowSequence.asIterable().spliterator(), false)
+            .onClose {
+                reader.close()
+                allocator.close()
+            }
     }
 
     fun callInfo(): InfoData {

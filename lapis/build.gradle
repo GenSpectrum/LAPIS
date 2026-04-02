@@ -42,6 +42,8 @@ dependencies {
     implementation 'org.antlr:antlr4-runtime:4.13.2'
     implementation 'org.apache.commons:commons-csv:1.14.1'
     implementation 'com.github.luben:zstd-jni:1.5.7-7'
+    implementation 'org.apache.arrow:arrow-vector:19.0.0'
+    implementation 'org.apache.arrow:arrow-memory-unsafe:19.0.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat'
 
@@ -86,6 +88,12 @@ tasks.named('test') {
         exceptionFormat = TestExceptionFormat.FULL
         showExceptions = true
     }
+    maxHeapSize = '1g'
+    // Required by Apache Arrow to access DirectByteBuffer internals on Java 9+
+    jvmArgs(
+        '--add-opens=java.base/java.nio=ALL-UNNAMED',
+        '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
+    )
 }
 
 // taken from https://github.com/JLLeitschuh/ktlint-gradle/issues/809#issuecomment-2515514826
