@@ -508,13 +508,51 @@ private fun primitiveSequenceFilterFieldSchemas(sequenceFilterFields: SequenceFi
 
 private fun filterFieldSchema(fieldType: SequenceFilterFieldType) =
     when (fieldType) {
-        SequenceFilterFieldType.String ->
+        SequenceFilterFieldType.String -> {
+            val fieldSchema = stringSchema(fieldType.openApiType)
+                .description("A string or null")
             Schema<String>().anyOf(
                 listOf(
-                    stringSchema(fieldType.openApiType),
-                    logicalOrArraySchema(stringSchema(fieldType.openApiType)),
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
                 ),
             )
+        }
+
+        SequenceFilterFieldType.Int -> {
+            val fieldSchema = Schema<Int>()
+                .types(setOf(fieldType.openApiType))
+                .description("An integer or null")
+            Schema<Any>().anyOf(
+                listOf(
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
+                ),
+            )
+        }
+
+        SequenceFilterFieldType.Float -> {
+            val fieldSchema = Schema<Float>()
+                .types(setOf(fieldType.openApiType))
+                .description("A float or null")
+            Schema<Any>().anyOf(
+                listOf(
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
+                ),
+            )
+        }
+
+        SequenceFilterFieldType.Date -> {
+            val fieldSchema = stringSchema(fieldType.openApiType)
+                .description("A date string (YYYY-MM-DD) or null")
+            Schema<String>().anyOf(
+                listOf(
+                    fieldSchema,
+                    logicalOrArraySchema(fieldSchema),
+                ),
+            )
+        }
 
         SequenceFilterFieldType.Lineage -> {
             val fieldSchema = stringSchema(fieldType.openApiType)
