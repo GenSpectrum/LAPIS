@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/GenSpectrum/LAPIS/compare/v0.8.0...v0.8.1) (2026-04-10)
+
+
+### Features
+
+* **lapis:** also allow multiple value in int, float and date filters (and concatenate them with `or`) ([#1626](https://github.com/GenSpectrum/LAPIS/issues/1626)) ([7e2736c](https://github.com/GenSpectrum/LAPIS/commit/7e2736c829d305aa0cd121cca6909a68313a40ba))
+
 ## [0.8.0](https://github.com/GenSpectrum/LAPIS/compare/v0.7.2...v0.8.0) (2026-03-19)
 
 
