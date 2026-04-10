@@ -28,11 +28,11 @@ You can use metadata fields as filter parameters in your queries. The filter syn
   You can also supply an array - the fields will be combined with logical OR.
   Examples: `"[(${stringField})]": "someValue"`, `"[(${stringField})].regex": "^startsWithThis*"`, `"[(${stringField})]": ["someValue", "orOtherValue"]`[/]
 [# th:if="${lineageField != null}"]- **Lineage fields**: For string fields that also have a lineage index, you can filter for exact matches (`"[(${lineageField})]": "lineage"`) or including sublineages (`"[(${lineageField})]": "lineage*"`).[/]
-[# th:if="${dateField != null}"]- **Date fields**: Use exact match, or `From`/`To` suffixes for ranges. You can also supply an array for exact match - the values will be combined with logical OR.
+[# th:if="${dateField != null}"]- **Date fields**: Use exact match, or `From`/`To` suffixes for ranges. You can also supply an array for exact match - the values will be combined with logical OR, and may include `null`.
   Examples: `"[(${dateField})]": "2023-01-15"`, `"[(${dateField})]From": "2023-01-01", "[(${dateField})]To": "2023-12-31"`, `"[(${dateField})]": ["2023-01-15", "2023-02-20"]`[/]
-[# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. You can also supply an array for exact match - the values will be combined with logical OR.
+[# th:if="${intField != null}"]- **Integer fields**: Use exact match or `From`/`To` for ranges. You can also supply an array for exact match - the values will be combined with logical OR, and may include `null`.
   Examples: `"[(${intField})]": 42`, `"[(${intField})]From": 10, "[(${intField})]To": 50`, `"[(${intField})]": [42, 43]`[/]
-[# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. You can also supply an array for exact match - the values will be combined with logical OR.
+[# th:if="${floatField != null}"]- **Float fields**: Use exact match or `From`/`To` for ranges. You can also supply an array for exact match - the values will be combined with logical OR, and may include `null`.
   Examples: `"[(${floatField})]": 0.95`, `"[(${floatField})]From": 0.8, "[(${floatField})]To": 1.0`, `"[(${floatField})]": [0.95, 0.97]`[/]
 [# th:if="${booleanField != null}"]- **Boolean fields**: Use `true` or `false`. Example: `"[(${booleanField})]": true`[/]
 
