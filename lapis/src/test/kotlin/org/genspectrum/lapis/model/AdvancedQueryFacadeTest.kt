@@ -636,6 +636,15 @@ class AdvancedQueryFacadeTest {
                     expected = StringEquals("some_metadata", "Zürich"),
                 ),
                 ValidTestCase(
+                    // "Zürich" in NFD form: the ü is decomposed into u (U+0075) + combining diaeresis (U+0308).
+                    // The combining diaeresis is a Unicode combining mark (category M), which is NOT matched by
+                    // \p{Letter}. This test demonstrates the bug Copilot pointed out: UNICODE_LETTER only covers
+                    // \p{Letter} and therefore rejects combining marks, so NFD-encoded input fails to parse.
+                    description = "string equals with unquoted umlaut in NFD form (u + combining diaeresis U+0308)",
+                    query = "some_metadata=Zu\u0308rich",
+                    expected = StringEquals("some_metadata", "Zu\u0308rich"),
+                ),
+                ValidTestCase(
                     description = "string equals with unquoted accented character (â)",
                     query = "some_metadata=Neuchâtel",
                     expected = StringEquals("some_metadata", "Neuchâtel"),
