@@ -635,14 +635,42 @@ class AdvancedQueryFacadeTest {
                     query = "some_metadata=Zürich",
                     expected = StringEquals("some_metadata", "Zürich"),
                 ),
+                // The tests below cover NFD (decomposed) Unicode forms, where diacritics are represented as
+                // separate combining mark codepoints (Unicode category M) rather than precomposed single
+                // codepoints. UNICODE_LETTER only matches \p{Letter} and therefore rejects combining marks,
+                // causing them to be silently dropped or triggering a token recognition error.
                 ValidTestCase(
-                    // "Zürich" in NFD form: the ü is decomposed into u (U+0075) + combining diaeresis (U+0308).
-                    // The combining diaeresis is a Unicode combining mark (category M), which is NOT matched by
-                    // \p{Letter}. This test demonstrates the bug Copilot pointed out: UNICODE_LETTER only covers
-                    // \p{Letter} and therefore rejects combining marks, so NFD-encoded input fails to parse.
+                    // "Zürich" in NFD: ü = u (U+0075) + combining diaeresis (U+0308, Mn)
                     description = "string equals with unquoted umlaut in NFD form (u + combining diaeresis U+0308)",
                     query = "some_metadata=Zu\u0308rich",
                     expected = StringEquals("some_metadata", "Zu\u0308rich"),
+                ),
+                ValidTestCase(
+                    // "Bogotá" in NFD: á = a (U+0061) + combining acute accent (U+0301, Mn)
+                    description = "string equals with NFD acute accent (Bogota\u0301)",
+                    query = "some_metadata=Bogota\u0301",
+                    expected = StringEquals("some_metadata", "Bogota\u0301"),
+                ),
+                ValidTestCase(
+                    // "Genève" in NFD: è = e (U+0065) + combining grave accent (U+0300, Mn)
+                    description = "string equals with NFD grave accent (Gene\u0300ve)",
+                    query = "some_metadata=Gene\u0300ve",
+                    expected = StringEquals("some_metadata", "Gene\u0300ve"),
+                ),
+                ValidTestCase(
+                    // "Hà Nội" simplified to "HaNoi" with NFD: à = a + U+0300, ộ = o + U+0302 + U+0323
+                    // Tests stacked combining marks (two Mn per vowel) as in Vietnamese
+                    description = "string equals with NFD stacked combining marks (Vietnamese Ha\u0300No\u0323\u0302i)",
+                    query = "some_metadata=Ha\u0300No\u0323\u0302i",
+                    expected = StringEquals("some_metadata", "Ha\u0300No\u0323\u0302i"),
+                ),
+                ValidTestCase(
+                    // Devanagari: "दिल्ली" (Delhi) — contains matra ि (U+093F, Mc spacing mark) and
+                    // virama ् (U+094D, Mn non-spacing mark) even in NFC. These are combining marks
+                    // that are NOT results of NFD decomposition — they exist in NFC already.
+                    description = "string equals with Devanagari combining marks (Delhi in Hindi, NFC already contains Mc/Mn)",
+                    query = "some_metadata=\u0926\u093F\u0932\u094D\u0932\u0940",
+                    expected = StringEquals("some_metadata", "\u0926\u093F\u0932\u094D\u0932\u0940"),
                 ),
                 ValidTestCase(
                     description = "string equals with unquoted accented character (â)",
