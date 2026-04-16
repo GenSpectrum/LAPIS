@@ -44,31 +44,46 @@ data class SiloQuery<ResponseType>(
 /** Converts one row at [rowIndex] from an Arrow [VectorSchemaRoot] to a typed Kotlin object. */
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
-private fun VectorSchemaRoot.getString(name: String, rowIndex: Int): String? {
+private fun VectorSchemaRoot.getString(
+    name: String,
+    rowIndex: Int,
+): String? {
     val vector = getVector(name) as? VarCharVector ?: return null
     if (vector.isNull(rowIndex)) return null
     return String(vector.get(rowIndex))
 }
 
-private fun VectorSchemaRoot.getInt(name: String, rowIndex: Int): Int? {
+private fun VectorSchemaRoot.getInt(
+    name: String,
+    rowIndex: Int,
+): Int? {
     val vector = getVector(name) as? IntVector ?: return null
     if (vector.isNull(rowIndex)) return null
     return vector.get(rowIndex)
 }
 
-private fun VectorSchemaRoot.getLong(name: String, rowIndex: Int): Long? {
+private fun VectorSchemaRoot.getLong(
+    name: String,
+    rowIndex: Int,
+): Long? {
     val vector = getVector(name) as? BigIntVector ?: return null
     if (vector.isNull(rowIndex)) return null
     return vector.get(rowIndex)
 }
 
-private fun VectorSchemaRoot.getDouble(name: String, rowIndex: Int): Double? {
+private fun VectorSchemaRoot.getDouble(
+    name: String,
+    rowIndex: Int,
+): Double? {
     val vector = getVector(name) as? Float8Vector ?: return null
     if (vector.isNull(rowIndex)) return null
     return vector.get(rowIndex)
 }
 
-private fun VectorSchemaRoot.fieldValueAsJsonNode(columnIndex: Int, rowIndex: Int): JsonNode {
+private fun VectorSchemaRoot.fieldValueAsJsonNode(
+    columnIndex: Int,
+    rowIndex: Int,
+): JsonNode {
     val vector = getFieldVectors()[columnIndex]
     if (vector.isNull(rowIndex)) return NullNode.instance
     return when (vector) {
@@ -256,20 +271,20 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<AggregationData>(
-        typeReference = AggregationDataTypeReference(),
-        cacheable = true,
-        arrowConverter = { root, rowIndex ->
-            val count = root.getLong(COUNT_PROPERTY, rowIndex)?.toInt() ?: 0
-            val fields = root.schema.fields
-                .filter { it.name != COUNT_PROPERTY }
-                .mapIndexed { colIdx, field ->
-                    val actualColIdx = root.schema.fields.indexOfFirst { it.name == field.name }
-                    field.name to root.fieldValueAsJsonNode(actualColIdx, rowIndex)
-                }
-                .toMap()
-            AggregationData(count, fields)
-        },
-    ) {
+            typeReference = AggregationDataTypeReference(),
+            cacheable = true,
+            arrowConverter = { root, rowIndex ->
+                val count = root.getLong(COUNT_PROPERTY, rowIndex)?.toInt() ?: 0
+                val fields = root.schema.fields
+                    .filter { it.name != COUNT_PROPERTY }
+                    .mapIndexed { colIdx, field ->
+                        val actualColIdx = root.schema.fields.indexOfFirst { it.name == field.name }
+                        field.name to root.fieldValueAsJsonNode(actualColIdx, rowIndex)
+                    }
+                    .toMap()
+                AggregationData(count, fields)
+            },
+        ) {
         val type: String = "Aggregated"
     }
 
@@ -282,10 +297,10 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
     ) : SiloAction<MutationData>(
-        typeReference = MutationDataTypeReference(),
-        cacheable = true,
-        arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
-    ) {
+            typeReference = MutationDataTypeReference(),
+            cacheable = true,
+            arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
+        ) {
         val type: String = "Mutations"
     }
 
@@ -298,10 +313,10 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
     ) : SiloAction<MutationData>(
-        typeReference = AminoAcidMutationDataTypeReference(),
-        cacheable = true,
-        arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
-    ) {
+            typeReference = AminoAcidMutationDataTypeReference(),
+            cacheable = true,
+            arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
+        ) {
         val type: String = "AminoAcidMutations"
     }
 
@@ -313,16 +328,16 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<DetailsData>(
-        typeReference = DetailsDataTypeReference(),
-        cacheable = false,
-        arrowConverter = { root, rowIndex ->
-            DetailsData(
-                root.schema.fields.mapIndexed { colIdx, field ->
-                    field.name to root.fieldValueAsJsonNode(colIdx, rowIndex)
-                }.toMap(),
-            )
-        },
-    ) {
+            typeReference = DetailsDataTypeReference(),
+            cacheable = false,
+            arrowConverter = { root, rowIndex ->
+                DetailsData(
+                    root.schema.fields.mapIndexed { colIdx, field ->
+                        field.name to root.fieldValueAsJsonNode(colIdx, rowIndex)
+                    }.toMap(),
+                )
+            },
+        ) {
         val type: String = "Details"
     }
 
@@ -333,10 +348,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(
-        typeReference = InsertionDataTypeReference(),
-        cacheable = true,
-        arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
-    ) {
+            typeReference = InsertionDataTypeReference(),
+            cacheable = true,
+            arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
+        ) {
         val type: String = "Insertions"
     }
 
@@ -349,16 +364,16 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
     ) : SiloAction<MostCommonAncestorData>(
-        typeReference = MostCommonAncestorDataTypeReference(),
-        cacheable = true,
-        arrowConverter = { root, rowIndex ->
-            MostCommonAncestorData(
-                mrcaNode = root.getString("mrcaNode", rowIndex),
-                missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
-                missingFromTree = root.getString("missingFromTree", rowIndex),
-            )
-        },
-    ) {
+            typeReference = MostCommonAncestorDataTypeReference(),
+            cacheable = true,
+            arrowConverter = { root, rowIndex ->
+                MostCommonAncestorData(
+                    mrcaNode = root.getString("mrcaNode", rowIndex),
+                    missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
+                    missingFromTree = root.getString("missingFromTree", rowIndex),
+                )
+            },
+        ) {
         val type: String = "MostRecentCommonAncestor"
     }
 
@@ -371,16 +386,16 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
     ) : SiloAction<PhyloSubtreeData>(
-        typeReference = PhyloSubtreeDataTypeReference(),
-        cacheable = true,
-        arrowConverter = { root, rowIndex ->
-            PhyloSubtreeData(
-                subtreeNewick = root.getString("subtreeNewick", rowIndex) ?: "",
-                missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
-                missingFromTree = root.getString("missingFromTree", rowIndex),
-            )
-        },
-    ) {
+            typeReference = PhyloSubtreeDataTypeReference(),
+            cacheable = true,
+            arrowConverter = { root, rowIndex ->
+                PhyloSubtreeData(
+                    subtreeNewick = root.getString("subtreeNewick", rowIndex) ?: "",
+                    missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
+                    missingFromTree = root.getString("missingFromTree", rowIndex),
+                )
+            },
+        ) {
         val type: String = "PhyloSubtree"
     }
 
@@ -391,10 +406,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : SiloAction<InsertionData>(
-        typeReference = InsertionDataTypeReference(),
-        cacheable = true,
-        arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
-    ) {
+            typeReference = InsertionDataTypeReference(),
+            cacheable = true,
+            arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
+        ) {
         val type: String = "AminoAcidInsertions"
     }
 
@@ -408,16 +423,16 @@ sealed class SiloAction<ResponseType>(
         val sequenceNames: List<String>,
         val additionalFields: List<String> = emptyList(),
     ) : SiloAction<SequenceData>(
-        typeReference = SequenceDataTypeReference(),
-        cacheable = false,
-        arrowConverter = { root, rowIndex ->
-            SequenceData(
-                root.schema.fields.mapIndexed { colIdx, field ->
-                    field.name.removePrefix(UNALIGNED_PREFIX) to root.fieldValueAsJsonNode(colIdx, rowIndex)
-                }.toMap(),
-            )
-        },
-    )
+            typeReference = SequenceDataTypeReference(),
+            cacheable = false,
+            arrowConverter = { root, rowIndex ->
+                SequenceData(
+                    root.schema.fields.mapIndexed { colIdx, field ->
+                        field.name.removePrefix(UNALIGNED_PREFIX) to root.fieldValueAsJsonNode(colIdx, rowIndex)
+                    }.toMap(),
+                )
+            },
+        )
 }
 
 private val MUTATION_DATA_ARROW_CONVERTER: ArrowRowConverter<MutationData> = { root, rowIndex ->

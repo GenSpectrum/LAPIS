@@ -39,7 +39,13 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
         when (value) {
             is Long -> Field(name, FieldType.nullable(ArrowType.Int(64, true)), null)
             is Int -> Field(name, FieldType.nullable(ArrowType.Int(32, true)), null)
-            is Double -> Field(name, FieldType.nullable(ArrowType.FloatingPoint(org.apache.arrow.vector.types.FloatingPointPrecision.DOUBLE)), null)
+            is Double -> Field(
+                name,
+                FieldType.nullable(
+                    ArrowType.FloatingPoint(org.apache.arrow.vector.types.FloatingPointPrecision.DOUBLE),
+                ),
+                null,
+            )
             is Boolean -> Field(name, FieldType.nullable(ArrowType.Bool()), null)
             else -> Field(name, FieldType.nullable(ArrowType.Utf8()), null)
         }
@@ -58,7 +64,13 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
                 is BigIntVector -> if (value == null) vector.setNull(rowIdx) else vector.set(rowIdx, value as Long)
                 is IntVector -> if (value == null) vector.setNull(rowIdx) else vector.set(rowIdx, value as Int)
                 is Float8Vector -> if (value == null) vector.setNull(rowIdx) else vector.set(rowIdx, value as Double)
-                is BitVector -> if (value == null) vector.setNull(rowIdx) else vector.set(rowIdx, if (value as Boolean) 1 else 0)
+                is BitVector -> if (value ==
+                    null
+                ) {
+                    vector.setNull(rowIdx)
+                } else {
+                    vector.set(rowIdx, if (value as Boolean) 1 else 0)
+                }
                 is VarCharVector ->
                     if (value == null) {
                         vector.setNull(rowIdx)

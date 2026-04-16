@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.apache.arrow.memory.BufferAllocator
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.ipc.ArrowStreamReader
 import org.genspectrum.lapis.config.DatabaseConfig
@@ -29,7 +30,6 @@ import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.stream.Stream
-import java.util.stream.StreamSupport
 
 @Component
 class SiloClient(
@@ -91,6 +91,7 @@ open class CachedSiloClient(
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
     private val config: DatabaseConfig,
+    private val rootAllocator: RootAllocator,
 ) {
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
@@ -129,8 +130,13 @@ open class CachedSiloClient(
                 .POST(HttpRequest.BodyPublishers.ofString(queryJson))
         }
 
+        val childAllocator = rootAllocator.newChildAllocator(
+            "query-${query.action.javaClass.simpleName}",
+            0,
+            Long.MAX_VALUE,
+        )
         return WithDataVersion(
-            queryResult = parseArrowStream(response.body(), query.action.arrowConverter),
+            queryResult = parseArrowStream(response.body(), query.action.arrowConverter, childAllocator),
             dataVersion = getDataVersion(response),
         )
     }
@@ -138,30 +144,26 @@ open class CachedSiloClient(
     private fun <ResponseType> parseArrowStream(
         inputStream: InputStream,
         converter: ArrowRowConverter<ResponseType>,
-    ): Stream<ResponseType> {
-        val allocator = RootAllocator()
-        val reader = ArrowStreamReader(inputStream, allocator)
-
-        val batches = generateSequence {
-            try {
-                if (reader.loadNextBatch()) reader.vectorSchemaRoot else null
-            } catch (exception: Exception) {
-                val message = "Could not parse Arrow IPC response from SILO: " +
-                    exception::class.toString() + " " + exception.message
-                throw RuntimeException(message, exception)
+        allocator: BufferAllocator,
+    ): Stream<ResponseType> =
+        allocator.use { alloc ->
+            ArrowStreamReader(inputStream, alloc).use { reader ->
+                val rows = mutableListOf<ResponseType>()
+                try {
+                    while (reader.loadNextBatch()) {
+                        val root = reader.vectorSchemaRoot
+                        for (rowIndex in 0 until root.rowCount) {
+                            rows.add(converter(root, rowIndex))
+                        }
+                    }
+                } catch (exception: Exception) {
+                    val message = "Could not parse Arrow IPC response from SILO: " +
+                        exception::class.toString() + " " + exception.message
+                    throw RuntimeException(message, exception)
+                }
+                rows.stream()
             }
         }
-
-        val rowSequence = batches.flatMap { root ->
-            (0 until root.rowCount).asSequence().map { rowIndex -> converter(root, rowIndex) }
-        }
-
-        return StreamSupport.stream(rowSequence.asIterable().spliterator(), false)
-            .onClose {
-                reader.close()
-                allocator.close()
-            }
-    }
 
     fun callInfo(): InfoData {
         val response = send(
