@@ -84,7 +84,7 @@ value: name | QUOTED_STRING;
 dateOrNumber: digit+;
 digit: NUMBER | MINUS | DOT;
 name: charOrNumber+;
-charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK;
+charOrNumber: A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | NUMBER | MINUS | UNDERSCORE | DOT | ASTERISK | UNICODE_LETTER;
 
 isNullQuery: isnull_ '(' name ')';
 isnull_: I S N U L L ;
@@ -122,6 +122,7 @@ UNDERSCORE: '_';
 DOT: '.';
 ASTERISK: '*';
 QUOTED_STRING: '\'' ( '\\' . | ~['\\] )* '\'';  // matches all strings with quotes, supports backslash escaping (e.g. \' for a literal single quote, \\ for a literal backslash)
+UNICODE_LETTER: [\p{Letter}\p{Mark}] ; // matches Unicode letters and combining marks (e.g. precomposed and NFD-decomposed umlauts, Devanagari matras)
 AND: ' ' A N D ' '; // space is important here, otherwise metadataNames with 'AND' in them would be misinterpreted
 OR: ' ' O R ' ';
 NOT: N O T ' ';

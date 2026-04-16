@@ -341,6 +341,11 @@ class AdvancedQueryFacadeTest {
                     query = "some_metadata.regex='it\\'s'",
                     expected = StringSearch("some_metadata", "it's"),
                 ),
+                ValidTestCase(
+                    description = "unquoted regex with non-ASCII characters",
+                    query = "some_metadata.regex=Graubünden",
+                    expected = StringSearch("some_metadata", "Graubünden"),
+                ),
             ),
             invalid = listOf(
                 InvalidTestCase(
@@ -626,6 +631,78 @@ class AdvancedQueryFacadeTest {
                     expected = StringEquals("some_metadata", "Côte d'Ivoire"),
                 ),
                 ValidTestCase(
+                    description = "string equals with unquoted umlaut (ü)",
+                    query = "some_metadata=Zürich",
+                    expected = StringEquals("some_metadata", "Zürich"),
+                ),
+                // The tests below cover NFD (decomposed) Unicode forms, where diacritics are represented as
+                // separate combining mark codepoints (Unicode category M) rather than precomposed single
+                // codepoints. UNICODE_LETTER only matches \p{Letter} and therefore rejects combining marks,
+                // causing them to be silently dropped or triggering a token recognition error.
+                ValidTestCase(
+                    // "Zürich" in NFD: ü = u (U+0075) + combining diaeresis (U+0308, Mn)
+                    description = "string equals with unquoted umlaut in NFD form (u + combining diaeresis U+0308)",
+                    query = "some_metadata=Zu\u0308rich",
+                    expected = StringEquals("some_metadata", "Zu\u0308rich"),
+                ),
+                ValidTestCase(
+                    // "Bogotá" in NFD: á = a (U+0061) + combining acute accent (U+0301, Mn)
+                    description = "string equals with NFD acute accent (Bogota\u0301)",
+                    query = "some_metadata=Bogota\u0301",
+                    expected = StringEquals("some_metadata", "Bogota\u0301"),
+                ),
+                ValidTestCase(
+                    // "Genève" in NFD: è = e (U+0065) + combining grave accent (U+0300, Mn)
+                    description = "string equals with NFD grave accent (Gene\u0300ve)",
+                    query = "some_metadata=Gene\u0300ve",
+                    expected = StringEquals("some_metadata", "Gene\u0300ve"),
+                ),
+                ValidTestCase(
+                    // "Hà Nội" simplified to "HaNoi" with NFD: à = a + U+0300, ộ = o + U+0302 + U+0323
+                    // Tests stacked combining marks (two Mn per vowel) as in Vietnamese
+                    description = "string equals with NFD stacked combining marks (Vietnamese Ha\u0300No\u0323\u0302i)",
+                    query = "some_metadata=Ha\u0300No\u0323\u0302i",
+                    expected = StringEquals("some_metadata", "Ha\u0300No\u0323\u0302i"),
+                ),
+                ValidTestCase(
+                    // Devanagari: "दिल्ली" (Delhi) — contains matra ि (U+093F, Mc spacing mark) and
+                    // virama ् (U+094D, Mn non-spacing mark) even in NFC. These are combining marks
+                    // that are NOT results of NFD decomposition — they exist in NFC already.
+                    description = "string equals with Devanagari combining marks (Delhi in Hindi)",
+                    query = "some_metadata=\u0926\u093F\u0932\u094D\u0932\u0940",
+                    expected = StringEquals("some_metadata", "\u0926\u093F\u0932\u094D\u0932\u0940"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted accented character (â)",
+                    query = "some_metadata=Neuchâtel",
+                    expected = StringEquals("some_metadata", "Neuchâtel"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted cedilla (ç)",
+                    query = "some_metadata=Français",
+                    expected = StringEquals("some_metadata", "Français"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted tilde-n (ñ)",
+                    query = "some_metadata=España",
+                    expected = StringEquals("some_metadata", "España"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted Cyrillic characters",
+                    query = "some_metadata=Москва",
+                    expected = StringEquals("some_metadata", "Москва"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted Chinese characters",
+                    query = "some_metadata=北京",
+                    expected = StringEquals("some_metadata", "北京"),
+                ),
+                ValidTestCase(
+                    description = "string equals with unquoted mixed ASCII and non-ASCII",
+                    query = "some_metadata=Graubünden",
+                    expected = StringEquals("some_metadata", "Graubünden"),
+                ),
+                ValidTestCase(
                     description = "string equals with escaped backslash in value",
                     query = "some_metadata='back\\\\slash'",
                     expected = StringEquals("some_metadata", "back\\slash"),
@@ -726,6 +803,16 @@ class AdvancedQueryFacadeTest {
                     "floatField=notAFloat",
                     "'notAFloat' is not a valid float",
                 ),
+                InvalidTestCase(
+                    description = "non-ASCII field name",
+                    query = "divïsion=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
+                InvalidTestCase(
+                    description = "non-ASCII field name with regex suffix",
+                    query = "divïsion.regex=Bern",
+                    expected = "Metadata field divïsion does not exist",
+                ),
             ),
         )
 
@@ -796,6 +883,11 @@ class AdvancedQueryFacadeTest {
                     description = "amino acid mutation with invalid gene",
                     query = "invalidGene:501Y",
                     expected = "invalidGene is not a known segment or gene",
+                ),
+                InvalidTestCase(
+                    description = "named mutation with non-ASCII gene/segment name",
+                    query = "Ñ:123A",
+                    expected = "Ñ is not a known segment or gene",
                 ),
                 InvalidTestCase(
                     description = "'-' in nucleotide 'from' position is invalid",
