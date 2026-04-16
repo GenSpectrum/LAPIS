@@ -668,7 +668,7 @@ class AdvancedQueryFacadeTest {
                     // Devanagari: "दिल्ली" (Delhi) — contains matra ि (U+093F, Mc spacing mark) and
                     // virama ् (U+094D, Mn non-spacing mark) even in NFC. These are combining marks
                     // that are NOT results of NFD decomposition — they exist in NFC already.
-                    description = "string equals with Devanagari combining marks (Delhi in Hindi, NFC already contains Mc/Mn)",
+                    description = "string equals with Devanagari combining marks (Delhi in Hindi)",
                     query = "some_metadata=\u0926\u093F\u0932\u094D\u0932\u0940",
                     expected = StringEquals("some_metadata", "\u0926\u093F\u0932\u094D\u0932\u0940"),
                 ),
