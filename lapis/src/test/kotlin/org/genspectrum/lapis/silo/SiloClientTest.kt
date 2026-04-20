@@ -745,8 +745,8 @@ class SiloClientAndCacheInvalidatorTest(
             Times.once(),
         )
 
-        siloClient.sendQuery(someQuery).toList()
-        siloClient.sendQuery(someQuery).toList()
+        siloClient.sendQuery(someQuery).use { it.toList() }
+        siloClient.sendQuery(someQuery).use { it.toList() }
         assertThat(dataVersion.dataVersion, `is`(firstDataVersion))
     }
 

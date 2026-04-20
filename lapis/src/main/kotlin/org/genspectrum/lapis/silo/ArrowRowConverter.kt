@@ -103,7 +103,9 @@ private fun VectorSchemaRoot.getOptionalString(
     name: String,
     rowIndex: Int,
 ): String? {
-    val vector = getVector(name) as? VarCharVector ?: return null
+    val rawVector = getVector(name) ?: return null
+    val vector = rawVector as? VarCharVector
+        ?: error("Expected VarCharVector for column '$name' but got ${rawVector.javaClass.simpleName}")
     if (vector.isNull(rowIndex)) {
         return null
     }
@@ -124,7 +126,9 @@ private fun VectorSchemaRoot.getOptionalInt(
     name: String,
     rowIndex: Int,
 ): Int? {
-    val vector = getVector(name) as? IntVector ?: return null
+    val rawVector = getVector(name) ?: return null
+    val vector = rawVector as? IntVector
+        ?: error("Expected IntVector for column '$name' but got ${rawVector.javaClass.simpleName}")
     if (vector.isNull(rowIndex)) {
         return null
     }
@@ -155,7 +159,9 @@ private fun VectorSchemaRoot.getOptionalDouble(
     name: String,
     rowIndex: Int,
 ): Double? {
-    val vector = getVector(name) as? Float8Vector ?: return null
+    val rawVector = getVector(name) ?: return null
+    val vector = rawVector as? Float8Vector
+        ?: error("Expected Float8Vector for column '$name' but got ${rawVector.javaClass.simpleName}")
     if (vector.isNull(rowIndex)) {
         return null
     }
