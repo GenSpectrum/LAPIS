@@ -148,6 +148,7 @@ open class CachedSiloClient(
                 while (reader.loadNextBatch()) {
                     val root = reader.vectorSchemaRoot
                     for (rowIndex in 0 until root.rowCount) {
+                        // make sure that this is lazy and doesn't load the whole response into memory at once
                         yield(action.arrowConverter(root, rowIndex))
                     }
                 }
