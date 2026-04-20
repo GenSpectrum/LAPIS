@@ -26,14 +26,6 @@ data class DetailsData(
 ) : Map<String, JsonNode> by map
 
 @JsonComponent
-class DetailsDataDeserializer : JsonDeserializer<DetailsData>() {
-    override fun deserialize(
-        p: JsonParser,
-        ctxt: DeserializationContext,
-    ): DetailsData = DetailsData(p.readValueAs(object : TypeReference<Map<String, JsonNode>>() {}))
-}
-
-@JsonComponent
 class AggregationDataSerializer : JsonSerializer<AggregationData>() {
     override fun serialize(
         value: AggregationData,
@@ -44,19 +36,6 @@ class AggregationDataSerializer : JsonSerializer<AggregationData>() {
         gen.writeNumberField(COUNT_PROPERTY, value.count)
         value.fields.forEach { (key, value) -> gen.writeObjectField(key, value) }
         gen.writeEndObject()
-    }
-}
-
-@JsonComponent
-class AggregationDataDeserializer : JsonDeserializer<AggregationData>() {
-    override fun deserialize(
-        p: JsonParser,
-        ctxt: DeserializationContext,
-    ): AggregationData {
-        val node = p.readValueAsTree<JsonNode>()
-        val count = node.get(COUNT_PROPERTY).asInt()
-        val fields = node.properties().asSequence().filter { it.key != COUNT_PROPERTY }.associate { it.key to it.value }
-        return AggregationData(count, fields)
     }
 }
 
@@ -99,19 +78,3 @@ data class InfoData(
     val dataVersion: String,
     val siloVersion: String?,
 )
-
-@JsonComponent
-class SequenceDataDeserializer(
-    val databaseConfig: DatabaseConfig,
-) : JsonDeserializer<SequenceData>() {
-    override fun deserialize(
-        p: JsonParser,
-        ctxt: DeserializationContext,
-    ): SequenceData {
-        val node = p.readValueAsTree<ObjectNode>()
-
-        return SequenceData(
-            node.properties().associate { (key, value) -> key.removePrefix(UNALIGNED_PREFIX) to value },
-        )
-    }
-}
