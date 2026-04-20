@@ -123,7 +123,11 @@ open class CachedSiloClient(
         val response = send(
             uri = siloUris.query,
             bodyHandler = BodyHandlers.ofInputStream(),
-            tryToReadSiloErrorFromBody = { tryToReadSiloErrorFromString(it.readBytes().toString(Charsets.UTF_8)) },
+            tryToReadSiloErrorFromBody = { body ->
+                body.use {
+                    tryToReadSiloErrorFromString(it.readBytes().toString(Charsets.UTF_8))
+                }
+            },
         ) {
             it.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.ACCEPT, ARROW_STREAM_MEDIA_TYPE)

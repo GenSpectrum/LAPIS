@@ -31,10 +31,12 @@ typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 val AGGREGATION_DATA_ARROW_CONVERTER: ArrowRowConverter<AggregationData> = { root, rowIndex ->
     val count = root.getLong(COUNT_PROPERTY, rowIndex).toInt()
     val fields = root.schema.fields
-        .filter { it.name != COUNT_PROPERTY }
-        .mapIndexed { _, field ->
-            val actualColIdx = root.schema.fields.indexOfFirst { it.name == field.name }
-            field.name to root.fieldValueAsJsonNode(actualColIdx, rowIndex)
+        .mapIndexedNotNull { colIdx, field ->
+            if (field.name == COUNT_PROPERTY) {
+                null
+            } else {
+                field.name to root.fieldValueAsJsonNode(colIdx, rowIndex)
+            }
         }
         .toMap()
     AggregationData(count, fields)
@@ -105,7 +107,7 @@ private fun VectorSchemaRoot.getOptionalString(
     if (vector.isNull(rowIndex)) {
         return null
     }
-    return String(vector.get(rowIndex))
+    return String(vector.get(rowIndex), Charsets.UTF_8)
 }
 
 private fun VectorSchemaRoot.getString(
@@ -115,7 +117,7 @@ private fun VectorSchemaRoot.getString(
     val vector = getVector(name) as? VarCharVector
         ?: error("Expected VarCharVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
     check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
-    return String(vector.get(rowIndex))
+    return String(vector.get(rowIndex), Charsets.UTF_8)
 }
 
 private fun VectorSchemaRoot.getOptionalInt(
@@ -167,7 +169,7 @@ private fun VectorSchemaRoot.fieldValueAsJsonNode(
     val vector = fieldVectors[columnIndex]
     if (vector.isNull(rowIndex)) return NullNode.instance
     return when (vector) {
-        is VarCharVector -> TextNode(String(vector.get(rowIndex)))
+        is VarCharVector -> TextNode(String(vector.get(rowIndex), Charsets.UTF_8))
         is IntVector -> IntNode(vector.get(rowIndex))
         is BigIntVector -> LongNode(vector.get(rowIndex))
         is Float8Vector -> DoubleNode(vector.get(rowIndex))

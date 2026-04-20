@@ -101,7 +101,7 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
                     if (value == null) {
                         vector.setNull(rowIdx)
                     } else {
-                        vector.setSafe(rowIdx, (value as String).toByteArray())
+                        vector.setSafe(rowIdx, (value as String).toByteArray(Charsets.UTF_8))
                     }
                 }
             }
