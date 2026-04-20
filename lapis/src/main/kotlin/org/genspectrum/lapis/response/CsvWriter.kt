@@ -11,7 +11,7 @@ interface RecordCollection<T> {
 
     fun getHeader(): List<String>
 
-    fun getCsvRecords(): Stream<List<String?>> = records.use { stream -> stream.map { mapToCsvValuesList(it) } }
+    fun getCsvRecords(): Stream<List<String?>> = records.map { mapToCsvValuesList(it) }
 
     /**
      * Csv values - must be in the same order as the header.
