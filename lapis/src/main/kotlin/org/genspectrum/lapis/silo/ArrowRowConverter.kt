@@ -29,7 +29,7 @@ import org.genspectrum.lapis.util.UNALIGNED_PREFIX
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
 val AGGREGATION_DATA_ARROW_CONVERTER: ArrowRowConverter<AggregationData> = { root, rowIndex ->
-    val count = root.getLong(COUNT_PROPERTY, rowIndex)?.toInt() ?: 0
+    val count = root.getLong(COUNT_PROPERTY, rowIndex).toInt()
     val fields = root.schema.fields
         .filter { it.name != COUNT_PROPERTY }
         .mapIndexed { _, field ->
@@ -50,40 +50,40 @@ val DETAILS_DATA_ARROW_CONVERTER: ArrowRowConverter<DetailsData> = { root, rowIn
 
 val MOST_COMMON_ANCESTOR_DATA_ARROW_CONVERTER: ArrowRowConverter<MostCommonAncestorData> = { root, rowIndex ->
     MostCommonAncestorData(
-        mrcaNode = root.getString("mrcaNode", rowIndex),
-        missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
-        missingFromTree = root.getString("missingFromTree", rowIndex),
+        mrcaNode = root.getOptionalString("mrcaNode", rowIndex),
+        missingNodeCount = root.getInt("missingNodeCount", rowIndex),
+        missingFromTree = root.getOptionalString("missingFromTree", rowIndex),
     )
 }
 
 val MUTATION_DATA_ARROW_CONVERTER: ArrowRowConverter<MutationData> = { root, rowIndex ->
     MutationData(
-        mutation = root.getString("mutation", rowIndex),
-        count = root.getInt("count", rowIndex),
-        proportion = root.getDouble("proportion", rowIndex),
-        sequenceName = root.getString("sequenceName", rowIndex),
-        mutationFrom = root.getString("mutationFrom", rowIndex),
-        mutationTo = root.getString("mutationTo", rowIndex),
-        position = root.getInt("position", rowIndex),
-        coverage = root.getInt("coverage", rowIndex),
+        mutation = root.getOptionalString("mutation", rowIndex),
+        count = root.getOptionalInt("count", rowIndex),
+        proportion = root.getOptionalDouble("proportion", rowIndex),
+        sequenceName = root.getOptionalString("sequenceName", rowIndex),
+        mutationFrom = root.getOptionalString("mutationFrom", rowIndex),
+        mutationTo = root.getOptionalString("mutationTo", rowIndex),
+        position = root.getOptionalInt("position", rowIndex),
+        coverage = root.getOptionalInt("coverage", rowIndex),
     )
 }
 
 val INSERTION_DATA_ARROW_CONVERTER: ArrowRowConverter<InsertionData> = { root, rowIndex ->
     InsertionData(
-        count = root.getInt("count", rowIndex) ?: 0,
-        insertion = root.getString("insertion", rowIndex) ?: "",
-        insertedSymbols = root.getString("insertedSymbols", rowIndex) ?: "",
-        position = root.getInt("position", rowIndex) ?: 0,
-        sequenceName = root.getString("sequenceName", rowIndex) ?: "",
+        count = root.getInt("count", rowIndex),
+        insertion = root.getString("insertion", rowIndex),
+        insertedSymbols = root.getString("insertedSymbols", rowIndex),
+        position = root.getInt("position", rowIndex),
+        sequenceName = root.getString("sequenceName", rowIndex),
     )
 }
 
 val PHYLO_SUBTREE_DATA_ARROW_CONVERTER: ArrowRowConverter<PhyloSubtreeData> = { root, rowIndex ->
     PhyloSubtreeData(
-        subtreeNewick = root.getString("subtreeNewick", rowIndex) ?: "",
-        missingNodeCount = root.getInt("missingNodeCount", rowIndex) ?: 0,
-        missingFromTree = root.getString("missingFromTree", rowIndex),
+        subtreeNewick = root.getString("subtreeNewick", rowIndex),
+        missingNodeCount = root.getInt("missingNodeCount", rowIndex),
+        missingFromTree = root.getOptionalString("missingFromTree", rowIndex),
     )
 }
 
@@ -97,7 +97,7 @@ val SEQUENCE_DATA_ARROW_CONVERTER: ArrowRowConverter<SequenceData> = { root, row
     )
 }
 
-private fun VectorSchemaRoot.getString(
+private fun VectorSchemaRoot.getOptionalString(
     name: String,
     rowIndex: Int,
 ): String? {
@@ -108,7 +108,17 @@ private fun VectorSchemaRoot.getString(
     return String(vector.get(rowIndex))
 }
 
-private fun VectorSchemaRoot.getInt(
+private fun VectorSchemaRoot.getString(
+    name: String,
+    rowIndex: Int,
+): String {
+    val vector = getVector(name) as? VarCharVector
+        ?: error("Expected VarCharVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
+    return String(vector.get(rowIndex))
+}
+
+private fun VectorSchemaRoot.getOptionalInt(
     name: String,
     rowIndex: Int,
 ): Int? {
@@ -119,18 +129,27 @@ private fun VectorSchemaRoot.getInt(
     return vector.get(rowIndex)
 }
 
-private fun VectorSchemaRoot.getLong(
+private fun VectorSchemaRoot.getInt(
     name: String,
     rowIndex: Int,
-): Long? {
-    val vector = getVector(name) as? BigIntVector ?: return null
-    if (vector.isNull(rowIndex)) {
-        return null
-    }
+): Int {
+    val vector = getVector(name) as? IntVector
+        ?: error("Expected IntVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
     return vector.get(rowIndex)
 }
 
-private fun VectorSchemaRoot.getDouble(
+private fun VectorSchemaRoot.getLong(
+    name: String,
+    rowIndex: Int,
+): Long {
+    val vector = getVector(name) as? BigIntVector
+        ?: error("Expected BigIntVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
+    return vector.get(rowIndex)
+}
+
+private fun VectorSchemaRoot.getOptionalDouble(
     name: String,
     rowIndex: Int,
 ): Double? {
