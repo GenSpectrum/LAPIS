@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/GenSpectrum/LAPIS/compare/v0.8.1...v0.8.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **lapis:** allow non-ASCII characters in advanced queries ([#1628](https://github.com/GenSpectrum/LAPIS/issues/1628)) ([9cb6949](https://github.com/GenSpectrum/LAPIS/commit/9cb694921292b40b2c191686ebb746a304dda55f))
+
 ## [0.8.1](https://github.com/GenSpectrum/LAPIS/compare/v0.8.0...v0.8.1) (2026-04-10)
 
 
