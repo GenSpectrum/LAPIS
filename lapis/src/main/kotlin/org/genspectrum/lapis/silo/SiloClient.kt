@@ -130,30 +130,30 @@ open class CachedSiloClient(
                 .POST(HttpRequest.BodyPublishers.ofString(queryJson))
         }
 
-        val childAllocator = rootAllocator.newChildAllocator(
-            "query-${query.action.javaClass.simpleName}",
-            0,
-            Long.MAX_VALUE,
-        )
         return WithDataVersion(
-            queryResult = parseArrowStream(response.body(), query.action.arrowConverter, childAllocator),
+            queryResult = parseArrowStream(response.body(), query.action),
             dataVersion = getDataVersion(response),
         )
     }
 
     private fun <ResponseType> parseArrowStream(
         inputStream: InputStream,
-        converter: ArrowRowConverter<ResponseType>,
-        allocator: BufferAllocator,
-    ): Stream<ResponseType> =
-        allocator.use { alloc ->
+        action: SiloAction<ResponseType>,
+    ): Stream<ResponseType> {
+        val allocator = rootAllocator.newChildAllocator(
+            "query-${action.javaClass.simpleName}",
+            0,
+            Long.MAX_VALUE,
+        )
+
+        return allocator.use { alloc ->
             ArrowStreamReader(inputStream, alloc).use { reader ->
                 val rows = mutableListOf<ResponseType>()
                 try {
                     while (reader.loadNextBatch()) {
                         val root = reader.vectorSchemaRoot
                         for (rowIndex in 0 until root.rowCount) {
-                            rows.add(converter(root, rowIndex))
+                            rows.add(action.arrowConverter(root, rowIndex))
                         }
                     }
                 } catch (exception: Exception) {
@@ -164,6 +164,7 @@ open class CachedSiloClient(
                 rows.stream()
             }
         }
+    }
 
     fun callInfo(): InfoData {
         val response = send(
