@@ -41,7 +41,7 @@ data class SiloQuery<ResponseType>(
     val filterExpression: SiloFilterExpression,
 )
 
-/** Converts one row at [rowIndex] from an Arrow [VectorSchemaRoot] to a typed Kotlin object. */
+/** Converts one row at `rowIndex` from an Arrow [VectorSchemaRoot] to a typed Kotlin object. */
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
 private fun VectorSchemaRoot.getString(
@@ -49,7 +49,9 @@ private fun VectorSchemaRoot.getString(
     rowIndex: Int,
 ): String? {
     val vector = getVector(name) as? VarCharVector ?: return null
-    if (vector.isNull(rowIndex)) return null
+    if (vector.isNull(rowIndex)) {
+        return null
+    }
     return String(vector.get(rowIndex))
 }
 
@@ -58,7 +60,9 @@ private fun VectorSchemaRoot.getInt(
     rowIndex: Int,
 ): Int? {
     val vector = getVector(name) as? IntVector ?: return null
-    if (vector.isNull(rowIndex)) return null
+    if (vector.isNull(rowIndex)) {
+        return null
+    }
     return vector.get(rowIndex)
 }
 
@@ -67,7 +71,9 @@ private fun VectorSchemaRoot.getLong(
     rowIndex: Int,
 ): Long? {
     val vector = getVector(name) as? BigIntVector ?: return null
-    if (vector.isNull(rowIndex)) return null
+    if (vector.isNull(rowIndex)) {
+        return null
+    }
     return vector.get(rowIndex)
 }
 
@@ -76,7 +82,9 @@ private fun VectorSchemaRoot.getDouble(
     rowIndex: Int,
 ): Double? {
     val vector = getVector(name) as? Float8Vector ?: return null
-    if (vector.isNull(rowIndex)) return null
+    if (vector.isNull(rowIndex)) {
+        return null
+    }
     return vector.get(rowIndex)
 }
 
@@ -84,7 +92,7 @@ private fun VectorSchemaRoot.fieldValueAsJsonNode(
     columnIndex: Int,
     rowIndex: Int,
 ): JsonNode {
-    val vector = getFieldVectors()[columnIndex]
+    val vector = fieldVectors[columnIndex]
     if (vector.isNull(rowIndex)) return NullNode.instance
     return when (vector) {
         is VarCharVector -> TextNode(String(vector.get(rowIndex)))
