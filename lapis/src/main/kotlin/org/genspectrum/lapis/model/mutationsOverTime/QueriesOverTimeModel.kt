@@ -353,7 +353,7 @@ class QueriesOverTimeModel(
                 ),
             ),
             setRequestDataVersion = false,
-        ).map { it.toList() }
+        ).map { stream -> stream.use { it.toList() } }
 
     /**
      * Builds a result row for one particular mutation.

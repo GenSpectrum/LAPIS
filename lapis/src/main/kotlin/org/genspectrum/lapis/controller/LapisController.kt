@@ -1231,7 +1231,7 @@ class LapisController(
     ): String {
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
         response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
-        return treeResponse.toList().first().subtreeNewick
+        return treeResponse.use { it.toList() }.first().subtreeNewick
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
