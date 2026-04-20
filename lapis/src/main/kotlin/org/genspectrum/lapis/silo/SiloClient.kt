@@ -30,6 +30,7 @@ import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.stream.Stream
+import java.util.stream.StreamSupport
 
 @Component
 class SiloClient(
@@ -109,7 +110,7 @@ open class CachedSiloClient(
     )
     open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
         sendQuery(query)
-            .let { WithDataVersion(it.dataVersion, it.queryResult.toList()) }
+            .let { WithDataVersion(it.dataVersion, it.queryResult.use { stream -> stream.toList() }) }
 
     fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
         if (RequestContextHolder.getRequestAttributes() != null) {
@@ -140,30 +141,29 @@ open class CachedSiloClient(
         inputStream: InputStream,
         action: SiloAction<ResponseType>,
     ): Stream<ResponseType> {
-        val allocator = rootAllocator.newChildAllocator(
-            "query-${action.javaClass.simpleName}",
-            0,
-            Long.MAX_VALUE,
-        )
+        val allocator = rootAllocator.newChildAllocator("query-${action.javaClass.simpleName}", 0, Long.MAX_VALUE)
+        val reader = ArrowStreamReader(inputStream, allocator)
 
-        return allocator.use { alloc ->
-            ArrowStreamReader(inputStream, alloc).use { reader ->
-                val rows = mutableListOf<ResponseType>()
-                try {
-                    while (reader.loadNextBatch()) {
-                        val root = reader.vectorSchemaRoot
-                        for (rowIndex in 0 until root.rowCount) {
-                            rows.add(action.arrowConverter(root, rowIndex))
-                        }
+        val rowSequence = sequence {
+            try {
+                while (reader.loadNextBatch()) {
+                    val root = reader.vectorSchemaRoot
+                    for (rowIndex in 0 until root.rowCount) {
+                        yield(action.arrowConverter(root, rowIndex))
                     }
-                } catch (exception: Exception) {
-                    val message = "Could not parse Arrow IPC response from SILO: " +
-                        exception::class.toString() + " " + exception.message
-                    throw RuntimeException(message, exception)
                 }
-                rows.stream()
+            } catch (exception: Exception) {
+                val message = "Could not parse Arrow IPC response from SILO: " +
+                    exception::class.toString() + " " + exception.message
+                throw RuntimeException(message, exception)
             }
         }
+
+        return StreamSupport.stream(rowSequence.asIterable().spliterator(), false)
+            .onClose {
+                reader.close()
+                allocator.close()
+            }
     }
 
     fun callInfo(): InfoData {
