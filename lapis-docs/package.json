@@ -30,8 +30,7 @@
         "swagger-ui": "^5.32.4",
         "swagger-ui-react": "^5.32.4",
         "tailwindcss": "^4.1.17",
-        "yaml": "^2.8.3",
-        "zod": "^3.24.2"
+        "yaml": "^2.8.3"
     },
     "devDependencies": {
         "@astrojs/check": "^0.9.8",
