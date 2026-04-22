@@ -1,5 +1,5 @@
 import { createContext, type FC, type PropsWithChildren, useState } from 'react';
-import { z } from 'zod';
+import { z } from 'astro/zod';
 
 export type ConfigType = 'SILO' | 'Pathoplexus';
 

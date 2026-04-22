@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'astro/zod';
 import { featureSchema, metadataTypeSchema, opennessLevelSchema } from './configContext.tsx';
 
 export const siloConfigSchema = z.object({

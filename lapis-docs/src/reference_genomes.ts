@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { z } from 'zod';
+import { z } from 'astro/zod';
 
 const referenceSequenceSchema = z.object({
     name: z.string(),
