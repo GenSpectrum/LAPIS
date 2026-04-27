@@ -36,6 +36,13 @@ Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
   If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
 
+Additionally, Apache Arrow requires these flags to be set on the JVM:
+```
+-Dio.netty.tryReflectionSetAccessible=true --add-opens=java.base/java.nio=ALL-UNNAMED
+```
+(see [Arrow docs](https://github.com/apache/arrow-java/?tab=readme-ov-file#java-properties)).
+We already set the flags in Docker and when starting LAPIS via the Gradle `bootRun` command.
+
 ### Operating LAPIS behind a proxy
 
 When running LAPIS behind a proxy, the proxy needs to set X-Forwarded headers:
