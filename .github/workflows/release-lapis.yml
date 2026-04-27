@@ -20,7 +20,7 @@ jobs:
       checks: read
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository == 'GenSpectrum/LAPIS' }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           path: .
