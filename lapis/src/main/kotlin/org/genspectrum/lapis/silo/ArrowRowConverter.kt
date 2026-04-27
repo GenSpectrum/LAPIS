@@ -120,8 +120,9 @@ private fun VectorSchemaRoot.getString(
     name: String,
     rowIndex: Int,
 ): String {
-    val vector = getVector(name) as? VarCharVector
-        ?: error("Expected VarCharVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    val rawVector = getVector(name)
+    val vector = rawVector as? VarCharVector
+        ?: error("Expected VarCharVector for column '$name' but got ${rawVector?.javaClass?.simpleName}")
     check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
     return String(vector.get(rowIndex), Charsets.UTF_8)
 }
@@ -143,8 +144,9 @@ private fun VectorSchemaRoot.getInt(
     name: String,
     rowIndex: Int,
 ): Int {
-    val vector = getVector(name) as? IntVector
-        ?: error("Expected IntVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    val rawVector = getVector(name)
+    val vector = rawVector as? IntVector
+        ?: error("Expected IntVector for column '$name' but got ${rawVector?.javaClass?.simpleName}")
     check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
     return vector.get(rowIndex)
 }
@@ -153,8 +155,9 @@ private fun VectorSchemaRoot.getLong(
     name: String,
     rowIndex: Int,
 ): Long {
-    val vector = getVector(name) as? BigIntVector
-        ?: error("Expected BigIntVector for column '$name' but got ${getVector(name)?.javaClass?.simpleName}")
+    val rawVector = getVector(name)
+    val vector = rawVector as? BigIntVector
+        ?: error("Expected BigIntVector for column '$name' but got ${rawVector?.javaClass?.simpleName}")
     check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
     return vector.get(rowIndex)
 }
