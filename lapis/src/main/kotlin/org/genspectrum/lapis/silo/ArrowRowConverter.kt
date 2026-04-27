@@ -25,11 +25,15 @@ import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.util.UNALIGNED_PREFIX
 
-/** Converts one row at `rowIndex` from an Arrow [org.apache.arrow.vector.VectorSchemaRoot] to a typed Kotlin object. */
+/**
+ * Converts one row at `rowIndex` from an Arrow [org.apache.arrow.vector.VectorSchemaRoot] to a typed Kotlin object.
+ *
+ * See https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md#action for the SILO response schema
+ */
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
 val AGGREGATION_DATA_ARROW_CONVERTER: ArrowRowConverter<AggregationData> = { root, rowIndex ->
-    val count = root.getLong(COUNT_PROPERTY, rowIndex).toInt()
+    val count = root.getLong(COUNT_PROPERTY, rowIndex)
     val fields = root.schema.fields
         .mapIndexedNotNull { colIdx, field ->
             if (field.name == COUNT_PROPERTY) {

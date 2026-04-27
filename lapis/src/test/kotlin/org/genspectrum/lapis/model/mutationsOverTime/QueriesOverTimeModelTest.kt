@@ -211,7 +211,7 @@ class QueriesOverTimeModelTest {
         )
         assertThat(
             result.totalCountsByDateRange,
-            equalTo(listOf(10, 23)),
+            equalTo(listOf(10L, 23L)),
         )
         assertThat(dataVersion.dataVersion, notNullValue())
     }
@@ -267,7 +267,7 @@ class QueriesOverTimeModelTest {
         )
         assertThat(
             result.totalCountsByDateRange,
-            equalTo(listOf(0, 0)),
+            equalTo(listOf(0L, 0L)),
         )
     }
 

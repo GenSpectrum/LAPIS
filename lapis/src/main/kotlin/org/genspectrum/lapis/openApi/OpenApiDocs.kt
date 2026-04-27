@@ -800,7 +800,7 @@ private fun getAggregatedResponseProperties(filterProperties: Map<SequenceFilter
                 "The response is stratified by this field.",
         )
     } + mapOf(
-        COUNT_PROPERTY to IntegerSchema().description("The number of sequences matching the filters."),
+        COUNT_PROPERTY to IntegerSchema().format("int64").description("The number of sequences matching the filters."),
     )
 
 private fun nucleotideMutationProportionSchema() =

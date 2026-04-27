@@ -10,7 +10,7 @@ import org.springframework.boot.jackson.JsonComponent
 const val COUNT_PROPERTY = "count"
 
 data class AggregationData(
-    val count: Int,
+    val count: Long,
     @param:Schema(hidden = true) val fields: Map<String, JsonNode>,
 )
 
