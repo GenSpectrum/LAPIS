@@ -108,8 +108,6 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
         }
     }
 
-    root.setRowCount(rows.size)
-
     val outputStream = ByteArrayOutputStream()
     val writer = ArrowStreamWriter(root, null, Channels.newChannel(outputStream))
     writer.start()
