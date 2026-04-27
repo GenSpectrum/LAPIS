@@ -33,6 +33,8 @@ class QueryParseModel(
         doFullValidation: Boolean,
     ): ParsedQueryResult =
         try {
+            log.info { "Parsing query: $query" }
+
             val filter = try {
                 advancedQueryFacade.map(query)
             } catch (e: BadRequestException) {
@@ -51,7 +53,8 @@ class QueryParseModel(
             }
 
             ParsedQueryResult.Success(filter = filter)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            log.error(e) { "Unexpected error parsing query: $query" }
             ParsedQueryResult.Failure(error = "Unexpected error parsing query.")
         }
 
