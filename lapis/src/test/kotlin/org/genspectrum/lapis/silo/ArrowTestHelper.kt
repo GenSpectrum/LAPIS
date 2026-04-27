@@ -51,6 +51,10 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
 
             is Boolean -> Field(name, FieldType.nullable(ArrowType.Bool()), null)
 
+            // Note: null values (and any unrecognized types) are typed as Utf8.
+            // If the first row has null for a column that later rows fill with a typed value (e.g. Int, Long),
+            // the column will be inferred as Utf8 and the converter will throw a cast error at runtime.
+            // Avoid this in tests by ensuring the first row contains non-null values for all typed columns.
             else -> Field(name, FieldType.nullable(ArrowType.Utf8()), null)
         }
     }
