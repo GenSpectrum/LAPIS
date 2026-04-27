@@ -15,6 +15,7 @@ import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
+import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.scheduler.DataVersionCacheInvalidator
 import org.hamcrest.MatcherAssert.assertThat
@@ -329,6 +330,46 @@ class SiloClientTest(
                     mrcaNode = "node",
                     missingNodeCount = 5,
                     missingFromTree = "node1,node2,node3,node4,node5",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN server returns phylo subtree response THEN response can be deserialized`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
+                .withBody(
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf(
+                                "subtreeNewick" to "(A,B);",
+                                "missingNodeCount" to 2,
+                                "missingFromTree" to "node1,node2",
+                            ),
+                        ),
+                    ),
+                ),
+        )
+
+        val query = SiloQuery(
+            SiloAction.phyloSubtree(
+                phyloTreeField = "phyloTreeField",
+                printNodesNotInTree = true,
+            ),
+            StringEquals("theColumn", "theValue"),
+        )
+        val result = sendQuery(query)
+
+        assertThat(result, hasSize(1))
+        assertThat(
+            result[0],
+            `is`(
+                PhyloSubtreeData(
+                    subtreeNewick = "(A,B);",
+                    missingNodeCount = 2,
+                    missingFromTree = "node1,node2",
                 ),
             ),
         )
