@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
@@ -24,22 +23,6 @@ data class SiloQuery<ResponseType>(
     val filterExpression: SiloFilterExpression,
 )
 
-class AggregationDataTypeReference : TypeReference<AggregationData>()
-
-class MutationDataTypeReference : TypeReference<MutationData>()
-
-class AminoAcidMutationDataTypeReference : TypeReference<MutationData>()
-
-class DetailsDataTypeReference : TypeReference<DetailsData>()
-
-class InsertionDataTypeReference : TypeReference<InsertionData>()
-
-class SequenceDataTypeReference : TypeReference<SequenceData>()
-
-class MostCommonAncestorDataTypeReference : TypeReference<MostCommonAncestorData>()
-
-class PhyloSubtreeDataTypeReference : TypeReference<PhyloSubtreeData>()
-
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
     val limit: Int?
@@ -50,7 +33,7 @@ interface CommonActionFields {
 const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 
 sealed class SiloAction<ResponseType>(
-    @JsonIgnore val typeReference: TypeReference<ResponseType>,
+    @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
     companion object {
@@ -176,10 +159,14 @@ sealed class SiloAction<ResponseType>(
 
         private fun getRandomize(orderByFields: OrderBySpec): RandomizeConfig =
             when (orderByFields) {
-                is OrderBySpec.ByFields -> RandomizeConfig.Disabled
-                is OrderBySpec.Random ->
+                is OrderBySpec.ByFields -> {
+                    RandomizeConfig.Disabled
+                }
+
+                is OrderBySpec.Random -> {
                     orderByFields.seed?.let { RandomizeConfig.WithSeed(it) }
                         ?: RandomizeConfig.Enabled
+                }
             }
 
         private fun getOrderByFieldsList(orderByFields: OrderBySpec): List<OrderByField> =
@@ -196,7 +183,10 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<AggregationData>(AggregationDataTypeReference(), cacheable = true) {
+    ) : SiloAction<AggregationData>(
+            arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "Aggregated"
     }
 
@@ -208,7 +198,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
-    ) : SiloAction<MutationData>(MutationDataTypeReference(), cacheable = true) {
+    ) : SiloAction<MutationData>(
+            arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "Mutations"
     }
 
@@ -220,7 +213,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
-    ) : SiloAction<MutationData>(AminoAcidMutationDataTypeReference(), cacheable = true) {
+    ) : SiloAction<MutationData>(
+            arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "AminoAcidMutations"
     }
 
@@ -231,7 +227,10 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<DetailsData>(DetailsDataTypeReference(), cacheable = false) {
+    ) : SiloAction<DetailsData>(
+            arrowConverter = DETAILS_DATA_ARROW_CONVERTER,
+            cacheable = false,
+        ) {
         val type: String = "Details"
     }
 
@@ -241,7 +240,10 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
+    ) : SiloAction<InsertionData>(
+            arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "Insertions"
     }
 
@@ -253,7 +255,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
-    ) : SiloAction<MostCommonAncestorData>(MostCommonAncestorDataTypeReference(), cacheable = true) {
+    ) : SiloAction<MostCommonAncestorData>(
+            arrowConverter = MOST_COMMON_ANCESTOR_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "MostRecentCommonAncestor"
     }
 
@@ -265,7 +270,10 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
-    ) : SiloAction<PhyloSubtreeData>(PhyloSubtreeDataTypeReference(), cacheable = true) {
+    ) : SiloAction<PhyloSubtreeData>(
+            arrowConverter = PHYLO_SUBTREE_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "PhyloSubtree"
     }
 
@@ -275,7 +283,10 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<InsertionData>(InsertionDataTypeReference(), cacheable = true) {
+    ) : SiloAction<InsertionData>(
+            arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
         val type: String = "AminoAcidInsertions"
     }
 
@@ -288,7 +299,10 @@ sealed class SiloAction<ResponseType>(
         val type: SequenceType,
         val sequenceNames: List<String>,
         val additionalFields: List<String> = emptyList(),
-    ) : SiloAction<SequenceData>(SequenceDataTypeReference(), cacheable = false)
+    ) : SiloAction<SequenceData>(
+            arrowConverter = SEQUENCE_DATA_ARROW_CONVERTER,
+            cacheable = false,
+        )
 }
 
 sealed class SiloFilterExpression(
@@ -450,8 +464,14 @@ class RandomizeConfigSerializer : JsonSerializer<RandomizeConfig>() {
         serializers: SerializerProvider,
     ) {
         when (value) {
-            is RandomizeConfig.Enabled -> gen.writeBoolean(true)
-            is RandomizeConfig.Disabled -> gen.writeBoolean(false)
+            is RandomizeConfig.Enabled -> {
+                gen.writeBoolean(true)
+            }
+
+            is RandomizeConfig.Disabled -> {
+                gen.writeBoolean(false)
+            }
+
             is RandomizeConfig.WithSeed -> {
                 gen.writeStartObject()
                 gen.writeNumberField("seed", value.seed)

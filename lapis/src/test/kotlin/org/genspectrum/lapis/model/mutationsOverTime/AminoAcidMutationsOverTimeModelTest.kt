@@ -186,7 +186,7 @@ AminoAcidMutationsOverTimeModelTest {
         )
         assertThat(
             result.totalCountsByDateRange,
-            equalTo(listOf(10, 23)),
+            equalTo(listOf(10L, 23L)),
         )
         assertThat(dataVersion.dataVersion, notNullValue())
     }
@@ -235,7 +235,7 @@ AminoAcidMutationsOverTimeModelTest {
                 ),
             ),
         )
-        assertThat(result.totalCountsByDateRange, equalTo(listOf(0, 0)))
+        assertThat(result.totalCountsByDateRange, equalTo(listOf(0L, 0L)))
     }
 
     @Test

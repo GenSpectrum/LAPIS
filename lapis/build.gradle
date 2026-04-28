@@ -42,6 +42,8 @@ dependencies {
     implementation 'org.antlr:antlr4-runtime:4.13.2'
     implementation 'org.apache.commons:commons-csv:1.14.1'
     implementation 'com.github.luben:zstd-jni:1.5.7-7'
+    implementation 'org.apache.arrow:arrow-vector:19.0.0'
+    implementation 'org.apache.arrow:arrow-memory-netty:19.0.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat'
 
@@ -59,6 +61,13 @@ dependencies {
     testImplementation "io.jsonwebtoken:jjwt-jackson"
 }
 
+
+// Required by Apache Arrow (Netty memory backend) to access DirectByteBuffer on Java 9+
+// See https://github.com/apache/arrow-java/?tab=readme-ov-file#java-properties
+def ARROW_JVM_ARGS = [
+    '-Dio.netty.tryReflectionSetAccessible=true',
+    '--add-opens=java.base/java.nio=ALL-UNNAMED',
+]
 
 compileKotlin {
     dependsOn generateGrammarSource
@@ -86,6 +95,12 @@ tasks.named('test') {
         exceptionFormat = TestExceptionFormat.FULL
         showExceptions = true
     }
+    maxHeapSize = '2g'
+    jvmArgs(ARROW_JVM_ARGS)
+}
+
+tasks.named('bootRun') {
+    jvmArgs(ARROW_JVM_ARGS)
 }
 
 // taken from https://github.com/JLLeitschuh/ktlint-gradle/issues/809#issuecomment-2515514826

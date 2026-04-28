@@ -63,12 +63,12 @@ data class MutationsOverTimeResult(
 
 data class MutationsOverTimeCell(
     @param:Schema(description = "Number of sequences with the mutation in the date range")
-    var count: Int,
+    var count: Long,
     @param:Schema(
         description = "Number of sequences with coverage (i.e., having a non-ambiguous symbol) at the position in" +
             "the date range. Confirmed deletions (i.e., \"-\") are included.",
     )
-    var coverage: Int,
+    var coverage: Long,
 )
 
 @Schema(
@@ -112,13 +112,13 @@ data class QueriesOverTimeResult(
 
 data class QueryOverTimeCell(
     @param:Schema(description = "Number of sequences that match the 'countQuery' in the date range")
-    var count: Int,
+    var count: Long,
     @param:Schema(
         description = "Number of sequences that match the 'coverageQuery' in the date range. " +
             "The query should be picked such that this number is the count of sequences that have a non-ambiguous " +
             "symbol at the positions of interest.",
     )
-    var coverage: Int,
+    var coverage: Long,
 )
 
 @Component
@@ -353,7 +353,7 @@ class QueriesOverTimeModel(
                 ),
             ),
             setRequestDataVersion = false,
-        ).map { it.toList() }
+        ).map { stream -> stream.use { it.toList() } }
 
     /**
      * Builds a result row for one particular mutation.
@@ -387,7 +387,7 @@ class QueriesOverTimeModel(
         dateField: String,
         dateRanges: List<DateRange>,
     ): List<Number> {
-        val result = Array(dateRanges.size) { 0 }
+        val result = Array(dateRanges.size) { 0L }
 
         counts.forEach { dateCount ->
             val index = findDateRangeIndex(dateCount, dateField, dateRanges)

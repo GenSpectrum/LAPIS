@@ -8,7 +8,9 @@ import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.parameters.HeaderParameter
 import io.swagger.v3.oas.models.security.SecurityRequirement
+import jakarta.annotation.PreDestroy
 import mu.KotlinLogging
+import org.apache.arrow.memory.RootAllocator
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseConfigValidator
@@ -51,6 +53,16 @@ private const val VERSION_FILE = "version.txt"
 @EnableScheduling
 @EnableCaching
 class LapisSpringConfig {
+    private val rootAllocator = RootAllocator()
+
+    @Bean
+    fun rootAllocator() = rootAllocator
+
+    @PreDestroy
+    fun closeRootAllocator() {
+        rootAllocator.close()
+    }
+
     @Bean
     fun openAPI(
         sequenceFilterFields: SequenceFilterFields,
