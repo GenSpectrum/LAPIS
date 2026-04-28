@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.3](https://github.com/GenSpectrum/LAPIS/compare/v0.8.2...v0.8.3) (2026-04-28)
+
+
+### Features
+
+* **lapis:** fetch data from SILO in the Apache Arrow format ([#1650](https://github.com/GenSpectrum/LAPIS/issues/1650)) ([6fde912](https://github.com/GenSpectrum/LAPIS/commit/6fde912c8698cc97f8726965392896ad6410f7e9))
+
+
+### Bug Fixes
+
+* **lapis:** logs in the query parse endpoint ([#1661](https://github.com/GenSpectrum/LAPIS/issues/1661)) ([9313868](https://github.com/GenSpectrum/LAPIS/commit/9313868723ee375ac04481dc52a3a0ddacfcbb9c))
+
 ## [0.8.2](https://github.com/GenSpectrum/LAPIS/compare/v0.8.1...v0.8.2) (2026-04-16)
 
 
