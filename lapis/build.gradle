@@ -44,7 +44,7 @@ dependencies {
     implementation 'com.github.luben:zstd-jni:1.5.7-7'
     implementation 'org.apache.arrow:arrow-vector:19.0.0'
     implementation 'org.apache.arrow:arrow-memory-netty:19.0.0'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.4'
     implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.7.1-0.6.x-compat'
 
     implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
