@@ -41,7 +41,7 @@ dependencies {
     antlr 'org.antlr:antlr4:4.13.2'
     implementation 'org.antlr:antlr4-runtime:4.13.2'
     implementation 'org.apache.commons:commons-csv:1.14.1'
-    implementation 'com.github.luben:zstd-jni:1.5.7-7'
+    implementation 'com.github.luben:zstd-jni:1.5.7-8'
     implementation 'org.apache.arrow:arrow-vector:19.0.0'
     implementation 'org.apache.arrow:arrow-memory-netty:19.0.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
