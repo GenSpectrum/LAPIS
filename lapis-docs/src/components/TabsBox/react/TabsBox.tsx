@@ -44,7 +44,7 @@ export const Tab: FC<TabProps> = () => {
     return null;
 };
 
-function nodeIsTab(node: ReactNode | {}): node is ReactElement<TabProps, typeof Tab> {
+function nodeIsTab(_node: ReactNode | {}): _node is ReactElement<TabProps, typeof Tab> {
     // return typeof node === 'object' && (node as any).type === Tab;
     return true;
 }

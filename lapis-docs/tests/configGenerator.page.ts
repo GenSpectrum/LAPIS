@@ -80,7 +80,7 @@ export class ConfigGeneratorPage {
         await this.page.getByRole('row', { name: metadataName }).getByRole('combobox').selectOption(type);
     }
 
-    public async editMetadataGenerateIndexInModal(metadataName: string, generateIndex: boolean) {
+    public async editMetadataGenerateIndexInModal(metadataName: string, _generateIndex: boolean) {
         await this.page.getByRole('row', { name: metadataName }).getByRole('checkbox').check({
             timeout: 1000,
         });

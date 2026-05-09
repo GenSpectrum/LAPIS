@@ -11,7 +11,7 @@ const { html, panels } = processPanels(panelHtml);
     {
         panels && (
             <div class='tabs not-content mt-6' role='tablist'>
-                {panels.map(({ label, panelId, tabId }, index) => (
+                {panels.map(({ label, tabId }, index) => (
                     <a
                         role='tab'
                         id={tabId}
@@ -63,7 +63,7 @@ const { html, panels } = processPanels(panelHtml);
             this.tabs.forEach((tab) => {
                 tab.removeAttribute('aria-selected');
                 tab.setAttribute('tabindex', '-1');
-                tab.setAttribute('class', tab.getAttribute('class').replace('tab-active', ''));
+                tab.setAttribute('class', (tab.getAttribute('class') ?? '').replace('tab-active', ''));
             });
             this.panels.forEach((oldPanel) => {
                 oldPanel.hidden = true;
@@ -76,7 +76,7 @@ const { html, panels } = processPanels(panelHtml);
             newTab.removeAttribute('tabindex');
             newTab.setAttribute('aria-selected', 'true');
 
-            newTab.setAttribute('class', newTab.getAttribute('class') + ' tab-active');
+            newTab.setAttribute('class', (newTab.getAttribute('class') ?? '') + ' tab-active');
             newTab.focus();
         }
     }

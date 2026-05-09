@@ -2,7 +2,7 @@
 import { getConfig } from '../../config';
 import BaseAwareLink from '../BaseAwareLink.astro';
 import { getFilters, getCommonFilterDescription } from './getFilters';
-import { getReferenceGenomes, isMultiSegmented } from '../../reference_genomes';
+import { getReferenceGenomes } from '../../reference_genomes';
 
 const config = getConfig();
 const filters = getFilters(config);

@@ -1,4 +1,4 @@
-import React, { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from 'react';
+import { type Dispatch, type SetStateAction, useEffect, useMemo, useState } from 'react';
 import { LabelledInput } from './LabelledInput.tsx';
 import { getResultFields, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
 import type { Config } from '../../config.ts';

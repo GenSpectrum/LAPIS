@@ -5,7 +5,7 @@ import { CodeBlock } from '../CodeBlock';
 import { Tab, TabsBox } from '../TabsBox/react/TabsBox';
 import { generateNonFastaQuery } from '../../utils/code-generators/python/generator';
 import type { Config } from '../../config';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { ResultField } from '../../utils/code-generators/types';
 import { CheckBoxesWrapper, ContainerWrapper, LabeledCheckBox, LabelWrapper } from './styled-components';
 import { getResultFields, MULTI_SEGMENTED, type QueryTypeSelectionState } from './QueryTypeSelectionState.ts';
@@ -137,7 +137,7 @@ const QueryUrlTab = (props: TabProps) => {
     );
 };
 
-const RTab = (props: TabProps) => {
+const RTab = (_props: TabProps) => {
     return <CodeBlock>TODO R code</CodeBlock>;
 };
 

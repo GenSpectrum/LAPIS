@@ -1,4 +1,4 @@
-import { ConfigContext, featureSchema, LAPIS_OPENNESS_OPEN, type PartialConfig } from './configContext.tsx';
+import { ConfigContext, LAPIS_OPENNESS_OPEN, type PartialConfig } from './configContext.tsx';
 import { useContext, useEffect } from 'react';
 
 const features = [
