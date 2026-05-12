@@ -11,6 +11,7 @@
         "check-format": "prettier --check \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
         "format": "prettier --write \"**/*.{ts,tsx,json,astro,md,mdx,mjs,cjs}\"",
         "check-types": "CONFIG_FILE=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml astro sync && tsc --noEmit",
+        "check-astro": "CONFIG_FILE=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml astro check",
         "e2e": "playwright test"
     },
     "dependencies": {
@@ -38,6 +39,7 @@
         "@types/js-yaml": "^4.0.9",
         "@types/node": "^24.12.2",
         "@types/swagger-ui": "^5.32.0",
+        "@types/swagger-ui-react": "^5.18.0",
         "prettier": "^3.8.3",
         "prettier-plugin-astro": "^0.14.1",
         "typescript": "^5.9.3"
