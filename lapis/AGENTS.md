@@ -69,7 +69,7 @@ LAPIS follows a three-layer architecture:
 - **Functions:** camelCase (e.g., `getAggregated()`, `handleException()`)
 - **Constants:** UPPER_SNAKE_CASE (e.g., `DEFAULT_MIN_PROPORTION`)
 - **Test classes:** Suffix with `Test` (e.g., `LapisControllerTest`)
-- **Test methods:** Descriptive names, backticks allowed for spaces
+- **Test methods:** `GIVEN <setup> WHEN <action> THEN <outcome>`, omit `WHEN` part when obvious.
 
 ### Data Classes
 
