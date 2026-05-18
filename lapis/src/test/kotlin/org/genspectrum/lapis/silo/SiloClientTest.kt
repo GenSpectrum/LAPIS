@@ -830,7 +830,7 @@ private fun expectQueryRequestAndRespondWith(
             request()
                 .withMethod("POST")
                 .withPath("/query")
-                .withContentType(MediaType.APPLICATION_JSON)
+                .withContentType(MediaType.TEXT_PLAIN)
                 .withHeader("X-Request-Id", REQUEST_ID_VALUE)
                 .withHeader("Accept", ARROW_STREAM_MEDIA_TYPE),
             times,
