@@ -46,7 +46,7 @@ class SiloQuerySaneQlSerializerTest {
         assertThat(result, equalTo("default"))
     }
 
-    @ParameterizedTest(name = "SiloAction serialization: {1}")
+    @ParameterizedTest(name = "filter: {1}")
     @MethodSource("getSiloActionTestCases")
     fun `SiloAction is correctly serialized to SaneQL`(
         action: SiloAction<*>,
@@ -59,7 +59,7 @@ class SiloQuerySaneQlSerializerTest {
         assertThat(result, equalTo("default$expectedSaneQl"))
     }
 
-    @ParameterizedTest(name = "SiloFilterExpression serialization: {1}")
+    @ParameterizedTest(name = "action: {1}")
     @MethodSource("getFilterExpressionTestCases")
     fun `SiloFilterExpression is correctly serialized to SaneQL`(
         filter: SiloFilterExpression,
