@@ -4,6 +4,7 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
+  SILO_TAG: 0.11.3 # TODO(#1682) revert to latest after SaneQL migration
 
 jobs:
   Tests:
@@ -128,7 +129,6 @@ jobs:
           docker compose -f lapis/docker-compose.yml up -d --wait
           cd lapis-e2e && npm run test
         env:
-          SILO_TAG: latest
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Store Logs
@@ -141,7 +141,6 @@ jobs:
             docker compose logs "$service" > "e2e-logs/${service}.log"
           done
         env:
-          SILO_TAG: 0.8.5
           LAPIS_TAG: ${{ steps.lapisBranchTag.outputs.lapisTag }}
 
       - name: Upload logs
