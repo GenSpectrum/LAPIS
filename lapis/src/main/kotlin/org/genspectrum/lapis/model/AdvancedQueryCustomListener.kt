@@ -27,6 +27,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.IsNull
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
@@ -268,7 +269,7 @@ class AdvancedQueryCustomListener(
             }
 
             MetadataType.DATE -> {
-                expressionStack.addLast(Not(DateBetween(field.name, to = null, from = null)))
+                expressionStack.addLast(IsNull(field.name))
             }
 
             MetadataType.FLOAT -> {
