@@ -10,22 +10,13 @@ object SiloQuerySaneQlSerializer {
         val action = serializeAction(query.action)
         val suffix = serializePipelineSuffix(query.action)
 
-        return buildString {
-            append("default")
-            if (filter != null) {
-                append(".filter(")
-                append(filter)
-                append(")")
-            }
-            append(action)
-            append(suffix)
-        }
+        return "default.filter($filter)$action$suffix"
     }
 
     @Suppress("CyclomaticComplexity")
-    private fun serializeFilter(expression: SiloFilterExpression): String? =
+    private fun serializeFilter(expression: SiloFilterExpression): String =
         when (expression) {
-            is True -> null
+            is True -> "true"
             is StringEquals -> serializeStringEquals(expression)
             is BooleanEquals -> serializeBooleanEquals(expression)
             is IntEquals -> serializeIntEquals(expression)
@@ -289,7 +280,7 @@ object SiloQuerySaneQlSerializer {
      * And/Or children that are themselves And/Or need wrapping to avoid ambiguity.
      */
     private fun wrapIfNeeded(expression: SiloFilterExpression): String {
-        val serialized = serializeFilter(expression)!!
+        val serialized = serializeFilter(expression)
         return when (expression) {
             is Or, is And -> "($serialized)"
             else -> serialized
