@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/GenSpectrum/LAPIS/compare/v0.8.3...v0.8.4) (2026-05-19)
+
+
+### Bug Fixes
+
+* **lapis-docs:** resolve TypeScript warnings and add astro check to CI ([#1681](https://github.com/GenSpectrum/LAPIS/issues/1681)) ([5829e17](https://github.com/GenSpectrum/LAPIS/commit/5829e17ea44cdecd99508a860a0334bc8af4dd17))
+
 ## [0.8.3](https://github.com/GenSpectrum/LAPIS/compare/v0.8.2...v0.8.3) (2026-04-28)
 
 
