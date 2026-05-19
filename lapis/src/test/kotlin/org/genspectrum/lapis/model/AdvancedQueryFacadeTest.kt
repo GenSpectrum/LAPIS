@@ -16,6 +16,7 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.IntBetween
 import org.genspectrum.lapis.silo.IntEquals
+import org.genspectrum.lapis.silo.IsNull
 import org.genspectrum.lapis.silo.LineageEquals
 import org.genspectrum.lapis.silo.Maybe
 import org.genspectrum.lapis.silo.NOf
@@ -374,7 +375,7 @@ class AdvancedQueryFacadeTest {
                 ValidTestCase(
                     "date metadata with isNull",
                     "isNull(date)",
-                    Not(DateBetween("date", null, null)),
+                    IsNull("date"),
                 ),
                 ValidTestCase(
                     "int metadata with isNull",
