@@ -108,6 +108,13 @@ class SiloQuerySaneQlSerializerTest {
                     SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
                     ".groupBy({count:=count()}).randomize(seed:=123)",
                 ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        orderByFields = OrderBySpec.Random(seed = 42),
+                        limit = 10,
+                    ),
+                    ".groupBy({count:=count()}).randomize(seed:=42).limit(10)",
+                ),
                 // Mutations
                 Arguments.of(
                     SiloAction.mutations(),
@@ -178,6 +185,14 @@ class SiloQuerySaneQlSerializerTest {
                         ),
                     ),
                     ".project({country, date}).orderBy({country, date.desc()})",
+                ),
+                Arguments.of(
+                    SiloAction.details(
+                        fields = listOf("country"),
+                        orderByFields = OrderBySpec.Random(seed = null),
+                        limit = 5,
+                    ),
+                    ".project({country}).randomize().limit(5)",
                 ),
                 // NucleotideInsertions
                 Arguments.of(
