@@ -264,13 +264,13 @@ object SiloQuerySaneQlSerializer {
             if (action.offset != null) {
                 append(".offset(${action.offset})")
             }
-            if (action.limit != null) {
-                append(".limit(${action.limit})")
-            }
             when (val randomize = action.randomize) {
                 is RandomizeConfig.Enabled -> append(".randomize()")
                 is RandomizeConfig.WithSeed -> append(".randomize(seed:=${randomize.seed})")
                 is RandomizeConfig.Disabled, null -> {}
+            }
+            if (action.limit != null) {
+                append(".limit(${action.limit})")
             }
         }
 
