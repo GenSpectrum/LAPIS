@@ -6,7 +6,7 @@
   "type": "module",
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^20.5.0",
+    "@commitlint/config-conventional": "^21.0.1",
     "@commitlint/types": "^21.0.1",
     "release-please": "^17.6.0"
   },
