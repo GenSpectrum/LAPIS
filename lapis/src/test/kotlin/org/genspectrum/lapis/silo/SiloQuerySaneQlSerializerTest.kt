@@ -24,7 +24,7 @@ class SiloQuerySaneQlSerializerTest {
 
         assertThat(
             result,
-            equalTo("default.filter(theColumn = 'theValue').groupBy({count:=count()})"),
+            equalTo("""default.filter("theColumn" = 'theValue').groupBy({count:=count()})"""),
         )
     }
 
@@ -86,7 +86,7 @@ class SiloQuerySaneQlSerializerTest {
                 ),
                 Arguments.of(
                     SiloAction.aggregated(listOf("field1", "field2")),
-                    ".groupBy({count:=count()}, {field1, field2})",
+                    """.groupBy({count:=count()}, {"field1", "field2"})""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
@@ -98,7 +98,7 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".groupBy({count:=count()}, {field1, field2}).orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.groupBy({count:=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
@@ -120,7 +120,6 @@ class SiloQuerySaneQlSerializerTest {
                     SiloAction.mutations(),
                     ".mutations()",
                 ),
-                // Mutations (with minProportion, orderBy, limit, offset)
                 Arguments.of(
                     SiloAction.mutations(
                         0.5,
@@ -131,11 +130,11 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".mutations(minProportion:=0.5).orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.mutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     SiloAction.mutations(0.05, fields = listOf("mutation", "count", "proportion")),
-                    ".mutations(minProportion:=0.05, fields:={mutation, count, proportion})",
+                    """.mutations(minProportion:=0.05, fields:={"mutation", "count", "proportion"})""",
                 ),
                 Arguments.of(
                     SiloAction.aminoAcidMutations(),
@@ -151,7 +150,7 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".aminoAcidMutations(minProportion:=0.5).orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.aminoAcidMutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Details
                 Arguments.of(
@@ -168,7 +167,7 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".project({age, pango_lineage}).orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.project({"age", "pango_lineage"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     SiloAction.details(orderByFields = OrderBySpec.Random(seed = 0)),
@@ -184,7 +183,7 @@ class SiloQuerySaneQlSerializerTest {
                             ),
                         ),
                     ),
-                    ".project({country, date}).orderBy({country, date.desc()})",
+                    """.project({"country", "date"}).orderBy({"country", "date".desc()})""",
                 ),
                 Arguments.of(
                     SiloAction.details(
@@ -192,7 +191,7 @@ class SiloQuerySaneQlSerializerTest {
                         orderByFields = OrderBySpec.Random(seed = null),
                         limit = 5,
                     ),
-                    ".project({country}).randomize().limit(5)",
+                    """.project({"country"}).randomize().limit(5)""",
                 ),
                 // NucleotideInsertions
                 Arguments.of(
@@ -208,7 +207,7 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".insertions().orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.insertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     SiloAction.aminoAcidInsertions(),
@@ -223,16 +222,16 @@ class SiloQuerySaneQlSerializerTest {
                         100,
                         50,
                     ),
-                    ".aminoAcidInsertions().orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.aminoAcidInsertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Sequence
                 Arguments.of(
                     SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
-                    ".project({someSequenceName})",
+                    """.project({"someSequenceName"})""",
                 ),
                 Arguments.of(
                     SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
-                    ".project({someSequenceName})",
+                    """.project({"someSequenceName"})""",
                 ),
                 Arguments.of(
                     SiloAction.genomicSequence(
@@ -246,7 +245,7 @@ class SiloQuerySaneQlSerializerTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    ".project({field1, field2, someSequenceName}).orderBy({field3, field4.desc()}).offset(50).limit(100)",
+                    """.project({"field1", "field2", "someSequenceName"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // MostRecentCommonAncestor
                 Arguments.of(
@@ -274,109 +273,109 @@ class SiloQuerySaneQlSerializerTest {
                 // StringEquals
                 Arguments.of(
                     StringEquals("theColumn", "theValue"),
-                    "theColumn = 'theValue'",
+                    """"theColumn" = 'theValue'""",
                 ),
                 Arguments.of(
                     StringEquals("theColumn", null),
-                    "isNull(theColumn)",
+                    """isNull("theColumn")""",
                 ),
                 // StringEquals with single quote in value
                 Arguments.of(
                     StringEquals("country", "Côte d'Ivoire"),
-                    "country = 'Côte d''Ivoire'",
+                    """"country" = 'Côte d''Ivoire'""",
                 ),
                 // BooleanEquals
                 Arguments.of(
                     BooleanEquals("theColumn", true),
-                    "theColumn = true",
+                    """"theColumn" = true""",
                 ),
                 Arguments.of(
                     BooleanEquals("theColumn", false),
-                    "theColumn = false",
+                    """"theColumn" = false""",
                 ),
                 Arguments.of(
                     BooleanEquals("theColumn", null),
-                    "isNull(theColumn)",
+                    """isNull("theColumn")""",
                 ),
                 // IntEquals
                 Arguments.of(
                     IntEquals("theColumn", 42),
-                    "theColumn = 42",
+                    """"theColumn" = 42""",
                 ),
                 Arguments.of(
                     IntEquals("theColumn", null),
-                    "isNull(theColumn)",
+                    """isNull("theColumn")""",
                 ),
                 // FloatEquals
                 Arguments.of(
                     FloatEquals("theColumn", 1.0),
-                    "theColumn = 1.0",
+                    """"theColumn" = 1.0""",
                 ),
                 Arguments.of(
                     FloatEquals("theColumn", null),
-                    "isNull(theColumn)",
+                    """isNull("theColumn")""",
                 ),
                 // DateBetween
                 Arguments.of(
                     DateBetween("fieldName", LocalDate.of(2021, 3, 31), LocalDate.of(2022, 6, 3)),
-                    "fieldName.between('2021-03-31'::date, '2022-06-03'::date)",
+                    """"fieldName".between('2021-03-31'::date, '2022-06-03'::date)""",
                 ),
                 Arguments.of(
                     DateBetween("fieldName", null, LocalDate.of(2022, 6, 3)),
-                    "fieldName.between(null, '2022-06-03'::date)",
+                    """"fieldName".between(null, '2022-06-03'::date)""",
                 ),
                 Arguments.of(
                     DateBetween("fieldName", LocalDate.of(2021, 3, 31), null),
-                    "fieldName.between('2021-03-31'::date, null)",
+                    """"fieldName".between('2021-03-31'::date, null)""",
                 ),
                 // IntBetween
                 Arguments.of(
                     IntBetween("age", 18, 65),
-                    "age.between(18, 65)",
+                    """"age".between(18, 65)""",
                 ),
                 Arguments.of(
                     IntBetween("age", 18, null),
-                    "age.between(18, null)",
+                    """"age".between(18, null)""",
                 ),
                 Arguments.of(
                     IntBetween("age", null, 65),
-                    "age.between(null, 65)",
+                    """"age".between(null, 65)""",
                 ),
                 // FloatBetween
                 Arguments.of(
                     FloatBetween("score", 0.5, 1.0),
-                    "score.between(0.5, 1.0)",
+                    """"score".between(0.5, 1.0)""",
                 ),
                 Arguments.of(
                     FloatBetween("score", 0.5, null),
-                    "score.between(0.5, null)",
+                    """"score".between(0.5, null)""",
                 ),
                 // LineageEquals
                 Arguments.of(
                     LineageEquals("fieldName", "ABC", includeSublineages = false),
-                    "fieldName.lineage('ABC', includeSublineages:=false)",
+                    """"fieldName".lineage('ABC', includeSublineages:=false)""",
                 ),
                 Arguments.of(
                     LineageEquals("fieldName", "ABC", includeSublineages = true),
-                    "fieldName.lineage('ABC', includeSublineages:=true)",
+                    """"fieldName".lineage('ABC', includeSublineages:=true)""",
                 ),
                 Arguments.of(
                     LineageEquals("fieldName", null, includeSublineages = false),
-                    "fieldName.lineage(null, includeSublineages:=false)",
+                    """"fieldName".lineage(null, includeSublineages:=false)""",
                 ),
                 // StringSearch
                 Arguments.of(
                     StringSearch("theColumn", "theValue"),
-                    "theColumn.like('theValue')",
+                    """"theColumn".like('theValue')""",
                 ),
                 // IsNull / IsNotNull
                 Arguments.of(
                     IsNull("theColumn"),
-                    "isNull(theColumn)",
+                    """isNull("theColumn")""",
                 ),
                 Arguments.of(
                     IsNotNull("theColumn"),
-                    "isNotNull(theColumn)",
+                    """isNotNull("theColumn")""",
                 ),
                 // NucleotideSymbolEquals
                 Arguments.of(
@@ -427,27 +426,27 @@ class SiloQuerySaneQlSerializerTest {
                 // PhyloDescendantOf
                 Arguments.of(
                     PhyloDescendantOf("theColumn", "internalNode"),
-                    "theColumn.phyloDescendantOf('internalNode')",
+                    """"theColumn".phyloDescendantOf('internalNode')""",
                 ),
                 // And
                 Arguments.of(
                     And(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue")),
-                    "theColumn = 'theValue' && theOtherColumn = 'theOtherValue'",
+                    """"theColumn" = 'theValue' && "theOtherColumn" = 'theOtherValue'""",
                 ),
                 // Or
                 Arguments.of(
                     Or(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue")),
-                    "theColumn = 'theValue' || theOtherColumn = 'theOtherValue'",
+                    """"theColumn" = 'theValue' || "theOtherColumn" = 'theOtherValue'""",
                 ),
                 // Not
                 Arguments.of(
                     Not(StringEquals("theColumn", "theValue")),
-                    "!(theColumn = 'theValue')",
+                    """!("theColumn" = 'theValue')""",
                 ),
                 // Maybe
                 Arguments.of(
                     Maybe(StringEquals("theColumn", "theValue")),
-                    "maybe(theColumn = 'theValue')",
+                    """maybe("theColumn" = 'theValue')""",
                 ),
                 // NOf
                 Arguments.of(
@@ -459,7 +458,7 @@ class SiloQuerySaneQlSerializerTest {
                             StringEquals("theOtherColumn", "theOtherValue"),
                         ),
                     ),
-                    "nOf(2, {theColumn = 'theValue', theOtherColumn = 'theOtherValue'}, matchExactly:=true)",
+                    """nOf(2, {"theColumn" = 'theValue', "theOtherColumn" = 'theOtherValue'}, matchExactly:=true)""",
                 ),
                 Arguments.of(
                     NOf(
@@ -470,7 +469,7 @@ class SiloQuerySaneQlSerializerTest {
                             StringEquals("theOtherColumn", "theOtherValue"),
                         ),
                     ),
-                    "nOf(2, {theColumn = 'theValue', theOtherColumn = 'theOtherValue'})",
+                    """nOf(2, {"theColumn" = 'theValue', "theOtherColumn" = 'theOtherValue'})""",
                 ),
                 // Nested And inside Or — verifies parenthesization
                 Arguments.of(
@@ -478,7 +477,7 @@ class SiloQuerySaneQlSerializerTest {
                         And(StringEquals("a", "1"), StringEquals("b", "2")),
                         StringEquals("c", "3"),
                     ),
-                    "(a = '1' && b = '2') || c = '3'",
+                    """("a" = '1' && "b" = '2') || "c" = '3'""",
                 ),
                 // Nested Or inside And — verifies parenthesization
                 Arguments.of(
@@ -486,7 +485,7 @@ class SiloQuerySaneQlSerializerTest {
                         Or(StringEquals("a", "1"), StringEquals("b", "2")),
                         StringEquals("c", "3"),
                     ),
-                    "(a = '1' || b = '2') && c = '3'",
+                    """("a" = '1' || "b" = '2') && "c" = '3'""",
                 ),
             )
     }

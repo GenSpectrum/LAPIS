@@ -26,8 +26,8 @@ object SiloQuerySaneQlSerializer {
             is FloatBetween -> serializeFloatBetween(expression)
             is LineageEquals -> serializeLineageEquals(expression)
             is StringSearch -> serializeStringSearch(expression)
-            is IsNull -> "isNull(${expression.column})"
-            is IsNotNull -> "isNotNull(${expression.column})"
+            is IsNull -> "isNull(${id(expression.column)})"
+            is IsNotNull -> "isNotNull(${id(expression.column)})"
             is NucleotideSymbolEquals -> serializeNucleotideSymbolEquals(expression)
             is HasNucleotideMutation -> serializeHasNucleotideMutation(expression)
             is AminoAcidSymbolEquals -> serializeAminoAcidSymbolEquals(expression)
@@ -44,58 +44,58 @@ object SiloQuerySaneQlSerializer {
 
     private fun serializeStringEquals(expr: StringEquals): String =
         if (expr.value == null) {
-            "isNull(${expr.column})"
+            "isNull(${id(expr.column)})"
         } else {
-            "${expr.column} = ${str(expr.value)}"
+            "${id(expr.column)} = ${str(expr.value)}"
         }
 
     private fun serializeBooleanEquals(expr: BooleanEquals): String =
         if (expr.value == null) {
-            "isNull(${expr.column})"
+            "isNull(${id(expr.column)})"
         } else {
-            "${expr.column} = ${expr.value}"
+            "${id(expr.column)} = ${expr.value}"
         }
 
     private fun serializeIntEquals(expr: IntEquals): String =
         if (expr.value == null) {
-            "isNull(${expr.column})"
+            "isNull(${id(expr.column)})"
         } else {
-            "${expr.column} = ${expr.value}"
+            "${id(expr.column)} = ${expr.value}"
         }
 
     private fun serializeFloatEquals(expr: FloatEquals): String =
         if (expr.value == null) {
-            "isNull(${expr.column})"
+            "isNull(${id(expr.column)})"
         } else {
-            "${expr.column} = ${expr.value}"
+            "${id(expr.column)} = ${expr.value}"
         }
 
     private fun serializeDateBetween(expr: DateBetween): String {
         val from = dateLiteral(expr.from)
         val to = dateLiteral(expr.to)
-        return "${expr.column}.between($from, $to)"
+        return "${id(expr.column)}.between($from, $to)"
     }
 
     private fun serializeIntBetween(expr: IntBetween): String {
         val from = expr.from ?: "null"
         val to = expr.to ?: "null"
-        return "${expr.column}.between($from, $to)"
+        return "${id(expr.column)}.between($from, $to)"
     }
 
     private fun serializeFloatBetween(expr: FloatBetween): String {
         val from = expr.from ?: "null"
         val to = expr.to ?: "null"
-        return "${expr.column}.between($from, $to)"
+        return "${id(expr.column)}.between($from, $to)"
     }
 
     private fun serializeLineageEquals(expr: LineageEquals): String {
         val value = if (expr.value == null) "null" else str(expr.value)
-        return "${expr.column}.lineage($value, includeSublineages:=${expr.includeSublineages})"
+        return "${id(expr.column)}.lineage($value, includeSublineages:=${expr.includeSublineages})"
     }
 
     private fun serializeStringSearch(expr: StringSearch): String {
         val pattern = str(expr.searchExpression)
-        return "${expr.column}.like($pattern)"
+        return "${id(expr.column)}.like($pattern)"
     }
 
     private fun serializeNucleotideSymbolEquals(expr: NucleotideSymbolEquals) =
@@ -144,7 +144,7 @@ object SiloQuerySaneQlSerializer {
 
     private fun serializePhyloDescendantOf(expr: PhyloDescendantOf): String {
         val node = str(expr.internalNode)
-        return "${expr.column}.phyloDescendantOf($node)"
+        return "${id(expr.column)}.phyloDescendantOf($node)"
     }
 
     private fun serializeNOf(expr: NOf) =
@@ -174,7 +174,7 @@ object SiloQuerySaneQlSerializer {
         buildString {
             append(".groupBy({count:=count()}")
             if (action.groupByFields.isNotEmpty()) {
-                val fields = action.groupByFields.joinToString(", ")
+                val fields = action.groupByFields.joinToString(", ") { id(it) }
                 append(", {$fields}")
             }
             append(")")
@@ -184,7 +184,7 @@ object SiloQuerySaneQlSerializer {
         if (action.fields.isEmpty()) {
             ""
         } else {
-            val fields = action.fields.joinToString(", ")
+            val fields = action.fields.joinToString(", ") { id(it) }
             ".project({$fields})"
         }
 
@@ -196,7 +196,7 @@ object SiloQuerySaneQlSerializer {
                 args.add("minProportion:=${action.minProportion}")
             }
             if (action.fields.isNotEmpty()) {
-                val fields = action.fields.joinToString(", ")
+                val fields = action.fields.joinToString(", ") { id(it) }
                 args.add("fields:={$fields}")
             }
             append(args.joinToString(", "))
@@ -211,7 +211,7 @@ object SiloQuerySaneQlSerializer {
                 args.add("minProportion:=${action.minProportion}")
             }
             if (action.fields.isNotEmpty()) {
-                val fields = action.fields.joinToString(", ")
+                val fields = action.fields.joinToString(", ") { id(it) }
                 args.add("fields:={$fields}")
             }
             append(args.joinToString(", "))
@@ -220,7 +220,7 @@ object SiloQuerySaneQlSerializer {
 
     private fun serializeSequenceAction(action: SiloAction.SequenceAction): String {
         val allFields = action.additionalFields + action.sequenceNames
-        val fields = allFields.joinToString(", ")
+        val fields = allFields.joinToString(", ") { id(it) }
         return ".project({$fields})"
     }
 
@@ -267,11 +267,15 @@ object SiloQuerySaneQlSerializer {
 
     private fun serializeOrderByField(field: OrderByField): String =
         when (field.order) {
-            Order.ASCENDING -> field.field
-            Order.DESCENDING -> "${field.field}.desc()"
+            Order.ASCENDING -> id(field.field)
+            Order.DESCENDING -> "${id(field.field)}.desc()"
         }
 
+    /** Wraps a string value in single quotes, escaping embedded single quotes. */
     private fun str(value: String) = "'" + value.replace("'", "''") + "'"
+
+    /** Wraps an identifier in double quotes, escaping embedded double quotes. Prevents SaneQL injection. */
+    private fun id(name: String) = "\"" + name.replace("\"", "\"\"") + "\""
 
     private fun dateLiteral(date: LocalDate?) = if (date == null) "null" else "'$date'::date"
 
