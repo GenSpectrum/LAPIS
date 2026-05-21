@@ -4,7 +4,7 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
-  SILO_TAG: 1182-sane-ql # TODO revert to latest
+  SILO_TAG: latest
 
 jobs:
   Tests:
