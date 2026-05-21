@@ -149,7 +149,7 @@ object SiloQuerySaneQlSerializer {
 
     private fun serializeNOf(expr: NOf) =
         buildString {
-            val children = expr.children.joinToString(", ") { serializeFilter(it)!! }
+            val children = expr.children.joinToString(", ") { serializeFilter(it) }
             append("nOf(${expr.numberOfMatchers}, {$children}")
             if (expr.matchExactly) {
                 append(", matchExactly:=true")

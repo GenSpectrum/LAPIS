@@ -29,21 +29,21 @@ class SiloQuerySaneQlSerializerTest {
     }
 
     @Test
-    fun `GIVEN query with True filter THEN omits filter clause`() {
+    fun `GIVEN query with True filter THEN filters for true`() {
         val query = SiloQuery(SiloAction.aggregated(), True)
 
         val result = SiloQuerySaneQlSerializer.serialize(query)
 
-        assertThat(result, equalTo("default.groupBy({count:=count()})"))
+        assertThat(result, equalTo("default.filter(true).groupBy({count:=count()})"))
     }
 
     @Test
-    fun `GIVEN query with details action and no fields THEN produces bare default`() {
+    fun `GIVEN query with details action and no fields THEN produces no action`() {
         val query = SiloQuery(SiloAction.details(), True)
 
         val result = SiloQuerySaneQlSerializer.serialize(query)
 
-        assertThat(result, equalTo("default"))
+        assertThat(result, equalTo("default.filter(true)"))
     }
 
     @ParameterizedTest(name = "action: {1}")
@@ -56,7 +56,7 @@ class SiloQuerySaneQlSerializerTest {
 
         val result = SiloQuerySaneQlSerializer.serialize(query)
 
-        assertThat(result, equalTo("default$expectedSaneQl"))
+        assertThat(result, equalTo("default.filter(true)$expectedSaneQl"))
     }
 
     @ParameterizedTest(name = "filter: {1}")
