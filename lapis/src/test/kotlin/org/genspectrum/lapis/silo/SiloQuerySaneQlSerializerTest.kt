@@ -75,6 +75,29 @@ class SiloQuerySaneQlSerializerTest {
         )
     }
 
+    @Test
+    fun `GIVEN orderBy field with injection attempt THEN payload is quoted as identifier`() {
+        val query = SiloQuery(
+            SiloAction.aggregated(
+                listOf("country"),
+                listOf(
+                    OrderByField("count}).filter(true).groupBy({evil:=count()", Order.ASCENDING),
+                ).toOrderBySpec(),
+            ),
+            True,
+        )
+
+        val result = SiloQuerySaneQlSerializer.serialize(query)
+
+        assertThat(
+            result,
+            equalTo(
+                """default.filter(true).groupBy({count:=count()}, {"country"})""" +
+                    """.orderBy({"count}).filter(true).groupBy({evil:=count()"})""", // <- the orderBy field is quoted
+            ),
+        )
+    }
+
     companion object {
         @JvmStatic
         fun getSiloActionTestCases() =
