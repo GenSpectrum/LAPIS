@@ -3,12 +3,8 @@ title: Database Configuration
 description: Reference for how to configure LAPIS and SILO
 ---
 
-import { OnlyIf } from '../../../../components/OnlyIf.tsx';
-import MetadataTypesList from '../../../../components/Configuration/MetadataTypesList.astro';
-import { hasFeature } from '../../../../config.ts';
-
 LAPIS and SILO need a `database_config.yaml`.
-It's main purpose is to define the database schema for the sequence metadata.
+Its main purpose is to define the database schema for the sequence metadata.
 See the [tutorial](../tutorials/start-lapis-and-silo#writing-configuration) for an example,
 or use our [config generator](../tutorials/generate-your-config) to generate your own config.
 More examples can be found in our tests.
@@ -16,77 +12,106 @@ More examples can be found in our tests.
 The database config is considered static configuration that doesn't change with data updates.
 This page contains the technical specification of the database config.
 
+## Top-Level Structure
+
+The `database_config.yaml` permits the following top-level keys:
+
+| Key                         | Type   | Required | Description                                                                                           |
+| --------------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------- |
+| `schema`                    | object | true     | The [schema object](#the-schema-object).                                                              |
+| `defaultNucleotideSequence` | string | false    | Name of the default nucleotide sequence segment. Only meaningful when there is more than one segment. |
+| `defaultAminoAcidSequence`  | string | false    | Name of the default amino acid gene                                                                   |
+| `siloClientThreadCount`     | int    | false    | How many threads (connections) LAPIS uses to talk to SILO.                                            |
+
 ## The Schema Object
 
-The `database_config.yaml` must contain a `schema` object on top level.
-It permits the following fields:
+The `schema` object permits the following fields:
 
-| Key           | Type   | Required | Description                                                                                           |
-| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------- |
-| instanceName  | string | true     | The name assigned to the instance. Only used for diplay purposes.                                     |
-| metadata      | array  | true     | A list of [metadata objects](#the-metadata-object) that is available on the underlying sequence data. |
-| opennessLevel | enum   | true     | Possible values: `OPEN`. To be extended in the future.                                                |
-| primaryKey    | string | true     | The field that serves as the primary key in SILO for the data.                                        |
-| dateToSortBy  | string | false    | The field used to sort the data by date. Queries on this column will be faster.                       |
-| partitionBy   | string | false    | The field used to partition the data. Used by SILO for overall query optimization.                    |
-| features      | array  | false    | A list of [feature objects](#features).                                                               |
-
-:::tip
-If you have a pango lineage column in your metadata, make use of the `partitionBy` feature.
-SILO will partition the data according to the lineage, which will speed up queries,
-since querying can be parallelized.
-:::
-
-:::tip
-If you anticipate that users will query for a certain date column more often,
-it will be beneficial to set `dateToSortBy` to that column.
-:::
+| Key            | Type   | Required | Description                                                                                                                  |
+| -------------- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `instanceName` | string | true     | The name assigned to the instance. Used for display purposes.                                                                |
+| `metadata`     | array  | true     | A list of [metadata objects](#the-metadata-object) describing the metadata fields available on the underlying sequence data. |
+| `primaryKey`   | string | true     | The name of the metadata field that serves as the primary key. The value must match one of the entries in `metadata`.        |
+| `features`     | array  | false    | A list of [feature objects](#features) that enable additional query capabilities. Defaults to no features.                   |
 
 ## The Metadata Object
 
-The metadata object permits the following fields:
+Each entry in `schema.metadata` describes a single metadata field. The following keys are permitted:
 
-| Key           | Type    | Required | Description                                           |
-| ------------- | ------- | -------- | ----------------------------------------------------- |
-| name          | string  | true     | The name of the metadata field.                       |
-| type          | enum    | true     | The [type of the metadata](#metadata-types).          |
-| generateIndex | boolean | false    | See [Generating an index](#generating-an-index) below |
+| Key                    | Type    | Required | Description                                                                                                                                                                                       |
+| ---------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                 | string  | true     | The name of the metadata field. Must be unique within `metadata`.                                                                                                                                 |
+| `type`                 | enum    | true     | The [type of the metadata](#metadata-types).                                                                                                                                                      |
+| `generateIndex`        | boolean | false    | If `true`, SILO builds an index for this field so that filter queries become a trivial lookup. See [Generating an index](#generating-an-index). Only valid for fields of type `string`.           |
+| `generateLineageIndex` | string  | false    | If set, SILO treats the field as a lineage-indexed field belonging to the named lineage system. See [Lineage-indexed fields](#lineage-indexed-fields). Only valid for fields of type `string`.    |
+| `isPhyloTreeField`     | boolean | false    | If `true`, marks the field as a phylogenetic tree field. Sequences can then be queried by their position in a tree (e.g. via `mostRecentCommonAncestor`). Only valid for fields of type `string`. |
 
 :::caution
 The `name` must not contain the reserved character `.`.
-
-LAPIS uses `.` internally to generate new filters, such as the `$name.regex` filter.
-To avoid conflicts, the `name` must not contain reserved characters.
+LAPIS uses `.` internally to generate derived filters such as `<name>.regex` and `<name>.isNull`.
+LAPIS will refuse to start if a metadata field name contains a `.`.
 :::
 
 ### Metadata Types
 
-<MetadataTypesList />
+LAPIS supports the following metadata types:
 
-##### Generating an Index
+<ul>
+    <li>
+        <code>string</code>: Arbitrary text values.
+    </li>
+    <li>
+        <code>int</code>: Integer values.
+    </li>
+    <li>
+        <code>float</code>: Floating-point values.
+    </li>
+    <li>
+        <code>boolean</code>: <code>true</code> or <code>false</code>.
+    </li>
+    <li>
+        <code>date</code>: Values must be valid dates in the form <code>YYYY-MM-DD</code>.
+    </li>
+</ul>
 
-Columns of type `string` support generating an index.
-For columns of type `pango_lineage`, an index is always generated.
-SILO internally stores precomputed bitmaps for those columns so that a query on that column becomes a trivial lookup.
+### Generating an Index
+
+For string fields, setting `generateIndex: true` makes SILO precompute bitmaps for the field's distinct values,
+turning queries against the field into very fast lookups.
 
 :::tip
-Generating an index makes most sense for columns with many equal values,
-since it increases the compression ratio and thus decreases memory consumption of SILO.
+Generating an index makes most sense for columns with relatively few distinct values that repeat often
+(e.g. `country`, `region`, `host`).
+This increases the compression ratio and reduces SILO's memory footprint, in addition to speeding up queries.
 :::
+
+### Lineage-Indexed Fields
+
+Setting `generateLineageIndex: <systemName>` on a string field tells SILO that the values form a hierarchy
+(e.g. Pango lineages). The value of `generateLineageIndex` is the name of the _lineage system_ — a SILO-side
+definition that lists how the lineages relate to each other (parent/child relationships, aliases).
+Multiple metadata fields can share the same lineage system.
+
+The lineage definitions themselves are provided to SILO at preprocessing time
+and are not part of the LAPIS database config.
+See SILO's documentation for how to supply lineage definitions.
+
+### Phylogenetic Tree Fields
+
+Setting `isPhyloTreeField: true` on a string field declares that the field stores identifiers in a phylogenetic tree
+(for example node labels of an UShER tree). The tree itself is supplied to SILO at preprocessing time.
 
 ## Features
 
-The feature object permits the following fields:
+Each entry in `schema.features` enables a feature in LAPIS:
 
-| Key  | Type   | Required | Description              |
-| ---- | ------ | -------- | ------------------------ |
-| name | string | true     | The name of the feature. |
+| Key    | Type   | Required | Description              |
+| ------ | ------ | -------- | ------------------------ |
+| `name` | string | true     | The name of the feature. |
 
-Currently, we support the `sarsCoV2VariantQuery` as well as the `generalizedAdvancedQuery` feature.
-The `sarsCoV2VariantQuery` is a specialized query language for SARS-CoV-2 instances (see [variant queries](../../concepts/variant-query)), while the `generalizedAdvancedQuery` feature can be used for all instances (see [advanced queries](../../concepts/advanced-query)).
+The following feature names are recognized. Any other value will cause LAPIS to fail on startup.
 
-## Other configuration
-
-| Key                   | Type | Required | Description                                                      |
-| --------------------- | ---- | -------- | ---------------------------------------------------------------- |
-| siloClientThreadCount | int  | false    | How many threads (connections) the SILO client uses. Default: 64 |
+| Feature name               | Description                                                                                                                                                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sarsCoV2VariantQuery`     | Enables the SARS-CoV-2-specific [variant query](../../concepts/variant-query) language, exposed via the `variantQuery` request parameter. The feature is used for CoV-Spectrum and it is not recommended to use it otherwise. |
+| `generalizedAdvancedQuery` | Enables the generic [advanced query](../../concepts/advanced-query) language, exposed via the `advancedQuery` request parameter. Recommended for non-SARS-CoV-2 instances.                                                    |
