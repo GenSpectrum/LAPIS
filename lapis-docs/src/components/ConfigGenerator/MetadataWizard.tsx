@@ -1,68 +1,113 @@
-import { type Dispatch, type SetStateAction, useContext, useRef, useState } from 'react';
+import { type Dispatch, type SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import { ConfigContext, type Metadata, type MetadataType } from './configContext.tsx';
-import { AddIcon, DeleteIcon, EditIcon } from './Icons.tsx';
+import { HelpTooltip } from './HelpTooltip.tsx';
+import { Field, SectionHeading } from './FormLayout.tsx';
 
 export function MetadataWizard() {
     const { config, addNewMetadata, deleteMetadata, removeConfigField } = useContext(ConfigContext);
+    const [autoOpenIndex, setAutoOpenIndex] = useState<number | null>(null);
 
     function handleDeleteMetadata(metadata: Metadata, index: number) {
         if (metadata.type === 'string' && config.primaryKey === metadata.name) {
             removeConfigField('primaryKey');
         }
-        if (metadata.type === 'date' && config.dateToSortBy === metadata.name) {
-            removeConfigField('dateToSortBy');
-        }
-        if (metadata.type === 'pango_lineage' && config.partitionBy === metadata.name) {
-            removeConfigField('partitionBy');
-        }
         deleteMetadata(index);
     }
 
+    function handleAddMetadata() {
+        // The new row is appended; its index is the current length.
+        setAutoOpenIndex(config.metadata.length);
+        addNewMetadata();
+    }
+
+    const hasRows = config.metadata.length > 0;
+
     return (
-        <div className='flex flex-col mb-4'>
-            <h1 className='text-xl font-bold mb-4'>Metadata</h1>
-            <div className='card bg-base-100 shadow-xl'>
-                <table className='table '>
-                    <thead>
+        <div className='space-y-4'>
+            <SectionHeading>Metadata fields</SectionHeading>
+            <div className='border border-base-300 rounded-sm'>
+                <table className='w-full text-sm border-collapse'>
+                    <thead className='bg-base-200 text-left'>
                         <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Generate Index</th>
-                            <th></th>
+                            <th className='px-3 py-2 font-medium whitespace-nowrap'>
+                                Name
+                                <HelpTooltip
+                                    text='Must be unique and must not contain a "." (which LAPIS reserves for derived filters such as "<name>.regex" and "<name>.isNull").'
+                                    docsHref='/maintainer-docs/references/database-configuration#the-metadata-object'
+                                />
+                            </th>
+                            <th className='px-3 py-2 font-medium whitespace-nowrap w-24'>
+                                Type
+                                <HelpTooltip
+                                    text='Data type of the field. One of string, date, int, float, or boolean.'
+                                    docsHref='/maintainer-docs/references/database-configuration#metadata-types'
+                                />
+                            </th>
+                            <th className='px-3 py-2 font-medium text-center whitespace-nowrap w-20'>
+                                Indexed
+                                <HelpTooltip
+                                    text='When enabled, SILO precomputes bitmaps for the field. Recommended for low-cardinality string fields like country or host.'
+                                    docsHref='/maintainer-docs/references/database-configuration#generating-an-index'
+                                />
+                            </th>
+                            <th className='px-3 py-2 w-20'></th>
                         </tr>
                     </thead>
                     <tbody>
+                        {!hasRows && (
+                            <tr>
+                                <td colSpan={4} className='px-3 py-6 text-center text-sm text-base-content/60'>
+                                    No metadata fields yet. Add one to start.
+                                </td>
+                            </tr>
+                        )}
                         {config.metadata.map((metadata, index) => {
-                            const modal = `modal_${metadata.name.replace(' ', '')}`;
-
+                            const modal = `modal_${metadata.name.replace(/\s+/g, '_')}_${index}`;
                             return (
-                                <tr key={metadata.name}>
-                                    <td className='break-all max-w-72'>{metadata.name}</td>
-                                    <td>{metadata.type}</td>
-                                    <td>{metadata.generateIndex ? 'yes' : 'no'}</td>
-                                    <td>
+                                <tr key={index} className='border-t border-base-300'>
+                                    <td className='px-3 py-2 font-mono truncate max-w-xs' title={metadata.name}>
+                                        {metadata.name}
+                                    </td>
+                                    <td className='px-3 py-2 font-mono whitespace-nowrap'>{metadata.type}</td>
+                                    <td className='px-3 py-2 text-center'>
+                                        {metadata.generateIndex ? (
+                                            <span aria-label='indexed' title='indexed'>
+                                                ✓
+                                            </span>
+                                        ) : (
+                                            <span className='text-base-content/40' aria-label='not indexed'>
+                                                —
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className='px-3 py-2 text-right whitespace-nowrap'>
                                         <ActionsOnMetadata
                                             handleDeleteMetadata={() => handleDeleteMetadata(metadata, index)}
                                             index={index}
                                             metadata={metadata}
                                             modal={modal}
+                                            shouldAutoOpen={autoOpenIndex === index}
+                                            onAutoOpened={() => setAutoOpenIndex(null)}
                                         />
                                     </td>
                                 </tr>
                             );
                         })}
                     </tbody>
+                    <tfoot>
+                        <tr className='border-t border-base-300 bg-base-100'>
+                            <td colSpan={4} className='px-3 py-2'>
+                                <button
+                                    type='button'
+                                    className='text-sm text-base-content/80 hover:text-base-content underline'
+                                    onClick={handleAddMetadata}
+                                >
+                                    + Add field
+                                </button>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
-                <div className={'flex justify-end'}>
-                    <button
-                        className='btn m-4'
-                        onClick={() => {
-                            addNewMetadata();
-                        }}
-                    >
-                        <AddIcon />
-                    </button>
-                </div>
             </div>
         </div>
     );
@@ -73,28 +118,47 @@ function ActionsOnMetadata(props: {
     index: number;
     metadata: Metadata;
     modal: string;
+    shouldAutoOpen: boolean;
+    onAutoOpened: () => void;
 }) {
     const modalRef = useRef<HTMLDialogElement>(null);
+    // Bumping this key on each open re-mounts MetadataEditModal so that
+    // its local form state is re-initialised from the current metadata
+    // prop — i.e. Cancel actually cancels and discards typed-but-unsaved
+    // edits.
+    const [sessionKey, setSessionKey] = useState(0);
 
     const openModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
-        }
+        setSessionKey((k) => k + 1);
+        modalRef.current?.showModal();
     };
+
+    const { shouldAutoOpen, onAutoOpened } = props;
+    useEffect(() => {
+        if (shouldAutoOpen) {
+            openModal();
+            onAutoOpened();
+        }
+    }, [shouldAutoOpen, onAutoOpened]);
 
     return (
         <>
-            <div className='join'>
-                <button className='btn' onClick={openModal}>
-                    <EditIcon />
-                </button>
-                <button className='btn' onClick={props.handleDeleteMetadata}>
-                    <DeleteIcon />
-                </button>
-            </div>
-
+            <button
+                type='button'
+                className='text-xs text-base-content/80 hover:text-base-content underline mr-3'
+                onClick={openModal}
+            >
+                Edit
+            </button>
+            <button
+                type='button'
+                className='text-xs text-error/80 hover:text-error underline'
+                onClick={props.handleDeleteMetadata}
+            >
+                Delete
+            </button>
             <dialog ref={modalRef} className='modal' id={props.modal}>
-                <MetadataEditModal index={props.index} metadata={props.metadata} />
+                <MetadataEditModal key={sessionKey} index={props.index} metadata={props.metadata} />
             </dialog>
         </>
     );
@@ -114,111 +178,86 @@ export function MetadataEditModal({ index, metadata }: { index: number; metadata
     const handleSetMetadataType = (newType: MetadataType) => {
         setMetadataType(newType);
 
-        switch (newType) {
-            case 'string':
-                break;
-            case 'pango_lineage':
-                setGenerateIndex(true);
-                break;
-            default:
-                setGenerateIndex(false);
-                break;
+        if (newType !== 'string') {
+            setGenerateIndex(false);
         }
     };
 
     return (
-        <div className='modal-box'>
-            <h3 className='font-bold text-lg'>Edit metadata</h3>
-
-            <form method='dialog'>
-                <div className='flex flex-col space-x-2 items-center'>
-                    <table className='table'>
-                        <tbody>
-                            <tr>
-                                <td>Name</td>
-                                <td>
-                                    <EditMetadataName metadataName={metadataName} setMetadataName={setMetadataName} />
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Type</td>
-                                <td>
-                                    <SelectMetadataType
-                                        metadataType={metadataType}
-                                        setMetadataType={handleSetMetadataType}
-                                    />
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Generate Index</td>
-                                <td>
-                                    <EditGenerateIndexWrapper
-                                        generateIndex={generateIndex}
-                                        setGenerateIndex={setGenerateIndex}
-                                        metadataType={metadataType}
-                                    />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div className='flex justify-end'>
+        <div className='modal-box rounded-sm'>
+            <h3 className='font-semibold text-base mb-4'>Edit metadata field</h3>
+            <form method='dialog' className='space-y-4'>
+                <Field label='Name' required>
+                    <EditMetadataName metadataName={metadataName} setMetadataName={setMetadataName} />
+                </Field>
+                <Field label='Type' required>
+                    <SelectMetadataType metadataType={metadataType} setMetadataType={handleSetMetadataType} />
+                </Field>
+                <Field
+                    label='Generate index'
+                    description={
+                        metadataType === 'string'
+                            ? 'Best for low-cardinality string fields.'
+                            : 'Indexing is only available for string fields.'
+                    }
+                >
+                    <EditGenerateIndex
+                        generateIndex={generateIndex}
+                        setGenerateIndex={setGenerateIndex}
+                        disabled={metadataType !== 'string'}
+                    />
+                </Field>
+                <div className='flex justify-end gap-2 pt-2'>
+                    <button type='submit' className='btn btn-sm btn-ghost'>
+                        Cancel
+                    </button>
                     <button
                         type='submit'
-                        className='btn join-item'
+                        className='btn btn-sm btn-primary'
                         onClick={() => {
                             handleUpdateMetadata();
                         }}
                     >
-                        OK
+                        Save
                     </button>
-                    <button className='btn btn-ghost join-item'>Cancel</button>
                 </div>
             </form>
         </div>
     );
 }
 
-function EditGenerateIndexWrapper({
-    generateIndex,
-    setGenerateIndex,
-    metadataType,
-}: {
-    generateIndex: boolean;
-    setGenerateIndex: Dispatch<SetStateAction<boolean>>;
-    metadataType: MetadataType;
-}) {
-    switch (metadataType) {
-        case 'string':
-            return <EditGenerateIndex generateIndex={generateIndex} setGenerateIndex={setGenerateIndex} />;
-        case 'pango_lineage':
-            return <div>An index has to be generated for pango lineages</div>;
-        default:
-            return <div>You can only generate index for string metadata.</div>;
-    }
-}
-
 function EditGenerateIndex({
     generateIndex,
     setGenerateIndex,
+    disabled,
 }: {
     generateIndex: boolean;
     setGenerateIndex: Dispatch<SetStateAction<boolean>>;
+    disabled?: boolean;
 }) {
-    const handleGenerateIndexChange = () => {
-        setGenerateIndex(!generateIndex);
-    };
-
     return (
         <input
             type='checkbox'
-            className='toggle toggle-accent'
+            className='toggle toggle-sm'
             checked={generateIndex}
-            onChange={handleGenerateIndexChange}
+            onChange={() => setGenerateIndex(!generateIndex)}
+            disabled={disabled}
         />
     );
+}
+
+function validateMetadataName(name: string, metadataName: string, existing: { name: string }[]): string | null {
+    const trimmed = name.trim();
+    if (trimmed.length === 0) {
+        return 'Name cannot be empty.';
+    }
+    if (name.includes('.')) {
+        return 'Name must not contain the reserved character ".". LAPIS uses it to generate derived filters and will refuse to start otherwise.';
+    }
+    if (name !== metadataName && existing.some((metadata) => metadata.name === name)) {
+        return `Another metadata field is already called "${name}".`;
+    }
+    return null;
 }
 
 function EditMetadataName({
@@ -229,27 +268,31 @@ function EditMetadataName({
     setMetadataName: Dispatch<SetStateAction<string>>;
 }) {
     const { config } = useContext(ConfigContext);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleMetadataNameChange = (event: { target: { value: string } }) => {
-        if (config.metadata.filter((metadata) => metadata.name === event.target.value).length > 0) {
-            if (event.target.value !== metadataName) {
-                setError(true);
-                return;
-            }
+        const value = event.target.value;
+        const validationError = validateMetadataName(value, metadataName, config.metadata);
+
+        if (validationError !== null) {
+            setError(validationError);
+            return;
         }
 
-        setError(false);
-        setMetadataName(event.target.value);
+        setError(null);
+        setMetadataName(value);
     };
 
     return (
-        <input
-            type='text'
-            className={`input input-bordered ${error ? 'input-error' : ''}`}
-            defaultValue={metadataName}
-            onChange={handleMetadataNameChange}
-        />
+        <div className='flex flex-col gap-1'>
+            <input
+                type='text'
+                className={`input input-bordered input-sm font-mono ${error ? 'input-error' : ''}`}
+                defaultValue={metadataName}
+                onChange={handleMetadataNameChange}
+            />
+            {error !== null && <span className='text-error text-xs'>{error}</span>}
+        </div>
     );
 }
 
@@ -266,14 +309,16 @@ function SelectMetadataType({
     };
 
     return (
-        <select className='select select-bordered mt-0' value={metadataType} onChange={handleMetadataTypeChange}>
-            <option value='string'>String</option>
-            <option value='date'>Date</option>
-            <option value='number'>Number</option>
-            <option value='boolean'>Boolean</option>
-            <option value='pango_lineage'>Pango lineage</option>
-            <option value='insertion'>Insertion</option>
-            <option value='aaInsertion'>AA insertion</option>
+        <select
+            className='select select-bordered select-sm font-mono'
+            value={metadataType}
+            onChange={handleMetadataTypeChange}
+        >
+            <option value='string'>string</option>
+            <option value='date'>date</option>
+            <option value='int'>int</option>
+            <option value='float'>float</option>
+            <option value='boolean'>boolean</option>
         </select>
     );
 }

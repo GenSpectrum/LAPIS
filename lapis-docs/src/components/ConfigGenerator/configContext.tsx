@@ -8,22 +8,15 @@ export const LAPIS_OPENNESS_OPEN = 'OPEN';
 export const opennessLevelSchema = z.enum([LAPIS_OPENNESS_OPEN]);
 export type OpennessLevel = z.infer<typeof opennessLevelSchema>;
 
-export const metadataTypeSchema = z.enum([
-    'string',
-    'date',
-    'pango_lineage',
-    'int',
-    'float',
-    'insertion',
-    'aaInsertion',
-    'boolean',
-]);
+export const metadataTypeSchema = z.enum(['string', 'date', 'int', 'float', 'boolean']);
 export type MetadataType = z.infer<typeof metadataTypeSchema>;
 
 export const metadataSchema = z.object({
     name: z.string(),
     type: metadataTypeSchema,
     generateIndex: z.boolean().optional(),
+    generateLineageIndex: z.string().optional(),
+    isPhyloTreeField: z.boolean().optional(),
     autocomplete: z.boolean().optional(),
     required: z.boolean().optional(),
     notSearchable: z.boolean().optional(),
@@ -41,17 +34,25 @@ export const schemaSchema = z.object({
     opennessLevel: opennessLevelSchema,
     metadata: z.array(metadataSchema),
     primaryKey: z.string(),
-    dateToSortBy: z.string().optional(),
-    partitionBy: z.string().optional(),
     tableColumns: z.array(z.string()).optional(),
     features: z.array(featureSchema).optional(),
 });
 
 export type Schema = z.infer<typeof schemaSchema>;
 
-export const configSchema = z.object({
-    schema: schemaSchema,
+export const topLevelConfigSchema = z.object({
+    defaultNucleotideSequence: z.string().optional(),
+    defaultAminoAcidSequence: z.string().optional(),
+    siloClientThreadCount: z.number().int().positive().optional(),
 });
+
+export type TopLevelConfig = z.infer<typeof topLevelConfigSchema>;
+
+export const configSchema = z
+    .object({
+        schema: schemaSchema,
+    })
+    .merge(topLevelConfigSchema);
 
 export type PartialConfig = Partial<Schema> & { metadata: Metadata[] };
 
@@ -59,6 +60,7 @@ export type ConfigContextType = {
     configType: ConfigType;
     setConfigType: (configType: ConfigType) => void;
     config: PartialConfig;
+    topLevelConfig: TopLevelConfig;
     addNewMetadata: () => void;
     updateMetadata: (metadata: Metadata, index: number) => void;
     deleteMetadata: (index: number) => void;
@@ -68,12 +70,14 @@ export type ConfigContextType = {
     modifyConfigField: <T extends keyof Schema>(field: T, value: Schema[T]) => void;
     removeConfigField: (field: keyof Schema) => void;
     modifyFeatureFields: (featureName: string, action: 'add' | 'delete') => void;
+    modifyTopLevelField: <T extends keyof TopLevelConfig>(field: T, value: TopLevelConfig[T] | undefined) => void;
 };
 
 export const ConfigContext = createContext<ConfigContextType>({
     configType: 'SILO',
     setConfigType: () => {},
     config: { metadata: [], primaryKey: '', tableColumns: [] },
+    topLevelConfig: {},
     addNewMetadata: () => {},
     updateMetadata: () => {},
     deleteMetadata: () => {},
@@ -83,26 +87,27 @@ export const ConfigContext = createContext<ConfigContextType>({
     modifyConfigField: () => {},
     removeConfigField: () => {},
     modifyFeatureFields: () => {},
+    modifyTopLevelField: () => {},
 });
 
-export const ConfigProvider: FC<PropsWithChildren<{ initialConfig: PartialConfig }>> = ({
-    children,
-    initialConfig,
-}) => {
+export const ConfigProvider: FC<
+    PropsWithChildren<{ initialConfig: PartialConfig; initialTopLevelConfig?: TopLevelConfig }>
+> = ({ children, initialConfig, initialTopLevelConfig }) => {
     const [config, setConfig] = useState(initialConfig);
+    const [topLevelConfig, setTopLevelConfig] = useState<TopLevelConfig>(initialTopLevelConfig ?? {});
     const [configType, setConfigType] = useState<ConfigType>('SILO');
 
     const addNewMetadata = () => {
         const metadata: Metadata = {
-            name: 'New Metadata',
+            name: 'newMetadata',
             type: 'string',
             generateIndex: false,
         };
 
-        const existingMetadata = config.metadata.filter((metadata) => metadata.name.startsWith('New Metadata'));
+        const existingMetadata = config.metadata.filter((metadata) => metadata.name.startsWith('newMetadata'));
 
         if (existingMetadata.length > 0) {
-            metadata.name = `${metadata.name} (${existingMetadata.length + 1})`;
+            metadata.name = `newMetadata${existingMetadata.length + 1}`;
         }
 
         setConfig({
@@ -174,12 +179,25 @@ export const ConfigProvider: FC<PropsWithChildren<{ initialConfig: PartialConfig
         setConfig({ ...config, features });
     };
 
+    const modifyTopLevelField = <T extends keyof TopLevelConfig>(field: T, value: TopLevelConfig[T] | undefined) => {
+        setTopLevelConfig((previous) => {
+            const next = { ...previous };
+            if (value === undefined) {
+                delete next[field];
+            } else {
+                next[field] = value;
+            }
+            return next;
+        });
+    };
+
     return (
         <ConfigContext.Provider
             value={{
                 configType,
                 setConfigType,
                 config,
+                topLevelConfig,
                 updateMetadata,
                 addNewMetadata,
                 deleteMetadata,
@@ -189,6 +207,7 @@ export const ConfigProvider: FC<PropsWithChildren<{ initialConfig: PartialConfig
                 modifyConfigField,
                 removeConfigField,
                 modifyFeatureFields,
+                modifyTopLevelField,
             }}
         >
             {children}

@@ -1,12 +1,13 @@
 import { type ChangeEvent, type Dispatch, type DragEvent, type SetStateAction, useState } from 'react';
-import { configSchema, type PartialConfig } from './configContext.tsx';
+import { configSchema, type PartialConfig, type TopLevelConfig } from './configContext.tsx';
 import { load } from 'js-yaml';
 
 export type UploadConfigProps = {
     setConfig: Dispatch<SetStateAction<PartialConfig | undefined>>;
+    setTopLevelConfig: Dispatch<SetStateAction<TopLevelConfig>>;
 };
 
-export function UploadConfig({ setConfig }: UploadConfigProps) {
+export function UploadConfig({ setConfig, setTopLevelConfig }: UploadConfigProps) {
     const [highlight, setHighlight] = useState(false);
 
     const readAndSetConfigFile = (file: File): void => {
@@ -19,7 +20,9 @@ export function UploadConfig({ setConfig }: UploadConfigProps) {
             const config = configSchema.safeParse(load(fileContent));
 
             if (config.success) {
-                setConfig(config.data.schema);
+                const { schema, ...topLevel } = config.data;
+                setConfig(schema);
+                setTopLevelConfig(topLevel);
             } else {
                 alert('Invalid config file: ' + config.error.message);
             }
@@ -57,17 +60,18 @@ export function UploadConfig({ setConfig }: UploadConfigProps) {
     };
 
     return (
-        <div
-            className={`p-5 ${highlight ? 'border-2 border-dashed border-primary' : 'border-2 border-transparent'}`}
+        <label
+            htmlFor='fileUploader'
+            className={`flex flex-col items-center justify-center text-center h-24 px-4 cursor-pointer border border-dashed text-base-content/70 transition-colors ${
+                highlight ? 'border-primary bg-base-200' : 'border-base-300 hover:border-base-content/40'
+            }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
             <input hidden id='fileUploader' type='file' onChange={handleFileUpload} />
-            <label htmlFor='fileUploader' className='btn btn-primary cursor-pointer'>
-                Upload Config
-            </label>
-            <div className='mt-2'>or drag and drop file here.</div>
-        </div>
+            <span className='text-base text-base-content'>Upload existing config</span>
+            <span className='text-xs mt-1'>or drag and drop here</span>
+        </label>
     );
 }

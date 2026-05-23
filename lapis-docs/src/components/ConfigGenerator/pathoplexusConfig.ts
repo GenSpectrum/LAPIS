@@ -9,6 +9,8 @@ export const pathoplexusConfigSchema = z.object({
             name: z.string(),
             type: metadataTypeSchema,
             generateIndex: z.boolean().optional(),
+            generateLineageIndex: z.string().optional(),
+            isPhyloTreeField: z.boolean().optional(),
             autocomplete: z.boolean().optional(),
             required: z.boolean().optional(),
             notSearchable: z.boolean().optional(),
@@ -16,9 +18,5 @@ export const pathoplexusConfigSchema = z.object({
     ),
     website: z.object({
         tableColumns: z.array(z.string()),
-    }),
-    silo: z.object({
-        dateToSortBy: z.string().optional(),
-        partitionBy: z.string().optional(),
     }),
 });
