@@ -4,7 +4,7 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
-  SILO_TAG: 0.11.3 # TODO(#1682) revert to latest after SaneQL migration
+  SILO_TAG: latest
 
 jobs:
   Tests:

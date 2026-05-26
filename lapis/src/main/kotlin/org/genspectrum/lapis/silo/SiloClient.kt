@@ -116,9 +116,9 @@ open class CachedSiloClient(
             requestContext.cached = false
         }
 
-        val queryJson = objectMapper.writeValueAsString(query)
+        val saneQlQuery = SiloQuerySaneQlSerializer.serialize(query)
 
-        log.info { "Calling SILO: $queryJson" }
+        log.info { "Calling SILO: $saneQlQuery" }
 
         val response = send(
             uri = siloUris.query,
@@ -129,9 +129,9 @@ open class CachedSiloClient(
                 }
             },
         ) {
-            it.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            it.header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
                 .header(HttpHeaders.ACCEPT, ARROW_STREAM_MEDIA_TYPE)
-                .POST(HttpRequest.BodyPublishers.ofString(queryJson))
+                .POST(HttpRequest.BodyPublishers.ofString(saneQlQuery))
         }
 
         return WithDataVersion(

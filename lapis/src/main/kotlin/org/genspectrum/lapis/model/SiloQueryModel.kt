@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.model
 
+import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
@@ -29,7 +30,10 @@ class SiloQueryModel(
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val fastaHeaderTemplateParser: FastaHeaderTemplateParser,
+    databaseConfig: DatabaseConfig,
 ) {
+    private val allMetadataFields = databaseConfig.schema.metadata.map { it.name }
+
     fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
         siloClient.sendQuery(
             SiloQuery(
@@ -136,7 +140,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
-                    sequenceFilters.fields.map { it.fieldName },
+                    sequenceFilters.fields.map { it.fieldName }.ifEmpty { allMetadataFields },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,

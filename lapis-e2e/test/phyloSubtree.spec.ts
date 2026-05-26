@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { basePath, lapisClient } from './common';
+import { basePath } from './common';
 
 describe('The /phyloSubtree endpoint', () => {
   it('should return a newick', async () => {

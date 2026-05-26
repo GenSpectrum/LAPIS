@@ -14,6 +14,7 @@ import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
@@ -22,6 +23,7 @@ import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -70,19 +72,21 @@ class SiloQueryModelTest {
 
     private lateinit var underTest: SiloQueryModel
 
+    private val testDatabaseConfig = databaseConfig(
+        metadata = listOf(
+            DatabaseMetadata(name = "accession", type = MetadataType.STRING),
+            DatabaseMetadata(name = "age", type = MetadataType.INT),
+            DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
+            DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
+            DatabaseMetadata(name = "date", type = MetadataType.DATE),
+            DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
+        ),
+        primaryKey = "primaryKey",
+    )
+
     private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
         caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
-            databaseConfig = databaseConfig(
-                metadata = listOf(
-                    DatabaseMetadata(name = "accession", type = MetadataType.STRING),
-                    DatabaseMetadata(name = "age", type = MetadataType.INT),
-                    DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
-                    DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
-                    DatabaseMetadata(name = "date", type = MetadataType.DATE),
-                    DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
-                ),
-                primaryKey = "primaryKey",
-            ),
+            databaseConfig = testDatabaseConfig,
         ),
     )
 
@@ -94,6 +98,7 @@ class SiloQueryModelTest {
             siloFilterExpressionMapper = siloFilterExpressionMapperMock,
             referenceGenomeSchema = referenceGenomeSchemaMock,
             fastaHeaderTemplateParser = fastaHeaderTemplateParser,
+            databaseConfig = testDatabaseConfig,
         )
     }
 
@@ -118,6 +123,62 @@ class SiloQueryModelTest {
         verify {
             siloClientMock.sendQuery(
                 SiloQuery(SiloAction.aggregated(emptyList()), True),
+            )
+        }
+    }
+
+    @Test
+    fun `GIVEN no fields specified THEN getDetails uses all metadata fields`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<DetailsData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getDetails(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                OrderBySpec.EMPTY,
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.details(
+                        listOf("accession", "age", "qc", "isBoolean", "date", "primaryKey"),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `GIVEN fields specified THEN getDetails uses only those fields`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<DetailsData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getDetails(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(Field("accession"), Field("date")),
+                OrderBySpec.EMPTY,
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.details(listOf("accession", "date")),
+                    True,
+                ),
             )
         }
     }
@@ -433,6 +494,7 @@ class SiloQueryModelTest {
             siloFilterExpressionMapper = siloFilterExpressionMapperMock,
             referenceGenomeSchema = referenceGenomeSchemaMock,
             fastaHeaderTemplateParser = fastaHeaderTemplateParser,
+            databaseConfig = testDatabaseConfig,
         )
 
         underTest.getGenomicSequence(
