@@ -2,6 +2,23 @@
 
 This guide covers the LAPIS documentation website (TypeScript/Astro/Starlight).
 
+Docs page is assumed to be deployed alongside actual running LAPIS instance.
+Serves primarily as documentation for that instance.
+Field names mentioned on pages (e.g. in examples) should reference actually existing fields from that instance
+(rather than generic names like `stringField`).
+
+Content is organized in these categories:
+
+- Tutorials
+    - Learning-oriented: Aimed at someone who is new to the project, foolproof, starting-at-zero guide
+    - Example: Teaching a child to cook
+- How-To Guides
+    - Problem-oriented: How to solve a common problem, reasonable starting point (not at zero)
+    - Example: Food recipe
+- References
+    - Information-oriented: Describes classes, methods, APIs, etc.
+    - Example: Wikipedia article on an ingredient
+
 ## Build, Test, and Lint Commands
 
 ```bash
@@ -41,26 +58,9 @@ lapis-docs/
 - **Prefer explicit types** for function parameters and return values
 - **Use interfaces** for object shapes
 - **Avoid `any`** - use `unknown` if type is truly unknown
-
-### Code Patterns
-
-```typescript
-// Component props with explicit types
-interface ButtonProps {
-    label: string;
-    onClick: () => void;
-    variant?: 'primary' | 'secondary';
-}
-
-// Async operations
-const fetchData = async (): Promise<ApiResponse> => {
-    const response = await fetch('/api/data');
-    return response.json();
-};
-
-// Destructuring
-const { title, description } = props;
-```
+- **Be explicit** - use strict equality:
+    - Avoid: `if (string) { ... }`. Instead: `if (string !== undefined) { ... }`
+    - Avoid: `if (maybeValue != null) { ... }`. Instead: `if (maybeValue !== undefined && maybeValue !== null) { ... }`
 
 ### Naming Conventions
 
@@ -68,57 +68,6 @@ const { title, description } = props;
 - **Files:** kebab-case for pages (e.g., `getting-started.mdx`)
 - **Variables/Functions:** camelCase (e.g., `fetchApiData`, `isActive`)
 - **Constants:** UPPER_SNAKE_CASE for true constants (e.g., `API_BASE_URL`)
-
-## Astro-Specific Guidelines
-
-### Component Structure
-
-```astro
----
-// Component script (runs at build time)
-import Layout from '../layouts/Layout.astro';
-
-interface Props {
-    title: string;
-    description?: string;
-}
-
-const { title, description = 'Default description' } = Astro.props;
----
-
-<Layout title={title}>
-    <div class='content'>
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
-    </div>
-</Layout>
-
-<style>
-    .content {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-</style>
-```
-
-### Markdown/MDX
-
-- Use frontmatter for metadata
-- Support for code syntax highlighting
-- Can embed Astro/React components in MDX
-
-```mdx
----
-title: API Reference
-description: Complete API documentation
----
-
-import CodeBlock from '../../components/CodeBlock.astro';
-
-# API Reference
-
-<CodeBlock lang='bash'>curl https://api.example.com/endpoint</CodeBlock>
-```
 
 ## Documentation Best Practices
 
@@ -152,7 +101,7 @@ import CodeBlock from '../../components/CodeBlock.astro';
 
 ### Updating Existing Documentation
 
-1. Locate the file in `src/content/` or `src/pages/`
+1. Locate the file in `src/content/`
 2. Make changes
 3. Preview with `npm run dev`
 4. Verify formatting and types
@@ -162,9 +111,7 @@ import CodeBlock from '../../components/CodeBlock.astro';
 
 1. Create component in `src/components/`
 2. Use `.astro` for Astro components, `.tsx` for React components
-3. Export props interface if using TypeScript
-4. Document component usage with JSDoc comments
-5. Import and use in pages or other components
+3. Export props interface
 
 ## Technology Stack
 
@@ -176,47 +123,5 @@ import CodeBlock from '../../components/CodeBlock.astro';
 
 ## Important Development Notes
 
-### Astro Islands
-
-Astro uses "islands architecture" - interactive components are hydrated on demand:
-
-```astro
-<!-- Static by default (no JS shipped) -->
-<StaticComponent />
-
-<!-- Hydrate on page load -->
-<InteractiveComponent client:load />
-
-<!-- Hydrate when visible -->
-<InteractiveComponent client:visible />
-
-<!-- Hydrate on idle -->
-<InteractiveComponent client:idle />
-```
-
-### Build Output
-
-- Static HTML files generated at build time
-- Minimal JavaScript shipped to client
-- Fast page loads and excellent SEO
-
-### Content Updates
-
-Content changes require rebuilding:
-
-```bash
-npm run build
-```
-
-For continuous development:
-
-```bash
-npm run dev  # Auto-rebuilds on file changes
-```
-
-### CI/CD Integration
-
-- Prettier formatting checked in CI
-- TypeScript type checking enforced
-- Build must succeed before merge
-- Deploy on merge to main branch
+Slight hack in "production":
+The Dockerfile builds the code when starting since the build process needs access to the database config.
