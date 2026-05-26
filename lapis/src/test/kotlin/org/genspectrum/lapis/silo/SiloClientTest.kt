@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
+import java.time.LocalDate
 import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
@@ -291,6 +292,36 @@ class SiloClientTest(
                         "qc_value" to DoubleNode(0.94),
                     ),
                 ),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN server returns details with date32 column THEN date values are converted to ISO-8601 strings and nulls remain null`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
+                .withBody(
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf("date" to LocalDate.of(2021, 2, 23), "label" to "A"),
+                            mapOf("date" to LocalDate.of(2021, 3, 19), "label" to "B"),
+                            mapOf("date" to null, "label" to "C"),
+                        ),
+                    ),
+                ),
+        )
+
+        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val result = sendQuery(query)
+
+        assertThat(result, hasSize(3))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                DetailsData(mapOf("date" to TextNode("2021-02-23"), "label" to TextNode("A"))),
+                DetailsData(mapOf("date" to TextNode("2021-03-19"), "label" to TextNode("B"))),
+                DetailsData(mapOf("date" to NullNode.instance, "label" to TextNode("C"))),
             ),
         )
     }

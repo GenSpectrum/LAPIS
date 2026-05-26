@@ -3,17 +3,20 @@ package org.genspectrum.lapis.silo
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.BigIntVector
 import org.apache.arrow.vector.BitVector
+import org.apache.arrow.vector.DateDayVector
 import org.apache.arrow.vector.Float8Vector
 import org.apache.arrow.vector.IntVector
 import org.apache.arrow.vector.VarCharVector
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamWriter
+import org.apache.arrow.vector.types.DateUnit
 import org.apache.arrow.vector.types.pojo.ArrowType
 import org.apache.arrow.vector.types.pojo.Field
 import org.apache.arrow.vector.types.pojo.FieldType
 import org.apache.arrow.vector.types.pojo.Schema
 import java.io.ByteArrayOutputStream
 import java.nio.channels.Channels
+import java.time.LocalDate
 
 /**
  * Builds an Arrow IPC stream byte array from [rows] using the given builder.
@@ -50,6 +53,8 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
             )
 
             is Boolean -> Field(name, FieldType.nullable(ArrowType.Bool()), null)
+
+            is LocalDate -> Field(name, FieldType.nullable(ArrowType.Date(DateUnit.DAY)), null)
 
             // Note: null values (and any unrecognized types) are typed as Utf8.
             // If the first row has null for a column that later rows fill with a typed value (e.g. Int, Long),
@@ -98,6 +103,14 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
                         vector.setNull(rowIdx)
                     } else {
                         vector.set(rowIdx, if (value as Boolean) 1 else 0)
+                    }
+                }
+
+                is DateDayVector -> {
+                    if (value == null) {
+                        vector.setNull(rowIdx)
+                    } else {
+                        vector.set(rowIdx, (value as LocalDate).toEpochDay().toInt())
                     }
                 }
 
