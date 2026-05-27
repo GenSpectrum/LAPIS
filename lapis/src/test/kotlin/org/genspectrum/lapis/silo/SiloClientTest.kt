@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.DoubleNode
 import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
-import java.time.LocalDate
 import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
@@ -42,6 +41,7 @@ import org.mockserver.model.MediaType
 import org.mockserver.model.MediaType.parse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.time.LocalDate
 
 private const val MOCK_SERVER_PORT = 1080
 
@@ -297,7 +297,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `GIVEN server returns details with date32 column THEN date values are converted to ISO-8601 strings and nulls remain null`() {
+    fun `GIVEN server returns date32 column THEN dates are converted to ISO-8601 strings and nulls remain null`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
