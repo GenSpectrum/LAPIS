@@ -2,17 +2,16 @@
 
 This guide covers the LAPIS documentation website (TypeScript/Astro/Starlight).
 
-Docs page is assumed to be deployed alongside actual running LAPIS instance.
-Serves primarily as documentation for that instance.
-Field names mentioned on pages (e.g. in examples) should reference actually existing fields from that instance
+Docs page is assumed to be deployed alongside actual running LAPIS instance and serves primarily as documentation for that instance.
+Field names mentioned on pages (e.g. in examples) should reference fields that actually exist in that instance
 (rather than generic names like `stringField`).
 
-Content is organized in these categories:
+Content organization is inspired by these categories:
 
 - Tutorials
     - Learning-oriented: Aimed at someone who is new to the project, foolproof, starting-at-zero guide
     - Example: Teaching a child to cook
-- How-To Guides
+- Concepts
     - Problem-oriented: How to solve a common problem, reasonable starting point (not at zero)
     - Example: Food recipe
 - References
