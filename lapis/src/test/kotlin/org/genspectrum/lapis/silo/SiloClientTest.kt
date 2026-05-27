@@ -41,6 +41,7 @@ import org.mockserver.model.MediaType
 import org.mockserver.model.MediaType.parse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.time.LocalDate
 
 private const val MOCK_SERVER_PORT = 1080
 
@@ -291,6 +292,36 @@ class SiloClientTest(
                         "qc_value" to DoubleNode(0.94),
                     ),
                 ),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN server returns date32 column THEN dates are converted to ISO-8601 strings and nulls remain null`() {
+        expectQueryRequestAndRespondWith(
+            response()
+                .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
+                .withBody(
+                    buildArrowIpcStream(
+                        listOf(
+                            mapOf("date" to LocalDate.of(2021, 2, 23), "label" to "A"),
+                            mapOf("date" to LocalDate.of(2021, 3, 19), "label" to "B"),
+                            mapOf("date" to null, "label" to "C"),
+                        ),
+                    ),
+                ),
+        )
+
+        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val result = sendQuery(query)
+
+        assertThat(result, hasSize(3))
+        assertThat(
+            result,
+            containsInAnyOrder(
+                DetailsData(mapOf("date" to TextNode("2021-02-23"), "label" to TextNode("A"))),
+                DetailsData(mapOf("date" to TextNode("2021-03-19"), "label" to TextNode("B"))),
+                DetailsData(mapOf("date" to NullNode.instance, "label" to TextNode("C"))),
             ),
         )
     }

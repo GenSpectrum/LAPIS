@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.apache.arrow.vector.BigIntVector
 import org.apache.arrow.vector.BitVector
+import org.apache.arrow.vector.DateDayVector
 import org.apache.arrow.vector.Float4Vector
 import org.apache.arrow.vector.Float8Vector
 import org.apache.arrow.vector.IntVector
@@ -188,6 +189,7 @@ private fun VectorSchemaRoot.fieldValueAsJsonNode(
         is Float8Vector -> DoubleNode(vector.get(rowIndex))
         is Float4Vector -> FloatNode(vector.get(rowIndex))
         is BitVector -> BooleanNode.valueOf(vector.get(rowIndex) != 0)
+        is DateDayVector -> TextNode(java.time.LocalDate.ofEpochDay(vector.get(rowIndex).toLong()).toString())
         else -> TextNode(vector.getObject(rowIndex)?.toString() ?: "")
     }
 }
