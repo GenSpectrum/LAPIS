@@ -12,8 +12,8 @@ Content organization is inspired by these categories:
     - Learning-oriented: Aimed at someone who is new to the project, foolproof, starting-at-zero guide
     - Example: Teaching a child to cook
 - Concepts
-    - Problem-oriented: How to solve a common problem, reasonable starting point (not at zero)
-    - Example: Food recipe
+    - Explains certain cross-cutting aspects of the project, reasonable starting point (not at zero)
+    - Example: Explanation how and what for to use the stove
 - References
     - Information-oriented: Describes classes, methods, APIs, etc.
     - Example: Wikipedia article on an ingredient
