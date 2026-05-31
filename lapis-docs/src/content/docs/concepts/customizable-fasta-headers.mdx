@@ -5,7 +5,7 @@ description: Customize the header line of FASTA records returned by sequence end
 
 When requesting sequences as FASTA, you can customize the header line of each record by setting the
 `fastaHeaderTemplate` request property.
-The parameter is ignored if the data format is not FASTA.
+An error is thrown if the prameter is set but the data format is not FASTA.
 
 The template allows placeholders in curly braces:
 
