@@ -1230,7 +1230,7 @@ class LapisController(
         response: HttpServletResponse,
     ) {
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
         if (response.contentType == null) {
             response.contentType = "${LapisMediaType.TEXT_NEWICK_VALUE};charset=UTF-8"
         }

@@ -45,7 +45,7 @@ class LapisResponseStreamer(
         requestContext.filter = request
         val data = getData(request)
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
 
         when (responseFormat) {
             is ResponseFormat.Json -> {
@@ -145,7 +145,7 @@ class LapisResponseStreamer(
             else -> MediaType(targetMediaType, Charset.defaultCharset())
         }
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
         if (response.contentType == null) {
             response.contentType = contentType.toString()
         }

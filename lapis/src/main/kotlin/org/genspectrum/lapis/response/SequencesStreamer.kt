@@ -22,7 +22,7 @@ class SequencesStreamer(
         response: HttpServletResponse,
         sequencesDataFormat: SequencesDataFormat,
     ) {
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
 
         when (sequencesDataFormat) {
             SequencesDataFormat.FASTA -> streamFasta(response, sequencesResponse)
