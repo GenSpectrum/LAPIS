@@ -62,7 +62,7 @@ internal class RequestContextLoggerTest {
         verify {
             loggerMock.info(
                 """
-                {"unixTimestamp":100,"responseTimeInMilliSeconds":99,"endpoint":"/shouldBeLogged","responseCode":200}
+                {"endpoint":"/shouldBeLogged","responseCode":200,"responseTimeInMilliSeconds":99,"unixTimestamp":100}
                 """.trimIndent(),
             )
         }

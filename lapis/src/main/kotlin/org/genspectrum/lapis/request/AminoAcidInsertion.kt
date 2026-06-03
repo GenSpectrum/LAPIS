@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.ValueDeserializer
 
 const val STOP_CODON = "*"
 const val ESCAPED_STOP_CODON = "\\*"
@@ -64,10 +64,10 @@ private val AMINO_ACID_INSERTION_REGEX =
         ),
     )
 
-@JsonComponent
+@JacksonComponent
 class AminoAcidInsertionDeserializer(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-) : JsonDeserializer<AminoAcidInsertion>() {
+) : ValueDeserializer<AminoAcidInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,

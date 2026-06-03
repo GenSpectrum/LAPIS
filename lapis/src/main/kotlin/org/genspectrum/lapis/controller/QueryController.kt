@@ -39,7 +39,7 @@ class QueryController(
         )
         return ResponseEntity
             .ok()
-            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
             .body(QueryParseResponse(data, lapisInfoFactory.create()))
     }
 }

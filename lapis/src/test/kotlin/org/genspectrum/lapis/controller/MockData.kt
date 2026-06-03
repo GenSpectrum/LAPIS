@@ -1,10 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
@@ -27,6 +22,11 @@ import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.`is`
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.stream.Stream
 
 data class MockDataCollection(
@@ -290,9 +290,13 @@ object MockDataForEndpoints {
             getSequencesResponse = {
                 SequencesResponse(
                     sequenceData = listOf<SequenceData>(
-                        SequenceData(mapOf("primaryKey" to TextNode("sequence1"), sequenceName to TextNode("CAGAA"))),
-                        SequenceData(mapOf("primaryKey" to TextNode("sequence2"), sequenceName to TextNode("CAGAT"))),
-                        SequenceData(mapOf("primaryKey" to TextNode("sequence3"), sequenceName to NullNode.instance)),
+                        SequenceData(
+                            mapOf("primaryKey" to StringNode("sequence1"), sequenceName to StringNode("CAGAA")),
+                        ),
+                        SequenceData(
+                            mapOf("primaryKey" to StringNode("sequence2"), sequenceName to StringNode("CAGAT")),
+                        ),
+                        SequenceData(mapOf("primaryKey" to StringNode("sequence3"), sequenceName to NullNode.instance)),
                     ).stream(),
                     requestedSequenceNames = listOf(sequenceName),
                     fastaHeaderTemplate = FastaHeaderTemplate(
@@ -334,28 +338,28 @@ object MockDataForEndpoints {
                     sequenceData = listOf(
                         SequenceData(
                             mapOf(
-                                "primaryKey" to TextNode("key1"),
-                                "sequence1" to TextNode("CAGAA"),
-                                "sequence2" to TextNode("CAGAT"),
+                                "primaryKey" to StringNode("key1"),
+                                "sequence1" to StringNode("CAGAA"),
+                                "sequence2" to StringNode("CAGAT"),
                             ),
                         ),
                         SequenceData(
                             mapOf(
-                                "primaryKey" to TextNode("key2"),
-                                "sequence1" to TextNode("CAGAT"),
+                                "primaryKey" to StringNode("key2"),
+                                "sequence1" to StringNode("CAGAT"),
                                 "sequence2" to NullNode.instance,
                             ),
                         ),
                         SequenceData(
                             mapOf(
-                                "primaryKey" to TextNode("key3"),
+                                "primaryKey" to StringNode("key3"),
                                 "sequence1" to NullNode.instance,
-                                "sequence2" to TextNode("CAGAC"),
+                                "sequence2" to StringNode("CAGAC"),
                             ),
                         ),
                         SequenceData(
                             mapOf(
-                                "primaryKey" to TextNode("key4"),
+                                "primaryKey" to StringNode("key4"),
                                 "sequence1" to NullNode.instance,
                                 "sequence2" to NullNode.instance,
                             ),
@@ -406,7 +410,7 @@ object MockDataForEndpoints {
         modelData = listOf(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+                mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42)),
             ),
         ),
         fields = listOf("country", "age"),
@@ -436,14 +440,14 @@ object MockDataForEndpoints {
         modelData = listOf(
             DetailsData(
                 mapOf(
-                    "country" to TextNode("Switzerland"),
+                    "country" to StringNode("Switzerland"),
                     "age" to IntNode(42),
                     "floatValue" to DoubleNode(3.14),
                 ),
             ),
             DetailsData(
                 mapOf(
-                    "country" to TextNode("Switzerland"),
+                    "country" to StringNode("Switzerland"),
                     "age" to IntNode(43),
                     "floatValue" to NullNode.instance,
                 ),

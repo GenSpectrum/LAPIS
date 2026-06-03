@@ -1,11 +1,11 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
 import io.swagger.v3.oas.annotations.media.Schema
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueSerializer
 
 const val COUNT_PROPERTY = "count"
 
@@ -18,16 +18,16 @@ data class DetailsData(
     val map: Map<String, JsonNode>,
 ) : Map<String, JsonNode> by map
 
-@JsonComponent
-class AggregationDataSerializer : JsonSerializer<AggregationData>() {
+@JacksonComponent
+class AggregationDataSerializer : ValueSerializer<AggregationData>() {
     override fun serialize(
         value: AggregationData,
         gen: JsonGenerator,
-        serializers: SerializerProvider,
+        serializers: SerializationContext,
     ) {
         gen.writeStartObject()
-        gen.writeNumberField(COUNT_PROPERTY, value.count)
-        value.fields.forEach { (key, value) -> gen.writeObjectField(key, value) }
+        gen.writeNumberProperty(COUNT_PROPERTY, value.count)
+        value.fields.forEach { (key, value) -> gen.writePOJOProperty(key, value) }
         gen.writeEndObject()
     }
 }

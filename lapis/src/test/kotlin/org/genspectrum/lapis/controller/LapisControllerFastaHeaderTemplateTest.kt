@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
@@ -16,14 +15,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private const val SEGMENT_NAME = "main"
@@ -78,8 +78,8 @@ class LapisControllerFastaHeaderTemplateTest(
         every {
             siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
         } returns Stream.of(
-            SequenceData(mapOf(SEGMENT_NAME to TextNode("AAAA"), "primaryKey" to TextNode("1234"))),
-            SequenceData(mapOf(SEGMENT_NAME to TextNode("GGGG"), "primaryKey" to TextNode("5678"))),
+            SequenceData(mapOf(SEGMENT_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
+            SequenceData(mapOf(SEGMENT_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),
         )
 
         mockMvc.perform(scenario.request)
@@ -93,8 +93,8 @@ class LapisControllerFastaHeaderTemplateTest(
         every {
             siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
         } returns Stream.of(
-            SequenceData(mapOf(GENE_NAME to TextNode("AAAA"), "primaryKey" to TextNode("1234"))),
-            SequenceData(mapOf(GENE_NAME to TextNode("GGGG"), "primaryKey" to TextNode("5678"))),
+            SequenceData(mapOf(GENE_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
+            SequenceData(mapOf(GENE_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),
         )
 
         mockMvc.perform(scenario.request)
@@ -404,8 +404,8 @@ class LapisControllerSingleSegmentedFastaHeaderTemplateTest(
         every {
             siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
         } returns Stream.of(
-            SequenceData(mapOf(SEGMENT_NAME to TextNode("AAAA"), "primaryKey" to TextNode("1234"))),
-            SequenceData(mapOf(SEGMENT_NAME to TextNode("GGGG"), "primaryKey" to TextNode("5678"))),
+            SequenceData(mapOf(SEGMENT_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
+            SequenceData(mapOf(SEGMENT_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),
         )
 
         mockMvc.perform(scenario.request)

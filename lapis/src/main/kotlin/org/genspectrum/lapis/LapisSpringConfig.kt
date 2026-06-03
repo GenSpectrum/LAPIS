@@ -1,8 +1,5 @@
 package org.genspectrum.lapis
 
-import com.fasterxml.jackson.core.StreamReadConstraints
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
@@ -36,15 +33,18 @@ import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.CommonsRequestLoggingFilter
+import tools.jackson.core.StreamReadConstraints
+import tools.jackson.core.json.JsonFactory
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 private const val VERSION_FILE = "version.txt"
@@ -175,14 +175,16 @@ class LapisSpringConfig {
         }
 
     @Bean
-    fun streamConstraintsCustomizer(): Jackson2ObjectMapperBuilderCustomizer =
-        Jackson2ObjectMapperBuilderCustomizer { builder: Jackson2ObjectMapperBuilder ->
-            builder.postConfigurer { objectMapper: ObjectMapper ->
-                objectMapper.factory.setStreamReadConstraints(
-                    StreamReadConstraints.builder()
-                        .maxStringLength(200_000_000)
-                        .build(),
-                )
-            }
-        }
+    fun jsonMapperBuilder(customizers: List<JsonMapperBuilderCustomizer>): JsonMapper.Builder {
+        val factory = JsonFactory.builder()
+            .streamReadConstraints(
+                StreamReadConstraints.builder()
+                    .maxStringLength(200_000_000)
+                    .build(),
+            )
+            .build()
+        val builder = JsonMapper.builder(factory)
+        customizers.forEach { it.customize(builder) }
+        return builder
+    }
 }

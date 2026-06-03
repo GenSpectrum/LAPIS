@@ -1,11 +1,5 @@
 package org.genspectrum.lapis.util
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.BooleanNode
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.fasterxml.jackson.databind.node.LongNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.NUCLEOTIDE_MUTATIONS_PROPERTY
@@ -14,6 +8,12 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.BooleanNode
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.JsonNodeFactory
+import tools.jackson.databind.node.LongNode
+import tools.jackson.databind.node.StringNode
 
 class TryToGuessTheTypeKtTest {
     @ParameterizedTest(name = "{0}")
@@ -34,7 +34,7 @@ class TryToGuessTheTypeKtTest {
             Arguments.of(
                 "non-special field with single value should map to single text value",
                 entry("someField", listOf("value")),
-                TextNode("value"),
+                StringNode("value"),
             ),
             Arguments.of(
                 "non-special field with multiple values should map to multiple text values",
@@ -49,7 +49,7 @@ class TryToGuessTheTypeKtTest {
             Arguments.of(
                 "special bool-valued field should map non-boolean value to text",
                 entry(DOWNLOAD_AS_FILE_PROPERTY, listOf("not a boolean")),
-                TextNode("not a boolean"),
+                StringNode("not a boolean"),
             ),
             Arguments.of(
                 "special bool-valued field should map true to boolean",
@@ -74,7 +74,7 @@ class TryToGuessTheTypeKtTest {
             Arguments.of(
                 "special number-valued field should map non-number to text",
                 entry(LIMIT_PROPERTY, listOf("not a number")),
-                TextNode("not a number"),
+                StringNode("not a number"),
             ),
         )
 

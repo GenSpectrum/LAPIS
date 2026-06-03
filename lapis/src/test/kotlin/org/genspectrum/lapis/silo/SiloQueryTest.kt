@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
@@ -13,6 +12,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.databind.ObjectMapper
 import java.time.LocalDate
 
 @SpringBootTest

@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
@@ -15,6 +14,7 @@ import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import java.nio.charset.Charset
 import java.util.stream.Stream
 
@@ -71,14 +71,13 @@ class LapisResponseStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
 
-        val jsonFactory = objectMapper.factory
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
-                jsonFactory.createGenerator(outputStream).use { generator ->
+                objectMapper.createGenerator(outputStream).use { generator ->
                     streamAndLogDisconnect("Plain JSON data") {
                         generator.writeStartArray()
                         inputStream.forEach {
-                            generator.writeObject(it)
+                            generator.writePOJO(it)
                         }
                         generator.writeEndArray()
                     }
@@ -95,21 +94,19 @@ class LapisResponseStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
 
-        val jsonFactory = objectMapper.factory
-
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
-                jsonFactory.createGenerator(outputStream).use { generator ->
+                objectMapper.createGenerator(outputStream).use { generator ->
                     streamAndLogDisconnect("Lapis JSON data") {
                         generator.writeStartObject()
 
-                        generator.writeArrayFieldStart("data")
+                        generator.writeArrayPropertyStart("data")
                         inputStream.forEach {
-                            generator.writeObject(it)
+                            generator.writePOJO(it)
                         }
                         generator.writeEndArray()
 
-                        generator.writePOJOField("info", lapisInfoFactory.create())
+                        generator.writePOJOProperty("info", lapisInfoFactory.create())
 
                         generator.writeEndObject()
                     }

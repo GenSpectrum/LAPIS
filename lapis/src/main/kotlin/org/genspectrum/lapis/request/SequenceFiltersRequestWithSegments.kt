@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.ArrayNode
 
 data class SequenceFiltersRequestWithSegments(
     override val sequenceFilters: SequenceFilters,
@@ -22,20 +22,19 @@ data class SequenceFiltersRequestWithSegments(
     val fastaHeaderTemplate: String? = null,
 ) : CommonSequenceFilters
 
-@JsonComponent
+@JacksonComponent
 class SequenceFiltersRequestWithSegmentsDeserializer(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-) : JsonDeserializer<SequenceFiltersRequestWithSegments>() {
+) : ValueDeserializer<SequenceFiltersRequestWithSegments>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): SequenceFiltersRequestWithSegments {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val segments = parseSegments(node)
         val fastaHeaderTemplate = parseFastaHeaderTemplateParameter(node)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequestWithSegments(
             sequenceFilters = parsedCommonFields.sequenceFilters,
@@ -51,11 +50,11 @@ class SequenceFiltersRequestWithSegmentsDeserializer(
         )
     }
 
-    private fun parseSegments(node: JsonNode) =
+    private fun parseSegments(node: JsonNode): List<String> =
         when (val segments = node.get(SEGMENTS_PROPERTY)) {
             null -> referenceGenomeSchema.getNucleotideSequenceNames()
             is ArrayNode -> {
-                segments.map {
+                segments.toList().map {
                     if (!it.isTextual) {
                         throw BadRequestException(
                             "$SEGMENTS_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asText()}",

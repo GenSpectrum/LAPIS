@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.NumericNode
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.NumericNode
 
 const val DEFAULT_MIN_PROPORTION = 0.05
 
@@ -48,14 +48,13 @@ enum class MutationsField(
     }
 }
 
-@JsonComponent
-class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProportionsRequest>() {
+@JacksonComponent
+class MutationProportionsRequestDeserializer : ValueDeserializer<MutationProportionsRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): MutationProportionsRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val minProportion = when (val minProportionNode = node.get(MIN_PROPORTION_PROPERTY)) {
             null, is NullNode -> DEFAULT_MIN_PROPORTION
@@ -65,7 +64,7 @@ class MutationProportionsRequestDeserializer : JsonDeserializer<MutationProporti
         }
 
         val fields = parseFieldsProperty(node) { MutationsField.fromString(it) }
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return MutationProportionsRequest(
             sequenceFilters = parsedCommonFields.sequenceFilters,

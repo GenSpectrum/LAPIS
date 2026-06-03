@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.FIELD_WITH_ONLY_LOWERCASE_LETTERS
@@ -29,14 +28,15 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 @SpringBootTest
@@ -71,7 +71,7 @@ class LapisControllerCommonFieldsTest(
                     listOf(OrderByField("country", Order.ASCENDING)).toOrderBySpec(),
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?orderBy=country"))
             .andExpect(status().isOk)
@@ -97,7 +97,7 @@ class LapisControllerCommonFieldsTest(
                     ).toOrderBySpec(),
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         val uppercaseField = FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()
         val lowercaseField = FIELD_WITH_UPPERCASE_LETTER.lowercase()
@@ -129,7 +129,7 @@ class LapisControllerCommonFieldsTest(
                     ).toOrderBySpec(),
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -154,7 +154,7 @@ class LapisControllerCommonFieldsTest(
                     ).toOrderBySpec(),
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(AGGREGATED_ROUTE)
             .content(
@@ -200,7 +200,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random&fields=country"))
             .andExpect(status().isOk)
@@ -216,7 +216,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(DETAILS_ROUTE)
             .content(
@@ -243,7 +243,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(DETAILS_ROUTE)
             .content(
@@ -270,7 +270,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(getSample("$DETAILS_ROUTE?orderBy=random(123)&orderBy=age&fields=country"))
             .andExpect(status().isOk)
@@ -286,7 +286,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(DETAILS_ROUTE)
             .content(
@@ -313,7 +313,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(DETAILS_ROUTE)
             .content(
@@ -340,7 +340,7 @@ class LapisControllerCommonFieldsTest(
                         it.fields == listOf(Field("country"))
                 },
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
 
         val request = postSample(DETAILS_ROUTE)
             .param("orderBy", "random(123)")
@@ -368,7 +368,7 @@ class LapisControllerCommonFieldsTest(
                     100,
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?limit=100"))
             .andExpect(status().isOk)
@@ -395,7 +395,7 @@ class LapisControllerCommonFieldsTest(
                     100,
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(requestWithLimit(100))
             .andExpect(status().isOk)
@@ -429,7 +429,7 @@ class LapisControllerCommonFieldsTest(
                     5,
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(getSample("$AGGREGATED_ROUTE?offset=5"))
             .andExpect(status().isOk)
@@ -457,7 +457,7 @@ class LapisControllerCommonFieldsTest(
                     5,
                 ),
             )
-        } returns Stream.of(AggregationData(0, mapOf("country" to TextNode("Switzerland"))))
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
 
         mockMvc.perform(requestWithOffset(5))
             .andExpect(status().isOk)

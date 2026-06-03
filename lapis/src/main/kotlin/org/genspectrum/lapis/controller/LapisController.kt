@@ -1191,7 +1191,7 @@ class LapisController(
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
-    ): String {
+    ) {
         val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
@@ -1206,7 +1206,7 @@ class LapisController(
             ).fieldName,
         )
 
-        return getNewickSubtree(request, response)
+        writeNewickSubtree(request, response)
     }
 
     @PostMapping(
@@ -1223,15 +1223,20 @@ class LapisController(
         @RequestBody
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
-    ): String = getNewickSubtree(request, response)
+    ) = writeNewickSubtree(request, response)
 
-    private fun getNewickSubtree(
+    private fun writeNewickSubtree(
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
-    ): String {
+    ) {
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
         response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
-        return treeResponse.use { it.toList() }.first().subtreeNewick
+        if (response.contentType == null) {
+            response.contentType = "${LapisMediaType.TEXT_NEWICK_VALUE};charset=UTF-8"
+        }
+        val newick = treeResponse.use { it.toList() }.first().subtreeNewick
+        response.outputStream.write(newick.toByteArray(Charsets.UTF_8))
+        response.outputStream.flush()
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])

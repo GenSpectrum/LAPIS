@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
-import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private val DUMMY_QUERY_ITEM_1 = QueryOverTimeItem(
@@ -140,8 +140,8 @@ class QueriesOverTimeModelTest {
             mutationFilter = DUMMY_FILTER_1,
             dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
-                AggregationData(1, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
         mockSiloCountQuery(
@@ -149,17 +149,17 @@ class QueriesOverTimeModelTest {
             mutationFilter = DUMMY_FILTER_2,
             dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
-                AggregationData(3, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(3, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
         mockSiloCoverageQuery(
             siloClient = siloQueryClient,
             dateBetween = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
-                AggregationData(5, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(6, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(5, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(6, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
             coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_1 },
         )
@@ -167,9 +167,9 @@ class QueriesOverTimeModelTest {
             siloClient = siloQueryClient,
             dateBetween = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
-                AggregationData(0, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(0, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
             coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_2 },
         )
@@ -177,9 +177,9 @@ class QueriesOverTimeModelTest {
             siloQueryClient,
             DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
-                AggregationData(10, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(11, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(12, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(10, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(11, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(12, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
     }
@@ -281,7 +281,7 @@ class QueriesOverTimeModelTest {
             WithDataVersion(
                 version,
                 Stream.of(
-                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to StringNode("2021-06-01"))),
                 ),
             )
         }
@@ -309,7 +309,7 @@ class QueriesOverTimeModelTest {
             WithDataVersion(
                 version,
                 Stream.of(
-                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to StringNode("2021-06-01"))),
                 ),
             )
         }

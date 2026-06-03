@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller.middleware
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.luben.zstd.ZstdOutputStream
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletOutputStream
@@ -15,20 +14,18 @@ import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.util.CachedBodyHttpServletRequest
 import org.genspectrum.lapis.util.ResponseWithContentType
 import org.springframework.boot.context.properties.bind.Binder
-import org.springframework.boot.web.servlet.server.Encoding
 import org.springframework.core.annotation.Order
 import org.springframework.core.env.Environment
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_ENCODING
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail
 import org.springframework.http.converter.StringHttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.databind.ObjectMapper
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.charset.Charset
@@ -273,59 +270,23 @@ class CompressingServletOutputStream(
 }
 
 @Component
-class CompressionAwareMappingJackson2HttpMessageConverter(
-    objectMapper: ObjectMapper,
-    private val requestCompression: RequestCompression,
-) : MappingJackson2HttpMessageConverter(objectMapper) {
-    override fun canWrite(mediaType: MediaType?): Boolean {
-        if (requestCompression.compressionSource.compression?.contentType?.isCompatibleWith(mediaType) == true) {
-            return true
-        }
-
-        return super.canWrite(mediaType)
-    }
-
-    override fun addDefaultHeaders(
-        headers: HttpHeaders,
-        value: Any,
-        contentType: MediaType?,
-    ) {
-        val compressionSource = requestCompression.compressionSource
-        if (
-            compressionSource is CompressionSource.RequestProperty &&
-            compressionSource.compression.contentType != contentType
-        ) {
-            headers.set(CONTENT_ENCODING, compressionSource.compression.value)
-        }
-
-        super.addDefaultHeaders(headers, value, contentType)
-    }
-}
-
-@Component
 class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
     environment: Environment,
     private val requestCompression: RequestCompression,
 ) : StringHttpMessageConverter(getCharsetFromEnvironment(environment)) {
-    // The original method is declared in Java as returning Long (can be null)
-    // but in Kotlin it is Long! (platform type) which is not nullable.
-    @Suppress("INCOMPATIBLE_OVERRIDE")
     override fun getContentLength(
         str: String,
         contentType: MediaType?,
-    ): Long? =
+    ): Long =
         when (requestCompression.compressionSource.compression) {
             null -> super.getContentLength(str, contentType)
-            else -> null
+            else -> -1L
         }
 
     companion object {
-        // taken from the initialization in
-        // org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
-        // since this class replaces that one
         private fun getCharsetFromEnvironment(environment: Environment): Charset =
             Binder.get(environment)
-                .bindOrCreate("server.servlet.encoding", Encoding::class.java)
-                .charset
+                .bind("server.servlet.encoding.charset", Charset::class.java)
+                .orElse(Charsets.UTF_8) ?: Charsets.UTF_8
     }
 }

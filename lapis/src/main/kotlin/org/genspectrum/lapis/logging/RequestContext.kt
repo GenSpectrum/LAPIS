@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.logging
 
-import com.fasterxml.jackson.core.JsonProcessingException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -11,6 +10,7 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.core.JacksonException
 
 @Component
 @RequestScope
@@ -58,7 +58,7 @@ class RequestContextLogger(
             requestContext.responseTimeInMilliSeconds = timeFactory.now() - before
             try {
                 statisticsLogger.info(objectMapper.writeValueAsString(requestContext))
-            } catch (e: JsonProcessingException) {
+            } catch (e: JacksonException) {
                 log.error(e) { "Could not log statistics message: " + e.message }
             }
         }

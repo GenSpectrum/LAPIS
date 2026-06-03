@@ -96,6 +96,6 @@ class QueriesOverTimeController(
     private fun <Result> createResponse(resultData: Result) =
         ResponseEntity
             .ok()
-            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
             .body(QueriesOverTimeResponse(resultData, lapisInfoFactory.create()))
 }
