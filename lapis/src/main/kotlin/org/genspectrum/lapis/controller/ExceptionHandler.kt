@@ -45,6 +45,28 @@ class ExceptionHandler(
     private val lapisInfoFactory: LapisInfoFactory,
     private val requestCompression: org.genspectrum.lapis.controller.middleware.RequestCompression,
 ) : ResponseEntityExceptionHandler() {
+    override fun createProblemDetail(
+        ex: Exception,
+        status: HttpStatusCode,
+        defaultDetail: String,
+        detailMessageCode: String?,
+        detailMessageArguments: Array<out Any>?,
+        request: WebRequest,
+    ): ProblemDetail {
+        val problemDetail = super.createProblemDetail(
+            ex,
+            status,
+            defaultDetail,
+            detailMessageCode,
+            detailMessageArguments,
+            request,
+        )
+        if (problemDetail.type == null) {
+            problemDetail.type = java.net.URI.create("about:blank")
+        }
+        return problemDetail
+    }
+
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleUnexpectedException(e: Throwable): ErrorResponse {
@@ -141,6 +163,7 @@ class ExceptionHandler(
             .body(
                 LapisErrorResponse(
                     error = ProblemDetail.forStatus(httpStatus).also {
+                        it.type = java.net.URI.create("about:blank")
                         it.title = title
                         it.detail = truncate(detail, maxLength = 100_000)
                     },
