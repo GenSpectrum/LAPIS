@@ -60,7 +60,7 @@ class SequenceFiltersRequestWithSegmentsDeserializer(
                             "$SEGMENTS_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asString()}",
                         )
                     }
-                    referenceGenomeSchema.getNucleotideSequence(it.asString())
+                    referenceGenomeSchema.getNucleotideSequence(it.stringValue())
                         ?.name
                         ?: throw BadRequestException(
                             "Unknown segment: ${it.asString()}, " +
