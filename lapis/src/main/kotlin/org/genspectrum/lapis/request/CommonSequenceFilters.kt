@@ -77,49 +77,45 @@ fun parseMutationsAndInsertions(
     node: JsonNode,
     ctxt: DeserializationContext,
 ): ParsedMutationsAndInsertions {
-    val nucleotideMutations: List<NucleotideMutation> =
-        when (val nucleotideMutationsNode = node.get(NUCLEOTIDE_MUTATIONS_PROPERTY)) {
-            null -> emptyList()
-            is ArrayNode -> nucleotideMutationsNode.toList().map {
-                ctxt.readTreeAsValue(it, NucleotideMutation::class.java)
-            }
-            else -> throw BadRequestException(
-                "nucleotideMutations must be an array or null, ${butWas(nucleotideMutationsNode)}",
-            )
+    val nucleotideMutations = when (val nucleotideMutationsNode = node.get(NUCLEOTIDE_MUTATIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> nucleotideMutationsNode.toList().map {
+            ctxt.readTreeAsValue(it, NucleotideMutation::class.java)
         }
+        else -> throw BadRequestException(
+            "nucleotideMutations must be an array or null, ${butWas(nucleotideMutationsNode)}",
+        )
+    }
 
-    val aminoAcidMutations: List<AminoAcidMutation> =
-        when (val aminoAcidMutationsNode = node.get(AMINO_ACID_MUTATIONS_PROPERTY)) {
-            null -> emptyList()
-            is ArrayNode -> aminoAcidMutationsNode.toList().map {
-                ctxt.readTreeAsValue(it, AminoAcidMutation::class.java)
-            }
-            else -> throw BadRequestException(
-                "aminoAcidMutations must be an array or null, ${butWas(aminoAcidMutationsNode)}",
-            )
+    val aminoAcidMutations = when (val aminoAcidMutationsNode = node.get(AMINO_ACID_MUTATIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> aminoAcidMutationsNode.toList().map {
+            ctxt.readTreeAsValue(it, AminoAcidMutation::class.java)
         }
+        else -> throw BadRequestException(
+            "aminoAcidMutations must be an array or null, ${butWas(aminoAcidMutationsNode)}",
+        )
+    }
 
-    val nucleotideInsertions: List<NucleotideInsertion> =
-        when (val nucleotideInsertionsNode = node.get(NUCLEOTIDE_INSERTIONS_PROPERTY)) {
-            null -> emptyList()
-            is ArrayNode -> nucleotideInsertionsNode.toList().map {
-                ctxt.readTreeAsValue(it, NucleotideInsertion::class.java)
-            }
-            else -> throw BadRequestException(
-                "nucleotideInsertions must be an array or null, ${butWas(nucleotideInsertionsNode)}",
-            )
+    val nucleotideInsertions = when (val nucleotideInsertionsNode = node.get(NUCLEOTIDE_INSERTIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> nucleotideInsertionsNode.toList().map {
+            ctxt.readTreeAsValue(it, NucleotideInsertion::class.java)
         }
+        else -> throw BadRequestException(
+            "nucleotideInsertions must be an array or null, ${butWas(nucleotideInsertionsNode)}",
+        )
+    }
 
-    val aminoAcidInsertions: List<AminoAcidInsertion> =
-        when (val aminoAcidInsertionsNode = node.get(AMINO_ACID_INSERTIONS_PROPERTY)) {
-            null -> emptyList()
-            is ArrayNode -> aminoAcidInsertionsNode.toList().map {
-                ctxt.readTreeAsValue(it, AminoAcidInsertion::class.java)
-            }
-            else -> throw BadRequestException(
-                "aminoAcidInsertions must be an array or null, ${butWas(aminoAcidInsertionsNode)}",
-            )
+    val aminoAcidInsertions = when (val aminoAcidInsertionsNode = node.get(AMINO_ACID_INSERTIONS_PROPERTY)) {
+        null -> emptyList()
+        is ArrayNode -> aminoAcidInsertionsNode.toList().map {
+            ctxt.readTreeAsValue(it, AminoAcidInsertion::class.java)
         }
+        else -> throw BadRequestException(
+            "aminoAcidInsertions must be an array or null, ${butWas(aminoAcidInsertionsNode)}",
+        )
+    }
 
     return ParsedMutationsAndInsertions(
         nucleotideMutations,
