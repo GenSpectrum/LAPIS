@@ -94,8 +94,8 @@ class CachedBodyHttpServletRequest private constructor(
         }
         if (method != HttpMethod.GET.name()) {
             val fieldValue = parsedBody[fieldName]
-            if (fieldValue?.isTextual == true) {
-                return fieldValue.asText()
+            if (fieldValue?.isString == true) {
+                return fieldValue.asString()
             }
         }
         return null
@@ -120,7 +120,7 @@ class CachedBodyHttpServletRequest private constructor(
 
         val fieldValue = parsedBody[fieldName]
         if (fieldValue?.isArray == true) {
-            return fieldValue.toList().map { it.asText() }
+            return fieldValue.toList().map { it.asString() }
         }
         return emptyList()
     }

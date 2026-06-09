@@ -406,7 +406,7 @@ class QueriesOverTimeModel(
         dateField: String,
         dateRanges: List<DateRange>,
     ): Int? {
-        val dateString = datum.fields[dateField]?.asText() ?: return null
+        val dateString = datum.fields[dateField]?.asString() ?: return null
 
         val date = LocalDate.parse(dateString)
 

@@ -37,7 +37,7 @@ data class FastaHeaderTemplate(
             .forEach { (field, value) ->
                 val replacement = when (value) {
                     is NullNode -> ""
-                    else -> value!!.asText()
+                    else -> value!!.asString()
                 }
                 result = result.replace("{$field}", replacement, ignoreCase = true)
             }

@@ -45,7 +45,7 @@ class DetailsCollection(
 private fun JsonNode.toCsvValue() =
     when (this) {
         is NullNode -> null
-        else -> asText()
+        else -> asString()
     }
 
 class MutationsCollection(

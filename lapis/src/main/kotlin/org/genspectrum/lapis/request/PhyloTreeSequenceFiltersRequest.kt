@@ -103,12 +103,12 @@ fun parsePhyloTreeProperty(
             "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field",
         )
     }
-    if (!phyloTreeField.isTextual) {
+    if (!phyloTreeField.isString) {
         throw BadRequestException(
             "$PHYLO_TREE_FIELD_PROPERTY must be a string, but was ${phyloTreeField.nodeType}",
         )
     }
-    return validatePhyloTreeField(phyloTreeField.textValue(), fieldConverter, databaseConfig)
+    return validatePhyloTreeField(phyloTreeField.stringValue(), fieldConverter, databaseConfig)
 }
 
 fun parsePrintNodesNotInTree(node: JsonNode): Boolean {

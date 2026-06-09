@@ -53,7 +53,7 @@ class SequencesStreamer(
                                 values = it,
                                 sequenceName = sequenceName,
                             )
-                            outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
+                            outputStream.appendLine(">$fastaHeader\n${sequence.asString()}")
                         }
                     }
                 }
