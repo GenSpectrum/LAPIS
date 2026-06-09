@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'tools.jackson.module:jackson-module-kotlin'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin' // needed by springdoc/swagger-core (still on Jackson 2)
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'tools.jackson.dataformat:jackson-dataformat-yaml'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
