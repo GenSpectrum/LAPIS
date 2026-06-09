@@ -32,12 +32,14 @@ import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
+import org.springdoc.core.utils.SpringDocUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpHeaders
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.CommonsRequestLoggingFilter
@@ -53,6 +55,10 @@ private const val VERSION_FILE = "version.txt"
 @EnableScheduling
 @EnableCaching
 class LapisSpringConfig {
+    init {
+        SpringDocUtils.getConfig().addRequestWrapperToIgnore(HttpHeaders::class.java)
+    }
+
     private val rootAllocator = RootAllocator()
 
     @Bean
