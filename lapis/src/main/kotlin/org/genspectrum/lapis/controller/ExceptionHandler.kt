@@ -3,6 +3,8 @@ package org.genspectrum.lapis.controller
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.controller.middleware.CompressionSource
+import org.genspectrum.lapis.controller.middleware.RequestCompression
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
@@ -31,6 +33,7 @@ import org.springframework.web.servlet.View
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.net.URI
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
@@ -43,7 +46,7 @@ private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 class ExceptionHandler(
     private val notFoundView: NotFoundView,
     private val lapisInfoFactory: LapisInfoFactory,
-    private val requestCompression: org.genspectrum.lapis.controller.middleware.RequestCompression,
+    private val requestCompression: RequestCompression,
 ) : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -128,7 +131,7 @@ class ExceptionHandler(
     ): ErrorResponse {
         val compressionSource = requestCompression.compressionSource
         val addCompressionEncoding: BodyBuilder.() -> Unit = {
-            if (compressionSource is org.genspectrum.lapis.controller.middleware.CompressionSource.RequestProperty) {
+            if (compressionSource is CompressionSource.RequestProperty) {
                 header(HttpHeaders.CONTENT_ENCODING, compressionSource.compression.value)
             }
         }
@@ -141,7 +144,7 @@ class ExceptionHandler(
             .body(
                 LapisErrorResponse(
                     error = ProblemDetail.forStatus(httpStatus).also {
-                        it.type = java.net.URI.create("about:blank")
+                        it.type = URI.create("about:blank")
                         it.title = title
                         it.detail = truncate(detail, maxLength = 100_000)
                     },

@@ -9,6 +9,7 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -1232,7 +1233,7 @@ class LapisController(
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
         response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
         if (response.contentType == null) {
-            response.contentType = "${LapisMediaType.TEXT_NEWICK_VALUE};charset=UTF-8"
+            response.contentType = MediaType(TEXT_NEWICK, Charsets.UTF_8).toString()
         }
         val newick = treeResponse.use { it.toList() }.first().subtreeNewick
         response.outputStream.write(newick.toByteArray(Charsets.UTF_8))
