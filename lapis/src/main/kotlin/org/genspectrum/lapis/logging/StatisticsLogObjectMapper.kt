@@ -11,7 +11,9 @@ class StatisticsLogObjectMapper {
     private val mapper = JsonMapper.builder()
         .addModule(kotlinModule())
         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-        .changeDefaultPropertyInclusion { JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, null) }
+        .changeDefaultPropertyInclusion {
+            JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.USE_DEFAULTS)
+        }
         .build()
 
     fun writeValueAsString(requestContext: RequestContext): String =

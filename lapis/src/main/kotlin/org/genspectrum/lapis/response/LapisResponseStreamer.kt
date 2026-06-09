@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.response
 
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.middleware.ESCAPED_ACCEPT_HEADER_PARAMETER
@@ -11,6 +10,7 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -45,7 +45,7 @@ class LapisResponseStreamer(
         requestContext.filter = request
         val data = getData(request)
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
+        dataVersion.setHeaderOn(response)
 
         when (responseFormat) {
             is ResponseFormat.Json -> {
@@ -145,7 +145,7 @@ class LapisResponseStreamer(
             else -> MediaType(targetMediaType, Charset.defaultCharset())
         }
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
+        dataVersion.setHeaderOn(response)
         if (response.contentType == null) {
             response.contentType = contentType.toString()
         }

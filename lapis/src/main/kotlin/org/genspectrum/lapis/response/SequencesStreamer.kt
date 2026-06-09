@@ -1,11 +1,11 @@
 package org.genspectrum.lapis.response
 
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -22,7 +22,7 @@ class SequencesStreamer(
         response: HttpServletResponse,
         sequencesDataFormat: SequencesDataFormat,
     ) {
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
+        dataVersion.setHeaderOn(response)
 
         when (sequencesDataFormat) {
             SequencesDataFormat.FASTA -> streamFasta(response, sequencesResponse)

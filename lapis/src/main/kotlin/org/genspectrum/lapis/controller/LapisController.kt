@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
@@ -89,6 +88,7 @@ import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -1231,7 +1231,7 @@ class LapisController(
         response: HttpServletResponse,
     ) {
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion ?: "")
+        dataVersion.setHeaderOn(response)
         if (response.contentType == null) {
             response.contentType = MediaType(TEXT_NEWICK, Charsets.UTF_8).toString()
         }
