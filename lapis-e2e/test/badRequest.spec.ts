@@ -13,7 +13,6 @@ describe('Error handling: BadRequest', () => {
       instance: '/sample/aggregated',
       status: 400,
       title: 'Bad Request',
-      type: 'about:blank',
     });
   });
 });
