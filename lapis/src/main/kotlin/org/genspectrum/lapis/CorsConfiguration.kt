@@ -5,7 +5,7 @@ import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.controller.middleware.Compression
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders.RETRY_AFTER
-import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverters
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
@@ -21,15 +21,17 @@ class CorsConfiguration : WebMvcConfigurer {
             .maxAge(3600)
     }
 
-    override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
+    override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
         // Register compression media types with the Jackson JSON converter so that
         // error responses can be serialized even when the Content-Type is forced to
         // application/gzip or application/zstd by the CompressionFilter.
         val compressionMediaTypes = Compression.entries.map { it.contentType }
-        converters.filterIsInstance<JacksonJsonHttpMessageConverter>().forEach { converter ->
-            val supportedTypes = converter.supportedMediaTypes.toMutableList()
-            supportedTypes.addAll(compressionMediaTypes)
-            converter.supportedMediaTypes = supportedTypes
+        builder.configureMessageConverters { converter ->
+            if (converter is JacksonJsonHttpMessageConverter) {
+                val supportedTypes = converter.supportedMediaTypes.toMutableList()
+                supportedTypes.addAll(compressionMediaTypes)
+                converter.supportedMediaTypes = supportedTypes
+            }
         }
     }
 }
