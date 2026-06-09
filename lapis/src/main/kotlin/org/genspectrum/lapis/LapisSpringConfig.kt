@@ -180,6 +180,8 @@ class LapisSpringConfig {
             LapisVersion("local")
         }
 
+    // We must call the customizers ourselves to preserve Boot's default Jackson configuration
+    // (Kotlin module registration, feature flags, date handling, etc.).
     @Bean
     fun jsonMapperBuilder(customizers: List<JsonMapperBuilderCustomizer>): JsonMapper.Builder {
         val factory = JsonFactory.builder()
