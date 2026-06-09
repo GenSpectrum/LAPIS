@@ -33,7 +33,9 @@ describe('LAPIS that requires authentication', () => {
         const result = await fetch(basePath + '/sample/aggregated');
 
         expect(result.status).to.equal(401);
-        expect(result.headers.get('www-authenticate')).to.equal('Bearer');
+        expect(result.headers.get('www-authenticate')).to.match(
+          /Bearer resource_metadata="http:\/\/localhost:\d+\/.well-known\/oauth-protected-resource"/
+        );
       });
 
       it('should reject call with invalid token', async () => {
