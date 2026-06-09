@@ -284,6 +284,9 @@ class StringHttpMessageConverterWithUnknownContentLengthInCaseOfCompression(
         }
 
     companion object {
+        // taken from the initialization in
+        // org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
+        // since this class replaces that one
         private fun getCharsetFromEnvironment(environment: Environment): Charset =
             Binder.get(environment)
                 .bind("server.servlet.encoding.charset", Charset::class.java)
