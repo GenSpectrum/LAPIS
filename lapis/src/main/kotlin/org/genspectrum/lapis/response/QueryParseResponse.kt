@@ -9,7 +9,7 @@ data class QueryParseResponse(
 )
 
 sealed interface ParsedQueryResult {
-    @Schema(description = "Successful query parse result")
+    @Schema(description = "Successful query parse result", requiredProperties = ["filter", "type"])
     data class Success(
         @field:Schema(description = "The parsed SILO filter expression")
         val filter: SiloFilterExpression,
@@ -22,7 +22,7 @@ sealed interface ParsedQueryResult {
             get() = "success"
     }
 
-    @Schema(description = "Failed query parse result")
+    @Schema(description = "Failed query parse result", requiredProperties = ["error", "type"])
     data class Failure(
         @field:Schema(description = "Error message describing why parsing failed")
         val error: String,
