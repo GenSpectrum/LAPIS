@@ -182,12 +182,12 @@ fun getValueNode(value: JsonNode): String? {
     if (value.isNull) {
         return null
     }
-    return value.asText()
+    return value.asString()
 }
 
 fun parseFastaHeaderTemplateParameter(node: JsonNode) =
     when (val fastaHeaderTemplate = node.get(FASTA_HEADER_TEMPLATE_PROPERTY)) {
-        is StringNode -> fastaHeaderTemplate.asText()
+        is StringNode -> fastaHeaderTemplate.asString()
         is NullNode -> null
         null -> null
         else -> throw BadRequestException(

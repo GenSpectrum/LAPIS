@@ -52,7 +52,7 @@ fun <T> parseFieldsProperty(
     fieldConverter: FieldConverter<T>,
 ) = when (val fields = node.get(FIELDS_PROPERTY)) {
     null -> emptyList()
-    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
+    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asString()) }.toList()
     else -> throw BadRequestException(
         "$FIELDS_PROPERTY must be an array or null",
     )

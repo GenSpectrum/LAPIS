@@ -55,15 +55,15 @@ class SequenceFiltersRequestWithGenesDeserializer(
             null -> referenceGenomeSchema.getGeneNames()
             is ArrayNode -> {
                 genes.toList().map {
-                    if (!it.isTextual) {
+                    if (!it.isString) {
                         throw BadRequestException(
-                            "$GENES_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asText()}",
+                            "$GENES_PROPERTY items must be strings, but was ${it.nodeType}: ${it.stringValue()}",
                         )
                     }
-                    referenceGenomeSchema.getGene(it.textValue())
+                    referenceGenomeSchema.getGene(it.stringValue())
                         ?.name
                         ?: throw BadRequestException(
-                            "Unknown gene: ${it.asText()}, " +
+                            "Unknown gene: ${it.stringValue()}, " +
                                 "available genes: ${referenceGenomeSchema.getGeneNames()}",
                         )
                 }

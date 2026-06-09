@@ -98,7 +98,7 @@ class OrderByFieldDeserializer(
         ctxt: DeserializationContext,
     ): OrderByField =
         when (val value = jsonParser.readValueAsTree<JsonNode>()) {
-            is StringNode -> OrderByField(orderByFieldsCleaner.clean(value.asText()), Order.ASCENDING)
+            is StringNode -> OrderByField(orderByFieldsCleaner.clean(value.asString()), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
             else -> throw BadRequestException("orderByField must be a string or an object")
         }
@@ -109,13 +109,13 @@ class OrderByFieldDeserializer(
             throw BadRequestException("orderByField must have a string property \"field\", was $value")
         }
 
-        val ascending = when (value.get("type")?.asText()) {
+        val ascending = when (value.get("type")?.asString()) {
             "ascending", null -> Order.ASCENDING
             "descending" -> Order.DESCENDING
             else -> throw BadRequestException("orderByField type must be \"ascending\" or \"descending\"")
         }
 
-        return OrderByField(orderByFieldsCleaner.clean(fieldNode.asText()), ascending)
+        return OrderByField(orderByFieldsCleaner.clean(fieldNode.asString()), ascending)
     }
 }
 

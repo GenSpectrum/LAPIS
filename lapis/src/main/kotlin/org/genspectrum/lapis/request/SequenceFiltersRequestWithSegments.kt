@@ -55,15 +55,15 @@ class SequenceFiltersRequestWithSegmentsDeserializer(
             null -> referenceGenomeSchema.getNucleotideSequenceNames()
             is ArrayNode -> {
                 segments.toList().map {
-                    if (!it.isTextual) {
+                    if (!it.isString) {
                         throw BadRequestException(
-                            "$SEGMENTS_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asText()}",
+                            "$SEGMENTS_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asString()}",
                         )
                     }
-                    referenceGenomeSchema.getNucleotideSequence(it.textValue())
+                    referenceGenomeSchema.getNucleotideSequence(it.asString())
                         ?.name
                         ?: throw BadRequestException(
-                            "Unknown segment: ${it.asText()}, " +
+                            "Unknown segment: ${it.asString()}, " +
                                 "available segments: ${referenceGenomeSchema.getNucleotideSequenceNames()}",
                         )
                 }
