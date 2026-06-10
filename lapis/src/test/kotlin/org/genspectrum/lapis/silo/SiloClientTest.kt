@@ -1,9 +1,5 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
@@ -41,6 +37,10 @@ import org.mockserver.model.MediaType
 import org.mockserver.model.MediaType.parse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 import java.time.LocalDate
 
 private const val MOCK_SERVER_PORT = 1080
@@ -102,8 +102,8 @@ class SiloClientTest(
             result,
             equalTo(
                 listOf(
-                    AggregationData(6, mapOf("division" to TextNode("Aargau"))),
-                    AggregationData(8, mapOf("division" to TextNode("Basel-Land"))),
+                    AggregationData(6, mapOf("division" to StringNode("Aargau"))),
+                    AggregationData(8, mapOf("division" to StringNode("Basel-Land"))),
                 ),
             ),
         )
@@ -200,9 +200,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(mapOf("primaryKey" to TextNode("key1"), "someSequenceName" to TextNode("ABCD"))),
-                SequenceData(mapOf("primaryKey" to TextNode("key2"), "someSequenceName" to TextNode("DEFG"))),
-                SequenceData(mapOf("primaryKey" to TextNode("key3"), "someSequenceName" to NullNode.instance)),
+                SequenceData(mapOf("primaryKey" to StringNode("key1"), "someSequenceName" to StringNode("ABCD"))),
+                SequenceData(mapOf("primaryKey" to StringNode("key2"), "someSequenceName" to StringNode("DEFG"))),
+                SequenceData(mapOf("primaryKey" to StringNode("key3"), "someSequenceName" to NullNode.instance)),
             ),
         )
     }
@@ -233,9 +233,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                SequenceData(mapOf("primaryKey" to TextNode("key1"), "someSequenceName" to TextNode("ABCD"))),
-                SequenceData(mapOf("primaryKey" to TextNode("key2"), "someSequenceName" to TextNode("DEFG"))),
-                SequenceData(mapOf("primaryKey" to TextNode("key3"), "someSequenceName" to NullNode.instance)),
+                SequenceData(mapOf("primaryKey" to StringNode("key1"), "someSequenceName" to StringNode("ABCD"))),
+                SequenceData(mapOf("primaryKey" to StringNode("key2"), "someSequenceName" to StringNode("DEFG"))),
+                SequenceData(mapOf("primaryKey" to StringNode("key3"), "someSequenceName" to NullNode.instance)),
             ),
         )
     }
@@ -277,18 +277,18 @@ class SiloClientTest(
                 DetailsData(
                     mapOf(
                         "age" to IntNode(50),
-                        "country" to TextNode("Switzerland"),
-                        "date" to TextNode("2021-02-23"),
-                        "pango_lineage" to TextNode("B.1.1.7"),
+                        "country" to StringNode("Switzerland"),
+                        "date" to StringNode("2021-02-23"),
+                        "pango_lineage" to StringNode("B.1.1.7"),
                         "qc_value" to DoubleNode(0.95),
                     ),
                 ),
                 DetailsData(
                     mapOf(
                         "age" to IntNode(54),
-                        "country" to TextNode("Switzerland"),
-                        "date" to TextNode("2021-03-19"),
-                        "pango_lineage" to TextNode("B.1.1.7"),
+                        "country" to StringNode("Switzerland"),
+                        "date" to StringNode("2021-03-19"),
+                        "pango_lineage" to StringNode("B.1.1.7"),
                         "qc_value" to DoubleNode(0.94),
                     ),
                 ),
@@ -319,9 +319,9 @@ class SiloClientTest(
         assertThat(
             result,
             containsInAnyOrder(
-                DetailsData(mapOf("date" to TextNode("2021-02-23"), "label" to TextNode("A"))),
-                DetailsData(mapOf("date" to TextNode("2021-03-19"), "label" to TextNode("B"))),
-                DetailsData(mapOf("date" to NullNode.instance, "label" to TextNode("C"))),
+                DetailsData(mapOf("date" to StringNode("2021-02-23"), "label" to StringNode("A"))),
+                DetailsData(mapOf("date" to StringNode("2021-03-19"), "label" to StringNode("B"))),
+                DetailsData(mapOf("date" to NullNode.instance, "label" to StringNode("C"))),
             ),
         )
     }

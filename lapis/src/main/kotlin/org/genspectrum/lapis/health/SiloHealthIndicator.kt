@@ -3,9 +3,9 @@ package org.genspectrum.lapis.health
 import org.genspectrum.lapis.silo.CachedSiloClient
 import org.genspectrum.lapis.silo.SiloNotReachableException
 import org.genspectrum.lapis.silo.SiloUnavailableException
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.HealthIndicator
-import org.springframework.boot.actuate.health.Status
+import org.springframework.boot.health.contributor.Health
+import org.springframework.boot.health.contributor.HealthIndicator
+import org.springframework.boot.health.contributor.Status
 import org.springframework.stereotype.Component
 
 @Component
@@ -30,7 +30,7 @@ class SiloHealthIndicator(
                     it
                         .withDetail("siloStatus", Status.DOWN)
                         .withDetail("error", "SILO unavailable (HTTP 503)")
-                        .withDetail("retryAfter", e.retryAfter)
+                        .withDetail("retryAfter", e.retryAfter ?: "unknown")
                 } catch (_: Exception) {
                     it
                         .withDetail("siloStatus", Status.DOWN)

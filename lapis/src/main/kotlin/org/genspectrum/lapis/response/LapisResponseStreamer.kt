@@ -1,8 +1,6 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.middleware.ESCAPED_ACCEPT_HEADER_PARAMETER
@@ -12,9 +10,11 @@ import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 import java.nio.charset.Charset
 import java.util.stream.Stream
 
@@ -45,7 +45,7 @@ class LapisResponseStreamer(
         requestContext.filter = request
         val data = getData(request)
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        dataVersion.setHeaderOn(response)
 
         when (responseFormat) {
             is ResponseFormat.Json -> {
@@ -71,14 +71,13 @@ class LapisResponseStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
 
-        val jsonFactory = objectMapper.factory
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
-                jsonFactory.createGenerator(outputStream).use { generator ->
+                objectMapper.createGenerator(outputStream).use { generator ->
                     streamAndLogDisconnect("Plain JSON data") {
                         generator.writeStartArray()
                         inputStream.forEach {
-                            generator.writeObject(it)
+                            generator.writePOJO(it)
                         }
                         generator.writeEndArray()
                     }
@@ -95,21 +94,19 @@ class LapisResponseStreamer(
             response.contentType = MediaType(MediaType.APPLICATION_JSON).toString()
         }
 
-        val jsonFactory = objectMapper.factory
-
         sequenceData.use { inputStream ->
             response.outputStream.writer().use { outputStream ->
-                jsonFactory.createGenerator(outputStream).use { generator ->
+                objectMapper.createGenerator(outputStream).use { generator ->
                     streamAndLogDisconnect("Lapis JSON data") {
                         generator.writeStartObject()
 
-                        generator.writeArrayFieldStart("data")
+                        generator.writeArrayPropertyStart("data")
                         inputStream.forEach {
-                            generator.writeObject(it)
+                            generator.writePOJO(it)
                         }
                         generator.writeEndArray()
 
-                        generator.writePOJOField("info", lapisInfoFactory.create())
+                        generator.writePOJOProperty("info", lapisInfoFactory.create())
 
                         generator.writeEndObject()
                     }
@@ -148,7 +145,7 @@ class LapisResponseStreamer(
             else -> MediaType(targetMediaType, Charset.defaultCharset())
         }
 
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        dataVersion.setHeaderOn(response)
         if (response.contentType == null) {
             response.contentType = contentType.toString()
         }

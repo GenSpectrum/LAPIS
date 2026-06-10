@@ -1,10 +1,5 @@
 package org.genspectrum.lapis.model
 
-import com.fasterxml.jackson.databind.node.BooleanNode
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.controller.BadRequestException
@@ -15,6 +10,11 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.databind.node.BooleanNode
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 
 class FastaHeaderTemplateTest {
     private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
@@ -41,7 +41,7 @@ class FastaHeaderTemplateTest {
         )
 
         val filledTemplate = template.fillTemplate(
-            values = mapOf("accession" to TextNode("my_accession")),
+            values = mapOf("accession" to StringNode("my_accession")),
             sequenceName = "sequenceName",
         )
 
@@ -72,7 +72,7 @@ class FastaHeaderTemplateTest {
 
         val filledTemplate = template.fillTemplate(
             values = mapOf(
-                "accession" to TextNode("my_accession"),
+                "accession" to StringNode("my_accession"),
                 "age" to IntNode(42),
                 "qc" to DoubleNode(0.987),
                 "isBoolean" to BooleanNode.TRUE,
@@ -96,8 +96,8 @@ class FastaHeaderTemplateTest {
 
         val filledTemplate = template.fillTemplate(
             values = mapOf(
-                "accession" to TextNode("my_accession"),
-                "superfluous" to TextNode("should be ignored"),
+                "accession" to StringNode("my_accession"),
+                "superfluous" to StringNode("should be ignored"),
             ),
             sequenceName = "sequenceName",
         )
@@ -117,7 +117,7 @@ class FastaHeaderTemplateTest {
 
         val filledTemplate = template.fillTemplate(
             values = mapOf(
-                "accession" to TextNode("my_accession"),
+                "accession" to StringNode("my_accession"),
                 // "age" is missing
                 "qc" to DoubleNode(0.987),
             ),
@@ -135,7 +135,7 @@ class FastaHeaderTemplateTest {
         )
 
         val filledTemplate = template.fillTemplate(
-            values = mapOf("accession" to TextNode("my_accession"), "age" to IntNode(42)),
+            values = mapOf("accession" to StringNode("my_accession"), "age" to IntNode(42)),
             sequenceName = "sequenceName",
         )
 

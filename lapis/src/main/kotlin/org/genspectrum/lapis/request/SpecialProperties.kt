@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.databind.node.JsonNodeType
+import tools.jackson.databind.node.JsonNodeType
 
 const val FORMAT_PROPERTY = "dataFormat"
 const val MIN_PROPORTION_PROPERTY = "minProportion"

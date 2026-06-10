@@ -3,10 +3,6 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.response.AggregationData
@@ -16,6 +12,10 @@ import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ValueSerializer
+import tools.jackson.databind.annotation.JsonSerialize
 import java.time.LocalDate
 
 data class SiloQuery<ResponseType>(
@@ -457,11 +457,11 @@ sealed class RandomizeConfig {
     ) : RandomizeConfig()
 }
 
-class RandomizeConfigSerializer : JsonSerializer<RandomizeConfig>() {
+class RandomizeConfigSerializer : ValueSerializer<RandomizeConfig>() {
     override fun serialize(
         value: RandomizeConfig,
         gen: JsonGenerator,
-        serializers: SerializerProvider,
+        serializers: SerializationContext,
     ) {
         when (value) {
             is RandomizeConfig.Enabled -> {
@@ -474,7 +474,7 @@ class RandomizeConfigSerializer : JsonSerializer<RandomizeConfig>() {
 
             is RandomizeConfig.WithSeed -> {
                 gen.writeStartObject()
-                gen.writeNumberField("seed", value.seed)
+                gen.writeNumberProperty("seed", value.seed)
                 gen.writeEndObject()
             }
         }

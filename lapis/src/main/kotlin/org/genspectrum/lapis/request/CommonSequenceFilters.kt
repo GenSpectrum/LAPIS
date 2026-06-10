@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.ObjectCodec
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.JsonNodeType
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.util.MultiValueMap
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.JsonNodeType
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 
 typealias SequenceFilters = Map<String, List<String?>>
 typealias GetRequestSequenceFilters = MultiValueMap<String, String>
@@ -35,14 +35,14 @@ interface CommonSequenceFilters : BaseSequenceFilters {
 
 fun parseCommonFields(
     node: JsonNode,
-    codec: ObjectCodec,
+    ctxt: DeserializationContext,
 ): ParsedCommonFields {
-    val parsedMutationsAndInsertions = parseMutationsAndInsertions(node, codec)
+    val parsedMutationsAndInsertions = parseMutationsAndInsertions(node, ctxt)
 
     val orderByFields =
         when (val orderByNode = node.get(ORDER_BY_PROPERTY)) {
             null -> OrderBySpec.EMPTY
-            else -> codec.treeToValue(orderByNode, OrderBySpec::class.java)
+            else -> ctxt.readTreeAsValue(orderByNode, OrderBySpec::class.java)
         }
 
     val limitNode = node.get(LIMIT_PROPERTY)
@@ -75,11 +75,13 @@ fun parseCommonFields(
 
 fun parseMutationsAndInsertions(
     node: JsonNode,
-    codec: ObjectCodec,
+    ctxt: DeserializationContext,
 ): ParsedMutationsAndInsertions {
     val nucleotideMutations = when (val nucleotideMutationsNode = node.get(NUCLEOTIDE_MUTATIONS_PROPERTY)) {
         null -> emptyList()
-        is ArrayNode -> nucleotideMutationsNode.map { codec.treeToValue(it, NucleotideMutation::class.java) }
+        is ArrayNode -> nucleotideMutationsNode.toList().map {
+            ctxt.readTreeAsValue(it, NucleotideMutation::class.java)
+        }
         else -> throw BadRequestException(
             "nucleotideMutations must be an array or null, ${butWas(nucleotideMutationsNode)}",
         )
@@ -87,7 +89,9 @@ fun parseMutationsAndInsertions(
 
     val aminoAcidMutations = when (val aminoAcidMutationsNode = node.get(AMINO_ACID_MUTATIONS_PROPERTY)) {
         null -> emptyList()
-        is ArrayNode -> aminoAcidMutationsNode.map { codec.treeToValue(it, AminoAcidMutation::class.java) }
+        is ArrayNode -> aminoAcidMutationsNode.toList().map {
+            ctxt.readTreeAsValue(it, AminoAcidMutation::class.java)
+        }
         else -> throw BadRequestException(
             "aminoAcidMutations must be an array or null, ${butWas(aminoAcidMutationsNode)}",
         )
@@ -95,7 +99,9 @@ fun parseMutationsAndInsertions(
 
     val nucleotideInsertions = when (val nucleotideInsertionsNode = node.get(NUCLEOTIDE_INSERTIONS_PROPERTY)) {
         null -> emptyList()
-        is ArrayNode -> nucleotideInsertionsNode.map { codec.treeToValue(it, NucleotideInsertion::class.java) }
+        is ArrayNode -> nucleotideInsertionsNode.toList().map {
+            ctxt.readTreeAsValue(it, NucleotideInsertion::class.java)
+        }
         else -> throw BadRequestException(
             "nucleotideInsertions must be an array or null, ${butWas(nucleotideInsertionsNode)}",
         )
@@ -103,7 +109,9 @@ fun parseMutationsAndInsertions(
 
     val aminoAcidInsertions = when (val aminoAcidInsertionsNode = node.get(AMINO_ACID_INSERTIONS_PROPERTY)) {
         null -> emptyList()
-        is ArrayNode -> aminoAcidInsertionsNode.map { codec.treeToValue(it, AminoAcidInsertion::class.java) }
+        is ArrayNode -> aminoAcidInsertionsNode.toList().map {
+            ctxt.readTreeAsValue(it, AminoAcidInsertion::class.java)
+        }
         else -> throw BadRequestException(
             "aminoAcidInsertions must be an array or null, ${butWas(aminoAcidInsertionsNode)}",
         )
@@ -124,7 +132,7 @@ fun parseSequenceFilters(
     node.properties()
         .asSequence()
         .filter { !fieldsToExclude.contains(it.key) }
-        .associate { it.key to getValuesList(it.value, it.key) }
+        .associate { (key, value) -> key to getValuesList(value, key) }
 
 fun butWas(jsonNode: JsonNode) = "but was $jsonNode (${jsonNode.nodeType})"
 
@@ -152,7 +160,7 @@ fun getValuesList(
 ) = when {
     value.isValueNode -> listOf(getValueNode(value))
 
-    value.nodeType == JsonNodeType.ARRAY -> value.map {
+    value.nodeType == JsonNodeType.ARRAY -> value.toList().map {
         when {
             it.isValueNode -> getValueNode(it)
             else -> throw BadRequestException(
@@ -170,12 +178,12 @@ fun getValueNode(value: JsonNode): String? {
     if (value.isNull) {
         return null
     }
-    return value.asText()
+    return value.asString()
 }
 
 fun parseFastaHeaderTemplateParameter(node: JsonNode) =
     when (val fastaHeaderTemplate = node.get(FASTA_HEADER_TEMPLATE_PROPERTY)) {
-        is TextNode -> fastaHeaderTemplate.asText()
+        is StringNode -> fastaHeaderTemplate.asString()
         is NullNode -> null
         null -> null
         else -> throw BadRequestException(

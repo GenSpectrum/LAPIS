@@ -1,11 +1,11 @@
 package org.genspectrum.lapis.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.springframework.stereotype.Component
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 import java.util.Locale
 
 private const val SEGMENT_PLACEHOLDER = ".segment"
@@ -29,15 +29,15 @@ data class FastaHeaderTemplate(
             .map { field ->
                 when (field) {
                     is TemplateField.MetadataField -> field.fieldNameInTemplate to values[field.fieldNameInConfig]
-                    TemplateField.GeneField -> GENE_PLACEHOLDER to TextNode(sequenceName)
-                    TemplateField.SegmentField -> SEGMENT_PLACEHOLDER to TextNode(sequenceName)
+                    TemplateField.GeneField -> GENE_PLACEHOLDER to StringNode(sequenceName)
+                    TemplateField.SegmentField -> SEGMENT_PLACEHOLDER to StringNode(sequenceName)
                 }
             }
             .filter { (_, value) -> value != null }
             .forEach { (field, value) ->
                 val replacement = when (value) {
                     is NullNode -> ""
-                    else -> value!!.asText()
+                    else -> value!!.asString()
                 }
                 result = result.replace("{$field}", replacement, ignoreCase = true)
             }

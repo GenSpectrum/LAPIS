@@ -1,10 +1,10 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
 
 data class SequenceFiltersRequest(
     override val sequenceFilters: SequenceFilters,
@@ -18,17 +18,16 @@ data class SequenceFiltersRequest(
     val fastaHeaderTemplate: String? = null,
 ) : CommonSequenceFilters
 
-@JsonComponent
-class SequenceFiltersRequestDeserializer : JsonDeserializer<SequenceFiltersRequest>() {
+@JacksonComponent
+class SequenceFiltersRequestDeserializer : ValueDeserializer<SequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): SequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val fastaHeaderTemplate = parseFastaHeaderTemplateParameter(node)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequest(
             sequenceFilters = parsedCommonFields.sequenceFilters,

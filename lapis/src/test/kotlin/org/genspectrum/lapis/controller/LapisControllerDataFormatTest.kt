@@ -1,8 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
@@ -20,8 +17,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -30,6 +27,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private const val DATA_VERSION = "1234"
@@ -143,7 +143,7 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
-                mapOf("primaryKey" to TextNode("someValue"), "date" to NullNode.instance),
+                mapOf("primaryKey" to StringNode("someValue"), "date" to NullNode.instance),
             ),
         )
 
@@ -168,9 +168,9 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
-                    "primaryKey" to TextNode("some first value"),
+                    "primaryKey" to StringNode("some first value"),
                     "date" to NullNode.instance,
-                    "country" to TextNode("someValue"),
+                    "country" to StringNode("someValue"),
                 ),
             ),
         )
@@ -196,11 +196,19 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
-                mapOf("date" to TextNode("date1"), "primaryKey" to TextNode("key1"), "region" to TextNode("region1")),
+                mapOf(
+                    "date" to StringNode("date1"),
+                    "primaryKey" to StringNode("key1"),
+                    "region" to StringNode("region1"),
+                ),
             ),
             AggregationData(
                 2,
-                mapOf("date" to TextNode("date2"), "primaryKey" to TextNode("key2"), "region" to TextNode("region2")),
+                mapOf(
+                    "date" to StringNode("date2"),
+                    "primaryKey" to StringNode("key2"),
+                    "region" to StringNode("region2"),
+                ),
             ),
         )
 
@@ -230,10 +238,18 @@ class LapisControllerDataFormatTest(
     fun `returns details csv columns in correct order`(scenario: ColumnOrderScenario) {
         every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
-                mapOf("date" to TextNode("date1"), "primaryKey" to TextNode("key1"), "region" to TextNode("region1")),
+                mapOf(
+                    "date" to StringNode("date1"),
+                    "primaryKey" to StringNode("key1"),
+                    "region" to StringNode("region1"),
+                ),
             ),
             DetailsData(
-                mapOf("date" to TextNode("date2"), "primaryKey" to TextNode("key2"), "region" to TextNode("region2")),
+                mapOf(
+                    "date" to StringNode("date2"),
+                    "primaryKey" to StringNode("key2"),
+                    "region" to StringNode("region2"),
+                ),
             ),
         )
 
@@ -254,8 +270,8 @@ class LapisControllerDataFormatTest(
         every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
-                    "primaryKey" to TextNode("key1\tfoo"),
-                    "region" to TextNode("regionLine1\nregionLine2"),
+                    "primaryKey" to StringNode("key1\tfoo"),
+                    "region" to StringNode("regionLine1\nregionLine2"),
                 ),
             ),
         )

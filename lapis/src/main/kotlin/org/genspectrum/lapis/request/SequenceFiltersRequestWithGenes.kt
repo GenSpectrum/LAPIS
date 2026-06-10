@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.ArrayNode
 
 data class SequenceFiltersRequestWithGenes(
     override val sequenceFilters: SequenceFilters,
@@ -22,20 +22,19 @@ data class SequenceFiltersRequestWithGenes(
     val fastaHeaderTemplate: String? = null,
 ) : CommonSequenceFilters
 
-@JsonComponent
+@JacksonComponent
 class SequenceFiltersRequestWithGenesDeserializer(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-) : JsonDeserializer<SequenceFiltersRequestWithGenes>() {
+) : ValueDeserializer<SequenceFiltersRequestWithGenes>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): SequenceFiltersRequestWithGenes {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val genes = parseGenes(node)
         val fastaHeaderTemplate = parseFastaHeaderTemplateParameter(node)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequestWithGenes(
             sequenceFilters = parsedCommonFields.sequenceFilters,
@@ -51,20 +50,20 @@ class SequenceFiltersRequestWithGenesDeserializer(
         )
     }
 
-    private fun parseGenes(node: JsonNode) =
+    private fun parseGenes(node: JsonNode): List<String> =
         when (val genes = node.get(GENES_PROPERTY)) {
             null -> referenceGenomeSchema.getGeneNames()
             is ArrayNode -> {
-                genes.map {
-                    if (!it.isTextual) {
+                genes.toList().map {
+                    if (!it.isString) {
                         throw BadRequestException(
-                            "$GENES_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asText()}",
+                            "$GENES_PROPERTY items must be strings, but was ${it.nodeType}: ${it.asString()}",
                         )
                     }
-                    referenceGenomeSchema.getGene(it.textValue())
+                    referenceGenomeSchema.getGene(it.stringValue())
                         ?.name
                         ?: throw BadRequestException(
-                            "Unknown gene: ${it.asText()}, " +
+                            "Unknown gene: ${it.asString()}, " +
                                 "available genes: ${referenceGenomeSchema.getGeneNames()}",
                         )
                 }

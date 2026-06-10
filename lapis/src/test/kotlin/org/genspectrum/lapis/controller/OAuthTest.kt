@@ -15,9 +15,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
@@ -70,13 +70,13 @@ class OAuthTest(
         if (scenario.supportsGet) {
             mockMvc.perform(get(scenario.path))
                 .andExpect(status().isUnauthorized)
-                .andExpect(header().string("WWW-Authenticate", "Bearer"))
+                .andExpect(header().string("WWW-Authenticate", containsString("Bearer")))
         }
 
         if (scenario.supportsPost) {
             mockMvc.perform(post(scenario.path))
                 .andExpect(status().isUnauthorized)
-                .andExpect(header().string("WWW-Authenticate", "Bearer"))
+                .andExpect(header().string("WWW-Authenticate", containsString("Bearer")))
         }
     }
 

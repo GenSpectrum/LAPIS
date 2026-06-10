@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
+import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
@@ -88,6 +88,7 @@ import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -1191,7 +1192,7 @@ class LapisController(
         @RequestParam
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
-    ): String {
+    ) {
         val request = PhyloTreeSequenceFiltersRequest(
             sequenceFilters?.filterKeys { !SPECIAL_REQUEST_PROPERTIES.contains(it) }
                 ?: emptyMap(),
@@ -1206,7 +1207,7 @@ class LapisController(
             ).fieldName,
         )
 
-        return getNewickSubtree(request, response)
+        writeNewickSubtree(request, response)
     }
 
     @PostMapping(
@@ -1223,15 +1224,20 @@ class LapisController(
         @RequestBody
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
-    ): String = getNewickSubtree(request, response)
+    ) = writeNewickSubtree(request, response)
 
-    private fun getNewickSubtree(
+    private fun writeNewickSubtree(
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
-    ): String {
+    ) {
         val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
-        return treeResponse.use { it.toList() }.first().subtreeNewick
+        dataVersion.setHeaderOn(response)
+        if (response.contentType == null) {
+            response.contentType = MediaType(TEXT_NEWICK, Charsets.UTF_8).toString()
+        }
+        val newick = treeResponse.use { it.toList() }.first().subtreeNewick
+        response.outputStream.write(newick.toByteArray(Charsets.UTF_8))
+        response.outputStream.flush()
     }
 
     @GetMapping(DETAILS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])

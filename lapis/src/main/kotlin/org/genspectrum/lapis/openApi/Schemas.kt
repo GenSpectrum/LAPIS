@@ -239,7 +239,12 @@ annotation class LapisMostRecentCommonAncestorResponse
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
     description = PHYLO_SUBTREE_ENDPOINT_DESCRIPTION,
-    content = [Content(examples = [ExampleObject("(seq1:3,(seq2:2,seq3:1)node2:1)node1:1;")])],
+    content = [
+        Content(
+            schema = Schema(type = "string"),
+            examples = [ExampleObject("(seq1:3,(seq2:2,seq3:1)node2:1)node1:1;")],
+        ),
+    ],
 )
 annotation class LapisPhyloSubtreeResponse
 

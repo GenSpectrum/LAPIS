@@ -1,12 +1,12 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.media.Schema
 import org.genspectrum.lapis.model.mutationsOverTime.DateRange
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
 
 data class NucleotideMutationsOverTimeRequest(
     val filters: QueriesOverTimeRequestFilters,
@@ -52,16 +52,15 @@ data class QueriesOverTimeRequestFilters(
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
 ) : BaseSequenceFilters
 
-@JsonComponent
-class QueriesOverTimeRequestFiltersDeserializer : JsonDeserializer<QueriesOverTimeRequestFilters>() {
+@JacksonComponent
+class QueriesOverTimeRequestFiltersDeserializer : ValueDeserializer<QueriesOverTimeRequestFilters>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): QueriesOverTimeRequestFilters {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return QueriesOverTimeRequestFilters(
             parsedCommonFields.sequenceFilters,

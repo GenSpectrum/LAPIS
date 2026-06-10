@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller.middleware
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -14,6 +13,7 @@ import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.databind.ObjectMapper
 
 const val HEADERS_ACCEPT_HEADER_PARAMETER = "headers"
 const val ESCAPED_ACCEPT_HEADER_PARAMETER = "escaped"

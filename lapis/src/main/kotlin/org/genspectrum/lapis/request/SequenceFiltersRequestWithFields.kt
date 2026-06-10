@@ -1,12 +1,12 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.ArrayNode
 
 data class SequenceFiltersRequestWithFields(
     override val sequenceFilters: SequenceFilters,
@@ -20,19 +20,18 @@ data class SequenceFiltersRequestWithFields(
     override val offset: Int? = null,
 ) : CommonSequenceFilters
 
-@JsonComponent
+@JacksonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-) : JsonDeserializer<SequenceFiltersRequestWithFields>() {
+) : ValueDeserializer<SequenceFiltersRequestWithFields>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): SequenceFiltersRequestWithFields {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val fields = parseFieldsProperty(node, caseInsensitiveFieldConverter)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequestWithFields(
             parsedCommonFields.sequenceFilters,
@@ -53,7 +52,7 @@ fun <T> parseFieldsProperty(
     fieldConverter: FieldConverter<T>,
 ) = when (val fields = node.get(FIELDS_PROPERTY)) {
     null -> emptyList()
-    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asText()) }.toList()
+    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asString()) }.toList()
     else -> throw BadRequestException(
         "$FIELDS_PROPERTY must be an array or null",
     )

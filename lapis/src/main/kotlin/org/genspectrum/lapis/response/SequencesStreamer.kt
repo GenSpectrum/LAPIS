@@ -1,15 +1,15 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.NullNode
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.NullNode
 import java.nio.charset.Charset
 
 @Component
@@ -22,7 +22,7 @@ class SequencesStreamer(
         response: HttpServletResponse,
         sequencesDataFormat: SequencesDataFormat,
     ) {
-        response.setHeader(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        dataVersion.setHeaderOn(response)
 
         when (sequencesDataFormat) {
             SequencesDataFormat.FASTA -> streamFasta(response, sequencesResponse)
@@ -53,7 +53,7 @@ class SequencesStreamer(
                                 values = it,
                                 sequenceName = sequenceName,
                             )
-                            outputStream.appendLine(">$fastaHeader\n${sequence.asText()}")
+                            outputStream.appendLine(">$fastaHeader\n${sequence.asString()}")
                         }
                     }
                 }

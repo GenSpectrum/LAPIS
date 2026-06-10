@@ -1,13 +1,5 @@
 package org.genspectrum.lapis.silo
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.BooleanNode
-import com.fasterxml.jackson.databind.node.DoubleNode
-import com.fasterxml.jackson.databind.node.FloatNode
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.LongNode
-import com.fasterxml.jackson.databind.node.NullNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.apache.arrow.vector.BigIntVector
 import org.apache.arrow.vector.BitVector
 import org.apache.arrow.vector.DateDayVector
@@ -25,6 +17,14 @@ import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.util.UNALIGNED_PREFIX
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.BooleanNode
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.FloatNode
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.LongNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.StringNode
 
 /**
  * Converts one row at `rowIndex` from an Arrow [org.apache.arrow.vector.VectorSchemaRoot] to a typed Kotlin object.
@@ -183,13 +183,13 @@ private fun VectorSchemaRoot.fieldValueAsJsonNode(
     val vector = fieldVectors[columnIndex]
     if (vector.isNull(rowIndex)) return NullNode.instance
     return when (vector) {
-        is VarCharVector -> TextNode(String(vector.get(rowIndex), Charsets.UTF_8))
+        is VarCharVector -> StringNode(String(vector.get(rowIndex), Charsets.UTF_8))
         is IntVector -> IntNode(vector.get(rowIndex))
         is BigIntVector -> LongNode(vector.get(rowIndex))
         is Float8Vector -> DoubleNode(vector.get(rowIndex))
         is Float4Vector -> FloatNode(vector.get(rowIndex))
         is BitVector -> BooleanNode.valueOf(vector.get(rowIndex) != 0)
-        is DateDayVector -> TextNode(java.time.LocalDate.ofEpochDay(vector.get(rowIndex).toLong()).toString())
-        else -> TextNode(vector.getObject(rowIndex)?.toString() ?: "")
+        is DateDayVector -> StringNode(java.time.LocalDate.ofEpochDay(vector.get(rowIndex).toLong()).toString())
+        else -> StringNode(vector.getObject(rowIndex)?.toString() ?: "")
     }
 }

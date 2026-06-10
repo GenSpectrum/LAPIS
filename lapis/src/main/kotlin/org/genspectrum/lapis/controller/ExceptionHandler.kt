@@ -3,15 +3,17 @@ package org.genspectrum.lapis.controller
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.controller.middleware.CompressionSource
+import org.genspectrum.lapis.controller.middleware.RequestCompression
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloNotReachableException
 import org.genspectrum.lapis.silo.SiloUnavailableException
-import org.springframework.boot.autoconfigure.web.ServerProperties
-import org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController
-import org.springframework.boot.web.servlet.error.ErrorAttributes
+import org.springframework.boot.autoconfigure.web.WebProperties
+import org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController
+import org.springframework.boot.webmvc.error.ErrorAttributes
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.RETRY_AFTER
@@ -31,6 +33,7 @@ import org.springframework.web.servlet.View
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.net.URI
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 
@@ -43,6 +46,7 @@ private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
 class ExceptionHandler(
     private val notFoundView: NotFoundView,
     private val lapisInfoFactory: LapisInfoFactory,
+    private val requestCompression: RequestCompression,
 ) : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Throwable::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -84,7 +88,9 @@ class ExceptionHandler(
     fun handleSiloUnavailableException(e: SiloUnavailableException): ErrorResponse {
         log.warn { "Caught SiloUnavailableException: ${e.message}" } // don't log stack trace for this common case
 
-        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) { header(RETRY_AFTER, e.retryAfter) }
+        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) {
+            e.retryAfter?.let { header(RETRY_AFTER, it) }
+        }
     }
 
     override fun handleNoResourceFoundException(
@@ -122,20 +128,30 @@ class ExceptionHandler(
         title: String,
         detail: String?,
         alsoDoOnBuilder: BodyBuilder.() -> Unit = {},
-    ): ErrorResponse =
-        ResponseEntity
+    ): ErrorResponse {
+        val compressionSource = requestCompression.compressionSource
+        val addCompressionEncoding: BodyBuilder.() -> Unit = {
+            if (compressionSource is CompressionSource.RequestProperty) {
+                header(HttpHeaders.CONTENT_ENCODING, compressionSource.compression.value)
+            }
+        }
+
+        return ResponseEntity
             .status(httpStatus)
             .contentType(MediaType.APPLICATION_JSON)
             .also(alsoDoOnBuilder)
+            .also(addCompressionEncoding)
             .body(
                 LapisErrorResponse(
                     error = ProblemDetail.forStatus(httpStatus).also {
+                        it.type = URI.create("about:blank")
                         it.title = title
                         it.detail = truncate(detail, maxLength = 100_000)
                     },
                     info = lapisInfoFactory.create(),
                 ),
             )
+    }
 
     private fun truncate(
         value: String?,
@@ -191,8 +207,8 @@ class NotFoundView(
 class ErrorController(
     private val databaseConfig: DatabaseConfig,
     errorAttributes: ErrorAttributes,
-    serverProperties: ServerProperties,
-) : BasicErrorController(errorAttributes, serverProperties.error) {
+    webProperties: WebProperties,
+) : BasicErrorController(errorAttributes, webProperties.error) {
     override fun errorHtml(
         request: HttpServletRequest,
         response: HttpServletResponse,

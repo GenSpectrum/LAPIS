@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.response
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
 import org.genspectrum.lapis.request.MutationsField
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.NullNode
 import java.util.stream.Stream
 
 class AggregatedCollection(
@@ -45,7 +45,7 @@ class DetailsCollection(
 private fun JsonNode.toCsvValue() =
     when (this) {
         is NullNode -> null
-        else -> asText()
+        else -> asString()
     }
 
 class MutationsCollection(

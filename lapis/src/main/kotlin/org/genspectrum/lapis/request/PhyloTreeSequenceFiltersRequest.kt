@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.request
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.JsonNodeFactory
 
 data class PhyloTreeSequenceFiltersRequest(
     override val sequenceFilters: SequenceFilters,
@@ -34,20 +34,19 @@ data class MRCASequenceFiltersRequest(
     val printNodesNotInTree: Boolean = false,
 ) : CommonSequenceFilters
 
-@JsonComponent
+@JacksonComponent
 class PhyloTreeSequenceFiltersRequestDeserializer(
     private val fieldConverter: CaseInsensitiveFieldConverter,
     private val databaseConfig: DatabaseConfig,
-) : JsonDeserializer<PhyloTreeSequenceFiltersRequest>() {
+) : ValueDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): PhyloTreeSequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return PhyloTreeSequenceFiltersRequest(
             parsedCommonFields.sequenceFilters,
@@ -63,21 +62,20 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
     }
 }
 
-@JsonComponent
+@JacksonComponent
 class MRCASequenceFiltersRequestDeserializer(
     private val fieldConverter: CaseInsensitiveFieldConverter,
     private val databaseConfig: DatabaseConfig,
-) : JsonDeserializer<MRCASequenceFiltersRequest>() {
+) : ValueDeserializer<MRCASequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): MRCASequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
-        val codec = jsonParser.codec
 
         val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
         val printNodesNotInTree = parsePrintNodesNotInTree(node)
-        val parsedCommonFields = parseCommonFields(node, codec)
+        val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return MRCASequenceFiltersRequest(
             parsedCommonFields.sequenceFilters,
@@ -105,12 +103,12 @@ fun parsePhyloTreeProperty(
             "$PHYLO_TREE_FIELD_PROPERTY is required and must be a string representing a phylo tree field",
         )
     }
-    if (!phyloTreeField.isTextual) {
+    if (!phyloTreeField.isString) {
         throw BadRequestException(
             "$PHYLO_TREE_FIELD_PROPERTY must be a string, but was ${phyloTreeField.nodeType}",
         )
     }
-    return validatePhyloTreeField(phyloTreeField.textValue(), fieldConverter, databaseConfig)
+    return validatePhyloTreeField(phyloTreeField.stringValue(), fieldConverter, databaseConfig)
 }
 
 fun parsePrintNodesNotInTree(node: JsonNode): Boolean {

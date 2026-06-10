@@ -1,7 +1,5 @@
 package org.genspectrum.lapis.controller
 
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.TextNode
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
@@ -27,8 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
@@ -38,6 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 @SpringBootTest
@@ -69,7 +69,7 @@ class LapisControllerTest(
         } returns Stream.of(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42)),
+                mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42)),
             ),
         )
 
@@ -98,7 +98,7 @@ class LapisControllerTest(
         } returns Stream.of(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date")),
+                mapOf("country" to StringNode("Switzerland"), "date" to StringNode("a date")),
             ),
         )
 
@@ -124,7 +124,7 @@ class LapisControllerTest(
         } returns Stream.of(
             AggregationData(
                 0,
-                mapOf("country" to TextNode("Switzerland")),
+                mapOf("country" to StringNode("Switzerland")),
             ),
         )
 
@@ -467,7 +467,7 @@ class LapisControllerTest(
                 "POST JSON",
                 { route: String ->
                     postSample(route)
-                        .content("""{"country": "Switzerland", "fields": ["country","date"]}}""")
+                        .content("""{"country": "Switzerland", "fields": ["country","date"]}""")
                         .contentType(MediaType.APPLICATION_JSON)
                 },
             ),
@@ -503,7 +503,7 @@ class LapisControllerTest(
     ) {
         every {
             siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "age" to IntNode(42))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(request(DETAILS_ROUTE))
             .andExpect(status().isOk)
@@ -526,7 +526,7 @@ class LapisControllerTest(
                     fields = listOf("country", "date"),
                 ),
             )
-        } returns Stream.of(DetailsData(mapOf("country" to TextNode("Switzerland"), "date" to TextNode("a date"))))
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"), "date" to StringNode("a date"))))
 
         mockMvc.perform(request(DETAILS_ROUTE))
             .andExpect(status().isOk)

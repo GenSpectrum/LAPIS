@@ -1,12 +1,12 @@
 package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.model.QueryParseModel
 import org.genspectrum.lapis.request.QueryParseRequest
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.response.QueryParseResponse
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -37,9 +37,7 @@ class QueryController(
             queries = request.queries,
             doFullValidation = request.doFullValidation,
         )
-        return ResponseEntity
-            .ok()
-            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        return dataVersion.setHeaderOn(ResponseEntity.ok())
             .body(QueryParseResponse(data, lapisInfoFactory.create()))
     }
 }

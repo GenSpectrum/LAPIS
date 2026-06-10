@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.model.mutationsOverTime
 
-import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private val DUMMY_MUTATION1 = AminoAcidMutation("S", 1, "R")
@@ -113,8 +113,8 @@ AminoAcidMutationsOverTimeModelTest {
             DUMMY_MUTATION_EQUALS1,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
-                AggregationData(1, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
         mockSiloCountQuery(
@@ -122,9 +122,9 @@ AminoAcidMutationsOverTimeModelTest {
             DUMMY_MUTATION_EQUALS2,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
-                AggregationData(3, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(2, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(3, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(2, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
         mockSiloAminoAcidCoverageQuery(
@@ -133,8 +133,8 @@ AminoAcidMutationsOverTimeModelTest {
             1,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
-                AggregationData(5, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(6, fields = mapOf("date" to TextNode("2022-06-01"))),
+                AggregationData(5, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(6, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
         mockSiloAminoAcidCoverageQuery(
@@ -143,18 +143,18 @@ AminoAcidMutationsOverTimeModelTest {
             2,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
-                AggregationData(0, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(1, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(0, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(1, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
         mockSiloTotalCountQuery(
             siloQueryClient,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
-                AggregationData(10, fields = mapOf("date" to TextNode("2021-06-01"))),
-                AggregationData(11, fields = mapOf("date" to TextNode("2022-06-01"))),
-                AggregationData(12, fields = mapOf("date" to TextNode("2022-07-01"))),
+                AggregationData(10, fields = mapOf("date" to StringNode("2021-06-01"))),
+                AggregationData(11, fields = mapOf("date" to StringNode("2022-06-01"))),
+                AggregationData(12, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
     }
@@ -248,7 +248,7 @@ AminoAcidMutationsOverTimeModelTest {
             WithDataVersion(
                 version,
                 Stream.of(
-                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to StringNode("2021-06-01"))),
                 ),
             )
         }
@@ -276,7 +276,7 @@ AminoAcidMutationsOverTimeModelTest {
             WithDataVersion(
                 version,
                 Stream.of(
-                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to TextNode("2021-06-01"))),
+                    AggregationData(1, fields = mapOf(DUMMY_DATE_FIELD to StringNode("2021-06-01"))),
                 ),
             )
         }

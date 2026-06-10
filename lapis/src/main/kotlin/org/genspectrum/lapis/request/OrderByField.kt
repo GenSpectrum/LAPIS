@@ -2,16 +2,16 @@ package org.genspectrum.lapis.request
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.TextNode
 import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.boot.jackson.JsonComponent
+import org.springframework.boot.jackson.JacksonComponent
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.DeserializationContext
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ValueDeserializer
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.StringNode
 
 /**
  * Order by can either be a list of fields or it can be random, with an integer seed
@@ -39,8 +39,8 @@ sealed class OrderBySpec {
  * or random with seed:
  * `{random: 123}`
  */
-@JsonComponent
-class OrderBySpecDeserializer : JsonDeserializer<OrderBySpec>() {
+@JacksonComponent
+class OrderBySpecDeserializer : ValueDeserializer<OrderBySpec>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
@@ -49,9 +49,9 @@ class OrderBySpecDeserializer : JsonDeserializer<OrderBySpec>() {
 
         return when {
             node.isArray -> {
-                val fields =
-                    node.map { fieldNode ->
-                        p.codec.treeToValue(fieldNode, OrderByField::class.java)
+                val fields: List<OrderByField> =
+                    node.toList().map { fieldNode ->
+                        ctxt.readTreeAsValue(fieldNode, OrderByField::class.java)
                     }
                 fields.toOrderBySpec()
             }
@@ -89,33 +89,33 @@ enum class Order {
     DESCENDING,
 }
 
-@JsonComponent
+@JacksonComponent
 class OrderByFieldDeserializer(
     private val orderByFieldsCleaner: OrderByFieldsCleaner,
-) : JsonDeserializer<OrderByField>() {
+) : ValueDeserializer<OrderByField>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
     ): OrderByField =
         when (val value = jsonParser.readValueAsTree<JsonNode>()) {
-            is TextNode -> OrderByField(orderByFieldsCleaner.clean(value.asText()), Order.ASCENDING)
+            is StringNode -> OrderByField(orderByFieldsCleaner.clean(value.asString()), Order.ASCENDING)
             is ObjectNode -> deserializeOrderByField(value)
             else -> throw BadRequestException("orderByField must be a string or an object")
         }
 
     private fun deserializeOrderByField(value: ObjectNode): OrderByField {
         val fieldNode = value.get("field")
-        if (fieldNode == null || fieldNode !is TextNode) {
+        if (fieldNode == null || fieldNode !is StringNode) {
             throw BadRequestException("orderByField must have a string property \"field\", was $value")
         }
 
-        val ascending = when (value.get("type")?.asText()) {
+        val ascending = when (value.get("type")?.asString()) {
             "ascending", null -> Order.ASCENDING
             "descending" -> Order.DESCENDING
             else -> throw BadRequestException("orderByField type must be \"ascending\" or \"descending\"")
         }
 
-        return OrderByField(orderByFieldsCleaner.clean(fieldNode.asText()), ascending)
+        return OrderByField(orderByFieldsCleaner.clean(fieldNode.asString()), ascending)
     }
 }
 

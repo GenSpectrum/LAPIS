@@ -1,6 +1,5 @@
 package org.genspectrum.lapis.controller.middleware
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.genspectrum.lapis.util.tryToGuessTheType
 import org.springframework.http.HttpInputMessage
 import org.springframework.http.HttpOutputMessage
@@ -8,6 +7,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.converter.AbstractHttpMessageConverter
 import org.springframework.http.converter.FormHttpMessageConverter
 import org.springframework.stereotype.Component
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class JacksonFormHttpMessageConverter(

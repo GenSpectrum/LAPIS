@@ -3,7 +3,6 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
-import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
@@ -15,6 +14,7 @@ import org.genspectrum.lapis.request.QueriesOverTimeRequest
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.response.QueriesOverTimeResponse
 import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.silo.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -94,8 +94,6 @@ class QueriesOverTimeController(
     }
 
     private fun <Result> createResponse(resultData: Result) =
-        ResponseEntity
-            .ok()
-            .header(LAPIS_DATA_VERSION, dataVersion.dataVersion)
+        dataVersion.setHeaderOn(ResponseEntity.ok())
             .body(QueriesOverTimeResponse(resultData, lapisInfoFactory.create()))
 }
