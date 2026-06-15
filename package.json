@@ -8,7 +8,7 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@commitlint/types": "^21.0.1",
-    "release-please": "^17.7.0"
+    "release-please": "^17.9.0"
   },
   "scripts": {
     "commitlint:last-commit": "commitlint --from=HEAD~1 --verbose",
