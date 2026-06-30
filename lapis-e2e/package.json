@@ -22,7 +22,6 @@
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.39.0",
     "@types/chai": "^5.2.3",
-    "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.12.4",
     "chai": "^6.2.2",
