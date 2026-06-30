@@ -5,10 +5,10 @@
   "description": "Utility for the LAPIS repository",
   "type": "module",
   "devDependencies": {
-    "@commitlint/cli": "^21.0.2",
+    "@commitlint/cli": "^21.1.0",
     "@commitlint/config-conventional": "^21.0.2",
     "@commitlint/types": "^21.0.1",
-    "release-please": "^17.9.0"
+    "release-please": "^17.10.1"
   },
   "scripts": {
     "commitlint:last-commit": "commitlint --from=HEAD~1 --verbose",
