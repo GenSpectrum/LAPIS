@@ -23,7 +23,7 @@
     "@openapitools/openapi-generator-cli": "^2.39.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.12.4",
+    "@types/node": "^26.0.1",
     "chai": "^6.2.2",
     "js-yaml": "^5.2.0",
     "mocha": "^11.7.6",
