@@ -22,11 +22,10 @@
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.39.0",
     "@types/chai": "^5.2.3",
-    "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.12.4",
     "chai": "^6.2.2",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^5.2.0",
     "mocha": "^11.7.6",
     "prettier": "^3.9.3",
     "tsx": "^4.22.4",

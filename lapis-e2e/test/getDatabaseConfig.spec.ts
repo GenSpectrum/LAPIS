@@ -1,5 +1,5 @@
 import { lapisInfoClient } from './common';
-import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import fs from 'fs';
 import { expect } from 'chai';
 import { DatabaseConfig } from './lapisClient';
@@ -8,7 +8,7 @@ describe('The /databaseConfig endpoint', () => {
   it('should download the config with all defaults set', async () => {
     const result = await lapisInfoClient.getDatabaseConfigAsJson();
 
-    const databaseConfigFromFile = yaml.load(
+    const databaseConfigFromFile = load(
       fs.readFileSync('testData/singleSegmented/testDatabaseConfig.yaml', 'utf8')
     ) as DatabaseConfig;
 
