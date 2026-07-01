@@ -1,0 +1,55 @@
+---
+title: Customizable FASTA headers
+description: Customize the header line of FASTA records returned by sequence endpoints
+---
+
+When requesting sequences as FASTA, you can customize the header line of each record by setting the
+`fastaHeaderTemplate` request property.
+An error is thrown if the prameter is set but the data format is not FASTA.
+
+The template allows placeholders in curly braces:
+
+- `{<metadataField>}` — replaced with the value of the metadata field for that sequence (e.g. `{country}`).
+  The instance's primary key field (configured by the maintainer) can be used as a placeholder in the same way.
+- `{.segment}` — replaced with the segment name. Only valid on nucleotide sequence endpoints.
+- `{.gene}` — replaced with the gene name. Only valid on amino acid sequence endpoints.
+
+If a metadata value is `null`, the placeholder is replaced with an empty string.
+
+If `fastaHeaderTemplate` is not set, LAPIS uses a default that includes the primary key (and the gene name
+for amino acid sequences, and the segment name for multi-segmented nucleotide sequences).
+
+The template contains characters (`{`, `}`, `|`) that are not URL-safe.
+When sending the request as a GET, the value of `fastaHeaderTemplate` must be URL-encoded.
+In JavaScript, this can be done with the
+[encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
+function. POST requests can carry the template unencoded in the JSON body.
+
+## Examples
+
+Assuming the instance's primary key field is named `accession`, include it together with a separator and two
+metadata fields. As a POST request, the template can be sent unencoded:
+
+```http
+POST /sample/alignedNucleotideSequences
+
+{
+    "fastaHeaderTemplate": "{accession}|{country}|{date}"
+}
+```
+
+The same query as a GET request, with the template URL-encoded:
+
+```
+GET /sample/alignedNucleotideSequences?fastaHeaderTemplate=%7Baccession%7D%7C%7Bcountry%7D%7C%7Bdate%7D
+```
+
+For amino acid sequences, include the gene name (useful when requesting multiple genes in one call):
+
+```http
+POST /sample/alignedAminoAcidSequences
+
+{
+    "fastaHeaderTemplate": "{accession}|{.gene}"
+}
+```

@@ -91,6 +91,10 @@ export default defineConfig({
                             link: '/concepts/response-format',
                         },
                         {
+                            label: 'Customizable FASTA headers',
+                            link: '/concepts/customizable-fasta-headers',
+                        },
+                        {
                             label: 'Data versions',
                             link: '/concepts/data-versions',
                         },
@@ -112,6 +116,10 @@ export default defineConfig({
                                 {
                                     label: 'Ambiguous symbols',
                                     link: '/concepts/ambiguous-symbols',
+                                },
+                                {
+                                    label: 'Lineage queries',
+                                    link: '/concepts/lineage-queries',
                                 },
                                 {
                                     label: 'Pango lineage query',

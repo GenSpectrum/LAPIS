@@ -1,15 +1,50 @@
 ---
 title: Welcome to LAPIS
-description: Get started with LAPIS
+description: Lightweight API for Sequences — query genomic data over HTTP
 template: splash
 hero:
-    tagline: Instance for SARS-CoV-2
+    tagline: A fast, lightweight API for querying genomic sequence data
     actions:
-        - text: Introduction
+        - text: Get started
           link: getting-started/introduction
           icon: right-arrow
           variant: primary
-        - text: LAPIS on GitHub
+        - text: Source code on GitHub
           link: https://github.com/GenSpectrum/LAPIS
           icon: external
+          variant: minimal
 ---
+
+## What is LAPIS?
+
+LAPIS (**Lightweight API for Sequences**) is an open-source HTTP API for querying large
+collections of pathogen genome sequences. It is built for researchers, public health
+analysts and developers who need to filter, aggregate or download genomic data
+programmatically.
+
+Under the hood, LAPIS delegates storage and fast filter execution to
+[**SILO**](https://github.com/GenSpectrum/LAPIS-SILO), a purpose-built sequence database.
+
+## Known instances
+
+LAPIS is deployed in a number of production systems:
+
+- **[CoV-Spectrum](https://cov-spectrum.org) and [GenSpectrum](https://genspectrum.org)** are interactive dashboards for
+  analyzing virus variants and mutations, backed by a LAPIS instance over INSDC and Pathoplexus data.
+- **[Loculus](https://loculus.org)** is an open-source software for managing and sharing microbial genome data that uses
+  LAPIS and SILO as its query engine. Production Loculus deployments include
+  [Pathoplexus](https://pathoplexus.org), an initiative to facilitate sharing of
+  genetic sequencing data for human viruses of public health importance.
+- **[W-ASAP](https://db.wasap.genspectrum.org/)** uses a LAPIS instance for wastewater sequencing data, supporting queries over mutation abundances
+  from Swiss wastewater samples.
+
+If you are operating a public LAPIS instance and want it to be listed here, please open an issue on
+[GitHub](https://github.com/GenSpectrum/LAPIS).
+
+## Citation
+
+If you use LAPIS in your work, please cite:
+
+> Chen, C., Taepper, A., Engelniederhammer, F., Kellerer, J., Roemer, C. & Stadler, T. "LAPIS is a fast web API for
+> massive open virus sequencing data" BMC Bioinformatics (2023); doi:
+> [10.1186/s12859-023-05364-3](https://doi.org/10.1186/s12859-023-05364-3)
