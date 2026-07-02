@@ -270,6 +270,30 @@ class SiloQuerySaneQlSerializerTest {
                     ),
                     """.project({"field1", "field2", "someSequenceName"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
+                // CoOccurrence
+                Arguments.of(
+                    SiloAction.coOccurrence("segment1", listOf(1)),
+                    """.map({"pos_1":="segment1".at(1)}).groupBy({count:=count()}, {"pos_1"})""",
+                ),
+                Arguments.of(
+                    SiloAction.coOccurrence("segment1", listOf(1, 421)),
+                    """.map({"pos_1":="segment1".at(1), "pos_421":="segment1".at(421)})""" +
+                        """.groupBy({count:=count()}, {"pos_1", "pos_421"})""",
+                ),
+                Arguments.of(
+                    SiloAction.coOccurrence(
+                        sequenceName = "segment1",
+                        positions = listOf(1, 2),
+                        orderByFields = listOf(
+                            OrderByField("count", Order.DESCENDING),
+                        ).toOrderBySpec(),
+                        limit = 100,
+                        offset = 50,
+                    ),
+                    """.map({"pos_1":="segment1".at(1), "pos_2":="segment1".at(2)})""" +
+                        """.groupBy({count:=count()}, {"pos_1", "pos_2"})""" +
+                        """.orderBy({"count".desc()}).offset(50).limit(100)""",
+                ),
                 // MostRecentCommonAncestor
                 Arguments.of(
                     SiloAction.mostRecentCommonAncestor("phyloTreeField"),

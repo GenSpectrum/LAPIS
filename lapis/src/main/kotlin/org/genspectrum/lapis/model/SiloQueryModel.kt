@@ -2,14 +2,18 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.expandAndValidatePositions
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -20,8 +24,11 @@ import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.coOccurrencePositionColumnName
+import org.genspectrum.lapis.silo.coOccurrenceResponseFieldName
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
+import tools.jackson.databind.node.NullNode
 import java.util.stream.Stream
 
 @Component
@@ -46,6 +53,62 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+
+    fun getCoOccurrence(
+        sequenceFilters: CoOccurrenceRequest,
+        sequenceName: String,
+    ): Stream<AggregationData> {
+        val positions = sequenceFilters.positions.expandAndValidatePositions()
+
+        val responseFieldNameToColumnName = positions.associate {
+            coOccurrenceResponseFieldName(sequenceName, it) to coOccurrencePositionColumnName(it)
+        }
+
+        val data = siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.coOccurrence(
+                    sequenceName = sequenceName,
+                    positions = positions,
+                    orderByFields = remapOrderByFields(sequenceFilters.orderByFields, responseFieldNameToColumnName),
+                    limit = sequenceFilters.limit,
+                    offset = sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+
+        return data.map { relabelCoOccurrenceFields(it, sequenceName, positions) }
+    }
+
+    private fun relabelCoOccurrenceFields(
+        data: AggregationData,
+        sequenceName: String,
+        positions: List<Int>,
+    ): AggregationData {
+        val relabeledFields = positions.associate { position ->
+            coOccurrenceResponseFieldName(sequenceName, position) to
+                (data.fields[coOccurrencePositionColumnName(position)] ?: NullNode.getInstance())
+        }
+        return data.copy(fields = relabeledFields)
+    }
+
+    /**
+     * The user-facing `orderBy` for co-occurrence queries refers to the relabeled response field names
+     * (e.g. "S:123"), but the SILO query needs to refer to the internal groupBy column names (e.g. "pos_123").
+     */
+    private fun remapOrderByFields(
+        orderBySpec: OrderBySpec,
+        responseFieldNameToColumnName: Map<String, String>,
+    ): OrderBySpec =
+        when (orderBySpec) {
+            is OrderBySpec.ByFields -> OrderBySpec.ByFields(
+                orderBySpec.fields.map { field ->
+                    OrderByField(responseFieldNameToColumnName[field.field] ?: field.field, field.order)
+                },
+            )
+
+            is OrderBySpec.Random -> orderBySpec
+        }
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
         val fields = sequenceFilters.fields

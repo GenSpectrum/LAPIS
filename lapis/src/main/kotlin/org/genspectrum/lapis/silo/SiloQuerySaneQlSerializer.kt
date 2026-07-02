@@ -160,6 +160,7 @@ object SiloQuerySaneQlSerializer {
     private fun serializeAction(action: SiloAction<*>): String =
         when (action) {
             is SiloAction.AggregatedAction -> serializeAggregatedAction(action)
+            is SiloAction.CoOccurrenceAction -> serializeCoOccurrenceAction(action)
             is SiloAction.DetailsAction -> serializeDetailsAction(action)
             is SiloAction.MutationsAction -> serializeMutationsAction(action)
             is SiloAction.AminoAcidMutationsAction -> serializeAminoAcidMutationsAction(action)
@@ -179,6 +180,17 @@ object SiloQuerySaneQlSerializer {
             }
             append(")")
         }
+
+    private fun serializeCoOccurrenceAction(action: SiloAction.CoOccurrenceAction): String {
+        val sequenceColumn = id(action.sequenceName)
+        val columnNames = action.positions.map { id(coOccurrencePositionColumnName(it)) }
+
+        val assignments = action.positions.zip(columnNames)
+            .joinToString(", ") { (position, columnName) -> "$columnName:=$sequenceColumn.at($position)" }
+        val groupByColumns = columnNames.joinToString(", ")
+
+        return ".map({$assignments}).groupBy({count:=count()}, {$groupByColumns})"
+    }
 
     private fun serializeDetailsAction(action: SiloAction.DetailsAction): String =
         if (action.fields.isEmpty()) {

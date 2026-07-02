@@ -13,6 +13,8 @@ import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
+import org.genspectrum.lapis.request.CoOccurrencePosition
+import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationsField
@@ -39,6 +41,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private val someMutationData = MutationData(
@@ -521,6 +524,82 @@ class SiloQueryModelTest {
                         orderByFields = listOf(
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
+                        ).toOrderBySpec(),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getCoOccurrence calls SILO with a coOccurrence action and relabels response fields`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.of(
+            AggregationData(48, mapOf("pos_1" to StringNode("A"), "pos_421" to StringNode("T"))),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.getCoOccurrence(
+            CoOccurrenceRequest(
+                sequenceFilters = emptyMap(),
+                nucleotideMutations = emptyList(),
+                aminoAcidMutations = emptyList(),
+                nucleotideInsertions = emptyList(),
+                aminoAcidInsertions = emptyList(),
+                positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(421)),
+            ),
+            sequenceName = "segment1",
+        ).toList()
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(SiloAction.coOccurrence("segment1", listOf(1, 421)), True),
+            )
+        }
+
+        assertThat(
+            result,
+            equalTo(
+                listOf(
+                    AggregationData(
+                        48,
+                        mapOf("segment1:1" to StringNode("A"), "segment1:421" to StringNode("T")),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `getCoOccurrence remaps orderBy fields from response field names to internal column names`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getCoOccurrence(
+            CoOccurrenceRequest(
+                sequenceFilters = emptyMap(),
+                nucleotideMutations = emptyList(),
+                aminoAcidMutations = emptyList(),
+                nucleotideInsertions = emptyList(),
+                aminoAcidInsertions = emptyList(),
+                positions = listOf(CoOccurrencePosition.Single(1)),
+                orderByFields = listOf(
+                    OrderByField("segment1:1", Order.DESCENDING),
+                    OrderByField("count", Order.ASCENDING),
+                ).toOrderBySpec(),
+            ),
+            sequenceName = "segment1",
+        ).toList()
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.coOccurrence(
+                        sequenceName = "segment1",
+                        positions = listOf(1),
+                        orderByFields = listOf(
+                            OrderByField("pos_1", Order.DESCENDING),
+                            OrderByField("count", Order.ASCENDING),
                         ).toOrderBySpec(),
                     ),
                     True,

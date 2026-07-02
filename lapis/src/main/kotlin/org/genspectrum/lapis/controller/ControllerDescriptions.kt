@@ -56,6 +56,14 @@ const val ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 const val MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION =
     """Returns the number of sequences containing the specified mutations within the requested date ranges, along 
     with the corresponding coverage in a tabular format. The order of the mutations and date ranges is preserved."""
+const val NUCLEOTIDE_CO_OCCURRENCE_ENDPOINT_DESCRIPTION =
+    """Returns, for the given nucleotide sequence and list of (1-based) positions, every combination of symbols
+that occurs at these positions among the sequences matching the specified sequence filters, along with the
+number of sequences for each combination."""
+const val AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION =
+    """Returns, for the given gene and list of (1-based) positions, every combination of symbols
+that occurs at these positions among the sequences matching the specified sequence filters, along with the
+number of sequences for each combination."""
 const val QUERIES_OVER_TIME_ENDPOINT_DESCRIPTION = """
 Returns the number of sequences matching the specified queries within the requested date ranges, along 
 with the corresponding coverage in a tabular format. The order of the queries and date ranges is preserved.

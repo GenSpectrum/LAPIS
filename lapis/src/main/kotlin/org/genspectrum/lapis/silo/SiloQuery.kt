@@ -139,6 +139,22 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
+        fun coOccurrence(
+            sequenceName: String,
+            positions: List<Int>,
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<AggregationData> =
+            CoOccurrenceAction(
+                sequenceName = sequenceName,
+                positions = positions,
+                orderByFields = getOrderByFieldsList(orderByFields),
+                randomize = getRandomize(orderByFields),
+                limit = limit,
+                offset = offset,
+            )
+
         fun genomicSequence(
             type: SequenceType,
             sequenceNames: List<String>,
@@ -188,6 +204,21 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "Aggregated"
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class CoOccurrenceAction(
+        val sequenceName: String,
+        val positions: List<Int>,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: RandomizeConfig? = null,
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+    ) : SiloAction<AggregationData>(
+            arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
+        val type: String = "CoOccurrence"
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -437,6 +468,21 @@ data class IsNull(
 data class IsNotNull(
     val column: String,
 ) : SiloFilterExpression("IsNotNull")
+
+/**
+ * The name of the SILO groupBy/map column used internally for a given 1-based co-occurrence position.
+ * This is a valid SaneQL identifier - it does not need to be quoted since it's fully controlled by LAPIS
+ * (as opposed to the user-supplied sequence name).
+ */
+fun coOccurrencePositionColumnName(position: Int) = "pos_$position"
+
+/**
+ * The field name used in the LAPIS API response for a given sequence name and 1-based co-occurrence position.
+ */
+fun coOccurrenceResponseFieldName(
+    sequenceName: String,
+    position: Int,
+) = "$sequenceName:$position"
 
 enum class SequenceType {
     @JsonProperty("Fasta")
