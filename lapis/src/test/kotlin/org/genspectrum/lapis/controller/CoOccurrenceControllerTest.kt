@@ -74,7 +74,7 @@ class CoOccurrenceControllerTest(
     }
 
     @Test
-    fun `GET nucleotideCoOccurrence with a range in positions expands it`() {
+    fun `GET nucleotideCoOccurrence with multiple discrete positions`() {
         every {
             siloQueryModelMock.getCoOccurrence(
                 CoOccurrenceRequest(
@@ -83,21 +83,33 @@ class CoOccurrenceControllerTest(
                     aminoAcidMutations = emptyList(),
                     nucleotideInsertions = emptyList(),
                     aminoAcidInsertions = emptyList(),
-                    positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Range(100, 102)),
+                    positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(100)),
                 ),
                 "main",
             )
         } returns Stream.empty()
 
-        mockMvc.perform(get("/component/nucleotideCoOccurrence/main?positions=1,100-102"))
+        mockMvc.perform(get("/component/nucleotideCoOccurrence/main?positions=1,100"))
             .andExpect(status().isOk)
     }
 
     @Test
+    fun `GET nucleotideCoOccurrence with a range string in positions returns bad request`() {
+        // 'positions' is now List<Int>, so Spring's own type conversion rejects non-integer values before
+        // reaching our code - see the comment on the "without positions" test below for the resulting shape.
+        mockMvc.perform(get("/component/nucleotideCoOccurrence/main?positions=1,100-102"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.detail", containsString("positions")))
+    }
+
+    @Test
     fun `GET nucleotideCoOccurrence without positions returns bad request`() {
+        // 'positions' is a required @RequestParam, so this is rejected by Spring itself before reaching our
+        // code, which is why the error body has Spring's default ProblemDetail shape instead of LAPIS's usual
+        // wrapped {error, info} shape.
         mockMvc.perform(get("/component/nucleotideCoOccurrence/main"))
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("\$.error.detail", containsString("positions")))
+            .andExpect(jsonPath("\$.detail", containsString("positions")))
     }
 
     @Test

@@ -21,10 +21,13 @@ class CoOccurrencePositionTest {
     }
 
     @Test
-    fun `GIVEN a range string THEN parses to a Range position`() {
-        val result = parsePositionToken("100-110")
+    fun `GIVEN a range string THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> { parsePositionToken("100-110") }
 
-        assertThat(result, equalTo(CoOccurrencePosition.Range(100, 110)))
+        assertThat(
+            exception.message,
+            equalTo("Invalid entry '100-110' in positions: must be a number (e.g. '5')"),
+        )
     }
 
     @Test
@@ -33,19 +36,17 @@ class CoOccurrencePositionTest {
 
         assertThat(
             exception.message,
-            equalTo(
-                "Invalid entry 'abc' in positions: must be a number (e.g. '5') or an inclusive range (e.g. '100-110')",
-            ),
+            equalTo("Invalid entry 'abc' in positions: must be a number (e.g. '5')"),
         )
     }
 
     @Test
-    fun `GIVEN a range with digits that overflow Int THEN throws BadRequestException instead of crashing`() {
-        val exception = assertThrows<BadRequestException> { parsePositionToken("99999999999-1") }
+    fun `GIVEN a token that overflows Int THEN throws BadRequestException instead of crashing`() {
+        val exception = assertThrows<BadRequestException> { parsePositionToken("99999999999") }
 
         assertThat(
             exception.message,
-            equalTo("Invalid range '99999999999-1' in positions: 'from' and 'to' must fit in a 32-bit integer"),
+            equalTo("Invalid entry '99999999999' in positions: must be a number (e.g. '5')"),
         )
     }
 
@@ -174,10 +175,15 @@ class CoOccurrencePositionDeserializerTest {
     }
 
     @Test
-    fun `GIVEN a JSON string range THEN deserializes to Range`() {
-        val result = objectMapper.readValue(""""100-110"""", CoOccurrencePosition::class.java)
+    fun `GIVEN a JSON string range THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> {
+            objectMapper.readValue(""""100-110"""", CoOccurrencePosition::class.java)
+        }
 
-        assertThat(result, equalTo(CoOccurrencePosition.Range(100, 110)))
+        assertThat(
+            exception.message,
+            equalTo("Invalid entry '100-110' in positions: must be a number (e.g. '5')"),
+        )
     }
 
     @Test

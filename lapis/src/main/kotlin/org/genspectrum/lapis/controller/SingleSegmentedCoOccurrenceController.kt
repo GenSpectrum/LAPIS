@@ -56,7 +56,7 @@ class SingleSegmentedCoOccurrenceController(
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam
-        positions: List<String>,
+        positions: List<Int>,
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -115,7 +115,7 @@ class SingleSegmentedCoOccurrenceController(
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam
-        positions: List<String>,
+        positions: List<Int>,
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -175,7 +175,7 @@ class SingleSegmentedCoOccurrenceController(
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
         @RequestParam
-        positions: List<String>,
+        positions: List<Int>,
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations

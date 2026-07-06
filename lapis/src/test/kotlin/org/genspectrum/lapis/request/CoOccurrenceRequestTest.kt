@@ -68,7 +68,7 @@ class CoOccurrenceRequestTest {
                 Arguments.of(
                     """
                     {
-                        "positions": ["5", "100-110"]
+                        "positions": ["5", 7]
                     }
                     """,
                     CoOccurrenceRequest(
@@ -79,7 +79,7 @@ class CoOccurrenceRequestTest {
                         aminoAcidInsertions = emptyList(),
                         positions = listOf(
                             CoOccurrencePosition.Single(5),
-                            CoOccurrencePosition.Range(100, 110),
+                            CoOccurrencePosition.Single(7),
                         ),
                     ),
                 ),
@@ -95,6 +95,10 @@ class CoOccurrenceRequestTest {
                 Arguments.of(
                     "{}",
                     "positions is required",
+                ),
+                Arguments.of(
+                    """{"positions": ["100-110"]}""",
+                    "Invalid entry '100-110' in positions: must be a number (e.g. '5')",
                 ),
             )
     }

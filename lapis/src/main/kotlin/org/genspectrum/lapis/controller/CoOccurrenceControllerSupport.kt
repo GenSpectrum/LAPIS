@@ -3,6 +3,7 @@ package org.genspectrum.lapis.controller
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
+import org.genspectrum.lapis.request.CoOccurrencePosition
 import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.NucleotideInsertion
@@ -10,7 +11,6 @@ import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.expandAndValidatePositions
-import org.genspectrum.lapis.request.parsePositionToken
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.silo.coOccurrenceResponseFieldName
@@ -20,7 +20,7 @@ import org.genspectrum.lapis.silo.coOccurrenceResponseFieldName
  */
 fun buildCoOccurrenceRequest(
     sequenceFilters: GetRequestSequenceFilters?,
-    positions: List<String>,
+    positions: List<Int>,
     nucleotideMutations: List<NucleotideMutation>?,
     aminoAcidMutations: List<AminoAcidMutation>?,
     nucleotideInsertions: List<NucleotideInsertion>?,
@@ -39,7 +39,7 @@ fun buildCoOccurrenceRequest(
         aminoAcidMutations ?: emptyList(),
         nucleotideInsertions ?: emptyList(),
         aminoAcidInsertions ?: emptyList(),
-        positions.map { parsePositionToken(it) },
+        positions.map { CoOccurrencePosition.Single(it) },
         orderBy.toOrderBySpec(),
         limit,
         offset,

@@ -24,34 +24,18 @@ sealed class CoOccurrencePosition {
 
 /**
  * Parses a single token from a GET request (or a form-urlencoded POST body) into a [CoOccurrencePosition].
- * A token is either a plain positive integer (e.g. "5") or an inclusive range (e.g. "100-110").
+ * A token must be a plain positive integer (e.g. "5"). Ranges are only accepted as JSON objects
+ * (e.g. `{"from": 100, "to": 110}`), not as strings.
  */
 fun parsePositionToken(token: String): CoOccurrencePosition {
-    // TODO: accept number or object, no "range strings"
     val trimmed = token.trim()
-
-    val rangeMatch = POSITION_RANGE_REGEX.matchEntire(trimmed)
-    if (rangeMatch != null) {
-        val (fromString, toString) = rangeMatch.destructured
-        val from = fromString.toIntOrNull()
-        val to = toString.toIntOrNull()
-        if (from == null || to == null) {
-            throw BadRequestException(
-                "Invalid range '$token' in $POSITIONS_PROPERTY: 'from' and 'to' must fit in a 32-bit integer",
-            )
-        }
-        return CoOccurrencePosition.Range(from, to)
-    }
 
     val position = trimmed.toIntOrNull()
         ?: throw BadRequestException(
-            "Invalid entry '$token' in $POSITIONS_PROPERTY: must be a number (e.g. '5') " +
-                "or an inclusive range (e.g. '100-110')",
+            "Invalid entry '$token' in $POSITIONS_PROPERTY: must be a number (e.g. '5')",
         )
     return CoOccurrencePosition.Single(position)
 }
-
-private val POSITION_RANGE_REGEX = Regex("""^(\d+)-(\d+)$""")
 
 /**
  * Safety limit on the number of distinct positions a single co-occurrence request may expand to.
@@ -131,7 +115,7 @@ fun List<CoOccurrencePosition>.expandAndValidatePositions(): List<Int> {
  * An entry can be:
  * - a JSON number, e.g. `5`
  * - a JSON object with `from`/`to`, e.g. `{"from": 100, "to": 110}`
- * - a JSON string (used for form-urlencoded requests), e.g. `"5"` or `"100-110"`
+ * - a JSON string with a plain number (used for form-urlencoded requests), e.g. `"5"`
  */
 @JacksonComponent
 class CoOccurrencePositionDeserializer : ValueDeserializer<CoOccurrencePosition>() {
