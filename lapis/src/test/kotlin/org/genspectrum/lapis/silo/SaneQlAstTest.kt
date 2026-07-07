@@ -135,6 +135,17 @@ class SaneQlAstTest {
     }
 
     @Test
+    fun `GIVEN method call with positional and named args THEN joins them with commas`() {
+        val call = SaneQlMethodCall(
+            receiver = SaneQlIdentifier("fieldName"),
+            name = "lineage",
+            positionalArgs = listOf(SaneQlString("ABC")),
+            namedArgs = listOf(SaneQlNamedArg("includeSublineages", SaneQlBoolean(true))),
+        )
+        assertThat(call.render(), equalTo(""""fieldName".lineage('ABC', includeSublineages:=true)"""))
+    }
+
+    @Test
     fun `GIVEN step with no args THEN renders empty parentheses`() {
         assertThat(SaneQlStep("insertions").render(), equalTo(".insertions()"))
     }

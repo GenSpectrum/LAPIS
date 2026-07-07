@@ -58,7 +58,10 @@ data class SaneQlIdentifier(
     override fun render() = "\"" + name.replace("\"", "\"\"") + "\""
 }
 
-/** A `{item1, item2, ...}` list/record literal. */
+/**
+ * A `{item1, item2, ...}` list literal. Acts as a record when its [items] are [SaneQlAssignment]s,
+ * e.g. `{count:=count()}`.
+ */
 data class SaneQlList(
     val items: List<SaneQlExpression>,
 ) : SaneQlExpression {

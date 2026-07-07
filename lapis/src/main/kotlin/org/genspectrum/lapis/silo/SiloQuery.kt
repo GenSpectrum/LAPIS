@@ -262,17 +262,8 @@ sealed class SiloAction<ResponseType>(
         ) {
         val type: String = "Mutations"
 
-        override fun ownSaneQlSteps() = listOf(SaneQlStep("mutations", namedArgs = mutationsNamedArgs()))
-
-        private fun mutationsNamedArgs() =
-            buildList {
-                if (minProportion != null) {
-                    add(SaneQlNamedArg("minProportion", SaneQlFloat(minProportion)))
-                }
-                if (fields.isNotEmpty()) {
-                    add(SaneQlNamedArg("fields", SaneQlList(fields.map { id(it) })))
-                }
-            }
+        override fun ownSaneQlSteps() =
+            listOf(SaneQlStep("mutations", namedArgs = mutationsNamedArgs(minProportion, fields)))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -289,17 +280,8 @@ sealed class SiloAction<ResponseType>(
         ) {
         val type: String = "AminoAcidMutations"
 
-        override fun ownSaneQlSteps() = listOf(SaneQlStep("aminoAcidMutations", namedArgs = mutationsNamedArgs()))
-
-        private fun mutationsNamedArgs() =
-            buildList {
-                if (minProportion != null) {
-                    add(SaneQlNamedArg("minProportion", SaneQlFloat(minProportion)))
-                }
-                if (fields.isNotEmpty()) {
-                    add(SaneQlNamedArg("fields", SaneQlList(fields.map { id(it) })))
-                }
-            }
+        override fun ownSaneQlSteps() =
+            listOf(SaneQlStep("aminoAcidMutations", namedArgs = mutationsNamedArgs(minProportion, fields)))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -420,6 +402,19 @@ sealed class SiloAction<ResponseType>(
         }
     }
 }
+
+private fun mutationsNamedArgs(
+    minProportion: Double?,
+    fields: List<String>,
+): List<SaneQlNamedArg> =
+    buildList {
+        if (minProportion != null) {
+            add(SaneQlNamedArg("minProportion", SaneQlFloat(minProportion)))
+        }
+        if (fields.isNotEmpty()) {
+            add(SaneQlNamedArg("fields", SaneQlList(fields.map { id(it) })))
+        }
+    }
 
 private fun printNodesNotInTreeNamedArgs(printNodesNotInTree: Boolean?): List<SaneQlNamedArg> =
     if (printNodesNotInTree == true) {
