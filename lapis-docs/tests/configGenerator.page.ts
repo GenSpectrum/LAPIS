@@ -24,7 +24,7 @@ export class ConfigGeneratorPage {
 
     public async goto() {
         await this.page.goto(baseUrl);
-        await this.page.getByRole('link', { name: 'Introduction' }).click();
+        await this.page.getByRole('link', { name: 'Get started' }).click();
         await this.page.getByRole('link', { name: 'Generate your config', exact: true }).click();
     }
 

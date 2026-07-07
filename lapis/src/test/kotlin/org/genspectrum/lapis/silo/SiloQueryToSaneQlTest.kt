@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
-class SiloQuerySaneQlSerializerTest {
+class SiloQueryToSaneQlTest {
     @Test
     fun `GIVEN full query THEN is correctly serialized to SaneQL`() {
         val query = SiloQuery(
@@ -20,7 +20,7 @@ class SiloQuerySaneQlSerializerTest {
             StringEquals("theColumn", "theValue"),
         )
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(
             result,
@@ -32,7 +32,7 @@ class SiloQuerySaneQlSerializerTest {
     fun `GIVEN query with True filter THEN filters for true`() {
         val query = SiloQuery(SiloAction.aggregated(), True)
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(result, equalTo("default.filter(true).groupBy({count:=count()})"))
     }
@@ -41,7 +41,7 @@ class SiloQuerySaneQlSerializerTest {
     fun `GIVEN query with details action and no fields THEN produces no action`() {
         val query = SiloQuery(SiloAction.details(), True)
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(result, equalTo("default.filter(true)"))
     }
@@ -54,7 +54,7 @@ class SiloQuerySaneQlSerializerTest {
     ) {
         val query = SiloQuery(action, True)
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(result, equalTo("default.filter(true)$expectedSaneQl"))
     }
@@ -67,7 +67,7 @@ class SiloQuerySaneQlSerializerTest {
     ) {
         val query = SiloQuery(SiloAction.aggregated(), filter)
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(
             result,
@@ -87,7 +87,7 @@ class SiloQuerySaneQlSerializerTest {
             True,
         )
 
-        val result = SiloQuerySaneQlSerializer.serialize(query)
+        val result = query.toSaneQl()
 
         assertThat(
             result,

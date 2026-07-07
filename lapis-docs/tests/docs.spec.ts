@@ -44,11 +44,13 @@ const conceptsPages = prependToRelativeUrl(
         { title: 'Authentication', relativeUrl: '/authentication' },
         { title: 'Request methods: GET and POST', relativeUrl: '/request-methods' },
         { title: 'Response format', relativeUrl: '/response-format' },
+        { title: 'Customizable FASTA headers', relativeUrl: '/customizable-fasta-headers' },
         { title: 'Data versions', relativeUrl: '/data-versions' },
         { title: 'Request ID', relativeUrl: '/request-id' },
         { title: 'Mutation filters', relativeUrl: '/mutation-filters' },
         { title: 'Insertion filters', relativeUrl: '/insertion-filters' },
         { title: 'Ambiguous symbols', relativeUrl: '/ambiguous-symbols' },
+        { title: 'Lineage queries', relativeUrl: '/lineage-queries' },
         { title: 'Pango lineage query', relativeUrl: '/pango-lineage-query' },
         { title: 'Variant query', relativeUrl: '/variant-query' },
         { title: 'Advanced query', relativeUrl: '/advanced-query' },
@@ -130,7 +132,7 @@ test.describe('The documentation', () => {
     test('should show all expected pages via link in navigation', async ({ page }) => {
         await page.goto(baseUrl);
 
-        await page.getByRole('link', { name: 'Introduction' }).click();
+        await page.getByRole('link', { name: 'Get started' }).click();
         await expect(page).toHaveTitle(/^Introduction/);
         await expect(page).toHaveURL(thatDoesNotEndWithSlash);
 

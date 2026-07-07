@@ -60,3 +60,7 @@ export function hasPangoLineage(config: Config): boolean {
             (m.name.toLowerCase().includes('pangolineage') || m.name.toLowerCase().includes('pango_lineage')),
     );
 }
+
+export function hasLineageFields(config: Config): boolean {
+    return config.schema.metadata.some((m) => m.generateLineageIndex !== undefined && m.generateLineageIndex !== null);
+}
