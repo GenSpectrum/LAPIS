@@ -116,7 +116,7 @@ open class CachedSiloClient(
             requestContext.cached = false
         }
 
-        val saneQlQuery = SiloQuerySaneQlSerializer.serialize(query)
+        val saneQlQuery = query.toSaneQl()
 
         log.info { "Calling SILO: $saneQlQuery" }
 
