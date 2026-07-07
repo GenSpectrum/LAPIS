@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.response.AggregationData
@@ -21,7 +22,10 @@ import java.time.LocalDate
 data class SiloQuery<ResponseType>(
     val action: SiloAction<ResponseType>,
     val filterExpression: SiloFilterExpression,
-)
+) {
+    /** Renders this query as a SaneQL query string, e.g. `default.filter(true).groupBy({count:=count()})`. */
+    fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
+}
 
 interface CommonActionFields {
     val orderByFields: List<OrderByField>
@@ -36,6 +40,47 @@ sealed class SiloAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
+    /** The SaneQL pipeline step(s) specific to this action, e.g. `.groupBy({count:=count()})`. */
+    protected abstract fun ownSaneQlSteps(): List<SaneQlStep>
+
+    /**
+     * All SaneQL pipeline steps for this action: [ownSaneQlSteps] followed by the steps common to
+     * every action (`orderBy`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
+     */
+    fun toSaneQlSteps(): List<SaneQlStep> = ownSaneQlSteps() + commonSaneQlSuffixSteps()
+
+    private fun commonSaneQlSuffixSteps(): List<SaneQlStep> =
+        buildList {
+            val orderByFields = this@SiloAction.orderByFields
+            if (orderByFields.isNotEmpty()) {
+                add(SaneQlStep("orderBy", positionalArgs = listOf(SaneQlList(orderByFields.map { toSaneQl(it) }))))
+            }
+            val offset = this@SiloAction.offset
+            if (offset != null) {
+                add(SaneQlStep("offset", positionalArgs = listOf(SaneQlInt(offset))))
+            }
+            when (val randomize = this@SiloAction.randomize) {
+                is RandomizeConfig.Enabled -> {
+                    add(SaneQlStep("randomize"))
+                }
+
+                is RandomizeConfig.WithSeed -> {
+                    add(
+                        SaneQlStep(
+                            "randomize",
+                            namedArgs = listOf(SaneQlNamedArg("seed", SaneQlInt(randomize.seed))),
+                        ),
+                    )
+                }
+
+                is RandomizeConfig.Disabled, null -> {}
+            }
+            val limit = this@SiloAction.limit
+            if (limit != null) {
+                add(SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(limit))))
+            }
+        }
+
     companion object {
         fun aggregated(
             groupByFields: List<String> = emptyList(),
@@ -188,6 +233,19 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "Aggregated"
+
+        override fun ownSaneQlSteps() =
+            listOf(
+                SaneQlStep(
+                    "groupBy",
+                    positionalArgs = buildList {
+                        add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
+                        if (groupByFields.isNotEmpty()) {
+                            add(SaneQlList(groupByFields.map { id(it) }))
+                        }
+                    },
+                ),
+            )
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -203,6 +261,18 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "Mutations"
+
+        override fun ownSaneQlSteps() = listOf(SaneQlStep("mutations", namedArgs = mutationsNamedArgs()))
+
+        private fun mutationsNamedArgs() =
+            buildList {
+                if (minProportion != null) {
+                    add(SaneQlNamedArg("minProportion", SaneQlFloat(minProportion)))
+                }
+                if (fields.isNotEmpty()) {
+                    add(SaneQlNamedArg("fields", SaneQlList(fields.map { id(it) })))
+                }
+            }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -218,6 +288,18 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "AminoAcidMutations"
+
+        override fun ownSaneQlSteps() = listOf(SaneQlStep("aminoAcidMutations", namedArgs = mutationsNamedArgs()))
+
+        private fun mutationsNamedArgs() =
+            buildList {
+                if (minProportion != null) {
+                    add(SaneQlNamedArg("minProportion", SaneQlFloat(minProportion)))
+                }
+                if (fields.isNotEmpty()) {
+                    add(SaneQlNamedArg("fields", SaneQlList(fields.map { id(it) })))
+                }
+            }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -232,6 +314,13 @@ sealed class SiloAction<ResponseType>(
             cacheable = false,
         ) {
         val type: String = "Details"
+
+        override fun ownSaneQlSteps() =
+            if (fields.isEmpty()) {
+                emptyList()
+            } else {
+                listOf(SaneQlStep("project", positionalArgs = listOf(SaneQlList(fields.map { id(it) }))))
+            }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -245,6 +334,8 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "Insertions"
+
+        override fun ownSaneQlSteps() = listOf(SaneQlStep("insertions"))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -260,6 +351,15 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "MostRecentCommonAncestor"
+
+        override fun ownSaneQlSteps() =
+            listOf(
+                SaneQlStep(
+                    "mostRecentCommonAncestor",
+                    positionalArgs = listOf(str(columnName)),
+                    namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
+                ),
+            )
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -275,6 +375,15 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "PhyloSubtree"
+
+        override fun ownSaneQlSteps() =
+            listOf(
+                SaneQlStep(
+                    "phyloSubtree",
+                    positionalArgs = listOf(str(columnName)),
+                    namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
+                ),
+            )
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -288,6 +397,8 @@ sealed class SiloAction<ResponseType>(
             cacheable = true,
         ) {
         val type: String = "AminoAcidInsertions"
+
+        override fun ownSaneQlSteps() = listOf(SaneQlStep("aminoAcidInsertions"))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -302,65 +413,159 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<SequenceData>(
             arrowConverter = SEQUENCE_DATA_ARROW_CONVERTER,
             cacheable = false,
-        )
+        ) {
+        override fun ownSaneQlSteps(): List<SaneQlStep> {
+            val allFields = additionalFields + sequenceNames
+            return listOf(SaneQlStep("project", positionalArgs = listOf(SaneQlList(allFields.map { id(it) }))))
+        }
+    }
 }
+
+private fun printNodesNotInTreeNamedArgs(printNodesNotInTree: Boolean?): List<SaneQlNamedArg> =
+    if (printNodesNotInTree == true) {
+        listOf(SaneQlNamedArg("printNodesNotInTree", SaneQlBoolean(true)))
+    } else {
+        emptyList()
+    }
+
+private fun toSaneQl(field: OrderByField): SaneQlExpression =
+    when (field.order) {
+        Order.ASCENDING -> id(field.field)
+        Order.DESCENDING -> SaneQlMethodCall(id(field.field), "desc")
+    }
 
 sealed class SiloFilterExpression(
     val type: String,
-)
+) {
+    /** Renders this filter expression as a SaneQL expression, e.g. `"theColumn" = 'theValue'`. */
+    abstract fun toSaneQl(): SaneQlExpression
+}
 
 data class StringEquals(
     val column: String,
     val value: String?,
-) : SiloFilterExpression("StringEquals")
+) : SiloFilterExpression("StringEquals") {
+    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), str(value))
+}
 
 data class BooleanEquals(
     val column: String,
     val value: Boolean?,
-) : SiloFilterExpression("BooleanEquals")
+) : SiloFilterExpression("BooleanEquals") {
+    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlBoolean(value))
+}
 
 data class LineageEquals(
     val column: String,
     val value: String?,
     val includeSublineages: Boolean,
-) : SiloFilterExpression("Lineage")
+) : SiloFilterExpression("Lineage") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(
+            receiver = id(column),
+            name = "lineage",
+            positionalArgs = listOf(if (value == null) SaneQlNull else str(value)),
+            namedArgs = listOf(SaneQlNamedArg("includeSublineages", SaneQlBoolean(includeSublineages))),
+        )
+}
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class NucleotideSymbolEquals(
     val sequenceName: String?,
     val position: Int,
     val symbol: String,
-) : SiloFilterExpression("NucleotideEquals")
+) : SiloFilterExpression("NucleotideEquals") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "nucleotideEquals",
+            namedArgs = buildList {
+                add(SaneQlNamedArg("position", SaneQlInt(position)))
+                add(SaneQlNamedArg("symbol", str(symbol)))
+                if (sequenceName != null) {
+                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
+                }
+            },
+        )
+}
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class HasNucleotideMutation(
     val sequenceName: String?,
     val position: Int,
-) : SiloFilterExpression("HasNucleotideMutation")
+) : SiloFilterExpression("HasNucleotideMutation") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "hasMutation",
+            namedArgs = buildList {
+                add(SaneQlNamedArg("position", SaneQlInt(position)))
+                if (sequenceName != null) {
+                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
+                }
+            },
+        )
+}
 
 data class AminoAcidSymbolEquals(
     val sequenceName: String,
     val position: Int,
     val symbol: String,
-) : SiloFilterExpression("AminoAcidEquals")
+) : SiloFilterExpression("AminoAcidEquals") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "aminoAcidEquals",
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("symbol", str(symbol)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
+        )
+}
 
 data class HasAminoAcidMutation(
     val sequenceName: String,
     val position: Int,
-) : SiloFilterExpression("HasAminoAcidMutation")
+) : SiloFilterExpression("HasAminoAcidMutation") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "hasAAMutation",
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
+        )
+}
 
 data class DateBetween(
     val column: String,
     val from: LocalDate?,
     val to: LocalDate?,
-) : SiloFilterExpression("DateBetween")
+) : SiloFilterExpression("DateBetween") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(
+            receiver = id(column),
+            name = "between",
+            positionalArgs = listOf(SaneQlDate(from), SaneQlDate(to)),
+        )
+}
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class NucleotideInsertionContains(
     val position: Int,
     val value: String,
     val sequenceName: String?,
-) : SiloFilterExpression("InsertionContains")
+) : SiloFilterExpression("InsertionContains") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "insertionContains",
+            namedArgs = buildList {
+                add(SaneQlNamedArg("position", SaneQlInt(position)))
+                add(SaneQlNamedArg("value", str(value)))
+                if (sequenceName != null) {
+                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
+                }
+            },
+        )
+}
 
 data class AminoAcidInsertionContains(
     val position: Int,
@@ -368,75 +573,144 @@ data class AminoAcidInsertionContains(
     val sequenceName: String,
 ) : SiloFilterExpression(
         "AminoAcidInsertionContains",
-    )
+    ) {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "aminoAcidInsertionContains",
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("value", str(value)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
+        )
+}
 
-data object True : SiloFilterExpression("True")
+data object True : SiloFilterExpression("True") {
+    override fun toSaneQl() = SaneQlBoolean(true)
+}
 
 data class And(
     val children: List<SiloFilterExpression>,
 ) : SiloFilterExpression("And") {
     constructor(vararg children: SiloFilterExpression) : this(children.toList())
+
+    override fun toSaneQl() = SaneQlAnd(children.map { it.toSaneQl() })
 }
 
 data class Or(
     val children: List<SiloFilterExpression>,
 ) : SiloFilterExpression("Or") {
     constructor(vararg children: SiloFilterExpression) : this(children.toList())
+
+    override fun toSaneQl() = SaneQlOr(children.map { it.toSaneQl() })
 }
 
 data class Not(
     val child: SiloFilterExpression,
-) : SiloFilterExpression("Not")
+) : SiloFilterExpression("Not") {
+    override fun toSaneQl() = SaneQlNot(child.toSaneQl())
+}
 
 data class Maybe(
     val child: SiloFilterExpression,
-) : SiloFilterExpression("Maybe")
+) : SiloFilterExpression("Maybe") {
+    override fun toSaneQl() = SaneQlFunctionCall("maybe", positionalArgs = listOf(child.toSaneQl()))
+}
 
 data class NOf(
     val numberOfMatchers: Int,
     val matchExactly: Boolean,
     val children: List<SiloFilterExpression>,
-) : SiloFilterExpression("N-Of")
+) : SiloFilterExpression("N-Of") {
+    override fun toSaneQl() =
+        SaneQlFunctionCall(
+            "nOf",
+            positionalArgs = listOf(SaneQlInt(numberOfMatchers), SaneQlList(children.map { it.toSaneQl() })),
+            namedArgs = if (matchExactly) {
+                listOf(SaneQlNamedArg("matchExactly", SaneQlBoolean(true)))
+            } else {
+                emptyList()
+            },
+        )
+}
 
 data class IntEquals(
     val column: String,
     val value: Int?,
-) : SiloFilterExpression("IntEquals")
+) : SiloFilterExpression("IntEquals") {
+    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlInt(value))
+}
 
 data class IntBetween(
     val column: String,
     val from: Int?,
     val to: Int?,
-) : SiloFilterExpression("IntBetween")
+) : SiloFilterExpression("IntBetween") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(
+            receiver = id(column),
+            name = "between",
+            positionalArgs = listOf(intOrNull(from), intOrNull(to)),
+        )
+}
 
 data class FloatEquals(
     val column: String,
     val value: Double?,
-) : SiloFilterExpression("FloatEquals")
+) : SiloFilterExpression("FloatEquals") {
+    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlFloat(value))
+}
 
 data class FloatBetween(
     val column: String,
     val from: Double?,
     val to: Double?,
-) : SiloFilterExpression("FloatBetween")
+) : SiloFilterExpression("FloatBetween") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(
+            receiver = id(column),
+            name = "between",
+            positionalArgs = listOf(floatOrNull(from), floatOrNull(to)),
+        )
+}
 
 data class StringSearch(
     val column: String,
     val searchExpression: String,
-) : SiloFilterExpression("StringSearch")
+) : SiloFilterExpression("StringSearch") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(receiver = id(column), name = "like", positionalArgs = listOf(str(searchExpression)))
+}
 
 data class PhyloDescendantOf(
     val column: String,
     val internalNode: String,
-) : SiloFilterExpression("PhyloDescendantOf")
+) : SiloFilterExpression("PhyloDescendantOf") {
+    override fun toSaneQl() =
+        SaneQlMethodCall(receiver = id(column), name = "phyloDescendantOf", positionalArgs = listOf(str(internalNode)))
+}
 
 data class IsNull(
     val column: String,
-) : SiloFilterExpression("IsNull")
+) : SiloFilterExpression("IsNull") {
+    override fun toSaneQl() = isNull(column)
+}
 
 data class IsNotNull(
     val column: String,
-) : SiloFilterExpression("IsNotNull")
+) : SiloFilterExpression("IsNotNull") {
+    override fun toSaneQl() = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
+}
+
+private fun id(name: String) = SaneQlIdentifier(name)
+
+private fun str(value: String) = SaneQlString(value)
+
+private fun isNull(column: String) = SaneQlFunctionCall("isNull", positionalArgs = listOf(id(column)))
+
+private fun intOrNull(value: Int?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlInt(value)
+
+private fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlFloat(value)
 
 enum class SequenceType {
     @JsonProperty("Fasta")
