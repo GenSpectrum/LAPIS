@@ -70,6 +70,12 @@ class SaneQlAstTest {
     }
 
     @Test
+    fun `GIVEN named arg THEN renders as name colon-equals value`() {
+        val namedArg = SaneQlNamedArg("minProportion", SaneQlFloat(0.5))
+        assertThat(namedArg.render(), equalTo("minProportion:=0.5"))
+    }
+
+    @Test
     fun `GIVEN equals THEN renders column equals value`() {
         val equals = SaneQlEquals(SaneQlIdentifier("theColumn"), SaneQlString("theValue"))
         assertThat(equals.render(), equalTo(""""theColumn" = 'theValue'"""))

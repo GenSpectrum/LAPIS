@@ -11,7 +11,9 @@ sealed interface SaneQlNode {
 data class SaneQlNamedArg(
     val name: String,
     val value: SaneQlExpression,
-)
+) : SaneQlNode {
+    override fun render() = "$name:=${value.render()}"
+}
 
 sealed interface SaneQlExpression : SaneQlNode
 
@@ -140,7 +142,7 @@ private fun renderArgs(
     positionalArgs: List<SaneQlExpression>,
     namedArgs: List<SaneQlNamedArg>,
 ): String =
-    (positionalArgs.map { it.render() } + namedArgs.map { "${it.name}:=${it.value.render()}" })
+    (positionalArgs.map { it.render() } + namedArgs.map { it.render() })
         .joinToString(", ")
 
 /**
