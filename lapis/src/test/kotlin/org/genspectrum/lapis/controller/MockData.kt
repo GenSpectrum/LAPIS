@@ -9,6 +9,7 @@ import org.genspectrum.lapis.model.FastaHeaderTemplate
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.model.TemplateField
+import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -402,6 +403,38 @@ object MockDataForEndpoints {
                 { "primaryKey": "key2", "sequence1": "CAGAT", "sequence2": null }
                 { "primaryKey": "key3", "sequence1": null, "sequence2": "CAGAC" }
                 { "primaryKey": "key4", "sequence1": null, "sequence2": null }
+            """.trimIndent(),
+        )
+
+    fun coOccurrenceMockData(sequenceName: String = "main") =
+        MockDataCollection.create(
+            siloQueryModelMockCall = { modelMock ->
+                { request: CoOccurrenceRequest -> modelMock.getCoOccurrence(request, sequenceName) }
+            },
+            modelData = listOf(
+                AggregationData(
+                    5,
+                    mapOf("$sequenceName:1" to StringNode("A"), "$sequenceName:2" to StringNode("T")),
+                ),
+            ),
+            expectedJson = """
+                [
+                    {
+                        "$sequenceName:1": "A",
+                        "$sequenceName:2": "T",
+                        "count": 5
+                    }
+                ]
+            """.trimIndent(),
+            expectedCsv = """
+                $sequenceName:1,$sequenceName:2,count
+                A,T,5
+                
+            """.trimIndent(),
+            expectedTsv = """
+                $sequenceName:1	$sequenceName:2	count
+                A	T	5
+                
             """.trimIndent(),
         )
 
