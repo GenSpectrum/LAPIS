@@ -1,6 +1,8 @@
 package org.genspectrum.lapis.controller
 
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
+import org.genspectrum.lapis.request.MAX_CO_OCCURRENCE_POSITIONS
+import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
 
 const val DETAILS_ENDPOINT_DESCRIPTION = """Returns the specified metadata fields of sequences matching the filter."""
 const val MOST_RECENT_COMMON_ANCESTOR_ENDPOINT_DESCRIPTION =
@@ -64,6 +66,17 @@ const val AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION =
     """Returns, for the given gene and list of (1-based) positions, every combination of symbols
 that occurs at these positions among the sequences matching the specified sequence filters, along with the
 number of sequences for each combination."""
+const val CO_OCCURRENCE_POSITIONS_DESCRIPTION =
+    """The 1-based positions to compute co-occurrences for. Must not be empty, and must not expand to more than
+    $MAX_CO_OCCURRENCE_POSITIONS distinct positions. Only single positions are supported here; use the POST 
+    endpoint with a JSON body to request ranges of positions."""
+const val CO_OCCURRENCE_POSITIONS_REQUEST_BODY_DESCRIPTION =
+    """The 1-based positions to compute co-occurrences for. Each entry is either a single position (a number)
+    or an inclusive range of positions (an object with 'from' and 'to'). Must not be empty, and must not expand
+    to more than $MAX_CO_OCCURRENCE_POSITIONS distinct positions."""
+const val CO_OCCURRENCE_ORDER_BY_FIELDS_DESCRIPTION =
+    """The fields by which the result is ordered. Valid values are 'count', '$ORDER_BY_RANDOM_FIELD_NAME', or one
+    of the requested positions in the format '<sequenceName>:<position>' (as it appears in the response)."""
 const val QUERIES_OVER_TIME_ENDPOINT_DESCRIPTION = """
 Returns the number of sequences matching the specified queries within the requested date ranges, along 
 with the corresponding coverage in a tabular format. The order of the queries and date ranges is preserved.

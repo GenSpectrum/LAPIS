@@ -2,14 +2,19 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
+import org.genspectrum.lapis.openApi.CO_OCCURRENCE_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.CoOccurrenceOrderByFields
+import org.genspectrum.lapis.openApi.CoOccurrencePositionsParam
 import org.genspectrum.lapis.openApi.DataFormat
 import org.genspectrum.lapis.openApi.Gene
+import org.genspectrum.lapis.openApi.LapisCoOccurrenceResponse
 import org.genspectrum.lapis.openApi.Limit
 import org.genspectrum.lapis.openApi.NucleotideInsertions
 import org.genspectrum.lapis.openApi.NucleotideMutations
@@ -48,7 +53,7 @@ class AminoAcidCoOccurrenceController(
         "$AMINO_ACID_CO_OCCURRENCE_ROUTE/{gene}",
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    @Operation(description = AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION)
+    @LapisCoOccurrenceResponse(description = AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION)
     fun getAminoAcidCoOccurrenceAsJson(
         @PathVariable(name = "gene", required = true)
         @Gene
@@ -56,8 +61,10 @@ class AminoAcidCoOccurrenceController(
         @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
+        @CoOccurrencePositionsParam
         @RequestParam
         positions: List<Int>,
+        @CoOccurrenceOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -118,8 +125,10 @@ class AminoAcidCoOccurrenceController(
         @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
+        @CoOccurrencePositionsParam
         @RequestParam
         positions: List<Int>,
+        @CoOccurrenceOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -181,8 +190,10 @@ class AminoAcidCoOccurrenceController(
         @PrimitiveFieldFilters
         @RequestParam
         sequenceFilters: GetRequestSequenceFilters?,
+        @CoOccurrencePositionsParam
         @RequestParam
         positions: List<Int>,
+        @CoOccurrenceOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
         @NucleotideMutations
@@ -234,15 +245,15 @@ class AminoAcidCoOccurrenceController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_FORM_URLENCODED_VALUE],
     )
+    @LapisCoOccurrenceResponse(description = AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION)
     @Operation(
-        description = AMINO_ACID_CO_OCCURRENCE_ENDPOINT_DESCRIPTION,
         operationId = "postAminoAcidCoOccurrence",
     )
     fun postAminoAcidCoOccurrence(
         @PathVariable(name = "gene", required = true)
         @Gene
         gene: String,
-        @Parameter(description = "The sequence filters, positions, and other options for the co-occurrence query.")
+        @Parameter(schema = Schema(ref = "#/components/schemas/$CO_OCCURRENCE_REQUEST_SCHEMA"))
         @RequestBody
         request: CoOccurrenceRequest,
         response: HttpServletResponse,

@@ -22,6 +22,9 @@ import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
+import org.genspectrum.lapis.controller.CO_OCCURRENCE_ORDER_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.CO_OCCURRENCE_POSITIONS_DESCRIPTION
+import org.genspectrum.lapis.controller.CO_OCCURRENCE_POSITIONS_REQUEST_BODY_DESCRIPTION
 import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
@@ -59,6 +62,7 @@ import org.genspectrum.lapis.request.OFFSET_PROPERTY
 import org.genspectrum.lapis.request.ORDER_BY_PROPERTY
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.PHYLO_TREE_FIELD_PROPERTY
+import org.genspectrum.lapis.request.POSITIONS_PROPERTY
 import org.genspectrum.lapis.request.PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
@@ -219,6 +223,16 @@ fun buildOpenApiSchema(
                     requestSchemaForQueriesOverTime(sequenceFilterFields),
                 )
                 .addSchemas(
+                    CO_OCCURRENCE_REQUEST_SCHEMA,
+                    requestSchemaForCommonSequenceFilters(
+                        getSequenceFiltersWithFormat(
+                            sequenceFilterFields = sequenceFilterFields,
+                            orderByFieldsSchema = coOccurrenceOrderByFieldsSchema(),
+                            dataFormatSchema = dataFormatSchema(),
+                        ) + Pair(POSITIONS_PROPERTY, coOccurrencePositionsRequestSchema()),
+                    ),
+                )
+                .addSchemas(
                     AGGREGATED_RESPONSE_SCHEMA,
                     lapisArrayResponseSchema(
                         Schema<String>()
@@ -231,6 +245,31 @@ fun buildOpenApiSchema(
                             .required(listOf(COUNT_PROPERTY))
                             .properties(
                                 getAggregatedResponseProperties(aggregatedMetadataFieldSchemas(databaseConfig)),
+                            ),
+                    ),
+                )
+                .addSchemas(
+                    CO_OCCURRENCE_RESPONSE_SCHEMA,
+                    lapisArrayResponseSchema(
+                        Schema<String>()
+                            .types(setOf("object"))
+                            .description(
+                                "Co-occurrence data. Each entry represents one combination of symbols observed " +
+                                    "at the requested positions, along with the number of sequences that have " +
+                                    "this exact combination. The keys for the requested positions have the " +
+                                    "format '<sequenceName>:<position>', and their values are the nucleotide or " +
+                                    "amino acid symbol observed at that position. The key 'count' is always " +
+                                    "present.",
+                            )
+                            .required(listOf(COUNT_PROPERTY))
+                            .properties(
+                                mapOf(
+                                    COUNT_PROPERTY to IntegerSchema()
+                                        .format("int64")
+                                        .description(
+                                            "The number of sequences with this combination of symbols.",
+                                        ),
+                                ),
                             ),
                     ),
                 )
@@ -368,6 +407,14 @@ fun buildOpenApiSchema(
                 .addSchemas(
                     NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA,
                     arraySchema(nucleotideSequenceOrderByFieldsEnum(databaseConfig)),
+                )
+                .addSchemas(
+                    CO_OCCURRENCE_ORDER_BY_FIELDS_SCHEMA,
+                    arraySchema(coOccurrenceOrderByFieldsSchema()),
+                )
+                .addSchemas(
+                    CO_OCCURRENCE_POSITIONS_SCHEMA,
+                    coOccurrencePositionsParamSchema(),
                 )
                 .addSchemas(
                     SEGMENT_SCHEMA,
@@ -1101,6 +1148,45 @@ private fun mutationsOrderByFieldsEnum() =
 
 private fun insertionsOrderByFieldsEnum() =
     orderByFieldsEnum(emptyList(), listOf("insertion", "count", "position", "sequenceName", "insertedSymbols"))
+
+/**
+ * Unlike the other `orderBy` fields, valid co-occurrence `orderBy` values (besides "count" and
+ * "[ORDER_BY_RANDOM_FIELD_NAME]") depend on the positions requested in each individual query
+ * (e.g. "main:123"), so they cannot be enumerated statically.
+ */
+private fun coOccurrenceOrderByFieldsSchema() =
+    Schema<String>()
+        .types(setOf("string"))
+        .description(CO_OCCURRENCE_ORDER_BY_FIELDS_DESCRIPTION)
+        .example(ORDER_BY_RANDOM_FIELD_NAME)
+
+private fun coOccurrencePositionsParamSchema() =
+    ArraySchema()
+        .items(IntegerSchema().example(421))
+        .description(CO_OCCURRENCE_POSITIONS_DESCRIPTION)
+
+private fun coOccurrencePositionsRequestSchema() =
+    ArraySchema()
+        .items(
+            Schema<Any>().oneOf(
+                listOf(
+                    IntegerSchema()
+                        .example(421)
+                        .description("A single 1-based position."),
+                    Schema<Any>()
+                        .types(setOf("object"))
+                        .description("An inclusive range of 1-based positions.")
+                        .required(listOf("from", "to"))
+                        .properties(
+                            mapOf(
+                                "from" to IntegerSchema().example(100),
+                                "to" to IntegerSchema().example(110),
+                            ),
+                        ),
+                ),
+            ),
+        )
+        .description(CO_OCCURRENCE_POSITIONS_REQUEST_BODY_DESCRIPTION)
 
 private fun aminoAcidSequenceOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
     orderByFieldsEnum(databaseConfig.schema.metadata)
