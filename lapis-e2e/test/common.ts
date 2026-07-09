@@ -1,15 +1,18 @@
 import {
   ActuatorApi,
+  AminoAcidCoOccurrenceControllerApi,
   Configuration,
   InfoControllerApi,
   LapisControllerApi,
   Middleware,
   QueriesOverTimeControllerApi,
   QueryControllerApi,
+  SingleSegmentedCoOccurrenceControllerApi,
   SingleSegmentedSequenceControllerApi,
 } from './lapisClient';
 import {
   LapisControllerApi as LapisControllerApiMultiSegmented,
+  MultiSegmentedCoOccurrenceControllerApi,
   MultiSegmentedSequenceControllerApi,
 } from './lapisClientMultiSegmented';
 import { LapisControllerApi as LapisControllerApiWithAuth } from './lapisClientWithAuth';
@@ -72,6 +75,18 @@ export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenc
 
 export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceControllerApi(
   new Configuration({ basePath: basePathMultiSegmented })
+).withMiddleware(middleware);
+
+export const singleSegmentedCoOccurrenceClient = new SingleSegmentedCoOccurrenceControllerApi(
+  new Configuration({ basePath })
+).withMiddleware(middleware);
+
+export const multiSegmentedCoOccurrenceClient = new MultiSegmentedCoOccurrenceControllerApi(
+  new Configuration({ basePath: basePathMultiSegmented })
+).withMiddleware(middleware);
+
+export const aminoAcidCoOccurrenceClient = new AminoAcidCoOccurrenceControllerApi(
+  new Configuration({ basePath })
 ).withMiddleware(middleware);
 
 export const lapisClientWithAuth = ({ basePath, accessToken }: { basePath: string; accessToken?: string }) =>

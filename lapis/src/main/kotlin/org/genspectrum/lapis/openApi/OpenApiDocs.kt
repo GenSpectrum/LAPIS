@@ -270,6 +270,14 @@ fun buildOpenApiSchema(
                                             "The number of sequences with this combination of symbols.",
                                         ),
                                 ),
+                            )
+                            .additionalProperties(
+                                StringSchema()
+                                    .description(
+                                        "The symbol observed at the corresponding requested position, " +
+                                            "for this combination of symbols.",
+                                    )
+                                    .example("A"),
                             ),
                     ),
                 )
