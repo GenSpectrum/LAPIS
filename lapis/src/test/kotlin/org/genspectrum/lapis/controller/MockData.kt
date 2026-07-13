@@ -409,7 +409,7 @@ object MockDataForEndpoints {
     fun coOccurrenceMockData(sequenceName: String = "main") =
         MockDataCollection.create(
             siloQueryModelMockCall = { modelMock ->
-                { request: CoOccurrenceRequest -> modelMock.getCoOccurrence(request, sequenceName) }
+                { request: CoOccurrenceRequest -> modelMock.getCoOccurrence(request, sequenceName, sequenceName) }
             },
             modelData = listOf(
                 AggregationData(

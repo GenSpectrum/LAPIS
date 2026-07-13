@@ -60,6 +60,7 @@ class CoOccurrenceControllerTest(
                     positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(421)),
                 ),
                 "main",
+                "main",
             )
         } returns Stream.of(
             AggregationData(48, mapOf("main:1" to StringNode("A"), "main:421" to StringNode("T"))),
@@ -85,6 +86,7 @@ class CoOccurrenceControllerTest(
                     aminoAcidInsertions = emptyList(),
                     positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(100)),
                 ),
+                "main",
                 "main",
             )
         } returns Stream.empty()
@@ -125,6 +127,7 @@ class CoOccurrenceControllerTest(
                     positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(2)),
                 ),
                 "main",
+                "main",
             )
         } returns Stream.of(
             AggregationData(5, mapOf("main:1" to StringNode("A"), "main:2" to StringNode("C"))),
@@ -147,6 +150,7 @@ class CoOccurrenceControllerTest(
                     aminoAcidInsertions = emptyList(),
                     positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(2)),
                 ),
+                "gene1",
                 "gene1",
             )
         } returns Stream.of(
@@ -184,6 +188,7 @@ class CoOccurrenceControllerTest(
                     orderByFields = OrderBySpec.EMPTY,
                 ),
                 "gene1",
+                "gene1",
             )
         } returns Stream.empty()
 
@@ -204,6 +209,7 @@ class CoOccurrenceControllerTest(
                     aminoAcidInsertions = emptyList(),
                     positions = listOf(CoOccurrencePosition.Range(1, 3)),
                 ),
+                "gene1",
                 "gene1",
             )
         }

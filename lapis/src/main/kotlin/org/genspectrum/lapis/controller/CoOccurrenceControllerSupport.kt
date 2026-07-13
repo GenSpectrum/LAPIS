@@ -50,17 +50,22 @@ fun buildCoOccurrenceRequest(
  * Builds the [AggregatedCollection] for a co-occurrence response: it queries SILO for the co-occurrence of
  * symbols at the requested positions of [sequenceName], and prepares the dynamic (position-dependent) header
  * for the response, e.g. `["S:1", "S:421", "count"]`.
+ *
+ * [responsePrefix] is the name that response field names are prefixed with (e.g. gene or segment name).
+ * It is null for single-segmented nucleotide sequences, where the segment name is implicit and thus omitted
+ * from the response field names (e.g. `["1", "421", "count"]`), mirroring the nucleotide mutation convention.
  */
 fun getCoOccurrenceCollection(
     siloQueryModel: SiloQueryModel,
     request: CoOccurrenceRequest,
     sequenceName: String,
+    responsePrefix: String?,
 ): AggregatedCollection {
     val positions = request.positions.expandAndValidatePositions()
-    val fields = positions.map { coOccurrenceResponseFieldName(sequenceName, it) }
+    val fields = positions.map { coOccurrenceResponseFieldName(responsePrefix, it) }
 
     return AggregatedCollection(
-        records = siloQueryModel.getCoOccurrence(request, sequenceName),
+        records = siloQueryModel.getCoOccurrence(request, sequenceName, responsePrefix),
         fields = fields,
     )
 }

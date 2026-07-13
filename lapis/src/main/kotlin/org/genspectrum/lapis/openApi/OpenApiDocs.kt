@@ -257,8 +257,9 @@ fun buildOpenApiSchema(
                                 "Co-occurrence data. Each entry represents one combination of symbols observed " +
                                     "at the requested positions, along with the number of sequences that have " +
                                     "this exact combination. The keys for the requested positions have the " +
-                                    "format '<sequenceName>:<position>', and their values are the nucleotide or " +
-                                    "amino acid symbol observed at that position. The key 'count' is always " +
+                                    "format '<gene or segment>:<position>' (or just '<position>' for " +
+                                    "single-segmented nucleotide sequences), and their values are the nucleotide " +
+                                    "or amino acid symbol observed at that position. The key 'count' is always " +
                                     "present.",
                             )
                             .required(listOf(COUNT_PROPERTY))

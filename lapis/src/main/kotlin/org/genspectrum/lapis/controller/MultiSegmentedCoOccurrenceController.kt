@@ -106,7 +106,7 @@ class MultiSegmentedCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -171,7 +171,7 @@ class MultiSegmentedCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = COMMA, acceptHeader = httpHeaders.accept),
         )
@@ -236,7 +236,7 @@ class MultiSegmentedCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = TAB, acceptHeader = httpHeaders.accept),
         )
@@ -262,7 +262,7 @@ class MultiSegmentedCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -288,7 +288,7 @@ class MultiSegmentedCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = COMMA, acceptHeader = httpHeaders.accept),
         )
@@ -314,7 +314,7 @@ class MultiSegmentedCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, segment, responsePrefix = segment) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = TAB, acceptHeader = httpHeaders.accept),
         )

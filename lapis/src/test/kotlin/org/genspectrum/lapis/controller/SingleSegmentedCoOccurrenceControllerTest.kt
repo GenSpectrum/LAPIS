@@ -57,12 +57,13 @@ class SingleSegmentedCoOccurrenceControllerTest(
                     positions = listOf(CoOccurrencePosition.Single(1)),
                 ),
                 SEGMENT_NAME,
+                null,
             )
-        } returns Stream.of(AggregationData(1, mapOf("$SEGMENT_NAME:1" to StringNode("A"))))
+        } returns Stream.of(AggregationData(1, mapOf("1" to StringNode("A"))))
 
         mockMvc.perform(get("/component/nucleotideCoOccurrence?positions=1"))
             .andExpect(status().isOk)
-            .andExpect(jsonPath("\$.data[0]['$SEGMENT_NAME:1']").value("A"))
+            .andExpect(jsonPath("\$.data[0]['1']").value("A"))
             .andExpect(jsonPath("\$.data[0].count").value(1))
     }
 

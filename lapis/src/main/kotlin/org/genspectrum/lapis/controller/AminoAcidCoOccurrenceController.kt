@@ -104,7 +104,7 @@ class AminoAcidCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -169,7 +169,7 @@ class AminoAcidCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = COMMA, acceptHeader = httpHeaders.accept),
         )
@@ -234,7 +234,7 @@ class AminoAcidCoOccurrenceController(
 
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = TAB, acceptHeader = httpHeaders.accept),
         )
@@ -260,7 +260,7 @@ class AminoAcidCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Json,
         )
@@ -286,7 +286,7 @@ class AminoAcidCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = COMMA, acceptHeader = httpHeaders.accept),
         )
@@ -312,7 +312,7 @@ class AminoAcidCoOccurrenceController(
     ) {
         lapisResponseStreamer.streamData(
             request = request,
-            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene) },
+            getData = { getCoOccurrenceCollection(siloQueryModel, it, gene, responsePrefix = gene) },
             response = response,
             responseFormat = ResponseFormat.Csv(delimiter = TAB, acceptHeader = httpHeaders.accept),
         )

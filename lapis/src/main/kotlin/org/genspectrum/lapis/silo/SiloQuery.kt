@@ -186,7 +186,7 @@ sealed class SiloAction<ResponseType>(
 
         fun coOccurrence(
             sequenceName: String,
-            positions: List<Int>,
+            positions: List<CoOccurrencePositionColumn>,
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
@@ -267,7 +267,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class CoOccurrenceAction(
         val sequenceName: String,
-        val positions: List<Int>,
+        val positions: List<CoOccurrencePositionColumn>,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
@@ -280,12 +280,16 @@ sealed class SiloAction<ResponseType>(
 
         override fun ownSaneQlSteps(): List<SaneQlStep> {
             val sequenceColumn = id(sequenceName)
-            val columnIdentifiers = positions.map { id(coOccurrencePositionColumnName(it)) }
+            val columnIdentifiers = positions.map { id(it.columnName) }
 
             val mapAssignments = positions.zip(columnIdentifiers).map { (position, columnIdentifier) ->
                 SaneQlAssignment(
                     name = columnIdentifier.render(),
-                    value = SaneQlMethodCall(sequenceColumn, "at", positionalArgs = listOf(SaneQlInt(position))),
+                    value = SaneQlMethodCall(
+                        sequenceColumn,
+                        "at",
+                        positionalArgs = listOf(SaneQlInt(position.position)),
+                    ),
                 )
             }
 
@@ -762,19 +766,26 @@ private fun intOrNull(value: Int?): SaneQlExpression = if (value == null) SaneQl
 private fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlFloat(value)
 
 /**
- * The name of the SILO groupBy/map column used internally for a given 1-based co-occurrence position.
- * This is a valid SaneQL identifier - it does not need to be quoted since it's fully controlled by LAPIS
- * (as opposed to the user-supplied sequence name).
+ * A 1-based co-occurrence [position] together with the [columnName] that SILO should use for it in both
+ * the groupBy/map step and the response. This is also the field name in the LAPIS API response, so no
+ * translation is needed on the way back (see [coOccurrenceResponseFieldName]).
  */
-fun coOccurrencePositionColumnName(position: Int) = "pos_$position"
+data class CoOccurrencePositionColumn(
+    val position: Int,
+    val columnName: String,
+)
 
 /**
- * The field name used in the LAPIS API response for a given sequence name and 1-based co-occurrence position.
+ * The field name used in the LAPIS API response (and as the SILO groupBy/map column name) for a given
+ * 1-based co-occurrence position.
+ * [responsePrefix] is the sequence/segment/gene name to prefix the position with (e.g. "S" -> "S:123").
+ * It is null for single-segmented nucleotide sequences, where the segment name is implicit and thus
+ * omitted (e.g. -> "123"), mirroring the convention used for nucleotide mutations.
  */
 fun coOccurrenceResponseFieldName(
-    sequenceName: String,
+    responsePrefix: String?,
     position: Int,
-) = "$sequenceName:$position"
+) = if (responsePrefix == null) "$position" else "$responsePrefix:$position"
 
 enum class SequenceType {
     @JsonProperty("Fasta")

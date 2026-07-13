@@ -26,7 +26,7 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
     const totalCount = result.data.reduce((sum, entry) => sum + entry.count, 0);
     expect(totalCount).to.be.at.most(maxPossibleSwitzerlandCount);
 
-    const mutatedCombination = result.data.find(entry => entry['main:28280'] === 'C');
+    const mutatedCombination = result.data.find(entry => entry['28280'] === 'C');
     expect(mutatedCombination?.count).to.equal(51);
   });
 
@@ -41,9 +41,9 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
     expect(result.data.length).to.be.greaterThan(0);
 
     result.data.forEach(entry => {
-      expect(entry).to.have.property('main:28279');
-      expect(entry).to.have.property('main:28280');
-      expect(entry).to.have.property('main:28281');
+      expect(entry).to.have.property('28279');
+      expect(entry).to.have.property('28280');
+      expect(entry).to.have.property('28281');
     });
   });
 
@@ -58,8 +58,8 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
     expect(result.data.length).to.be.greaterThan(0);
 
     result.data.forEach(entry => {
-      expect(entry).to.have.property('main:19220');
-      expect(entry).to.have.property('main:28280');
+      expect(entry).to.have.property('19220');
+      expect(entry).to.have.property('28280');
     });
   });
 
@@ -70,9 +70,7 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
     expect(response.status).to.equal(200);
     const resultJson = await response.json();
 
-    const mutatedCombination = resultJson.data.find(
-      (entry: { 'main:28280': string }) => entry['main:28280'] === 'C'
-    );
+    const mutatedCombination = resultJson.data.find((entry: { '28280': string }) => entry['28280'] === 'C');
     expect(mutatedCombination?.count).to.equal(51);
   });
 
@@ -87,7 +85,7 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
     });
 
     expect(result.data).to.have.lengthOf(1);
-    expect(result.data[0]['main:28280']).to.equal('C');
+    expect(result.data[0]['28280']).to.equal('C');
     expect(result.data[0].count).to.equal(51);
   });
 
@@ -96,11 +94,11 @@ describe('The /nucleotideCoOccurrence endpoint (single segmented)', () => {
       coOccurrenceRequest: {
         country: 'Switzerland',
         positions: [28280],
-        orderBy: [{ field: 'main:28280', type: 'ascending' }],
+        orderBy: [{ field: '28280', type: 'ascending' }],
       },
     });
 
-    const values = result.data.map(entry => entry['main:28280']);
+    const values = result.data.map(entry => entry['28280']);
     expect(values).to.deep.equal([...values].sort());
   });
 
