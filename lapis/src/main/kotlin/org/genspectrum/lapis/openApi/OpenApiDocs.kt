@@ -253,15 +253,7 @@ fun buildOpenApiSchema(
                     lapisArrayResponseSchema(
                         Schema<String>()
                             .types(setOf("object"))
-                            .description(
-                                "Co-occurrence data. Each entry represents one combination of symbols observed " +
-                                    "at the requested positions, along with the number of sequences that have " +
-                                    "this exact combination. The keys for the requested positions have the " +
-                                    "format '<gene or segment>:<position>' (or just '<position>' for " +
-                                    "single-segmented nucleotide sequences), and their values are the nucleotide " +
-                                    "or amino acid symbol observed at that position. The key 'count' is always " +
-                                    "present.",
-                            )
+                            .description(coOccurrenceResponseDescription(referenceGenomeSchema))
                             .required(listOf(COUNT_PROPERTY))
                             .properties(
                                 mapOf(
@@ -668,6 +660,21 @@ private fun stringPhyloDescendantOfSchema(associatedField: SequenceFilterFieldNa
 private fun stringSchema(type: String) =
     Schema<String>()
         .types(setOf(type))
+
+private fun coOccurrenceResponseDescription(referenceGenomeSchema: ReferenceGenomeSchema): String {
+    val keyFormat = if (referenceGenomeSchema.isSingleSegmented()) {
+        "For nucleotide co-occurrence the keys are the requested positions ('<position>'), and for amino acid " +
+            "co-occurrence they have the format '<gene>:<position>'."
+    } else {
+        "The keys for the requested positions have the format '<segment>:<position>' (nucleotides) or " +
+            "'<gene>:<position>' (amino acids)."
+    }
+
+    return "Co-occurrence data. Each entry represents one combination of symbols observed at the requested " +
+        "positions, along with the number of sequences that have this exact combination. $keyFormat " +
+        "Their values are the nucleotide or amino acid symbol observed at that position. " +
+        "The key 'count' is always present."
+}
 
 private fun requestSchemaForCommonSequenceFilters(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
