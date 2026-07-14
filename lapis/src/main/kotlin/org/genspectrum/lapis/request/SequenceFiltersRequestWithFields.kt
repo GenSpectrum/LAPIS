@@ -14,7 +14,7 @@ data class SequenceFiltersRequestWithFields(
     override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val fields: List<Field>,
+    val fields: List<RequestField>,
     override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,

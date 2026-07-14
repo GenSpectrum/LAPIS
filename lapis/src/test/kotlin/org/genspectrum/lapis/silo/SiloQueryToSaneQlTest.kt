@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -137,6 +138,22 @@ class SiloQueryToSaneQlTest {
                         limit = 10,
                     ),
                     ".groupBy({count:=count()}).randomize(seed:=42).limit(10)",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        groupByFields = listOf("country"),
+                        sequencePositionFields = listOf(SequencePositionField("S", 501)),
+                    ),
+                    """.map({S_501:="S".at(501)}).groupBy({count:=count()}, {"country", "S_501"})""",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        sequencePositionFields = listOf(
+                            SequencePositionField("S", 123),
+                            SequencePositionField("main", 456),
+                        ),
+                    ),
+                    """.map({S_123:="S".at(123), main_456:="main".at(456)}).groupBy({count:=count()}, {"S_123", "main_456"})""",
                 ),
                 // Mutations
                 Arguments.of(

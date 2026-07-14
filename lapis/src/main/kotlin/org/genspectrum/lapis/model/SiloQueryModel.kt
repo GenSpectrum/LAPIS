@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
@@ -10,6 +11,7 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -38,10 +40,11 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    sequenceFilters.fields.map { it.fieldName },
-                    sequenceFilters.orderByFields,
-                    sequenceFilters.limit,
-                    sequenceFilters.offset,
+                    groupByFields = sequenceFilters.fields.filterIsInstance<Field>().map { it.fieldName },
+                    orderByFields = sequenceFilters.orderByFields,
+                    limit = sequenceFilters.limit,
+                    offset = sequenceFilters.offset,
+                    sequencePositionFields = sequenceFilters.fields.filterIsInstance<SequencePositionField>(),
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
@@ -140,7 +143,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
-                    sequenceFilters.fields.map { it.fieldName }.ifEmpty { allMetadataFields },
+                    sequenceFilters.fields.filterIsInstance<Field>().map { it.fieldName }.ifEmpty { allMetadataFields },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,

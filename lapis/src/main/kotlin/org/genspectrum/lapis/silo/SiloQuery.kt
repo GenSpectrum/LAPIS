@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
@@ -87,9 +88,11 @@ sealed class SiloAction<ResponseType>(
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
+            sequencePositionFields: List<SequencePositionField> = emptyList(),
         ): SiloAction<AggregationData> =
             AggregatedAction(
                 groupByFields = groupByFields,
+                sequencePositionFields = sequencePositionFields,
                 orderByFields = getOrderByFieldsList(orderByFields),
                 randomize = getRandomize(orderByFields),
                 limit = limit,
@@ -224,6 +227,7 @@ sealed class SiloAction<ResponseType>(
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class AggregatedAction(
         val groupByFields: List<String>,
+        val sequencePositionFields: List<SequencePositionField> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
@@ -235,17 +239,42 @@ sealed class SiloAction<ResponseType>(
         val type: String = "Aggregated"
 
         override fun ownSaneQlSteps() =
-            listOf(
-                SaneQlStep(
-                    "groupBy",
-                    positionalArgs = buildList {
-                        add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
-                        if (groupByFields.isNotEmpty()) {
-                            add(SaneQlList(groupByFields.map { id(it) }))
-                        }
-                    },
-                ),
-            )
+            buildList {
+                if (sequencePositionFields.isNotEmpty()) {
+                    add(
+                        SaneQlStep(
+                            "map",
+                            positionalArgs = listOf(
+                                SaneQlList(
+                                    sequencePositionFields.map { field ->
+                                        SaneQlAssignment(
+                                            field.columnAlias,
+                                            SaneQlMethodCall(
+                                                SaneQlIdentifier(field.sequenceName),
+                                                "at",
+                                                listOf(SaneQlInt(field.position)),
+                                            ),
+                                        )
+                                    },
+                                ),
+                            ),
+                        ),
+                    )
+                }
+                val allGroupByColumns =
+                    groupByFields.map { id(it) } + sequencePositionFields.map { id(it.columnAlias) }
+                add(
+                    SaneQlStep(
+                        "groupBy",
+                        positionalArgs = buildList {
+                            add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
+                            if (allGroupByColumns.isNotEmpty()) {
+                                add(SaneQlList(allGroupByColumns))
+                            }
+                        },
+                    ),
+                )
+            }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

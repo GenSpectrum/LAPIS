@@ -61,6 +61,7 @@ import org.genspectrum.lapis.openApi.TreeDataFormatParam
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
@@ -371,7 +372,7 @@ class LapisController(
     private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields): AggregatedCollection =
         AggregatedCollection(
             records = siloQueryModel.getAggregated(request),
-            fields = request.fields.map { it.fieldName },
+            fields = request.fields.map { it.outputColumnName },
         )
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -1490,7 +1491,7 @@ class LapisController(
     }
 
     private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
-        val fields = request.fields.map { it.fieldName }
+        val fields = request.fields.filterIsInstance<Field>().map { it.fieldName }
 
         return DetailsCollection(
             records = siloQueryModel.getDetails(request),
