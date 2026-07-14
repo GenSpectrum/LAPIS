@@ -71,7 +71,7 @@ If empty, only the overall count is returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
 
 Sequence positions can be requested using the syntax `SequenceName[position]` (e.g. `S[501]` for position 501 of gene S).
-For single-segmented genomes with a sequence named `main`, the shorthand `[position]` (e.g. `[501]`) can be used.
+For single-segmented genomes, the shorthand `[position]` (e.g. `[501]`) can be used.
 Position fields appear in the response under the same name as requested (e.g. `S[501]`)."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 

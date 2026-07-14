@@ -248,17 +248,6 @@ class SequenceFiltersRequestWithFieldsTest {
                     ),
                 ),
                 Arguments.of(
-                    """{"fields": ["[456]"]}""",
-                    SequenceFiltersRequestWithFields(
-                        emptyMap(),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                        emptyList(),
-                        listOf(SequencePositionField("main", 456)),
-                    ),
-                ),
-                Arguments.of(
                     """{"fields": ["GENE1[1]"]}""",
                     SequenceFiltersRequestWithFields(
                         emptyMap(),
@@ -289,6 +278,10 @@ class SequenceFiltersRequestWithFieldsTest {
         @JvmStatic
         fun getInvalidRequests() =
             listOf(
+                Arguments.of(
+                    """{"fields": ["[456]"]}""",
+                    "Shorthand position syntax '[N]' can only be used for single-segmented genomes",
+                ),
                 Arguments.of(
                     """{"fields": ["unknownSequence[1]"]}""",
                     "Unknown sequence 'unknownSequence'",

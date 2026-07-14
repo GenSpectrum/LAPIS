@@ -21,11 +21,12 @@ data class Field(
 data class SequencePositionField(
     val sequenceName: String,
     val position: Int,
+    val isSingleSegment: Boolean = false,
 ) : RequestField {
     /** Internal SaneQL alias, e.g. `S_501`. Used as the column name inside the query pipeline. */
     val columnAlias: String get() = "${sequenceName}_${position}"
-    /** User-facing name echoed back in the response, e.g. `S[501]`. */
-    val userFacingName: String get() = "${sequenceName}[${position}]"
+    /** User-facing name echoed back in the response, e.g. `S[501]` or `[501]` for single-segment shorthand. */
+    val userFacingName: String get() = if (isSingleSegment) "[${position}]" else "${sequenceName}[${position}]"
     override val outputColumnName: String get() = userFacingName
 }
 
@@ -48,11 +49,13 @@ class CaseInsensitiveFieldConverter(
             if (position <= 0) {
                 throw BadRequestException("Invalid position in '$source': must be a positive integer, got $position")
             }
-            val canonicalName = referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName("main")
-                ?: throw BadRequestException(
-                    "Shorthand position syntax '[N]' requires a sequence named 'main' to exist",
+            if (!referenceGenomeSchema.isSingleSegmented()) {
+                throw BadRequestException(
+                    "Shorthand position syntax '[N]' can only be used for single-segmented genomes",
                 )
-            return SequencePositionField(canonicalName, position)
+            }
+            val canonicalName = referenceGenomeSchema.nucleotideSequences.first().name
+            return SequencePositionField(canonicalName, position, isSingleSegment = true)
         }
 
         val positionMatch = SEQUENCE_POSITION_REGEX.matchEntire(source)
