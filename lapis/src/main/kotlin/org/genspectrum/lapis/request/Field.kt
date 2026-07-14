@@ -22,8 +22,11 @@ data class SequencePositionField(
     val sequenceName: String,
     val position: Int,
 ) : RequestField {
+    /** Internal SaneQL alias, e.g. `S_501`. Used as the column name inside the query pipeline. */
     val columnAlias: String get() = "${sequenceName}_${position}"
-    override val outputColumnName: String get() = columnAlias
+    /** User-facing name echoed back in the response, e.g. `S[501]`. */
+    val userFacingName: String get() = "${sequenceName}[${position}]"
+    override val outputColumnName: String get() = userFacingName
 }
 
 fun interface FieldConverter<T> {
