@@ -75,6 +75,7 @@ import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
@@ -1491,6 +1492,13 @@ class LapisController(
     }
 
     private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
+        val positionFields = request.fields.filterIsInstance<SequencePositionField>()
+        if (positionFields.isNotEmpty()) {
+            throw BadRequestException(
+                "Sequence position fields are not supported for this endpoint: " +
+                    positionFields.joinToString(", ") { it.userFacingName },
+            )
+        }
         val fields = request.fields.filterIsInstance<Field>().map { it.fieldName }
 
         return DetailsCollection(
