@@ -62,7 +62,6 @@ import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.Field
-import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
@@ -370,21 +369,11 @@ class LapisController(
         )
     }
 
-    private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields): AggregatedCollection {
-        val aliasToUserFacingName = request.fields
-            .filterIsInstance<SequencePositionField>()
-            .associate { it.columnAlias to it.userFacingName }
-        val records = siloQueryModel.getAggregated(request).let { stream ->
-            if (aliasToUserFacingName.isEmpty()) stream
-            else stream.map { data ->
-                data.copy(fields = data.fields.mapKeys { aliasToUserFacingName[it.key] ?: it.key })
-            }
-        }
-        return AggregatedCollection(
-            records = records,
+    private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields) =
+        AggregatedCollection(
+            records = siloQueryModel.getAggregated(request),
             fields = request.fields.map { it.outputColumnName },
         )
-    }
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisNucleotideMutationsResponse

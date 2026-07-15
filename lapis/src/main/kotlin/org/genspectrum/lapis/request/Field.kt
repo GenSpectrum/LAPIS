@@ -23,9 +23,7 @@ data class SequencePositionField(
     val position: Int,
     val isSingleSegment: Boolean = false,
 ) : RequestField {
-    /** Internal SaneQL alias, e.g. `S_501`. Used as the column name inside the query pipeline. */
-    val columnAlias: String get() = "${sequenceName}_${position}"
-    /** User-facing name echoed back in the response, e.g. `S[501]` or `[501]` for single-segment shorthand. */
+    /** Name used both as the SaneQL alias and as the response column key, e.g. `S[501]` or `[501]` for shorthand. */
     val userFacingName: String get() = if (isSingleSegment) "[${position}]" else "${sequenceName}[${position}]"
     override val outputColumnName: String get() = userFacingName
 }
