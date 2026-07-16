@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -10,16 +11,20 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.expandAndValidatePositions
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
+import org.genspectrum.lapis.silo.CoOccurrencePositionColumn
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.coOccurrenceResponseFieldName
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
@@ -46,6 +51,29 @@ class SiloQueryModel(
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+
+    fun getCoOccurrence(
+        sequenceFilters: CoOccurrenceRequest,
+        sequenceName: String,
+        responsePrefix: String?,
+    ): Stream<AggregationData> {
+        val positions = sequenceFilters.positions.expandAndValidatePositions().map { position ->
+            CoOccurrencePositionColumn(position, coOccurrenceResponseFieldName(responsePrefix, position))
+        }
+
+        return siloClient.sendQuery(
+            SiloQuery(
+                SiloAction.coOccurrence(
+                    sequenceName = sequenceName,
+                    positions = positions,
+                    orderByFields = sequenceFilters.orderByFields,
+                    limit = sequenceFilters.limit,
+                    offset = sequenceFilters.offset,
+                ),
+                siloFilterExpressionMapper.map(sequenceFilters),
+            ),
+        )
+    }
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
         val fields = sequenceFilters.fields

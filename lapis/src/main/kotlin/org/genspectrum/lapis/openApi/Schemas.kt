@@ -17,6 +17,8 @@ import org.genspectrum.lapis.controller.ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DES
 import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_INSERTIONS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.CO_OCCURRENCE_ORDER_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.CO_OCCURRENCE_POSITIONS_DESCRIPTION
 import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
@@ -57,6 +59,7 @@ const val NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "NucleotideSequenceRequest"
 const val ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA = "AllNucleotideSequenceRequest"
 const val MUTATIONS_OVER_TIME_REQUEST_SCHEMA = "MutationsOverTimeRequest"
 const val QUERIES_OVER_TIME_REQUEST_SCHEMA = "QueriesOverTimeRequest"
+const val CO_OCCURRENCE_REQUEST_SCHEMA = "CoOccurrenceRequest"
 
 const val AGGREGATED_RESPONSE_SCHEMA = "AggregatedResponse"
 const val DETAILS_RESPONSE_SCHEMA = "DetailsResponse"
@@ -69,6 +72,7 @@ const val NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "NucleotideSequencesResponse"
 const val ALL_NUCLEOTIDE_SEQUENCES_RESPONSE_SCHEMA = "AllNucleotideSequencesResponse"
 const val AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AminoAcidSequencesResponse"
 const val ALL_AMINO_ACID_SEQUENCES_RESPONSE_SCHEMA = "AllAminoAcidSequencesResponse"
+const val CO_OCCURRENCE_RESPONSE_SCHEMA = "CoOccurrenceResponse"
 
 const val NUCLEOTIDE_MUTATIONS_SCHEMA = "NucleotideMutations"
 const val AMINO_ACID_MUTATIONS_SCHEMA = "AminoAcidMutations"
@@ -81,6 +85,8 @@ const val MUTATIONS_ORDER_BY_FIELDS_SCHEMA = "MutationsOrderByFields"
 const val INSERTIONS_ORDER_BY_FIELDS_SCHEMA = "InsertionsOrderByFields"
 const val AMINO_ACID_SEQUENCES_ORDER_BY_FIELDS_SCHEMA = "AminoAcidSequencesOrderByFields"
 const val NUCLEOTIDE_SEQUENCES_ORDER_BY_FIELDS_SCHEMA = "NucleotideSequencesOrderByFields"
+const val CO_OCCURRENCE_ORDER_BY_FIELDS_SCHEMA = "CoOccurrenceOrderByFields"
+const val CO_OCCURRENCE_POSITIONS_SCHEMA = "CoOccurrencePositions"
 const val LIMIT_SCHEMA = "Limit"
 const val OFFSET_SCHEMA = "Offset"
 const val FORMAT_SCHEMA = "DataFormat"
@@ -279,6 +285,22 @@ annotation class LapisAminoAcidInsertionsResponse
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @LapisResponseAnnotation(
+    content = [
+        Content(
+            schema = Schema(
+                ref = "#/components/schemas/$CO_OCCURRENCE_RESPONSE_SCHEMA",
+            ),
+        ),
+    ],
+)
+annotation class LapisCoOccurrenceResponse(
+    @get:AliasFor(annotation = LapisResponseAnnotation::class, attribute = "description")
+    val description: String = "",
+)
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@LapisResponseAnnotation(
     description = ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION,
     content = [
         Content(mediaType = LapisMediaType.TEXT_X_FASTA_VALUE, schema = Schema(type = "string")),
@@ -459,6 +481,23 @@ annotation class AminoAcidSequencesOrderByFields
     NUCLEOTIDE_SEQUENCES_ORDER_BY_DESCRIPTION,
 )
 annotation class NucleotideSequencesOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$CO_OCCURRENCE_ORDER_BY_FIELDS_SCHEMA"),
+    description = CO_OCCURRENCE_ORDER_BY_FIELDS_DESCRIPTION,
+)
+annotation class CoOccurrenceOrderByFields
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$CO_OCCURRENCE_POSITIONS_SCHEMA"),
+    description = CO_OCCURRENCE_POSITIONS_DESCRIPTION,
+    explode = Explode.TRUE,
+)
+annotation class CoOccurrencePositionsParam
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

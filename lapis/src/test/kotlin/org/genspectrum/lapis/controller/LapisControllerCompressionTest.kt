@@ -255,6 +255,30 @@ class LapisControllerCompressionTest(
                     mockDataCollection = MockDataForEndpoints.treeEndpointMockData(),
                     dataFormat = TreeEndpointMockDataCollection.DataFormat.NEWICK,
                     compressionFormat = COMPRESSION_FORMAT_ZSTD,
+                ) +
+                getCoOccurrenceRequests(
+                    endpoint = "$NUCLEOTIDE_CO_OCCURRENCE_ROUTE/main",
+                    mockDataCollection = MockDataForEndpoints.coOccurrenceMockData("main"),
+                    dataFormat = CSV,
+                    compressionFormat = COMPRESSION_FORMAT_GZIP,
+                ) +
+                getCoOccurrenceRequests(
+                    endpoint = "$NUCLEOTIDE_CO_OCCURRENCE_ROUTE/main",
+                    mockDataCollection = MockDataForEndpoints.coOccurrenceMockData("main"),
+                    dataFormat = TSV,
+                    compressionFormat = COMPRESSION_FORMAT_ZSTD,
+                ) +
+                getCoOccurrenceRequests(
+                    endpoint = "$AMINO_ACID_CO_OCCURRENCE_ROUTE/gene1",
+                    mockDataCollection = MockDataForEndpoints.coOccurrenceMockData("gene1"),
+                    dataFormat = NESTED_JSON,
+                    compressionFormat = COMPRESSION_FORMAT_GZIP,
+                ) +
+                getCoOccurrenceRequests(
+                    endpoint = "$AMINO_ACID_CO_OCCURRENCE_ROUTE/gene1",
+                    mockDataCollection = MockDataForEndpoints.coOccurrenceMockData("gene1"),
+                    dataFormat = CSV,
+                    compressionFormat = COMPRESSION_FORMAT_ZSTD,
                 )
 
         @JvmStatic
@@ -518,6 +542,93 @@ private fun getTreeRequests(
         expectedContentEncoding = compressionFormat,
     ),
 )
+
+private fun getCoOccurrenceRequests(
+    endpoint: String,
+    mockDataCollection: MockDataCollection,
+    dataFormat: MockDataCollection.DataFormat,
+    compressionFormat: String,
+): List<RequestScenario> {
+    val mockData = mockDataCollection.expecting(dataFormat)
+
+    return listOf(
+        RequestScenario(
+            callDescription = "GET $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = getComponent(endpoint)
+                .queryParam("positions", "1", "2")
+                .queryParam("dataFormat", dataFormat.fileFormat)
+                .queryParam("compression", compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
+        ),
+        RequestScenario(
+            callDescription = "GET $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = getComponent(endpoint)
+                .queryParam("positions", "1", "2")
+                .queryParam("dataFormat", dataFormat.fileFormat)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+        RequestScenario(
+            callDescription = "POST JSON $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = postComponent(endpoint)
+                .content(
+                    """
+                        {
+                            "positions": [1, 2],
+                            "dataFormat": "${dataFormat.fileFormat}",
+                            "compression": "$compressionFormat"
+                        }
+                    """.trimIndent(),
+                )
+                .contentType(APPLICATION_JSON),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
+        ),
+        RequestScenario(
+            callDescription = "POST JSON $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = postComponent(endpoint)
+                .content("""{"positions": [1, 2], "dataFormat": "${dataFormat.fileFormat}"}""")
+                .contentType(APPLICATION_JSON)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+        RequestScenario(
+            callDescription = "POST form url encoded $endpoint as $dataFormat with request parameter",
+            mockData = mockData,
+            request = postComponent(endpoint)
+                .param("positions", "1", "2")
+                .param("dataFormat", dataFormat.fileFormat)
+                .param("compression", compressionFormat)
+                .contentType(APPLICATION_FORM_URLENCODED),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForCompressionFormat(compressionFormat),
+            expectedContentEncoding = null,
+        ),
+        RequestScenario(
+            callDescription = "POST form url encoded $endpoint as $dataFormat with accept header",
+            mockData = mockData,
+            request = postComponent(endpoint)
+                .param("positions", "1", "2")
+                .param("dataFormat", dataFormat.fileFormat)
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .header(ACCEPT_ENCODING, compressionFormat),
+            compressionFormat = compressionFormat,
+            expectedContentType = getContentTypeForDataFormat(dataFormat),
+            expectedContentEncoding = compressionFormat,
+        ),
+    )
+}
 
 fun getContentTypeForCompressionFormat(compressionFormat: String) =
     when (compressionFormat) {

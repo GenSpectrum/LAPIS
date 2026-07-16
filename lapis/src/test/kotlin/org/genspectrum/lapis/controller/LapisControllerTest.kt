@@ -539,6 +539,10 @@ fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path"
 
 fun postSample(path: String): MockHttpServletRequestBuilder = post("/sample/$path")
 
+fun getComponent(path: String): MockHttpServletRequestBuilder = get("/component$path")
+
+fun postComponent(path: String): MockHttpServletRequestBuilder = post("/component$path")
+
 private fun mutationRequestsForMinProportion(
     endpoint: String,
 ): List<Pair<String, (Any?) -> MockHttpServletRequestBuilder>> =

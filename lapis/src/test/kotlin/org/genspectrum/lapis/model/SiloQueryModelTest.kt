@@ -13,6 +13,8 @@ import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
+import org.genspectrum.lapis.request.CoOccurrencePosition
+import org.genspectrum.lapis.request.CoOccurrenceRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationsField
@@ -30,6 +32,7 @@ import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
+import org.genspectrum.lapis.silo.CoOccurrencePositionColumn
 import org.genspectrum.lapis.silo.SequenceType
 import org.genspectrum.lapis.silo.SiloAction
 import org.genspectrum.lapis.silo.SiloClient
@@ -39,6 +42,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.StringNode
 import java.util.stream.Stream
 
 private val someMutationData = MutationData(
@@ -522,6 +526,126 @@ class SiloQueryModelTest {
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
                         ).toOrderBySpec(),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getCoOccurrence calls SILO naming the columns with the prefixed response field names`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.of(
+            AggregationData(48, mapOf("segment1:1" to StringNode("A"), "segment1:421" to StringNode("T"))),
+        )
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val result = underTest.getCoOccurrence(
+            CoOccurrenceRequest(
+                sequenceFilters = emptyMap(),
+                nucleotideMutations = emptyList(),
+                aminoAcidMutations = emptyList(),
+                nucleotideInsertions = emptyList(),
+                aminoAcidInsertions = emptyList(),
+                positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(421)),
+            ),
+            sequenceName = "segment1",
+            responsePrefix = "segment1",
+        ).toList()
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.coOccurrence(
+                        "segment1",
+                        listOf(
+                            CoOccurrencePositionColumn(1, "segment1:1"),
+                            CoOccurrencePositionColumn(421, "segment1:421"),
+                        ),
+                    ),
+                    True,
+                ),
+            )
+        }
+
+        assertThat(
+            result,
+            equalTo(
+                listOf(
+                    AggregationData(
+                        48,
+                        mapOf("segment1:1" to StringNode("A"), "segment1:421" to StringNode("T")),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `getCoOccurrence with a null responsePrefix names the columns with bare positions`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getCoOccurrence(
+            CoOccurrenceRequest(
+                sequenceFilters = emptyMap(),
+                nucleotideMutations = emptyList(),
+                aminoAcidMutations = emptyList(),
+                nucleotideInsertions = emptyList(),
+                aminoAcidInsertions = emptyList(),
+                positions = listOf(CoOccurrencePosition.Single(1), CoOccurrencePosition.Single(421)),
+            ),
+            sequenceName = "main",
+            responsePrefix = null,
+        ).toList()
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.coOccurrence(
+                        "main",
+                        listOf(
+                            CoOccurrencePositionColumn(1, "1"),
+                            CoOccurrencePositionColumn(421, "421"),
+                        ),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getCoOccurrence passes orderBy fields to SILO unchanged`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        val orderByFields = listOf(
+            OrderByField("segment1:1", Order.DESCENDING),
+            OrderByField("count", Order.ASCENDING),
+        ).toOrderBySpec()
+
+        underTest.getCoOccurrence(
+            CoOccurrenceRequest(
+                sequenceFilters = emptyMap(),
+                nucleotideMutations = emptyList(),
+                aminoAcidMutations = emptyList(),
+                nucleotideInsertions = emptyList(),
+                aminoAcidInsertions = emptyList(),
+                positions = listOf(CoOccurrencePosition.Single(1)),
+                orderByFields = orderByFields,
+            ),
+            sequenceName = "segment1",
+            responsePrefix = "segment1",
+        ).toList()
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.coOccurrence(
+                        sequenceName = "segment1",
+                        positions = listOf(CoOccurrencePositionColumn(1, "segment1:1")),
+                        orderByFields = orderByFields,
                     ),
                     True,
                 ),

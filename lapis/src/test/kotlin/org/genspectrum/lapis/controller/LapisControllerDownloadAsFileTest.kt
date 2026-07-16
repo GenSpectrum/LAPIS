@@ -215,6 +215,25 @@ class LapisControllerDownloadAsFileTest(
             )
     }
 
+    @Test
+    fun `GIVEN a co-occurrence request WHEN downloading as file THEN the filename is based on the route`() {
+        val mockData = MockDataForEndpoints.coOccurrenceMockData("main")
+            .expecting(MockDataCollection.DataFormat.CSV)
+        mockData.mockWithData(siloQueryModelMock)
+
+        mockMvc.perform(
+            getComponent(
+                "$NUCLEOTIDE_CO_OCCURRENCE_ROUTE/main?positions=1,2&$DOWNLOAD_AS_FILE_PROPERTY=true",
+            )
+                .header(ACCEPT, "text/csv"),
+        )
+            .andExpect(status().isOk)
+            .andExpectAttachmentWithContent(
+                expectedFilename = "nucleotideCoOccurrence.csv",
+                assertFileContentMatches = mockData.assertDataMatches,
+            )
+    }
+
     private fun ResultActions.andExpectAttachmentWithContent(
         expectedFilename: String,
         assertFileContentMatches: (String) -> Unit,

@@ -270,6 +270,41 @@ class SiloQueryToSaneQlTest {
                     ),
                     """.project({"field1", "field2", "someSequenceName"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
+                // CoOccurrence
+                Arguments.of(
+                    SiloAction.coOccurrence("segment1", listOf(CoOccurrencePositionColumn(1, "segment1:1"))),
+                    """.project({"segment1"}).map({"segment1:1":="segment1".at(1)})""" +
+                        """.groupBy({count:=count()}, {"segment1:1"})""",
+                ),
+                Arguments.of(
+                    SiloAction.coOccurrence(
+                        "segment1",
+                        listOf(
+                            CoOccurrencePositionColumn(1, "segment1:1"),
+                            CoOccurrencePositionColumn(421, "segment1:421"),
+                        ),
+                    ),
+                    """.project({"segment1"})""" +
+                        """.map({"segment1:1":="segment1".at(1), "segment1:421":="segment1".at(421)})""" +
+                        """.groupBy({count:=count()}, {"segment1:1", "segment1:421"})""",
+                ),
+                Arguments.of(
+                    SiloAction.coOccurrence(
+                        sequenceName = "main",
+                        positions = listOf(
+                            CoOccurrencePositionColumn(1, "1"),
+                            CoOccurrencePositionColumn(2, "2"),
+                        ),
+                        orderByFields = listOf(
+                            OrderByField("count", Order.DESCENDING),
+                        ).toOrderBySpec(),
+                        limit = 100,
+                        offset = 50,
+                    ),
+                    """.project({"main"}).map({"1":="main".at(1), "2":="main".at(2)})""" +
+                        """.groupBy({count:=count()}, {"1", "2"})""" +
+                        """.orderBy({"count".desc()}).offset(50).limit(100)""",
+                ),
                 // MostRecentCommonAncestor
                 Arguments.of(
                     SiloAction.mostRecentCommonAncestor("phyloTreeField"),

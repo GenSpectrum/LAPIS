@@ -202,7 +202,8 @@ class CompressionFilter(
         if (downloadAsFile) {
             return response
         }
-        if (!reReadableRequest.getProxyAwarePath().startsWith("/sample")) {
+        val path = reReadableRequest.getProxyAwarePath()
+        if (!path.startsWith("/sample") && !path.startsWith("/component")) {
             return response
         }
 

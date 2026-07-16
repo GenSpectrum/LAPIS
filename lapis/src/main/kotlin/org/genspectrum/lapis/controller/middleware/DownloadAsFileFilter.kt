@@ -3,9 +3,11 @@ package org.genspectrum.lapis.controller.middleware
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.controller.AMINO_ACID_CO_OCCURRENCE_ROUTE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
+import org.genspectrum.lapis.controller.NUCLEOTIDE_CO_OCCURRENCE_ROUTE
 import org.genspectrum.lapis.controller.SampleRoute
 import org.genspectrum.lapis.controller.ServeType
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
@@ -19,6 +21,17 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import tools.jackson.databind.ObjectMapper
+
+/**
+ * Maps routes under `/component` to their default download filename.
+ * Unlike routes under `/sample`, these aren't registered in [SampleRoute] since that enum's other
+ * consumers (e.g. test scenario builders) assume a route can be requested without any extra
+ * required parameters, which doesn't hold for e.g. the co-occurrence routes (they require `positions`).
+ */
+private val COMPONENT_ROUTE_FILENAMES = mapOf(
+    NUCLEOTIDE_CO_OCCURRENCE_ROUTE to "nucleotideCoOccurrence",
+    AMINO_ACID_CO_OCCURRENCE_ROUTE to "aminoAcidCoOccurrence",
+)
 
 @Component
 @Order(DOWNLOAD_AS_FILE_FILTER_ORDER)
@@ -43,10 +56,15 @@ class DownloadAsFileFilter(
     }
 
     private fun getFilename(request: CachedBodyHttpServletRequest): String {
-        val matchingRoute =
-            SampleRoute.entries.find { request.getProxyAwarePath().startsWith("/sample${it.pathSegment}") }
+        val path = request.getProxyAwarePath()
+        val matchingRoute = SampleRoute.entries.find { path.startsWith("/sample${it.pathSegment}") }
+        val matchingComponentRouteName = COMPONENT_ROUTE_FILENAMES.entries
+            .find { (routeSegment, _) -> path.startsWith("/component$routeSegment") }
+            ?.value
+
         val dataName = request.getStringField(DOWNLOAD_FILE_BASENAME_PROPERTY)
             ?: matchingRoute?.pathSegment?.trim('/')
+            ?: matchingComponentRouteName
             ?: "data"
 
         val compressionEnding = when (val compressionSource = requestCompression.compressionSource) {

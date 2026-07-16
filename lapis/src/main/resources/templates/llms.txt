@@ -140,6 +140,23 @@ Endpoints:
 - [sample/aminoAcidInsertions](sample/aminoAcidInsertions): List amino acid insertions.
   Shows how often which insertion of amino acids occurred in the amino acid sequences for the given filters.
 
+### Co-occurrence Analysis
+
+These endpoints return, for a given sequence and a list of positions, every combination of symbols that occurs
+at those positions among the sequences matching your filters, along with the count of sequences for each
+combination. Useful for checking whether mutations at different positions occur together or independently.
+These endpoints are available as GET or POST.
+
+Both require a `positions` parameter: an array where each entry is either a number (a single 1-based position)
+or an object `{"from": <number>, "to": <number>}` (an inclusive range of positions).
+
+[# th:if="${isSingleSegmented}"]- [component/nucleotideCoOccurrence](component/nucleotideCoOccurrence):
+  Returns symbol co-occurrence counts at the given nucleotide positions.[/]
+[# th:unless="${isSingleSegmented}"]- [component/nucleotideCoOccurrence/{segment}](component/nucleotideCoOccurrence/{segment}):
+  Returns symbol co-occurrence counts at the given nucleotide positions for the given segment.[/]
+- [component/aminoAcidCoOccurrence/{gene}](component/aminoAcidCoOccurrence/{gene}):
+  Returns symbol co-occurrence counts at the given amino acid positions for the given gene.
+
 ### Time Series
 
 These endpoints are mainly built for specialized display components that show time series data in a tabular form.

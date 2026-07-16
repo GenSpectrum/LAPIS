@@ -184,6 +184,22 @@ sealed class SiloAction<ResponseType>(
                 randomize = getRandomize(orderByFields),
             )
 
+        fun coOccurrence(
+            sequenceName: String,
+            positions: List<CoOccurrencePositionColumn>,
+            orderByFields: OrderBySpec = OrderBySpec.EMPTY,
+            limit: Int? = null,
+            offset: Int? = null,
+        ): SiloAction<AggregationData> =
+            CoOccurrenceAction(
+                sequenceName = sequenceName,
+                positions = positions,
+                orderByFields = getOrderByFieldsList(orderByFields),
+                randomize = getRandomize(orderByFields),
+                limit = limit,
+                offset = offset,
+            )
+
         fun genomicSequence(
             type: SequenceType,
             sequenceNames: List<String>,
@@ -246,6 +262,51 @@ sealed class SiloAction<ResponseType>(
                     },
                 ),
             )
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    data class CoOccurrenceAction(
+        val sequenceName: String,
+        val positions: List<CoOccurrencePositionColumn>,
+        override val orderByFields: List<OrderByField> = emptyList(),
+        override val randomize: RandomizeConfig? = null,
+        override val limit: Int? = null,
+        override val offset: Int? = null,
+    ) : SiloAction<AggregationData>(
+            arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
+            cacheable = true,
+        ) {
+        val type: String = "CoOccurrence"
+
+        override fun ownSaneQlSteps(): List<SaneQlStep> {
+            val sequenceColumn = id(sequenceName)
+            val columnIdentifiers = positions.map { id(it.columnName) }
+
+            val mapAssignments = positions.zip(columnIdentifiers).map { (position, columnIdentifier) ->
+                SaneQlAssignment(
+                    name = columnIdentifier.render(),
+                    value = SaneQlMethodCall(
+                        sequenceColumn,
+                        "at",
+                        positionalArgs = listOf(SaneQlInt(position.position)),
+                    ),
+                )
+            }
+
+            return listOf(
+                // Narrow down to just the sequence column before mapping, so that the map column names
+                // (e.g. "S:478") can't collide with any other (e.g. metadata) column in the table.
+                SaneQlStep("project", positionalArgs = listOf(SaneQlList(listOf(sequenceColumn)))),
+                SaneQlStep("map", positionalArgs = listOf(SaneQlList(mapAssignments))),
+                SaneQlStep(
+                    "groupBy",
+                    positionalArgs = listOf(
+                        SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))),
+                        SaneQlList(columnIdentifiers),
+                    ),
+                ),
+            )
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -706,6 +767,28 @@ private fun isNull(column: String) = SaneQlFunctionCall("isNull", positionalArgs
 private fun intOrNull(value: Int?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlInt(value)
 
 private fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlFloat(value)
+
+/**
+ * A 1-based co-occurrence [position] together with the [columnName] that SILO should use for it in both
+ * the groupBy/map step and the response. This is also the field name in the LAPIS API response, so no
+ * translation is needed on the way back (see [coOccurrenceResponseFieldName]).
+ */
+data class CoOccurrencePositionColumn(
+    val position: Int,
+    val columnName: String,
+)
+
+/**
+ * The field name used in the LAPIS API response (and as the SILO groupBy/map column name) for a given
+ * 1-based co-occurrence position.
+ * [responsePrefix] is the sequence/segment/gene name to prefix the position with (e.g. "S" -> "S:123").
+ * It is null for single-segmented nucleotide sequences, where the segment name is implicit and thus
+ * omitted (e.g. -> "123"), mirroring the convention used for nucleotide mutations.
+ */
+fun coOccurrenceResponseFieldName(
+    responsePrefix: String?,
+    position: Int,
+) = if (responsePrefix == null) "$position" else "$responsePrefix:$position"
 
 enum class SequenceType {
     @JsonProperty("Fasta")
