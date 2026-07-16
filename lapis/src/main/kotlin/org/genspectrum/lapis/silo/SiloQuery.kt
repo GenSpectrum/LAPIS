@@ -294,6 +294,9 @@ sealed class SiloAction<ResponseType>(
             }
 
             return listOf(
+                // Narrow down to just the sequence column before mapping, so that the map column names
+                // (e.g. "S:478") can't collide with any other (e.g. metadata) column in the table.
+                SaneQlStep("project", positionalArgs = listOf(SaneQlList(listOf(sequenceColumn)))),
                 SaneQlStep("map", positionalArgs = listOf(SaneQlList(mapAssignments))),
                 SaneQlStep(
                     "groupBy",

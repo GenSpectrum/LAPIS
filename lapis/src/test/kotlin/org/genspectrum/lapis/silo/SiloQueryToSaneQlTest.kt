@@ -273,7 +273,8 @@ class SiloQueryToSaneQlTest {
                 // CoOccurrence
                 Arguments.of(
                     SiloAction.coOccurrence("segment1", listOf(CoOccurrencePositionColumn(1, "segment1:1"))),
-                    """.map({"segment1:1":="segment1".at(1)}).groupBy({count:=count()}, {"segment1:1"})""",
+                    """.project({"segment1"}).map({"segment1:1":="segment1".at(1)})""" +
+                        """.groupBy({count:=count()}, {"segment1:1"})""",
                 ),
                 Arguments.of(
                     SiloAction.coOccurrence(
@@ -283,7 +284,8 @@ class SiloQueryToSaneQlTest {
                             CoOccurrencePositionColumn(421, "segment1:421"),
                         ),
                     ),
-                    """.map({"segment1:1":="segment1".at(1), "segment1:421":="segment1".at(421)})""" +
+                    """.project({"segment1"})""" +
+                        """.map({"segment1:1":="segment1".at(1), "segment1:421":="segment1".at(421)})""" +
                         """.groupBy({count:=count()}, {"segment1:1", "segment1:421"})""",
                 ),
                 Arguments.of(
@@ -299,7 +301,7 @@ class SiloQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.map({"1":="main".at(1), "2":="main".at(2)})""" +
+                    """.project({"main"}).map({"1":="main".at(1), "2":="main".at(2)})""" +
                         """.groupBy({count:=count()}, {"1", "2"})""" +
                         """.orderBy({"count".desc()}).offset(50).limit(100)""",
                 ),
