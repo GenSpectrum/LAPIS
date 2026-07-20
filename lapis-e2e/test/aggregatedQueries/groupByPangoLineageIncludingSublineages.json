@@ -1,0 +1,201 @@
+{
+  "_comment": "Sublineage-inclusive aggregation (includeSublineagesFor). This case FAILS in CI until a lapis-silo image containing the feature is published and SILO_TAG (lapis.yml / docker-compose.yml) is bumped to it; the LAPIS PR depends on a SILO release. orderBy(count desc, pangoLineage asc) + limit make the returned set deterministic (the full result is one row per defined lineage incl. thousands of zero-count rows). Expected counts were produced by running the built SILO + LAPIS against this same testData/singleSegmented dataset.",
+  "testCaseName": "aggregate by pango lineage including sublineages",
+  "lapisRequest": {
+    "fields": ["pangoLineage"],
+    "includeSublineagesFor": "pangoLineage",
+    "orderBy": [
+      {
+        "field": "count",
+        "type": "descending"
+      },
+      {
+        "field": "pangoLineage",
+        "type": "ascending"
+      }
+    ],
+    "limit": 45
+  },
+  "expected": [
+    {
+      "pangoLineage": "B",
+      "count": 97
+    },
+    {
+      "pangoLineage": "B.1",
+      "count": 97
+    },
+    {
+      "pangoLineage": "B.1.1",
+      "count": 61
+    },
+    {
+      "pangoLineage": "B.1.1.7",
+      "count": 51
+    },
+    {
+      "pangoLineage": "B.1.177",
+      "count": 11
+    },
+    {
+      "pangoLineage": "B.1.617",
+      "count": 8
+    },
+    {
+      "pangoLineage": "B.1.617.2",
+      "count": 8
+    },
+    {
+      "pangoLineage": "B.1.160",
+      "count": 7
+    },
+    {
+      "pangoLineage": "AY.43",
+      "count": 4
+    },
+    {
+      "pangoLineage": "B.1.221",
+      "count": 3
+    },
+    {
+      "pangoLineage": "Q.7",
+      "count": 3
+    },
+    {
+      "pangoLineage": "B.1.1.189",
+      "count": 2
+    },
+    {
+      "pangoLineage": "B.1.1.39",
+      "count": 2
+    },
+    {
+      "pangoLineage": "B.1.177.44",
+      "count": 2
+    },
+    {
+      "pangoLineage": "B.1.258",
+      "count": 2
+    },
+    {
+      "pangoLineage": "AY.122",
+      "count": 1
+    },
+    {
+      "pangoLineage": "AY.9",
+      "count": 1
+    },
+    {
+      "pangoLineage": "AY.9.2",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.1.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.1.28",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.1.70",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.160.16",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.258.17",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.36",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.36.35",
+      "count": 1
+    },
+    {
+      "pangoLineage": "B.1.525",
+      "count": 1
+    },
+    {
+      "pangoLineage": "C.36",
+      "count": 1
+    },
+    {
+      "pangoLineage": "C.36.3",
+      "count": 1
+    },
+    {
+      "pangoLineage": "GD.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "GL.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "P.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XAY",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XAY.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XAY.1.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XAY.1.1.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XBB",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XBB.1",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XBB.1.9",
+      "count": 1
+    },
+    {
+      "pangoLineage": "XBB.1.9.3",
+      "count": 1
+    },
+    {
+      "pangoLineage": "A",
+      "count": 0
+    },
+    {
+      "pangoLineage": "A.1",
+      "count": 0
+    },
+    {
+      "pangoLineage": "A.11",
+      "count": 0
+    },
+    {
+      "pangoLineage": "A.12",
+      "count": 0
+    },
+    {
+      "pangoLineage": "A.15",
+      "count": 0
+    },
+    {
+      "pangoLineage": "A.16",
+      "count": 0
+    }
+  ]
+}
