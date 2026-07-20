@@ -37,6 +37,39 @@ To include sub-lineages, add `*` at the end of the lineage:
 `B.1.1*` and `B.1.1.*` are equivalent.
 Both match `B.1.1` itself and descendants such as `B.1.1.7`.
 
+## Aggregating Including Sublineages
+
+The `*` suffix above includes descendants when _filtering_.
+The `includeSublineagesFor` parameter is the _aggregation_ counterpart:
+it groups the [`/sample/aggregated`](../references/introduction) results by a lineage field so that each
+lineage's count includes the sequences assigned to that lineage **or any of its sublineages**.
+
+Name the lineage field to expand with `includeSublineagesFor`, and list that same field in `fields`:
+
+<Code lang='http' code={`GET /sample/aggregated?fields=${lineageField}&includeSublineagesFor=${lineageField}`} />
+
+In a POST request:
+
+<Code lang='json' code={JSON.stringify({ fields: [lineageField], includeSublineagesFor: lineageField }, null, 4)} />
+
+The response contains **one row per lineage defined for that field**, including lineages that have a
+count of zero. This makes the result well-suited to building lineage facets, where you want every
+possible lineage listed even if no sequence currently matches.
+
+:::caution
+**`includeSublineagesFor` can only group by a single field.**
+The field it names must be the **only** entry in `fields`. Combining sublineage-inclusive aggregation
+with any other group-by field (for example adding `country` to `fields`) is **not supported** and
+returns an error. If you need a breakdown by another field as well, run separate queries.
+:::
+
+:::caution
+Unlike a plain group-by, these counts do **not** partition the data.
+A sequence is counted under its own lineage _and_ under every ancestor lineage,
+so if `B.1.1` is a sub-lineage of `B.1`, a `B.1.1` sequence contributes to both the `B.1.1` and the
+`B.1` count. As a result the counts do not sum to the total number of sequences.
+:::
+
 ## Advanced Queries
 
 Lineage-indexed fields can also be used in [advanced queries](../concepts/advanced-query):
