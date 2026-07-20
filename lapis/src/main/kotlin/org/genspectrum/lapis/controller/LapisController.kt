@@ -33,6 +33,7 @@ import org.genspectrum.lapis.openApi.GENES_DESCRIPTION
 import org.genspectrum.lapis.openApi.GENE_SCHEMA
 import org.genspectrum.lapis.openApi.Gene
 import org.genspectrum.lapis.openApi.INSERTIONS_REQUEST_SCHEMA
+import org.genspectrum.lapis.openApi.IncludeSublineagesForField
 import org.genspectrum.lapis.openApi.InsertionsOrderByFields
 import org.genspectrum.lapis.openApi.LapisAggregatedResponse
 import org.genspectrum.lapis.openApi.LapisAlignedAminoAcidSequenceResponse
@@ -121,6 +122,9 @@ class LapisController(
         @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
+        @IncludeSublineagesForField
+        @RequestParam
+        includeSublineagesFor: String?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -157,6 +161,7 @@ class LapisController(
             orderBy.toOrderBySpec(),
             limit,
             offset,
+            includeSublineagesFor,
         )
 
         lapisResponseStreamer.streamData(
@@ -179,6 +184,9 @@ class LapisController(
         @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
+        @IncludeSublineagesForField
+        @RequestParam
+        includeSublineagesFor: String?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -216,6 +224,7 @@ class LapisController(
             orderBy.toOrderBySpec(),
             limit,
             offset,
+            includeSublineagesFor,
         )
 
         lapisResponseStreamer.streamData(
@@ -241,6 +250,9 @@ class LapisController(
         @FieldsToAggregateBy
         @RequestParam
         fields: List<String>?,
+        @IncludeSublineagesForField
+        @RequestParam
+        includeSublineagesFor: String?,
         @AggregatedOrderByFields
         @RequestParam
         orderBy: List<OrderByField>?,
@@ -278,6 +290,7 @@ class LapisController(
             orderBy.toOrderBySpec(),
             limit,
             offset,
+            includeSublineagesFor,
         )
 
         lapisResponseStreamer.streamData(

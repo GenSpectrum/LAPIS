@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -10,6 +11,7 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -34,18 +36,73 @@ class SiloQueryModel(
 ) {
     private val allMetadataFields = databaseConfig.schema.metadata.map { it.name }
 
-    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
-        siloClient.sendQuery(
+    private val canonicalFieldNameByLowercase =
+        databaseConfig.schema.metadata.associate { it.name.lowercase() to it.name }
+
+    private val lineageFieldNames =
+        databaseConfig.schema.metadata.filter { it.generateLineageIndex != null }.map { it.name }.toSet()
+
+    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields): Stream<AggregationData> {
+        val fields = sequenceFilters.fields.map { it.fieldName }
+        val includeSublineagesFor = resolveIncludeSublineagesFor(sequenceFilters.includeSublineagesFor, fields)
+
+        return siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    sequenceFilters.fields.map { it.fieldName },
+                    fields,
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,
+                    includeSublineagesFor = includeSublineagesFor,
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
         )
+    }
+
+    /**
+     * Validates the `includeSublineagesFor` request parameter and resolves it to the canonical field name.
+     *
+     * v1 constraint (enforced by the SILO backend): when set, the named field must be a lineage-indexed
+     * field, must be present in [fields], and must be the only group-by field. We reject unsupported
+     * combinations here with a clear message rather than forwarding a query SILO would reject cryptically.
+     */
+    private fun resolveIncludeSublineagesFor(
+        includeSublineagesFor: String?,
+        fields: List<String>,
+    ): String? {
+        if (includeSublineagesFor == null) {
+            return null
+        }
+
+        val canonicalName = canonicalFieldNameByLowercase[includeSublineagesFor.lowercase()]
+            ?: throw BadRequestException(
+                "Unknown field '$includeSublineagesFor' in 'includeSublineagesFor', known values are $allMetadataFields",
+            )
+
+        if (canonicalName !in lineageFieldNames) {
+            throw BadRequestException(
+                "'includeSublineagesFor' must name a lineage field, but '$canonicalName' is not a lineage field. " +
+                    "Lineage fields are $lineageFieldNames",
+            )
+        }
+
+        if (canonicalName !in fields) {
+            throw BadRequestException(
+                "'includeSublineagesFor' field '$canonicalName' must also be present in 'fields'",
+            )
+        }
+
+        if (fields.size != 1) {
+            throw BadRequestException(
+                "When 'includeSublineagesFor' is set, 'fields' must contain exactly the single lineage field " +
+                    "'$canonicalName'. Grouping by lineage-with-sublineages together with other fields is not " +
+                    "supported.",
+            )
+        }
+
+        return canonicalName
+    }
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
         val fields = sequenceFilters.fields
