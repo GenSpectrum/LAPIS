@@ -21,6 +21,7 @@ import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_ORDER_BY_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.INCLUDE_SUBLINEAGES_FOR_DESCRIPTION
 import org.genspectrum.lapis.controller.INSERTIONS_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION
@@ -89,6 +90,7 @@ const val TREE_DATA_FORMAT_SCHEMA = "TreeDataFormat"
 const val NUCLEOTIDE_FASTA_HEADER_TEMPLATE_SCHEMA = "NucleotideFastaHeaderTemplate"
 const val AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA = "AminoAcidFastaHeaderTemplate"
 const val FIELDS_TO_AGGREGATE_BY_SCHEMA = "FieldsToAggregateBy"
+const val INCLUDE_SUBLINEAGES_FOR_SCHEMA = "IncludeSublineagesFor"
 const val DETAILS_FIELDS_SCHEMA = "DetailsFields"
 const val PHYLO_TREE_FIELD_SCHEMA = "PhyloTreeField"
 const val MUTATIONS_FIELDS_SCHEMA = "MutationsFields"
@@ -546,6 +548,14 @@ annotation class AminoAcidFastaHeaderTemplateParam
     description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
 )
 annotation class FieldsToAggregateBy
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@Parameter(
+    schema = Schema(ref = "#/components/schemas/$INCLUDE_SUBLINEAGES_FOR_SCHEMA"),
+    description = INCLUDE_SUBLINEAGES_FOR_DESCRIPTION,
+)
+annotation class IncludeSublineagesForField
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)

@@ -82,14 +82,24 @@ sealed class SiloAction<ResponseType>(
         }
 
     companion object {
+        /**
+         * @param includeSublineagesFor when non-null, names the single lineage-indexed field to group by
+         * *including all sublineages*. In this case [groupByFields] is ignored and the group-by column is
+         * rendered as `lineage(<field>, includeSublineages:=true)`. Callers must have validated that this
+         * field is a lineage field, is present in [groupByFields], and is the only group-by field.
+         */
         fun aggregated(
             groupByFields: List<String> = emptyList(),
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
+            includeSublineagesFor: String? = null,
         ): SiloAction<AggregationData> =
             AggregatedAction(
-                groupByFields = groupByFields,
+                groupByFields = when (includeSublineagesFor) {
+                    null -> groupByFields.map { GroupByField.Plain(it) }
+                    else -> listOf(GroupByField.LineageWithSublineages(includeSublineagesFor))
+                },
                 orderByFields = getOrderByFieldsList(orderByFields),
                 randomize = getRandomize(orderByFields),
                 limit = limit,
@@ -223,7 +233,7 @@ sealed class SiloAction<ResponseType>(
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     data class AggregatedAction(
-        val groupByFields: List<String>,
+        val groupByFields: List<GroupByField>,
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
@@ -241,7 +251,7 @@ sealed class SiloAction<ResponseType>(
                     positionalArgs = buildList {
                         add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
                         if (groupByFields.isNotEmpty()) {
-                            add(SaneQlList(groupByFields.map { id(it) }))
+                            add(SaneQlList(groupByFields.map { it.toSaneQl() }))
                         }
                     },
                 ),
@@ -399,6 +409,61 @@ sealed class SiloAction<ResponseType>(
         override fun ownSaneQlSteps(): List<SaneQlStep> {
             val allFields = additionalFields + sequenceNames
             return listOf(SaneQlStep("project", positionalArgs = listOf(SaneQlList(allFields.map { id(it) }))))
+        }
+    }
+}
+
+/**
+ * A single group-by column of an [SiloAction.AggregatedAction].
+ *
+ * [Plain] renders as a bare column identifier (`id(name)` → `"name"`), exactly as before.
+ * [LineageWithSublineages] renders as `lineage("name", includeSublineages:=true)`, telling SILO to
+ * produce one count per defined lineage where each count includes that lineage's sublineages.
+ */
+@JsonSerialize(using = GroupByFieldSerializer::class)
+sealed interface GroupByField {
+    val name: String
+
+    fun toSaneQl(): SaneQlExpression
+
+    data class Plain(
+        override val name: String,
+    ) : GroupByField {
+        override fun toSaneQl(): SaneQlExpression = id(name)
+    }
+
+    data class LineageWithSublineages(
+        override val name: String,
+    ) : GroupByField {
+        override fun toSaneQl(): SaneQlExpression =
+            SaneQlFunctionCall(
+                "lineage",
+                positionalArgs = listOf(id(name)),
+                namedArgs = listOf(SaneQlNamedArg("includeSublineages", SaneQlBoolean(true))),
+            )
+    }
+}
+
+/**
+ * Serializes [GroupByField] so the (non-wire, informational) action JSON keeps its historic shape:
+ * a [GroupByField.Plain] becomes a bare string, so `groupByFields` still renders as `["a", "b"]`.
+ * A [GroupByField.LineageWithSublineages] becomes `{"lineage": "...", "includeSublineages": true}`.
+ * The actual query sent to SILO is the SaneQL string from [SiloQuery.toSaneQl], not this JSON.
+ */
+class GroupByFieldSerializer : ValueSerializer<GroupByField>() {
+    override fun serialize(
+        value: GroupByField,
+        gen: JsonGenerator,
+        serializers: SerializationContext,
+    ) {
+        when (value) {
+            is GroupByField.Plain -> gen.writeString(value.name)
+            is GroupByField.LineageWithSublineages -> {
+                gen.writeStartObject()
+                gen.writeStringProperty("lineage", value.name)
+                gen.writeBooleanProperty("includeSublineages", true)
+                gen.writeEndObject()
+            }
         }
     }
 }

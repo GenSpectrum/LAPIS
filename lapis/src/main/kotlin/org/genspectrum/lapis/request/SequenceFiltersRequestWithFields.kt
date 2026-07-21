@@ -7,6 +7,7 @@ import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.NullNode
 
 data class SequenceFiltersRequestWithFields(
     override val sequenceFilters: SequenceFilters,
@@ -18,6 +19,11 @@ data class SequenceFiltersRequestWithFields(
     override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
+    /**
+     * When set, names the lineage field to group by *including all sublineages* (see the
+     * `includeSublineagesFor` request parameter). Validated and resolved in [SiloQueryModel.getAggregated].
+     */
+    val includeSublineagesFor: String? = null,
 ) : CommonSequenceFilters
 
 @JacksonComponent
@@ -31,6 +37,7 @@ class SequenceFiltersRequestWithFieldsDeserializer(
         val node = jsonParser.readValueAsTree<JsonNode>()
 
         val fields = parseFieldsProperty(node, caseInsensitiveFieldConverter)
+        val includeSublineagesFor = parseIncludeSublineagesForProperty(node)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequestWithFields(
@@ -43,9 +50,22 @@ class SequenceFiltersRequestWithFieldsDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
+            includeSublineagesFor,
         )
     }
 }
+
+fun parseIncludeSublineagesForProperty(node: JsonNode): String? =
+    when (val value = node.get(INCLUDE_SUBLINEAGES_FOR_PROPERTY)) {
+        null, is NullNode -> null
+        else -> if (value.isString) {
+            value.stringValue()
+        } else {
+            throw BadRequestException(
+                "$INCLUDE_SUBLINEAGES_FOR_PROPERTY must be a string, ${butWas(value)}",
+            )
+        }
+    }
 
 fun <T> parseFieldsProperty(
     node: JsonNode,

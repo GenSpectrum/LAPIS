@@ -12,3 +12,17 @@ This page is generated from the underlying LAPIS configuration.
 This instance of LAPIS supports the following fields:
 
 <FieldsTable />
+
+## Grouping By Fields
+
+On `/sample/aggregated` you can group the counts by one or more of these fields with the `fields`
+parameter, for example `GET /sample/aggregated?fields=country` to get the count per country.
+
+For a lineage-indexed field you can additionally group so that each lineage's count includes all of
+its sublineages, using the `includeSublineagesFor` parameter.
+See [aggregating including sublineages](../concepts/lineage-queries#aggregating-including-sublineages).
+
+:::caution
+`includeSublineagesFor` can only group by a **single** field: the field it names must be the only
+entry in `fields`. It cannot be combined with grouping by any other field.
+:::
