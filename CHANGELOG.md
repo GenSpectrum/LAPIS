@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.4](https://github.com/GenSpectrum/LAPIS/compare/v0.8.3...v0.8.4) (2026-07-21)
+
+
+### Features
+
+* **lapis:** also handle SILO returning arrow date values ([#1700](https://github.com/GenSpectrum/LAPIS/issues/1700)) ([0d5387c](https://github.com/GenSpectrum/LAPIS/commit/0d5387c9bc507e0fb4b7a208cea43075582e1829))
+* **lapis:** send SILO queries as SaneQL ([#1698](https://github.com/GenSpectrum/LAPIS/issues/1698)) ([f561e1c](https://github.com/GenSpectrum/LAPIS/commit/f561e1c4cf0e1e4b0d2c1de265f860d82eb7b6b8))
+
+
+### Bug Fixes
+
+* **lapis-docs:** resolve TypeScript warnings and add astro check to CI ([#1681](https://github.com/GenSpectrum/LAPIS/issues/1681)) ([5829e17](https://github.com/GenSpectrum/LAPIS/commit/5829e17ea44cdecd99508a860a0334bc8af4dd17))
+* **lapis:** send `isNull` to SILO on `isNull(date)` advanced query ([#1697](https://github.com/GenSpectrum/LAPIS/issues/1697)) ([d43345c](https://github.com/GenSpectrum/LAPIS/commit/d43345cdf27ce960b62bf4a71314593494c9b5b7))
+* **lapis:** upgrade to Spring boot 4 ([#1719](https://github.com/GenSpectrum/LAPIS/issues/1719)) ([013129f](https://github.com/GenSpectrum/LAPIS/commit/013129fa39ee7d954211de17b560fd08f5ff7f2c))
+
 ## [0.8.3](https://github.com/GenSpectrum/LAPIS/compare/v0.8.2...v0.8.3) (2026-04-28)
 
 
