@@ -30,8 +30,6 @@ data class SequencePositionField(
 
 fun interface FieldConverter<T> {
     fun convert(source: String): T
-
-    fun validatePhyloTreeFields(source: String): T = convert(source)
 }
 
 @Component
@@ -78,23 +76,6 @@ class CaseInsensitiveFieldConverter(
                 "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
             )
         return Field(cleaned)
-    }
-
-    override fun validatePhyloTreeFields(source: String): RequestField {
-        val converted = convert(source)
-        if (converted !is Field) {
-            throw BadRequestException(
-                "Position fields like '$source' cannot be used as phylo tree fields",
-            )
-        }
-        val validFields = caseInsensitiveFieldsCleaner.getPhyloTreeFields()
-        if (converted.fieldName !in validFields) {
-            throw BadRequestException(
-                "Field '${converted.fieldName}' is not a phylo tree field, " +
-                    "known phylo tree fields are [${validFields.joinToString(", ")}]",
-            )
-        }
-        return converted
     }
 }
 
