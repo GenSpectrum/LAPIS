@@ -47,12 +47,13 @@ class SequenceFiltersRequestWithFieldsDeserializer(
     }
 }
 
+/** Removes duplicate fields (after conversion), since each field is only ever needed once. */
 fun <T> parseFieldsProperty(
     node: JsonNode,
     fieldConverter: FieldConverter<T>,
 ) = when (val fields = node.get(FIELDS_PROPERTY)) {
     null -> emptyList()
-    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asString()) }.toList()
+    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asString()) }.distinct().toList()
     else -> throw BadRequestException(
         "$FIELDS_PROPERTY must be an array or null",
     )

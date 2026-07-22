@@ -273,6 +273,20 @@ class SequenceFiltersRequestWithFieldsTest {
                         ),
                     ),
                 ),
+                Arguments.of(
+                    """{"fields": ["gene1[7]", "GENE1[7]", "country", "country"]}""",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            SequencePositionField("gene1", 7),
+                            Field("country"),
+                        ),
+                    ),
+                ),
             )
 
         @JvmStatic
