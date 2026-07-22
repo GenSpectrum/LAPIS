@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -139,11 +140,11 @@ class SiloQueryModel(
         }
     }
 
-    fun getDetails(sequenceFilters: SequenceFiltersRequestWithFields) =
+    fun getDetails(sequenceFilters: DetailsFiltersRequest) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.details(
-                    sequenceFilters.fields.filterIsInstance<Field>().map { it.fieldName }.ifEmpty { allMetadataFields },
+                    sequenceFilters.fields.map { it.fieldName }.ifEmpty { allMetadataFields },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,

@@ -62,7 +62,8 @@ import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.Field
+import org.genspectrum.lapis.request.DetailsFieldConverter
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -75,7 +76,6 @@ import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
-import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
@@ -108,6 +108,7 @@ class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+    private val detailsFieldConverter: DetailsFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
@@ -1277,13 +1278,13 @@ class LapisController(
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1332,13 +1333,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1391,13 +1392,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1426,7 +1427,7 @@ class LapisController(
     fun postDetails(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -1449,7 +1450,7 @@ class LapisController(
     fun postDetailsAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1476,7 +1477,7 @@ class LapisController(
     fun postDetailsAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1491,15 +1492,8 @@ class LapisController(
         )
     }
 
-    private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
-        val positionFields = request.fields.filterIsInstance<SequencePositionField>()
-        if (positionFields.isNotEmpty()) {
-            throw BadRequestException(
-                "Sequence position fields are not supported for this endpoint: " +
-                    positionFields.joinToString(", ") { it.userFacingName },
-            )
-        }
-        val fields = request.fields.filterIsInstance<Field>().map { it.fieldName }
+    private fun getDetailsCollection(request: DetailsFiltersRequest): DetailsCollection {
+        val fields = request.fields.map { it.fieldName }
 
         return DetailsCollection(
             records = siloQueryModel.getDetails(request),

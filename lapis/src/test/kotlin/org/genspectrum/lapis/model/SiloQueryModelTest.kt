@@ -14,6 +14,7 @@ import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
@@ -133,7 +134,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getDetails(
-            SequenceFiltersRequestWithFields(
+            DetailsFiltersRequest(
                 emptyMap(),
                 emptyList(),
                 emptyList(),
@@ -162,7 +163,7 @@ class SiloQueryModelTest {
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getDetails(
-            SequenceFiltersRequestWithFields(
+            DetailsFiltersRequest(
                 emptyMap(),
                 emptyList(),
                 emptyList(),

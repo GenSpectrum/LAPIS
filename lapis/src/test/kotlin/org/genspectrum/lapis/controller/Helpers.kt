@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.controller
 
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -46,6 +47,19 @@ fun sequenceFiltersRequestWithFields(
     sequenceFilters: Map<String, String>,
     fields: List<String> = emptyList(),
 ) = SequenceFiltersRequestWithFields(
+    sequenceFilters.mapValues { listOf(it.value) },
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    fields.map { Field(it) },
+    OrderBySpec.EMPTY,
+)
+
+fun detailsFiltersRequest(
+    sequenceFilters: Map<String, String>,
+    fields: List<String> = emptyList(),
+) = DetailsFiltersRequest(
     sequenceFilters.mapValues { listOf(it.value) },
     emptyList(),
     emptyList(),

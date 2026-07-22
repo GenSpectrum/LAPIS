@@ -502,7 +502,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            siloQueryModelMock.getDetails(detailsFiltersRequest(mapOf("country" to "Switzerland")))
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(request(DETAILS_ROUTE))
@@ -521,7 +521,7 @@ class LapisControllerTest(
     ) {
         every {
             siloQueryModelMock.getDetails(
-                sequenceFiltersRequestWithFields(
+                detailsFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country", "date"),
                 ),
