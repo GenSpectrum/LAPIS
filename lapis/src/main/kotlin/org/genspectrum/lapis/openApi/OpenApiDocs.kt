@@ -118,7 +118,7 @@ fun buildOpenApiSchema(
                             orderByFieldsSchema = aggregatedOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
                         ),
-                        AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
+                        aggregatedFieldsDescription(referenceGenomeSchema),
                         databaseConfig.schema.metadata,
                     ),
                 )
@@ -385,6 +385,19 @@ fun buildOpenApiSchema(
                 .addSchemas(AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA, aminoAcidFastaHeaderTemplateSchema(databaseConfig))
                 .addSchemas(FORMAT_SCHEMA, dataFormatSchema()),
         )
+
+internal fun aggregatedFieldsDescription(referenceGenomeSchema: ReferenceGenomeSchema): String {
+    val shorthand = if (referenceGenomeSchema.isSingleSegmented()) {
+        " The shorthand `[position]` (e.g. `[501]`) can also be used."
+    } else {
+        ""
+    }
+    return AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION +
+        "\n\nSequence positions can be requested using the syntax `SequenceName[position]` " +
+        "(e.g. `S[501]` for position 501 of sequence `S`).$shorthand\n" +
+        "Position field column names in the response use the canonical sequence name from the reference genome " +
+        "(case-insensitive input), e.g. `s[501]` -> `S[501]`."
+}
 
 private fun getSequenceFiltersWithFormat(
     sequenceFilterFields: SequenceFilterFields,

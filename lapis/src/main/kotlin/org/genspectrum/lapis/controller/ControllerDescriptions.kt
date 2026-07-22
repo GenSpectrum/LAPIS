@@ -68,11 +68,7 @@ such as combinations of mutations ("mutation 1 or mutation 2") and other filters
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     """The fields to stratify by.
 If empty, only the overall count is returned.
-If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
-
-Sequence positions can be requested using the syntax `SequenceName[position]` (e.g. `S[501]` for position 501 of sequence `S`).
-For single-segmented genomes, the shorthand `[position]` (e.g. `[501]`) can be used.
-Position field column names in the response use the canonical sequence name from the reference genome (case-insensitive input), e.g. `s[501]` -> `S[501]`."""
+If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
     Fields specified here must either be \"count\" or also be present in \"fields\".
