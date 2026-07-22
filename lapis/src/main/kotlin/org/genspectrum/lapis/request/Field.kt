@@ -5,7 +5,7 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.stereotype.Component
 
-private val SEQUENCE_POSITION_REGEX = Regex("""^([A-Za-z][A-Za-z0-9_]*)?\[(\d+)\]$""")
+private val SEQUENCE_POSITION_REGEX = Regex("""^([A-Za-z][A-Za-z0-9_]*)?\[(\d+)]$""")
 
 sealed interface RequestField {
     val outputColumnName: String
