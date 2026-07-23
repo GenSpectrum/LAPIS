@@ -339,10 +339,10 @@ class QueriesOverTimeModel(
         siloClient.sendQueryAndGetDataVersion(
             SiloQuery(
                 SiloAction.aggregated(
-                    listOf(dateField),
-                    OrderBySpec.EMPTY,
-                    null,
-                    null,
+                    groupByFields = listOf(dateField),
+                    orderByFields = OrderBySpec.EMPTY,
+                    limit = null,
+                    offset = null,
                 ),
                 And(
                     children = listOfNotNull(

@@ -168,7 +168,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                listOf(Field("accession"), Field("date")),
+                listOf(Field.Plain("accession"), Field.Plain("date")),
                 OrderBySpec.EMPTY,
             ),
         )
@@ -522,6 +522,103 @@ class SiloQueryModelTest {
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
                         ).toOrderBySpec(),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getAggregated with computed field sends map step and groupBy with alias`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getAggregated(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(
+                    Field.Plain("date"),
+                    Field.Computed("date", org.genspectrum.lapis.request.ScalarFunction.ISO_WEEK),
+                ),
+                OrderBySpec.EMPTY,
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(
+                        groupByFields = listOf("date"),
+                        computedFields = listOf(
+                            Field.Computed("date", org.genspectrum.lapis.request.ScalarFunction.ISO_WEEK),
+                        ),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getAggregated renames alias columns to user-facing names in response`() {
+        val isoWeekField = Field.Computed("date", org.genspectrum.lapis.request.ScalarFunction.ISO_WEEK)
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.of(
+            AggregationData(
+                count = 5,
+                fields = mapOf(isoWeekField.alias to tools.jackson.databind.node.IntNode(3)),
+            ),
+        )
+
+        val result = underTest.getAggregated(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(isoWeekField),
+                OrderBySpec.EMPTY,
+            ),
+        ).toList()
+
+        assertThat(result.size, equalTo(1))
+        assertThat(result[0].fields.keys, equalTo(setOf(isoWeekField.fieldName)))
+        assertThat(result[0].fields[isoWeekField.fieldName]!!.asInt(), equalTo(3))
+    }
+
+    @Test
+    fun `getAggregated rewrites orderBy field to alias for computed fields`() {
+        val isoWeekField = Field.Computed("date", org.genspectrum.lapis.request.ScalarFunction.ISO_WEEK)
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+
+        underTest.getAggregated(
+            SequenceFiltersRequestWithFields(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(isoWeekField),
+                OrderBySpec.ByFields(listOf(OrderByField(field = isoWeekField.fieldName, order = Order.ASCENDING))),
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(
+                        groupByFields = emptyList(),
+                        computedFields = listOf(isoWeekField),
+                        orderByFields = OrderBySpec.ByFields(
+                            listOf(OrderByField(field = isoWeekField.alias, order = Order.ASCENDING)),
+                        ),
                     ),
                     True,
                 ),

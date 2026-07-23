@@ -62,6 +62,7 @@ import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -1490,6 +1491,14 @@ class LapisController(
     }
 
     private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
+        val computedFields = request.fields.filterIsInstance<Field.Computed>()
+        if (computedFields.isNotEmpty()) {
+            throw BadRequestException(
+                "Scalar functions are not supported in fields for this endpoint: " +
+                    computedFields.joinToString { it.fieldName },
+            )
+        }
+
         val fields = request.fields.map { it.fieldName }
 
         return DetailsCollection(
