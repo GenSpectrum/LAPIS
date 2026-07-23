@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -24,7 +25,7 @@ class SiloQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter("theColumn" = 'theValue').groupBy({count:=count()})"""),
+            equalTo("""default.filter("theColumn" = 'theValue').groupBy({"count":=count()})"""),
         )
     }
 
@@ -34,7 +35,7 @@ class SiloQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("default.filter(true).groupBy({count:=count()})"))
+        assertThat(result, equalTo("""default.filter(true).groupBy({"count":=count()})"""))
     }
 
     @Test
@@ -71,7 +72,7 @@ class SiloQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("default.filter($expectedPredicate).groupBy({count:=count()})"),
+            equalTo("""default.filter($expectedPredicate).groupBy({"count":=count()})"""),
         )
     }
 
@@ -92,7 +93,7 @@ class SiloQueryToSaneQlTest {
         assertThat(
             result,
             equalTo(
-                """default.filter(true).groupBy({count:=count()}, {"country"})""" +
+                """default.filter(true).groupBy({"count":=count()}, {"country"})""" +
                     """.orderBy({"count}).filter(true).groupBy({evil:=count()"})""", // <- the orderBy field is quoted
             ),
         )
@@ -105,11 +106,11 @@ class SiloQueryToSaneQlTest {
                 // Aggregated
                 Arguments.of(
                     SiloAction.aggregated(),
-                    ".groupBy({count:=count()})",
+                    """.groupBy({"count":=count()})""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(listOf("field1", "field2")),
-                    """.groupBy({count:=count()}, {"field1", "field2"})""",
+                    """.groupBy({"count":=count()}, {"field1", "field2"})""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
@@ -121,22 +122,38 @@ class SiloQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.groupBy({count:=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.groupBy({"count":=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
-                    ".groupBy({count:=count()}).randomize()",
+                    """.groupBy({"count":=count()}).randomize()""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
-                    ".groupBy({count:=count()}).randomize(seed:=123)",
+                    """.groupBy({"count":=count()}).randomize(seed:=123)""",
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = 42),
                         limit = 10,
                     ),
-                    ".groupBy({count:=count()}).randomize(seed:=42).limit(10)",
+                    """.groupBy({"count":=count()}).randomize(seed:=42).limit(10)""",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        groupByFields = listOf("country"),
+                        sequencePositionFields = listOf(SequencePositionField("S", 501)),
+                    ),
+                    """.map({"S[501]":="S".at(501)}).groupBy({"count":=count()}, {"country", "S[501]"})""",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        sequencePositionFields = listOf(
+                            SequencePositionField("S", 123),
+                            SequencePositionField("main", 456),
+                        ),
+                    ),
+                    """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).groupBy({"count":=count()}, {"S[123]", "main[456]"})""",
                 ),
                 // Mutations
                 Arguments.of(

@@ -118,8 +118,8 @@ fun buildOpenApiSchema(
                             orderByFieldsSchema = aggregatedOrderByFieldsEnum(databaseConfig),
                             dataFormatSchema = dataFormatSchema(),
                         ),
-                        AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
-                        databaseConfig.schema.metadata,
+                        aggregatedFieldsDescription(referenceGenomeSchema),
+                        aggregatedFieldsArraySchema(databaseConfig.schema.metadata),
                     ),
                 )
                 .addSchemas(
@@ -131,7 +131,7 @@ fun buildOpenApiSchema(
                             dataFormatSchema = dataFormatSchema(),
                         ),
                         DETAILS_FIELDS_DESCRIPTION,
-                        databaseConfig.schema.metadata,
+                        fieldsArray(databaseConfig.schema.metadata),
                     ),
                 )
                 .addSchemas(
@@ -226,11 +226,23 @@ fun buildOpenApiSchema(
                             .description(
                                 "Aggregated sequence data. " +
                                     "If fields are specified, then these fields are also keys in the result. " +
-                                    "The key 'count' is always present.",
+                                    "The key 'count' is always present. " +
+                                    "If a sequence position field (e.g. `S[501]`) was specified, " +
+                                    "it is also a key in the result, holding the symbol at that position " +
+                                    "as its value; such keys are not enumerable ahead of time, " +
+                                    "so they are not listed as named properties here.",
                             )
                             .required(listOf(COUNT_PROPERTY))
                             .properties(
                                 getAggregatedResponseProperties(aggregatedMetadataFieldSchemas(databaseConfig)),
+                            )
+                            .additionalProperties(
+                                StringSchema()
+                                    .description(
+                                        "The symbol at the requested sequence position, " +
+                                            "present if and only if a sequence position field " +
+                                            "(e.g. `S[501]`) was specified in \"fields\" in the request.",
+                                    ),
                             ),
                     ),
                 )
@@ -326,7 +338,7 @@ fun buildOpenApiSchema(
                         referenceGenomeSchema.genes,
                     ),
                 )
-                .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
+                .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, aggregatedFieldsArraySchema(databaseConfig.schema.metadata))
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
                     PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY,
@@ -385,6 +397,19 @@ fun buildOpenApiSchema(
                 .addSchemas(AMINO_ACID_FASTA_HEADER_TEMPLATE_SCHEMA, aminoAcidFastaHeaderTemplateSchema(databaseConfig))
                 .addSchemas(FORMAT_SCHEMA, dataFormatSchema()),
         )
+
+internal fun aggregatedFieldsDescription(referenceGenomeSchema: ReferenceGenomeSchema): String {
+    val shorthand = if (referenceGenomeSchema.isSingleSegmented()) {
+        " The shorthand `[position]` (e.g. `[501]`) can also be used."
+    } else {
+        ""
+    }
+    return AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION +
+        "\n\nSequence positions can be requested using the syntax `SequenceName[position]` " +
+        "(e.g. `S[501]` for position 501 of sequence `S`).$shorthand\n" +
+        "Position field column names in the response use the canonical sequence name from the reference genome " +
+        "(case-insensitive input), e.g. `s[501]` -> `S[501]`."
+}
 
 private fun getSequenceFiltersWithFormat(
     sequenceFilterFields: SequenceFilterFields,
@@ -624,7 +649,7 @@ private fun requestSchemaForCommonSequenceFilters(
 private fun requestSchemaWithFields(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
     fieldsDescription: String,
-    databaseConfig: List<DatabaseMetadata>,
+    fieldsSchema: Schema<out Any>,
 ): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
@@ -632,7 +657,7 @@ private fun requestSchemaWithFields(
         .properties(
             requestProperties + Pair(
                 FIELDS_PROPERTY,
-                fieldsArray(databaseConfig).description(fieldsDescription),
+                fieldsSchema.description(fieldsDescription),
             ),
         )
 
@@ -1089,6 +1114,22 @@ private fun fieldsArray(
     databaseConfig: List<DatabaseMetadata> = emptyList(),
     additionalFields: List<String> = emptyList(),
 ) = arraySchema(fieldsEnum(databaseConfig, additionalFields))
+
+/**
+ * Unlike [fieldsArray], this is not a closed enum: sequence position fields (e.g. `S[501]`) can name any
+ * position of any sequence, so their possible values cannot be enumerated ahead of time.
+ */
+private fun aggregatedFieldsArraySchema(databaseConfig: List<DatabaseMetadata>) =
+    arraySchema(
+        Schema<String>()
+            .types(setOf("string"))
+            .description(
+                "A metadata field name (" +
+                    databaseConfig.joinToString(", ") { it.name } +
+                    "), or a sequence position field in the form `SequenceName[position]` " +
+                    "(e.g. `S[501]`), or the shorthand `[position]` for single-segmented genomes.",
+            ),
+    )
 
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
     orderByFieldsEnum(databaseConfig.schema.metadata, listOf("count"))

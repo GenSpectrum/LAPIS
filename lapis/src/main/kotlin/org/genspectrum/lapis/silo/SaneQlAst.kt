@@ -70,12 +70,12 @@ data class SaneQlList(
     override fun render() = "{" + items.joinToString(", ") { it.render() } + "}"
 }
 
-/** A `name:=value` assignment, used inside [SaneQlList]s that act as records, e.g. `{count:=count()}`. */
+/** A `"name":=value` assignment, used inside [SaneQlList]s that act as records, e.g. `{"count":=count()}`. */
 data class SaneQlAssignment(
     val name: String,
     val value: SaneQlExpression,
 ) : SaneQlExpression {
-    override fun render() = "$name:=${value.render()}"
+    override fun render() = "\"${name.replace("\"", "\"\"")}\":=${value.render()}"
 }
 
 /** `"column" = value` */

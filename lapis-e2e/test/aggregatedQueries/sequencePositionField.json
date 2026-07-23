@@ -1,0 +1,20 @@
+{
+  "testCaseName": "group by amino acid symbol at gene position S[501]",
+  "lapisRequest": {
+    "fields": ["S[501]"]
+  },
+  "expected": [
+    {
+      "count": 41,
+      "S[501]": "Y"
+    },
+    {
+      "count": 7,
+      "S[501]": "X"
+    },
+    {
+      "count": 52,
+      "S[501]": "N"
+    }
+  ]
+}

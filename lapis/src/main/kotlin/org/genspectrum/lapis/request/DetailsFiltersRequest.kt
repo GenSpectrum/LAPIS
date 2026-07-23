@@ -2,38 +2,54 @@ package org.genspectrum.lapis.request
 
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JacksonComponent
+import org.springframework.stereotype.Component
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ValueDeserializer
-import tools.jackson.databind.node.ArrayNode
 
-data class SequenceFiltersRequestWithFields(
+data class DetailsFiltersRequest(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val fields: List<RequestField>,
+    val fields: List<Field>,
     override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
 ) : CommonSequenceFilters
 
-@JacksonComponent
-class SequenceFiltersRequestWithFieldsDeserializer(
+/** Rejects sequence position fields, since the /details endpoint has no notion of a per-position column. */
+@Component
+class DetailsFieldConverter(
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-) : ValueDeserializer<SequenceFiltersRequestWithFields>() {
+) : FieldConverter<Field> {
+    override fun convert(source: String): Field {
+        val converted = caseInsensitiveFieldConverter.convert(source)
+        if (converted !is Field) {
+            throw BadRequestException(
+                "Sequence position fields are not supported for this endpoint: ${converted.outputColumnName}",
+            )
+        }
+        return converted
+    }
+}
+
+@JacksonComponent
+class DetailsFiltersRequestDeserializer(
+    private val detailsFieldConverter: DetailsFieldConverter,
+) : ValueDeserializer<DetailsFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
-    ): SequenceFiltersRequestWithFields {
+    ): DetailsFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
-        val fields = parseFieldsProperty(node, caseInsensitiveFieldConverter)
+        val fields = parseFieldsProperty(node, detailsFieldConverter)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
-        return SequenceFiltersRequestWithFields(
+        return DetailsFiltersRequest(
             parsedCommonFields.sequenceFilters,
             parsedCommonFields.nucleotideMutations,
             parsedCommonFields.aminoAcidMutations,
@@ -45,16 +61,4 @@ class SequenceFiltersRequestWithFieldsDeserializer(
             parsedCommonFields.offset,
         )
     }
-}
-
-/** Removes duplicate fields (after conversion), since each field is only ever needed once. */
-fun <T> parseFieldsProperty(
-    node: JsonNode,
-    fieldConverter: FieldConverter<T>,
-) = when (val fields = node.get(FIELDS_PROPERTY)) {
-    null -> emptyList()
-    is ArrayNode -> fields.asSequence().map { fieldConverter.convert(it.asString()) }.distinct().toList()
-    else -> throw BadRequestException(
-        "$FIELDS_PROPERTY must be an array or null",
-    )
 }

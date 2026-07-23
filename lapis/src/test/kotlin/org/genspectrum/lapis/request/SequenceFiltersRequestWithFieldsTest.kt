@@ -32,6 +32,17 @@ class SequenceFiltersRequestWithFieldsTest {
     }
 
     @ParameterizedTest
+    @MethodSource("getSequencePositionFieldTestCases")
+    fun `SequenceFiltersRequestWithFields correctly parses sequence position fields`(
+        input: String,
+        expected: SequenceFiltersRequestWithFields,
+    ) {
+        val result = objectMapper.readValue<SequenceFiltersRequestWithFields>(input)
+
+        assertThat(result, equalTo(expected))
+    }
+
+    @ParameterizedTest
     @MethodSource("getInvalidRequests")
     fun `Given invalid SequenceFiltersRequestWithFields then should throw an error`(
         input: String,
@@ -223,8 +234,76 @@ class SequenceFiltersRequestWithFieldsTest {
             )
 
         @JvmStatic
+        fun getSequencePositionFieldTestCases() =
+            listOf(
+                Arguments.of(
+                    """{"fields": ["gene1[123]"]}""",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(SequencePositionField("gene1", 123)),
+                    ),
+                ),
+                Arguments.of(
+                    """{"fields": ["GENE1[1]"]}""",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(SequencePositionField("gene1", 1)),
+                    ),
+                ),
+                Arguments.of(
+                    """{"fields": ["gene1[7]", "country", "gene2[42]"]}""",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            SequencePositionField("gene1", 7),
+                            Field("country"),
+                            SequencePositionField("gene2", 42),
+                        ),
+                    ),
+                ),
+                Arguments.of(
+                    """{"fields": ["gene1[7]", "GENE1[7]", "country", "country"]}""",
+                    SequenceFiltersRequestWithFields(
+                        emptyMap(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                        listOf(
+                            SequencePositionField("gene1", 7),
+                            Field("country"),
+                        ),
+                    ),
+                ),
+            )
+
+        @JvmStatic
         fun getInvalidRequests() =
             listOf(
+                Arguments.of(
+                    """{"fields": ["[456]"]}""",
+                    "Shorthand position syntax '[N]' can only be used for single-segmented genomes",
+                ),
+                Arguments.of(
+                    """{"fields": ["unknownSequence[1]"]}""",
+                    "Unknown sequence 'unknownSequence'",
+                ),
+                Arguments.of(
+                    """{"fields": ["gene1[0]"]}""",
+                    "Invalid position in 'gene1[0]': must be a positive integer",
+                ),
                 Arguments.of(
                     """
                     {

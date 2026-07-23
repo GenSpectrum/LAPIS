@@ -502,7 +502,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getDetails(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            siloQueryModelMock.getDetails(detailsFiltersRequest(mapOf("country" to "Switzerland")))
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(request(DETAILS_ROUTE))
@@ -521,7 +521,7 @@ class LapisControllerTest(
     ) {
         every {
             siloQueryModelMock.getDetails(
-                sequenceFiltersRequestWithFields(
+                detailsFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country", "date"),
                 ),
@@ -532,6 +532,28 @@ class LapisControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
+    }
+
+    @Test
+    fun `GET details with a sequence position field returns bad request`() {
+        mockMvc.perform(
+            getSample(DETAILS_ROUTE)
+                .queryParam("country", "Switzerland")
+                .queryParam("fields", "gene1[501]"),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.error.detail").value(containsString("Sequence position fields are not supported")))
+    }
+
+    @Test
+    fun `POST JSON details with a sequence position field returns bad request`() {
+        mockMvc.perform(
+            postSample(DETAILS_ROUTE)
+                .content("""{"country": "Switzerland", "fields": ["gene1[501]"]}""")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.error.detail").value(containsString("Sequence position fields are not supported")))
     }
 }
 
