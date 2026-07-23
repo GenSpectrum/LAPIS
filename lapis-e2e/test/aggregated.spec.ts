@@ -46,6 +46,27 @@ describe('The /aggregated endpoint', () => {
       })
     );
 
+  it('should group by a boolean field', async () => {
+    // "test_boolean_column" is renamed to "testBooleanColumn" by the generated client. Since the response
+    // schema also declares additionalProperties (for sequence position fields), the generated FromJSON
+    // spreads the raw JSON first and then adds the renamed property, so the raw snake_case key ends up
+    // alongside the camelCase one. Use a raw fetch here to assert on the actual wire format instead.
+    const response = await fetch(basePath + '/sample/aggregated', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: ['test_boolean_column'] }),
+    });
+
+    expect(response.status).to.equal(200);
+    const resultJson = await response.json();
+
+    expect(resultJson.data).to.have.deep.members([
+      { count: 34, test_boolean_column: true },
+      { count: 33, test_boolean_column: false },
+      { count: 33, test_boolean_column: null },
+    ]);
+  });
+
   it('should correctly handle aggregated request with multiple segments', async () => {
     const result = await lapisClientMultiSegmented.postAggregated({
       aggregatedPostRequest: {
