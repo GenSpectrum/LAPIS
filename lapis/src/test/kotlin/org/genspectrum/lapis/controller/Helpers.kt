@@ -51,7 +51,7 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { Field.Plain(it) },
     OrderBySpec.EMPTY,
 )
 
@@ -96,7 +96,7 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { Field.Plain(it) },
     OrderBySpec.EMPTY,
 )
 

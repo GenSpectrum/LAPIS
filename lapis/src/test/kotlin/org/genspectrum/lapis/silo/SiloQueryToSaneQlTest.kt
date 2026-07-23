@@ -1,8 +1,10 @@
 package org.genspectrum.lapis.silo
 
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.ScalarFunction
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -79,8 +81,8 @@ class SiloQueryToSaneQlTest {
     fun `GIVEN orderBy field with injection attempt THEN payload is quoted as identifier`() {
         val query = SiloQuery(
             SiloAction.aggregated(
-                listOf("country"),
-                listOf(
+                groupByFields = listOf("country"),
+                orderByFields = listOf(
                     OrderByField("count}).filter(true).groupBy({evil:=count()", Order.ASCENDING),
                 ).toOrderBySpec(),
             ),
@@ -113,13 +115,20 @@ class SiloQueryToSaneQlTest {
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
-                        listOf("field1", "field2"),
-                        listOf(
+                        groupByFields = listOf("country"),
+                        computedFields = listOf(Field.Computed("date", ScalarFunction.ISO_WEEK)),
+                    ),
+                    """.map({__scalar_isoWeek_date:="date".isoWeek()}).groupBy({count:=count()}, {"country", "__scalar_isoWeek_date"})""",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        groupByFields = listOf("field1", "field2"),
+                        orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                         ).toOrderBySpec(),
-                        100,
-                        50,
+                        limit = 100,
+                        offset = 50,
                     ),
                     """.groupBy({count:=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),

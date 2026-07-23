@@ -197,7 +197,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -213,7 +213,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -240,7 +240,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -267,7 +267,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -283,7 +283,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -310,7 +310,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -337,7 +337,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(Field.Plain("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))

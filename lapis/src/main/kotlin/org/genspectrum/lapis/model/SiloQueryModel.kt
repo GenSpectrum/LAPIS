@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
@@ -10,6 +11,7 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
@@ -38,14 +40,45 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    sequenceFilters.fields.map { it.fieldName },
-                    sequenceFilters.orderByFields,
-                    sequenceFilters.limit,
-                    sequenceFilters.offset,
+                    groupByFields = sequenceFilters.fields.filterIsInstance<Field.Plain>().map { it.fieldName },
+                    computedFields = sequenceFilters.fields.filterIsInstance<Field.Computed>(),
+                    orderByFields = rewriteOrderByForComputedFields(
+                        sequenceFilters.orderByFields,
+                        sequenceFilters.fields.filterIsInstance<Field.Computed>(),
+                    ),
+                    limit = sequenceFilters.limit,
+                    offset = sequenceFilters.offset,
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
+        ).let { stream ->
+            renameComputedFieldColumns(stream, sequenceFilters.fields.filterIsInstance<Field.Computed>())
+        }
+
+    private fun renameComputedFieldColumns(
+        stream: Stream<AggregationData>,
+        computedFields: List<Field.Computed>,
+    ): Stream<AggregationData> {
+        if (computedFields.isEmpty()) return stream
+        val aliasToFieldName = computedFields.associate { it.alias to it.fieldName }
+        return stream.map { data ->
+            data.copy(fields = data.fields.mapKeys { (k, _) -> aliasToFieldName[k] ?: k })
+        }
+    }
+
+    private fun rewriteOrderByForComputedFields(
+        orderBySpec: OrderBySpec,
+        computedFields: List<Field.Computed>,
+    ): OrderBySpec {
+        if (computedFields.isEmpty() || orderBySpec !is OrderBySpec.ByFields) return orderBySpec
+        val userFacingToAlias = computedFields.associate { it.fieldName to it.alias }
+        return OrderBySpec.ByFields(
+            orderBySpec.fields.map { field ->
+                val alias = userFacingToAlias[field.field]
+                if (alias != null) field.copy(field = alias) else field
+            },
         )
+    }
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
         val fields = sequenceFilters.fields

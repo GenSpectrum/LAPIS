@@ -45,10 +45,10 @@ val DUMMY_DATE_BETWEEN_ALL =
 
 const val DUMMY_DATE_FIELD = "date"
 val AGGREGATED_SILO_ACTION = SiloAction.aggregated(
-    listOf(DUMMY_DATE_FIELD),
-    OrderBySpec.EMPTY,
-    null,
-    null,
+    groupByFields = listOf(DUMMY_DATE_FIELD),
+    orderByFields = OrderBySpec.EMPTY,
+    limit = null,
+    offset = null,
 )
 
 fun mockSiloCallInfo(
