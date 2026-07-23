@@ -4,6 +4,7 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -46,6 +47,7 @@ class SiloQueryModel(
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,
                     sequencePositionFields = sequenceFilters.fields.filterIsInstance<SequencePositionField>(),
+                    computedFields = sequenceFilters.fields.filterIsInstance<ComputedField>(),
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
             ),
