@@ -69,7 +69,10 @@ const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     """The fields to stratify by.
 If empty, only the overall count is returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
-You can provide metadata fields."""
+You can provide metadata fields.
+A field can also be a computed field of the form "<field>.<function>" (e.g. "date.isoWeek"), which applies a
+scalar function to the field and stratifies by the result. The response uses the full "<field>.<function>" string
+as the field name. Currently, the only supported function is "isoWeek", which is only valid for date fields."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
     Fields specified here must either be \"count\" or also be present in \"fields\".
