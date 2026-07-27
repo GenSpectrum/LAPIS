@@ -1,0 +1,20 @@
+{
+  "testCaseName": "group by nucleotide symbol at genomic position main[100]",
+  "lapisRequest": {
+    "fields": ["main[100]"]
+  },
+  "expected": [
+    {
+      "count": 93,
+      "main[100]": "C"
+    },
+    {
+      "count": 3,
+      "main[100]": "N"
+    },
+    {
+      "count": 4,
+      "main[100]": "-"
+    }
+  ]
+}
