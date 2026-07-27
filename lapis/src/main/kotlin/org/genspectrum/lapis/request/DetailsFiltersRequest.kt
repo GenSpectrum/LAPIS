@@ -33,15 +33,15 @@ class DetailsFiltersRequestDeserializer(
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return DetailsFiltersRequest(
-            parsedCommonFields.sequenceFilters,
-            parsedCommonFields.nucleotideMutations,
-            parsedCommonFields.aminoAcidMutations,
-            parsedCommonFields.nucleotideInsertions,
-            parsedCommonFields.aminoAcidInsertions,
-            fields,
-            parsedCommonFields.orderByFields,
-            parsedCommonFields.limit,
-            parsedCommonFields.offset,
+            sequenceFilters = parsedCommonFields.sequenceFilters,
+            nucleotideMutations = parsedCommonFields.nucleotideMutations,
+            aminoAcidMutations = parsedCommonFields.aminoAcidMutations,
+            nucleotideInsertions = parsedCommonFields.nucleotideInsertions,
+            aminoAcidInsertions = parsedCommonFields.aminoAcidInsertions,
+            fields = fields,
+            orderByFields = parsedCommonFields.orderByFields,
+            limit = parsedCommonFields.limit,
+            offset = parsedCommonFields.offset,
         )
     }
 }
