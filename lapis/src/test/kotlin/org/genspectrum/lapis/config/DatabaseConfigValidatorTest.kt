@@ -45,4 +45,27 @@ class DatabaseConfigValidatorTest {
             `is`("Metadata field name 'field.with.regex.separator' contains the reserved character '.'"),
         )
     }
+
+    @Test
+    fun `GIVEN config with brackets in metadata field name THEN config is invalid`() {
+        val invalidConfig = DatabaseConfig(
+            DatabaseSchema(
+                instanceName = "test",
+                primaryKey = "primaryKey",
+                opennessLevel = OpennessLevel.OPEN,
+                metadata = listOf(
+                    DatabaseMetadata(
+                        name = "field[withBrackets]",
+                        type = MetadataType.STRING,
+                    ),
+                ),
+            ),
+        )
+
+        val exception = assertThrows<IllegalArgumentException> { underTest.validate(invalidConfig) }
+        assertThat(
+            exception.message,
+            `is`("Metadata field name 'field[withBrackets]' contains a reserved character, '[' or ']'"),
+        )
+    }
 }

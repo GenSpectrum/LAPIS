@@ -555,6 +555,44 @@ class LapisControllerTest(
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("\$.error.detail").value(containsString("Sequence position fields are not supported")))
     }
+
+    @Test
+    fun `GET aggregated with duplicate fields deduplicates them`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                aggregatedFiltersRequest(
+                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    fields = listOf("country"),
+                ),
+            )
+        } returns Stream.of(AggregationData(0, mapOf("country" to StringNode("Switzerland"))))
+
+        mockMvc.perform(
+            getSample(AGGREGATED_ROUTE)
+                .queryParam("country", "Switzerland")
+                .queryParam("fields", "country", "country"),
+        )
+            .andExpect(status().isOk)
+    }
+
+    @Test
+    fun `GET details with duplicate fields deduplicates them`() {
+        every {
+            siloQueryModelMock.getDetails(
+                detailsFiltersRequest(
+                    sequenceFilters = mapOf("country" to "Switzerland"),
+                    fields = listOf("country"),
+                ),
+            )
+        } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
+
+        mockMvc.perform(
+            getSample(DETAILS_ROUTE)
+                .queryParam("country", "Switzerland")
+                .queryParam("fields", "country", "country"),
+        )
+            .andExpect(status().isOk)
+    }
 }
 
 fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path")
