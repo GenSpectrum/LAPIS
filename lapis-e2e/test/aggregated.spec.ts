@@ -172,6 +172,56 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.error.detail).to.include("Unknown field: 'notAField', known values are [primaryKey,");
   });
 
+  it('should stratify by a computed field using dot notation', async () => {
+    const result = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        date: '2021-06-05',
+        fields: ['date.isoWeek'],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.have.property('count', 1);
+    expect(result.data[0]).to.have.property('date.isoWeek', 22);
+  });
+
+  it('should order by a computed field using dot notation', async () => {
+    const result = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        date: '2021-06-05',
+        fields: ['date.isoWeek'],
+        orderBy: [{ field: 'date.isoWeek', type: 'ascending' }],
+      },
+    });
+
+    expect(result.data).to.have.length(1);
+    expect(result.data[0]).to.have.property('date.isoWeek', 22);
+  });
+
+  it('should return bad request for an unknown scalar function', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'date.notAFunction',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include("Unknown scalar function 'notAFunction'");
+  });
+
+  it('should return bad request for a scalar function applied to a field of the wrong type', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'country.isoWeek',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include("is not valid for field 'country'");
+  });
+
   it('should return bad request for invalid variant query', async () => {
     const urlParams = new URLSearchParams({
       variantQuery: 'not a valid variant query',
