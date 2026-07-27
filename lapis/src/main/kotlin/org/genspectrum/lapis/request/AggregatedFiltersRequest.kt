@@ -10,7 +10,7 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.ValueDeserializer
 import tools.jackson.databind.node.ArrayNode
 
-data class SequenceFiltersRequestWithFields(
+data class AggregatedFiltersRequest(
     override val sequenceFilters: SequenceFilters,
     override val nucleotideMutations: List<NucleotideMutation>,
     override val aminoAcidMutations: List<AminoAcidMutation>,
@@ -23,19 +23,19 @@ data class SequenceFiltersRequestWithFields(
 ) : CommonSequenceFilters
 
 @JacksonComponent
-class SequenceFiltersRequestWithFieldsDeserializer(
+class AggregatedFiltersRequestDeserializer(
     private val aggregatedFieldConverter: AggregatedFieldConverter,
-) : ValueDeserializer<SequenceFiltersRequestWithFields>() {
+) : ValueDeserializer<AggregatedFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,
-    ): SequenceFiltersRequestWithFields {
+    ): AggregatedFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
         val fields = parseFieldsProperty(node, aggregatedFieldConverter)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
-        return SequenceFiltersRequestWithFields(
+        return AggregatedFiltersRequest(
             parsedCommonFields.sequenceFilters,
             parsedCommonFields.nucleotideMutations,
             parsedCommonFields.aminoAcidMutations,

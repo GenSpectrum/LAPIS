@@ -7,8 +7,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.util.TimeFactory
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
@@ -105,7 +105,7 @@ internal class RequestContextLoggerTest {
         fun provideInputFilters() =
             listOf(
                 Arguments.of(
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf("country" to listOf("Germany")),
                         emptyList(),
                         emptyList(),
@@ -116,7 +116,7 @@ internal class RequestContextLoggerTest {
                     """"country":["Germany"]""",
                 ),
                 Arguments.of(
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf(
                             "country" to listOf("Germany"),
                             "nucleotideMutation" to listOf("A123T"),

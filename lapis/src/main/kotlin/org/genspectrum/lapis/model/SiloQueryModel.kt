@@ -2,6 +2,7 @@ package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
@@ -11,7 +12,6 @@ import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
@@ -37,7 +37,7 @@ class SiloQueryModel(
 ) {
     private val allMetadataFields = databaseConfig.schema.metadata.map { it.name }
 
-    fun getAggregated(sequenceFilters: SequenceFiltersRequestWithFields) =
+    fun getAggregated(sequenceFilters: AggregatedFiltersRequest) =
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(

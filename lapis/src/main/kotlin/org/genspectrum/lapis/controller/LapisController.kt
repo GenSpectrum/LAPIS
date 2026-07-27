@@ -58,6 +58,7 @@ import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.openApi.TreeDataFormatParam
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
@@ -72,7 +73,6 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
 import org.genspectrum.lapis.request.converter.AggregatedFieldConverter
 import org.genspectrum.lapis.request.converter.PlainFieldConverter
@@ -150,7 +150,7 @@ class LapisController(
         dataFormat: String? = null,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
@@ -209,7 +209,7 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
@@ -271,7 +271,7 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
@@ -306,7 +306,7 @@ class LapisController(
     fun postAggregated(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -329,7 +329,7 @@ class LapisController(
     fun postAggregatedAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -356,7 +356,7 @@ class LapisController(
     fun postAggregatedAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -371,7 +371,7 @@ class LapisController(
         )
     }
 
-    private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields) =
+    private fun getAggregatedCollection(request: AggregatedFiltersRequest) =
         AggregatedCollection(
             records = siloQueryModel.getAggregated(request),
             fields = request.fields.map { it.outputColumnName },

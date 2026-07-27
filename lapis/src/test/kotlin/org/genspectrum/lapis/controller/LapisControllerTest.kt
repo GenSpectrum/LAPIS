@@ -65,7 +65,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getAggregated(sequenceFiltersRequestWithFields(mapOf("country" to "Switzerland")))
+            siloQueryModelMock.getAggregated(aggregatedFiltersRequest(mapOf("country" to "Switzerland")))
         } returns Stream.of(
             AggregationData(
                 0,
@@ -90,7 +90,7 @@ class LapisControllerTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                sequenceFiltersRequestWithFields(
+                aggregatedFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country", "date"),
                 ),

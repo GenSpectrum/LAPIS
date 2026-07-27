@@ -12,6 +12,7 @@ import org.genspectrum.lapis.controller.mutationData
 import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MutationsField
@@ -20,7 +21,6 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
@@ -110,7 +110,7 @@ class SiloQueryModelTest {
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.getAggregated(
-            SequenceFiltersRequestWithFields(
+            AggregatedFiltersRequest(
                 emptyMap(),
                 emptyList(),
                 emptyList(),

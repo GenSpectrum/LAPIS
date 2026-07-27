@@ -16,40 +16,40 @@ import tools.jackson.databind.ObjectMapper
 import tools.jackson.module.kotlin.readValue
 
 @SpringBootTest
-class SequenceFiltersRequestWithFieldsTest {
+class AggregatedFiltersRequestTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @ParameterizedTest
-    @MethodSource("getTestSequenceFiltersRequestWithFields")
-    fun `SequenceFiltersRequestWithFields is correctly deserialized from JSON`(
+    @MethodSource("getTestAggregatedFiltersRequest")
+    fun `AggregatedFiltersRequest is correctly deserialized from JSON`(
         input: String,
-        expected: SequenceFiltersRequestWithFields,
+        expected: AggregatedFiltersRequest,
     ) {
-        val result = objectMapper.readValue<SequenceFiltersRequestWithFields>(input)
+        val result = objectMapper.readValue<AggregatedFiltersRequest>(input)
 
         assertThat(result, equalTo(expected))
     }
 
     @ParameterizedTest
     @MethodSource("getSequencePositionFieldTestCases")
-    fun `SequenceFiltersRequestWithFields correctly parses sequence position fields`(
+    fun `AggregatedFiltersRequest correctly parses sequence position fields`(
         input: String,
-        expected: SequenceFiltersRequestWithFields,
+        expected: AggregatedFiltersRequest,
     ) {
-        val result = objectMapper.readValue<SequenceFiltersRequestWithFields>(input)
+        val result = objectMapper.readValue<AggregatedFiltersRequest>(input)
 
         assertThat(result, equalTo(expected))
     }
 
     @ParameterizedTest
     @MethodSource("getInvalidRequests")
-    fun `Given invalid SequenceFiltersRequestWithFields then should throw an error`(
+    fun `Given invalid AggregatedFiltersRequest then should throw an error`(
         input: String,
         expectedErrorMessage: String,
     ) {
         val exception = assertThrows(BadRequestException::class.java) {
-            objectMapper.readValue<SequenceFiltersRequestWithFields>(input)
+            objectMapper.readValue<AggregatedFiltersRequest>(input)
         }
 
         assertThat(exception.message, startsWith(expectedErrorMessage))
@@ -57,7 +57,7 @@ class SequenceFiltersRequestWithFieldsTest {
 
     companion object {
         @JvmStatic
-        fun getTestSequenceFiltersRequestWithFields() =
+        fun getTestAggregatedFiltersRequest() =
             listOf(
                 Arguments.of(
                     """
@@ -66,7 +66,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["date", "country"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf("country" to listOf("Switzerland")),
                         emptyList(),
                         emptyList(),
@@ -81,7 +81,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "country": ["Switzerland", "Germany"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf("country" to listOf("Switzerland", "Germany")),
                         emptyList(),
                         emptyList(),
@@ -96,7 +96,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["${FIELD_WITH_UPPERCASE_LETTER.lowercase()}"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -111,7 +111,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["${FIELD_WITH_ONLY_LOWERCASE_LETTERS.uppercase()}"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -127,7 +127,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["date", "country"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
                         emptyList(),
@@ -143,7 +143,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["date", "country"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         listOf(AminoAcidMutation("gene1", 501, "Y"), AminoAcidMutation("gene2", 12, null)),
@@ -159,7 +159,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["date", "country"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -178,7 +178,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "fields": ["date", "country"]
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -196,7 +196,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "country": "Switzerland"
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf("country" to listOf("Switzerland")),
                         emptyList(),
                         emptyList(),
@@ -207,7 +207,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 ),
                 Arguments.of(
                     "{}",
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -222,7 +222,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         "country": null
                     }
                     """,
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         mapOf("country" to listOf(null)),
                         emptyList(),
                         emptyList(),
@@ -238,7 +238,7 @@ class SequenceFiltersRequestWithFieldsTest {
             listOf(
                 Arguments.of(
                     """{"fields": ["gene1[123]"]}""",
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -249,7 +249,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 ),
                 Arguments.of(
                     """{"fields": ["GENE1[1]"]}""",
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -260,7 +260,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 ),
                 Arguments.of(
                     """{"fields": ["gene1[7]", "country", "gene2[42]"]}""",
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
@@ -275,7 +275,7 @@ class SequenceFiltersRequestWithFieldsTest {
                 ),
                 Arguments.of(
                     """{"fields": ["gene1[7]", "GENE1[7]", "country", "country"]}""",
-                    SequenceFiltersRequestWithFields(
+                    AggregatedFiltersRequest(
                         emptyMap(),
                         emptyList(),
                         emptyList(),
