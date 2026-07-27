@@ -14,12 +14,14 @@ import org.genspectrum.lapis.controller.sequenceFiltersRequest
 import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
+import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PlainField
+import org.genspectrum.lapis.request.ScalarFunction
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.toOrderBySpec
@@ -523,6 +525,75 @@ class SiloQueryModelTest {
                             OrderByField(field = "primaryKey", order = Order.ASCENDING),
                             OrderByField(field = "unaligned_Segment1", order = Order.DESCENDING),
                         ).toOrderBySpec(),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getAggregated splits plain and computed fields into groupByFields and computedFields`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getAggregated(
+            AggregatedFiltersRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(
+                    PlainField("date"),
+                    ComputedField("date", ScalarFunction.ISO_WEEK),
+                ),
+                OrderBySpec.EMPTY,
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(
+                        groupByFields = listOf("date"),
+                        computedFields = listOf(ComputedField("date", ScalarFunction.ISO_WEEK)),
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getAggregated passes orderBy fields through unchanged for computed fields`() {
+        val isoWeekField = ComputedField("date", ScalarFunction.ISO_WEEK)
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+
+        val orderByFields = OrderBySpec.ByFields(
+            listOf(OrderByField(field = isoWeekField.outputColumnName, order = Order.ASCENDING)),
+        )
+
+        underTest.getAggregated(
+            AggregatedFiltersRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(isoWeekField),
+                orderByFields,
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(
+                        groupByFields = emptyList(),
+                        computedFields = listOf(isoWeekField),
+                        orderByFields = orderByFields,
                     ),
                     True,
                 ),
