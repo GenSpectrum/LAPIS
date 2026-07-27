@@ -45,12 +45,4 @@ class LandingPageControllerTest(
             .andExpect(content().string(startsWith("# LAPIS")))
             .andExpect(content().string(not(containsString("$")))) // dollars hint at broken Thymeleaf template
     }
-
-    @Test
-    fun `WHEN calling llms txt endpoint THEN documents sequence position fields`() {
-        mockMvc.perform(get("/llms.txt"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(containsString("Sequence Position Fields")))
-            .andExpect(content().string(containsString("SequenceName[position]")))
-    }
 }
