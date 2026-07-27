@@ -1,13 +1,13 @@
 package org.genspectrum.lapis.controller
 
 import org.genspectrum.lapis.request.DetailsFiltersRequest
-import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
@@ -52,7 +52,7 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { PlainField(it) },
     OrderBySpec.EMPTY,
 )
 
@@ -65,7 +65,7 @@ fun detailsFiltersRequest(
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { PlainField(it) },
     OrderBySpec.EMPTY,
 )
 
@@ -110,7 +110,7 @@ fun sequenceFiltersRequestWithArrayValuedFilters(
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { PlainField(it) },
     OrderBySpec.EMPTY,
 )
 

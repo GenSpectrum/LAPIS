@@ -4,12 +4,12 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DetailsFiltersRequest
-import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequencePositionField
@@ -41,7 +41,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aggregated(
-                    groupByFields = sequenceFilters.fields.filterIsInstance<Field>().map { it.fieldName },
+                    groupByFields = sequenceFilters.fields.filterIsInstance<PlainField>().map { it.fieldName },
                     orderByFields = sequenceFilters.orderByFields,
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,

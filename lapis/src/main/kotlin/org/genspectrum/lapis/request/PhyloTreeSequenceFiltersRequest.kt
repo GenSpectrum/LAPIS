@@ -94,9 +94,9 @@ class MRCASequenceFiltersRequestDeserializer(
 
 fun parsePhyloTreeProperty(
     node: JsonNode,
-    fieldConverter: FieldConverter<RequestField>,
+    fieldConverter: FieldConverter<Field>,
     databaseConfig: DatabaseConfig,
-): Field {
+): PlainField {
     val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)
     if (phyloTreeField == null) {
         throw BadRequestException(

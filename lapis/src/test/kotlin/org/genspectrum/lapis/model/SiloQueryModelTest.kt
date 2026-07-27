@@ -15,11 +15,11 @@ import org.genspectrum.lapis.databaseConfig
 import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DetailsFiltersRequest
-import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.toOrderBySpec
@@ -169,7 +169,7 @@ class SiloQueryModelTest {
                 emptyList(),
                 emptyList(),
                 emptyList(),
-                listOf(Field("accession"), Field("date")),
+                listOf(PlainField("accession"), PlainField("date")),
                 OrderBySpec.EMPTY,
             ),
         )

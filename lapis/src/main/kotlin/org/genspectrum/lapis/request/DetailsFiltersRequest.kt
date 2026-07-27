@@ -14,7 +14,7 @@ data class DetailsFiltersRequest(
     override val aminoAcidMutations: List<AminoAcidMutation>,
     override val nucleotideInsertions: List<NucleotideInsertion>,
     override val aminoAcidInsertions: List<AminoAcidInsertion>,
-    val fields: List<Field>,
+    val fields: List<PlainField>,
     override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
@@ -24,10 +24,10 @@ data class DetailsFiltersRequest(
 @Component
 class DetailsFieldConverter(
     private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-) : FieldConverter<Field> {
-    override fun convert(source: String): Field {
+) : FieldConverter<PlainField> {
+    override fun convert(source: String): PlainField {
         val converted = caseInsensitiveFieldConverter.convert(source)
-        if (converted !is Field) {
+        if (converted !is PlainField) {
             throw BadRequestException(
                 "Sequence position fields are not supported for this endpoint: ${converted.outputColumnName}",
             )

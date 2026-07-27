@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component
 
 private val SEQUENCE_POSITION_REGEX = Regex("""^([A-Za-z][A-Za-z0-9_]*)?\[(\d+)]$""")
 
-sealed interface RequestField {
+sealed interface Field {
     val outputColumnName: String
 }
 
-data class Field(
+data class PlainField(
     val fieldName: String,
-) : RequestField {
+) : Field {
     override val outputColumnName: String get() = fieldName
 }
 
@@ -21,7 +21,7 @@ data class SequencePositionField(
     val sequenceName: String,
     val position: Int,
     val isSingleSegment: Boolean = false,
-) : RequestField {
+) : Field {
     /** Name used both as the SaneQL alias and as the response column key, e.g. `S[501]` or `[501]` for shorthand. */
     val userFacingName: String get() = if (isSingleSegment) "[$position]" else "$sequenceName[$position]"
     override val outputColumnName: String get() = userFacingName
@@ -35,8 +35,8 @@ fun interface FieldConverter<T> {
 class CaseInsensitiveFieldConverter(
     private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
-) : FieldConverter<RequestField> {
-    override fun convert(source: String): RequestField {
+) : FieldConverter<Field> {
+    override fun convert(source: String): Field {
         val positionMatch = SEQUENCE_POSITION_REGEX.matchEntire(source)
         if (positionMatch != null) {
             val name = positionMatch.groupValues[1]
@@ -69,17 +69,17 @@ class CaseInsensitiveFieldConverter(
             ?: throw BadRequestException(
                 "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
             )
-        return Field(cleaned)
+        return PlainField(cleaned)
     }
 }
 
 fun validatePhyloTreeField(
     source: String,
-    fieldConverter: FieldConverter<RequestField>,
+    fieldConverter: FieldConverter<Field>,
     databaseConfig: DatabaseConfig,
-): Field {
+): PlainField {
     val converted = fieldConverter.convert(source)
-    if (converted !is Field) {
+    if (converted !is PlainField) {
         throw BadRequestException(
             "Position fields like '$source' cannot be used as phylo tree fields",
         )

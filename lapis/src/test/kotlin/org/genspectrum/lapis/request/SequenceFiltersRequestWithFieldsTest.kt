@@ -72,7 +72,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf(Field("date"), Field("country")),
+                        listOf(PlainField("date"), PlainField("country")),
                     ),
                 ),
                 Arguments.of(
@@ -102,7 +102,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf(Field(FIELD_WITH_UPPERCASE_LETTER)),
+                        listOf(PlainField(FIELD_WITH_UPPERCASE_LETTER)),
                     ),
                 ),
                 Arguments.of(
@@ -117,7 +117,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf(Field(FIELD_WITH_ONLY_LOWERCASE_LETTERS)),
+                        listOf(PlainField(FIELD_WITH_ONLY_LOWERCASE_LETTERS)),
                     ),
                 ),
                 Arguments.of(
@@ -133,7 +133,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         emptyList(),
                         emptyList(),
-                        listOf(Field("date"), Field("country")),
+                        listOf(PlainField("date"), PlainField("country")),
                     ),
                 ),
                 Arguments.of(
@@ -149,7 +149,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         listOf(AminoAcidMutation("gene1", 501, "Y"), AminoAcidMutation("gene2", 12, null)),
                         emptyList(),
                         emptyList(),
-                        listOf(Field("date"), Field("country")),
+                        listOf(PlainField("date"), PlainField("country")),
                     ),
                 ),
                 Arguments.of(
@@ -168,7 +168,7 @@ class SequenceFiltersRequestWithFieldsTest {
                             NucleotideInsertion(12, "ABCD", null),
                         ),
                         emptyList(),
-                        listOf(Field("date"), Field("country")),
+                        listOf(PlainField("date"), PlainField("country")),
                     ),
                 ),
                 Arguments.of(
@@ -187,7 +187,7 @@ class SequenceFiltersRequestWithFieldsTest {
                             AminoAcidInsertion(501, "gene1", "Y"),
                             AminoAcidInsertion(12, "gene2", "ABCD"),
                         ),
-                        listOf(Field("date"), Field("country")),
+                        listOf(PlainField("date"), PlainField("country")),
                     ),
                 ),
                 Arguments.of(
@@ -268,7 +268,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         listOf(
                             SequencePositionField("gene1", 7),
-                            Field("country"),
+                            PlainField("country"),
                             SequencePositionField("gene2", 42),
                         ),
                     ),
@@ -283,7 +283,7 @@ class SequenceFiltersRequestWithFieldsTest {
                         emptyList(),
                         listOf(
                             SequencePositionField("gene1", 7),
-                            Field("country"),
+                            PlainField("country"),
                         ),
                     ),
                 ),
