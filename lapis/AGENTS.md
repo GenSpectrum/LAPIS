@@ -88,6 +88,10 @@ greet(
 )
 ```
 
+Exceptions when it's ok not to use named arguments:
+- when hurts readability
+- only a single argument
+
 ### Data Classes
 
 ```kotlin
