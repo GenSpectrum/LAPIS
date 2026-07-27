@@ -103,6 +103,10 @@ export default defineConfig({
                             link: '/concepts/request-id',
                         },
                         {
+                            label: 'Computed fields',
+                            link: '/concepts/computed-fields',
+                        },
+                        {
                             label: 'Filters',
                             items: [
                                 {
