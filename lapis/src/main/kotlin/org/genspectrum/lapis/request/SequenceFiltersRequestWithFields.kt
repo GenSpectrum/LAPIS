@@ -1,6 +1,8 @@
 package org.genspectrum.lapis.request
 
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.request.converter.AggregatedFieldConverter
+import org.genspectrum.lapis.request.converter.FieldConverter
 import org.springframework.boot.jackson.JacksonComponent
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
@@ -22,7 +24,7 @@ data class SequenceFiltersRequestWithFields(
 
 @JacksonComponent
 class SequenceFiltersRequestWithFieldsDeserializer(
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+    private val aggregatedFieldConverter: AggregatedFieldConverter,
 ) : ValueDeserializer<SequenceFiltersRequestWithFields>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -30,7 +32,7 @@ class SequenceFiltersRequestWithFieldsDeserializer(
     ): SequenceFiltersRequestWithFields {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
-        val fields = parseFieldsProperty(node, caseInsensitiveFieldConverter)
+        val fields = parseFieldsProperty(node, aggregatedFieldConverter)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return SequenceFiltersRequestWithFields(

@@ -1,8 +1,7 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.request.converter.PlainFieldConverter
 import org.springframework.boot.jackson.JacksonComponent
-import org.springframework.stereotype.Component
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.JsonNode
@@ -20,25 +19,9 @@ data class DetailsFiltersRequest(
     override val offset: Int? = null,
 ) : CommonSequenceFilters
 
-/** Rejects sequence position fields, since the /details endpoint has no notion of a per-position column. */
-@Component
-class DetailsFieldConverter(
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-) : FieldConverter<PlainField> {
-    override fun convert(source: String): PlainField {
-        val converted = caseInsensitiveFieldConverter.convert(source)
-        if (converted !is PlainField) {
-            throw BadRequestException(
-                "Sequence position fields are not supported for this endpoint: ${converted.outputColumnName}",
-            )
-        }
-        return converted
-    }
-}
-
 @JacksonComponent
 class DetailsFiltersRequestDeserializer(
-    private val detailsFieldConverter: DetailsFieldConverter,
+    private val plainFieldConverter: PlainFieldConverter,
 ) : ValueDeserializer<DetailsFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -46,7 +29,7 @@ class DetailsFiltersRequestDeserializer(
     ): DetailsFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
-        val fields = parseFieldsProperty(node, detailsFieldConverter)
+        val fields = parseFieldsProperty(node, plainFieldConverter)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return DetailsFiltersRequest(

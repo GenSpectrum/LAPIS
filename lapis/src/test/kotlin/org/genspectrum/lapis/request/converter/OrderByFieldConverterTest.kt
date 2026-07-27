@@ -1,5 +1,6 @@
-package org.genspectrum.lapis.request
+package org.genspectrum.lapis.request.converter
 
+import org.genspectrum.lapis.request.Order
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test

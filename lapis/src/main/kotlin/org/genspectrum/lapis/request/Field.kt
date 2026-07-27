@@ -1,12 +1,5 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.stereotype.Component
-
-private val SEQUENCE_POSITION_REGEX = Regex("""^([A-Za-z][A-Za-z0-9_]*)?\[(\d+)]$""")
-
 sealed interface Field {
     val outputColumnName: String
 }
@@ -25,73 +18,4 @@ data class SequencePositionField(
     /** Name used both as the SaneQL alias and as the response column key, e.g. `S[501]` or `[501]` for shorthand. */
     val userFacingName: String get() = if (isSingleSegment) "[$position]" else "$sequenceName[$position]"
     override val outputColumnName: String get() = userFacingName
-}
-
-fun interface FieldConverter<T> {
-    fun convert(source: String): T
-}
-
-@Component
-class CaseInsensitiveFieldConverter(
-    private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
-) : FieldConverter<Field> {
-    override fun convert(source: String): Field {
-        val positionMatch = SEQUENCE_POSITION_REGEX.matchEntire(source)
-        if (positionMatch != null) {
-            val name = positionMatch.groupValues[1]
-            val position = positionMatch.groupValues[2].toIntOrNull()
-                ?: throw BadRequestException("Invalid position in '$source': must be a positive integer")
-            if (position <= 0) {
-                throw BadRequestException("Invalid position in '$source': must be a positive integer, got $position")
-            }
-
-            if (name.isEmpty()) {
-                if (!referenceGenomeSchema.isSingleSegmented()) {
-                    throw BadRequestException(
-                        "Shorthand position syntax '[N]' can only be used for single-segmented genomes",
-                    )
-                }
-                val canonicalName = referenceGenomeSchema.nucleotideSequences.first().name
-                return SequencePositionField(canonicalName, position, isSingleSegment = true)
-            }
-
-            val canonicalName = referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(name)
-                ?: throw BadRequestException(
-                    "Unknown sequence '$name' in '$source', known sequences are: " +
-                        (referenceGenomeSchema.getNucleotideSequenceNames() + referenceGenomeSchema.getGeneNames())
-                            .joinToString(", "),
-                )
-            return SequencePositionField(canonicalName, position)
-        }
-
-        val cleaned = caseInsensitiveFieldsCleaner.clean(source)
-            ?: throw BadRequestException(
-                "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
-            )
-        return PlainField(cleaned)
-    }
-}
-
-fun validatePhyloTreeField(
-    source: String,
-    fieldConverter: FieldConverter<Field>,
-    databaseConfig: DatabaseConfig,
-): PlainField {
-    val converted = fieldConverter.convert(source)
-    if (converted !is PlainField) {
-        throw BadRequestException(
-            "Position fields like '$source' cannot be used as phylo tree fields",
-        )
-    }
-    val validFields = databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
-    if (converted.fieldName !in validFields) {
-        throw BadRequestException(
-            "Field '${converted.fieldName}' is not a phylo tree field, " +
-                "known phylo tree fields are [${validFields.joinToString(
-                    ", ",
-                )}]",
-        )
-    }
-    return converted
 }

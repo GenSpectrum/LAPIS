@@ -60,9 +60,7 @@ import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.openApi.TreeDataFormatParam
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
-import org.genspectrum.lapis.request.DetailsFieldConverter
 import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
@@ -76,8 +74,10 @@ import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
+import org.genspectrum.lapis.request.converter.AggregatedFieldConverter
+import org.genspectrum.lapis.request.converter.PlainFieldConverter
+import org.genspectrum.lapis.request.converter.validatePhyloTreeField
 import org.genspectrum.lapis.request.toOrderBySpec
-import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
@@ -107,8 +107,8 @@ import org.springframework.web.bind.annotation.RestController
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
-    private val detailsFieldConverter: DetailsFieldConverter,
+    private val aggregatedFieldConverter: AggregatedFieldConverter,
+    private val plainFieldConverter: PlainFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
@@ -156,7 +156,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -215,7 +215,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -277,7 +277,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -953,7 +953,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
@@ -1008,7 +1008,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField =
-                validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+                validatePhyloTreeField(phyloTreeField, plainFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1066,7 +1066,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
@@ -1163,7 +1163,7 @@ class LapisController(
     private fun getMostRecentCommonAncestorCollection(
         request: MRCASequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
-        validatePhyloTreeField(request.phyloTreeField, caseInsensitiveFieldConverter, databaseConfig)
+        validatePhyloTreeField(request.phyloTreeField, plainFieldConverter, databaseConfig)
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
@@ -1205,7 +1205,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
         )
@@ -1284,7 +1284,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1339,7 +1339,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1398,7 +1398,7 @@ class LapisController(
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { detailsFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) } ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,

@@ -3,9 +3,8 @@ package org.genspectrum.lapis.request
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.request.converter.OrderByFieldsCleaner
 import org.springframework.boot.jackson.JacksonComponent
-import org.springframework.core.convert.converter.Converter
-import org.springframework.stereotype.Component
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.JsonNode
@@ -117,35 +116,6 @@ class OrderByFieldDeserializer(
 
         return OrderByField(orderByFieldsCleaner.clean(fieldNode.asString()), ascending)
     }
-}
-
-/**
- * The `OrderByFieldConverter` converts a list of strings into a list of fields to order by.
- * It checks that all the fields exist, or start with "random".
- * The `Converter` is used automatically by Spring in the GET requests.
- */
-@Component
-class OrderByFieldConverter(
-    private val orderByFieldsCleaner: OrderByFieldsCleaner,
-) : Converter<String, OrderByField> {
-    override fun convert(source: String): OrderByField {
-        val field =
-            if (source.startsWith("random")) {
-                // validation and conversion happens later on, in `toOrderBySpec`.
-                source
-            } else {
-                orderByFieldsCleaner.clean(source)
-            }
-
-        return OrderByField(field = field, order = Order.ASCENDING)
-    }
-}
-
-@Component
-class OrderByFieldsCleaner(
-    private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
-) {
-    fun clean(fieldName: String): String = caseInsensitiveFieldsCleaner.clean(fieldName) ?: fieldName
 }
 
 /**

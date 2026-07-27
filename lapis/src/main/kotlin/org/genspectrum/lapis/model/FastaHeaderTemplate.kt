@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
+import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.springframework.stereotype.Component
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.node.NullNode

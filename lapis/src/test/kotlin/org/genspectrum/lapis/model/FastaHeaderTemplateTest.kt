@@ -4,7 +4,7 @@ import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.databaseConfig
-import org.genspectrum.lapis.request.CaseInsensitiveFieldsCleaner
+import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString

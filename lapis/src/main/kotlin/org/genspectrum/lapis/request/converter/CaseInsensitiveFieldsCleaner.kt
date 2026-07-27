@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.request
+package org.genspectrum.lapis.request.converter
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.springframework.stereotype.Component
