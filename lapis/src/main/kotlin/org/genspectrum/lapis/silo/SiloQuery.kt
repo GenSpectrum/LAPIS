@@ -248,7 +248,7 @@ sealed class SiloAction<ResponseType>(
                                 SaneQlList(
                                     sequencePositionFields.map { field ->
                                         SaneQlAssignment(
-                                            field.userFacingName,
+                                            field.outputColumnName,
                                             SaneQlMethodCall(
                                                 SaneQlIdentifier(field.sequenceName),
                                                 "at",
@@ -262,7 +262,7 @@ sealed class SiloAction<ResponseType>(
                     )
                 }
                 val allGroupByColumns =
-                    groupByFields.map { id(it) } + sequencePositionFields.map { id(it.userFacingName) }
+                    groupByFields.map { id(it) } + sequencePositionFields.map { id(it.outputColumnName) }
                 add(
                     SaneQlStep(
                         "groupBy",
