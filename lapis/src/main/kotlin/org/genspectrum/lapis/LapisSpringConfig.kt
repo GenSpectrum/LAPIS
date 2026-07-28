@@ -21,16 +21,13 @@ import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFields
-import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.LapisHeaders
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.SECURITY_SCHEMA_NAME
-import org.genspectrum.lapis.openApi.aggregatedFieldsDescription
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
-import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.util.TimeFactory
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OpenApiCustomizer
@@ -116,22 +113,6 @@ class LapisSpringConfig {
                         }
                     }
             }
-        }
-
-    /**
-     * The GET `fields` parameter is otherwise documented via the `@FieldsToAggregateBy` annotation (see
-     * [org.genspectrum.lapis.openApi.FieldsToAggregateBy]), which deliberately leaves out `description` since it
-     * can't hold the dynamic [aggregatedFieldsDescription] (it depends on the reference genome). Set it here
-     * instead, matching what the POST body's `AGGREGATED_REQUEST_SCHEMA` already documents.
-     */
-    @Bean
-    fun aggregatedFieldsGetCustomizer(referenceGenomeSchema: ReferenceGenomeSchema) =
-        OpenApiCustomizer { openApi ->
-            openApi.paths["/sample$AGGREGATED_ROUTE"]
-                ?.get
-                ?.parameters
-                ?.find { it.name == FIELDS_PROPERTY }
-                ?.description = aggregatedFieldsDescription(referenceGenomeSchema)
         }
 
     @Bean
