@@ -14,8 +14,10 @@ class OperationsSorter : OperationCustomizer {
         handlerMethod: HandlerMethod,
     ): Operation {
         operation.responses.forEach { _, response ->
+            val content = response.content ?: return@forEach
+
             val applicationJsonFirstContents =
-                response.content.toSortedMap(
+                content.toSortedMap(
                     compareByDescending<String> { it.contains(MediaType.APPLICATION_JSON_VALUE) }.thenBy { it },
                 )
 
