@@ -119,9 +119,10 @@ class LapisSpringConfig {
         }
 
     /**
-     * The GET `fields` parameter is documented via the static `@FieldsToAggregateBy` annotation, which can't hold
-     * the dynamic [aggregatedFieldsDescription] (it depends on the reference genome). Overwrite it here after the
-     * fact, matching what the POST body's `AGGREGATED_REQUEST_SCHEMA` already documents.
+     * The GET `fields` parameter is otherwise documented via the `@FieldsToAggregateBy` annotation (see
+     * [org.genspectrum.lapis.openApi.FieldsToAggregateBy]), which deliberately leaves out `description` since it
+     * can't hold the dynamic [aggregatedFieldsDescription] (it depends on the reference genome). Set it here
+     * instead, matching what the POST body's `AGGREGATED_REQUEST_SCHEMA` already documents.
      */
     @Bean
     fun aggregatedFieldsGetCustomizer(referenceGenomeSchema: ReferenceGenomeSchema) =
