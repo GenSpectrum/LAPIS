@@ -4,7 +4,10 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
-  SILO_TAG: latest
+  # TEMPORARY: pin e2e to the SILO PR image (GenSpectrum/LAPIS-SILO#1366) which contains the
+  # `includeSublineagesFor` support this PR depends on. REVERT to `latest` before merging, once
+  # the SILO PR is merged and `lapis-silo:latest` includes the feature.
+  SILO_TAG: pr-1366
 
 jobs:
   Tests:

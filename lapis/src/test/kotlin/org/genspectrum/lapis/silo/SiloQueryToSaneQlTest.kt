@@ -124,6 +124,23 @@ class SiloQueryToSaneQlTest {
                     """.groupBy({count:=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
+                    SiloAction.aggregated(
+                        listOf("pangoLineage"),
+                        includeSublineagesFor = "pangoLineage",
+                    ),
+                    """.groupBy({count:=count()}, {lineage("pangoLineage", includeSublineages:=true)})""",
+                ),
+                Arguments.of(
+                    SiloAction.aggregated(
+                        listOf("pangoLineage"),
+                        listOf(OrderByField("count", Order.DESCENDING)).toOrderBySpec(),
+                        limit = 10,
+                        includeSublineagesFor = "pangoLineage",
+                    ),
+                    """.groupBy({count:=count()}, {lineage("pangoLineage", includeSublineages:=true)})""" +
+                        """.orderBy({"count".desc()}).limit(10)""",
+                ),
+                Arguments.of(
                     SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
                     ".groupBy({count:=count()}).randomize()",
                 ),

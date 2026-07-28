@@ -24,6 +24,7 @@ import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIP
 import org.genspectrum.lapis.controller.AMINO_ACID_MUTATION_DESCRIPTION
 import org.genspectrum.lapis.controller.DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.DETAILS_FIELDS_DESCRIPTION
+import org.genspectrum.lapis.controller.INCLUDE_SUBLINEAGES_FOR_DESCRIPTION
 import org.genspectrum.lapis.controller.LIMIT_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_FASTA_HEADER_TEMPLATE_DESCRIPTION
 import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATION_DESCRIPTION
@@ -48,6 +49,7 @@ import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.genspectrum.lapis.request.FORMAT_PROPERTY
 import org.genspectrum.lapis.request.GENES_PROPERTY
+import org.genspectrum.lapis.request.INCLUDE_SUBLINEAGES_FOR_PROPERTY
 import org.genspectrum.lapis.request.LIMIT_PROPERTY
 import org.genspectrum.lapis.request.MIN_PROPORTION_PROPERTY
 import org.genspectrum.lapis.request.MutationsField
@@ -120,6 +122,9 @@ fun buildOpenApiSchema(
                         ),
                         AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
                         databaseConfig.schema.metadata,
+                        includeSublineagesForSchema = fieldsEnum(
+                            databaseConfig.schema.metadata.filter { it.generateLineageIndex != null },
+                        ).description(INCLUDE_SUBLINEAGES_FOR_DESCRIPTION),
                     ),
                 )
                 .addSchemas(
@@ -327,6 +332,13 @@ fun buildOpenApiSchema(
                     ),
                 )
                 .addSchemas(FIELDS_TO_AGGREGATE_BY_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
+                .addSchemas(
+                    INCLUDE_SUBLINEAGES_FOR_SCHEMA,
+                    fieldsEnum(
+                        databaseConfig.schema.metadata
+                            .filter { it.generateLineageIndex != null },
+                    ),
+                )
                 .addSchemas(DETAILS_FIELDS_SCHEMA, fieldsArray(databaseConfig.schema.metadata))
                 .addSchemas(
                     PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY,
@@ -625,6 +637,7 @@ private fun requestSchemaWithFields(
     requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>,
     fieldsDescription: String,
     databaseConfig: List<DatabaseMetadata>,
+    includeSublineagesForSchema: Schema<*>? = null,
 ): Schema<*> =
     Schema<Any>()
         .types(setOf("object"))
@@ -633,7 +646,12 @@ private fun requestSchemaWithFields(
             requestProperties + Pair(
                 FIELDS_PROPERTY,
                 fieldsArray(databaseConfig).description(fieldsDescription),
-            ),
+            ) +
+                if (includeSublineagesForSchema != null) {
+                    mapOf(INCLUDE_SUBLINEAGES_FOR_PROPERTY to includeSublineagesForSchema)
+                } else {
+                    emptyMap()
+                },
         )
 
 private fun requestSchemaPhyloTree(requestProperties: Map<SequenceFilterFieldName, Schema<out Any>>): Schema<*> =

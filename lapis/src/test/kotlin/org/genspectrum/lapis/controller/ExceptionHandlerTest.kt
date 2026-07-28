@@ -43,7 +43,7 @@ class ExceptionHandlerTest(
     private val validRoute = "/aggregated"
 
     private fun MockKMatcherScope.validControllerCall() =
-        lapisController.aggregated(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        lapisController.aggregated(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
 
     @Test
     fun `throw NOT_FOUND(404) when route is not found`() {

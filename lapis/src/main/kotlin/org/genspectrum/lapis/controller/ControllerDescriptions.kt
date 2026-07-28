@@ -69,6 +69,14 @@ const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     """The fields to stratify by.
 If empty, only the overall count is returned.
 If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here."""
+const val INCLUDE_SUBLINEAGES_FOR_DESCRIPTION =
+    """The name of a lineage field to group by *including all sublineages*: the response contains one row
+    per lineage defined for that field (including lineages with a count of zero), where each count includes
+    all sequences in that lineage or any of its sublineages.
+    The named field must be a lineage field and must be the single entry in \"fields\"
+    (grouping by lineage-with-sublineages together with other fields is not supported).
+    Note that, unlike a plain groupBy, counts do not partition the data: a sequence is counted under its
+    lineage and under every ancestor lineage, so the counts do not sum to the total."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
     Fields specified here must either be \"count\" or also be present in \"fields\".

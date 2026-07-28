@@ -8,6 +8,7 @@ import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
+import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.controller.mutationData
 import org.genspectrum.lapis.controller.mutationProportionsRequest
 import org.genspectrum.lapis.controller.sequenceFiltersRequest
@@ -36,9 +37,11 @@ import org.genspectrum.lapis.silo.SiloClient
 import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.stream.Stream
 
 private val someMutationData = MutationData(
@@ -80,6 +83,11 @@ class SiloQueryModelTest {
             DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
             DatabaseMetadata(name = "date", type = MetadataType.DATE),
             DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
+            DatabaseMetadata(
+                name = "pangoLineage",
+                type = MetadataType.STRING,
+                generateLineageIndex = "pangoLineageDefinition.yaml",
+            ),
         ),
         primaryKey = "primaryKey",
     )
@@ -101,6 +109,20 @@ class SiloQueryModelTest {
             databaseConfig = testDatabaseConfig,
         )
     }
+
+    private fun aggregatedRequest(
+        fields: List<Field>,
+        includeSublineagesFor: String? = null,
+    ) = SequenceFiltersRequestWithFields(
+        emptyMap(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        emptyList(),
+        fields,
+        OrderBySpec.EMPTY,
+        includeSublineagesFor = includeSublineagesFor,
+    )
 
     @Test
     fun `aggregate calls the SILO client with an aggregated action`() {
@@ -128,6 +150,106 @@ class SiloQueryModelTest {
     }
 
     @Test
+    fun `GIVEN includeSublineagesFor names the sole lineage field THEN sends a sublineage-inclusive aggregation`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getAggregated(
+            aggregatedRequest(
+                fields = listOf(Field("pangoLineage")),
+                includeSublineagesFor = "pangoLineage",
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(listOf("pangoLineage"), includeSublineagesFor = "pangoLineage"),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `GIVEN includeSublineagesFor with different casing THEN normalizes to the canonical field name`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getAggregated(
+            aggregatedRequest(
+                fields = listOf(Field("pangoLineage")),
+                includeSublineagesFor = "PANGOLINEAGE",
+            ),
+        )
+
+        verify {
+            siloClientMock.sendQuery(
+                SiloQuery(
+                    SiloAction.aggregated(listOf("pangoLineage"), includeSublineagesFor = "pangoLineage"),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `GIVEN includeSublineagesFor names an unknown field THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> {
+            underTest.getAggregated(
+                aggregatedRequest(
+                    fields = listOf(Field("notAField")),
+                    includeSublineagesFor = "notAField",
+                ),
+            )
+        }
+
+        assertThat(exception.message, containsString("Unknown field 'notAField'"))
+    }
+
+    @Test
+    fun `GIVEN includeSublineagesFor names a non-lineage field THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> {
+            underTest.getAggregated(
+                aggregatedRequest(
+                    fields = listOf(Field("accession")),
+                    includeSublineagesFor = "accession",
+                ),
+            )
+        }
+
+        assertThat(exception.message, containsString("not a lineage field"))
+    }
+
+    @Test
+    fun `GIVEN includeSublineagesFor field is not present in fields THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> {
+            underTest.getAggregated(
+                aggregatedRequest(
+                    fields = listOf(Field("accession")),
+                    includeSublineagesFor = "pangoLineage",
+                ),
+            )
+        }
+
+        assertThat(exception.message, containsString("must also be present in 'fields'"))
+    }
+
+    @Test
+    fun `GIVEN includeSublineagesFor combined with a second group-by field THEN throws BadRequestException`() {
+        val exception = assertThrows<BadRequestException> {
+            underTest.getAggregated(
+                aggregatedRequest(
+                    fields = listOf(Field("pangoLineage"), Field("accession")),
+                    includeSublineagesFor = "pangoLineage",
+                ),
+            )
+        }
+
+        assertThat(exception.message, containsString("must contain exactly the single lineage field"))
+    }
+
+    @Test
     fun `GIVEN no fields specified THEN getDetails uses all metadata fields`() {
         every { siloClientMock.sendQuery(any<SiloQuery<DetailsData>>()) } returns Stream.empty()
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
@@ -148,7 +270,7 @@ class SiloQueryModelTest {
             siloClientMock.sendQuery(
                 SiloQuery(
                     SiloAction.details(
-                        listOf("accession", "age", "qc", "isBoolean", "date", "primaryKey"),
+                        listOf("accession", "age", "qc", "isBoolean", "date", "primaryKey", "pangoLineage"),
                     ),
                     True,
                 ),

@@ -5,6 +5,7 @@ import tools.jackson.databind.node.JsonNodeType
 const val FORMAT_PROPERTY = "dataFormat"
 const val MIN_PROPORTION_PROPERTY = "minProportion"
 const val FIELDS_PROPERTY = "fields"
+const val INCLUDE_SUBLINEAGES_FOR_PROPERTY = "includeSublineagesFor"
 const val NUCLEOTIDE_MUTATIONS_PROPERTY = "nucleotideMutations"
 const val AMINO_ACID_MUTATIONS_PROPERTY = "aminoAcidMutations"
 const val NUCLEOTIDE_INSERTIONS_PROPERTY = "nucleotideInsertions"
@@ -25,6 +26,7 @@ val SPECIAL_REQUEST_PROPERTY_TYPES = mapOf(
     FORMAT_PROPERTY to JsonNodeType.STRING,
     MIN_PROPORTION_PROPERTY to JsonNodeType.NUMBER,
     FIELDS_PROPERTY to JsonNodeType.ARRAY,
+    INCLUDE_SUBLINEAGES_FOR_PROPERTY to JsonNodeType.STRING,
     NUCLEOTIDE_MUTATIONS_PROPERTY to JsonNodeType.ARRAY,
     AMINO_ACID_MUTATIONS_PROPERTY to JsonNodeType.ARRAY,
     NUCLEOTIDE_INSERTIONS_PROPERTY to JsonNodeType.ARRAY,

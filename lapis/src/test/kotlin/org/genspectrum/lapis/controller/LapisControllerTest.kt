@@ -82,6 +82,48 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.info.dataVersion").value(1234))
     }
 
+    @Test
+    fun `GIVEN GET request with includeSublineagesFor THEN passes it through to the model`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                sequenceFiltersRequestWithFields(
+                    sequenceFilters = emptyMap(),
+                    fields = listOf("pangoLineage"),
+                    includeSublineagesFor = "pangoLineage",
+                ),
+            )
+        } returns Stream.of(AggregationData(0, mapOf("pangoLineage" to StringNode("B.1"))))
+
+        mockMvc.perform(
+            getSample("aggregated")
+                .param("fields", "pangoLineage")
+                .param("includeSublineagesFor", "pangoLineage"),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+    }
+
+    @Test
+    fun `GIVEN POST request with includeSublineagesFor THEN passes it through to the model`() {
+        every {
+            siloQueryModelMock.getAggregated(
+                sequenceFiltersRequestWithFields(
+                    sequenceFilters = emptyMap(),
+                    fields = listOf("pangoLineage"),
+                    includeSublineagesFor = "pangoLineage",
+                ),
+            )
+        } returns Stream.of(AggregationData(0, mapOf("pangoLineage" to StringNode("B.1"))))
+
+        mockMvc.perform(
+            postSample("aggregated")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"fields": ["pangoLineage"], "includeSublineagesFor": "pangoLineage"}"""),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(0))
+    }
+
     @ParameterizedTest(name = "{0} aggregated with fields")
     @MethodSource("getRequestsWithFields")
     fun `aggregated with fields`(

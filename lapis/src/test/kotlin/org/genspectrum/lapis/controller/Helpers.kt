@@ -45,6 +45,7 @@ fun mutationProportionsRequest(
 fun sequenceFiltersRequestWithFields(
     sequenceFilters: Map<String, String>,
     fields: List<String> = emptyList(),
+    includeSublineagesFor: String? = null,
 ) = SequenceFiltersRequestWithFields(
     sequenceFilters.mapValues { listOf(it.value) },
     emptyList(),
@@ -53,6 +54,7 @@ fun sequenceFiltersRequestWithFields(
     emptyList(),
     fields.map { Field(it) },
     OrderBySpec.EMPTY,
+    includeSublineagesFor = includeSublineagesFor,
 )
 
 fun phyloTreeSequenceFiltersRequest(
