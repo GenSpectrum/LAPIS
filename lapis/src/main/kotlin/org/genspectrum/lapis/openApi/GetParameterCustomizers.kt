@@ -17,12 +17,13 @@ class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
     companion object {
         private val PATH_WITHOUT_DOWNLOAD_AS_FILE = listOf(
             "/sample$INFO_ROUTE",
+            "/{view}/sample$INFO_ROUTE",
         )
     }
 
     override fun customise(openApi: OpenAPI) {
         for ((_, path) in openApi.paths.filter { (url, _) ->
-            url.startsWith("/sample") &&
+            (url.startsWith("/sample") || url.startsWith("/{view}/sample")) &&
                 !PATH_WITHOUT_DOWNLOAD_AS_FILE.any {
                     url.startsWith(it)
                 }
@@ -63,7 +64,7 @@ class AggregatedFieldsGetParameterCustomizer(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : OpenApiCustomizer {
     override fun customise(openApi: OpenAPI) {
-        openApi.paths["/sample$AGGREGATED_ROUTE"]
+        (openApi.paths["/{view}/sample$AGGREGATED_ROUTE"] ?: openApi.paths["/sample$AGGREGATED_ROUTE"])
             ?.get
             ?.parameters
             ?.find { it.name == FIELDS_PROPERTY }

@@ -162,6 +162,7 @@ data class SaneQlStep(
 data class SaneQlPipeline(
     val filter: SaneQlExpression,
     val steps: List<SaneQlStep>,
+    val baseQuery: String = "default",
 ) : SaneQlNode {
-    override fun render() = "default.filter(${filter.render()})" + steps.joinToString("") { it.render() }
+    override fun render() = "$baseQuery.filter(${filter.render()})" + steps.joinToString("") { it.render() }
 }

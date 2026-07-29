@@ -36,7 +36,8 @@ class SiloQueryTest {
                     "type": "StringEquals",
                     "column": "theColumn",
                     "value": "theValue"
-                }
+                },
+                "baseQuery": "default"
             }
         """
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))

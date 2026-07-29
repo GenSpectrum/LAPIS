@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JacksonComponent
@@ -66,17 +67,17 @@ private val AMINO_ACID_INSERTION_REGEX =
 
 @JacksonComponent
 class AminoAcidInsertionDeserializer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<AminoAcidInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = AminoAcidInsertion.fromString(p.valueAsString, referenceGenomeSchema)
+    ) = AminoAcidInsertion.fromString(p.valueAsString, activeView.referenceGenomeSchema)
 }
 
 @Component
 class StringToAminoAcidInsertionConverter(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : Converter<String, AminoAcidInsertion> {
-    override fun convert(source: String) = AminoAcidInsertion.fromString(source, referenceGenomeSchema)
+    override fun convert(source: String) = AminoAcidInsertion.fromString(source, activeView.referenceGenomeSchema)
 }

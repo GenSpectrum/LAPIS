@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.request.converter
 
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.SequencePositionField
 import org.springframework.stereotype.Component
@@ -14,8 +14,10 @@ private val SEQUENCE_POSITION_REGEX = Regex("""^([A-Za-z][A-Za-z0-9_]*)?\[(\d+)]
  */
 @Component
 class SequencePositionFieldConverter(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) {
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
+
     fun tryConvert(source: String): SequencePositionField? {
         val positionMatch = SEQUENCE_POSITION_REGEX.matchEntire(source) ?: return null
 

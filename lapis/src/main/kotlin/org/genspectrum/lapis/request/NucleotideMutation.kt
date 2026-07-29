@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
@@ -74,17 +75,17 @@ private val NUCLEOTIDE_MUTATION_REGEX =
 
 @JacksonComponent
 class NucleotideMutationDeserializer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<NucleotideMutation>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = NucleotideMutation.fromString(p.valueAsString, referenceGenomeSchema)
+    ) = NucleotideMutation.fromString(p.valueAsString, activeView.referenceGenomeSchema)
 }
 
 @Component
 class StringToNucleotideMutationConverter(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : Converter<String, NucleotideMutation> {
-    override fun convert(source: String) = NucleotideMutation.fromString(source, referenceGenomeSchema)
+    override fun convert(source: String) = NucleotideMutation.fromString(source, activeView.referenceGenomeSchema)
 }

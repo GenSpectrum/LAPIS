@@ -10,17 +10,10 @@ import mu.KotlinLogging
 import org.apache.arrow.memory.RootAllocator
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.DatabaseConfigValidator
 import org.genspectrum.lapis.config.LapisVersion
-import org.genspectrum.lapis.config.NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE
-import org.genspectrum.lapis.config.REFERENCE_GENOME_ENV_VARIABLE_NAME
-import org.genspectrum.lapis.config.REFERENCE_GENOME_FILENAME_ARGS_NAME
-import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
-import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFields
+import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.LapisHeaders
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
@@ -29,11 +22,9 @@ import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.SECURITY_SCHEMA_NAME
 import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
-import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springdoc.core.utils.SpringDocUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties
 import org.springframework.cache.annotation.EnableCaching
@@ -46,7 +37,6 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter
 import tools.jackson.core.StreamReadConstraints
 import tools.jackson.core.json.JsonFactory
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.readValue
 import java.io.File
 
 private const val VERSION_FILE = "version.txt"
@@ -71,11 +61,16 @@ class LapisSpringConfig {
 
     @Bean
     fun openAPI(
-        sequenceFilterFields: SequenceFilterFields,
-        databaseConfig: DatabaseConfig,
-        referenceGenomeSchema: ReferenceGenomeSchema,
+        viewRegistry: ViewRegistry,
         resourceServerProperties: OAuth2ResourceServerProperties,
-    ) = buildOpenApiSchema(sequenceFilterFields, databaseConfig, referenceGenomeSchema, resourceServerProperties)
+    ) = viewRegistry.first().let {
+        buildOpenApiSchema(
+            sequenceFilterFields = it.sequenceFilterFields,
+            databaseConfig = it.databaseConfig,
+            referenceGenomeSchema = it.referenceGenomeSchema,
+            resourceServerProperties = resourceServerProperties,
+        )
+    }
 
     @Bean
     fun headerCustomizer() =
@@ -116,13 +111,7 @@ class LapisSpringConfig {
         }
 
     @Bean
-    fun databaseConfig(
-        @Value("\${lapis.databaseConfig.path}") configPath: String,
-        yamlObjectMapper: YamlObjectMapper,
-        databaseConfigValidator: DatabaseConfigValidator,
-    ): DatabaseConfig =
-        yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(File(configPath))
-            .let { databaseConfigValidator.validate(it) }
+    fun databaseConfig(viewRegistry: ViewRegistry): DatabaseConfig = viewRegistry.first().databaseConfig
 
     @Bean
     fun sequenceFilterFields(databaseConfig: DatabaseConfig) = SequenceFilterFields.fromDatabaseConfig(databaseConfig)
@@ -152,24 +141,10 @@ class LapisSpringConfig {
     ) = dataOpennessAuthorizationFilterFactory.create()
 
     @Bean
-    fun referenceGenomeSchema(
-        @Value("\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}") nucleotideSegments: List<String>,
-        @Value("\${$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX}") genes: List<String>,
-    ) = ReferenceGenomeSchema(
-        nucleotideSegments.map { ReferenceSequenceSchema(it) },
-        genes.map { ReferenceSequenceSchema(it) },
-    )
+    fun referenceGenomeSchema(viewRegistry: ViewRegistry) = viewRegistry.first().referenceGenomeSchema
 
     @Bean
-    fun referenceGenome(
-        @Value("\${$REFERENCE_GENOME_FILENAME_ARGS_NAME:#{null}}") referenceGenomeFilename: String?,
-    ): ReferenceGenome {
-        val filename = referenceGenomeFilename
-            ?: System.getenv(REFERENCE_GENOME_ENV_VARIABLE_NAME)
-            ?: throw IllegalArgumentException(NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE)
-
-        return ReferenceGenome.readFromFile(filename)
-    }
+    fun referenceGenome(viewRegistry: ViewRegistry): ReferenceGenome = viewRegistry.first().referenceGenome
 
     @Bean
     fun lapisVersion() =

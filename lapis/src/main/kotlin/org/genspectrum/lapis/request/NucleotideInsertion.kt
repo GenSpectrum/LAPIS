@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JacksonComponent
@@ -66,17 +67,17 @@ private val NUCLEOTIDE_INSERTION_REGEX =
 
 @JacksonComponent
 class NucleotideInsertionDeserializer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<NucleotideInsertion>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = NucleotideInsertion.fromString(p.valueAsString, referenceGenomeSchema)
+    ) = NucleotideInsertion.fromString(p.valueAsString, activeView.referenceGenomeSchema)
 }
 
 @Component
 class StringToNucleotideInsertionConverter(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : Converter<String, NucleotideInsertion> {
-    override fun convert(source: String) = NucleotideInsertion.fromString(source, referenceGenomeSchema)
+    override fun convert(source: String) = NucleotideInsertion.fromString(source, activeView.referenceGenomeSchema)
 }

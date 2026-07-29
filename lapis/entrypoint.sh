@@ -9,7 +9,6 @@ ARROW_OPTS="-Dio.netty.tryReflectionSetAccessible=true --add-opens=java.base/jav
 
 GENERAL_OPTS="$ARROW_OPTS -jar app.jar \
     --spring.profiles.active=docker \
-    --referenceGenomeFilename=./reference_genomes.json \
     $ARGS"
 
 if [ -n "$JVM_OPTS" ]; then

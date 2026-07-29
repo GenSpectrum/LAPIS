@@ -37,6 +37,16 @@ class SwaggerUiTest(
     }
 
     @Test
+    fun `view-specific JSON API docs are available`() {
+        mockMvc.perform(get("/test/api-docs"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/json"))
+            .andExpect(jsonPath("\$.openapi").exists())
+            .andExpect(jsonPath("\$.paths./test/sample/aggregated").exists())
+            .andExpect(jsonPath("\$.paths./sample/aggregated").doesNotExist())
+    }
+
+    @Test
     fun `YAML API docs are available`() {
         val result = mockMvc.perform(get("/api-docs.yaml"))
             .andExpect(status().isOk)
@@ -47,5 +57,19 @@ class SwaggerUiTest(
         val yaml = yamlMapper.readTree(result.response.contentAsString)
         assertTrue(yaml.has("openapi"))
         assertTrue(yaml.get("paths").has("/sample/aggregated"))
+    }
+
+    @Test
+    fun `view-specific YAML API docs are available`() {
+        val result = mockMvc.perform(get("/test/api-docs.yaml"))
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/vnd.oai.openapi"))
+            .andReturn()
+
+        val yamlMapper = YAMLMapper.builder().addModule(kotlinModule()).build()
+        val yaml = yamlMapper.readTree(result.response.contentAsString)
+        assertTrue(yaml.has("openapi"))
+        assertTrue(yaml.get("paths").has("/test/sample/aggregated"))
+        assertTrue(!yaml.get("paths").has("/sample/aggregated"))
     }
 }

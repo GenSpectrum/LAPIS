@@ -23,9 +23,15 @@ import java.time.LocalDate
 data class SiloQuery<ResponseType>(
     val action: SiloAction<ResponseType>,
     val filterExpression: SiloFilterExpression,
+    val baseQuery: String = "default",
 ) {
     /** Renders this query as a SaneQL query string, e.g. `default.filter(true).groupBy({count:=count()})`. */
-    fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
+    fun toSaneQl(): String =
+        SaneQlPipeline(
+            filter = filterExpression.toSaneQl(),
+            steps = action.toSaneQlSteps(),
+            baseQuery = baseQuery,
+        ).render()
 }
 
 interface CommonActionFields {

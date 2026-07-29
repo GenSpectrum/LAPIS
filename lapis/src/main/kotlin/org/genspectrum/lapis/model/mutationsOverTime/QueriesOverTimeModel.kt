@@ -2,8 +2,8 @@ package org.genspectrum.lapis.model.mutationsOverTime
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.annotation.PreDestroy
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ActiveView
+import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -125,15 +125,16 @@ data class QueryOverTimeCell(
 class QueriesOverTimeModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
-    private val referenceGenome: ReferenceGenome,
+    private val activeView: ActiveView,
     private val dataVersion: DataVersion,
     private val advancedQueryFacade: AdvancedQueryFacade,
-    config: DatabaseConfig,
+    viewRegistry: ViewRegistry,
 ) {
     /**
      * Thread pool used for parallel queries to SILO.
      */
-    private val threadPool = Executors.newFixedThreadPool(config.siloClientThreadCount)
+    private val threadPool = Executors.newFixedThreadPool(viewRegistry.first().databaseConfig.siloClientThreadCount)
+    private val referenceGenome get() = activeView.referenceGenome
 
     fun evaluateQueriesOverTime(
         queries: List<QueryOverTimeItem>,

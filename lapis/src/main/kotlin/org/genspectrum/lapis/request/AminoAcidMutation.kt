@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
@@ -70,17 +71,17 @@ private val AMINO_ACID_MUTATION_REGEX =
 
 @JacksonComponent
 class AminoAcidMutationDeserializer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<AminoAcidMutation>() {
     override fun deserialize(
         p: JsonParser,
         ctxt: DeserializationContext,
-    ) = AminoAcidMutation.fromString(p.valueAsString, referenceGenomeSchema)
+    ) = AminoAcidMutation.fromString(p.valueAsString, activeView.referenceGenomeSchema)
 }
 
 @Component
 class StringToAminoAcidMutationConverter(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : Converter<String, AminoAcidMutation> {
-    override fun convert(source: String) = AminoAcidMutation.fromString(source, referenceGenomeSchema)
+    override fun convert(source: String) = AminoAcidMutation.fromString(source, activeView.referenceGenomeSchema)
 }

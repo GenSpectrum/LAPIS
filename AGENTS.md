@@ -15,7 +15,7 @@ The default preview on the `views` branch is the LAPIS service on `http://127.0.
 
 Run `./lapis/preview.sh start` from the repository root. Use `restart` or `recreate` after code changes, `status` to check it, `logs` to inspect recent output, and `stop` to shut it down. The helper performs an incremental Gradle build, binds LAPIS to loopback, and waits for its health endpoint. Its runtime state and log are in `/tmp/lapis-views-preview-$UID/`.
 
-The matching database config is `lapis/preview/database_config.yaml`. The reference genome is `lapis-e2e/testData/singleSegmented/reference_genomes.json`; it is identical to the reference genome in `/home/chaoran/workspace/tmp/lapis-configs/`. The remaining files in that temporary config directory are SILO preprocessing inputs and are not required when LAPIS uses the remote SILO API.
+The preview views manifest is `lapis/preview/views.yaml`. It defines `http://127.0.0.1:8090/all/...` for the full staging table and `http://127.0.0.1:8090/swiss/...` for Swiss metadata backed by `default.filter(country = 'Switzerland').map({canton := division})`. The view database configs are in `lapis/preview/`; the reference genome is `lapis-e2e/testData/singleSegmented/reference_genomes.json`, which is identical to `/home/chaoran/workspace/tmp/lapis-configs/reference_genomes.json`.
 
 ## Commit Message Convention
 

@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
@@ -103,7 +102,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/sample")
+@RequestMapping("/{view}/sample", "/sample")
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
@@ -111,10 +110,12 @@ class LapisController(
     private val plainFieldConverter: PlainFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
-    private val databaseConfig: DatabaseConfig,
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
     private val dataVersion: DataVersion,
 ) {
+    private val databaseConfig get() = activeView.databaseConfig
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
+
     @GetMapping(AGGREGATED_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @LapisAggregatedResponse
     fun aggregated(

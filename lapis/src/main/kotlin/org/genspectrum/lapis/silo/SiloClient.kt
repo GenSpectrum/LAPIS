@@ -3,7 +3,8 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonInclude
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.ipc.ArrowStreamReader
-import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.ActiveView
+import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.logging.RequestContext
@@ -36,6 +37,7 @@ class SiloClient(
     private val cachedSiloClient: CachedSiloClient,
     private val dataVersion: DataVersion,
     private val requestContext: RequestContext,
+    private val activeView: ActiveView,
 ) {
     fun <ResponseType> sendQuery(
         query: SiloQuery<ResponseType>,
@@ -46,9 +48,10 @@ class SiloClient(
         query: SiloQuery<ResponseType>,
         setRequestDataVersion: Boolean = true,
     ): WithDataVersion<Stream<ResponseType>> {
-        val response = when (query.action.cacheable) {
-            true -> cachedSiloClient.sendCachedQuery(query).map { it.stream() }
-            else -> cachedSiloClient.sendQuery(query)
+        val viewQuery = query.copy(baseQuery = activeView.config.baseQuery)
+        val response = when (viewQuery.action.cacheable) {
+            true -> cachedSiloClient.sendCachedQuery(viewQuery).map { it.stream() }
+            else -> cachedSiloClient.sendQuery(viewQuery)
         }
 
         if (setRequestDataVersion) {
@@ -90,13 +93,13 @@ open class CachedSiloClient(
     private val yamlObjectMapper: YamlObjectMapper,
     private val requestIdContext: RequestIdContext,
     private val requestContext: RequestContext,
-    private val config: DatabaseConfig,
+    viewRegistry: ViewRegistry,
     private val rootAllocator: RootAllocator,
 ) {
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
         // Use fixed pool with unbounded queue to prevent RejectedExecutionExeceptions
-        .executor(Executors.newFixedThreadPool(config.siloClientThreadCount))
+        .executor(Executors.newFixedThreadPool(viewRegistry.first().databaseConfig.siloClientThreadCount))
         .build()
 
     @Cacheable(

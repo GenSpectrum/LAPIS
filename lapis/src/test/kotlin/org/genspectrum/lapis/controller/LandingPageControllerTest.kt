@@ -26,7 +26,8 @@ class LandingPageControllerTest(
         mockMvc.perform(get("/"))
             .andExpect(status().isOk)
             .andExpect(content().contentType(APPLICATION_JSON))
-            .andExpect(jsonPath("['Swagger UI']").exists())
+            .andExpect(jsonPath("\$.views[0].viewName").value("test"))
+            .andExpect(jsonPath("\$.views[0].url").value("/test/"))
     }
 
     @Test
@@ -39,7 +40,7 @@ class LandingPageControllerTest(
 
     @Test
     fun `WHEN calling llms txt endpoint THEN returns 200 OK`() {
-        mockMvc.perform(get("/llms.txt"))
+        mockMvc.perform(get("/test/llms.txt"))
             .andExpect(status().isOk)
             .andExpect(content().contentType("text/plain;charset=UTF-8"))
             .andExpect(content().string(startsWith("# LAPIS")))

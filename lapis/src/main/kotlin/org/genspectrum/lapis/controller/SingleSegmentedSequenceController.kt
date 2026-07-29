@@ -3,9 +3,9 @@ package org.genspectrum.lapis.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
+import org.genspectrum.lapis.config.SegmentationType
+import org.genspectrum.lapis.config.SegmentedViewController
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
@@ -34,7 +34,6 @@ import org.genspectrum.lapis.request.SequenceFiltersRequest
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.SequencesStreamer
 import org.genspectrum.lapis.silo.SequenceType
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -45,20 +44,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-const val SHOW_SINGLE_SEGMENTED_CONTROLLER =
-    "#{'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}'.split(',').length == 1 &&" +
-        "'\${$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX}' > ''}"
-
 @RestController
-@ConditionalOnExpression(SHOW_SINGLE_SEGMENTED_CONTROLLER)
-@RequestMapping("/sample")
+@SegmentedViewController(SegmentationType.SINGLE)
+@RequestMapping("/{view}/sample", "/sample")
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
     private val sequencesStreamer: SequencesStreamer,
-    private val databaseConfig: DatabaseConfig,
 ) {
+    private val databaseConfig get() = activeView.databaseConfig
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
+
     @GetMapping(
         ALIGNED_NUCLEOTIDE_SEQUENCES_ROUTE,
         produces = [TEXT_X_FASTA_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_NDJSON_VALUE],

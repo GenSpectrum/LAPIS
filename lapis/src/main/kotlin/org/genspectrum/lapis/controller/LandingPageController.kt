@@ -1,9 +1,9 @@
 package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Hidden
-import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.MetadataType
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ViewRegistry
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 class LandingPageController(
     @param:Value("\${lapis.docs.url:}") private val lapisDocsUrl: String,
-    private val databaseConfig: DatabaseConfig,
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) {
+    private val databaseConfig get() = activeView.databaseConfig
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
     private val links = buildMap {
         if (lapisDocsUrl.isNotBlank()) {
             put("Documentation", lapisDocsUrl)
@@ -29,17 +30,17 @@ class LandingPageController(
         put("GitHub", "https://github.com/GenSpectrum/LAPIS")
     }
 
-    @GetMapping("/", produces = [MediaType.TEXT_HTML_VALUE])
+    @GetMapping("/{view}/", produces = [MediaType.TEXT_HTML_VALUE])
     fun indexHtml(model: Model): String {
         populateModel(model)
         return "index"
     }
 
-    @GetMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping("/{view}/", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     fun indexJson() = links + ("Instance name" to databaseConfig.schema.instanceName)
 
-    @GetMapping("/llms.txt", produces = [MediaType.TEXT_PLAIN_VALUE])
+    @GetMapping("/{view}/llms.txt", produces = [MediaType.TEXT_PLAIN_VALUE])
     fun llmsTxt(model: Model): String {
         populateLlmsModel(model)
         return "llms.txt"
@@ -84,4 +85,40 @@ class LandingPageController(
             .firstOrNull { it.type == metadataType && it.name != databaseConfig.schema.primaryKey }
             ?.name
             ?: databaseConfig.schema.metadata.firstOrNull { it.type == metadataType }?.name
+}
+
+@Hidden
+@Controller
+class RootDiscoveryController(
+    private val viewRegistry: ViewRegistry,
+) {
+    @GetMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    fun indexJson() =
+        mapOf(
+            "views" to viewRegistry.views.values.map {
+                mapOf(
+                    "viewName" to it.viewName,
+                    "instanceName" to it.databaseConfig.schema.instanceName,
+                    "url" to "/${it.viewName}/",
+                )
+            },
+        )
+
+    @GetMapping("/", produces = [MediaType.TEXT_HTML_VALUE])
+    @ResponseBody
+    fun indexHtml() =
+        buildString {
+            append(
+                "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">" +
+                    "<title>LAPIS views</title></head><body>",
+            )
+            append("<h1>LAPIS views</h1><ul>")
+            viewRegistry.views.values.forEach {
+                append(
+                    "<li><a href=\"/${it.viewName}/\">${it.viewName} - ${it.databaseConfig.schema.instanceName}</a></li>",
+                )
+            }
+            append("</ul></body></html>")
+        }
 }

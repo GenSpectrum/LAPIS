@@ -224,7 +224,7 @@ LAPIS usually runs on localhost:8090
 - YAML file defines metadata fields
 - Determines available sequence filters
 - Influences OpenAPI spec generation
-- Config file path is provided via the `--lapis.databaseConfig.path` argument when starting the service
+- View manifests are provided via the `--lapis.viewsConfig.path` argument when starting the service
 - Example configs: see the test database configs under `lapis-e2e/testData/` in the repo
 
 ### Caching

@@ -1,0 +1,18 @@
+views:
+  - viewName: all
+    baseQuery: default
+    databaseConfig: database_config.yaml
+    referenceGenome: ../../lapis-e2e/testData/singleSegmented/reference_genomes.json
+    capabilities:
+      - metadata
+      - mutations
+      - insertions
+      - sequences
+      - phyloTree
+      - components
+  - viewName: swiss
+    baseQuery: default.filter(country = 'Switzerland').map({canton := division})
+    databaseConfig: database_config_swiss.yaml
+    referenceGenome: ../../lapis-e2e/testData/singleSegmented/reference_genomes.json
+    capabilities:
+      - metadata

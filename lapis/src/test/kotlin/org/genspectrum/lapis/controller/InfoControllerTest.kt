@@ -53,6 +53,15 @@ class InfoControllerTest(
     fun `GET databaseConfig as YAML`() {
         val yamlStart = """
             ---
+            viewName: "test"
+            baseQuery: "default"
+            capabilities:
+            - "metadata"
+            - "mutations"
+            - "insertions"
+            - "sequences"
+            - "phyloTree"
+            - "components"
             schema:
               instanceName: "sars_cov-2_minimal_test_config"
               opennessLevel: "OPEN"

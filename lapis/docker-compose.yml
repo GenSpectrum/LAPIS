@@ -11,6 +11,11 @@ x-database-config-volume: &database-config-volume
   target: /workspace/database_config.yaml
   read_only: true
 
+x-views-config-volume: &views-config-volume
+  type: bind
+  target: /workspace/views.yaml
+  read_only: true
+
 x-reference-genomes-volume: &reference-genomes-volume
   type: bind
   target: /workspace/reference_genomes.json
@@ -29,6 +34,8 @@ services:
       - "8090:8080"
     command: --silo.url=http://silo:8081
     volumes:
+      - <<: *views-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/views.yaml
       - <<: *database-config-volume
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
       - <<: *reference-genomes-volume
@@ -80,6 +87,8 @@ services:
       - "8094:8080"
     command: --silo.url=http://siloMultisegmented:8081
     volumes:
+      - <<: *views-config-volume
+        source: ../lapis-e2e/testData/multiSegmented/views.yaml
       - <<: *database-config-volume
         source: ../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml
       - <<: *reference-genomes-volume
@@ -91,6 +100,8 @@ services:
       - "8095:8080"
     command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.public-key-location=file:/workspace/test_public_key.pem
     volumes:
+      - <<: *views-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/views.yaml
       - <<: *database-config-volume
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
       - <<: *reference-genomes-volume
@@ -106,6 +117,8 @@ services:
       - "8096:8080"
     command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:8080/realms/test-realm/protocol/openid-connect/certs
     volumes:
+      - <<: *views-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/views.yaml
       - <<: *database-config-volume
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
       - <<: *reference-genomes-volume
@@ -118,6 +131,8 @@ services:
       - "8097:8080"
     command: --silo.url=http://silo:8081 --spring.security.oauth2.resourceserver.jwt.issuer-uri=http://keycloak:8080/realms/test-realm
     volumes:
+      - <<: *views-config-volume
+        source: ../lapis-e2e/testData/singleSegmented/views.yaml
       - <<: *database-config-volume
         source: ../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml
       - <<: *reference-genomes-volume

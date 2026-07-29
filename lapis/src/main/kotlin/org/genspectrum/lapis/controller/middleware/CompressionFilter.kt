@@ -202,7 +202,7 @@ class CompressionFilter(
         if (downloadAsFile) {
             return response
         }
-        if (!reReadableRequest.getProxyAwarePath().startsWith("/sample")) {
+        if (!reReadableRequest.isSampleRoute()) {
             return response
         }
 
@@ -216,6 +216,11 @@ class CompressionFilter(
             .apply {
                 setHeader(CONTENT_ENCODING, compression.value)
             }
+    }
+
+    private fun CachedBodyHttpServletRequest.isSampleRoute(): Boolean {
+        val segments = getProxyAwarePath().split('/').filter { it.isNotBlank() }
+        return segments.firstOrNull() == "sample" || segments.getOrNull(1) == "sample"
     }
 }
 

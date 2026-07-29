@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -33,7 +34,7 @@ class VariantQueryFacadeTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private val underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
+    private val underTest = VariantQueryFacade(mockActiveView(referenceGenomeSchema = dummyReferenceGenomeSchema))
 
     @Test
     fun `given a complex variant query then map should return the corresponding SiloQuery`() {

@@ -1,8 +1,8 @@
 package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.SequenceFilterFieldType
-import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.AminoAcidInsertion
@@ -49,7 +49,7 @@ typealias SequenceFilterFieldName = String
 
 @Component
 class SiloFilterExpressionMapper(
-    private val allowedSequenceFilterFields: SequenceFilterFields,
+    private val activeView: ActiveView,
     private val variantQueryFacade: VariantQueryFacade,
     private val advancedQueryFacade: AdvancedQueryFacade,
 ) {
@@ -109,7 +109,7 @@ class SiloFilterExpressionMapper(
     private fun mapToFilterExpressionIdentifier(
         key: SequenceFilterFieldName,
     ): Pair<Pair<SequenceFilterFieldName, Filter>, SequenceFilterFieldType> {
-        val field = allowedSequenceFilterFields.fields[key.lowercase(Locale.US)]
+        val field = activeView.sequenceFilterFields.fields[key.lowercase(Locale.US)]
 
         val type = field?.type
         val filterExpressionId = when (type) {
@@ -133,7 +133,7 @@ class SiloFilterExpressionMapper(
 
             null -> throw BadRequestException(
                 "'$key' is not a valid sequence filter key. Valid keys are: " +
-                    allowedSequenceFilterFields.fields.values.joinToString { it.name },
+                    activeView.sequenceFilterFields.fields.values.joinToString { it.name },
             )
         }
         return Pair(filterExpressionId, type)

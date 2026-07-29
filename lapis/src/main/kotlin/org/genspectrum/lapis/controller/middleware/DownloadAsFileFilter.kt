@@ -43,8 +43,9 @@ class DownloadAsFileFilter(
     }
 
     private fun getFilename(request: CachedBodyHttpServletRequest): String {
+        val samplePath = request.getSamplePath()
         val matchingRoute =
-            SampleRoute.entries.find { request.getProxyAwarePath().startsWith("/sample${it.pathSegment}") }
+            SampleRoute.entries.find { samplePath?.startsWith("/sample${it.pathSegment}") == true }
         val dataName = request.getStringField(DOWNLOAD_FILE_BASENAME_PROPERTY)
             ?: matchingRoute?.pathSegment?.trim('/')
             ?: "data"
@@ -93,5 +94,15 @@ class DownloadAsFileFilter(
             }
         }
         return ".json"
+    }
+
+    private fun CachedBodyHttpServletRequest.getSamplePath(): String? {
+        val segments = getProxyAwarePath().split('/').filter { it.isNotBlank() }
+        val sampleIndex = when {
+            segments.firstOrNull() == "sample" -> 0
+            segments.getOrNull(1) == "sample" -> 1
+            else -> return null
+        }
+        return "/" + segments.drop(sampleIndex).joinToString("/")
     }
 }

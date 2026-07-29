@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.request
 
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.converter.FieldConverter
@@ -40,7 +41,7 @@ data class MRCASequenceFiltersRequest(
 @JacksonComponent
 class PhyloTreeSequenceFiltersRequestDeserializer(
     private val fieldConverter: PlainFieldConverter,
-    private val databaseConfig: DatabaseConfig,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -48,7 +49,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
     ): PhyloTreeSequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
-        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
+        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, activeView.databaseConfig)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 
         return PhyloTreeSequenceFiltersRequest(
@@ -68,7 +69,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
 @JacksonComponent
 class MRCASequenceFiltersRequestDeserializer(
     private val fieldConverter: PlainFieldConverter,
-    private val databaseConfig: DatabaseConfig,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<MRCASequenceFiltersRequest>() {
     override fun deserialize(
         jsonParser: JsonParser,
@@ -76,7 +77,7 @@ class MRCASequenceFiltersRequestDeserializer(
     ): MRCASequenceFiltersRequest {
         val node = jsonParser.readValueAsTree<JsonNode>()
 
-        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, databaseConfig)
+        val phyloTreeField = parsePhyloTreeProperty(node, fieldConverter, activeView.databaseConfig)
         val printNodesNotInTree = parsePrintNodesNotInTree(node)
         val parsedCommonFields = parseCommonFields(node, ctxt)
 

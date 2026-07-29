@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.model
 
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.DetailsFiltersRequest
@@ -31,11 +30,11 @@ import java.util.stream.Stream
 class SiloQueryModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
     private val fastaHeaderTemplateParser: FastaHeaderTemplateParser,
-    databaseConfig: DatabaseConfig,
 ) {
-    private val allMetadataFields = databaseConfig.schema.metadata.map { it.name }
+    private val allMetadataFields get() = activeView.databaseConfig.schema.metadata.map { it.name }
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
 
     fun getAggregated(sequenceFilters: AggregatedFiltersRequest) =
         siloClient.sendQuery(

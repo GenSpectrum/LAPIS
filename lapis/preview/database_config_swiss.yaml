@@ -1,0 +1,20 @@
+schema:
+  instanceName: sars_cov-2_nextstrain_open_swiss
+  opennessLevel: OPEN
+  metadata:
+    - name: strain
+      type: string
+    - name: date
+      type: date
+    - name: dateSubmitted
+      type: date
+    - name: canton
+      type: string
+      generateIndex: true
+    - name: pangoLineage
+      type: string
+      generateIndex: true
+      generateLineageIndex: "lineage_definitions"
+  features:
+    - name: generalizedAdvancedQuery
+  primaryKey: strain

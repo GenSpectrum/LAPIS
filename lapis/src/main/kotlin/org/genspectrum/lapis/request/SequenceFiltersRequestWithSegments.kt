@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.controller.BadRequestException
 import org.springframework.boot.jackson.JacksonComponent
 import tools.jackson.core.JsonParser
@@ -24,8 +24,10 @@ data class SequenceFiltersRequestWithSegments(
 
 @JacksonComponent
 class SequenceFiltersRequestWithSegmentsDeserializer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : ValueDeserializer<SequenceFiltersRequestWithSegments>() {
+    private val referenceGenomeSchema get() = activeView.referenceGenomeSchema
+
     override fun deserialize(
         jsonParser: JsonParser,
         ctxt: DeserializationContext,

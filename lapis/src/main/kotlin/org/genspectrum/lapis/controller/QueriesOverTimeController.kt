@@ -27,7 +27,7 @@ const val AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE = "/aminoAcidMutationsOverTime"
 const val QUERIES_OVER_TIME_ROUTE = "/queriesOverTime"
 
 @RestController
-@RequestMapping("/component")
+@RequestMapping("/{view}/component", "/component")
 class QueriesOverTimeController(
     val queriesOverTimeModel: QueriesOverTimeModel,
     val lapisInfoFactory: LapisInfoFactory,

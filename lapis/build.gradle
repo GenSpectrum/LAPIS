@@ -124,34 +124,26 @@ openApi {
         }
     }
 
-    def getCustomLapisConfig = { segmented_ ->
+    def getCustomViewsConfig = { segmented_ ->
         if (segmented_ == "true") {
-            return "$rootDir/../lapis-e2e/testData/multiSegmented/testDatabaseConfig.yaml"
+            return "$rootDir/../lapis-e2e/testData/multiSegmented/views.yaml"
         } else {
-            return "$rootDir/../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml"
-        }
-    }
-
-    def getReferenceGenomeFilename = { segmented_ ->
-        if (segmented_ == "true") {
-            return "$rootDir/../lapis-e2e/testData/multiSegmented/reference_genomes.json"
-        } else {
-            return "$rootDir/../lapis-e2e/testData/singleSegmented/reference_genomes.json"
+            return "$rootDir/../lapis-e2e/testData/singleSegmented/views.yaml"
         }
     }
 
     def customOutputFileName = getCustomOutputFileName(segmented, auth)
-    def customLapisConfig = getCustomLapisConfig(segmented)
-    def referenceGenomeFilename = getReferenceGenomeFilename(segmented)
+    def customViewsConfig = getCustomViewsConfig(segmented)
 
     outputFileName.set(customOutputFileName)
-    apiDocsUrl.set("http://localhost:8080/api-docs")
+    apiDocsUrl.set("http://localhost:58080/test/api-docs")
 
     customBootRun {
         def bootRunArgs = [
                 "--silo.url=does.not.matter.here",
-                "--lapis.databaseConfig.path=$customLapisConfig",
-                "--referenceGenomeFilename=$referenceGenomeFilename",
+                "--lapis.viewsConfig.path=$customViewsConfig",
+                "--lapis.validateViewsOnStartup=false",
+                "--server.port=58080",
         ]
         
         if (auth == "true") {

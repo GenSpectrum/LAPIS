@@ -4,6 +4,7 @@ import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.databaseConfig
+import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -17,19 +18,20 @@ import tools.jackson.databind.node.NullNode
 import tools.jackson.databind.node.StringNode
 
 class FastaHeaderTemplateTest {
+    private val testDatabaseConfig = databaseConfig(
+        metadata = listOf(
+            DatabaseMetadata(name = "accession", type = MetadataType.STRING),
+            DatabaseMetadata(name = "age", type = MetadataType.INT),
+            DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
+            DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
+            DatabaseMetadata(name = "date", type = MetadataType.DATE),
+            DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
+        ),
+        primaryKey = "primaryKey",
+    )
     private val fastaHeaderTemplateParser = FastaHeaderTemplateParser(
         caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
-            databaseConfig = databaseConfig(
-                metadata = listOf(
-                    DatabaseMetadata(name = "accession", type = MetadataType.STRING),
-                    DatabaseMetadata(name = "age", type = MetadataType.INT),
-                    DatabaseMetadata(name = "qc", type = MetadataType.FLOAT),
-                    DatabaseMetadata(name = "isBoolean", type = MetadataType.BOOLEAN),
-                    DatabaseMetadata(name = "date", type = MetadataType.DATE),
-                    DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING),
-                ),
-                primaryKey = "primaryKey",
-            ),
+            activeView = mockActiveView(databaseConfig = testDatabaseConfig),
         ),
     )
 

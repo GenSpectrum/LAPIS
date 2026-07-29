@@ -27,10 +27,27 @@ SILO_TAG=latest LAPIS_TAG=local docker compose up --pull missing
 When running LAPIS, you need to pass the following arguments:
 
 * the SILO url `--silo.url=http://<url>:<port>`
-* the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
- in the Docker image this is already set to `/workspace/database_config.yaml`.
-* the path to the reference genome `--referenceGenomeFilename=<path/to/referenceGenome>`
-  in the Docker image this is already set to `/workspace/reference_genomes.yaml`.
+* the path to the views config `--lapis.viewsConfig.path=<path/to/views.yaml>`,
+  in the Docker image this is already set to `/workspace/views.yaml`.
+
+The views config defines one or more URL-prefixed LAPIS views. Each view references a database config and a reference genome file relative to the views config file:
+
+```yaml
+views:
+  - viewName: all
+    baseQuery: default
+    databaseConfig: database_config.yaml
+    referenceGenome: reference_genomes.json
+    capabilities:
+      - metadata
+      - mutations
+      - insertions
+      - sequences
+      - phyloTree
+      - components
+```
+
+With this example, LAPIS endpoints are available below `/all`, such as `/all/sample/aggregated`.
 
 Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
@@ -100,11 +117,11 @@ Run tests:
 e.g. when running via gradle:
 
 ```bash
-./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>'
+./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.viewsConfig.path=<path/to/views.yaml>'
 ```
 For example:
 ```
-./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
+./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.viewsConfig.path=../lapis-e2e/testData/singleSegmented/views.yaml --server.port=8090'
 ```
 
 bootRun rebuilds the code as needed - if you want to ensure a fresh build you can first explicitly build lapis

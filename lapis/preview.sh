@@ -3,7 +3,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPOSITORY_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 STATE_DIR="${LAPIS_PREVIEW_STATE_DIR:-/tmp/lapis-views-preview-$(id -u)}"
 PID_FILE="$STATE_DIR/pid"
 PORT_FILE="$STATE_DIR/port"
@@ -11,8 +10,7 @@ LOG_FILE="$STATE_DIR/lapis.log"
 
 PORT="${LAPIS_PREVIEW_PORT:-8090}"
 SILO_URL="${LAPIS_PREVIEW_SILO_URL:-https://gs-staging-1.int.genspectrum.org/open/v2/silo}"
-DATABASE_CONFIG="$SCRIPT_DIR/preview/database_config.yaml"
-REFERENCE_GENOME="$REPOSITORY_DIR/lapis-e2e/testData/singleSegmented/reference_genomes.json"
+VIEWS_CONFIG="$SCRIPT_DIR/preview/views.yaml"
 
 usage() {
     echo "Usage: $0 {start|restart|recreate|stop|status|logs}"
@@ -101,7 +99,7 @@ start_preview() {
     (
         cd "$SCRIPT_DIR"
         exec setsid ./gradlew --no-daemon --console=plain bootRun \
-            --args="--server.address=127.0.0.1 --server.port=$PORT --silo.url=$SILO_URL --lapis.databaseConfig.path=$DATABASE_CONFIG --referenceGenomeFilename=$REFERENCE_GENOME"
+            --args="--server.address=127.0.0.1 --server.port=$PORT --silo.url=$SILO_URL --lapis.viewsConfig.path=$VIEWS_CONFIG"
     ) >> "$LOG_FILE" 2>&1 < /dev/null &
     pid=$!
     printf '%s\n' "$pid" > "$PID_FILE"

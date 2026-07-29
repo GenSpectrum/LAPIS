@@ -22,7 +22,10 @@ class LapisApplicationFailsToLoadContextTest {
         val contextRunner: ApplicationContextRunner = ApplicationContextRunner()
             .withUserConfiguration(LapisSpringConfig::class.java)
             .withUserConfiguration(ComponentScanConfig::class.java)
-            .withPropertyValues("lapis.databaseConfig.path=src/test/resources/config/invalidTestDatabaseConfig.yaml")
+            .withPropertyValues(
+                "lapis.viewsConfig.path=src/test/resources/config/views-invalid-test.yaml",
+                "lapis.validateViewsOnStartup=false",
+            )
 
         var cause = assertThrows<Throwable> {
             contextRunner.run { it!!.getBean("databaseConfig") }

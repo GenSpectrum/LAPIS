@@ -5,7 +5,7 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.dummyDatabaseConfig
-import org.genspectrum.lapis.dummySequenceFilterFields
+import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
@@ -52,11 +52,15 @@ private const val SOME_VALUE = "some value"
 class SiloFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema =
         ReferenceGenomeSchema(listOf(ReferenceSequenceSchema("sequenceName")), emptyList())
-    private val variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
-    private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
+    private val activeView = mockActiveView(
+        databaseConfig = dummyDatabaseConfig,
+        referenceGenomeSchema = dummyReferenceGenomeSchema,
+    )
+    private val variantQueryFacade = VariantQueryFacade(activeView)
+    private val advancedQueryFacade = AdvancedQueryFacade(activeView)
 
     private val underTest =
-        SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
+        SiloFilterExpressionMapper(activeView, variantQueryFacade, advancedQueryFacade)
 
     @ParameterizedTest(name = "GIVEN {0} THEN throws exception")
     @MethodSource("getInvalidFilterScenarios")
@@ -1015,10 +1019,10 @@ class SiloFilterExpressionMapperTest {
                 ),
                 Arguments.of(
                     mapOf(
-                        "primaryKey.phylodescendantof" to listOf("innerNode"),
+                        "treeKey.phylodescendantof" to listOf("innerNode"),
                     ),
                     And(
-                        PhyloDescendantOf("primaryKey", "innerNode"),
+                        PhyloDescendantOf("treeKey", "innerNode"),
                     ),
                 ),
                 Arguments.of(

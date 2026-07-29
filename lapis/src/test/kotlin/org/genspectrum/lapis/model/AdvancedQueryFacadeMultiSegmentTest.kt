@@ -4,6 +4,7 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.dummyDatabaseConfig
+import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
 import org.genspectrum.lapis.silo.And
@@ -37,7 +38,12 @@ class AdvancedQueryFacadeMultiSegmentTest {
             ReferenceSequenceSchema("ORF1a"),
         ),
     )
-    private val underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
+    private val underTest = AdvancedQueryFacade(
+        mockActiveView(
+            databaseConfig = dummyDatabaseConfig,
+            referenceGenomeSchema = dummyReferenceGenomeSchema,
+        ),
+    )
 
     @Test
     fun `given a complex advanced query THEN map should return the corresponding SiloQuery`() {

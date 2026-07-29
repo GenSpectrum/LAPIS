@@ -3,7 +3,7 @@ package org.genspectrum.lapis.response
 import jakarta.servlet.http.HttpServletRequest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.config.SiloVersion
 import org.genspectrum.lapis.logging.RequestIdContext
@@ -16,7 +16,7 @@ import kotlin.time.Clock
 class LapisInfoFactory(
     private val dataVersion: DataVersion,
     private val requestIdContext: RequestIdContext,
-    private val databaseConfig: DatabaseConfig,
+    private val activeView: ActiveView,
     private val lapisVersion: LapisVersion,
     private val request: HttpServletRequest,
     private val siloVersion: SiloVersion,
@@ -31,7 +31,7 @@ class LapisInfoFactory(
         )
 
     fun getRequestInfo() =
-        "${databaseConfig.schema.instanceName} on ${URI(
+        "${activeView.config.viewName} (${activeView.databaseConfig.schema.instanceName}) on ${URI(
             request.requestURL.toString(),
         ).host} at ${now()}"
 

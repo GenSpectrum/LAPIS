@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 const val PARSE_ROUTE = "/parse"
 
 @RestController
-@RequestMapping("/query")
+@RequestMapping("/{view}/query", "/query")
 class QueryController(
     val queryParseModel: QueryParseModel,
     val lapisInfoFactory: LapisInfoFactory,

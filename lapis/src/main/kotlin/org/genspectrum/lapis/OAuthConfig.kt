@@ -28,6 +28,11 @@ val PUBLIC_ROUTES = arrayOf(
     "/api-docs**",
     "/api-docs/**",
     "/swagger-ui/**",
+    "/*/",
+    "/*/llms.txt",
+    "/*/api-docs**",
+    "/*/api-docs/**",
+    "/*/swagger-ui/**",
 )
 
 @Configuration

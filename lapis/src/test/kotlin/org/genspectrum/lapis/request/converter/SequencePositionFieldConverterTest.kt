@@ -3,6 +3,7 @@ package org.genspectrum.lapis.request.converter
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.request.SequencePositionField
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -12,16 +13,20 @@ import org.junit.jupiter.api.assertThrows
 
 class SequencePositionFieldConverterTest {
     private val singleSegmentedConverter = SequencePositionFieldConverter(
-        referenceGenomeSchema = ReferenceGenomeSchema(
-            nucleotideSequences = listOf(ReferenceSequenceSchema("main")),
-            genes = listOf(ReferenceSequenceSchema("ORF1a")),
+        activeView = mockActiveView(
+            referenceGenomeSchema = ReferenceGenomeSchema(
+                nucleotideSequences = listOf(ReferenceSequenceSchema("main")),
+                genes = listOf(ReferenceSequenceSchema("ORF1a")),
+            ),
         ),
     )
 
     private val multiSegmentedConverter = SequencePositionFieldConverter(
-        referenceGenomeSchema = ReferenceGenomeSchema(
-            nucleotideSequences = listOf(ReferenceSequenceSchema("S"), ReferenceSequenceSchema("L")),
-            genes = emptyList(),
+        activeView = mockActiveView(
+            referenceGenomeSchema = ReferenceGenomeSchema(
+                nucleotideSequences = listOf(ReferenceSequenceSchema("S"), ReferenceSequenceSchema("L")),
+                genes = emptyList(),
+            ),
         ),
     )
 

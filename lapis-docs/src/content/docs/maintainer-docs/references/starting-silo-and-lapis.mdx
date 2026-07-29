@@ -73,14 +73,9 @@ i.e. you only need to mount the result of the preprocessing to `/data`.
 To start LAPIS you need to provide the following parameters:
 
 - `--silo.url`: The URL where SILO is running, e.g. `http://localhost:8081`.
-- `--lapis.databaseConfig.path`:
-  The path to the [database config](../references/database-configuration) file that LAPIS should use,
-  e.g. `~/LAPIS/database_config.yaml`.
-- `--referenceGenomeFilename`:
-  The path to the [reference genomes](../references/reference-genomes) file that LAPIS should use,
-  e.g. `~/reference_genomes.json`.
-  This can alternatively be passed via the environment variable `REFERENCE_GENOME_ENV_VARIABLE_NAME`.
-  The parameter takes precedence over the environment variable.
+- `--lapis.viewsConfig.path`:
+  The path to the views config file that defines LAPIS URL prefixes, base SILO queries, database configs, reference genomes, and endpoint capabilities.
+  Database config and reference genome paths are resolved relative to the views config file.
 
 LAPIS listens on port 8080.
 
@@ -97,10 +92,9 @@ We provide Docker images for LAPIS with the name: `ghcr.io/genspectrum/lapis`.
 
 The provided Docker images already contain reasonable default values for
 
-- the `lapis.databaseConfig.path` parameter: `/workspace/database_config.yaml`,
-- the `REFERENCE_GENOME_ENV_VARIABLE_NAME` environment variable: `/workspace/reference_genomes.json`.
+- the `lapis.viewsConfig.path` parameter: `/workspace/views.yaml`.
 
 :::note
-You simply need to mount the config files to those locations in the container
+You simply need to mount the views config and the files it references into the container
 and start the container with `--silo.url=<your SILO URL>`.
 :::

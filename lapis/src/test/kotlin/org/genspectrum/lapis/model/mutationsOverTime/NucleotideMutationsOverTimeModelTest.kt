@@ -6,6 +6,8 @@ import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.mockActiveView
+import org.genspectrum.lapis.mockViewRegistry
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
 import org.genspectrum.lapis.request.NucleotideMutation
@@ -57,13 +59,14 @@ class NucleotideMutationsOverTimeModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
+        val activeView = mockActiveView(databaseConfig = config, referenceGenome = referenceGenome)
         underTest = QueriesOverTimeModel(
             siloClient = siloQueryClient,
             siloFilterExpressionMapper = siloFilterExpressionMapper,
-            referenceGenome = referenceGenome,
+            activeView = activeView,
             dataVersion = dataVersion,
             advancedQueryFacade = advancedQueryFacade,
-            config = config,
+            viewRegistry = mockViewRegistry(activeView.config),
         )
     }
 

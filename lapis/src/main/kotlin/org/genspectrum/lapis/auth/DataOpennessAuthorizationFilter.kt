@@ -3,8 +3,6 @@ package org.genspectrum.lapis.auth
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.OpennessLevel
 import org.genspectrum.lapis.controller.middleware.DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
@@ -19,17 +17,14 @@ import tools.jackson.databind.ObjectMapper
 
 @Component
 class DataOpennessAuthorizationFilterFactory(
-    private val databaseConfig: DatabaseConfig,
     private val objectMapper: ObjectMapper,
     private val lapisInfoFactory: LapisInfoFactory,
 ) {
     fun create(): DataOpennessAuthorizationFilter =
-        when (databaseConfig.schema.opennessLevel) {
-            OpennessLevel.OPEN -> AlwaysAuthorizedAuthorizationFilter(
-                objectMapper = objectMapper,
-                lapisInfoFactory = lapisInfoFactory,
-            )
-        }
+        AlwaysAuthorizedAuthorizationFilter(
+            objectMapper = objectMapper,
+            lapisInfoFactory = lapisInfoFactory,
+        )
 }
 
 @Order(DATA_OPENNESS_AUTHORIZATION_FILTER_ORDER)
