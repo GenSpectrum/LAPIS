@@ -66,7 +66,7 @@ class SaneQlAstTest {
     @Test
     fun `GIVEN assignment THEN renders as name colon-equals value`() {
         val assignment = SaneQlAssignment("count", SaneQlFunctionCall("count"))
-        assertThat(assignment.render(), equalTo("count:=count()"))
+        assertThat(assignment.render(), equalTo("\"count\":=count()"))
     }
 
     @Test

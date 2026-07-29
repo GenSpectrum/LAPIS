@@ -58,10 +58,11 @@ import org.genspectrum.lapis.openApi.REQUEST_SCHEMA_WITH_MIN_PROPORTION
 import org.genspectrum.lapis.openApi.SequencesDataFormatParam
 import org.genspectrum.lapis.openApi.StringResponseOperation
 import org.genspectrum.lapis.openApi.TreeDataFormatParam
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.CaseInsensitiveFieldConverter
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.GetRequestSequenceFilters
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
@@ -72,10 +73,11 @@ import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.SPECIAL_REQUEST_PROPERTIES
 import org.genspectrum.lapis.request.SequenceFiltersRequest
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
+import org.genspectrum.lapis.request.converter.AggregatedFieldConverter
+import org.genspectrum.lapis.request.converter.PlainFieldConverter
+import org.genspectrum.lapis.request.converter.validatePhyloTreeField
 import org.genspectrum.lapis.request.toOrderBySpec
-import org.genspectrum.lapis.request.validatePhyloTreeField
 import org.genspectrum.lapis.response.AggregatedCollection
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
@@ -105,7 +107,8 @@ import org.springframework.web.bind.annotation.RestController
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,
-    private val caseInsensitiveFieldConverter: CaseInsensitiveFieldConverter,
+    private val aggregatedFieldConverter: AggregatedFieldConverter,
+    private val plainFieldConverter: PlainFieldConverter,
     private val sequencesStreamer: SequencesStreamer,
     private val lapisResponseStreamer: LapisResponseStreamer,
     private val databaseConfig: DatabaseConfig,
@@ -147,13 +150,13 @@ class LapisController(
         dataFormat: String? = null,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -206,13 +209,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -268,13 +271,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = AggregatedFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { aggregatedFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -303,7 +306,7 @@ class LapisController(
     fun postAggregated(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -326,7 +329,7 @@ class LapisController(
     fun postAggregatedAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -353,7 +356,7 @@ class LapisController(
     fun postAggregatedAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$AGGREGATED_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: AggregatedFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -368,10 +371,10 @@ class LapisController(
         )
     }
 
-    private fun getAggregatedCollection(request: SequenceFiltersRequestWithFields): AggregatedCollection =
+    private fun getAggregatedCollection(request: AggregatedFiltersRequest) =
         AggregatedCollection(
             records = siloQueryModel.getAggregated(request),
-            fields = request.fields.map { it.fieldName },
+            fields = request.fields.map { it.outputColumnName },
         )
 
     @GetMapping(NUCLEOTIDE_MUTATIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -950,7 +953,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
@@ -1005,7 +1008,7 @@ class LapisController(
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField =
-                validatePhyloTreeField(phyloTreeField, caseInsensitiveFieldConverter, databaseConfig).fieldName,
+                validatePhyloTreeField(phyloTreeField, plainFieldConverter, databaseConfig).fieldName,
             printNodesNotInTree = printNodesNotInTree,
         )
 
@@ -1063,7 +1066,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
             printNodesNotInTree = printNodesNotInTree,
@@ -1160,7 +1163,7 @@ class LapisController(
     private fun getMostRecentCommonAncestorCollection(
         request: MRCASequenceFiltersRequest,
     ): MostRecentCommonAncestorCollection {
-        validatePhyloTreeField(request.phyloTreeField, caseInsensitiveFieldConverter, databaseConfig)
+        validatePhyloTreeField(request.phyloTreeField, plainFieldConverter, databaseConfig)
         return MostRecentCommonAncestorCollection(
             records = siloQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
@@ -1202,7 +1205,7 @@ class LapisController(
             aminoAcidInsertions ?: emptyList(),
             phyloTreeField = validatePhyloTreeField(
                 phyloTreeField,
-                caseInsensitiveFieldConverter,
+                plainFieldConverter,
                 databaseConfig,
             ).fieldName,
         )
@@ -1275,13 +1278,13 @@ class LapisController(
         aminoAcidInsertions: List<AminoAcidInsertion>?,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1330,13 +1333,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1389,13 +1392,13 @@ class LapisController(
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
-        val request = SequenceFiltersRequestWithFields(
+        val request = DetailsFiltersRequest(
             sequenceFilters?.filter { !SPECIAL_REQUEST_PROPERTIES.contains(it.key) } ?: emptyMap(),
             nucleotideMutations ?: emptyList(),
             aminoAcidMutations ?: emptyList(),
             nucleotideInsertions ?: emptyList(),
             aminoAcidInsertions ?: emptyList(),
-            fields?.map { caseInsensitiveFieldConverter.convert(it) } ?: emptyList(),
+            fields?.map { plainFieldConverter.convert(it) }?.distinct() ?: emptyList(),
             orderBy.toOrderBySpec(),
             limit,
             offset,
@@ -1424,7 +1427,7 @@ class LapisController(
     fun postDetails(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         response: HttpServletResponse,
     ) {
         lapisResponseStreamer.streamData(
@@ -1447,7 +1450,7 @@ class LapisController(
     fun postDetailsAsCsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1474,7 +1477,7 @@ class LapisController(
     fun postDetailsAsTsv(
         @Parameter(schema = Schema(ref = "#/components/schemas/$DETAILS_REQUEST_SCHEMA"))
         @RequestBody
-        request: SequenceFiltersRequestWithFields,
+        request: DetailsFiltersRequest,
         @RequestHeader httpHeaders: HttpHeaders,
         response: HttpServletResponse,
     ) {
@@ -1489,7 +1492,7 @@ class LapisController(
         )
     }
 
-    private fun getDetailsCollection(request: SequenceFiltersRequestWithFields): DetailsCollection {
+    private fun getDetailsCollection(request: DetailsFiltersRequest): DetailsCollection {
         val fields = request.fields.map { it.fieldName }
 
         return DetailsCollection(

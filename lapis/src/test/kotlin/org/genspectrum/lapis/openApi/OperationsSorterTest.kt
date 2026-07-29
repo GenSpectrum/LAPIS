@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Test
@@ -44,5 +45,21 @@ class OperationsSorterTest {
         val csvFirstKeys = result.responses["csvFirst"]?.content?.keys
         assertThat(csvFirstKeys?.first(), `is`("application/json"))
         assertThat(jsonFirstKeys, hasSize(3))
+    }
+
+    @Test
+    fun `given a response without content then does not throw`() {
+        val underTest = OperationsSorter()
+
+        val input = Operation().apply {
+            responses = ApiResponses()
+            responses["404"] = ApiResponse().apply {
+                description = "Not Found"
+            }
+        }
+
+        val result = underTest.customize(input, mockk<HandlerMethod>())
+
+        assertThat(result.responses["404"]?.content, `is`(nullValue()))
     }
 }

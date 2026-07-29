@@ -2,6 +2,9 @@ package org.genspectrum.lapis.request
 
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.request.converter.FieldConverter
+import org.genspectrum.lapis.request.converter.PlainFieldConverter
+import org.genspectrum.lapis.request.converter.validatePhyloTreeField
 import org.springframework.boot.jackson.JacksonComponent
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
@@ -36,7 +39,7 @@ data class MRCASequenceFiltersRequest(
 
 @JacksonComponent
 class PhyloTreeSequenceFiltersRequestDeserializer(
-    private val fieldConverter: CaseInsensitiveFieldConverter,
+    private val fieldConverter: PlainFieldConverter,
     private val databaseConfig: DatabaseConfig,
 ) : ValueDeserializer<PhyloTreeSequenceFiltersRequest>() {
     override fun deserialize(
@@ -64,7 +67,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
 
 @JacksonComponent
 class MRCASequenceFiltersRequestDeserializer(
-    private val fieldConverter: CaseInsensitiveFieldConverter,
+    private val fieldConverter: PlainFieldConverter,
     private val databaseConfig: DatabaseConfig,
 ) : ValueDeserializer<MRCASequenceFiltersRequest>() {
     override fun deserialize(
@@ -94,9 +97,9 @@ class MRCASequenceFiltersRequestDeserializer(
 
 fun parsePhyloTreeProperty(
     node: JsonNode,
-    fieldConverter: FieldConverter<Field>,
+    fieldConverter: FieldConverter<PlainField>,
     databaseConfig: DatabaseConfig,
-): Field {
+): PlainField {
     val phyloTreeField = node.get(PHYLO_TREE_FIELD_PROPERTY)
     if (phyloTreeField == null) {
         throw BadRequestException(

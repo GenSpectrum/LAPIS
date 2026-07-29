@@ -1,0 +1,20 @@
+{
+  "testCaseName": "group by nucleotide symbol using shorthand position syntax [100]",
+  "lapisRequest": {
+    "fields": ["[100]"]
+  },
+  "expected": [
+    {
+      "count": 93,
+      "[100]": "C"
+    },
+    {
+      "count": 3,
+      "[100]": "N"
+    },
+    {
+      "count": 4,
+      "[100]": "-"
+    }
+  ]
+}

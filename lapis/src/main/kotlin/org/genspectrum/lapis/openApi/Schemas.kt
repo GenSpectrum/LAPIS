@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.genspectrum.lapis.controller.AGGREGATED_ENDPOINT_DESCRIPTION
-import org.genspectrum.lapis.controller.AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_AMINO_ACID_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.AMINO_ACID_FASTA_HEADER_TEMPLATE_DESCRIPTION
@@ -539,11 +538,16 @@ annotation class NucleotideFastaHeaderTemplateParam
 )
 annotation class AminoAcidFastaHeaderTemplateParam
 
+/**
+ * No `description` here: it depends on the reference genome, which isn't available as an annotation
+ * (compile-time constant) argument. It's set at runtime by `aggregatedFieldsGetCustomizer` in
+ * [org.genspectrum.lapis.LapisSpringConfig] instead, matching what the POST body's `AGGREGATED_REQUEST_SCHEMA`
+ * already documents.
+ */
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @Parameter(
     schema = Schema(ref = "#/components/schemas/$FIELDS_TO_AGGREGATE_BY_SCHEMA"),
-    description = AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION,
 )
 annotation class FieldsToAggregateBy
 

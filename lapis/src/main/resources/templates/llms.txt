@@ -49,6 +49,15 @@ This instance uses a single-segmented genome.
 [/]
 Available genes for amino acid queries: [# th:each="gene, iterStat : ${geneNames}"][(${gene})][(${!iterStat.last ? ', ' : ''})][/]
 
+### Sequence Position Fields
+
+The `fields` parameter of [sample/aggregated](sample/aggregated) (not [sample/details](sample/details)) also accepts
+sequence position fields, to group by the nucleotide or amino acid symbol at a specific position of a segment or gene.
+Syntax: `SequenceName[position]`, e.g. `S[501]` for position 501 of segment/gene `S`.
+[# th:if="${isSingleSegmented}"]Since this instance is single-segmented, you can also use the shorthand `[position]`, e.g. `[501]`, which refers to the one nucleotide sequence.[/]
+Example: `{"fields": ["[(${firstGene})][123]"]}` groups sequences by the residue at position 123 of gene [(${firstGene})].
+Response column names always use the canonical sequence name from the reference genome, regardless of the case used in the request, e.g. `s[501]` -> `S[501]`.
+
 ### How to Filter by Mutations
 
 You can filter sequences by nucleotide and amino acid mutations.

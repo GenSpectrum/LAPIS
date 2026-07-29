@@ -1,61 +1,20 @@
 package org.genspectrum.lapis.request
 
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.controller.BadRequestException
-import org.springframework.stereotype.Component
+sealed interface Field {
+    val outputColumnName: String
+}
 
-data class Field(
+data class PlainField(
     val fieldName: String,
-)
-
-fun interface FieldConverter<T> {
-    fun convert(source: String): T
-
-    fun validatePhyloTreeFields(source: String): T = convert(source)
+) : Field {
+    override val outputColumnName: String get() = fieldName
 }
 
-@Component
-class CaseInsensitiveFieldConverter(
-    private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
-) : FieldConverter<Field> {
-    override fun convert(source: String): Field {
-        val cleaned = caseInsensitiveFieldsCleaner.clean(source)
-            ?: throw BadRequestException(
-                "Unknown field: '$source', known values are ${caseInsensitiveFieldsCleaner.getKnownFields()}",
-            )
-
-        return Field(cleaned)
-    }
-
-    override fun validatePhyloTreeFields(source: String): Field {
-        val converted = convert(source)
-        val validFields = caseInsensitiveFieldsCleaner.getPhyloTreeFields()
-        if (converted.fieldName !in validFields) {
-            throw BadRequestException(
-                "Field '${converted.fieldName}' is not a phylo tree field, " +
-                    "known phylo tree fields are [${validFields.joinToString(
-                        ", ",
-                    )}]",
-            )
-        }
-        return converted
-    }
-}
-
-fun validatePhyloTreeField(
-    source: String,
-    fieldConverter: FieldConverter<Field>,
-    databaseConfig: DatabaseConfig,
-): Field {
-    val converted = fieldConverter.convert(source)
-    val validFields = databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
-    if (converted.fieldName !in validFields) {
-        throw BadRequestException(
-            "Field '${converted.fieldName}' is not a phylo tree field, " +
-                "known phylo tree fields are [${validFields.joinToString(
-                    ", ",
-                )}]",
-        )
-    }
-    return converted
+data class SequencePositionField(
+    val sequenceName: String,
+    val position: Int,
+    val isSingleSegment: Boolean = false,
+) : Field {
+    /** Used both as the SaneQL alias and as the response column key, e.g. `S[501]` or `[501]` for shorthand. */
+    override val outputColumnName: String get() = if (isSingleSegment) "[$position]" else "$sequenceName[$position]"
 }

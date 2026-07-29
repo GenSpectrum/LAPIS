@@ -1,14 +1,15 @@
 package org.genspectrum.lapis.controller
 
-import org.genspectrum.lapis.request.Field
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
+import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.SequenceFiltersRequest
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithGenes
 import org.genspectrum.lapis.request.SequenceFiltersRequestWithSegments
 import org.genspectrum.lapis.request.toOrderBySpec
@@ -42,16 +43,29 @@ fun mutationProportionsRequest(
     orderByFields = OrderBySpec.EMPTY,
 )
 
-fun sequenceFiltersRequestWithFields(
+fun aggregatedFiltersRequest(
     sequenceFilters: Map<String, String>,
     fields: List<String> = emptyList(),
-) = SequenceFiltersRequestWithFields(
+) = AggregatedFiltersRequest(
     sequenceFilters.mapValues { listOf(it.value) },
     emptyList(),
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { PlainField(it) },
+    OrderBySpec.EMPTY,
+)
+
+fun detailsFiltersRequest(
+    sequenceFilters: Map<String, String>,
+    fields: List<String> = emptyList(),
+) = DetailsFiltersRequest(
+    sequenceFilters.mapValues { listOf(it.value) },
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    emptyList(),
+    fields.map { PlainField(it) },
     OrderBySpec.EMPTY,
 )
 
@@ -90,13 +104,13 @@ fun mrcaSequenceFiltersRequest(
 fun sequenceFiltersRequestWithArrayValuedFilters(
     sequenceFilters: Map<String, List<String>>,
     fields: List<String> = emptyList(),
-) = SequenceFiltersRequestWithFields(
+) = AggregatedFiltersRequest(
     sequenceFilters,
     emptyList(),
     emptyList(),
     emptyList(),
     emptyList(),
-    fields.map { Field(it) },
+    fields.map { PlainField(it) },
     OrderBySpec.EMPTY,
 )
 

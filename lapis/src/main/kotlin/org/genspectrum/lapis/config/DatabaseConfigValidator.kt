@@ -11,6 +11,11 @@ class DatabaseConfigValidator {
                     "Metadata field name '${it.name}' contains the reserved character '.'",
                 )
             }
+            if (it.name.contains('[') || it.name.contains(']')) {
+                throw IllegalArgumentException(
+                    "Metadata field name '${it.name}' contains a reserved character, '[' or ']'",
+                )
+            }
         }
 
         return databaseConfig

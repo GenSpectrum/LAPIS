@@ -7,15 +7,15 @@ import org.genspectrum.lapis.FIELD_WITH_UPPERCASE_LETTER
 import org.genspectrum.lapis.controller.SampleRoute.AGGREGATED
 import org.genspectrum.lapis.controller.SampleRoute.DETAILS
 import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.AminoAcidInsertion
 import org.genspectrum.lapis.request.AminoAcidMutation
-import org.genspectrum.lapis.request.Field
 import org.genspectrum.lapis.request.NucleotideInsertion
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
-import org.genspectrum.lapis.request.SequenceFiltersRequestWithFields
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -61,7 +61,7 @@ class LapisControllerCommonFieldsTest(
     fun `GET aggregated with a single orderBy field`() {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -83,7 +83,7 @@ class LapisControllerCommonFieldsTest(
     fun `GET aggregated with orderBy fields is case insensitive for configured fields`() {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -115,7 +115,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -140,7 +140,7 @@ class LapisControllerCommonFieldsTest(
     fun `POST aggregated with ascending and descending orderBy fields is case insensitive for configured fields`() {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -197,7 +197,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -213,7 +213,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -240,7 +240,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = null) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -267,7 +267,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -283,7 +283,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -310,7 +310,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -337,7 +337,7 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getDetails(
                 match {
                     it.orderByFields == OrderBySpec.Random(seed = 123) &&
-                        it.fields == listOf(Field("country"))
+                        it.fields == listOf(PlainField("country"))
                 },
             )
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"))))
@@ -357,7 +357,7 @@ class LapisControllerCommonFieldsTest(
     fun `GET aggregated with limit`() {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -384,7 +384,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -417,7 +417,7 @@ class LapisControllerCommonFieldsTest(
     fun `GET aggregated with offset`() {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -445,7 +445,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -483,7 +483,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -508,7 +508,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
@@ -533,7 +533,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
                     emptyList(),
@@ -558,7 +558,7 @@ class LapisControllerCommonFieldsTest(
     ) {
         every {
             siloQueryModelMock.getAggregated(
-                SequenceFiltersRequestWithFields(
+                AggregatedFiltersRequest(
                     emptyMap(),
                     emptyList(),
                     listOf(AminoAcidMutation("gene1", 123, "A"), AminoAcidMutation("gene2", 124, "B")),

@@ -2,10 +2,13 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.parameters.Parameter
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
+import org.genspectrum.lapis.request.FIELDS_PROPERTY
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component
 
@@ -46,5 +49,24 @@ class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
                     .schema(compressionSchema()),
             )
         }
+    }
+}
+
+/**
+ * The GET `fields` parameter is otherwise documented via the `@FieldsToAggregateBy` annotation, which deliberately
+ * leaves out `description` since it can't hold the dynamic [aggregatedFieldsDescription] (it depends on the
+ * reference genome). Set it here instead, matching what the POST body's `AGGREGATED_REQUEST_SCHEMA` already
+ * documents.
+ */
+@Component
+class AggregatedFieldsGetParameterCustomizer(
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
+) : OpenApiCustomizer {
+    override fun customise(openApi: OpenAPI) {
+        openApi.paths["/sample$AGGREGATED_ROUTE"]
+            ?.get
+            ?.parameters
+            ?.find { it.name == FIELDS_PROPERTY }
+            ?.description = aggregatedFieldsDescription(referenceGenomeSchema)
     }
 }
