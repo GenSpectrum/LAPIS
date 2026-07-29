@@ -60,7 +60,7 @@ class PhyloTreeSequenceFiltersRequestDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
-            phyloTreeField.fieldName,
+            phyloTreeField.outputColumnName,
         )
     }
 }
@@ -89,7 +89,7 @@ class MRCASequenceFiltersRequestDeserializer(
             parsedCommonFields.orderByFields,
             parsedCommonFields.limit,
             parsedCommonFields.offset,
-            phyloTreeField.fieldName,
+            phyloTreeField.outputColumnName,
             printNodesNotInTree = printNodesNotInTree,
         )
     }
