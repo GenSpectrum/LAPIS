@@ -71,6 +71,27 @@ LAPIS follows a three-layer architecture:
 - **Test classes:** Suffix with `Test` (e.g., `LapisControllerTest`)
 - **Test methods:** `GIVEN <setup> WHEN <action> THEN <outcome>`, omit `WHEN` part when obvious.
 
+### Named Arguments
+
+Always use named arguments in function calls when possible.
+
+Don't:
+```kotlin
+greet("hello", "world")
+```
+
+Do:
+```kotlin
+greet(
+    greeting = "hello",
+    who = "world",
+)
+```
+
+Exceptions when it's ok not to use named arguments:
+- when hurts readability
+- only a single argument
+
 ### Data Classes
 
 ```kotlin
