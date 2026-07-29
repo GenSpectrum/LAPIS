@@ -9,10 +9,7 @@ import jakarta.annotation.PreDestroy
 import mu.KotlinLogging
 import org.apache.arrow.memory.RootAllocator
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
-import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.LapisVersion
-import org.genspectrum.lapis.config.ReferenceGenome
-import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.LapisHeaders
 import org.genspectrum.lapis.logging.RequestContext
@@ -111,12 +108,6 @@ class LapisSpringConfig {
         }
 
     @Bean
-    fun databaseConfig(viewRegistry: ViewRegistry): DatabaseConfig = viewRegistry.first().databaseConfig
-
-    @Bean
-    fun sequenceFilterFields(databaseConfig: DatabaseConfig) = SequenceFilterFields.fromDatabaseConfig(databaseConfig)
-
-    @Bean
     fun logFilter(): CommonsRequestLoggingFilter {
         val filter = CommonsRequestLoggingFilter()
         filter.setIncludeHeaders(false)
@@ -139,12 +130,6 @@ class LapisSpringConfig {
     fun dataOpennessAuthorizationFilter(
         dataOpennessAuthorizationFilterFactory: DataOpennessAuthorizationFilterFactory,
     ) = dataOpennessAuthorizationFilterFactory.create()
-
-    @Bean
-    fun referenceGenomeSchema(viewRegistry: ViewRegistry) = viewRegistry.first().referenceGenomeSchema
-
-    @Bean
-    fun referenceGenome(viewRegistry: ViewRegistry): ReferenceGenome = viewRegistry.first().referenceGenome
 
     @Bean
     fun lapisVersion() =

@@ -8,7 +8,7 @@ x-silo-common: &silo-common
 
 x-database-config-volume: &database-config-volume
   type: bind
-  target: /workspace/database_config.yaml
+  target: /workspace/testDatabaseConfig.yaml
   read_only: true
 
 x-views-config-volume: &views-config-volume

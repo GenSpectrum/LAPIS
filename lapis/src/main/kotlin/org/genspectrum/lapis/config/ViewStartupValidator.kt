@@ -29,70 +29,32 @@ class ViewStartupValidator(
     }
 
     private fun validate(view: ViewConfig) {
-        val schema = querySchema("${applyRequestFilter(view.baseQuery, "true")}.schema()", view.viewName)
-        validateDeclaredSchema(view, schema)
-        val tableScanBaseQuery = view.tableScanQuery ?: view.baseQuery
-        if (view.tableScanQuery != null) {
-            validateTableScanSchema(
-                view = view,
-                actualFields = querySchema("${applyRequestFilter(tableScanBaseQuery, "true")}.schema()", view.viewName),
-            )
-        }
-
-        if (view.supports(ViewCapability.METADATA)) {
-            probe("${applyRequestFilter(view.baseQuery, "false")}.groupBy({count:=count()}).schema()", view)
-        }
-        if (view.supports(ViewCapability.MUTATIONS)) {
-            view.referenceGenomeSchema.getNucleotideSequenceNames().takeIf { it.isNotEmpty() }?.let {
-                probe(
-                    applyRequestFilter(tableScanBaseQuery, "false") +
-                        ".mutations(minProportion:=0.1, sequenceNames:=${set(it)}).schema()",
-                    view,
-                )
-            }
-            view.referenceGenomeSchema.getGeneNames().takeIf { it.isNotEmpty() }?.let {
-                probe(
-                    applyRequestFilter(tableScanBaseQuery, "false") +
-                        ".aminoAcidMutations(minProportion:=0.1, sequenceNames:=${set(it)}).schema()",
-                    view,
-                )
-            }
-        }
-        if (view.supports(ViewCapability.INSERTIONS)) {
-            view.referenceGenomeSchema.getNucleotideSequenceNames().takeIf { it.isNotEmpty() }?.let {
-                probe(
-                    "${applyRequestFilter(tableScanBaseQuery, "false")}" +
-                        ".insertions(sequenceNames:=${set(it)}).schema()",
-                    view,
-                )
-            }
-            view.referenceGenomeSchema.getGeneNames().takeIf { it.isNotEmpty() }?.let {
-                probe(
-                    "${applyRequestFilter(tableScanBaseQuery, "false")}" +
-                        ".aminoAcidInsertions(sequenceNames:=${set(it)}).schema()",
-                    view,
-                )
-            }
-        }
+        val baseSchema = querySchema("${applyRequestFilter(view.baseQuery, "true")}.schema()", view.viewName)
+        validateDeclaredSchema(view, baseSchema)
         if (view.supports(ViewCapability.SEQUENCES)) {
-            val sequenceColumns = buildList {
+            val requiredSequenceColumns = buildSet {
                 view.referenceGenomeSchema.getNucleotideSequenceNames().forEach {
                     add(it)
                     add("unaligned_$it")
                 }
                 addAll(view.referenceGenomeSchema.getGeneNames())
             }
-            probe("${applyRequestFilter(view.baseQuery, "false")}.project(${set(sequenceColumns)}).schema()", view)
+            val missingColumns = requiredSequenceColumns - baseSchema.map { it.fieldName }.toSet()
+            require(missingColumns.isEmpty()) {
+                "View '${view.viewName}' enables sequences but its baseQuery is missing: " +
+                    missingColumns.joinToString()
+            }
+        }
+        view.tableScanQuery?.let {
+            validateTableScanSchema(
+                view = view,
+                actualFields = querySchema("${applyRequestFilter(it, "true")}.schema()", view.viewName),
+            )
         }
         if (view.supports(ViewCapability.PHYLO_TREE)) {
             val treeFields = view.databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
             require(treeFields.isNotEmpty()) {
                 "View '${view.viewName}' enables phyloTree but defines no phylogenetic tree metadata field"
-            }
-            treeFields.forEach {
-                val filteredTableScanQuery = applyRequestFilter(tableScanBaseQuery, "false")
-                probe("$filteredTableScanQuery.mostRecentCommonAncestor('$it').schema()", view)
-                probe("$filteredTableScanQuery.phyloSubtree('$it').schema()", view)
             }
         }
     }
@@ -101,18 +63,8 @@ class ViewStartupValidator(
         view: ViewConfig,
         actualFields: List<SiloSchemaField>,
     ) {
-        val actualByName = actualFields.associateBy { it.fieldName }
-        view.databaseConfig.schema.metadata.forEach { metadata ->
-            val actual = requireNotNull(actualByName[metadata.name]) {
-                "View '${view.viewName}' declares metadata field '${metadata.name}' that is absent from its baseQuery"
-            }
-            require(actual.type in compatibleSiloTypes(metadata.type)) {
-                "View '${view.viewName}' declares '${metadata.name}' as ${metadata.type}, but SILO reports ${actual.type}"
-            }
-            require(!metadata.generateIndex || actual.type == "INDEXED_STRING") {
-                "View '${view.viewName}' declares '${metadata.name}' as indexed, but SILO reports ${actual.type}"
-            }
-        }
+        validateMetadataSchema(view, actualFields, "baseQuery") { it.name }
+        val actualByName = actualFields.map { it.fieldName }.toSet()
         require(view.databaseConfig.schema.primaryKey in actualByName) {
             "View '${view.viewName}' primary key '${view.databaseConfig.schema.primaryKey}' is absent from its baseQuery"
         }
@@ -121,21 +73,28 @@ class ViewStartupValidator(
     private fun validateTableScanSchema(
         view: ViewConfig,
         actualFields: List<SiloSchemaField>,
+    ) = validateMetadataSchema(view, actualFields, "tableScanQuery") { view.fieldAliases[it.name] ?: it.name }
+
+    private fun validateMetadataSchema(
+        view: ViewConfig,
+        actualFields: List<SiloSchemaField>,
+        queryName: String,
+        fieldName: (DatabaseMetadata) -> String,
     ) {
         val actualByName = actualFields.associateBy { it.fieldName }
         view.databaseConfig.schema.metadata.forEach { metadata ->
-            val tableScanField = view.fieldAliases[metadata.name] ?: metadata.name
-            val actual = requireNotNull(actualByName[tableScanField]) {
-                "View '${view.viewName}' maps metadata field '${metadata.name}' to table-scan field " +
-                    "'$tableScanField', which is absent from its tableScanQuery"
+            val queryField = fieldName(metadata)
+            val actual = requireNotNull(actualByName[queryField]) {
+                "View '${view.viewName}' metadata field '${metadata.name}' resolves to '$queryField', " +
+                    "which is absent from its $queryName"
             }
             require(actual.type in compatibleSiloTypes(metadata.type)) {
-                "View '${view.viewName}' declares '${metadata.name}' as ${metadata.type}, but its table-scan field " +
-                    "'$tableScanField' has type ${actual.type}"
+                "View '${view.viewName}' declares '${metadata.name}' as ${metadata.type}, " +
+                    "but '$queryField' in its $queryName has type ${actual.type}"
             }
             require(!metadata.generateIndex || actual.type == "INDEXED_STRING") {
-                "View '${view.viewName}' declares '${metadata.name}' as indexed, but its table-scan field " +
-                    "'$tableScanField' has type ${actual.type}"
+                "View '${view.viewName}' declares '${metadata.name}' as indexed, " +
+                    "but '$queryField' in its $queryName has type ${actual.type}"
             }
         }
     }
@@ -148,13 +107,6 @@ class ViewStartupValidator(
             MetadataType.FLOAT -> setOf("FLOAT", "DOUBLE")
             MetadataType.BOOLEAN -> setOf("BOOL")
         }
-
-    private fun probe(
-        query: String,
-        view: ViewConfig,
-    ) {
-        querySchema(query, view.viewName)
-    }
 
     private fun querySchema(
         query: String,
@@ -173,8 +125,6 @@ class ViewStartupValidator(
             objectMapper.readValue<SiloSchemaField>(it)
         }.toList()
     }
-
-    private fun set(values: List<String>) = values.joinToString(prefix = "{", postfix = "}", separator = ",")
 }
 
 private data class SiloSchemaField(

@@ -28,7 +28,7 @@ class LapisApplicationFailsToLoadContextTest {
             )
 
         var cause = assertThrows<Throwable> {
-            contextRunner.run { it!!.getBean("databaseConfig") }
+            contextRunner.run { it!!.getBean("viewRegistry") }
         }
 
         while (cause.cause != null) {

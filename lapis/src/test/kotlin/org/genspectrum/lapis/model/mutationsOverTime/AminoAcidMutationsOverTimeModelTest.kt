@@ -3,8 +3,7 @@ package org.genspectrum.lapis.model.mutationsOverTime
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import org.genspectrum.lapis.config.DatabaseConfig
-import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.mockActiveView
 import org.genspectrum.lapis.mockViewRegistry
@@ -44,7 +43,9 @@ AminoAcidMutationsOverTimeModelTest {
     private lateinit var siloFilterExpressionMapper: SiloFilterExpressionMapper
 
     @Autowired
-    private lateinit var referenceGenome: ReferenceGenome
+    private lateinit var viewRegistry: ViewRegistry
+
+    private val referenceGenome get() = viewRegistry.first().referenceGenome
 
     @Autowired
     private lateinit var dataVersion: DataVersion
@@ -54,13 +55,11 @@ AminoAcidMutationsOverTimeModelTest {
 
     private lateinit var underTest: QueriesOverTimeModel
 
-    @Autowired
-    private lateinit var config: DatabaseConfig
-
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        val activeView = mockActiveView(databaseConfig = config, referenceGenome = referenceGenome)
+        val view = viewRegistry.first()
+        val activeView = mockActiveView(databaseConfig = view.databaseConfig, referenceGenome = view.referenceGenome)
         underTest = QueriesOverTimeModel(
             siloClient = siloQueryClient,
             siloFilterExpressionMapper = siloFilterExpressionMapper,

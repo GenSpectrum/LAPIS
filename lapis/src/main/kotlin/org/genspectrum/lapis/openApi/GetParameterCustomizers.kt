@@ -2,7 +2,7 @@ package org.genspectrum.lapis.openApi
 
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.parameters.Parameter
-import org.genspectrum.lapis.config.ReferenceGenomeSchema
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.controller.AGGREGATED_ROUTE
 import org.genspectrum.lapis.controller.INFO_ROUTE
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
@@ -61,13 +61,13 @@ class SampleEndpointsGetParameterCustomizer : OpenApiCustomizer {
  */
 @Component
 class AggregatedFieldsGetParameterCustomizer(
-    private val referenceGenomeSchema: ReferenceGenomeSchema,
+    private val activeView: ActiveView,
 ) : OpenApiCustomizer {
     override fun customise(openApi: OpenAPI) {
         (openApi.paths["/{view}/sample$AGGREGATED_ROUTE"] ?: openApi.paths["/sample$AGGREGATED_ROUTE"])
             ?.get
             ?.parameters
             ?.find { it.name == FIELDS_PROPERTY }
-            ?.description = aggregatedFieldsDescription(referenceGenomeSchema)
+            ?.description = aggregatedFieldsDescription(activeView.referenceGenomeSchema)
     }
 }

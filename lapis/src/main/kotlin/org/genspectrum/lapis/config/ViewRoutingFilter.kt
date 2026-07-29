@@ -20,19 +20,19 @@ class ViewRoutingFilter(
         response: HttpServletResponse,
         filterChain: FilterChain,
     ) {
-        val segments = request.requestURI.substringBefore('?').split('/').filter { it.isNotBlank() }
+        val segments = request.requestURI.removePrefix(request.contextPath).split('/').filter { it.isNotBlank() }
         val view = segments.firstOrNull()?.let(viewRegistry::get)
 
         if (view != null) {
             request.setAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE, view)
-            val capability = requiredCapability(segments.drop(1))
+            val capability = requiredViewCapability(segments.drop(1))
             if (capability != null && !view.supports(capability)) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND)
                 return
             }
         } else if (legacyRoutesEnabled && segments.firstOrNull() in LEGACY_VIEW_ROUTES) {
             request.setAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE, viewRegistry.first())
-        } else if (!legacyRoutesEnabled && isViewRouteWithoutKnownView(segments)) {
+        } else if (isViewRouteWithoutKnownView(segments, request.requestURI.endsWith('/'))) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
             return
         }
@@ -40,41 +40,40 @@ class ViewRoutingFilter(
         filterChain.doFilter(request, response)
     }
 
-    private fun isViewRouteWithoutKnownView(segments: List<String>): Boolean =
+    private fun isViewRouteWithoutKnownView(
+        segments: List<String>,
+        hasTrailingSlash: Boolean,
+    ): Boolean =
         segments.firstOrNull() in BLOCKED_UNPREFIXED_ROUTES ||
+            (hasTrailingSlash && segments.size == 1 && segments.first() !in NON_VIEW_ROUTE_PREFIXES) ||
             (segments.firstOrNull() == "swagger-ui" && segments.getOrNull(1) == "index.html") ||
             (segments.size > 1 && segments[1] in PREFIXED_VIEW_ROUTES)
-
-    private fun requiredCapability(viewRelativeSegments: List<String>): ViewCapability? {
-        if (viewRelativeSegments.firstOrNull() == "component") {
-            return ViewCapability.COMPONENTS
-        }
-        if (viewRelativeSegments.firstOrNull() != "sample") {
-            return null
-        }
-
-        return when {
-            viewRelativeSegments.any { it in METADATA_ROUTES } -> ViewCapability.METADATA
-            viewRelativeSegments.any { it in MUTATION_ROUTES } -> ViewCapability.MUTATIONS
-            viewRelativeSegments.any { it in INSERTION_ROUTES } -> ViewCapability.INSERTIONS
-            viewRelativeSegments.any { it in SEQUENCE_ROUTES } -> ViewCapability.SEQUENCES
-            viewRelativeSegments.any { it in PHYLO_TREE_ROUTES } -> ViewCapability.PHYLO_TREE
-            else -> null
-        }
-    }
 
     companion object {
         private val LEGACY_VIEW_ROUTES = setOf("sample", "component", "query", "llms.txt", "api-docs", "swagger-ui")
         private val BLOCKED_UNPREFIXED_ROUTES = setOf("sample", "component", "query", "llms.txt", "api-docs")
         private val PREFIXED_VIEW_ROUTES = setOf("sample", "component", "query", "llms.txt", "api-docs", "swagger-ui")
-        private val METADATA_ROUTES = setOf("aggregated", "details")
-        private val MUTATION_ROUTES = setOf("nucleotideMutations", "aminoAcidMutations")
-        private val INSERTION_ROUTES = setOf("nucleotideInsertions", "aminoAcidInsertions")
-        private val SEQUENCE_ROUTES = setOf(
-            "alignedNucleotideSequences",
-            "unalignedNucleotideSequences",
-            "alignedAminoAcidSequences",
-        )
-        private val PHYLO_TREE_ROUTES = setOf("mostRecentCommonAncestor", "phyloSubtree")
+        private val NON_VIEW_ROUTE_PREFIXES = setOf("actuator", "error", "swagger-ui")
     }
 }
+
+private val VIEW_CAPABILITIES_BY_SAMPLE_ROUTE = mapOf(
+    "aggregated" to ViewCapability.METADATA,
+    "details" to ViewCapability.METADATA,
+    "nucleotideMutations" to ViewCapability.MUTATIONS,
+    "aminoAcidMutations" to ViewCapability.MUTATIONS,
+    "nucleotideInsertions" to ViewCapability.INSERTIONS,
+    "aminoAcidInsertions" to ViewCapability.INSERTIONS,
+    "alignedNucleotideSequences" to ViewCapability.SEQUENCES,
+    "unalignedNucleotideSequences" to ViewCapability.SEQUENCES,
+    "alignedAminoAcidSequences" to ViewCapability.SEQUENCES,
+    "mostRecentCommonAncestor" to ViewCapability.PHYLO_TREE,
+    "phyloSubtree" to ViewCapability.PHYLO_TREE,
+)
+
+internal fun requiredViewCapability(viewRelativeSegments: List<String>): ViewCapability? =
+    when (viewRelativeSegments.firstOrNull()) {
+        "component" -> ViewCapability.COMPONENTS
+        "sample" -> VIEW_CAPABILITIES_BY_SAMPLE_ROUTE[viewRelativeSegments.getOrNull(1)]
+        else -> null
+    }

@@ -46,13 +46,13 @@ const val ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of aligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered."""
 const val ALL_ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """"Returns the aligned nucleotide sequences of all requested segments that match the given filter criteria."""
+    """Returns the aligned nucleotide sequences of all requested segments that match the given filter criteria."""
 const val UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
     """Returns a string of unaligned nucleotide sequences of the requested segment.
     Only sequences matching the specified sequence filters are considered.
     Sequences that don't have an unaligned sequence for this segment are omitted."""
 const val ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION =
-    """"Returns the unaligned nucleotide sequences of all requested segments that match the given filter criteria."""
+    """Returns the unaligned nucleotide sequences of all requested segments that match the given filter criteria."""
 const val MUTATIONS_OVER_TIME_ENDPOINT_DESCRIPTION =
     """Returns the number of sequences containing the specified mutations within the requested date ranges, along 
     with the corresponding coverage in a tabular format. The order of the mutations and date ranges is preserved."""

@@ -2,7 +2,7 @@ package org.genspectrum.lapis.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.genspectrum.lapis.config.DatabaseConfig
+import org.genspectrum.lapis.config.ActiveView
 import org.genspectrum.lapis.controller.middleware.CompressionSource
 import org.genspectrum.lapis.controller.middleware.RequestCompression
 import org.genspectrum.lapis.log
@@ -33,6 +33,7 @@ import org.springframework.web.servlet.View
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import org.springframework.web.util.HtmlUtils
 import java.net.URI
 
 private typealias ErrorResponse = ResponseEntity<LapisErrorResponse>
@@ -104,7 +105,7 @@ class ExceptionHandler(
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.TEXT_HTML)
-                .body(notFoundView.render(request))
+                .body(notFoundView.render())
         }
 
         return super.handleNoResourceFoundException(ex, headers, status, request)
@@ -166,20 +167,23 @@ class ExceptionHandler(
 
 @Component
 class NotFoundView(
-    private val databaseConfig: DatabaseConfig,
+    private val activeView: ActiveView,
 ) {
-    fun render(request: WebRequest): String {
-        request.contextPath
-
-        val helloUriBuilder = ServletUriComponentsBuilder.fromCurrentRequest()
-            .replacePath("/${request.contextPath}")
-            .replaceQuery(null)
-            .fragment(null)
-        val helloUri = helloUriBuilder.toUriString()
-
-        val swaggerUri = helloUriBuilder
-            .replacePath("/${request.contextPath}/swagger-ui/index.html")
+    fun render(): String {
+        val view = activeView.configOrNull
+        val viewPath = view?.let { "/${it.viewName}" }.orEmpty()
+        val helloUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("$viewPath/")
+            .build()
             .toUriString()
+        val swaggerLink = view?.let {
+            val swaggerUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("$viewPath/swagger-ui/index.html")
+                .build()
+                .toUriString()
+            "<div><a href=\"$swaggerUri\">Visit our swagger-ui</a></div>"
+        }.orEmpty()
+        val instanceName = HtmlUtils.htmlEscape(view?.databaseConfig?.schema?.instanceName ?: "Views")
 
         return """
             <!DOCTYPE html>
@@ -189,14 +193,12 @@ class NotFoundView(
                 <title>LAPIS - Error 404</title>
             </head>
             <body>
-                <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
+                <h1>LAPIS - $instanceName</h1>
                 <h3>Page not found!</h3>
                 <div>
                     <a href="$helloUri">Back to landing page</a>
                 </div>
-                <div>
-                    <a href="$swaggerUri">Visit our swagger-ui</a>
-                </div>
+                $swaggerLink
             </body>
             </html>
             """.trimIndent()
@@ -205,7 +207,7 @@ class NotFoundView(
 
 @Component
 class ErrorController(
-    private val databaseConfig: DatabaseConfig,
+    private val activeView: ActiveView,
     errorAttributes: ErrorAttributes,
     webProperties: WebProperties,
 ) : BasicErrorController(errorAttributes, webProperties.error) {
@@ -217,6 +219,12 @@ class ErrorController(
 
         val attributes = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
         modelAndView.view = View { _, _, viewResponse ->
+            val instanceName = HtmlUtils.htmlEscape(
+                activeView.configOrNull?.databaseConfig?.schema?.instanceName ?: "Views",
+            )
+            val error = HtmlUtils.htmlEscape(attributes["error"].toString())
+            val status = HtmlUtils.htmlEscape(attributes["status"].toString())
+            val message = HtmlUtils.htmlEscape(attributes["message"].toString())
             val html = """
                 <html lang="en">
                 <head>
@@ -224,10 +232,10 @@ class ErrorController(
                     <title>LAPIS - Error</title>
                 </head>
                 <body>
-                    <h1>LAPIS - ${databaseConfig.schema.instanceName}</h1>
-                    <p>An error occurred: ${attributes["error"]}</p>
-                    <p>Status code: ${attributes["status"]}</p>
-                    <p>Error message: ${attributes["message"]}</p>
+                    <h1>LAPIS - $instanceName</h1>
+                    <p>An error occurred: $error</p>
+                    <p>Status code: $status</p>
+                    <p>Error message: $message</p>
                 </body>
                 </html>
             """.trimIndent()

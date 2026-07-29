@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.util.HtmlUtils
 
 @Hidden
 @Controller
@@ -115,8 +116,10 @@ class RootDiscoveryController(
             )
             append("<h1>LAPIS views</h1><ul>")
             viewRegistry.views.values.forEach {
+                val name = HtmlUtils.htmlEscape(it.viewName)
+                val instanceName = HtmlUtils.htmlEscape(it.databaseConfig.schema.instanceName)
                 append(
-                    "<li><a href=\"/${it.viewName}/\">${it.viewName} - ${it.databaseConfig.schema.instanceName}</a></li>",
+                    "<li><a href=\"/$name/\">$name - $instanceName</a></li>",
                 )
             }
             append("</ul></body></html>")

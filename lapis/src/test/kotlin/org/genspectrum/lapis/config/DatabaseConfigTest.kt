@@ -11,7 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class DatabaseConfigTest {
     @Autowired
-    private lateinit var underTest: DatabaseConfig
+    private lateinit var viewRegistry: ViewRegistry
+
+    private val underTest get() = viewRegistry.first().databaseConfig
 
     @Test
     fun `load test database config`() {
@@ -46,7 +48,9 @@ class DatabaseConfigTest {
 )
 class DatabaseConfigWithoutFeaturesTest {
     @Autowired
-    private lateinit var underTest: DatabaseConfig
+    private lateinit var viewRegistry: ViewRegistry
+
+    private val underTest get() = viewRegistry.first().databaseConfig
 
     @Test
     fun `a config without features can be read`() {

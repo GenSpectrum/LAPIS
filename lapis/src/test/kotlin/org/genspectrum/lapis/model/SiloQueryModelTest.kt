@@ -103,16 +103,32 @@ class SiloQueryModelTest {
         underTest = createSiloQueryModel(singleSegmentedReferenceGenomeSchema)
     }
 
-    private fun createSiloQueryModel(referenceGenomeSchema: ReferenceGenomeSchema) =
-        SiloQueryModel(
-            siloClient = siloClientMock,
-            siloFilterExpressionMapper = siloFilterExpressionMapperMock,
-            activeView = mockActiveView(
-                databaseConfig = testDatabaseConfig,
-                referenceGenomeSchema = referenceGenomeSchema,
-            ),
-            fastaHeaderTemplateParser = fastaHeaderTemplateParser,
+    private fun createSiloQueryModel(
+        referenceGenomeSchema: ReferenceGenomeSchema,
+        fieldAliases: Map<String, String> = emptyMap(),
+    ) = SiloQueryModel(
+        siloClient = siloClientMock,
+        siloFilterExpressionMapper = siloFilterExpressionMapperMock,
+        activeView = mockActiveView(
+            databaseConfig = testDatabaseConfig,
+            referenceGenomeSchema = referenceGenomeSchema,
+            fieldAliases = fieldAliases,
+        ),
+        fastaHeaderTemplateParser = fastaHeaderTemplateParser,
+    )
+
+    @Test
+    fun `lineage definition resolves a view field alias`() {
+        underTest = createSiloQueryModel(
+            singleSegmentedReferenceGenomeSchema,
+            fieldAliases = mapOf("publicLineage" to "sourceLineage"),
         )
+        every { siloClientMock.getLineageDefinition("sourceLineage") } returns emptyMap()
+
+        underTest.getLineageDefinition("publicLineage")
+
+        verify(exactly = 1) { siloClientMock.getLineageDefinition("sourceLineage") }
+    }
 
     @Test
     fun `aggregate calls the SILO client with an aggregated action`() {

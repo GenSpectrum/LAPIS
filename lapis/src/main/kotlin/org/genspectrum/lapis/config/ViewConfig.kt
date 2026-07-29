@@ -164,19 +164,11 @@ class ViewRegistry(
         require(definition.tableScanQuery == null || definition.tableScanQuery.isNotBlank()) {
             "View '${definition.viewName}' has an empty tableScanQuery"
         }
-        require(
-            definition.baseQuery.windowed(REQUEST_FILTER_PLACEHOLDER.length).count {
-                it == REQUEST_FILTER_PLACEHOLDER
-            } <= 1,
-        ) {
+        require(definition.baseQuery.containsAtMostOne(REQUEST_FILTER_PLACEHOLDER)) {
             "View '${definition.viewName}' uses the request-filter placeholder more than once in its baseQuery"
         }
         require(
-            (
-                definition.tableScanQuery?.windowed(REQUEST_FILTER_PLACEHOLDER.length)?.count {
-                    it == REQUEST_FILTER_PLACEHOLDER
-                } ?: 0
-            ) <= 1,
+            definition.tableScanQuery?.containsAtMostOne(REQUEST_FILTER_PLACEHOLDER) != false,
         ) {
             "View '${definition.viewName}' uses the request-filter placeholder more than once in its tableScanQuery"
         }
@@ -206,22 +198,29 @@ class ViewRegistry(
     }
 }
 
+private fun String.containsAtMostOne(value: String) = indexOf(value) == lastIndexOf(value)
+
 @Component
 class ActiveView(
     private val requestProvider: ObjectProvider<HttpServletRequest>,
     private val viewRegistry: ViewRegistry,
     @Value("\${lapis.legacyRoutesEnabled:false}") private val legacyRoutesEnabled: Boolean,
 ) {
-    val config: ViewConfig
+    val configOrNull: ViewConfig?
         get() = runCatching {
             requestProvider.ifAvailable?.getAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE) as? ViewConfig
         }.getOrNull()
-            ?: if (legacyRoutesEnabled) viewRegistry.first() else throw BadRequestException("No LAPIS view selected")
+            ?: viewRegistry.first().takeIf { legacyRoutesEnabled }
+
+    val config: ViewConfig
+        get() = configOrNull ?: throw BadRequestException("No LAPIS view selected")
 
     val databaseConfig: DatabaseConfig get() = config.databaseConfig
     val referenceGenome: ReferenceGenome get() = config.referenceGenome
     val referenceGenomeSchema: ReferenceGenomeSchema get() = config.referenceGenomeSchema
     val sequenceFilterFields: SequenceFilterFields get() = config.sequenceFilterFields
+
+    fun resolveField(name: String) = config.fieldAliases[name] ?: name
 }
 
 class ViewNotFoundException(

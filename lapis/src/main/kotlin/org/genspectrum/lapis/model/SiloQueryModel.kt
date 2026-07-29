@@ -156,7 +156,7 @@ class SiloQueryModel(
         siloClient.sendQuery(
             SiloQuery(
                 SiloAction.mostRecentCommonAncestor(
-                    sequenceFilters.phyloTreeField,
+                    activeView.resolveField(sequenceFilters.phyloTreeField),
                     sequenceFilters.printNodesNotInTree,
                 ),
                 siloFilterExpressionMapper.map(sequenceFilters),
@@ -217,7 +217,7 @@ class SiloQueryModel(
             siloClient.sendQuery(
                 SiloQuery(
                     SiloAction.phyloSubtree(
-                        sequenceFilters.phyloTreeField,
+                        activeView.resolveField(sequenceFilters.phyloTreeField),
                     ),
                     siloFilterExpressionMapper.map(sequenceFilters),
                 ),
@@ -315,7 +315,7 @@ class SiloQueryModel(
 
     fun getInfo(): InfoData = siloClient.callInfo()
 
-    fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
+    fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(activeView.resolveField(column))
 
     private fun addSequenceNameIfMissing(fields: List<MutationsField>) =
         when {

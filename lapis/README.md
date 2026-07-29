@@ -71,7 +71,7 @@ views:
 `tableScanQuery` is optional and is used by SILO operations that require a table scan, including mutations, insertions, and phylogenetic tree operations. Its schema must contain every configured metadata field, resolving names through `fieldAliases`. A projected `baseQuery` must include the sequence columns required by the configured reference genome when the `sequences` capability is enabled.
 
 Optionally, you can pass:
-* `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
+* `lapis.docs.url` to make the "Documentation" link on each view's landing page point to your self-hosted [lapis docs](../lapis-docs/README.md).
   If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
 
 Additionally, Apache Arrow requires these flags to be set on the JVM:
