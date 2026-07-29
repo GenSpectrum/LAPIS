@@ -400,7 +400,7 @@ fun buildOpenApiSchema(
 
 internal fun aggregatedFieldsDescription(referenceGenomeSchema: ReferenceGenomeSchema): String {
     val shorthand = if (referenceGenomeSchema.isSingleSegmented()) {
-        " The shorthand `[position]` (e.g. `[501]`) can also be used."
+        " The shorthand `[position]` (e.g. `[501]`) can also be used for nucleotide sequences."
     } else {
         ""
     }
