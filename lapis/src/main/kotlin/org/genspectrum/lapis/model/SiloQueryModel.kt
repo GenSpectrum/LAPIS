@@ -16,6 +16,7 @@ import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
@@ -52,14 +53,7 @@ class SiloQueryModel(
         )
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = sequenceFilters.fields
-            .let {
-                when {
-                    it.contains(MutationsField.MUTATION) -> addSequenceNameIfMissing(it)
-                    else -> it
-                }
-            }
-            .map { it.value }
+        val fields = siloMutationFields(sequenceFilters.fields)
 
         val data = siloClient.sendQuery(
             SiloQuery(
@@ -75,10 +69,15 @@ class SiloQueryModel(
         )
 
         return data.map {
-            val mutation = if (referenceGenomeSchema.isSingleSegmented()) {
-                it.mutation
+            val mutation = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION)) {
+                val core = "${it.mutationFrom}${it.position}${it.mutationTo}"
+                if (referenceGenomeSchema.isSingleSegmented()) {
+                    core
+                } else {
+                    "${it.sequenceName}:$core"
+                }
             } else {
-                "${it.sequenceName}:${it.mutation}"
+                null
             }
 
             MutationResponse(
@@ -86,29 +85,22 @@ class SiloQueryModel(
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
-                sequenceName = if (!sequenceFilters.shouldResponseContainSequenceName()) {
+                sequenceName = if (!sequenceFilters.shouldResponseContainField(MutationsField.SEQUENCE_NAME)) {
                     null
                 } else if (referenceGenomeSchema.isSingleSegmented()) {
                     ExplicitlyNullable(null)
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = it.mutationFrom,
-                mutationTo = it.mutationTo,
-                position = it.position,
+                mutationFrom = mutationFromOrNull(sequenceFilters, it),
+                mutationTo = mutationToOrNull(sequenceFilters, it),
+                position = positionOrNull(sequenceFilters, it),
             )
         }
     }
 
     fun computeAminoAcidMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = sequenceFilters.fields
-            .let {
-                when {
-                    it.contains(MutationsField.MUTATION) -> addSequenceNameIfMissing(it)
-                    else -> it
-                }
-            }
-            .map { it.value }
+        val fields = siloMutationFields(sequenceFilters.fields)
 
         val data = siloClient.sendQuery(
             SiloQuery(
@@ -124,18 +116,22 @@ class SiloQueryModel(
         )
         return data.map {
             MutationResponse(
-                mutation = "${it.sequenceName}:${it.mutation}",
+                mutation = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION)) {
+                    "${it.sequenceName}:${it.mutationFrom}${it.position}${it.mutationTo}"
+                } else {
+                    null
+                },
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
-                sequenceName = if (!sequenceFilters.shouldResponseContainSequenceName()) {
+                sequenceName = if (!sequenceFilters.shouldResponseContainField(MutationsField.SEQUENCE_NAME)) {
                     null
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = it.mutationFrom,
-                mutationTo = it.mutationTo,
-                position = it.position,
+                mutationFrom = mutationFromOrNull(sequenceFilters, it),
+                mutationTo = mutationToOrNull(sequenceFilters, it),
+                position = positionOrNull(sequenceFilters, it),
             )
         }
     }
@@ -177,15 +173,16 @@ class SiloQueryModel(
         )
 
         return data.map {
+            val sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
+                true -> null
+                false -> it.sequenceName
+            }
             InsertionResponse(
-                insertion = it.insertion,
+                insertion = buildInsertion(sequenceName, it.position, it.insertedSymbols),
                 count = it.count,
                 insertedSymbols = it.insertedSymbols,
                 position = it.position,
-                sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
-                    true -> null
-                    false -> it.sequenceName
-                },
+                sequenceName = sequenceName,
             )
         }
     }
@@ -204,7 +201,7 @@ class SiloQueryModel(
 
         return data.map {
             InsertionResponse(
-                insertion = it.insertion,
+                insertion = buildInsertion(it.sequenceName, it.position, it.insertedSymbols),
                 count = it.count,
                 insertedSymbols = it.insertedSymbols,
                 position = it.position,
@@ -318,11 +315,59 @@ class SiloQueryModel(
 
     fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
 
-    private fun addSequenceNameIfMissing(fields: List<MutationsField>) =
-        when {
-            !fields.contains(MutationsField.SEQUENCE_NAME) -> fields + MutationsField.SEQUENCE_NAME
-            else -> fields
+    /**
+     * SILO doesn't know the `mutation` field, instead we need the fields to assemble it.
+     */
+    private fun siloMutationFields(fields: List<MutationsField>): List<String> {
+        if (fields.isEmpty()) {
+            return emptyList()
         }
+        val expanded = fields.toMutableSet()
+        if (MutationsField.MUTATION in expanded) {
+            expanded -= MutationsField.MUTATION
+            expanded += MutationsField.MUTATION_FROM
+            expanded += MutationsField.MUTATION_TO
+            expanded += MutationsField.POSITION
+            expanded += MutationsField.SEQUENCE_NAME
+        }
+        return expanded.map { it.value }
+    }
+
+    private fun mutationFromOrNull(
+        sequenceFilters: MutationProportionsRequest,
+        data: MutationData,
+    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION_FROM)) {
+        data.mutationFrom
+    } else {
+        null
+    }
+
+    private fun mutationToOrNull(
+        sequenceFilters: MutationProportionsRequest,
+        data: MutationData,
+    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION_TO)) {
+        data.mutationTo
+    } else {
+        null
+    }
+
+    private fun positionOrNull(
+        sequenceFilters: MutationProportionsRequest,
+        data: MutationData,
+    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.POSITION)) {
+        data.position
+    } else {
+        null
+    }
+
+    private fun buildInsertion(
+        sequenceName: String?,
+        position: Int,
+        insertedSymbols: String,
+    ) = when (sequenceName) {
+        null -> "ins_$position:$insertedSymbols"
+        else -> "ins_$sequenceName:$position:$insertedSymbols"
+    }
 }
 
 data class SequencesResponse(

@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Test
 import java.util.stream.Stream
 
 private val someMutationData = MutationData(
-    mutation = "A1234B",
     count = 1234,
     coverage = 2345,
     proportion = 0.1234,
@@ -55,7 +54,6 @@ private val someMutationData = MutationData(
 
 val someInsertionData = InsertionData(
     count = 42,
-    insertion = "ins_sequenceName:1234:ABCD",
     insertedSymbols = "ABCD",
     position = 1234,
     sequenceName = "sequenceName",
@@ -288,8 +286,10 @@ class SiloQueryModelTest {
             )
         } returns Stream.of(
             mutationData(
-                mutation = "A1234B",
                 sequenceName = "sequenceName",
+                position = 1234,
+                mutationFrom = "A",
+                mutationTo = "B",
             ),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
@@ -369,8 +369,10 @@ class SiloQueryModelTest {
             )
         } returns Stream.of(
             mutationData(
-                mutation = "A1234B",
                 sequenceName = "sequenceName",
+                position = 1234,
+                mutationFrom = "A",
+                mutationTo = "B",
             ),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
@@ -410,7 +412,7 @@ class SiloQueryModelTest {
         ).toList()
 
         val expectedInsertion = InsertionResponse(
-            insertion = "ins_sequenceName:1234:ABCD",
+            insertion = "ins_1234:ABCD",
             count = 42,
             insertedSymbols = "ABCD",
             position = 1234,

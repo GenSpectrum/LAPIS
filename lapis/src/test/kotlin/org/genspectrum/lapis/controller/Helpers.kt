@@ -141,17 +141,17 @@ fun sequenceFiltersRequestWithGenes(
 )
 
 fun mutationData(
-    mutation: String? = null,
     sequenceName: String? = null,
     position: Int? = null,
+    mutationFrom: String? = null,
+    mutationTo: String? = null,
 ) = MutationData(
-    mutation = mutation,
     count = null,
     coverage = null,
     proportion = null,
     sequenceName = sequenceName,
-    mutationFrom = null,
-    mutationTo = null,
+    mutationFrom = mutationFrom,
+    mutationTo = mutationTo,
     position = position,
 )
 

@@ -65,7 +65,6 @@ val MOST_COMMON_ANCESTOR_DATA_ARROW_CONVERTER: ArrowRowConverter<MostCommonAnces
 
 val MUTATION_DATA_ARROW_CONVERTER: ArrowRowConverter<MutationData> = { root, rowIndex ->
     MutationData(
-        mutation = root.getOptionalString("mutation", rowIndex),
         count = root.getOptionalInt("count", rowIndex),
         proportion = root.getOptionalDouble("proportion", rowIndex),
         sequenceName = root.getOptionalString("sequenceName", rowIndex),
@@ -79,7 +78,6 @@ val MUTATION_DATA_ARROW_CONVERTER: ArrowRowConverter<MutationData> = { root, row
 val INSERTION_DATA_ARROW_CONVERTER: ArrowRowConverter<InsertionData> = { root, rowIndex ->
     InsertionData(
         count = root.getInt("count", rowIndex),
-        insertion = root.getString("insertion", rowIndex),
         insertedSymbols = root.getString("insertedSymbols", rowIndex),
         position = root.getInt("position", rowIndex),
         sequenceName = root.getString("sequenceName", rowIndex),

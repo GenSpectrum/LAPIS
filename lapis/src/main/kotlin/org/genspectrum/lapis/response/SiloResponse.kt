@@ -33,7 +33,6 @@ class AggregationDataSerializer : ValueSerializer<AggregationData>() {
 }
 
 data class MutationData(
-    val mutation: String?,
     val count: Int?,
     val proportion: Double?,
     val sequenceName: String?,
@@ -45,7 +44,6 @@ data class MutationData(
 
 data class InsertionData(
     val count: Int,
-    val insertion: String,
     val insertedSymbols: String,
     val position: Int,
     val sequenceName: String,
