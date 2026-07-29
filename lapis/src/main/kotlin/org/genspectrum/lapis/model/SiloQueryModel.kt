@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.PlainField
@@ -16,6 +17,7 @@ import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
@@ -26,6 +28,7 @@ import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
+import kotlin.collections.emptyList
 
 @Component
 class SiloQueryModel(
@@ -52,35 +55,14 @@ class SiloQueryModel(
         )
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = siloMutationFields(sequenceFilters.fields)
+        val assembleMutation = { data: MutationData ->
+            val core = "${data.mutationFrom}${data.position}${data.mutationTo}"
+            if (referenceGenomeSchema.isSingleSegmented()) core else "${data.sequenceName}:$core"
+        }
 
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.mutations(
-                    minProportion = sequenceFilters.minProportion,
-                    orderByFields = sequenceFilters.orderByFields,
-                    limit = sequenceFilters.limit,
-                    offset = sequenceFilters.offset,
-                    fields = fields,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
-            ),
-        )
-
-        return data.map {
-            val mutation = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION)) {
-                val core = "${it.mutationFrom}${it.position}${it.mutationTo}"
-                if (referenceGenomeSchema.isSingleSegmented()) {
-                    core
-                } else {
-                    "${it.sequenceName}:$core"
-                }
-            } else {
-                null
-            }
-
+        return queryMutationData(sequenceFilters, SiloAction.Companion::mutations).map {
             MutationResponse(
-                mutation = mutation,
+                mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
@@ -99,27 +81,13 @@ class SiloQueryModel(
     }
 
     fun computeAminoAcidMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = siloMutationFields(sequenceFilters.fields)
+        val assembleMutation = { data: MutationData ->
+            "${data.sequenceName}:${data.mutationFrom}${data.position}${data.mutationTo}"
+        }
 
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.aminoAcidMutations(
-                    minProportion = sequenceFilters.minProportion,
-                    orderByFields = sequenceFilters.orderByFields,
-                    limit = sequenceFilters.limit,
-                    offset = sequenceFilters.offset,
-                    fields = fields,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
-            ),
-        )
-        return data.map {
+        return queryMutationData(sequenceFilters, SiloAction.Companion::aminoAcidMutations).map {
             MutationResponse(
-                mutation = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION)) {
-                    "${it.sequenceName}:${it.mutationFrom}${it.position}${it.mutationTo}"
-                } else {
-                    null
-                },
+                mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
@@ -314,15 +282,63 @@ class SiloQueryModel(
 
     fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
 
+    private fun queryMutationData(
+        sequenceFilters: MutationProportionsRequest,
+        actionConstructor: (
+            minProportion: Double?,
+            orderByFields: OrderBySpec,
+            limit: Int?,
+            offset: Int?,
+            fields: List<String>,
+        ) -> SiloAction<MutationData>,
+    ): Stream<MutationData> {
+        val fields = siloMutationFields(sequenceFilters)
+
+        val action = actionConstructor(
+            sequenceFilters.minProportion,
+            expandMutationOrderBy(sequenceFilters.orderByFields),
+            sequenceFilters.limit,
+            sequenceFilters.offset,
+            fields,
+        )
+        return siloClient.sendQuery(SiloQuery(action, siloFilterExpressionMapper.map(sequenceFilters)))
+    }
+
     /**
-     * SILO doesn't know the `mutation` field, instead we need the fields to assemble it.
+     * Since SILO can't order by the assembled `mutation` field, replace any `mutation` order-by entry with its
+     * component fields (in `sequenceName`, `mutationFrom`, `position`, `mutationTo` order), keeping the direction.
      */
-    private fun siloMutationFields(fields: List<MutationsField>): List<String> {
+    private fun expandMutationOrderBy(orderByFields: OrderBySpec): OrderBySpec =
+        when (orderByFields) {
+            is OrderBySpec.ByFields -> OrderBySpec.ByFields(
+                orderByFields.fields.flatMap { field ->
+                    when (field.field) {
+                        MutationsField.MUTATION.value -> listOf(
+                            MutationsField.SEQUENCE_NAME,
+                            MutationsField.MUTATION_FROM,
+                            MutationsField.POSITION,
+                            MutationsField.MUTATION_TO,
+                        ).map { OrderByField(it.value, field.order) }
+
+                        else -> listOf(field)
+                    }
+                },
+            )
+
+            is OrderBySpec.Random -> orderByFields
+        }
+
+    private fun siloMutationFields(request: MutationProportionsRequest): List<String> {
+        val fields = request.fields
         if (fields.isEmpty()) {
             return emptyList()
         }
+
+        val hasOrderByMutation = request.orderByFields is OrderBySpec.ByFields &&
+            request.orderByFields.fields.any { it.field == MutationsField.MUTATION.value }
+
         val expanded = fields.toMutableSet()
-        if (MutationsField.MUTATION in expanded) {
+        if (hasOrderByMutation || MutationsField.MUTATION in expanded) {
             expanded -= MutationsField.MUTATION
             expanded += MutationsField.MUTATION_FROM
             expanded += MutationsField.MUTATION_TO
