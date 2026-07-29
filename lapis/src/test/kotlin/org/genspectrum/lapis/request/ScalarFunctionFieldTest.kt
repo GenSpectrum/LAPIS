@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.converter.CaseInsensitiveFieldsCleaner
 import org.genspectrum.lapis.request.converter.ScalarFunctionFieldConverter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -63,6 +64,6 @@ class ScalarFunctionFieldTest {
     @Test
     fun `isoWeek on non-date field throws BadRequestException`() {
         val ex = assertThrows<BadRequestException> { underTest.tryConvert("country.isoWeek") }
-        assert(ex.message.orEmpty().contains("STRING")) { "Expected error to mention type, got: ${ex.message}" }
+        assertTrue(ex.message.orEmpty().contains("STRING"), "Expected error to mention type, got: ${ex.message}")
     }
 }

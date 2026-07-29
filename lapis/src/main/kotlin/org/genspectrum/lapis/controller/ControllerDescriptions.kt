@@ -74,9 +74,9 @@ A field can also be a computed field of the form "<field>.<function>" (e.g. "dat
 scalar function to the field and stratifies by the result. The response uses the full "<field>.<function>" string
 as the field name. Currently, the only supported function is "isoWeek", which is only valid for date fields."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
-    """The fields of the response to order by. 
-    Fields specified here must either be \"count\" or also be present in \"fields\".
-    You can also use \"random\" or \"random(SEED)\" where SEED is an integer."""
+    """The fields of the response to order by.
+    Fields specified here must either be "count" or also be present in "fields".
+    You can also use "random" or "random(SEED)" where SEED is an integer."""
 const val DETAILS_FIELDS_DESCRIPTION =
     """The fields that the response items should contain.
 If empty, all fields are returned.
