@@ -164,5 +164,16 @@ data class SaneQlPipeline(
     val steps: List<SaneQlStep>,
     val baseQuery: String = "default",
 ) : SaneQlNode {
-    override fun render() = "$baseQuery.filter(${filter.render()})" + steps.joinToString("") { it.render() }
+    override fun render() = applyRequestFilter(baseQuery, filter.render()) + steps.joinToString("") { it.render() }
+}
+
+const val REQUEST_FILTER_PLACEHOLDER = "__LAPIS_REQUEST_FILTER__"
+
+fun applyRequestFilter(
+    baseQuery: String,
+    renderedFilter: String,
+) = if (REQUEST_FILTER_PLACEHOLDER in baseQuery) {
+    baseQuery.replace(REQUEST_FILTER_PLACEHOLDER, renderedFilter)
+} else {
+    "$baseQuery.filter($renderedFilter)"
 }

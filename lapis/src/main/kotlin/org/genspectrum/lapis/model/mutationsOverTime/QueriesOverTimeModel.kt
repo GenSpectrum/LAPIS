@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model.mutationsOverTime
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.annotation.PreDestroy
 import org.genspectrum.lapis.config.ActiveView
+import org.genspectrum.lapis.config.ViewConfig
 import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
@@ -274,8 +275,9 @@ class QueriesOverTimeModel(
         )
 
         val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
+        val view = activeView.config
 
-        val dailyTotalsWithDataVersion = sendQuery(baseFilter, dateQuery, null, dateField)
+        val dailyTotalsWithDataVersion = sendQuery(baseFilter, dateQuery, null, dateField, view)
         val dailyTotalsDataVersion = dailyTotalsWithDataVersion.dataVersion
         val totalCountsByDateRange = aggregateDailyCountsIntoDateRanges(
             dailyTotalsWithDataVersion.queryResult,
@@ -285,8 +287,8 @@ class QueriesOverTimeModel(
 
         val tasks = queryItems.map { queryItem ->
             Callable {
-                val counts = sendQuery(baseFilter, dateQuery, queryItem.countQuery, dateField)
-                val coverage = sendQuery(baseFilter, dateQuery, queryItem.coverageQuery, dateField)
+                val counts = sendQuery(baseFilter, dateQuery, queryItem.countQuery, dateField, view)
+                val coverage = sendQuery(baseFilter, dateQuery, queryItem.coverageQuery, dateField, view)
                 listOf(counts.dataVersion, coverage.dataVersion) to
                     aggregateDailyMutationDataIntoDateRanges(
                         counts.queryResult,
@@ -336,6 +338,7 @@ class QueriesOverTimeModel(
         dateQuery: SiloFilterExpression,
         mutationQuery: SiloFilterExpression?,
         dateField: String,
+        view: ViewConfig,
     ): WithDataVersion<List<AggregationData>> =
         siloClient.sendQueryAndGetDataVersion(
             SiloQuery(
@@ -354,6 +357,7 @@ class QueriesOverTimeModel(
                 ),
             ),
             setRequestDataVersion = false,
+            view = view,
         ).map { stream -> stream.use { it.toList() } }
 
     /**

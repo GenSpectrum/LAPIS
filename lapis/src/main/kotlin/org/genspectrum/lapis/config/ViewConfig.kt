@@ -3,6 +3,7 @@ package org.genspectrum.lapis.config
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.controller.BadRequestException
+import org.genspectrum.lapis.silo.REQUEST_FILTER_PLACEHOLDER
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
@@ -21,6 +22,8 @@ data class ViewsConfig(
 data class ViewDefinition(
     val viewName: String,
     val baseQuery: String,
+    val tableScanQuery: String? = null,
+    val fieldAliases: Map<String, String> = emptyMap(),
     val databaseConfig: String,
     val referenceGenome: String,
     val capabilities: Set<ViewCapability>,
@@ -49,6 +52,8 @@ enum class ViewCapability {
 data class ViewConfig(
     val viewName: String,
     val baseQuery: String,
+    val tableScanQuery: String? = null,
+    val fieldAliases: Map<String, String> = emptyMap(),
     val capabilities: Set<ViewCapability>,
     val databaseConfig: DatabaseConfig,
     val referenceGenome: ReferenceGenome,
@@ -61,6 +66,8 @@ data class ViewConfig(
         EffectiveViewConfig(
             viewName = viewName,
             baseQuery = baseQuery,
+            tableScanQuery = tableScanQuery,
+            fieldAliases = fieldAliases,
             capabilities = capabilities,
             schema = databaseConfig.schema,
             defaultNucleotideSequence = databaseConfig.defaultNucleotideSequence,
@@ -72,6 +79,8 @@ data class ViewConfig(
 data class EffectiveViewConfig(
     val viewName: String,
     val baseQuery: String,
+    val tableScanQuery: String?,
+    val fieldAliases: Map<String, String>,
     val capabilities: Set<ViewCapability>,
     val schema: DatabaseSchema,
     val defaultNucleotideSequence: String?,
@@ -102,6 +111,10 @@ class ViewRegistry(
             val referenceGenomeFile = resolveRelativeTo(manifestFile, definition.referenceGenome)
             val databaseConfig = yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(databaseConfigFile)
                 .let { databaseConfigValidator.validate(it) }
+            val metadataFields = databaseConfig.schema.metadata.map { it.name }.toSet()
+            require(definition.fieldAliases.keys.all { it in metadataFields }) {
+                "View '${definition.viewName}' has aliases for fields that are not declared as metadata"
+            }
             val referenceGenome = ReferenceGenome.readFromFile(referenceGenomeFile.path)
             val referenceGenomeSchema = when {
                 legacyRoutesEnabled && legacySegments.isNotBlank() -> ReferenceGenomeSchema(
@@ -118,6 +131,8 @@ class ViewRegistry(
             definition.viewName to ViewConfig(
                 viewName = definition.viewName,
                 baseQuery = definition.baseQuery.trim(),
+                tableScanQuery = definition.tableScanQuery?.trim(),
+                fieldAliases = definition.fieldAliases,
                 capabilities = definition.capabilities,
                 databaseConfig = databaseConfig,
                 referenceGenome = referenceGenome,
@@ -146,6 +161,35 @@ class ViewRegistry(
         }
         require(definition.viewName !in RESERVED_VIEW_NAMES) { "Reserved view name: ${definition.viewName}" }
         require(definition.baseQuery.isNotBlank()) { "View '${definition.viewName}' has an empty baseQuery" }
+        require(definition.tableScanQuery == null || definition.tableScanQuery.isNotBlank()) {
+            "View '${definition.viewName}' has an empty tableScanQuery"
+        }
+        require(
+            definition.baseQuery.windowed(REQUEST_FILTER_PLACEHOLDER.length).count {
+                it == REQUEST_FILTER_PLACEHOLDER
+            } <= 1,
+        ) {
+            "View '${definition.viewName}' uses the request-filter placeholder more than once in its baseQuery"
+        }
+        require(
+            (
+                definition.tableScanQuery?.windowed(REQUEST_FILTER_PLACEHOLDER.length)?.count {
+                    it == REQUEST_FILTER_PLACEHOLDER
+                } ?: 0
+            ) <= 1,
+        ) {
+            "View '${definition.viewName}' uses the request-filter placeholder more than once in its tableScanQuery"
+        }
+        require(definition.fieldAliases.isEmpty() || REQUEST_FILTER_PLACEHOLDER in definition.baseQuery) {
+            "View '${definition.viewName}' defines field aliases but has no request-filter placeholder in its baseQuery"
+        }
+        require(
+            definition.fieldAliases.isEmpty() ||
+                definition.tableScanQuery == null ||
+                REQUEST_FILTER_PLACEHOLDER in definition.tableScanQuery,
+        ) {
+            "View '${definition.viewName}' defines field aliases but has no request-filter placeholder in its tableScanQuery"
+        }
         require(definition.capabilities.isNotEmpty()) { "View '${definition.viewName}' must declare capabilities" }
         require(
             ViewCapability.COMPONENTS !in definition.capabilities ||

@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.config
 
 import org.genspectrum.lapis.silo.SiloUris
+import org.genspectrum.lapis.silo.applyRequestFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -28,22 +29,30 @@ class ViewStartupValidator(
     }
 
     private fun validate(view: ViewConfig) {
-        val schema = querySchema("${view.baseQuery}.schema()", view.viewName)
+        val schema = querySchema("${applyRequestFilter(view.baseQuery, "true")}.schema()", view.viewName)
         validateDeclaredSchema(view, schema)
+        val tableScanBaseQuery = view.tableScanQuery ?: view.baseQuery
+        if (view.tableScanQuery != null) {
+            validateTableScanSchema(
+                view = view,
+                actualFields = querySchema("${applyRequestFilter(tableScanBaseQuery, "true")}.schema()", view.viewName),
+            )
+        }
 
         if (view.supports(ViewCapability.METADATA)) {
-            probe("${view.baseQuery}.filter(false).groupBy({count:=count()}).schema()", view)
+            probe("${applyRequestFilter(view.baseQuery, "false")}.groupBy({count:=count()}).schema()", view)
         }
         if (view.supports(ViewCapability.MUTATIONS)) {
             view.referenceGenomeSchema.getNucleotideSequenceNames().takeIf { it.isNotEmpty() }?.let {
                 probe(
-                    "${view.baseQuery}.filter(false).mutations(minProportion:=0.1, sequenceNames:=${set(it)}).schema()",
+                    applyRequestFilter(tableScanBaseQuery, "false") +
+                        ".mutations(minProportion:=0.1, sequenceNames:=${set(it)}).schema()",
                     view,
                 )
             }
             view.referenceGenomeSchema.getGeneNames().takeIf { it.isNotEmpty() }?.let {
                 probe(
-                    "${view.baseQuery}.filter(false)" +
+                    applyRequestFilter(tableScanBaseQuery, "false") +
                         ".aminoAcidMutations(minProportion:=0.1, sequenceNames:=${set(it)}).schema()",
                     view,
                 )
@@ -51,10 +60,18 @@ class ViewStartupValidator(
         }
         if (view.supports(ViewCapability.INSERTIONS)) {
             view.referenceGenomeSchema.getNucleotideSequenceNames().takeIf { it.isNotEmpty() }?.let {
-                probe("${view.baseQuery}.filter(false).insertions(sequenceNames:=${set(it)}).schema()", view)
+                probe(
+                    "${applyRequestFilter(tableScanBaseQuery, "false")}" +
+                        ".insertions(sequenceNames:=${set(it)}).schema()",
+                    view,
+                )
             }
             view.referenceGenomeSchema.getGeneNames().takeIf { it.isNotEmpty() }?.let {
-                probe("${view.baseQuery}.filter(false).aminoAcidInsertions(sequenceNames:=${set(it)}).schema()", view)
+                probe(
+                    "${applyRequestFilter(tableScanBaseQuery, "false")}" +
+                        ".aminoAcidInsertions(sequenceNames:=${set(it)}).schema()",
+                    view,
+                )
             }
         }
         if (view.supports(ViewCapability.SEQUENCES)) {
@@ -65,7 +82,7 @@ class ViewStartupValidator(
                 }
                 addAll(view.referenceGenomeSchema.getGeneNames())
             }
-            probe("${view.baseQuery}.filter(false).project(${set(sequenceColumns)}).schema()", view)
+            probe("${applyRequestFilter(view.baseQuery, "false")}.project(${set(sequenceColumns)}).schema()", view)
         }
         if (view.supports(ViewCapability.PHYLO_TREE)) {
             val treeFields = view.databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
@@ -73,8 +90,9 @@ class ViewStartupValidator(
                 "View '${view.viewName}' enables phyloTree but defines no phylogenetic tree metadata field"
             }
             treeFields.forEach {
-                probe("${view.baseQuery}.filter(false).mostRecentCommonAncestor('$it').schema()", view)
-                probe("${view.baseQuery}.filter(false).phyloSubtree('$it').schema()", view)
+                val filteredTableScanQuery = applyRequestFilter(tableScanBaseQuery, "false")
+                probe("$filteredTableScanQuery.mostRecentCommonAncestor('$it').schema()", view)
+                probe("$filteredTableScanQuery.phyloSubtree('$it').schema()", view)
             }
         }
     }
@@ -97,6 +115,28 @@ class ViewStartupValidator(
         }
         require(view.databaseConfig.schema.primaryKey in actualByName) {
             "View '${view.viewName}' primary key '${view.databaseConfig.schema.primaryKey}' is absent from its baseQuery"
+        }
+    }
+
+    private fun validateTableScanSchema(
+        view: ViewConfig,
+        actualFields: List<SiloSchemaField>,
+    ) {
+        val actualByName = actualFields.associateBy { it.fieldName }
+        view.databaseConfig.schema.metadata.forEach { metadata ->
+            val tableScanField = view.fieldAliases[metadata.name] ?: metadata.name
+            val actual = requireNotNull(actualByName[tableScanField]) {
+                "View '${view.viewName}' maps metadata field '${metadata.name}' to table-scan field " +
+                    "'$tableScanField', which is absent from its tableScanQuery"
+            }
+            require(actual.type in compatibleSiloTypes(metadata.type)) {
+                "View '${view.viewName}' declares '${metadata.name}' as ${metadata.type}, but its table-scan field " +
+                    "'$tableScanField' has type ${actual.type}"
+            }
+            require(!metadata.generateIndex || actual.type == "INDEXED_STRING") {
+                "View '${view.viewName}' declares '${metadata.name}' as indexed, but its table-scan field " +
+                    "'$tableScanField' has type ${actual.type}"
+            }
         }
     }
 

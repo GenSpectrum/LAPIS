@@ -1,6 +1,7 @@
 package org.genspectrum.lapis
 
 import org.hamcrest.CoreMatchers.containsString
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,12 +39,22 @@ class SwaggerUiTest(
 
     @Test
     fun `view-specific JSON API docs are available`() {
-        mockMvc.perform(get("/test/api-docs"))
+        val result = mockMvc.perform(get("/test/api-docs"))
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json"))
             .andExpect(jsonPath("\$.openapi").exists())
             .andExpect(jsonPath("\$.paths./test/sample/aggregated").exists())
+            .andExpect(jsonPath("\$.paths./test/sample/alignedNucleotideSequences").exists())
             .andExpect(jsonPath("\$.paths./sample/aggregated").doesNotExist())
+            .andReturn()
+
+        assertFalse(result.response.contentAsString.contains(Regex(":null[,}]")))
+        val json = tools.jackson.module.kotlin.jacksonObjectMapper().readTree(result.response.contentAsString)
+        val schemas = json.get("components").get("schemas")
+        assertTrue(schemas.has("SequenceFilters"))
+        assertTrue(schemas.has("EffectiveViewConfig"))
+        assertTrue(schemas.has("LapisInfo"))
+        assertTrue(schemas.has("ReferenceGenome"))
     }
 
     @Test

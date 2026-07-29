@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.ipc.ArrowStreamReader
 import org.genspectrum.lapis.config.ActiveView
+import org.genspectrum.lapis.config.ViewConfig
 import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.LapisHeaders.REQUEST_ID
 import org.genspectrum.lapis.log
@@ -47,8 +48,21 @@ class SiloClient(
     fun <ResponseType> sendQueryAndGetDataVersion(
         query: SiloQuery<ResponseType>,
         setRequestDataVersion: Boolean = true,
+    ): WithDataVersion<Stream<ResponseType>> =
+        sendQueryAndGetDataVersion(query, setRequestDataVersion, activeView.config)
+
+    fun <ResponseType> sendQueryAndGetDataVersion(
+        query: SiloQuery<ResponseType>,
+        setRequestDataVersion: Boolean,
+        view: ViewConfig,
     ): WithDataVersion<Stream<ResponseType>> {
-        val viewQuery = query.copy(baseQuery = activeView.config.baseQuery)
+        val viewQuery = query.forView(
+            baseQuery = view.baseQuery,
+            tableScanQuery = view.tableScanQuery,
+            fieldAliases = view.fieldAliases,
+            defaultNucleotideSequence = view.databaseConfig.defaultNucleotideSequence
+                ?: view.referenceGenomeSchema.getNucleotideSequenceNames().singleOrNull(),
+        )
         val response = when (viewQuery.action.cacheable) {
             true -> cachedSiloClient.sendCachedQuery(viewQuery).map { it.stream() }
             else -> cachedSiloClient.sendQuery(viewQuery)

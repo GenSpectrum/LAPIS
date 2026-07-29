@@ -47,6 +47,72 @@ class SiloQueryToSaneQlTest {
         assertThat(result, equalTo("default.filter(true)"))
     }
 
+    @Test
+    fun `GIVEN regular action THEN view base query is used`() {
+        val query = SiloQuery(SiloAction.aggregated(), StringEquals("canton", "Bern"))
+
+        val result = query.forView(
+            baseQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__).map({canton:=division}).project({canton})",
+            tableScanQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__)",
+            fieldAliases = mapOf("canton" to "division"),
+            defaultNucleotideSequence = "main",
+        ).toSaneQl()
+
+        assertThat(
+            result,
+            equalTo(
+                """swissScan.filter("division" = 'Bern').map({canton:=division}).project({canton})""" +
+                    """.groupBy({"count":=count()})""",
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN table scan action THEN table scan query and field aliases are used`() {
+        val query = SiloQuery(
+            SiloAction.mutations(),
+            And(
+                StringEquals("canton", "Bern"),
+                Or(IsNull("canton"), StringEquals("countryExposure", "Switzerland")),
+            ),
+        )
+
+        val result = query.forView(
+            baseQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__).project({canton})",
+            tableScanQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__)",
+            fieldAliases = mapOf("canton" to "division"),
+            defaultNucleotideSequence = "main",
+        ).toSaneQl()
+
+        assertThat(
+            result,
+            equalTo(
+                """swissScan.filter("division" = 'Bern' && """ +
+                    """(isNull("division") || "countryExposure" = 'Switzerland')).mutations()""",
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN single-segment nucleotide filter THEN default sequence is explicit`() {
+        val query = SiloQuery(SiloAction.aggregated(), NucleotideSymbolEquals(null, 3037, "T"))
+
+        val result = query.forView(
+            baseQuery = "default",
+            tableScanQuery = null,
+            fieldAliases = emptyMap(),
+            defaultNucleotideSequence = "main",
+        ).toSaneQl()
+
+        assertThat(
+            result,
+            equalTo(
+                "default.filter(nucleotideEquals(position:=3037, symbol:='T', sequenceName:='main'))" +
+                    """.groupBy({"count":=count()})""",
+            ),
+        )
+    }
+
     @ParameterizedTest(name = "action: {1}")
     @MethodSource("getSiloActionTestCases")
     fun `SiloAction is correctly serialized to SaneQL`(

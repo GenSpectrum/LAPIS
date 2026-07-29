@@ -55,6 +55,8 @@ class InfoControllerTest(
             ---
             viewName: "test"
             baseQuery: "default"
+            tableScanQuery: null
+            fieldAliases: {}
             capabilities:
             - "metadata"
             - "mutations"

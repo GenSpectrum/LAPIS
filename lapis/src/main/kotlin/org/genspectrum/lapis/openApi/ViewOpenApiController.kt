@@ -1,5 +1,6 @@
 package org.genspectrum.lapis.openApi
 
+import io.swagger.v3.core.util.Json
 import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.config.ViewCapability
 import org.genspectrum.lapis.config.ViewConfig
@@ -72,9 +73,30 @@ class ViewOpenApiController(
             referenceGenomeSchema = view.referenceGenomeSchema,
             resourceServerProperties = resourceServerProperties,
         )
-        generated.set("components", objectMapper.valueToTree(viewSpecificOpenApiSchema.components))
+        mergeComponents(
+            generated = generated,
+            viewSpecific = objectMapper.readTree(Json.mapper().writeValueAsBytes(viewSpecificOpenApiSchema.components))
+                as ObjectNode,
+        )
         generated.set("paths", concretePaths(generated.get("paths") as ObjectNode, view))
         return generated
+    }
+
+    private fun mergeComponents(
+        generated: ObjectNode,
+        viewSpecific: ObjectNode,
+    ) {
+        val generatedComponents = (generated.get("components") as? ObjectNode)
+            ?: objectMapper.createObjectNode().also { generated.set("components", it) }
+        viewSpecific.properties().forEach { (sectionName, viewSpecificSection) ->
+            if (viewSpecificSection !is ObjectNode) {
+                generatedComponents.set(sectionName, viewSpecificSection)
+                return@forEach
+            }
+            val generatedSection = (generatedComponents.get(sectionName) as? ObjectNode)
+                ?: objectMapper.createObjectNode().also { generatedComponents.set(sectionName, it) }
+            viewSpecificSection.properties().forEach { (name, value) -> generatedSection.set(name, value) }
+        }
     }
 
     private fun concretePaths(
@@ -113,6 +135,7 @@ class ViewOpenApiController(
         view: ViewConfig,
     ): Boolean =
         when {
+            path.contains("NucleotideSequences/{segment}") -> !view.referenceGenomeSchema.isSingleSegmented()
             path.contains("/component/") -> view.supports(ViewCapability.COMPONENTS)
             path.endsWith("/aggregated") || path.endsWith("/details") -> view.supports(ViewCapability.METADATA)
             path.contains("Mutations") -> view.supports(ViewCapability.MUTATIONS)

@@ -49,6 +49,27 @@ views:
 
 With this example, LAPIS endpoints are available below `/all`, such as `/all/sample/aggregated`.
 
+`baseQuery` is the relation used by metadata and sequence endpoints. LAPIS appends the request filter to this relation by default. A view that renames or projects fields can place `__LAPIS_REQUEST_FILTER__` exactly once to control where the request filter is applied and use `fieldAliases` to translate public field names in that filter:
+
+```yaml
+views:
+  - viewName: swiss
+    baseQuery: >-
+      default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__)
+      .map({canton := division}).project({"strain", "canton", "main", "unaligned_main", "S"})
+    tableScanQuery: default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__)
+    fieldAliases:
+      canton: division
+    databaseConfig: database_config_swiss.yaml
+    referenceGenome: reference_genomes.json
+    capabilities:
+      - metadata
+      - mutations
+      - sequences
+```
+
+`tableScanQuery` is optional and is used by SILO operations that require a table scan, including mutations, insertions, and phylogenetic tree operations. Its schema must contain every configured metadata field, resolving names through `fieldAliases`. A projected `baseQuery` must include the sequence columns required by the configured reference genome when the `sequences` capability is enabled.
+
 Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
   If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
