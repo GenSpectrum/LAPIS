@@ -16,3 +16,4 @@ views:
     referenceGenome: ../../lapis-e2e/testData/singleSegmented/reference_genomes.json
     capabilities:
       - metadata
+      - sequences
