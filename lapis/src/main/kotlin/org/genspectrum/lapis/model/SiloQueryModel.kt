@@ -131,7 +131,7 @@ class SiloQueryModel(
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.nucleotideInsertions(
-                    sequenceFilters.orderByFields,
+                    expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
@@ -158,7 +158,7 @@ class SiloQueryModel(
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aminoAcidInsertions(
-                    sequenceFilters.orderByFields,
+                    expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
@@ -319,6 +319,26 @@ class SiloQueryModel(
                             MutationsField.POSITION,
                             MutationsField.MUTATION_TO,
                         ).map { OrderByField(it.value, field.order) }
+
+                        else -> listOf(field)
+                    }
+                },
+            )
+
+            is OrderBySpec.Random -> orderByFields
+        }
+
+    /**
+     * Since SILO can't order by the assembled `insertion` field, replace any `insertion` order-by entry with its
+     * component fields (in `sequenceName`, `position`, `insertedSymbols` order), keeping the direction.
+     */
+    private fun expandInsertionOrderBy(orderByFields: OrderBySpec): OrderBySpec =
+        when (orderByFields) {
+            is OrderBySpec.ByFields -> OrderBySpec.ByFields(
+                orderByFields.fields.flatMap { field ->
+                    when (field.field) {
+                        "insertion" -> listOf("sequenceName", "position", "insertedSymbols")
+                            .map { OrderByField(it, field.order) }
 
                         else -> listOf(field)
                     }
