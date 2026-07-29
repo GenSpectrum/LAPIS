@@ -68,7 +68,8 @@ such as combinations of mutations ("mutation 1 or mutation 2") and other filters
 const val AGGREGATED_GROUP_BY_FIELDS_DESCRIPTION =
     """The fields to stratify by.
 If empty, only the overall count is returned.
-If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here."""
+If requesting CSV or TSV data, the columns are ordered in the same order as the fields are specified here.
+You can provide metadata fields."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by. 
     Fields specified here must either be \"count\" or also be present in \"fields\".
