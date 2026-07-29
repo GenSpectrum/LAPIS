@@ -34,7 +34,7 @@ class QueryControllerTest(
     @Autowired
     lateinit var dataVersion: DataVersion
 
-    private val route = "/query/parse"
+    private val route = "/test/query/parse"
 
     @BeforeEach
     fun setup() {

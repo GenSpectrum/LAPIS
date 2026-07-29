@@ -134,7 +134,7 @@ class QueriesOverTimeModel(
     /**
      * Thread pool used for parallel queries to SILO.
      */
-    private val threadPool = Executors.newFixedThreadPool(viewRegistry.first().databaseConfig.siloClientThreadCount)
+    private val threadPool = Executors.newFixedThreadPool(viewRegistry.siloClientThreadCount)
     private val referenceGenome get() = activeView.referenceGenome
 
     fun evaluateQueriesOverTime(

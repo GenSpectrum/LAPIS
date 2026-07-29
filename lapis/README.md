@@ -38,37 +38,23 @@ views:
     baseQuery: default
     databaseConfig: database_config.yaml
     referenceGenome: reference_genomes.json
-    capabilities:
-      - metadata
-      - mutations
-      - insertions
-      - sequences
-      - phyloTree
-      - components
 ```
 
 With this example, LAPIS endpoints are available below `/all`, such as `/all/sample/aggregated`.
 
-`baseQuery` is the relation used by metadata and sequence endpoints. LAPIS appends the request filter to this relation by default. A view that renames or projects fields can place `__LAPIS_REQUEST_FILTER__` exactly once to control where the request filter is applied and use `fieldAliases` to translate public field names in that filter:
+`baseQuery` is the SaneQL relation used by every endpoint in the view. LAPIS appends the request filter and endpoint operation to it. The relation's fields therefore define the view's public metadata and sequence fields:
 
 ```yaml
 views:
   - viewName: swiss
     baseQuery: >-
-      default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__)
+      default.filter(country = 'Switzerland')
       .map({canton := division}).project({"strain", "canton", "main", "unaligned_main", "S"})
-    tableScanQuery: default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__)
-    fieldAliases:
-      canton: division
     databaseConfig: database_config_swiss.yaml
     referenceGenome: reference_genomes.json
-    capabilities:
-      - metadata
-      - mutations
-      - sequences
 ```
 
-`tableScanQuery` is optional and is used by SILO operations that require a table scan, including mutations, insertions, and phylogenetic tree operations. Its schema must contain every configured metadata field, resolving names through `fieldAliases`. A projected `baseQuery` must include the sequence columns required by the configured reference genome when the `sequences` capability is enabled.
+Each referenced database config must describe the metadata fields produced by its `baseQuery`. The relation must also include the sequence columns required by the referenced genome.
 
 Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on each view's landing page point to your self-hosted [lapis docs](../lapis-docs/README.md).

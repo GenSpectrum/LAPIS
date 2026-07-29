@@ -32,17 +32,6 @@ data class SiloQuery<ResponseType>(
             steps = action.toSaneQlSteps(),
             baseQuery = baseQuery,
         ).render()
-
-    fun forView(
-        baseQuery: String,
-        tableScanQuery: String?,
-        fieldAliases: Map<String, String>,
-        defaultNucleotideSequence: String?,
-    ): SiloQuery<ResponseType> =
-        copy(
-            baseQuery = if (action.requiresTableScan) tableScanQuery ?: baseQuery else baseQuery,
-            filterExpression = filterExpression.prepareForView(fieldAliases, defaultNucleotideSequence),
-        )
 }
 
 interface CommonActionFields {
@@ -57,7 +46,6 @@ const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 sealed class SiloAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
-    @JsonIgnore val requiresTableScan: Boolean = false,
 ) : CommonActionFields {
     /** The SaneQL pipeline step(s) specific to this action, e.g. `.groupBy({count:=count()})`. */
     protected abstract fun ownSaneQlSteps(): List<SaneQlStep>
@@ -306,7 +294,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<MutationData>(
             arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "Mutations"
 
@@ -325,7 +312,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<MutationData>(
             arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "AminoAcidMutations"
 
@@ -363,7 +349,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<InsertionData>(
             arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "Insertions"
 
@@ -381,7 +366,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<MostCommonAncestorData>(
             arrowConverter = MOST_COMMON_ANCESTOR_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "MostRecentCommonAncestor"
 
@@ -406,7 +390,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<PhyloSubtreeData>(
             arrowConverter = PHYLO_SUBTREE_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "PhyloSubtree"
 
@@ -429,7 +412,6 @@ sealed class SiloAction<ResponseType>(
     ) : SiloAction<InsertionData>(
             arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
             cacheable = true,
-            requiresTableScan = true,
         ) {
         val type: String = "AminoAcidInsertions"
 
@@ -749,38 +731,6 @@ data class IsNotNull(
 ) : SiloFilterExpression("IsNotNull") {
     override fun toSaneQl() = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
 }
-
-fun SiloFilterExpression.prepareForView(
-    aliases: Map<String, String>,
-    defaultNucleotideSequence: String?,
-): SiloFilterExpression =
-    when (this) {
-        is StringEquals -> copy(column = aliases[column] ?: column)
-        is BooleanEquals -> copy(column = aliases[column] ?: column)
-        is LineageEquals -> copy(column = aliases[column] ?: column)
-        is DateBetween -> copy(column = aliases[column] ?: column)
-        is And -> copy(children = children.map { it.prepareForView(aliases, defaultNucleotideSequence) })
-        is Or -> copy(children = children.map { it.prepareForView(aliases, defaultNucleotideSequence) })
-        is Not -> copy(child = child.prepareForView(aliases, defaultNucleotideSequence))
-        is Maybe -> copy(child = child.prepareForView(aliases, defaultNucleotideSequence))
-        is NOf -> copy(children = children.map { it.prepareForView(aliases, defaultNucleotideSequence) })
-        is IntEquals -> copy(column = aliases[column] ?: column)
-        is IntBetween -> copy(column = aliases[column] ?: column)
-        is FloatEquals -> copy(column = aliases[column] ?: column)
-        is FloatBetween -> copy(column = aliases[column] ?: column)
-        is StringSearch -> copy(column = aliases[column] ?: column)
-        is PhyloDescendantOf -> copy(column = aliases[column] ?: column)
-        is IsNull -> copy(column = aliases[column] ?: column)
-        is IsNotNull -> copy(column = aliases[column] ?: column)
-        is NucleotideSymbolEquals -> copy(sequenceName = sequenceName ?: defaultNucleotideSequence)
-        is HasNucleotideMutation -> copy(sequenceName = sequenceName ?: defaultNucleotideSequence)
-        is NucleotideInsertionContains -> copy(sequenceName = sequenceName ?: defaultNucleotideSequence)
-        is AminoAcidSymbolEquals,
-        is HasAminoAcidMutation,
-        is AminoAcidInsertionContains,
-        True,
-        -> this
-    }
 
 private fun id(name: String) = SaneQlIdentifier(name)
 

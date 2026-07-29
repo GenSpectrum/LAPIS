@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @SegmentedViewController(SegmentationType.SINGLE)
-@RequestMapping("/{view}/sample", "/sample")
+@RequestMapping("/{view}/sample")
 class SingleSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,

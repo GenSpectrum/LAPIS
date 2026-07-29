@@ -2,7 +2,6 @@ package org.genspectrum.lapis.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import org.genspectrum.lapis.config.ActiveView
-import org.genspectrum.lapis.config.EffectiveViewConfig
 import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.logging.RequestIdContext
@@ -22,7 +21,7 @@ const val LINEAGE_DEFINITION_ROUTE = "/lineageDefinition"
 const val REFERENCE_GENOME_ROUTE = "/referenceGenome"
 
 @RestController
-@RequestMapping("/{view}/sample", "/sample")
+@RequestMapping("/{view}/sample")
 class InfoController(
     private val siloQueryModel: SiloQueryModel,
     private val activeView: ActiveView,
@@ -45,7 +44,7 @@ class InfoController(
 
     @GetMapping(DATABASE_CONFIG_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE, APPLICATION_YAML_VALUE])
     @Operation(description = DATABASE_CONFIG_ENDPOINT_DESCRIPTION)
-    fun getDatabaseConfigAsJson(): EffectiveViewConfig = activeView.config.asEffectiveConfig()
+    fun getDatabaseConfigAsJson() = activeView.databaseConfig
 
     @GetMapping(
         "$LINEAGE_DEFINITION_ROUTE/{column}",

@@ -54,7 +54,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @SegmentedViewController(SegmentationType.MULTI)
-@RequestMapping("/{view}/sample", "/sample")
+@RequestMapping("/{view}/sample")
 class MultiSegmentedSequenceController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,

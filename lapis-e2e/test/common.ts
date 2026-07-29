@@ -15,20 +15,22 @@ import {
 import { LapisControllerApi as LapisControllerApiWithAuth } from './lapisClientWithAuth';
 import { expect } from 'chai';
 
-export const basePath = 'http://localhost:8090';
-export const basePathMultiSegmented = 'http://localhost:8094';
+const serverBasePath = 'http://localhost:8090';
+const serverBasePathMultiSegmented = 'http://localhost:8094';
+export const basePath = `${serverBasePath}/test`;
+export const basePathMultiSegmented = `${serverBasePathMultiSegmented}/test`;
 /**
  * has auth configured via a "hardcoded" public key file
  */
-export const basePathWithPublicKeyAuth = 'http://localhost:8095';
+export const basePathWithPublicKeyAuth = 'http://localhost:8095/test';
 /**
  * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.jwk-set-uri
  */
-export const basePathWithJwkSetUriAuth = 'http://localhost:8096';
+export const basePathWithJwkSetUriAuth = 'http://localhost:8096/test';
 /**
  * connected to Keycloak using the property --spring.security.oauth2.resourceserver.jwt.issuer-uri
  */
-export const basePathWithIssuerUriAuth = 'http://localhost:8097';
+export const basePathWithIssuerUriAuth = 'http://localhost:8097/test';
 
 const middleware: Middleware = {
   onError: errorContext => {
@@ -53,29 +55,37 @@ const middleware: Middleware = {
   },
 };
 
-export const lapisClient = new LapisControllerApi(new Configuration({ basePath })).withMiddleware(middleware);
-export const lapisInfoClient = new InfoControllerApi(new Configuration({ basePath })).withMiddleware(
+export const lapisClient = new LapisControllerApi(
+  new Configuration({ basePath: serverBasePath })
+).withMiddleware(middleware);
+export const lapisInfoClient = new InfoControllerApi(
+  new Configuration({ basePath: serverBasePath })
+).withMiddleware(middleware);
+export const actuatorClient = new ActuatorApi(new Configuration({ basePath: serverBasePath })).withMiddleware(
   middleware
 );
-export const actuatorClient = new ActuatorApi(new Configuration({ basePath })).withMiddleware(middleware);
-export const queryClient = new QueryControllerApi(new Configuration({ basePath })).withMiddleware(middleware);
+export const queryClient = new QueryControllerApi(
+  new Configuration({ basePath: serverBasePath })
+).withMiddleware(middleware);
 export const queriesOverTimeClient = new QueriesOverTimeControllerApi(
-  new Configuration({ basePath })
+  new Configuration({ basePath: serverBasePath })
 ).withMiddleware(middleware);
 export const lapisClientMultiSegmented = new LapisControllerApiMultiSegmented(
-  new Configuration({ basePath: basePathMultiSegmented })
+  new Configuration({ basePath: serverBasePathMultiSegmented })
 ).withMiddleware(middleware);
 
 export const lapisSingleSegmentedSequenceController = new SingleSegmentedSequenceControllerApi(
-  new Configuration({ basePath })
+  new Configuration({ basePath: serverBasePath })
 ).withMiddleware(middleware);
 
 export const lapisMultiSegmentedSequenceController = new MultiSegmentedSequenceControllerApi(
-  new Configuration({ basePath: basePathMultiSegmented })
+  new Configuration({ basePath: serverBasePathMultiSegmented })
 ).withMiddleware(middleware);
 
 export const lapisClientWithAuth = ({ basePath, accessToken }: { basePath: string; accessToken?: string }) =>
-  new LapisControllerApiWithAuth(new Configuration({ basePath, accessToken })).withMiddleware(middleware);
+  new LapisControllerApiWithAuth(
+    new Configuration({ basePath: basePath.replace(/\/test$/, ''), accessToken })
+  ).withMiddleware(middleware);
 
 export function sequenceData(serverResponse: string) {
   const lines = serverResponse.split('\n').filter(line => line.length > 0);

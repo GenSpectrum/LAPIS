@@ -1,0 +1,9 @@
+{
+  "nucleotideSequences": [
+    { "name": "main", "sequence": "ATTA" }
+  ],
+  "genes": [
+    { "name": "gene1", "sequence": "MYS*" },
+    { "name": "gene2", "sequence": "MYS*" }
+  ]
+}

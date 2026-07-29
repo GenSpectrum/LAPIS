@@ -98,11 +98,9 @@ class DownloadAsFileFilter(
 
     private fun CachedBodyHttpServletRequest.getSamplePath(): String? {
         val segments = getProxyAwarePath().split('/').filter { it.isNotBlank() }
-        val sampleIndex = when {
-            segments.firstOrNull() == "sample" -> 0
-            segments.getOrNull(1) == "sample" -> 1
-            else -> return null
+        if (segments.getOrNull(1) != "sample") {
+            return null
         }
-        return "/" + segments.drop(sampleIndex).joinToString("/")
+        return "/" + segments.drop(1).joinToString("/")
     }
 }

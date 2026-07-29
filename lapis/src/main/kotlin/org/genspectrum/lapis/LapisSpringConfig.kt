@@ -1,5 +1,6 @@
 package org.genspectrum.lapis
 
+import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.MediaType
 import io.swagger.v3.oas.models.media.Schema
@@ -10,14 +11,12 @@ import mu.KotlinLogging
 import org.apache.arrow.memory.RootAllocator
 import org.genspectrum.lapis.auth.DataOpennessAuthorizationFilterFactory
 import org.genspectrum.lapis.config.LapisVersion
-import org.genspectrum.lapis.config.ViewRegistry
 import org.genspectrum.lapis.controller.LapisHeaders
 import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestContextLogger
 import org.genspectrum.lapis.logging.StatisticsLogObjectMapper
 import org.genspectrum.lapis.openApi.REQUEST_ID_HEADER_DESCRIPTION
 import org.genspectrum.lapis.openApi.SECURITY_SCHEMA_NAME
-import org.genspectrum.lapis.openApi.buildOpenApiSchema
 import org.genspectrum.lapis.util.TimeFactory
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
@@ -57,17 +56,7 @@ class LapisSpringConfig {
     }
 
     @Bean
-    fun openAPI(
-        viewRegistry: ViewRegistry,
-        resourceServerProperties: OAuth2ResourceServerProperties,
-    ) = viewRegistry.first().let {
-        buildOpenApiSchema(
-            sequenceFilterFields = it.sequenceFilterFields,
-            databaseConfig = it.databaseConfig,
-            referenceGenomeSchema = it.referenceGenomeSchema,
-            resourceServerProperties = resourceServerProperties,
-        )
-    }
+    fun openAPI() = OpenAPI()
 
     @Bean
     fun headerCustomizer() =

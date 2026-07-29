@@ -10,7 +10,7 @@ describe('Error handling: BadRequest', () => {
     expect(result.headers.get('Content-Type')).equals('application/problem+json');
     expect(await result.json()).to.deep.equal({
       detail: "Failed to convert 'nucleotideMutations' with value: 'someInvalidMutation'",
-      instance: '/sample/aggregated',
+      instance: '/test/sample/aggregated',
       status: 400,
       title: 'Bad Request',
     });

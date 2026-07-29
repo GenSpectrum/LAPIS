@@ -102,7 +102,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/{view}/sample", "/sample")
+@RequestMapping("/{view}/sample")
 class LapisController(
     private val siloQueryModel: SiloQueryModel,
     private val requestContext: RequestContext,

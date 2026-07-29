@@ -3,10 +3,3 @@ views:
     baseQuery: default
     databaseConfig: testDatabaseConfig.yaml
     referenceGenome: reference_genomes.json
-    capabilities:
-      - metadata
-      - mutations
-      - insertions
-      - sequences
-      - phyloTree
-      - components

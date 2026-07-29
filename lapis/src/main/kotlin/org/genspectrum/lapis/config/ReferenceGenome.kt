@@ -5,17 +5,6 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import java.io.File
 
-const val REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX = "referenceGenome.segments"
-const val REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX = "referenceGenome.genes"
-
-const val REFERENCE_GENOME_ENV_VARIABLE_NAME = "LAPIS_REFERENCE_GENOME_FILENAME"
-const val REFERENCE_GENOME_FILENAME_ARGS_NAME = "referenceGenomeFilename"
-
-const val NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE =
-    """No reference genome filename specified.
-    Please specify a reference genome filename using the --$REFERENCE_GENOME_FILENAME_ARGS_NAME argument 
-    or the $REFERENCE_GENOME_ENV_VARIABLE_NAME environment variable."""
-
 class ReferenceGenomeSchema(
     val nucleotideSequences: List<ReferenceSequenceSchema>,
     val genes: List<ReferenceSequenceSchema>,
@@ -38,32 +27,6 @@ class ReferenceGenomeSchema(
     fun getSequenceNameFromCaseInsensitiveName(name: String) =
         nucleotideSequenceNames[name.lowercase()]?.name
             ?: geneNames[name.lowercase()]?.name
-
-    companion object {
-        fun readFromFileFromProgramArgsOrEnv(args: Array<String>): ReferenceGenomeSchema {
-            val filename = readFilenameFromProgramArgs(args)
-                ?: System.getenv(REFERENCE_GENOME_ENV_VARIABLE_NAME)
-                ?: throw IllegalArgumentException(NO_REFERENCE_GENOME_FILENAME_ERROR_MESSAGE)
-
-            return readFromFile(filename)
-        }
-
-        fun readFromFile(filename: String): ReferenceGenomeSchema = jacksonObjectMapper().readValue(File(filename))
-
-        private fun readFilenameFromProgramArgs(args: Array<String>): String? {
-            val referenceGenomeArg = args.find { it.startsWith("--$REFERENCE_GENOME_FILENAME_ARGS_NAME=") }
-            return referenceGenomeArg?.substringAfter("=")
-        }
-    }
-
-    fun toSpringApplicationArgs(): Array<String> {
-        val nucleotideSequenceArg = "--$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=" +
-            this.nucleotideSequences.joinToString(separator = ",") { it.name }
-        val genesArg = "--$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=" +
-            this.genes.joinToString(separator = ",") { it.name }
-
-        return arrayOf(nucleotideSequenceArg, genesArg)
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

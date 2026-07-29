@@ -3,16 +3,9 @@ views:
     baseQuery: default
     databaseConfig: database_config.yaml
     referenceGenome: ../../lapis-e2e/testData/singleSegmented/reference_genomes.json
-    capabilities:
-      - metadata
-      - mutations
-      - insertions
-      - sequences
-      - phyloTree
-      - components
   - viewName: swiss
     baseQuery: >-
-      default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__).map({canton := division}).project({
+      default.filter(country = 'Switzerland').map({canton := division}).project({
       "ace2Binding", "age", "authors", "countryExposure", "database", "date", "dateDay", "dateMonth",
       "dateOriginalValue", "dateSubmitted", "dateSubmittedDay", "dateSubmittedMonth", "dateSubmittedOriginalValue",
       "dateSubmittedYear", "dateUpdated", "dateUpdatedDay", "dateUpdatedMonth", "dateUpdatedOriginalValue",
@@ -25,15 +18,5 @@ views:
       "whoClade", "died", "fullyVaccinated", "hospitalized", "nextcladeDatasetVersion", "usherTree", "main",
       "unaligned_main", "E", "M", "N", "ORF1a", "ORF1b", "ORF3a", "ORF6", "ORF7a", "ORF7b", "ORF8",
       "ORF9b", "S"})
-    tableScanQuery: default.filter(country = 'Switzerland').filter(__LAPIS_REQUEST_FILTER__)
-    fieldAliases:
-      canton: division
     databaseConfig: database_config_swiss.yaml
     referenceGenome: ../../lapis-e2e/testData/singleSegmented/reference_genomes.json
-    capabilities:
-      - metadata
-      - mutations
-      - insertions
-      - sequences
-      - phyloTree
-      - components

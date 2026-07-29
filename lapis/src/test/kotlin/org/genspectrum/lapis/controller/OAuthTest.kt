@@ -58,7 +58,15 @@ class OAuthTest(
     }
 
     @ParameterizedTest(name = "GIVEN no access token WHEN I request {0} THEN returns success")
-    @ValueSource(strings = ["/swagger-ui/index.html", "/api-docs", "/api-docs.yaml", "/actuator", "/actuator/caches"])
+    @ValueSource(
+        strings = [
+            "/test/swagger-ui/index.html",
+            "/test/api-docs",
+            "/test/api-docs.yaml",
+            "/actuator",
+            "/actuator/caches",
+        ],
+    )
     fun `GIVEN no access token WHEN I request publicly available resource THEN returns success`(path: String) {
         mockMvc.perform(get(path))
             .andExpect(status().isOk)
@@ -137,7 +145,7 @@ class OAuthTest(
         fun getProtectedRouteScenarios(): List<ProtectedRouteScenario> =
             SampleRoute.entries.map {
                 ProtectedRouteScenario(
-                    path = "/sample${it.pathSegment}",
+                    path = "/test/sample${it.pathSegment}",
                     setupModelMock = { siloQueryModelMock, _ ->
                         when (it.serveType) {
                             ServeType.SEQUENCES -> MockDataForEndpoints.sequenceEndpointMockDataForAllSequences()
@@ -154,7 +162,7 @@ class OAuthTest(
                     },
                 )
             } + ProtectedRouteScenario(
-                path = "/component$QUERIES_OVER_TIME_ROUTE",
+                path = "/test/component$QUERIES_OVER_TIME_ROUTE",
                 supportsGet = false,
                 setupModelMock = { _, queriesOverTimeModelMock ->
                     every {
@@ -167,7 +175,7 @@ class OAuthTest(
                     )
                 },
             ) + ProtectedRouteScenario(
-                path = "/component$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE",
+                path = "/test/component$NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE",
                 supportsGet = false,
                 setupModelMock = { _, queriesOverTimeModelMock ->
                     every {
@@ -175,7 +183,7 @@ class OAuthTest(
                     } returns emptyMutationsOverTimeResult
                 },
             ) + ProtectedRouteScenario(
-                path = "/component$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE",
+                path = "/test/component$AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE",
                 supportsGet = false,
                 setupModelMock = { _, queriesOverTimeModelMock ->
                     every {
@@ -183,7 +191,7 @@ class OAuthTest(
                     } returns emptyMutationsOverTimeResult
                 },
             ) + ProtectedRouteScenario(
-                path = "/sample$INFO_ROUTE",
+                path = "/test/sample$INFO_ROUTE",
                 supportsPost = false,
                 setupModelMock = { siloQueryModelMock, _ ->
                     every {
@@ -191,11 +199,11 @@ class OAuthTest(
                     } returns InfoData(dataVersion = "dataVersion", siloVersion = "siloVersion")
                 },
             ) + ProtectedRouteScenario(
-                path = "/sample$DATABASE_CONFIG_ROUTE",
+                path = "/test/sample$DATABASE_CONFIG_ROUTE",
                 supportsPost = false,
                 setupModelMock = { _, _ -> },
             ) + ProtectedRouteScenario(
-                path = "/sample$LINEAGE_DEFINITION_ROUTE/pangeLineage",
+                path = "/test/sample$LINEAGE_DEFINITION_ROUTE/pangeLineage",
                 supportsPost = false,
                 setupModelMock = { siloQueryModelMock, _ ->
                     every {
@@ -203,7 +211,7 @@ class OAuthTest(
                     } returns emptyMap()
                 },
             ) + ProtectedRouteScenario(
-                path = "/sample$REFERENCE_GENOME_ROUTE",
+                path = "/test/sample$REFERENCE_GENOME_ROUTE",
                 supportsPost = false,
                 setupModelMock = { _, _ -> },
             )

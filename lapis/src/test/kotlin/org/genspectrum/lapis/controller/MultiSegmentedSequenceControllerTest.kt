@@ -2,8 +2,6 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.FastaHeaderTemplate
@@ -31,14 +29,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.stream.Stream
 
-private const val SEGMENT_NAME = "otherSegment"
+private const val SEGMENT_NAME = "main"
 
-@SpringBootTest(
-    properties = [
-        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=someSegment,$SEGMENT_NAME",
-        "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=gene1,gene2",
-    ],
-)
+@SpringBootTest
 @AutoConfigureMockMvc
 class MultiSegmentedSequenceControllerTest(
     @param:Autowired val mockMvc: MockMvc,
@@ -51,7 +44,7 @@ class MultiSegmentedSequenceControllerTest(
         .sequenceEndpointMockData(SEGMENT_NAME)
         .expectedFasta
 
-    val otherSegment = "otherSegment"
+    val otherSegment = "other_segment"
 
     val arbitraryOkResponse = SequencesResponse(
         sequenceData = Stream.empty(),

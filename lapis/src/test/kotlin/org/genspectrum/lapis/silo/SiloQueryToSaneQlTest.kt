@@ -51,24 +51,21 @@ class SiloQueryToSaneQlTest {
     fun `GIVEN regular action THEN view base query is used`() {
         val query = SiloQuery(SiloAction.aggregated(), StringEquals("canton", "Bern"))
 
-        val result = query.forView(
-            baseQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__).map({canton:=division}).project({canton})",
-            tableScanQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__)",
-            fieldAliases = mapOf("canton" to "division"),
-            defaultNucleotideSequence = "main",
+        val result = query.copy(
+            baseQuery = "swissScan.filter(country = 'Switzerland').map({canton:=division}).project({canton})",
         ).toSaneQl()
 
         assertThat(
             result,
             equalTo(
-                """swissScan.filter("division" = 'Bern').map({canton:=division}).project({canton})""" +
-                    """.groupBy({"count":=count()})""",
+                """swissScan.filter(country = 'Switzerland').map({canton:=division}).project({canton})""" +
+                    """.filter("canton" = 'Bern').groupBy({"count":=count()})""",
             ),
         )
     }
 
     @Test
-    fun `GIVEN table scan action THEN table scan query and field aliases are used`() {
+    fun `GIVEN mutation action THEN it is appended to the view base query`() {
         val query = SiloQuery(
             SiloAction.mutations(),
             And(
@@ -77,37 +74,27 @@ class SiloQueryToSaneQlTest {
             ),
         )
 
-        val result = query.forView(
-            baseQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__).project({canton})",
-            tableScanQuery = "swissScan.filter(__LAPIS_REQUEST_FILTER__)",
-            fieldAliases = mapOf("canton" to "division"),
-            defaultNucleotideSequence = "main",
-        ).toSaneQl()
+        val result = query.copy(baseQuery = "swissScan.project({canton, countryExposure})").toSaneQl()
 
         assertThat(
             result,
             equalTo(
-                """swissScan.filter("division" = 'Bern' && """ +
-                    """(isNull("division") || "countryExposure" = 'Switzerland')).mutations()""",
+                """swissScan.project({canton, countryExposure}).filter("canton" = 'Bern' && """ +
+                    """(isNull("canton") || "countryExposure" = 'Switzerland')).mutations()""",
             ),
         )
     }
 
     @Test
-    fun `GIVEN single-segment nucleotide filter THEN default sequence is explicit`() {
+    fun `GIVEN nucleotide filter without sequence name THEN SILO default is used`() {
         val query = SiloQuery(SiloAction.aggregated(), NucleotideSymbolEquals(null, 3037, "T"))
 
-        val result = query.forView(
-            baseQuery = "default",
-            tableScanQuery = null,
-            fieldAliases = emptyMap(),
-            defaultNucleotideSequence = "main",
-        ).toSaneQl()
+        val result = query.copy(baseQuery = "default").toSaneQl()
 
         assertThat(
             result,
             equalTo(
-                "default.filter(nucleotideEquals(position:=3037, symbol:='T', sequenceName:='main'))" +
+                "default.filter(nucleotideEquals(position:=3037, symbol:='T'))" +
                     """.groupBy({"count":=count()})""",
             ),
         )

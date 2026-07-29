@@ -1,9 +1,7 @@
 package org.genspectrum.lapis.config
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.silo.REQUEST_FILTER_PLACEHOLDER
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
@@ -22,78 +20,22 @@ data class ViewsConfig(
 data class ViewDefinition(
     val viewName: String,
     val baseQuery: String,
-    val tableScanQuery: String? = null,
-    val fieldAliases: Map<String, String> = emptyMap(),
     val databaseConfig: String,
     val referenceGenome: String,
-    val capabilities: Set<ViewCapability>,
 )
-
-enum class ViewCapability {
-    @JsonProperty("metadata")
-    METADATA,
-
-    @JsonProperty("mutations")
-    MUTATIONS,
-
-    @JsonProperty("insertions")
-    INSERTIONS,
-
-    @JsonProperty("sequences")
-    SEQUENCES,
-
-    @JsonProperty("phyloTree")
-    PHYLO_TREE,
-
-    @JsonProperty("components")
-    COMPONENTS,
-}
 
 data class ViewConfig(
     val viewName: String,
     val baseQuery: String,
-    val tableScanQuery: String? = null,
-    val fieldAliases: Map<String, String> = emptyMap(),
-    val capabilities: Set<ViewCapability>,
     val databaseConfig: DatabaseConfig,
     val referenceGenome: ReferenceGenome,
     val referenceGenomeSchema: ReferenceGenomeSchema,
     val sequenceFilterFields: SequenceFilterFields,
-) {
-    fun supports(capability: ViewCapability) = capability in capabilities
-
-    fun asEffectiveConfig() =
-        EffectiveViewConfig(
-            viewName = viewName,
-            baseQuery = baseQuery,
-            tableScanQuery = tableScanQuery,
-            fieldAliases = fieldAliases,
-            capabilities = capabilities,
-            schema = databaseConfig.schema,
-            defaultNucleotideSequence = databaseConfig.defaultNucleotideSequence,
-            defaultAminoAcidSequence = databaseConfig.defaultAminoAcidSequence,
-            siloClientThreadCount = databaseConfig.siloClientThreadCount,
-        )
-}
-
-data class EffectiveViewConfig(
-    val viewName: String,
-    val baseQuery: String,
-    val tableScanQuery: String?,
-    val fieldAliases: Map<String, String>,
-    val capabilities: Set<ViewCapability>,
-    val schema: DatabaseSchema,
-    val defaultNucleotideSequence: String?,
-    val defaultAminoAcidSequence: String?,
-    val siloClientThreadCount: Int,
 )
 
 @Component
 class ViewRegistry(
     @Value("\${lapis.viewsConfig.path}") manifestPath: String,
-    @Value("\${lapis.legacyRoutesEnabled:false}") legacyRoutesEnabled: Boolean,
-    @Value("\${referenceGenome.segments:}") legacySegments: String,
-    @Value("\${referenceGenome.genes:}") legacyGenes: String,
     yamlObjectMapper: YamlObjectMapper,
     databaseConfigValidator: DatabaseConfigValidator,
 ) {
@@ -111,29 +53,15 @@ class ViewRegistry(
             val referenceGenomeFile = resolveRelativeTo(manifestFile, definition.referenceGenome)
             val databaseConfig = yamlObjectMapper.objectMapper.readValue<DatabaseConfig>(databaseConfigFile)
                 .let { databaseConfigValidator.validate(it) }
-            val metadataFields = databaseConfig.schema.metadata.map { it.name }.toSet()
-            require(definition.fieldAliases.keys.all { it in metadataFields }) {
-                "View '${definition.viewName}' has aliases for fields that are not declared as metadata"
-            }
             val referenceGenome = ReferenceGenome.readFromFile(referenceGenomeFile.path)
-            val referenceGenomeSchema = when {
-                legacyRoutesEnabled && legacySegments.isNotBlank() -> ReferenceGenomeSchema(
-                    nucleotideSequences = legacySegments.split(',').filter { it.isNotBlank() }
-                        .map(::ReferenceSequenceSchema),
-                    genes = legacyGenes.split(',').filter { it.isNotBlank() }.map(::ReferenceSequenceSchema),
-                )
-                else -> ReferenceGenomeSchema(
-                    nucleotideSequences = referenceGenome.nucleotideSequences.map { ReferenceSequenceSchema(it.name) },
-                    genes = referenceGenome.genes.map { ReferenceSequenceSchema(it.name) },
-                )
-            }
+            val referenceGenomeSchema = ReferenceGenomeSchema(
+                nucleotideSequences = referenceGenome.nucleotideSequences.map { ReferenceSequenceSchema(it.name) },
+                genes = referenceGenome.genes.map { ReferenceSequenceSchema(it.name) },
+            )
 
             definition.viewName to ViewConfig(
                 viewName = definition.viewName,
                 baseQuery = definition.baseQuery.trim(),
-                tableScanQuery = definition.tableScanQuery?.trim(),
-                fieldAliases = definition.fieldAliases,
-                capabilities = definition.capabilities,
                 databaseConfig = databaseConfig,
                 referenceGenome = referenceGenome,
                 referenceGenomeSchema = referenceGenomeSchema,
@@ -142,11 +70,12 @@ class ViewRegistry(
         }
     }
 
-    init {
+    val siloClientThreadCount = run {
         val threadCounts = views.values.map { it.databaseConfig.siloClientThreadCount }.distinct()
         require(threadCounts.size == 1) {
             "All views must configure the same siloClientThreadCount because the SILO client is shared"
         }
+        threadCounts.single()
     }
 
     fun get(viewName: String): ViewConfig? = views[viewName]
@@ -161,32 +90,6 @@ class ViewRegistry(
         }
         require(definition.viewName !in RESERVED_VIEW_NAMES) { "Reserved view name: ${definition.viewName}" }
         require(definition.baseQuery.isNotBlank()) { "View '${definition.viewName}' has an empty baseQuery" }
-        require(definition.tableScanQuery == null || definition.tableScanQuery.isNotBlank()) {
-            "View '${definition.viewName}' has an empty tableScanQuery"
-        }
-        require(definition.baseQuery.containsAtMostOne(REQUEST_FILTER_PLACEHOLDER)) {
-            "View '${definition.viewName}' uses the request-filter placeholder more than once in its baseQuery"
-        }
-        require(
-            definition.tableScanQuery?.containsAtMostOne(REQUEST_FILTER_PLACEHOLDER) != false,
-        ) {
-            "View '${definition.viewName}' uses the request-filter placeholder more than once in its tableScanQuery"
-        }
-        require(definition.fieldAliases.isEmpty() || REQUEST_FILTER_PLACEHOLDER in definition.baseQuery) {
-            "View '${definition.viewName}' defines field aliases but has no request-filter placeholder in its baseQuery"
-        }
-        require(
-            definition.fieldAliases.isEmpty() ||
-                definition.tableScanQuery == null ||
-                REQUEST_FILTER_PLACEHOLDER in definition.tableScanQuery,
-        ) {
-            "View '${definition.viewName}' defines field aliases but has no request-filter placeholder in its tableScanQuery"
-        }
-        require(definition.capabilities.isNotEmpty()) { "View '${definition.viewName}' must declare capabilities" }
-        require(
-            ViewCapability.COMPONENTS !in definition.capabilities ||
-                setOf(ViewCapability.METADATA, ViewCapability.MUTATIONS).all { it in definition.capabilities },
-        ) { "View '${definition.viewName}' requires metadata and mutations when components are enabled" }
     }
 
     private fun resolveRelativeTo(
@@ -198,19 +101,14 @@ class ViewRegistry(
     }
 }
 
-private fun String.containsAtMostOne(value: String) = indexOf(value) == lastIndexOf(value)
-
 @Component
 class ActiveView(
     private val requestProvider: ObjectProvider<HttpServletRequest>,
-    private val viewRegistry: ViewRegistry,
-    @Value("\${lapis.legacyRoutesEnabled:false}") private val legacyRoutesEnabled: Boolean,
 ) {
     val configOrNull: ViewConfig?
         get() = runCatching {
             requestProvider.ifAvailable?.getAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE) as? ViewConfig
         }.getOrNull()
-            ?: viewRegistry.first().takeIf { legacyRoutesEnabled }
 
     val config: ViewConfig
         get() = configOrNull ?: throw BadRequestException("No LAPIS view selected")
@@ -219,8 +117,6 @@ class ActiveView(
     val referenceGenome: ReferenceGenome get() = config.referenceGenome
     val referenceGenomeSchema: ReferenceGenomeSchema get() = config.referenceGenomeSchema
     val sequenceFilterFields: SequenceFilterFields get() = config.sequenceFilterFields
-
-    fun resolveField(name: String) = config.fieldAliases[name] ?: name
 }
 
 class ViewNotFoundException(

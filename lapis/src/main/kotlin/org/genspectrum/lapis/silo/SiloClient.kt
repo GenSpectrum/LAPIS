@@ -56,13 +56,7 @@ class SiloClient(
         setRequestDataVersion: Boolean,
         view: ViewConfig,
     ): WithDataVersion<Stream<ResponseType>> {
-        val viewQuery = query.forView(
-            baseQuery = view.baseQuery,
-            tableScanQuery = view.tableScanQuery,
-            fieldAliases = view.fieldAliases,
-            defaultNucleotideSequence = view.databaseConfig.defaultNucleotideSequence
-                ?: view.referenceGenomeSchema.getNucleotideSequenceNames().singleOrNull(),
-        )
+        val viewQuery = query.copy(baseQuery = view.baseQuery)
         val response = when (viewQuery.action.cacheable) {
             true -> cachedSiloClient.sendCachedQuery(viewQuery).map { it.stream() }
             else -> cachedSiloClient.sendQuery(viewQuery)
@@ -113,7 +107,7 @@ open class CachedSiloClient(
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
         // Use fixed pool with unbounded queue to prevent RejectedExecutionExeceptions
-        .executor(Executors.newFixedThreadPool(viewRegistry.first().databaseConfig.siloClientThreadCount))
+        .executor(Executors.newFixedThreadPool(viewRegistry.siloClientThreadCount))
         .build()
 
     @Cacheable(

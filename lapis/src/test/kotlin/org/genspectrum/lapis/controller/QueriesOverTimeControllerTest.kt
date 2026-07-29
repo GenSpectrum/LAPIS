@@ -49,7 +49,7 @@ class QueriesOverTimeControllerTest(
     @MockkBean
     lateinit var dataVersion: DataVersion
 
-    private val route = "/component/queriesOverTime"
+    private val route = "/test/component/queriesOverTime"
 
     @BeforeEach
     fun setup() {
@@ -229,7 +229,7 @@ class NucleotideMutationsOverTimeControllerTest(
     @MockkBean
     lateinit var dataVersion: DataVersion
 
-    private val route = "/component/nucleotideMutationsOverTime"
+    private val route = "/test/component/nucleotideMutationsOverTime"
 
     @BeforeEach
     fun setup() {
@@ -404,7 +404,7 @@ class AminoAcidMutationsOverTimeControllerTest(
     @MockkBean
     lateinit var dataVersion: DataVersion
 
-    private val route = "/component/aminoAcidMutationsOverTime"
+    private val route = "/test/component/aminoAcidMutationsOverTime"
 
     @BeforeEach
     fun setup() {

@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
+@SpringBootTest(properties = ["lapis.viewsConfig.path=src/test/resources/config/views-test-info.yaml"])
 @AutoConfigureMockMvc
 class InfoControllerTest(
     @param:Autowired val mockMvc: MockMvc,
@@ -53,17 +53,6 @@ class InfoControllerTest(
     fun `GET databaseConfig as YAML`() {
         val yamlStart = """
             ---
-            viewName: "test"
-            baseQuery: "default"
-            tableScanQuery: null
-            fieldAliases: {}
-            capabilities:
-            - "metadata"
-            - "mutations"
-            - "insertions"
-            - "sequences"
-            - "phyloTree"
-            - "components"
             schema:
               instanceName: "sars_cov-2_minimal_test_config"
               opennessLevel: "OPEN"

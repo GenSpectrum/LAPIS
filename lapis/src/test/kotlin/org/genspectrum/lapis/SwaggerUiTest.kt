@@ -1,5 +1,9 @@
 package org.genspectrum.lapis
 
+import org.genspectrum.lapis.controller.AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.QUERIES_OVER_TIME_ROUTE
+import org.genspectrum.lapis.controller.SampleRoute
 import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,19 +26,20 @@ class SwaggerUiTest(
 ) {
     @Test
     fun `Swagger UI endpoint is reachable`() {
-        mockMvc.perform(get("/swagger-ui/index.html"))
+        mockMvc.perform(get("/test/swagger-ui/index.html"))
             .andExpect(status().isOk)
-            .andExpect(content().contentType("text/html"))
+            .andExpect(content().contentTypeCompatibleWith("text/html"))
             .andExpect(content().string(containsString("Swagger UI")))
     }
 
     @Test
-    fun `JSON API docs are available`() {
+    fun `unprefixed API docs are unavailable`() {
         mockMvc.perform(get("/api-docs"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType("application/json"))
-            .andExpect(jsonPath("\$.openapi").exists())
-            .andExpect(jsonPath("\$.paths./sample/aggregated").exists())
+            .andExpect(status().isNotFound)
+        mockMvc.perform(get("/api-docs.yaml"))
+            .andExpect(status().isNotFound)
+        mockMvc.perform(get("/swagger-ui/index.html"))
+            .andExpect(status().isNotFound)
     }
 
     @Test
@@ -45,22 +50,32 @@ class SwaggerUiTest(
             .andExpect(jsonPath("\$.openapi").exists())
             .andExpect(jsonPath("\$.paths./test/sample/aggregated").exists())
             .andExpect(jsonPath("\$.paths./test/sample/alignedNucleotideSequences").exists())
+            .andExpect(jsonPath("\$.paths./actuator/health").exists())
             .andExpect(jsonPath("\$.paths./sample/aggregated").doesNotExist())
             .andReturn()
 
         assertFalse(result.response.contentAsString.contains(Regex(":null[,}]")))
         val json = tools.jackson.module.kotlin.jacksonObjectMapper().readTree(result.response.contentAsString)
+        val paths = json.get("paths")
+        SampleRoute.entries.forEach {
+            assertTrue(paths.has("/test/sample${it.pathSegment}"), "Missing ${it.pathSegment}")
+        }
+        listOf(QUERIES_OVER_TIME_ROUTE, NUCLEOTIDE_MUTATIONS_OVER_TIME_ROUTE, AMINO_ACID_MUTATIONS_OVER_TIME_ROUTE)
+            .forEach { assertTrue(paths.has("/test/component$it"), "Missing $it") }
+        assertTrue(paths.has("/test/query/parse"))
         val schemas = json.get("components").get("schemas")
         assertTrue(schemas.has("SequenceFilters"))
-        assertTrue(schemas.has("EffectiveViewConfig"))
+        assertTrue(schemas.has("DatabaseConfig"))
         assertTrue(schemas.has("LapisInfo"))
         assertTrue(schemas.has("ReferenceGenome"))
+        assertTrue(
+            schemas.get("AggregatedPostRequest").at("/properties/orderBy/oneOf/0/type").stringValue() == "array",
+        )
 
         val alignedNucleotideSequences = json.get("paths").get("/test/sample/alignedNucleotideSequences")
         assertTrue(
             alignedNucleotideSequences.get("get").get("parameters").any {
-                it.get("name")?.stringValue() ==
-                    "segments"
+                it.get("name")?.stringValue() == "segments"
             },
         )
         assertTrue(
@@ -69,6 +84,18 @@ class SwaggerUiTest(
         )
         assertFalse(
             alignedNucleotideSequences.get("get").at("/responses/200/content/application~1json/schema").has("oneOf"),
+        )
+        assertTrue(
+            alignedNucleotideSequences.get("post").get("operationId").stringValue() ==
+                "postAllAlignedNucleotideSequences",
+        )
+        assertTrue(
+            alignedNucleotideSequences.get("post").get("tags").single().stringValue() ==
+                "multi-segmented-sequence-controller",
+        )
+        assertTrue(
+            paths.get("/test/sample/alignedNucleotideSequences/{segment}").get("post").get("operationId")
+                .stringValue() == "postAlignedNucleotideSequence",
         )
     }
 
@@ -92,24 +119,11 @@ class SwaggerUiTest(
     }
 
     @Test
-    fun `unknown view routes are not handled as the legacy view`() {
+    fun `unknown view routes return not found`() {
         mockMvc.perform(get("/missing/sample/aggregated"))
             .andExpect(status().isNotFound)
         mockMvc.perform(get("/missing/"))
             .andExpect(status().isNotFound)
-    }
-
-    @Test
-    fun `YAML API docs are available`() {
-        val result = mockMvc.perform(get("/api-docs.yaml"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentType("application/vnd.oai.openapi"))
-            .andReturn()
-
-        val yamlMapper = YAMLMapper.builder().addModule(kotlinModule()).build()
-        val yaml = yamlMapper.readTree(result.response.contentAsString)
-        assertTrue(yaml.has("openapi"))
-        assertTrue(yaml.get("paths").has("/sample/aggregated"))
     }
 
     @Test
@@ -129,7 +143,10 @@ class SwaggerUiTest(
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = ["referenceGenome.segments=main", "referenceGenome.genes=gene1"],
+    properties = [
+        "lapis.viewsConfig.path=src/test/resources/config/views-test-fasta-single.yaml",
+        "lapis.validateViewsOnStartup=false",
+    ],
 )
 @AutoConfigureMockMvc
 class SingleSegmentedViewSwaggerUiTest(
@@ -150,6 +167,10 @@ class SingleSegmentedViewSwaggerUiTest(
                 .stringValue().endsWith("/NucleotideSequenceRequest"),
         )
         assertFalse(operation.get("get").at("/responses/200/content/application~1json/schema").has("oneOf"))
+        assertTrue(operation.get("post").get("operationId").stringValue() == "postAlignedNucleotideSequence")
+        assertTrue(
+            operation.get("post").get("tags").single().stringValue() == "single-segmented-sequence-controller",
+        )
         assertFalse(paths.has("/test/sample/alignedNucleotideSequences/{segment}"))
     }
 }

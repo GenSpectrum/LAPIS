@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.config
 
 import org.genspectrum.lapis.silo.SiloUris
-import org.genspectrum.lapis.silo.applyRequestFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -29,33 +28,18 @@ class ViewStartupValidator(
     }
 
     private fun validate(view: ViewConfig) {
-        val baseSchema = querySchema("${applyRequestFilter(view.baseQuery, "true")}.schema()", view.viewName)
+        val baseSchema = querySchema("${view.baseQuery}.schema()", view.viewName)
         validateDeclaredSchema(view, baseSchema)
-        if (view.supports(ViewCapability.SEQUENCES)) {
-            val requiredSequenceColumns = buildSet {
-                view.referenceGenomeSchema.getNucleotideSequenceNames().forEach {
-                    add(it)
-                    add("unaligned_$it")
-                }
-                addAll(view.referenceGenomeSchema.getGeneNames())
+        val requiredSequenceColumns = buildSet {
+            view.referenceGenomeSchema.getNucleotideSequenceNames().forEach {
+                add(it)
+                add("unaligned_$it")
             }
-            val missingColumns = requiredSequenceColumns - baseSchema.map { it.fieldName }.toSet()
-            require(missingColumns.isEmpty()) {
-                "View '${view.viewName}' enables sequences but its baseQuery is missing: " +
-                    missingColumns.joinToString()
-            }
+            addAll(view.referenceGenomeSchema.getGeneNames())
         }
-        view.tableScanQuery?.let {
-            validateTableScanSchema(
-                view = view,
-                actualFields = querySchema("${applyRequestFilter(it, "true")}.schema()", view.viewName),
-            )
-        }
-        if (view.supports(ViewCapability.PHYLO_TREE)) {
-            val treeFields = view.databaseConfig.schema.metadata.filter { it.isPhyloTreeField }.map { it.name }
-            require(treeFields.isNotEmpty()) {
-                "View '${view.viewName}' enables phyloTree but defines no phylogenetic tree metadata field"
-            }
+        val missingColumns = requiredSequenceColumns - baseSchema.map { it.fieldName }.toSet()
+        require(missingColumns.isEmpty()) {
+            "View '${view.viewName}' baseQuery is missing sequence fields: ${missingColumns.joinToString()}"
         }
     }
 
@@ -63,30 +47,23 @@ class ViewStartupValidator(
         view: ViewConfig,
         actualFields: List<SiloSchemaField>,
     ) {
-        validateMetadataSchema(view, actualFields, "baseQuery") { it.name }
+        validateMetadataSchema(view, actualFields, "baseQuery")
         val actualByName = actualFields.map { it.fieldName }.toSet()
         require(view.databaseConfig.schema.primaryKey in actualByName) {
             "View '${view.viewName}' primary key '${view.databaseConfig.schema.primaryKey}' is absent from its baseQuery"
         }
     }
 
-    private fun validateTableScanSchema(
-        view: ViewConfig,
-        actualFields: List<SiloSchemaField>,
-    ) = validateMetadataSchema(view, actualFields, "tableScanQuery") { view.fieldAliases[it.name] ?: it.name }
-
     private fun validateMetadataSchema(
         view: ViewConfig,
         actualFields: List<SiloSchemaField>,
         queryName: String,
-        fieldName: (DatabaseMetadata) -> String,
     ) {
         val actualByName = actualFields.associateBy { it.fieldName }
         view.databaseConfig.schema.metadata.forEach { metadata ->
-            val queryField = fieldName(metadata)
+            val queryField = metadata.name
             val actual = requireNotNull(actualByName[queryField]) {
-                "View '${view.viewName}' metadata field '${metadata.name}' resolves to '$queryField', " +
-                    "which is absent from its $queryName"
+                "View '${view.viewName}' metadata field '$queryField' is absent from its $queryName"
             }
             require(actual.type in compatibleSiloTypes(metadata.type)) {
                 "View '${view.viewName}' declares '${metadata.name}' as ${metadata.type}, " +

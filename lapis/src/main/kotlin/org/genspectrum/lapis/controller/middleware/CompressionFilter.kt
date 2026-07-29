@@ -220,7 +220,7 @@ class CompressionFilter(
 
     private fun CachedBodyHttpServletRequest.isSampleRoute(): Boolean {
         val segments = getProxyAwarePath().split('/').filter { it.isNotBlank() }
-        return segments.firstOrNull() == "sample" || segments.getOrNull(1) == "sample"
+        return segments.getOrNull(1) == "sample"
     }
 }
 

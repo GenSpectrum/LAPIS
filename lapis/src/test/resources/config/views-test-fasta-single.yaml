@@ -2,4 +2,4 @@ views:
   - viewName: test
     baseQuery: default
     databaseConfig: testDatabaseConfig.yaml
-    referenceGenome: reference-genomes-test-default.json
+    referenceGenome: reference-genomes-test-fasta-single.json

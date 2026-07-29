@@ -6,7 +6,7 @@ Copy-paste the following prompts into your LLM agent and see whether it produces
 ## General instructions
 
 ```
-LAPIS is running on localhost:8090. Look at its `/llms.txt` endpoint.
+LAPIS is running on localhost:8090. Look at its `/test/llms.txt` endpoint.
 I will ask you questions about the underlying data next. Tell me when you're ready.
 ```
 
@@ -32,7 +32,7 @@ Download all sequences of the genes M and N of patients that were younger than 1
 
 1. Query LAPIS API
 
-- Endpoint: POST /sample/alignedAminoAcidSequences
+- Endpoint: POST /test/sample/alignedAminoAcidSequences
 - Filters: ageTo: 9 (patients younger than 10)
 - Parameters: genes: ["M", "N"], dataFormat: "json"
 - Expected result: 4 sequences with M and N gene data

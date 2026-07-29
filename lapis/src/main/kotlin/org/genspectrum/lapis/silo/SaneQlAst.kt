@@ -146,7 +146,7 @@ private fun renderArgs(
         .joinToString(", ")
 
 /**
- * One pipeline step chained after `default.filter(...)`, e.g. `.groupBy({count:=count()})`.
+ * One pipeline step chained after the filtered base query, e.g. `.groupBy({count:=count()})`.
  * Callers that need no step at all (e.g. `DetailsAction` without fields) simply omit it from
  * [SaneQlPipeline.steps] - there is no "empty step" representation.
  */
@@ -158,22 +158,11 @@ data class SaneQlStep(
     override fun render() = ".$name(${renderArgs(positionalArgs, namedArgs)})"
 }
 
-/** The full `default.filter(filter).step1.step2...` pipeline. */
+/** The full `baseQuery.filter(filter).step1.step2...` pipeline. */
 data class SaneQlPipeline(
     val filter: SaneQlExpression,
     val steps: List<SaneQlStep>,
     val baseQuery: String = "default",
 ) : SaneQlNode {
-    override fun render() = applyRequestFilter(baseQuery, filter.render()) + steps.joinToString("") { it.render() }
-}
-
-const val REQUEST_FILTER_PLACEHOLDER = "__LAPIS_REQUEST_FILTER__"
-
-fun applyRequestFilter(
-    baseQuery: String,
-    renderedFilter: String,
-) = if (REQUEST_FILTER_PLACEHOLDER in baseQuery) {
-    baseQuery.replace(REQUEST_FILTER_PLACEHOLDER, renderedFilter)
-} else {
-    "$baseQuery.filter($renderedFilter)"
+    override fun render() = "$baseQuery.filter(${filter.render()})" + steps.joinToString("") { it.render() }
 }

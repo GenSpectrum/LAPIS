@@ -25,8 +25,6 @@ val PUBLIC_ROUTES = arrayOf(
     "/favicon.ico",
     "/error/**",
     "/actuator/**",
-    "/api-docs**",
-    "/api-docs/**",
     "/swagger-ui/**",
     "/*/",
     "/*/llms.txt",

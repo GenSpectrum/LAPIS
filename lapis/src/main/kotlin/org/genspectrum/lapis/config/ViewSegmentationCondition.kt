@@ -26,7 +26,7 @@ private data class ViewSegmentationRequestCondition(
     override fun combine(other: ViewSegmentationRequestCondition) = other
 
     override fun getMatchingCondition(request: HttpServletRequest): ViewSegmentationRequestCondition? {
-        val view = request.getAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE) as? ViewConfig ?: viewRegistry.first()
+        val view = request.getAttribute(ACTIVE_VIEW_REQUEST_ATTRIBUTE) as? ViewConfig ?: return null
         val matches = when (type) {
             SegmentationType.SINGLE -> view.referenceGenomeSchema.isSingleSegmented()
             SegmentationType.MULTI -> !view.referenceGenomeSchema.isSingleSegmented()

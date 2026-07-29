@@ -19,6 +19,6 @@ describe('Error handling: UnknownUrl', () => {
 
     const responseBody = await result.text();
     expect(responseBody).contains('Page not found');
-    expect(responseBody).contains('<a href="http://localhost:8090/swagger-ui/index.html">');
+    expect(responseBody).contains('<a href="http://localhost:8090/test/swagger-ui/index.html">');
   });
 });

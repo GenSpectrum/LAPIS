@@ -74,7 +74,7 @@ To start LAPIS you need to provide the following parameters:
 
 - `--silo.url`: The URL where SILO is running, e.g. `http://localhost:8081`.
 - `--lapis.viewsConfig.path`:
-  The path to the views config file that defines LAPIS URL prefixes, base SILO queries, database configs, reference genomes, and endpoint capabilities.
+  The path to the views config file that defines LAPIS URL prefixes, base SILO queries, database configs, and reference genomes.
   Database config and reference genome paths are resolved relative to the views config file.
 
 LAPIS listens on port 8080.
@@ -82,9 +82,9 @@ LAPIS listens on port 8080.
 LAPIS provides the following optional parameters:
 
 - `--lapis.docs.url`:
-  If set, the landing page (`/`) will show a "Documentation" link to the provided value.
+  If set, each view's landing page will show a "Documentation" link to the provided value.
   It is meant to point to your self-hosted version of this LAPIS documentation.
-  If not set, the "Documentation" link on the landing page (`/`) will not be shown.
+  If not set, the "Documentation" link will not be shown.
 
 #### Starting LAPIS with Docker
 

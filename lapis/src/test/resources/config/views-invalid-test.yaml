@@ -3,5 +3,3 @@ views:
     baseQuery: default
     databaseConfig: invalidTestDatabaseConfig.yaml
     referenceGenome: reference-genomes.json
-    capabilities:
-      - metadata

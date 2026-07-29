@@ -2,8 +2,6 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
-import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
@@ -49,12 +47,7 @@ val expectedTemplatedAminoAcidFasta = """
     
 """.trimIndent()
 
-@SpringBootTest(
-    properties = [
-        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=someSegment,$SEGMENT_NAME",
-        "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=$GENE_NAME,gene2",
-    ],
-)
+@SpringBootTest
 @AutoConfigureMockMvc
 class LapisControllerFastaHeaderTemplateTest(
     @param:Autowired val mockMvc: MockMvc,
@@ -377,8 +370,7 @@ class LapisControllerFastaHeaderTemplateTest(
 
 @SpringBootTest(
     properties = [
-        "$REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX=$SEGMENT_NAME",
-        "$REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX=$GENE_NAME,gene2",
+        "lapis.viewsConfig.path=src/test/resources/config/views-test-fasta-single.yaml",
     ],
 )
 @AutoConfigureMockMvc

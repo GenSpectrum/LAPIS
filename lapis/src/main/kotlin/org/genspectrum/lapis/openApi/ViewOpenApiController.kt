@@ -1,14 +1,15 @@
 package org.genspectrum.lapis.openApi
 
-import io.swagger.v3.core.util.Json
+import io.swagger.v3.core.util.Json31
 import io.swagger.v3.oas.annotations.Hidden
 import jakarta.servlet.http.HttpServletRequest
 import org.genspectrum.lapis.config.ViewConfig
 import org.genspectrum.lapis.config.ViewRegistry
-import org.genspectrum.lapis.config.requiredViewCapability
+import org.genspectrum.lapis.controller.ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALL_ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.ALL_UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
+import org.genspectrum.lapis.controller.UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.controller.UNALIGNED_SINGLE_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
 import org.genspectrum.lapis.util.YamlObjectMapper
 import org.springdoc.webmvc.api.OpenApiWebMvcResource
@@ -83,7 +84,9 @@ class ViewOpenApiController(
         )
         mergeComponents(
             generated = generated,
-            viewSpecific = objectMapper.readTree(Json.mapper().writeValueAsBytes(viewSpecificOpenApiSchema.components))
+            viewSpecific = objectMapper.readTree(
+                Json31.mapper().writeValueAsBytes(viewSpecificOpenApiSchema.components),
+            )
                 as ObjectNode,
         )
         generated.set("paths", concretePaths(generated.get("paths") as ObjectNode, view))
@@ -124,10 +127,13 @@ class ViewOpenApiController(
         val result = objectMapper.createObjectNode()
         paths.properties().forEach { (path, item) ->
             if (!path.startsWith("/{view}/")) {
+                result.set(path, item.deepCopy())
                 return@forEach
             }
             val concretePath = "/${view.viewName}/" + path.removePrefix("/{view}/")
-            if (!isEnabled(concretePath, view)) {
+            if (concretePath.contains("NucleotideSequences/{segment}") &&
+                view.referenceGenomeSchema.isSingleSegmented()
+            ) {
                 return@forEach
             }
             val pathItem = item.deepCopy() as ObjectNode
@@ -180,6 +186,7 @@ class ViewOpenApiController(
                 val operation = operationNode as? ObjectNode ?: return@forEach
                 operation.put("description", description)
                 operation.put("operationId", nucleotideSequenceOperationId(route, method, singleSegmented))
+                operation.putArray("tags").add(nucleotideSequenceControllerTag(singleSegmented))
                 configureNucleotideSequenceResponse(operation, singleSegmented)
                 if (method == "get" && singleSegmented) {
                     (operation.get("parameters") as? ArrayNode)?.removeIf {
@@ -197,8 +204,34 @@ class ViewOpenApiController(
                     }
                 }
             }
+            if (!singleSegmented) {
+                configureSegmentNucleotideSequenceOperations(openApi, view, route)
+            }
         }
     }
+
+    private fun configureSegmentNucleotideSequenceOperations(
+        openApi: ObjectNode,
+        view: ViewConfig,
+        route: String,
+    ) {
+        val path = openApi.at("/paths/~1${view.viewName}~1sample~1$route~1{segment}") as? ObjectNode ?: return
+        val alignment = if (route.startsWith("unaligned")) "Unaligned" else "Aligned"
+        val description = if (route.startsWith("unaligned")) {
+            UNALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
+        } else {
+            ALIGNED_MULTI_SEGMENTED_NUCLEOTIDE_SEQUENCE_ENDPOINT_DESCRIPTION
+        }
+        path.properties().forEach { (method, operationNode) ->
+            val operation = operationNode as? ObjectNode ?: return@forEach
+            operation.put("description", description)
+            operation.put("operationId", "${method}$alignment" + "NucleotideSequence")
+            operation.putArray("tags").add(nucleotideSequenceControllerTag(singleSegmented = false))
+        }
+    }
+
+    private fun nucleotideSequenceControllerTag(singleSegmented: Boolean) =
+        if (singleSegmented) "single-segmented-sequence-controller" else "multi-segmented-sequence-controller"
 
     private fun configureNucleotideSequenceResponse(
         operation: ObjectNode,
@@ -231,15 +264,4 @@ class ViewOpenApiController(
         val suffix = if (method == "get" || !singleSegmented) "Sequences" else "Sequence"
         return "$prefix$all$alignment" + "Nucleotide$suffix"
     }
-
-    private fun isEnabled(
-        path: String,
-        view: ViewConfig,
-    ): Boolean =
-        when {
-            path.contains("NucleotideSequences/{segment}") -> !view.referenceGenomeSchema.isSingleSegmented()
-            else -> requiredViewCapability(path.split('/').filter(String::isNotBlank).drop(1))
-                ?.let(view::supports)
-                ?: true
-        }
 }

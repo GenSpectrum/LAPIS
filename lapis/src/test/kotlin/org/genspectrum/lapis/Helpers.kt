@@ -13,7 +13,6 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.ReferenceSequence
 import org.genspectrum.lapis.config.ReferenceSequenceSchema
 import org.genspectrum.lapis.config.SequenceFilterFields
-import org.genspectrum.lapis.config.ViewCapability
 import org.genspectrum.lapis.config.ViewConfig
 import org.genspectrum.lapis.config.ViewRegistry
 
@@ -38,13 +37,10 @@ fun mockActiveView(
         genes = emptyList(),
     ),
     referenceGenome: ReferenceGenome = referenceGenomeFromSchema(referenceGenomeSchema),
-    fieldAliases: Map<String, String> = emptyMap(),
 ): ActiveView {
     val viewConfig = ViewConfig(
         viewName = "test",
         baseQuery = "default",
-        fieldAliases = fieldAliases,
-        capabilities = ViewCapability.entries.toSet(),
         databaseConfig = databaseConfig,
         referenceGenome = referenceGenome,
         referenceGenomeSchema = referenceGenomeSchema,
@@ -56,16 +52,13 @@ fun mockActiveView(
     every { activeView.referenceGenome } returns referenceGenome
     every { activeView.referenceGenomeSchema } returns referenceGenomeSchema
     every { activeView.sequenceFilterFields } returns viewConfig.sequenceFilterFields
-    every { activeView.resolveField(any()) } answers {
-        val name = firstArg<String>()
-        fieldAliases[name] ?: name
-    }
     return activeView
 }
 
 fun mockViewRegistry(firstView: ViewConfig): ViewRegistry {
     val viewRegistry = mockk<ViewRegistry>()
     every { viewRegistry.first() } returns firstView
+    every { viewRegistry.siloClientThreadCount } returns firstView.databaseConfig.siloClientThreadCount
     return viewRegistry
 }
 

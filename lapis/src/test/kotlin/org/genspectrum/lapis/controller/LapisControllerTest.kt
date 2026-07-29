@@ -595,9 +595,9 @@ class LapisControllerTest(
     }
 }
 
-fun getSample(path: String): MockHttpServletRequestBuilder = get("/sample/$path")
+fun getSample(path: String): MockHttpServletRequestBuilder = get("/test/sample/$path")
 
-fun postSample(path: String): MockHttpServletRequestBuilder = post("/sample/$path")
+fun postSample(path: String): MockHttpServletRequestBuilder = post("/test/sample/$path")
 
 private fun mutationRequestsForMinProportion(
     endpoint: String,
