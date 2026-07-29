@@ -231,7 +231,7 @@ sealed class SiloAction<ResponseType>(
     data class AggregatedAction(
         val groupByFields: List<String>,
         val sequencePositionFields: List<SequencePositionField> = emptyList(),
-        @JsonIgnore val computedFields: List<ComputedField> = emptyList(),
+        val computedFields: List<ComputedField> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
