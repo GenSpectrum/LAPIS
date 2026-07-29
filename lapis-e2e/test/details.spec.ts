@@ -33,7 +33,9 @@ describe('The /details endpoint', () => {
   });
 
   it('should return bad request for a computed field', async () => {
-    const result = await fetch(basePath + '/sample/details?' + new URLSearchParams({ fields: 'date.isoWeek' }));
+    const result = await fetch(
+      basePath + '/sample/details?' + new URLSearchParams({ fields: 'date.isoWeek' })
+    );
 
     expect(result.status).equals(400);
     const resultJson = await result.json();
