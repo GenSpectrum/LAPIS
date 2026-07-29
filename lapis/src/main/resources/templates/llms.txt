@@ -58,6 +58,18 @@ Syntax: `SequenceName[position]`, e.g. `S[501]` for position 501 of segment/gene
 Example: `{"fields": ["[(${firstGene})][123]"]}` groups sequences by the residue at position 123 of gene [(${firstGene})].
 Response column names always use the canonical sequence name from the reference genome, regardless of the case used in the request, e.g. `s[501]` -> `S[501]`.
 
+### Computed Fields
+
+The `fields` parameter of [sample/aggregated](sample/aggregated) (not [sample/details](sample/details)) also accepts
+computed fields using the syntax `<field>.<function>`, e.g. `date.isoWeek`.
+A computed field applies a scalar function to a metadata field and groups by the result instead of the raw value.
+The response uses the full `<field>.<function>` string as the column name.
+
+Available functions:
+- `isoWeek`: Returns the ISO 8601 week number of a date field. Only valid for `date` fields.
+
+Example: `{"fields": ["date.isoWeek"]}` groups sequences by ISO week of the date field.
+
 ### How to Filter by Mutations
 
 You can filter sequences by nucleotide and amino acid mutations.
