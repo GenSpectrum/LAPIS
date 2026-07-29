@@ -47,6 +47,7 @@ const conceptsPages = prependToRelativeUrl(
         { title: 'Customizable FASTA headers', relativeUrl: '/customizable-fasta-headers' },
         { title: 'Data versions', relativeUrl: '/data-versions' },
         { title: 'Request ID', relativeUrl: '/request-id' },
+        { title: 'Computed fields', relativeUrl: '/computed-fields' },
         { title: 'Mutation filters', relativeUrl: '/mutation-filters' },
         { title: 'Insertion filters', relativeUrl: '/insertion-filters' },
         { title: 'Ambiguous symbols', relativeUrl: '/ambiguous-symbols' },
