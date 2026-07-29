@@ -4,10 +4,7 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
-  # Pinned because SILO's `latest` currently breaks single-segmented mutation/insertion
-  # handling (requires an explicit `sequenceName` and prefixes insertions with `main:`).
-  # TODO: bump back to `latest` once SILO is compatible again.
-  SILO_TAG: 0.12.1
+  SILO_TAG: latest
 
 jobs:
   Tests:
