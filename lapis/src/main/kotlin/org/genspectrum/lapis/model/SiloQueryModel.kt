@@ -16,7 +16,6 @@ import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
-import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
@@ -92,9 +91,9 @@ class SiloQueryModel(
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = mutationFromOrNull(sequenceFilters, it),
-                mutationTo = mutationToOrNull(sequenceFilters, it),
-                position = positionOrNull(sequenceFilters, it),
+                mutationFrom = sequenceFilters.ifRequested(MutationsField.MUTATION_FROM, it.mutationFrom),
+                mutationTo = sequenceFilters.ifRequested(MutationsField.MUTATION_TO, it.mutationTo),
+                position = sequenceFilters.ifRequested(MutationsField.POSITION, it.position),
             )
         }
     }
@@ -129,9 +128,9 @@ class SiloQueryModel(
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = mutationFromOrNull(sequenceFilters, it),
-                mutationTo = mutationToOrNull(sequenceFilters, it),
-                position = positionOrNull(sequenceFilters, it),
+                mutationFrom = sequenceFilters.ifRequested(MutationsField.MUTATION_FROM, it.mutationFrom),
+                mutationTo = sequenceFilters.ifRequested(MutationsField.MUTATION_TO, it.mutationTo),
+                position = sequenceFilters.ifRequested(MutationsField.POSITION, it.position),
             )
         }
     }
@@ -331,33 +330,6 @@ class SiloQueryModel(
             expanded += MutationsField.SEQUENCE_NAME
         }
         return expanded.map { it.value }
-    }
-
-    private fun mutationFromOrNull(
-        sequenceFilters: MutationProportionsRequest,
-        data: MutationData,
-    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION_FROM)) {
-        data.mutationFrom
-    } else {
-        null
-    }
-
-    private fun mutationToOrNull(
-        sequenceFilters: MutationProportionsRequest,
-        data: MutationData,
-    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.MUTATION_TO)) {
-        data.mutationTo
-    } else {
-        null
-    }
-
-    private fun positionOrNull(
-        sequenceFilters: MutationProportionsRequest,
-        data: MutationData,
-    ) = if (sequenceFilters.shouldResponseContainField(MutationsField.POSITION)) {
-        data.position
-    } else {
-        null
     }
 
     private fun buildInsertion(

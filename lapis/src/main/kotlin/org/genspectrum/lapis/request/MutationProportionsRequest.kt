@@ -1,7 +1,6 @@
 package org.genspectrum.lapis.request
 
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.response.MutationData
 import org.springframework.boot.jackson.JacksonComponent
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
@@ -25,6 +24,12 @@ data class MutationProportionsRequest(
     override val offset: Int? = null,
 ) : CommonSequenceFilters {
     fun shouldResponseContainField(field: MutationsField) = fields.isEmpty() || fields.contains(field)
+
+    /** Returns [value] only if [field] was requested (or all fields were requested), otherwise `null`. */
+    fun <T> ifRequested(
+        field: MutationsField,
+        value: T,
+    ): T? = if (shouldResponseContainField(field)) value else null
 }
 
 enum class MutationsField(
