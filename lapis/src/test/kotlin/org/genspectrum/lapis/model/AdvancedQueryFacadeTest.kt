@@ -70,23 +70,23 @@ class AdvancedQueryFacadeTest {
                 3,
                 matchExactly = false,
                 listOf(
-                    NucleotideSymbolEquals(null, 123, "A"),
-                    NucleotideSymbolEquals(null, 234, "T"),
-                    NucleotideSymbolEquals(null, 345, "G"),
+                    NucleotideSymbolEquals("main", 123, "A"),
+                    NucleotideSymbolEquals("main", 234, "T"),
+                    NucleotideSymbolEquals("main", 345, "G"),
                 ),
             ),
             Maybe(
                 Or(
-                    NucleotideSymbolEquals(null, 800, "-"),
-                    NucleotideSymbolEquals(null, 700, "B"),
+                    NucleotideSymbolEquals("main", 800, "-"),
+                    NucleotideSymbolEquals("main", 700, "B"),
                 ),
             ),
-            Not(HasNucleotideMutation(null, 600)),
+            Not(HasNucleotideMutation("main", 600)),
             Or(
-                NucleotideSymbolEquals(null, 500, "B"),
-                NucleotideSymbolEquals(null, 400, "-"),
+                NucleotideSymbolEquals("main", 500, "B"),
+                NucleotideSymbolEquals("main", 400, "-"),
             ),
-            NucleotideSymbolEquals(null, 300, "G"),
+            NucleotideSymbolEquals("main", 300, "G"),
         )
 
         assertThat(result, equalTo(expectedResult))
@@ -109,15 +109,15 @@ class AdvancedQueryFacadeTest {
                         3,
                         matchExactly = false,
                         listOf(
-                            NucleotideSymbolEquals(null, 123, "A"),
-                            NucleotideSymbolEquals(null, 234, "T"),
-                            NucleotideSymbolEquals(null, 345, "G"),
+                            NucleotideSymbolEquals("main", 123, "A"),
+                            NucleotideSymbolEquals("main", 234, "T"),
+                            NucleotideSymbolEquals("main", 345, "G"),
                         ),
                     ),
-                    Not(HasNucleotideMutation(null, 600)),
+                    Not(HasNucleotideMutation("main", 600)),
                     Or(
-                        NucleotideSymbolEquals(null, 800, "-"),
-                        NucleotideSymbolEquals(null, 700, "B"),
+                        NucleotideSymbolEquals("main", 800, "-"),
+                        NucleotideSymbolEquals("main", 700, "B"),
                     ),
                 ),
             ),
@@ -133,8 +133,8 @@ class AdvancedQueryFacadeTest {
         val result = underTest.map(advancedQuery)
 
         val expectedResult = Or(
-            NucleotideSymbolEquals(null, 400, "-"),
-            NucleotideSymbolEquals(null, 300, "G"),
+            NucleotideSymbolEquals("main", 400, "-"),
+            NucleotideSymbolEquals("main", 300, "G"),
         )
         assertThat(result, equalTo(expectedResult))
 
@@ -153,10 +153,10 @@ class AdvancedQueryFacadeTest {
 
         val expectedResult = And(
             Or(
-                NucleotideSymbolEquals(null, 500, "G"),
-                NucleotideSymbolEquals(null, 400, "A"),
+                NucleotideSymbolEquals("main", 500, "G"),
+                NucleotideSymbolEquals("main", 400, "A"),
             ),
-            NucleotideSymbolEquals(null, 300, "C"),
+            NucleotideSymbolEquals("main", 300, "C"),
         )
         assertThat(result, equalTo(expectedResult))
 
@@ -177,10 +177,10 @@ class AdvancedQueryFacadeTest {
             3,
             false,
             listOf(
-                NucleotideSymbolEquals(null, 123, "A"),
-                NucleotideSymbolEquals(null, 234, "T"),
-                NucleotideSymbolEquals(null, 345, "G"),
-                NucleotideSymbolEquals(null, 456, "A"),
+                NucleotideSymbolEquals("main", 123, "A"),
+                NucleotideSymbolEquals("main", 234, "T"),
+                NucleotideSymbolEquals("main", 345, "G"),
+                NucleotideSymbolEquals("main", 456, "A"),
             ),
         )
         assertThat(result, equalTo(expectedResult))
@@ -196,10 +196,10 @@ class AdvancedQueryFacadeTest {
             3,
             true,
             listOf(
-                NucleotideSymbolEquals(null, 123, "A"),
-                NucleotideSymbolEquals(null, 234, "T"),
-                NucleotideSymbolEquals(null, 345, "G"),
-                NucleotideSymbolEquals(null, 456, "A"),
+                NucleotideSymbolEquals("main", 123, "A"),
+                NucleotideSymbolEquals("main", 234, "T"),
+                NucleotideSymbolEquals("main", 345, "G"),
+                NucleotideSymbolEquals("main", 456, "A"),
             ),
         )
         assertThat(result, equalTo(expectedResult))
@@ -216,10 +216,10 @@ class AdvancedQueryFacadeTest {
             3,
             true,
             listOf(
-                NucleotideSymbolEquals(null, 123, "A"),
-                Not(NucleotideSymbolEquals(null, 234, "G")),
-                NucleotideSymbolEquals(null, 345, "G"),
-                NucleotideSymbolEquals(null, 456, "A"),
+                NucleotideSymbolEquals("main", 123, "A"),
+                Not(NucleotideSymbolEquals("main", 234, "G")),
+                NucleotideSymbolEquals("main", 345, "G"),
+                NucleotideSymbolEquals("main", 456, "A"),
             ),
         )
         assertThat(result, equalTo(expectedResult))
@@ -236,9 +236,9 @@ class AdvancedQueryFacadeTest {
             3,
             true,
             listOf(
-                NucleotideSymbolEquals(null, 123, "A"),
-                NucleotideSymbolEquals(null, 234, "T"),
-                NucleotideSymbolEquals(null, 345, "G"),
+                NucleotideSymbolEquals("main", 123, "A"),
+                NucleotideSymbolEquals("main", 234, "T"),
+                NucleotideSymbolEquals("main", 345, "G"),
             ),
         )
         assertThat(result, equalTo(expectedResult))
@@ -443,17 +443,17 @@ class AdvancedQueryFacadeTest {
                 ValidTestCase(
                     description = "maybe with a single entry",
                     query = "MAYBE(300G)",
-                    expected = Maybe(NucleotideSymbolEquals(null, 300, "G")),
+                    expected = Maybe(NucleotideSymbolEquals("main", 300, "G")),
                 ),
                 ValidTestCase(
                     description = "mixed case maybe",
                     query = "maYbE(T12C)",
-                    expected = Maybe(NucleotideSymbolEquals(null, 12, "C")),
+                    expected = Maybe(NucleotideSymbolEquals("main", 12, "C")),
                 ),
                 ValidTestCase(
                     description = "lower case maybe",
                     query = "maybe(T12C)",
-                    expected = Maybe(NucleotideSymbolEquals(null, 12, "C")),
+                    expected = Maybe(NucleotideSymbolEquals("main", 12, "C")),
                 ),
             ),
             invalid = listOf(
@@ -470,22 +470,22 @@ class AdvancedQueryFacadeTest {
                 ValidTestCase(
                     description = "textual not",
                     query = "NOT 300G",
-                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                    expected = Not(NucleotideSymbolEquals("main", 300, "G")),
                 ),
                 ValidTestCase(
                     description = "lower case textual not",
                     query = "not 300G",
-                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                    expected = Not(NucleotideSymbolEquals("main", 300, "G")),
                 ),
                 ValidTestCase(
                     description = "mixed case textual not",
                     query = "nOt 300G",
-                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                    expected = Not(NucleotideSymbolEquals("main", 300, "G")),
                 ),
                 ValidTestCase(
                     description = "not symbol",
                     query = "!300G",
-                    expected = Not(NucleotideSymbolEquals(null, 300, "G")),
+                    expected = Not(NucleotideSymbolEquals("main", 300, "G")),
                 ),
                 ValidTestCase(
                     description = "not on metadata",
@@ -502,50 +502,50 @@ class AdvancedQueryFacadeTest {
                     description = "symbol and",
                     query = "300G & 400-",
                     expected = And(
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
                     description = "textual and",
                     query = "300G AND 400-",
                     expected = And(
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
                     description = "textual and in mixed case",
                     query = "300G aNd 400-",
                     expected = And(
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
                     description = "textual and in lower case",
                     query = "300G and 400-",
                     expected = And(
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
                     description = "two symbol ands",
                     query = "300G & 400- & 500B",
                     expected = And(
-                        NucleotideSymbolEquals(null, 500, "B"),
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 500, "B"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
                     description = "two ands with symbol and textual",
                     query = "300G & 400- and 500B",
                     expected = And(
-                        NucleotideSymbolEquals(null, 500, "B"),
-                        NucleotideSymbolEquals(null, 400, "-"),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 500, "B"),
+                        NucleotideSymbolEquals("main", 400, "-"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                     ),
                 ),
                 ValidTestCase(
@@ -560,7 +560,7 @@ class AdvancedQueryFacadeTest {
                     description = "and on metadata and mutation",
                     query = "some_metadata = value1 AND 300G",
                     expected = And(
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                         StringEquals("some_metadata", "value1"),
                     ),
                 ),
@@ -572,7 +572,7 @@ class AdvancedQueryFacadeTest {
                             Not(AminoAcidSymbolEquals("S", 501, "Y")),
                             StringSearch("some_metadata", "BANGAL"),
                         ),
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                         StringEquals("some_metadata", "Turks and Caicos"),
                     ),
                 ),
@@ -580,7 +580,7 @@ class AdvancedQueryFacadeTest {
                     description = "and on metadata where metadata value is also 'and'",
                     query = "(NOT Some_metadata=and) & 300G",
                     expected = And(
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("main", 300, "G"),
                         Not(StringEquals("some_metadata", "and")),
                     ),
                 ),
@@ -823,28 +823,28 @@ class AdvancedQueryFacadeTest {
                     ValidTestCase(
                         description = "nucleotide mutation with symbol '$base'",
                         query = "${base}300$base",
-                        expected = NucleotideSymbolEquals(null, 300, "$base"),
+                        expected = NucleotideSymbolEquals("main", 300, "$base"),
                     )
                 }.toTypedArray(),
                 ValidTestCase(
                     description = "nucleotide mutation with symbol '-'",
                     query = "A300-",
-                    expected = NucleotideSymbolEquals(null, 300, "-"),
+                    expected = NucleotideSymbolEquals("main", 300, "-"),
                 ),
                 ValidTestCase(
                     description = "nucleotide mutation with symbol '.'",
                     query = "A300.",
-                    expected = NucleotideSymbolEquals(null, 300, "."),
+                    expected = NucleotideSymbolEquals("main", 300, "."),
                 ),
                 ValidTestCase(
                     description = "nucleotide mutation without 'from'",
                     query = "A300G",
-                    expected = NucleotideSymbolEquals(null, 300, "G"),
+                    expected = NucleotideSymbolEquals("main", 300, "G"),
                 ),
                 ValidTestCase(
                     description = "nucleotide mutation with position only",
                     query = "400",
-                    expected = HasNucleotideMutation(null, 400),
+                    expected = HasNucleotideMutation("main", 400),
                 ),
                 *(aaSymbols + ambiguousAaSymbols).map { base ->
                     ValidTestCase(
@@ -924,7 +924,7 @@ class AdvancedQueryFacadeTest {
                 ValidTestCase(
                     description = "nucleotide insertion with all allowed symbols",
                     query = "ins_1234:$allAllowedNucleotideSymbols",
-                    expected = NucleotideInsertionContains(1234, allAllowedNucleotideSymbols, null),
+                    expected = NucleotideInsertionContains(1234, allAllowedNucleotideSymbols, "main"),
                 ),
                 ValidTestCase(
                     description = "amino acid insertion with all allowed symbols",
@@ -934,17 +934,17 @@ class AdvancedQueryFacadeTest {
                 ValidTestCase(
                     description = "nucleotide insertion with lower case symbols",
                     query = "ins_1234:gAG",
-                    expected = NucleotideInsertionContains(1234, "GAG", null),
+                    expected = NucleotideInsertionContains(1234, "GAG", "main"),
                 ),
                 ValidTestCase(
                     description = "insertion with mixed case ins_ prefix",
                     query = "iNs_1234:gAG",
-                    expected = NucleotideInsertionContains(1234, "GAG", null),
+                    expected = NucleotideInsertionContains(1234, "GAG", "main"),
                 ),
                 ValidTestCase(
                     description = "insertion with wildcard symbols",
                     query = "ins_1234:G?A?G",
-                    expected = NucleotideInsertionContains(1234, "G.*A.*G", null),
+                    expected = NucleotideInsertionContains(1234, "G.*A.*G", "main"),
                 ),
                 ValidTestCase(
                     description = "amino acid insertion with stop codon",

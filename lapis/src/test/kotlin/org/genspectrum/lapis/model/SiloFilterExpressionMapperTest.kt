@@ -56,7 +56,12 @@ class SiloFilterExpressionMapperTest {
     private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     private val underTest =
-        SiloFilterExpressionMapper(dummySequenceFilterFields, variantQueryFacade, advancedQueryFacade)
+        SiloFilterExpressionMapper(
+            dummySequenceFilterFields,
+            variantQueryFacade,
+            advancedQueryFacade,
+            dummyReferenceGenomeSchema,
+        )
 
     @ParameterizedTest(name = "GIVEN {0} THEN throws exception")
     @MethodSource("getInvalidFilterScenarios")
@@ -124,7 +129,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected = And(
-            Maybe(NucleotideSymbolEquals(null, 123, "B")),
+            Maybe(NucleotideSymbolEquals("sequenceName", 123, "B")),
             NucleotideSymbolEquals("sequenceName", 999, "A"),
         )
         assertThat(result, equalTo(expected))
@@ -143,7 +148,7 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected = And(
-            HasNucleotideMutation(null, 123),
+            HasNucleotideMutation("sequenceName", 123),
             HasNucleotideMutation("sequenceName", 999),
         )
         assertThat(result, equalTo(expected))
@@ -191,7 +196,7 @@ class SiloFilterExpressionMapperTest {
     }
 
     @Test
-    fun `given nucleotide insertion it is mapped to NucleotideInsertionContains without using the segment`() {
+    fun `given nucleotide insertion without segment THEN defaults to the single segment name`() {
         val filterParameter = DummySequenceFilters(
             emptyMap(),
             emptyList(),
@@ -203,7 +208,10 @@ class SiloFilterExpressionMapperTest {
         val result = underTest.map(filterParameter)
 
         val expected =
-            And(NucleotideInsertionContains(123, "ABCD", "segment"), NucleotideInsertionContains(999, "DEF", null))
+            And(
+                NucleotideInsertionContains(123, "ABCD", "segment"),
+                NucleotideInsertionContains(999, "DEF", "sequenceName"),
+            )
         assertThat(result, equalTo(expected))
     }
 
@@ -836,8 +844,8 @@ class SiloFilterExpressionMapperTest {
                     ),
                     And(
                         And(
-                            NucleotideSymbolEquals(null, 400, "A"),
-                            NucleotideSymbolEquals(null, 300, "G"),
+                            NucleotideSymbolEquals("sequenceName", 400, "A"),
+                            NucleotideSymbolEquals("sequenceName", 300, "G"),
                         ),
                     ),
                 ),
@@ -847,7 +855,7 @@ class SiloFilterExpressionMapperTest {
                         "some_metadata" to listOf("ABC"),
                     ),
                     And(
-                        NucleotideSymbolEquals(null, 300, "G"),
+                        NucleotideSymbolEquals("sequenceName", 300, "G"),
                         Or(StringEquals("some_metadata", "ABC")),
                     ),
                 ),

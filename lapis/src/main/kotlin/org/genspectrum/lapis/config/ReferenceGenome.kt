@@ -35,6 +35,18 @@ class ReferenceGenomeSchema(
 
     fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1
 
+    /**
+     * SILO requires an explicit sequence name on nucleotide filters. For single-segmented genomes the client may
+     * omit it, so fall back to the only segment's name. Multi-segmented genomes keep the (possibly null) input,
+     * where a missing name is validated by SILO.
+     */
+    fun resolveNucleotideSequenceName(name: String? = null): String? =
+        name ?: if (isSingleSegmented()) {
+            nucleotideSequences.single().name
+        } else {
+            null
+        }
+
     fun getSequenceNameFromCaseInsensitiveName(name: String) =
         nucleotideSequenceNames[name.lowercase()]?.name
             ?: geneNames[name.lowercase()]?.name
