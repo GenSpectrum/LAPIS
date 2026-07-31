@@ -81,14 +81,14 @@ class MutationProportionsRequestTest {
                 Arguments.of(
                     """
                     {
-                        "nucleotideMutations": ["T1-", "A23062T"]
+                        "nucleotideMutations": ["other_segment:T1-", "other_segment:A23062T"]
                     }
                     """,
                     MutationProportionsRequest(
                         sequenceFilters = emptyMap(),
                         nucleotideMutations = listOf(
-                            NucleotideMutation(null, 1, "-"),
-                            NucleotideMutation(null, 23062, "T"),
+                            NucleotideMutation("other_segment", 1, "-"),
+                            NucleotideMutation("other_segment", 23062, "T"),
                         ),
                         aminoAcidMutations = emptyList(),
                         nucleotideInsertions = emptyList(),
@@ -119,7 +119,7 @@ class MutationProportionsRequestTest {
                 Arguments.of(
                     """
                     {
-                        "nucleotideInsertions": ["ins_other_segment:501:Y", "ins_12:ABCD"]
+                        "nucleotideInsertions": ["ins_other_segment:501:Y", "ins_other_segment:12:ABCD"]
                     }
                     """,
                     MutationProportionsRequest(
@@ -128,7 +128,7 @@ class MutationProportionsRequestTest {
                         aminoAcidMutations = emptyList(),
                         nucleotideInsertions = listOf(
                             NucleotideInsertion(501, "Y", "other_segment"),
-                            NucleotideInsertion(12, "ABCD", null),
+                            NucleotideInsertion(12, "ABCD", "other_segment"),
                         ),
                         aminoAcidInsertions = emptyList(),
                         fields = emptyList(),

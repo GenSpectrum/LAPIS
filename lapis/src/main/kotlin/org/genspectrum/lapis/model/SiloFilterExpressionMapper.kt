@@ -504,11 +504,13 @@ class SiloFilterExpressionMapper(
             nucleotideMutation,
             when (nucleotideMutation.symbol) {
                 null -> HasNucleotideMutation(
-                    sequenceName = nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                    sequenceName =
+                        nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
                     position = nucleotideMutation.position,
                 )
                 else -> NucleotideSymbolEquals(
-                    sequenceName = nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                    sequenceName =
+                        nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
                     position = nucleotideMutation.position,
                     symbol = nucleotideMutation.symbol,
                 )

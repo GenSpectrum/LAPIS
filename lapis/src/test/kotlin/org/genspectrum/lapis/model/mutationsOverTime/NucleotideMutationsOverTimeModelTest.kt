@@ -133,7 +133,7 @@ class NucleotideMutationsOverTimeModelTest {
         )
         mockSiloNucleotideCoverageQuery(
             siloQueryClient,
-            null,
+            "main",
             1,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -143,7 +143,7 @@ class NucleotideMutationsOverTimeModelTest {
         )
         mockSiloNucleotideCoverageQuery(
             siloQueryClient,
-            null,
+            "main",
             2,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -216,7 +216,7 @@ class NucleotideMutationsOverTimeModelTest {
     @Test
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
         mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloNucleotideCoverageQuery(siloQueryClient, null, 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockSiloNucleotideCoverageQuery(siloQueryClient, "main", 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
         mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val mutations = listOf(DUMMY_MUTATION1)

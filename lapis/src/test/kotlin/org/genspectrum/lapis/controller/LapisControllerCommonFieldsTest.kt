@@ -487,7 +487,10 @@ class LapisControllerCommonFieldsTest(
                     emptyMap(),
                     emptyList(),
                     emptyList(),
-                    listOf(NucleotideInsertion(123, "ABC", null), NucleotideInsertion(124, "DEF", "other_segment")),
+                    listOf(
+                        NucleotideInsertion(123, "ABC", "other_segment"),
+                        NucleotideInsertion(124, "DEF", "other_segment"),
+                    ),
                     emptyList(),
                     emptyList(),
                     OrderBySpec.EMPTY,
@@ -535,7 +538,10 @@ class LapisControllerCommonFieldsTest(
             siloQueryModelMock.getAggregated(
                 AggregatedFiltersRequest(
                     emptyMap(),
-                    listOf(NucleotideMutation(null, 123, "A"), NucleotideMutation(null, 124, "B")),
+                    listOf(
+                        NucleotideMutation("other_segment", 123, "A"),
+                        NucleotideMutation("other_segment", 124, "B"),
+                    ),
                     emptyList(),
                     emptyList(),
                     emptyList(),
@@ -545,7 +551,9 @@ class LapisControllerCommonFieldsTest(
             )
         } returns Stream.of(AggregationData(5, emptyMap()))
 
-        mockMvc.perform(getSample("$AGGREGATED_ROUTE?nucleotideMutations=123A,124B"))
+        mockMvc.perform(
+            getSample("$AGGREGATED_ROUTE?nucleotideMutations=other_segment:123A,other_segment:124B"),
+        )
             .andExpect(status().isOk)
             .andExpect(jsonPath("\$.data[0].count").value(5))
     }
@@ -754,7 +762,7 @@ class LapisControllerCommonFieldsTest(
             Arguments.of(
                 "GET",
                 getSample(AGGREGATED_ROUTE)
-                    .queryParam("nucleotideInsertions", "ins_123:ABC", "ins_other_segment:124:DEF"),
+                    .queryParam("nucleotideInsertions", "ins_other_segment:123:ABC", "ins_other_segment:124:DEF"),
             ),
             Arguments.of(
                 "POST JSON",
@@ -763,7 +771,7 @@ class LapisControllerCommonFieldsTest(
                         """
                         {
                             "nucleotideInsertions": [
-                                "ins_123:ABC",
+                                "ins_other_segment:123:ABC",
                                 "ins_other_segment:124:DEF"
                             ]
                         }
@@ -774,7 +782,7 @@ class LapisControllerCommonFieldsTest(
             Arguments.of(
                 "POST form encoded",
                 postSample(AGGREGATED_ROUTE)
-                    .param("nucleotideInsertions", "ins_123:ABC", "ins_other_segment:124:DEF")
+                    .param("nucleotideInsertions", "ins_other_segment:123:ABC", "ins_other_segment:124:DEF")
                     .contentType(APPLICATION_FORM_URLENCODED),
             ),
         )

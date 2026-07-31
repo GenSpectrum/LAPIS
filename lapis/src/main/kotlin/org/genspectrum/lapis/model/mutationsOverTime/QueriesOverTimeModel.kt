@@ -225,7 +225,7 @@ class QueriesOverTimeModel(
                 countQuery = when (mutation.symbol) {
                     null -> HasNucleotideMutation(
                         sequenceName = mutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
-                        position = mutation.position
+                        position = mutation.position,
                     )
                     else -> NucleotideSymbolEquals(
                         sequenceName = mutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
