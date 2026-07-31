@@ -419,10 +419,6 @@ class SiloQueryToSaneQlTest {
                 ),
                 // NucleotideSymbolEquals
                 Arguments.of(
-                    NucleotideSymbolEquals(null, 1234, "A"),
-                    "nucleotideEquals(position:=1234, symbol:='A')",
-                ),
-                Arguments.of(
                     NucleotideSymbolEquals("sequence name", 1234, "A"),
                     "nucleotideEquals(position:=1234, symbol:='A', sequenceName:='sequence name')",
                 ),
@@ -430,10 +426,6 @@ class SiloQueryToSaneQlTest {
                 Arguments.of(
                     HasNucleotideMutation("sequence name", 1234),
                     "hasMutation(position:=1234, sequenceName:='sequence name')",
-                ),
-                Arguments.of(
-                    HasNucleotideMutation(null, 1234),
-                    "hasMutation(position:=1234)",
                 ),
                 // AminoAcidSymbolEquals
                 Arguments.of(
@@ -449,10 +441,6 @@ class SiloQueryToSaneQlTest {
                 Arguments.of(
                     NucleotideInsertionContains(1234, "A", "segment"),
                     "insertionContains(position:=1234, value:='A', sequenceName:='segment')",
-                ),
-                Arguments.of(
-                    NucleotideInsertionContains(1234, "A", null),
-                    "insertionContains(position:=1234, value:='A')",
                 ),
                 // AminoAcidInsertionContains
                 Arguments.of(

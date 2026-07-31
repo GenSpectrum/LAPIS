@@ -495,37 +495,33 @@ data class LineageEquals(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class NucleotideSymbolEquals(
-    val sequenceName: String?,
+    val sequenceName: String,
     val position: Int,
     val symbol: String,
 ) : SiloFilterExpression("NucleotideEquals") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "nucleotideEquals",
-            namedArgs = buildList {
-                add(SaneQlNamedArg("position", SaneQlInt(position)))
-                add(SaneQlNamedArg("symbol", str(symbol)))
-                if (sequenceName != null) {
-                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
-                }
-            },
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("symbol", str(symbol)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
         )
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class HasNucleotideMutation(
-    val sequenceName: String?,
+    val sequenceName: String,
     val position: Int,
 ) : SiloFilterExpression("HasNucleotideMutation") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "hasMutation",
-            namedArgs = buildList {
-                add(SaneQlNamedArg("position", SaneQlInt(position)))
-                if (sequenceName != null) {
-                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
-                }
-            },
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
         )
 }
 
@@ -576,18 +572,16 @@ data class DateBetween(
 data class NucleotideInsertionContains(
     val position: Int,
     val value: String,
-    val sequenceName: String?,
+    val sequenceName: String,
 ) : SiloFilterExpression("InsertionContains") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "insertionContains",
-            namedArgs = buildList {
-                add(SaneQlNamedArg("position", SaneQlInt(position)))
-                add(SaneQlNamedArg("value", str(value)))
-                if (sequenceName != null) {
-                    add(SaneQlNamedArg("sequenceName", str(sequenceName)))
-                }
-            },
+            namedArgs = listOf(
+                SaneQlNamedArg("position", SaneQlInt(position)),
+                SaneQlNamedArg("value", str(value)),
+                SaneQlNamedArg("sequenceName", str(sequenceName)),
+            ),
         )
 }
 

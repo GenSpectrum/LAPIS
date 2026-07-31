@@ -293,11 +293,11 @@ class AdvancedQueryCustomListener(
 
         val expression = when (val secondSymbol = ctx.singleSegmentedMutationQuerySecondSymbol()) {
             null -> HasNucleotideMutation(
-                sequenceName = referenceGenomeSchema.resolveNucleotideSequenceName(),
+                sequenceName = referenceGenomeSchema.firstNucleotideSequenceName(),
                 position = position,
             )
             else -> NucleotideSymbolEquals(
-                sequenceName = referenceGenomeSchema.resolveNucleotideSequenceName(),
+                sequenceName = referenceGenomeSchema.firstNucleotideSequenceName(),
                 position = position,
                 symbol = secondSymbol.text.uppercase(),
             )
@@ -409,7 +409,7 @@ class AdvancedQueryCustomListener(
             NucleotideInsertionContains(
                 ctx.position().text.toInt(),
                 value.uppercase(),
-                referenceGenomeSchema.resolveNucleotideSequenceName(),
+                referenceGenomeSchema.firstNucleotideSequenceName(),
             ),
         )
     }

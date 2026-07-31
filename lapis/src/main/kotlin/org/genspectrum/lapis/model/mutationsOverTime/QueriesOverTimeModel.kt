@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.annotation.PreDestroy
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -126,6 +127,7 @@ class QueriesOverTimeModel(
     private val siloClient: SiloClient,
     private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val dataVersion: DataVersion,
     private val advancedQueryFacade: AdvancedQueryFacade,
     config: DatabaseConfig,
@@ -221,17 +223,20 @@ class QueriesOverTimeModel(
             ParsedQueryItem(
                 displayLabel = mutation.toString(referenceGenome),
                 countQuery = when (mutation.symbol) {
-                    null -> HasNucleotideMutation(mutation.sequenceName, mutation.position)
+                    null -> HasNucleotideMutation(
+                        sequenceName = mutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                        position = mutation.position
+                    )
                     else -> NucleotideSymbolEquals(
-                        mutation.sequenceName,
-                        mutation.position,
-                        mutation.symbol,
+                        sequenceName = mutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                        position = mutation.position,
+                        symbol = mutation.symbol,
                     )
                 },
                 coverageQuery = Or(
                     (nucleotideSymbols + deletionSymbols).map {
                         NucleotideSymbolEquals(
-                            sequenceName = mutation.sequenceName,
+                            sequenceName = mutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
                             position = mutation.position,
                             symbol = it.toString(),
                         )

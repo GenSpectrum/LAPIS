@@ -73,6 +73,28 @@ class MultiSegmentedSequenceControllerTest(
     }
 
     @Test
+    fun `GIVEN multi segmented AND nucleotide mutation filter without segment THEN returns bad request`() {
+        mockMvc.perform(
+            postSample("aggregated")
+                .contentType(APPLICATION_JSON)
+                .content("""{"nucleotideMutations": ["A123T"]}"""),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.error.detail", startsWith("The reference genome is multi-segmented")))
+    }
+
+    @Test
+    fun `GIVEN multi segmented AND nucleotide insertion filter without segment THEN returns bad request`() {
+        mockMvc.perform(
+            postSample("aggregated")
+                .contentType(APPLICATION_JSON)
+                .content("""{"nucleotideInsertions": ["ins_123:ABC"]}"""),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("\$.error.detail", startsWith("The reference genome is multi-segmented")))
+    }
+
+    @Test
     fun `GIVEN nucleotide sequences request with dataFormat csv THEN returns not acceptable`() {
         mockMvc
             .perform(

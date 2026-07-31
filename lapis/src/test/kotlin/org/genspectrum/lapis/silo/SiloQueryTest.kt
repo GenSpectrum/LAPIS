@@ -506,16 +506,6 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    NucleotideSymbolEquals(null, 1234, "A"),
-                    """
-                        {
-                            "type": "NucleotideEquals",
-                            "position": 1234,
-                            "symbol": "A"
-                        }
-                    """,
-                ),
-                Arguments.of(
                     NucleotideSymbolEquals("sequence name", 1234, "A"),
                     """
                         {
@@ -532,15 +522,6 @@ class SiloQueryTest {
                         {
                             "type": "HasNucleotideMutation",
                             "sequenceName": "sequence name",
-                            "position": 1234
-                        }
-                    """,
-                ),
-                Arguments.of(
-                    HasNucleotideMutation(null, 1234),
-                    """
-                        {
-                            "type": "HasNucleotideMutation",
                             "position": 1234
                         }
                     """,
@@ -574,16 +555,6 @@ class SiloQueryTest {
                             "position": 1234,
                             "value": "A",
                             "sequenceName":"segment"
-                        }
-                    """,
-                ),
-                Arguments.of(
-                    NucleotideInsertionContains(1234, "A", null),
-                    """
-                        {
-                            "type": "InsertionContains",
-                            "position": 1234,
-                            "value": "A"
                         }
                     """,
                 ),

@@ -504,11 +504,11 @@ class SiloFilterExpressionMapper(
             nucleotideMutation,
             when (nucleotideMutation.symbol) {
                 null -> HasNucleotideMutation(
-                    sequenceName = referenceGenomeSchema.resolveNucleotideSequenceName(nucleotideMutation.sequenceName),
+                    sequenceName = nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
                     position = nucleotideMutation.position,
                 )
                 else -> NucleotideSymbolEquals(
-                    sequenceName = referenceGenomeSchema.resolveNucleotideSequenceName(nucleotideMutation.sequenceName),
+                    sequenceName = nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
                     position = nucleotideMutation.position,
                     symbol = nucleotideMutation.symbol,
                 )
@@ -538,9 +538,9 @@ class SiloFilterExpressionMapper(
 
     private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains =
         NucleotideInsertionContains(
-            nucleotideInsertion.position,
-            nucleotideInsertion.insertions,
-            referenceGenomeSchema.resolveNucleotideSequenceName(nucleotideInsertion.segment),
+            position = nucleotideInsertion.position,
+            value = nucleotideInsertion.insertions,
+            sequenceName = nucleotideInsertion.segment ?: referenceGenomeSchema.firstNucleotideSequenceName(),
         )
 
     private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains =
