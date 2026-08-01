@@ -1,7 +1,5 @@
 package org.genspectrum.lapis.model
 
-import AdvancedQueryLexer
-import AdvancedQueryParser
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
@@ -12,6 +10,8 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silonew.AdvancedQueryLexer
+import org.genspectrum.lapis.silonew.AdvancedQueryParser
 import org.springframework.stereotype.Component
 
 @Component

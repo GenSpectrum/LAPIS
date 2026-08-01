@@ -1,14 +1,5 @@
 package org.genspectrum.lapis.model
 
-import AdvancedQueryBaseListener
-import AdvancedQueryParser.AndContext
-import AdvancedQueryParser.MaybeContext
-import AdvancedQueryParser.NOfQueryContext
-import AdvancedQueryParser.NamedInsertionQueryContext
-import AdvancedQueryParser.NotContext
-import AdvancedQueryParser.NucleotideInsertionQueryContext
-import AdvancedQueryParser.OrContext
-import AdvancedQueryParser.SingleSegmentedMutationQueryContext
 import org.antlr.v4.runtime.tree.ParseTreeListener
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.DatabaseMetadata
@@ -39,6 +30,16 @@ import org.genspectrum.lapis.silo.PhyloDescendantOf
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
+import org.genspectrum.lapis.silonew.AdvancedQueryBaseListener
+import org.genspectrum.lapis.silonew.AdvancedQueryParser
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.AndContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.MaybeContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.NOfQueryContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.NamedInsertionQueryContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.NotContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.NucleotideInsertionQueryContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.OrContext
+import org.genspectrum.lapis.silonew.AdvancedQueryParser.SingleSegmentedMutationQueryContext
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import java.util.Locale

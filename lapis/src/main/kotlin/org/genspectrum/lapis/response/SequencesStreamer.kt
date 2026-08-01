@@ -6,6 +6,7 @@ import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.model.SequencesResponse
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.setHeaderOn
+import org.genspectrum.lapis.silonew.FastaRecordWriter
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
@@ -39,7 +40,8 @@ class SequencesStreamer(
             response.contentType = MediaType(TEXT_X_FASTA, Charset.defaultCharset()).toString()
         }
 
-        response.outputStream.writer().use { outputStream ->
+        response.outputStream.use { outputStream ->
+            val writer = FastaRecordWriter(outputStream)
             sequencesResponse.sequenceData.use { inputStream ->
                 streamAndLogDisconnect("sequence FASTA") {
                     inputStream.forEach {
@@ -53,11 +55,12 @@ class SequencesStreamer(
                                 values = it,
                                 sequenceName = sequenceName,
                             )
-                            outputStream.appendLine(">$fastaHeader\n${sequence.asString()}")
+                            writer.writeRecord(fastaHeader, sequence.asString().toByteArray(Charsets.UTF_8))
                         }
                     }
                 }
             }
+            writer.flush()
         }
     }
 

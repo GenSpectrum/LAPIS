@@ -1,5 +1,9 @@
 grammar AdvancedQuery;
 
+@header {
+package org.genspectrum.lapis.silonew;
+}
+
 // parser rules
 
 start: expr EOF;

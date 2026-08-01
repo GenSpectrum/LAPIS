@@ -1,9 +1,7 @@
 package org.genspectrum.lapis.response
 
-import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVPrinter
+import org.genspectrum.lapis.silonew.DelimitedTextWriter
 import org.springframework.stereotype.Component
-import java.io.Flushable
 import java.util.stream.Stream
 
 interface RecordCollection<T> {
@@ -27,25 +25,18 @@ class CsvWriter {
         data: RecordCollection<*>,
         delimiter: Delimiter,
     ) {
-        CSVPrinter(
-            appendable,
-            CSVFormat.DEFAULT.builder()
-                .setRecordSeparator("\n")
-                .setDelimiter(delimiter.value)
-                .setNullString("")
-                .get(),
-        ).use {
-            if (includeHeaders) {
-                it.printRecord(data.getHeader())
-            }
-            streamAndLogDisconnect("CSV/TSV data") {
-                data.getCsvRecords().use { csvRecordStream ->
-                    csvRecordStream.forEach { csvRecord ->
-                        it.printRecord(csvRecord)
-                    }
-                }
+        val writer = DelimitedTextWriter(
+            appendable = appendable,
+            delimiter = delimiter.value,
+            escapeSpecialCharacters = false,
+        )
+        if (includeHeaders) writer.writeRecord(data.getHeader())
+        streamAndLogDisconnect("CSV/TSV data") {
+            data.getCsvRecords().use { csvRecordStream ->
+                csvRecordStream.forEach(writer::writeRecord)
             }
         }
+        writer.flush()
     }
 }
 
@@ -69,45 +60,20 @@ class IanaTsvWriter {
         data: RecordCollection<*>,
         delimiter: Delimiter,
     ) {
-        if (includeHeaders) {
-            writeRow(appendable, data.getHeader(), delimiter)
-        }
+        val writer = DelimitedTextWriter(
+            appendable = appendable,
+            delimiter = delimiter.value,
+            escapeSpecialCharacters = true,
+            flushEachRecord = true,
+        )
+        if (includeHeaders) writer.writeRecord(data.getHeader())
         streamAndLogDisconnect("Iana CSV/TSV data") {
             data.getCsvRecords().use { csvRecordStream ->
-                csvRecordStream.forEach { csvRecord ->
-                    writeRow(appendable, csvRecord.map { it.orEmpty() }, delimiter)
-                }
+                csvRecordStream.forEach(writer::writeRecord)
             }
         }
+        writer.flush()
     }
-
-    private fun writeRow(
-        appendable: Appendable,
-        cells: List<String>,
-        delimiter: Delimiter,
-    ) {
-        val row = getRow(cells, delimiter)
-        appendable.appendLine(row)
-        if (appendable is Flushable) {
-            (appendable as Flushable).flush()
-        }
-    }
-
-    private fun getRow(
-        record: List<String>,
-        delimiter: Delimiter,
-    ): String =
-        record.joinToString(separator = delimiter.value.toString()) { cell ->
-            cell
-                .replace("\n", "\\n")
-                .let { v ->
-                    if (delimiter.value == '\t') {
-                        v.replace("\t", "\\t")
-                    } else {
-                        v.replace(delimiter.value.toString(), "\\${delimiter.value}")
-                    }
-                }
-        }
 }
 
 enum class Delimiter(
