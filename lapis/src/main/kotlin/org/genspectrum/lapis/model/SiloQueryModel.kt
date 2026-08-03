@@ -28,7 +28,9 @@ import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
-import kotlin.collections.emptyList
+
+private const val INSERTION_FIELD = "insertion"
+private val INSERTION_COMPONENT_FIELDS = listOf("sequenceName", "position", "insertedSymbols")
 
 @Component
 class SiloQueryModel(
@@ -337,8 +339,7 @@ class SiloQueryModel(
             is OrderBySpec.ByFields -> OrderBySpec.ByFields(
                 orderByFields.fields.flatMap { field ->
                     when (field.field) {
-                        "insertion" -> listOf("sequenceName", "position", "insertedSymbols")
-                            .map { OrderByField(it, field.order) }
+                        INSERTION_FIELD -> INSERTION_COMPONENT_FIELDS.map { OrderByField(it, field.order) }
 
                         else -> listOf(field)
                     }

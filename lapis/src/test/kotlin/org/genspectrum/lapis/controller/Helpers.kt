@@ -32,6 +32,7 @@ fun mutationProportionsRequest(
     sequenceFilters: Map<String, String> = emptyMap(),
     minProportion: Double? = null,
     fields: List<MutationsField> = emptyList(),
+    orderByFields: OrderBySpec = OrderBySpec.EMPTY,
 ) = MutationProportionsRequest(
     sequenceFilters = sequenceFilters.mapValues { listOf(it.value) },
     nucleotideMutations = emptyList(),
@@ -40,7 +41,7 @@ fun mutationProportionsRequest(
     aminoAcidInsertions = emptyList(),
     fields = fields,
     minProportion = minProportion,
-    orderByFields = OrderBySpec.EMPTY,
+    orderByFields = orderByFields,
 )
 
 fun aggregatedFiltersRequest(
