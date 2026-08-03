@@ -52,6 +52,7 @@ Higher versions will also work if they are not specified in the table.
 
 | LAPIS  | SILO   |
 |--------|--------|
+| 0.8.5  | 0.13.0 |
 | 0.8.4  | 0.12.0 |
 | 0.7.0  | 0.10.0 |
 | 0.6.0  | 0.9.0  |
