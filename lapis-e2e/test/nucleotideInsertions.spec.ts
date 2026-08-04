@@ -47,7 +47,7 @@ describe('The /nucleotideInsertions endpoint', () => {
         orderBy: [{ field: 'insertion', type: 'ascending' }],
       },
     });
-    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_22204:CAGAA');
+    expect(ascendingOrderedResult.data[0]).to.have.property('insertion', 'ins_5959:TAT');
     expect(ascendingOrderedResult.data).to.have.length(4);
 
     const descendingOrderedResult = await lapisClient.postNucleotideInsertions({
@@ -57,7 +57,7 @@ describe('The /nucleotideInsertions endpoint', () => {
     });
 
     expect(descendingOrderedResult.data).to.have.length(4);
-    expect(descendingOrderedResult.data[3]).to.have.property('insertion', 'ins_22204:CAGAA');
+    expect(descendingOrderedResult.data[3]).to.have.property('insertion', 'ins_5959:TAT');
   });
 
   it('advancedQuery can filter out unwanted insertions', async () => {

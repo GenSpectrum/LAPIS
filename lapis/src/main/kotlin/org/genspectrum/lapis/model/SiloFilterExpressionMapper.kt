@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.model
 
 import org.genspectrum.lapis.config.ADVANCED_QUERY_FIELD
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.config.SequenceFilterFieldType
 import org.genspectrum.lapis.config.SequenceFilterFields
 import org.genspectrum.lapis.config.VARIANT_QUERY_FIELD
@@ -52,6 +53,7 @@ class SiloFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
     private val advancedQueryFacade: AdvancedQueryFacade,
+    private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
     fun map(sequenceFilters: BaseSequenceFilters): SiloFilterExpression {
         if (sequenceFilters.isEmpty()) {
@@ -501,11 +503,16 @@ class SiloFilterExpressionMapper(
         wrapInMaybe(
             nucleotideMutation,
             when (nucleotideMutation.symbol) {
-                null -> HasNucleotideMutation(nucleotideMutation.sequenceName, nucleotideMutation.position)
+                null -> HasNucleotideMutation(
+                    sequenceName =
+                        nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                    position = nucleotideMutation.position,
+                )
                 else -> NucleotideSymbolEquals(
-                    nucleotideMutation.sequenceName,
-                    nucleotideMutation.position,
-                    nucleotideMutation.symbol,
+                    sequenceName =
+                        nucleotideMutation.sequenceName ?: referenceGenomeSchema.firstNucleotideSequenceName(),
+                    position = nucleotideMutation.position,
+                    symbol = nucleotideMutation.symbol,
                 )
             },
         )
@@ -533,9 +540,9 @@ class SiloFilterExpressionMapper(
 
     private fun toNucleotideInsertionFilter(nucleotideInsertion: NucleotideInsertion): NucleotideInsertionContains =
         NucleotideInsertionContains(
-            nucleotideInsertion.position,
-            nucleotideInsertion.insertions,
-            nucleotideInsertion.segment,
+            position = nucleotideInsertion.position,
+            value = nucleotideInsertion.insertions,
+            sequenceName = nucleotideInsertion.segment ?: referenceGenomeSchema.firstNucleotideSequenceName(),
         )
 
     private fun toAminoAcidInsertionFilter(aminoAcidInsertion: AminoAcidInsertion): AminoAcidInsertionContains =

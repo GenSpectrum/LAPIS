@@ -119,7 +119,6 @@ class SiloClientTest(
                     buildArrowIpcStream(
                         listOf(
                             mapOf(
-                                "mutation" to "C3037T",
                                 "mutationFrom" to "C",
                                 "mutationTo" to "T",
                                 "sequenceName" to "main",
@@ -129,7 +128,6 @@ class SiloClientTest(
                                 "count" to 51,
                             ),
                             mapOf(
-                                "mutation" to "C14408T",
                                 "mutationFrom" to "C",
                                 "mutationTo" to "T",
                                 "sequenceName" to "main",
@@ -151,7 +149,6 @@ class SiloClientTest(
             result,
             containsInAnyOrder(
                 MutationData(
-                    mutation = "C3037T",
                     count = 51,
                     proportion = 1.0,
                     sequenceName = "main",
@@ -161,7 +158,6 @@ class SiloClientTest(
                     coverage = 100,
                 ),
                 MutationData(
-                    mutation = "C14408T",
                     count = 52,
                     proportion = 1.0,
                     sequenceName = "main",
@@ -421,14 +417,12 @@ class SiloClientTest(
                                 "count" to 1,
                                 "insertedSymbols" to "SGE",
                                 "position" to 143,
-                                "insertion" to "ins_S:247:SGE",
                                 "sequenceName" to "S",
                             ),
                             mapOf(
                                 "count" to 2,
                                 "insertedSymbols" to "EPE",
                                 "position" to 214,
-                                "insertion" to "ins_S:214:EPE",
                                 "sequenceName" to "S",
                             ),
                         ),
@@ -445,14 +439,12 @@ class SiloClientTest(
             containsInAnyOrder(
                 InsertionData(
                     1,
-                    "ins_S:247:SGE",
                     "SGE",
                     143,
                     "S",
                 ),
                 InsertionData(
                     2,
-                    "ins_S:214:EPE",
                     "EPE",
                     214,
                     "S",

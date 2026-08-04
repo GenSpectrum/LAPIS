@@ -43,6 +43,13 @@ data class NucleotideMutation(
                 }
                 ?.name
 
+            if (segmentName == null && !referenceGenomeSchema.isSingleSegmented()) {
+                throw BadRequestException(
+                    "The reference genome is multi-segmented, but no segment was specified in the nucleotide " +
+                        "mutation '$nucleotideMutation'. Please specify one, e.g. 'segmentName:A123T'.",
+                )
+            }
+
             return NucleotideMutation(
                 segmentName,
                 position,

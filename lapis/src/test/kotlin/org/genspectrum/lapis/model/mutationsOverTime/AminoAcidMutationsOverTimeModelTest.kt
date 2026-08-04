@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -45,6 +46,9 @@ AminoAcidMutationsOverTimeModelTest {
     private lateinit var referenceGenome: ReferenceGenome
 
     @Autowired
+    private lateinit var referenceGenomeSchema: ReferenceGenomeSchema
+
+    @Autowired
     private lateinit var dataVersion: DataVersion
 
     @Autowired
@@ -62,6 +66,7 @@ AminoAcidMutationsOverTimeModelTest {
             siloClient = siloQueryClient,
             siloFilterExpressionMapper = siloFilterExpressionMapper,
             referenceGenome = referenceGenome,
+            referenceGenomeSchema = referenceGenomeSchema,
             dataVersion = dataVersion,
             advancedQueryFacade = advancedQueryFacade,
             config = config,

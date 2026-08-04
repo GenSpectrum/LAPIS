@@ -8,6 +8,7 @@ import org.genspectrum.lapis.request.DetailsFiltersRequest
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
+import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.PhyloTreeSequenceFiltersRequest
 import org.genspectrum.lapis.request.PlainField
@@ -16,6 +17,7 @@ import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.response.InsertionResponse
+import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
@@ -26,6 +28,9 @@ import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
+
+private const val INSERTION_FIELD = "insertion"
+private val INSERTION_COMPONENT_FIELDS = listOf("sequenceName", "position", "insertedSymbols")
 
 @Component
 class SiloQueryModel(
@@ -52,90 +57,50 @@ class SiloQueryModel(
         )
 
     fun computeNucleotideMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = sequenceFilters.fields
-            .let {
-                when {
-                    it.contains(MutationsField.MUTATION) -> addSequenceNameIfMissing(it)
-                    else -> it
-                }
-            }
-            .map { it.value }
+        val assembleMutation = { data: MutationData ->
+            val core = "${data.mutationFrom}${data.position}${data.mutationTo}"
+            if (referenceGenomeSchema.isSingleSegmented()) core else "${data.sequenceName}:$core"
+        }
 
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.mutations(
-                    minProportion = sequenceFilters.minProportion,
-                    orderByFields = sequenceFilters.orderByFields,
-                    limit = sequenceFilters.limit,
-                    offset = sequenceFilters.offset,
-                    fields = fields,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
-            ),
-        )
-
-        return data.map {
-            val mutation = if (referenceGenomeSchema.isSingleSegmented()) {
-                it.mutation
-            } else {
-                "${it.sequenceName}:${it.mutation}"
-            }
-
+        return queryMutationData(sequenceFilters, SiloAction.Companion::mutations).map {
             MutationResponse(
-                mutation = mutation,
+                mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
-                sequenceName = if (!sequenceFilters.shouldResponseContainSequenceName()) {
+                sequenceName = if (!sequenceFilters.shouldResponseContainField(MutationsField.SEQUENCE_NAME)) {
                     null
                 } else if (referenceGenomeSchema.isSingleSegmented()) {
                     ExplicitlyNullable(null)
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = it.mutationFrom,
-                mutationTo = it.mutationTo,
-                position = it.position,
+                mutationFrom = sequenceFilters.ifRequested(MutationsField.MUTATION_FROM, it.mutationFrom),
+                mutationTo = sequenceFilters.ifRequested(MutationsField.MUTATION_TO, it.mutationTo),
+                position = sequenceFilters.ifRequested(MutationsField.POSITION, it.position),
             )
         }
     }
 
     fun computeAminoAcidMutationProportions(sequenceFilters: MutationProportionsRequest): Stream<MutationResponse> {
-        val fields = sequenceFilters.fields
-            .let {
-                when {
-                    it.contains(MutationsField.MUTATION) -> addSequenceNameIfMissing(it)
-                    else -> it
-                }
-            }
-            .map { it.value }
+        val assembleMutation = { data: MutationData ->
+            "${data.sequenceName}:${data.mutationFrom}${data.position}${data.mutationTo}"
+        }
 
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.aminoAcidMutations(
-                    minProportion = sequenceFilters.minProportion,
-                    orderByFields = sequenceFilters.orderByFields,
-                    limit = sequenceFilters.limit,
-                    offset = sequenceFilters.offset,
-                    fields = fields,
-                ),
-                siloFilterExpressionMapper.map(sequenceFilters),
-            ),
-        )
-        return data.map {
+        return queryMutationData(sequenceFilters, SiloAction.Companion::aminoAcidMutations).map {
             MutationResponse(
-                mutation = "${it.sequenceName}:${it.mutation}",
+                mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
                 coverage = it.coverage,
                 proportion = it.proportion,
-                sequenceName = if (!sequenceFilters.shouldResponseContainSequenceName()) {
+                sequenceName = if (!sequenceFilters.shouldResponseContainField(MutationsField.SEQUENCE_NAME)) {
                     null
                 } else {
                     ExplicitlyNullable(it.sequenceName)
                 },
-                mutationFrom = it.mutationFrom,
-                mutationTo = it.mutationTo,
-                position = it.position,
+                mutationFrom = sequenceFilters.ifRequested(MutationsField.MUTATION_FROM, it.mutationFrom),
+                mutationTo = sequenceFilters.ifRequested(MutationsField.MUTATION_TO, it.mutationTo),
+                position = sequenceFilters.ifRequested(MutationsField.POSITION, it.position),
             )
         }
     }
@@ -168,7 +133,7 @@ class SiloQueryModel(
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.nucleotideInsertions(
-                    sequenceFilters.orderByFields,
+                    expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
@@ -177,15 +142,16 @@ class SiloQueryModel(
         )
 
         return data.map {
+            val sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
+                true -> null
+                false -> it.sequenceName
+            }
             InsertionResponse(
-                insertion = it.insertion,
+                insertion = buildInsertion(sequenceName, it.position, it.insertedSymbols),
                 count = it.count,
                 insertedSymbols = it.insertedSymbols,
                 position = it.position,
-                sequenceName = when (referenceGenomeSchema.isSingleSegmented()) {
-                    true -> null
-                    false -> it.sequenceName
-                },
+                sequenceName = sequenceName,
             )
         }
     }
@@ -194,7 +160,7 @@ class SiloQueryModel(
         val data = siloClient.sendQuery(
             SiloQuery(
                 SiloAction.aminoAcidInsertions(
-                    sequenceFilters.orderByFields,
+                    expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
@@ -204,7 +170,7 @@ class SiloQueryModel(
 
         return data.map {
             InsertionResponse(
-                insertion = it.insertion,
+                insertion = buildInsertion(it.sequenceName, it.position, it.insertedSymbols),
                 count = it.count,
                 insertedSymbols = it.insertedSymbols,
                 position = it.position,
@@ -318,11 +284,99 @@ class SiloQueryModel(
 
     fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
 
-    private fun addSequenceNameIfMissing(fields: List<MutationsField>) =
-        when {
-            !fields.contains(MutationsField.SEQUENCE_NAME) -> fields + MutationsField.SEQUENCE_NAME
-            else -> fields
+    private fun queryMutationData(
+        sequenceFilters: MutationProportionsRequest,
+        actionConstructor: (
+            minProportion: Double?,
+            orderByFields: OrderBySpec,
+            limit: Int?,
+            offset: Int?,
+            fields: List<String>,
+        ) -> SiloAction<MutationData>,
+    ): Stream<MutationData> {
+        val fields = siloMutationFields(sequenceFilters)
+
+        val action = actionConstructor(
+            sequenceFilters.minProportion,
+            expandMutationOrderBy(sequenceFilters.orderByFields),
+            sequenceFilters.limit,
+            sequenceFilters.offset,
+            fields,
+        )
+        return siloClient.sendQuery(SiloQuery(action, siloFilterExpressionMapper.map(sequenceFilters)))
+    }
+
+    /**
+     * Since SILO can't order by the assembled `mutation` field, replace any `mutation` order-by entry with its
+     * component fields (in `sequenceName`, `mutationFrom`, `position`, `mutationTo` order), keeping the direction.
+     */
+    private fun expandMutationOrderBy(orderByFields: OrderBySpec): OrderBySpec =
+        when (orderByFields) {
+            is OrderBySpec.ByFields -> OrderBySpec.ByFields(
+                orderByFields.fields.flatMap { field ->
+                    when (field.field) {
+                        MutationsField.MUTATION.value -> listOf(
+                            MutationsField.SEQUENCE_NAME,
+                            MutationsField.MUTATION_FROM,
+                            MutationsField.POSITION,
+                            MutationsField.MUTATION_TO,
+                        ).map { OrderByField(it.value, field.order) }
+
+                        else -> listOf(field)
+                    }
+                },
+            )
+
+            is OrderBySpec.Random -> orderByFields
         }
+
+    /**
+     * Since SILO can't order by the assembled `insertion` field, replace any `insertion` order-by entry with its
+     * component fields (in `sequenceName`, `position`, `insertedSymbols` order), keeping the direction.
+     */
+    private fun expandInsertionOrderBy(orderByFields: OrderBySpec): OrderBySpec =
+        when (orderByFields) {
+            is OrderBySpec.ByFields -> OrderBySpec.ByFields(
+                orderByFields.fields.flatMap { field ->
+                    when (field.field) {
+                        INSERTION_FIELD -> INSERTION_COMPONENT_FIELDS.map { OrderByField(it, field.order) }
+
+                        else -> listOf(field)
+                    }
+                },
+            )
+
+            is OrderBySpec.Random -> orderByFields
+        }
+
+    private fun siloMutationFields(request: MutationProportionsRequest): List<String> {
+        val fields = request.fields
+        if (fields.isEmpty()) {
+            return emptyList()
+        }
+
+        val hasOrderByMutation = request.orderByFields is OrderBySpec.ByFields &&
+            request.orderByFields.fields.any { it.field == MutationsField.MUTATION.value }
+
+        val expanded = fields.toMutableSet()
+        if (hasOrderByMutation || MutationsField.MUTATION in expanded) {
+            expanded -= MutationsField.MUTATION
+            expanded += MutationsField.MUTATION_FROM
+            expanded += MutationsField.MUTATION_TO
+            expanded += MutationsField.POSITION
+            expanded += MutationsField.SEQUENCE_NAME
+        }
+        return expanded.map { it.value }
+    }
+
+    private fun buildInsertion(
+        sequenceName: String?,
+        position: Int,
+        insertedSymbols: String,
+    ) = when (sequenceName) {
+        null -> "ins_$position:$insertedSymbols"
+        else -> "ins_$sequenceName:$position:$insertedSymbols"
+    }
 }
 
 data class SequencesResponse(

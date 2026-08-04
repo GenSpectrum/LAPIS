@@ -47,6 +47,13 @@ data class NucleotideInsertion(
                 }
                 ?.name
 
+            if (segmentName == null && !referenceGenomeSchema.isSingleSegmented()) {
+                throw BadRequestException(
+                    "The reference genome is multi-segmented, but no segment was specified in the nucleotide " +
+                        "insertion '$nucleotideInsertion'. Please specify one, e.g. 'ins_segmentName:123:ABC'.",
+                )
+            }
+
             return NucleotideInsertion(
                 position,
                 insertions,

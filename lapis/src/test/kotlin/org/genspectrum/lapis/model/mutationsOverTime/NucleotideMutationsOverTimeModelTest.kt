@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenome
+import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.SiloFilterExpressionMapper
@@ -29,8 +30,8 @@ import java.util.stream.Stream
 
 private val DUMMY_MUTATION1 = NucleotideMutation(null, 1, "T")
 private val DUMMY_MUTATION2 = NucleotideMutation(null, 2, "G")
-private val DUMMY_MUTATION_EQUALS1 = NucleotideSymbolEquals(null, 1, "T")
-private val DUMMY_MUTATION_EQUALS2 = NucleotideSymbolEquals(null, 2, "G")
+private val DUMMY_MUTATION_EQUALS1 = NucleotideSymbolEquals("main", 1, "T")
+private val DUMMY_MUTATION_EQUALS2 = NucleotideSymbolEquals("main", 2, "G")
 
 @SpringBootTest
 class NucleotideMutationsOverTimeModelTest {
@@ -42,6 +43,9 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Autowired
     private lateinit var referenceGenome: ReferenceGenome
+
+    @Autowired
+    private lateinit var referenceGenomeSchema: ReferenceGenomeSchema
 
     @Autowired
     private lateinit var dataVersion: DataVersion
@@ -61,6 +65,7 @@ class NucleotideMutationsOverTimeModelTest {
             siloClient = siloQueryClient,
             siloFilterExpressionMapper = siloFilterExpressionMapper,
             referenceGenome = referenceGenome,
+            referenceGenomeSchema = referenceGenomeSchema,
             dataVersion = dataVersion,
             advancedQueryFacade = advancedQueryFacade,
             config = config,
@@ -128,7 +133,7 @@ class NucleotideMutationsOverTimeModelTest {
         )
         mockSiloNucleotideCoverageQuery(
             siloQueryClient,
-            null,
+            "main",
             1,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -138,7 +143,7 @@ class NucleotideMutationsOverTimeModelTest {
         )
         mockSiloNucleotideCoverageQuery(
             siloQueryClient,
-            null,
+            "main",
             2,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -211,7 +216,7 @@ class NucleotideMutationsOverTimeModelTest {
     @Test
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
         mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloNucleotideCoverageQuery(siloQueryClient, null, 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockSiloNucleotideCoverageQuery(siloQueryClient, "main", 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
         mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val mutations = listOf(DUMMY_MUTATION1)

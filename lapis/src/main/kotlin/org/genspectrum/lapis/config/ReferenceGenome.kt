@@ -35,6 +35,8 @@ class ReferenceGenomeSchema(
 
     fun isSingleSegmented(): Boolean = nucleotideSequences.size == 1
 
+    fun firstNucleotideSequenceName() = nucleotideSequences.first().name
+
     fun getSequenceNameFromCaseInsensitiveName(name: String) =
         nucleotideSequenceNames[name.lowercase()]?.name
             ?: geneNames[name.lowercase()]?.name

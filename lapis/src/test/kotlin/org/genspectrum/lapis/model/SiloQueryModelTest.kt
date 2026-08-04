@@ -3,6 +3,7 @@ package org.genspectrum.lapis.model
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.slot
 import io.mockk.verify
 import org.genspectrum.lapis.config.DatabaseMetadata
 import org.genspectrum.lapis.config.MetadataType
@@ -43,7 +44,6 @@ import org.junit.jupiter.api.Test
 import java.util.stream.Stream
 
 private val someMutationData = MutationData(
-    mutation = "A1234B",
     count = 1234,
     coverage = 2345,
     proportion = 0.1234,
@@ -55,7 +55,6 @@ private val someMutationData = MutationData(
 
 val someInsertionData = InsertionData(
     count = 42,
-    insertion = "ins_sequenceName:1234:ABCD",
     insertedSymbols = "ABCD",
     position = 1234,
     sequenceName = "sequenceName",
@@ -288,8 +287,10 @@ class SiloQueryModelTest {
             )
         } returns Stream.of(
             mutationData(
-                mutation = "A1234B",
                 sequenceName = "sequenceName",
+                position = 1234,
+                mutationFrom = "A",
+                mutationTo = "B",
             ),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
@@ -369,8 +370,10 @@ class SiloQueryModelTest {
             )
         } returns Stream.of(
             mutationData(
-                mutation = "A1234B",
                 sequenceName = "sequenceName",
+                position = 1234,
+                mutationFrom = "A",
+                mutationTo = "B",
             ),
         )
         every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
@@ -410,13 +413,98 @@ class SiloQueryModelTest {
         ).toList()
 
         val expectedInsertion = InsertionResponse(
-            insertion = "ins_sequenceName:1234:ABCD",
+            insertion = "ins_1234:ABCD",
             count = 42,
             insertedSymbols = "ABCD",
             position = 1234,
             sequenceName = null,
         )
         assertThat(result, equalTo(listOf(expectedInsertion)))
+    }
+
+    @Test
+    fun `getNucleotideInsertions includes the segment name if the nucleotide sequence has multiple segments`() {
+        every { siloClientMock.sendQuery(any<SiloQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
+
+        val result = underTest.getNucleotideInsertions(
+            SequenceFiltersRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                OrderBySpec.EMPTY,
+            ),
+        ).toList()
+
+        val expectedInsertion = InsertionResponse(
+            insertion = "ins_sequenceName:1234:ABCD",
+            count = 42,
+            insertedSymbols = "ABCD",
+            position = 1234,
+            sequenceName = "sequenceName",
+        )
+        assertThat(result, equalTo(listOf(expectedInsertion)))
+    }
+
+    @Test
+    fun `GIVEN orderBy mutation WHEN computing nuc mutations THEN expands to component fields in order`() {
+        val querySlot = slot<SiloQuery<MutationData>>()
+        every { siloClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
+
+        underTest.computeNucleotideMutationProportions(
+            mutationProportionsRequest(
+                orderByFields = listOf(OrderByField("mutation", Order.ASCENDING)).toOrderBySpec(),
+            ),
+        ).toList()
+
+        val action = querySlot.captured.action as SiloAction.MutationsAction
+        assertThat(
+            action.orderByFields,
+            equalTo(
+                listOf(
+                    OrderByField("sequenceName", Order.ASCENDING),
+                    OrderByField("mutationFrom", Order.ASCENDING),
+                    OrderByField("position", Order.ASCENDING),
+                    OrderByField("mutationTo", Order.ASCENDING),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `GIVEN orderBy insertion WHEN computing nuc insertions THEN expands to component fields in order`() {
+        val querySlot = slot<SiloQuery<InsertionData>>()
+        every { siloClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
+        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
+
+        underTest.getNucleotideInsertions(
+            SequenceFiltersRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(OrderByField("insertion", Order.DESCENDING)).toOrderBySpec(),
+            ),
+        ).toList()
+
+        val action = querySlot.captured.action as SiloAction.NucleotideInsertionsAction
+        assertThat(
+            action.orderByFields,
+            equalTo(
+                listOf(
+                    OrderByField("sequenceName", Order.DESCENDING),
+                    OrderByField("position", Order.DESCENDING),
+                    OrderByField("insertedSymbols", Order.DESCENDING),
+                ),
+            ),
+        )
     }
 
     @Test

@@ -269,7 +269,7 @@ class NucleotideMutationsOverTimeControllerTest(
                         "filters": {
                             "country":"Switzerland"
                         },
-                        "includeMutations": ["123T", "456G"],
+                        "includeMutations": ["main:123T", "main:456G"],
                         "dateRanges": [{"dateFrom": "2025-01-01", "dateTo": "2025-01-31"}],
                         "dateField": "date"
                     }
@@ -293,10 +293,10 @@ class NucleotideMutationsOverTimeControllerTest(
         verify(exactly = 1) { modelMock.evaluateNucleotideMutations(any(), any(), any(), any()) }
         assertThat(dateFieldSlot.captured, `is`("date"))
         assertThat(mutationsSlot.captured, hasSize(2))
-        assertThat(mutationsSlot.captured[0].sequenceName, `is`(nullValue()))
+        assertThat(mutationsSlot.captured[0].sequenceName, `is`("main"))
         assertThat(mutationsSlot.captured[0].position, `is`(123))
         assertThat(mutationsSlot.captured[0].symbol, `is`("T"))
-        assertThat(mutationsSlot.captured[1].sequenceName, `is`(nullValue()))
+        assertThat(mutationsSlot.captured[1].sequenceName, `is`("main"))
         assertThat(mutationsSlot.captured[1].position, `is`(456))
         assertThat(mutationsSlot.captured[1].symbol, `is`("G"))
         assertThat(dateRangesSlot.captured, hasSize(1))
@@ -321,7 +321,7 @@ class NucleotideMutationsOverTimeControllerTest(
                         "filters": {
                             "country":"Switzerland"
                         },
-                        "includeMutations": ["123T"],
+                        "includeMutations": ["main:123T"],
                         "dateRanges": [{"dateFrom": "2025-01-01", "dateTo": "2025-01-31"}],
                         "dateField": "date",
                         "compression": "zstd",

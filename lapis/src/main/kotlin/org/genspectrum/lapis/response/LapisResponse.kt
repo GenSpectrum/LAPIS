@@ -78,7 +78,7 @@ data class QueriesOverTimeResponse<T>(
 )
 
 /**
- * In Javascript terms, this is equivalent to using `null` instead of `undefined`.
+ * In JavaScript terms, this is equivalent to using `null` instead of `undefined`.
  * ExplicitlyNullable is used to serialize null values in JSON when the surrounding class ignores null values,
  * i.e. treats `null` as `undefined`.
  * In some cases, you still want to be able to explicitly set `null` on a field.

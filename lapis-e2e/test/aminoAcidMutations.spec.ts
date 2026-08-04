@@ -40,7 +40,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     expect(mutation).to.deep.equal({
       count: undefined,
       coverage: undefined,
-      mutation: 'ORF1a:A1306S',
+      mutation: 'E:T9I',
       mutationFrom: undefined,
       mutationTo: undefined,
       position: undefined,
@@ -71,7 +71,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       },
     });
 
-    expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'ORF1a:A1306S');
+    expect(ascendingOrderedResult.data[0]).to.have.property('mutation', 'E:T9I');
 
     const descendingOrderedResult = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
@@ -79,7 +79,7 @@ describe('The /aminoAcidMutations endpoint', () => {
       },
     });
 
-    expect(descendingOrderedResult.data[0]).to.have.property('mutation', 'ORF8:Y73C');
+    expect(descendingOrderedResult.data[0]).to.have.property('mutation', 'S:Y505H');
   });
 
   it('should apply limit and offset', async () => {
@@ -91,7 +91,7 @@ describe('The /aminoAcidMutations endpoint', () => {
     });
 
     expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('mutation', 'ORF1a:A1708D');
+    expect(resultWithLimit.data[1]).to.have.property('mutation', 'M:A63T');
 
     const resultWithLimitAndOffset = await lapisClient.postAminoAcidMutations({
       sequenceFiltersWithMinProportion: {
@@ -168,9 +168,9 @@ mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V,1,17,0.058823529411764705,N,A,V,220
-S:A222V,3,16,0.1875,S,A,V,222
-ORF1a:A2529V,3,17,0.17647058823529413,ORF1a,A,V,2529
+E:T9I,4,16,0.25,E,T,I,9
+M:A63T,5,17,0.29411764705882354,M,A,T,63
+M:D3G,3,17,0.17647058823529413,M,D,G,3
 `.trim()
     );
   });
@@ -194,9 +194,9 @@ mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
 
     expect(resultText).to.contain(
       String.raw`
-N:A220V	1	17	0.058823529411764705	N	A	V	220
-S:A222V	3	16	0.1875	S	A	V	222
-ORF1a:A2529V	3	17	0.17647058823529413	ORF1a	A	V	2529
+E:T9I	4	16	0.25	E	T	I	9
+M:A63T	5	17	0.29411764705882354	M	A	T	63
+M:D3G	3	17	0.17647058823529413	M	D	G	3
     `.trim()
     );
   });

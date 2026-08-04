@@ -97,7 +97,7 @@ describe('The /nucleotideMutations endpoint', () => {
       },
     });
 
-    expect(descendingOrderedResult.data[0]).to.have.property('mutation', 'T9-');
+    expect(descendingOrderedResult.data[0]).to.have.property('mutation', 'T29867A');
   });
 
   it('should apply limit and offset', async () => {
@@ -109,7 +109,7 @@ describe('The /nucleotideMutations endpoint', () => {
     });
 
     expect(resultWithLimit.data).to.have.length(2);
-    expect(resultWithLimit.data[1]).to.have.property('mutation', 'A11201G');
+    expect(resultWithLimit.data[1]).to.have.property('mutation', 'A4-');
 
     const resultWithLimitAndOffset = await lapisClient.postNucleotideMutations({
       sequenceFiltersWithMinProportion: {
@@ -186,9 +186,9 @@ mutation,count,coverage,proportion,sequenceName,mutationFrom,mutationTo,position
 
     expect(resultText).to.contain(
       String.raw`
-C7029T,1,16,0.0625,,C,T,7029
-C71-,1,17,0.058823529411764705,,C,-,71
-C7124T,2,17,0.11764705882352941,,C,T,7124
+A1-,5,5,1.0,,A,-,1
+A4-,5,6,0.8333333333333334,,A,-,4
+A5-,5,6,0.8333333333333334,,A,-,5
 `.trim()
     );
   });
@@ -212,9 +212,9 @@ mutation	count	coverage	proportion	sequenceName	mutationFrom	mutationTo	position
 
     expect(resultText).to.contain(
       String.raw`
-C7029T	1	16	0.0625		C	T	7029
-C71-	1	17	0.058823529411764705		C	-	71
-C7124T	2	17	0.11764705882352941		C	T	7124
+A1-	5	5	1.0		A	-	1
+A4-	5	6	0.8333333333333334		A	-	4
+A5-	5	6	0.8333333333333334		A	-	5
     `.trim()
     );
   });

@@ -123,13 +123,16 @@ class AggregatedFiltersRequestTest {
                 Arguments.of(
                     """
                     {
-                        "nucleotideMutations": ["T1-", "A23062T"],
+                        "nucleotideMutations": ["other_segment:T1-", "other_segment:A23062T"],
                         "fields": ["date", "country"]
                     }
                     """,
                     AggregatedFiltersRequest(
                         emptyMap(),
-                        listOf(NucleotideMutation(null, 1, "-"), NucleotideMutation(null, 23062, "T")),
+                        listOf(
+                            NucleotideMutation("other_segment", 1, "-"),
+                            NucleotideMutation("other_segment", 23062, "T"),
+                        ),
                         emptyList(),
                         emptyList(),
                         emptyList(),
@@ -155,7 +158,7 @@ class AggregatedFiltersRequestTest {
                 Arguments.of(
                     """
                     {
-                        "nucleotideInsertions": ["ins_other_segment:501:Y", "ins_12:ABCD"],
+                        "nucleotideInsertions": ["ins_other_segment:501:Y", "ins_other_segment:12:ABCD"],
                         "fields": ["date", "country"]
                     }
                     """,
@@ -165,7 +168,7 @@ class AggregatedFiltersRequestTest {
                         emptyList(),
                         listOf(
                             NucleotideInsertion(501, "Y", "other_segment"),
-                            NucleotideInsertion(12, "ABCD", null),
+                            NucleotideInsertion(12, "ABCD", "other_segment"),
                         ),
                         emptyList(),
                         listOf(PlainField("date"), PlainField("country")),
