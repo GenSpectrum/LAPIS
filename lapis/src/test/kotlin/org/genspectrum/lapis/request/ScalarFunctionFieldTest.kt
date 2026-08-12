@@ -12,21 +12,21 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-private val testDatabaseConfig = databaseConfig(
-    primaryKey = "accession",
-    metadata = listOf(
-        DatabaseMetadata("accession", MetadataType.STRING),
-        DatabaseMetadata("date", MetadataType.DATE),
-        DatabaseMetadata("country", MetadataType.STRING),
-    ),
-)
-
-private val underTest = ScalarFunctionFieldConverter(
-    caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(testDatabaseConfig),
-    databaseConfig = testDatabaseConfig,
-)
-
 class ScalarFunctionFieldTest {
+    private val testDatabaseConfig = databaseConfig(
+        primaryKey = "accession",
+        metadata = listOf(
+            DatabaseMetadata("accession", MetadataType.STRING),
+            DatabaseMetadata("date", MetadataType.DATE),
+            DatabaseMetadata("country", MetadataType.STRING),
+        ),
+    )
+
+    private val underTest = ScalarFunctionFieldConverter(
+        caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(testDatabaseConfig),
+        databaseConfig = testDatabaseConfig,
+    )
+
     @Test
     fun `plain field name (no dot) returns null`() {
         assertNull(underTest.tryConvert("date"))
