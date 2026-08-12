@@ -10,11 +10,13 @@ instead of grouping by the raw field value.
 
 **Example:** to count sequences per ISO week instead of per exact date:
 
-```
-[URL to LAPIS instance]/sample/aggregated?fields=date.isoWeek
+```http
+GET /sample/aggregated?fields=date.isoWeek
 ```
 
-```json
+```http
+POST /sample/aggregated
+
 {
     "fields": ["date.isoWeek"]
 }
