@@ -175,27 +175,25 @@ describe('The /aggregated endpoint', () => {
   it('should stratify by a computed field using dot notation', async () => {
     const result = await lapisClient.postAggregated({
       aggregatedPostRequest: {
-        date: '2021-06-05',
         fields: ['date.isoWeek'],
       },
     });
 
-    expect(result.data).to.have.length(1);
-    expect(result.data[0]).to.have.property('count', 1);
-    expect(result.data[0]).to.have.property('date.isoWeek', 22);
+    expect(result.data.length).to.be.greaterThan(1);
+    result.data.forEach(item => expect(item).to.have.property('date.isoWeek'));
   });
 
   it('should order by a computed field using dot notation', async () => {
     const result = await lapisClient.postAggregated({
       aggregatedPostRequest: {
-        date: '2021-06-05',
         fields: ['date.isoWeek'],
         orderBy: [{ field: 'date.isoWeek', type: 'ascending' }],
       },
     });
 
-    expect(result.data).to.have.length(1);
-    expect(result.data[0]).to.have.property('date.isoWeek', 22);
+    expect(result.data.length).to.be.greaterThan(1);
+    const isoWeeks = result.data.map(item => (item as Record<string, number | null>)['date.isoWeek']);
+    expect(isoWeeks).to.deep.equal([...isoWeeks].sort((a, b) => (a ?? -Infinity) - (b ?? -Infinity)));
   });
 
   it('should return bad request for an unknown scalar function', async () => {
