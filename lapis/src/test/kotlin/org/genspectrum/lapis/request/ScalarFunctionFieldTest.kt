@@ -64,6 +64,6 @@ class ScalarFunctionFieldTest {
     @Test
     fun `isoWeek on non-date field throws BadRequestException`() {
         val ex = assertThrows<BadRequestException> { underTest.tryConvert("country.isoWeek") }
-        assertTrue(ex.message.orEmpty().contains("STRING"), "Expected error to mention type, got: ${ex.message}")
+        assertTrue(ex.message.contains("STRING"), "Expected error to mention type, got: ${ex.message}")
     }
 }
