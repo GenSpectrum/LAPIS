@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class ScalarFunctionFieldConverter(
     private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
-    private val databaseConfig: DatabaseConfig,
+    databaseConfig: DatabaseConfig,
 ) {
     private val fieldTypesByLowercaseName: Map<String, MetadataType> =
         databaseConfig.schema.metadata.associateBy({ it.name.lowercase() }, { it.type })
