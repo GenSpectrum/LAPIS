@@ -18,3 +18,10 @@ data class SequencePositionField(
     /** Used both as the SaneQL alias and as the response column key, e.g. `S[501]` or `[501]` for shorthand. */
     override val outputColumnName: String get() = if (isSingleSegment) "[$position]" else "$sequenceName[$position]"
 }
+
+data class ComputedField(
+    val sourceField: String,
+    val function: ScalarFunction,
+) : Field {
+    override val outputColumnName: String get() = "$sourceField.${function.saneQlMethodName}"
+}

@@ -172,6 +172,54 @@ describe('The /aggregated endpoint', () => {
     expect(resultJson.error.detail).to.include("Unknown field: 'notAField', known values are [primaryKey,");
   });
 
+  it('should stratify by a computed field using dot notation', async () => {
+    const result = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        fields: ['date.isoWeek'],
+      },
+    });
+
+    expect(result.data.length).to.be.greaterThan(1);
+    result.data.forEach(item => expect(item).to.have.property('date.isoWeek'));
+  });
+
+  it('should order by a computed field using dot notation', async () => {
+    const result = await lapisClient.postAggregated({
+      aggregatedPostRequest: {
+        fields: ['date.isoWeek'],
+        orderBy: [{ field: 'date.isoWeek', type: 'ascending' }],
+      },
+    });
+
+    expect(result.data.length).to.be.greaterThan(1);
+    const isoWeeks = result.data.map(item => (item as Record<string, number | null>)['date.isoWeek']);
+    expect(isoWeeks).to.deep.equal([...isoWeeks].sort((a, b) => (a ?? -Infinity) - (b ?? -Infinity)));
+  });
+
+  it('should return bad request for an unknown scalar function', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'date.notAFunction',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include("Unknown scalar function 'notAFunction'");
+  });
+
+  it('should return bad request for a scalar function applied to a field of the wrong type', async () => {
+    const urlParams = new URLSearchParams({
+      fields: 'country.isoWeek',
+    });
+
+    const result = await getAggregated(urlParams);
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include("is not valid for field 'country'");
+  });
+
   it('should return bad request for invalid variant query', async () => {
     const urlParams = new URLSearchParams({
       variantQuery: 'not a valid variant query',

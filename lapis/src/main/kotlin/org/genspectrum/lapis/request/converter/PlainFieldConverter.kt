@@ -17,6 +17,11 @@ class PlainFieldConverter(
                 "Sequence position fields are not supported here: ${it.outputColumnName}",
             )
         }
+        if ('.' in source) {
+            throw BadRequestException(
+                "Scalar functions are not supported in fields for this endpoint: $source",
+            )
+        }
         return metadataFieldConverter.convert(source)
     }
 }

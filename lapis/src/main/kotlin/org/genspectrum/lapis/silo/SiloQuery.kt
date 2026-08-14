@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
@@ -85,6 +86,7 @@ sealed class SiloAction<ResponseType>(
     companion object {
         fun aggregated(
             groupByFields: List<String> = emptyList(),
+            computedFields: List<ComputedField> = emptyList(),
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
@@ -93,6 +95,7 @@ sealed class SiloAction<ResponseType>(
             AggregatedAction(
                 groupByFields = groupByFields,
                 sequencePositionFields = sequencePositionFields,
+                computedFields = computedFields,
                 orderByFields = getOrderByFieldsList(orderByFields),
                 randomize = getRandomize(orderByFields),
                 limit = limit,
@@ -228,6 +231,7 @@ sealed class SiloAction<ResponseType>(
     data class AggregatedAction(
         val groupByFields: List<String>,
         val sequencePositionFields: List<SequencePositionField> = emptyList(),
+        val computedFields: List<ComputedField> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
@@ -240,29 +244,34 @@ sealed class SiloAction<ResponseType>(
 
         override fun ownSaneQlSteps() =
             buildList {
-                if (sequencePositionFields.isNotEmpty()) {
+                val allComputedMappings =
+                    sequencePositionFields.map { field ->
+                        SaneQlAssignment(
+                            field.outputColumnName,
+                            SaneQlMethodCall(
+                                SaneQlIdentifier(field.sequenceName),
+                                "at",
+                                listOf(SaneQlInt(field.position)),
+                            ),
+                        )
+                    } + computedFields.map { field ->
+                        SaneQlAssignment(
+                            field.outputColumnName,
+                            SaneQlMethodCall(id(field.sourceField), field.function.saneQlMethodName),
+                        )
+                    }
+                if (allComputedMappings.isNotEmpty()) {
                     add(
                         SaneQlStep(
                             "map",
-                            positionalArgs = listOf(
-                                SaneQlList(
-                                    sequencePositionFields.map { field ->
-                                        SaneQlAssignment(
-                                            field.outputColumnName,
-                                            SaneQlMethodCall(
-                                                SaneQlIdentifier(field.sequenceName),
-                                                "at",
-                                                listOf(SaneQlInt(field.position)),
-                                            ),
-                                        )
-                                    },
-                                ),
-                            ),
+                            positionalArgs = listOf(SaneQlList(allComputedMappings)),
                         ),
                     )
                 }
                 val allGroupByColumns =
-                    groupByFields.map { id(it) } + sequencePositionFields.map { id(it.outputColumnName) }
+                    groupByFields.map { id(it) } +
+                        sequencePositionFields.map { id(it.outputColumnName) } +
+                        computedFields.map { id(it.outputColumnName) }
                 add(
                     SaneQlStep(
                         "groupBy",

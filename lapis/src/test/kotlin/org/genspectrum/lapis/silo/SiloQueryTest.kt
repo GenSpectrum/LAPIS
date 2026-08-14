@@ -79,13 +79,13 @@ class SiloQueryTest {
                 ),
                 Arguments.of(
                     SiloAction.aggregated(
-                        listOf("field1", "field2"),
-                        listOf(
+                        groupByFields = listOf("field1", "field2"),
+                        orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
                         ).toOrderBySpec(),
-                        100,
-                        50,
+                        limit = 100,
+                        offset = 50,
                     ),
                     """
                         {

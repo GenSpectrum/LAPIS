@@ -51,4 +51,28 @@ class OrderByFieldConverterTest {
         assertThat(result.field, equalTo("country"))
         assertThat(result.order, equalTo(Order.ASCENDING))
     }
+
+    @Test
+    fun `GIVEN a computed field THEN converts to OrderByField with the same computed field`() {
+        val result = orderByFieldConverter.convert("date.isoWeek")
+
+        assertThat(result.field, equalTo("date.isoWeek"))
+        assertThat(result.order, equalTo(Order.ASCENDING))
+    }
+
+    @Test
+    fun `GIVEN a differently-cased computed field THEN converts to the same canonical field as 'fields' would`() {
+        val result = orderByFieldConverter.convert("DATE.ISOWEEK")
+
+        assertThat(result.field, equalTo("date.isoWeek"))
+        assertThat(result.order, equalTo(Order.ASCENDING))
+    }
+
+    @Test
+    fun `GIVEN 'count' THEN converts to OrderByField with field 'count' unchanged`() {
+        val result = orderByFieldConverter.convert("count")
+
+        assertThat(result.field, equalTo("count"))
+        assertThat(result.order, equalTo(Order.ASCENDING))
+    }
 }

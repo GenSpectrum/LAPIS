@@ -32,6 +32,18 @@ describe('The /details endpoint', () => {
     });
   });
 
+  it('should return bad request for a computed field', async () => {
+    const result = await fetch(
+      basePath + '/sample/details?' + new URLSearchParams({ fields: 'date.isoWeek' })
+    );
+
+    expect(result.status).equals(400);
+    const resultJson = await result.json();
+    expect(resultJson.error.detail).to.include(
+      'Scalar functions are not supported in fields for this endpoint: date.isoWeek'
+    );
+  });
+
   it('should fetch the correct key for "isNull" filter', async () => {
     const result = await lapisClient.postDetails({
       detailsPostRequest: {

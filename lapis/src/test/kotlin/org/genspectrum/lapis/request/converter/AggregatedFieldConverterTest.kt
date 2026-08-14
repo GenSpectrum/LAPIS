@@ -13,6 +13,10 @@ import org.junit.jupiter.api.Test
 class AggregatedFieldConverterTest {
     @Test
     fun `convert resolves shorthand position syntax on a single-segmented genome`() {
+        val dbConfig = databaseConfig(
+            primaryKey = "primaryKey",
+            metadata = listOf(DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING)),
+        )
         val underTest = AggregatedFieldConverter(
             sequencePositionFieldConverter = SequencePositionFieldConverter(
                 referenceGenomeSchema = ReferenceGenomeSchema(
@@ -20,13 +24,12 @@ class AggregatedFieldConverterTest {
                     genes = emptyList(),
                 ),
             ),
+            scalarFunctionFieldConverter = ScalarFunctionFieldConverter(
+                caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(dbConfig),
+                databaseConfig = dbConfig,
+            ),
             metadataFieldConverter = MetadataFieldConverter(
-                caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(
-                    databaseConfig(
-                        primaryKey = "primaryKey",
-                        metadata = listOf(DatabaseMetadata(name = "primaryKey", type = MetadataType.STRING)),
-                    ),
-                ),
+                caseInsensitiveFieldsCleaner = CaseInsensitiveFieldsCleaner(dbConfig),
             ),
         )
 
