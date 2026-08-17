@@ -1,6 +1,6 @@
 # End-to-end tests
 
-These end-to-end test the integration of SILO and LAPIS.
+These end-to-end test the integration of RhyDB and LAPIS.
 
 How to execute the tests
 (Given that you have a running LAPIS instance listening on localhost:8090, e.g. via `docker compose up`):

@@ -25,12 +25,12 @@ npm run format                    # Auto-fix formatting
 
 E2E tests verify:
 
-1. **Integration** - LAPIS and SILO working together end-to-end
+1. **Integration** - LAPIS and RhyDB working together end-to-end
 2. **API Contract** - Endpoints match OpenAPI specification
 3. **Data Correctness** - Responses contain expected data
 4. **Client Generation** - Generated TypeScript client works correctly
 
-These tests run against a real LAPIS instance with SILO backend.
+These tests run against a real LAPIS instance with RhyDB backend.
 
 ## Project Structure
 
@@ -258,7 +258,7 @@ npm test -- --grep "aggregated|mutations"
 ### CI/CD Integration
 
 - Tests run in GitHub Actions
-- Docker containers spun up for LAPIS and SILO
+- Docker containers spun up for LAPIS and RhyDB
 - Test data loaded automatically
 - Prettier formatting enforced
 - All tests must pass before merge
