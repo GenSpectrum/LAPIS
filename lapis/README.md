@@ -7,7 +7,7 @@ LAPIS is a REST API written in Kotlin using Spring Boot.
 
 Check the [Docker compose file](docker-compose.yml) for an example on how to run the LAPIS Docker images.
 
-Use Docker Compose to run SILO and LAPIS:
+Use Docker Compose to run RhyDB and LAPIS:
 
 ```bash
 LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up --pull always
@@ -26,7 +26,7 @@ SILO_TAG=latest LAPIS_TAG=local docker compose up --pull missing
 
 When running LAPIS, you need to pass the following arguments:
 
-* the SILO url `--silo.url=http://<url>:<port>`
+* the RhyDB url `--silo.url=http://<url>:<port>`
 * the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
  in the Docker image this is already set to `/workspace/database_config.yaml`.
 * the path to the reference genome `--referenceGenomeFilename=<path/to/referenceGenome>`
@@ -77,7 +77,7 @@ The maintainer must ensure that enough memory is available to store the cache en
 heap size of the JVM.
 
 If the cache is full, the least recently used entry is removed from the cache.
-The cache is cleared when the server is restarted, or SILO provides a new data version.
+The cache is cleared when the server is restarted, or RhyDB provides a new data version.
 
 The cache can be turned off by providing the `spring.cache.type` attribute in the 
 `application.properties` file, for example: 

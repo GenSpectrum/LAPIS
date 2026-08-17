@@ -16,7 +16,7 @@ Main features include:
   Sequences are provided as FASTA.
 * **Very fast**: LAPIS was originally developed to query SARS-CoV-2 sequences
   and, therefore, capable to process millions of sequences efficiently.
-  It uses [SILO](https://github.com/GenSpectrum/LAPIS-SILO) as its data query engine.
+  It uses [RhyDB](https://github.com/GenSpectrum/LAPIS-SILO) as its data query engine.
 
 ## Documentation
 
@@ -45,12 +45,12 @@ The openApi documentation is generated per LAPIS instance from the provided conf
 The OpenAPI specification is available at `url.to.lapis:<port>/api-docs` (in JSON format) or at
 `url.to.lapis:<port>/api-docs.yaml` (in YAML format).
 
-## SILO Compatibility
+## RhyDB Compatibility
 
-This table shows which LAPIS version is required for which SILO version.
+This table shows which LAPIS version is required for which RhyDB version.
 Higher versions will also work if they are not specified in the table.
 
-| LAPIS  | SILO   |
+| LAPIS  | RhyDB  |
 |--------|--------|
 | 0.8.5  | 0.13.0 |
 | 0.8.4  | 0.12.0 |
