@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.5](https://github.com/GenSpectrum/LAPIS/compare/v0.8.4...v0.8.5) (2026-08-18)
+
+
+### Features
+
+* **lapis:** support scalar functions in aggregation fields via dot notation ([#1780](https://github.com/GenSpectrum/LAPIS/issues/1780)) ([80a55fd](https://github.com/GenSpectrum/LAPIS/commit/80a55fd5efb5e609c920107d77362b131c918bb4))
+
+
+### Bug Fixes
+
+* **lapis:** restore `insertion` and `mutation` format in response ([#1798](https://github.com/GenSpectrum/LAPIS/issues/1798)) ([58e1ed6](https://github.com/GenSpectrum/LAPIS/commit/58e1ed6e1b6b64aa84be91976a9311cabc3eb568))
+
 ## [0.8.4](https://github.com/GenSpectrum/LAPIS/compare/v0.8.3...v0.8.4) (2026-07-29)
 
 
