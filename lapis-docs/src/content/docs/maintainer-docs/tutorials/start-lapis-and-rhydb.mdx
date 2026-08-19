@@ -1,13 +1,17 @@
 ---
-title: Start LAPIS and SILO
-description: Tutorial to start LAPIS and SILO with Docker
+title: Start LAPIS and RhyDB
+description: Tutorial to start LAPIS and RhyDB with Docker
 ---
 
-Every LAPIS instance needs to be backed by a SILO instance, that acts as data source.
-SILO could be operated stand-alone.
-LAPIS is meant as a layer of convenience and abstraction around SILO.
+:::caution
+Some parts of this page might be outdated.
+:::
 
-We provide Docker images of SILO and LAPIS that are ready to use.
+Every LAPIS instance needs to be backed by a RhyDB instance, that acts as data source.
+RhyDB could be operated stand-alone.
+LAPIS is meant as a layer of convenience and abstraction around RhyDB.
+
+We provide Docker images of RhyDB and LAPIS that are ready to use.
 We recommend using those Docker images, so in this tutorial, we explain how to use them.
 You will build a Docker Compose file step by step.
 
@@ -31,9 +35,9 @@ cd ~/lapisExample
 
 ### Writing Configuration
 
-Both LAPIS and SILO need to know which metadata columns are available in the dataset.
+Both LAPIS and RhyDB need to know which metadata columns are available in the dataset.
 Furthermore, you need to define which column acts as primary key
-and which column should be used to generate partitions in SILO.
+and which column should be used to generate partitions in RhyDB.
 Also, LAPIS is configured to be an open instance, meaning that the underlying data requires no visibility restrictions.
 
 ```yaml
@@ -70,7 +74,7 @@ schema:
 See the [config reference](../references/database-configuration) for a full specification.
 :::
 
-### Starting SILO Preprocessing
+### Starting RhyDB Preprocessing
 
 :::note
 Refer to [Preprocessing](../references/preprocessing) for more explanation
@@ -84,18 +88,18 @@ Download the example dataset from the [end-to-end tests](https://github.com/GenS
 - small_metadata_set.tsv
 - all fasta files for the sequences
 
-SILO expects fasta files (possibly compressed via zstandard or xz)
+RhyDB expects fasta files (possibly compressed via zstandard or xz)
 in the same directory with naming scheme `nuc_<sequence_index>.fasta` for nucleotide sequences
 or `gene_<sequence_index>.fasta` for amino acid sequences.
 The `sequence_index`s have to match the indexes of the arrays defined in the `reference_genomes.json`.
 
 Put those files into the folder `~/lapisExample/data/`.
 
-Now SILO needs to know where it can find those files.
+Now RhyDB needs to know where it can find those files.
 You have to provide a "preprocessing config" for that.
 Note that you need to provide the paths where the files will be stored in the Docker container.
 Filenames are relative to the input directory.
-Since you don't provide the input directory explicitly, SILO will fall back to the default `/data`.
+Since you don't provide the input directory explicitly, RhyDB will fall back to the default `/data`.
 
 ```yaml
 // ~/lapisExample/config/preprocessing_config.yaml
@@ -106,7 +110,7 @@ referenceGenomeFilename: 'reference_genomes.json'
 
 To start the preprocessing, you have to:
 
-- start SILO in the `preprocessing` mode
+- start RhyDB in the `preprocessing` mode
 - mount the data into the container to the default location
 - mount the preprocessing config into the container to the default location
 - mount the database config into the container to the default location
@@ -130,13 +134,13 @@ services:
 ```
 
 After this has completed, the output directory should contain the result of the preprocessing.
-That result has to be provided to SILO in the next step.
+That result has to be provided to RhyDB in the next step.
 
-### Starting SILO
+### Starting RhyDB
 
-To start the SILO api, you have to:
+To start the RhyDB api, you have to:
 
-- start SILO in the `api` mode,
+- start RhyDB in the `api` mode,
 - expose port 8081,
 - mount the preprocessing result into the container,
 - wait for the preprocessing to complete.
@@ -175,8 +179,8 @@ Execute
 docker compose up
 ```
 
-Now SILO should be available at http://localhost:8081
-and http://localhost:8081/info should show that SILO contains sequences.
+Now RhyDB should be available at http://localhost:8081
+and http://localhost:8081/info should show that RhyDB contains sequences.
 
 ### Starting LAPIS
 
@@ -184,7 +188,7 @@ Now you can start LAPIS. You have to:
 
 - expose port 8080 to the host.
 - mount the database configuration and the reference genomes to the default locations in the Docker container.
-- provide LAPIS with the SILO URL.
+- provide LAPIS with the RhyDB URL.
 
 Add a corresponding service to the `docker-compose.yaml`:
 
@@ -239,6 +243,6 @@ LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that se
 
 ## Further Reading
 
-- Documentation of SILO in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
+- Documentation of RhyDB in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
 - Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/docker-compose.yml) that can also serve as an example.
   The CI makes sure that it works at any time.

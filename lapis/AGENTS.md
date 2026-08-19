@@ -37,14 +37,14 @@ LAPIS follows a three-layer architecture:
    - Uses Spring annotations (@RestController, @PostMapping, etc.)
    - Handles request validation and response formatting
 
-2. **Query Mapping Layer** - Maps HTTP requests to SILO queries
+2. **Query Mapping Layer** - Maps HTTP requests to RhyDB queries
    - Located in `org.genspectrum.lapis.request`
    - Parses and validates sequence filters, mutations, insertions
    - Maps dynamic metadata fields to query parameters
 
-3. **SILO Client Layer** - Communicates with SILO, handles caching
+3. **RhyDB Client Layer** - Communicates with RhyDB, handles caching
    - Located in `org.genspectrum.lapis.silo`
-   - HTTP client for SILO communication
+   - HTTP client for RhyDB communication
    - Caffeine cache for performance
 
 ### Key Concepts
@@ -231,10 +231,10 @@ LAPIS usually runs on localhost:8090
 
 - Uses Caffeine cache for performance
 - Caches aggregated, mutation, and insertion queries
-- Cache is cleared when SILO data version changes
+- Cache is cleared when RhyDB data version changes
 - Configuration:
     - Cache provider and Caffeine spec are defined in `application.properties`
-    - Cache usage/behavior is controlled via Spring cache annotations (e.g., in SILO services and scheduler classes)
+    - Cache usage/behavior is controlled via Spring cache annotations (e.g., in RhyDB services and scheduler classes)
 
 ### Multi-segmented Genomes
 
@@ -246,7 +246,7 @@ Project supports both single and multi-segmented genomes:
 ### Docker Compose
 
 There is `docker-compose.yml` for local testing.
-You can assume that the SILO containers are running.
+You can assume that the RhyDB containers are running.
 
 ### CI/CD
 

@@ -11,7 +11,7 @@ LAPIS is divided into three main components (from outer to inner):
 
 * the HTTP layer
 * the query mapping layer
-* the SILO client layer
+* the RhyDB client layer
 
 #### HTTP Layer
 
@@ -35,12 +35,12 @@ This approach has the advantage that it doesn't need to be implemented for every
 
 Once the data is extracted from the request, it is passed to the query mapping layer.
 This layer maps the request to a 
-[SILO query](https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md).
-A SILO query consists of two parts:
+[RhyDB query](https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md).
+A RhyDB query consists of two parts:
 
 * the **query action** (aggregated, details, etc.): 
   The action type is directly determined by which **LAPIS endpoint** has been called.
-  LAPIS offers endpoints for every SILO query action.
+  LAPIS offers endpoints for every RhyDB query action.
   Some request parameters (e.g. `fields` and `limit`) are used as parameters for the action.
 * the **query filter**: This is determined by the **request parameters**.
   LAPIS tries to match the request parameters on the metadata fields defined in the database configuration.
@@ -55,15 +55,15 @@ There are some concepts that we use throughout the LAPIS code:
   or range filtering (such as `country.regex`, `dataFrom`, or `dateTo`).
 * We called all request properties that are statically known "special properties".
   Those contain the mutation and insertion filters
-  and fields that either relevant for the SILO action (such as `limit` or `orderBy`)
+  and fields that either relevant for the RhyDB action (such as `limit` or `orderBy`)
   or are used for LAPIS features (such as `dataFormat` or `compression`).
 * The requests that LAPIS accepts are "sequence filters + special properties".
   Every request property that is not "special" is assumed to be a sequence filter.
 
-#### SILO Client Layer
+#### RhyDB Client Layer
 
-The SILO client layer is responsible for sending the query to SILO and processing the response.
-This layer makes sure that LAPIS sends syntactically correct queries to SILO and handles the response.
+The RhyDB client layer is responsible for sending the query to RhyDB and processing the response.
+This layer makes sure that LAPIS sends syntactically correct queries to RhyDB and handles the response.
 It is also responsible for caching the responses of certain queries.
 
 ### OpenAPI Documentation And Swagger UI
@@ -93,14 +93,14 @@ Unit tests test the individual layers of LAPIS separately.
   They use `MockMvc` to send a request to the controller and check the response.
   That allows the tests to test the full HTTP layer, including Spring's request processing.
 * There are tests that test certain parts of the **query mapping layer**.
-  Those are quite straight forward: Given a certain request, make sure that it yields the expected SILO query.
-* There are tests that make sure that the **SILO client** sends the correct query to SILO.
+  Those are quite straight forward: Given a certain request, make sure that it yields the expected RhyDB query.
+* There are tests that make sure that the **RhyDB client** sends the correct query to RhyDB.
 
 #### End-to-End Tests
 
 The end-to-end tests test the whole LAPIS stack.
-They spin up SILO and LAPIS in Docker containers with a dummy dataset and run queries against them.
-The main purpose is to test that **LAPIS and SILO work together**.
+They spin up RhyDB and LAPIS in Docker containers with a dummy dataset and run queries against them.
+The main purpose is to test that **LAPIS and RhyDB work together**.
 
 The tests generate a Typescript client from the OpenAPI documentation that the tests use to send requests to LAPIS.
 

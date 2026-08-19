@@ -59,11 +59,11 @@ which creates Git tags and Docker image tags based on the commit messages when a
 
 3. **Database Config:** YAML file defines metadata fields, determines available sequence filters.
 
-4. **Caching:** Caffeine cache for aggregated/mutation/insertion queries. Cleared on SILO data version change.
+4. **Caching:** Caffeine cache for aggregated/mutation/insertion queries. Cleared on RhyDB data version change.
 
 5. **Multi-segmented Genomes:** Project supports both single and multi-segmented genomes. Test both variants.
 
-6. **Docker Compose:** Use `docker-compose.yml` in `lapis/` for local development with SILO.
+6. **Docker Compose:** Use `docker-compose.yml` in `lapis/` for local development with RhyDB.
 
 7. **CI/CD:** GitHub Actions enforces ktlint, prettier, tests. Multi-platform Docker builds on main branch.
 
