@@ -264,5 +264,9 @@ export default defineConfig({
 
     vite: {
         plugins: [tailwindcss()],
+        optimizeDeps: {
+            // Ensure swagger-ui-react (and its deep CJS deps like core-js-pure) are pre-bundled deterministically.
+            include: ['swagger-ui-react'],
+        },
     },
 });
