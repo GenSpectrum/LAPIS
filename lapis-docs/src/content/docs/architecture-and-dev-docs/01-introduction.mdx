@@ -5,7 +5,7 @@ description: Introduction to the architecture and the developers docs of LAPIS
 
 This document was inspired by the [arc42 template](https://arc42.org/).
 
-It describes LAPIS (**L**ightweight **API** for **S**equences) and SILO,
+It describes LAPIS (**L**ightweight **API** for **S**equences) and RhyDB,
 which is a platform to give easy access to genomic sequence data alongside metadata of the sequenced probes.
 It is used to filter potentially large sequence data and return the result to the user through web access,
 so that a user can develop their own evaluation of the data.
@@ -13,13 +13,13 @@ so that a user can develop their own evaluation of the data.
 The initial implementation of LAPIS is specialized for SARS-CoV-2 and is used
 by [CoV-Spectrum](https://cov-spectrum.org).
 In this approach, we want to develop a generalized API that is configurable for a wider range of organisms.
-The solution consists of two systems, LAPIS and SILO, which are designed to work together,
+The solution consists of two systems, LAPIS and RhyDB, which are designed to work together,
 but they could be operated independently of each other.
-SILO serves as a database with a specialized query language (SILO queries),
+RhyDB serves as a database with a specialized query language (RhyDB queries),
 which could in principle be exchanged by any other database.
 
-This document focuses on LAPIS, but we usually think of it as operated as a single unit with SILO.
-We refer to this special configuration as SILO-LAPIS.
+This document focuses on LAPIS, but we usually think of it as operated as a single unit with RhyDB.
+We refer to this special configuration as RhyDB-LAPIS.
 
 The following goals have been established for this system:
 
@@ -47,8 +47,8 @@ The following goals have been established for this system:
 | Performance efficiency | Time behaviour   | It is possible to query millions of sequences in less than a second.                                              |
 |                        | Scalability      | Performance (query response time, memory usage) grows at most linearly with the number of stored sequences.       |
 |                        |                  |                                                                                                                   |
-| Maintainability        | Reusability      | It is possible to use LAPIS with any other database that implements the SILO query language.                      |
-|                        | Testability      | SILO-LAPIS is well tested on end to end scope. The tests serve as examples for users and maintainers.             |
+| Maintainability        | Reusability      | It is possible to use LAPIS with any other database that implements the RhyDB query language.                     |
+|                        | Testability      | RhyDB-LAPIS is well tested on end to end scope. The tests serve as examples for users and maintainers.            |
 
 ## Stakeholders
 

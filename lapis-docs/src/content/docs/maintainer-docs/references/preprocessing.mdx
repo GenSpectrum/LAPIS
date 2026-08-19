@@ -1,19 +1,23 @@
 ---
 title: Preprocessing
-description: Reference on the SILO preprocessing
+description: Reference on the RhyDB preprocessing
 ---
 
 import TsvExample from '../../../../components/TsvExample.astro';
 
-:::tip[Why preprocessing?]
-SILO contains an in-memory database.
-Building this database from the raw input data is computation intensive,
-thus this is done before starting SILO.
-This is called "preprocessing".
-The result is a serialized version of the database that can be loaded into SILO in a much shorter time.
+:::caution
+This is outdated.
 :::
 
-The SILO preprocessing accepts input data in two formats:
+:::tip[Why preprocessing?]
+RhyDB contains an in-memory database.
+Building this database from the raw input data is computation intensive,
+thus this is done before starting RhyDB.
+This is called "preprocessing".
+The result is a serialized version of the database that can be loaded into RhyDB in a much shorter time.
+:::
+
+The RhyDB preprocessing accepts input data in two formats:
 
 - `NDJSON`: a single [NDJSON](https://ndjson.org/) file containing all the data,
 - `TSV/FASTA`: a directory containing
@@ -74,7 +78,7 @@ All filenames are relative to the `inputDirectory`.
 
 ## `NDJSON` Format
 
-SILO will initiate preprocessing in the `NDJSON` format
+RhyDB will initiate preprocessing in the `NDJSON` format
 if `ndjsonInputFilename` is specified in the preprocessing configuration.
 
 Each line in the NDJSON file must be a JSON object with the following keys:
@@ -102,7 +106,7 @@ schema:
           type: aaInsertion
 ```
 
-Otherwise, SILO will not recognize insertions in the NDJSON format.
+Otherwise, RhyDB will not recognize insertions in the NDJSON format.
 :::
 
 #### Sequences Object
@@ -173,10 +177,10 @@ A real NDJSON file must not contain line breaks and should look as follows:
 
 ## `TSV/FASTA` Format
 
-SILO will initiate preprocessing in the `TSV/FASTA` format
+RhyDB will initiate preprocessing in the `TSV/FASTA` format
 if `metadataFilename` is specified in the preprocessing configuration.
 
-SILO expects the following files in the `inputDirectory`:
+RhyDB expects the following files in the `inputDirectory`:
 
 - a TSV file with the metadata named as configured in `metadataFilename`,
 - FASTA files with the sequences.
@@ -279,7 +283,7 @@ This file is relevant only if your data includes Pango Lineages.
 
 The Pango lineage definition file is a JSON file mapping Pango lineage names to their aliases.
 It is used to reconstruct the lineage tree structure.
-SILO requires this to properly group sequences into partitions to fully benefit from partitioning.
+RhyDB requires this to properly group sequences into partitions to fully benefit from partitioning.
 
 The file contains a JSON object with alias names as keys and:
 
