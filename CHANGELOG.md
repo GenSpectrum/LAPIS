@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.6](https://github.com/GenSpectrum/LAPIS/compare/v0.8.5...v0.8.6) (2026-08-19)
+
+
+### Bug Fixes
+
+* **lapis-docs:** bump astro and @astrojs/starlight in /lapis-docs - fix table formatting ([#1799](https://github.com/GenSpectrum/LAPIS/issues/1799)) ([ec162c5](https://github.com/GenSpectrum/LAPIS/commit/ec162c5ab9a5f1f7277aaaef733c7b59c2022025))
+
 ## [0.8.5](https://github.com/GenSpectrum/LAPIS/compare/v0.8.4...v0.8.5) (2026-08-18)
 
 
