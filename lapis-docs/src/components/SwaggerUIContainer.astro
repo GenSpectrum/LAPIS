@@ -1,6 +1,6 @@
 ---
 import { getLapisUrl } from '../lapisUrl';
-import SwaggerUI from './SwaggerUI.tsx';
+import { SwaggerUIWrapper } from './SwaggerUI.tsx';
 
 const swaggerUiUrl = getLapisUrl() + '/swagger-ui.html';
 const openApiUrl = getLapisUrl() + '/api-docs';
@@ -28,5 +28,5 @@ const openApiUrl = getLapisUrl() + '/api-docs';
 </p>
 
 <div class='not-content'>
-    <SwaggerUI url={openApiUrl} client:only='react' />
+    <SwaggerUIWrapper url={openApiUrl} client:only='react' />
 </div>
