@@ -206,8 +206,8 @@ export default defineConfig({
                                     link: '/maintainer-docs/references/reference-genomes',
                                 },
                                 {
-                                    label: 'Starting SILO and LAPIS',
-                                    link: '/maintainer-docs/references/starting-silo-and-lapis',
+                                    label: 'Starting RhyDB and LAPIS',
+                                    link: '/maintainer-docs/references/starting-rhydb-and-lapis',
                                 },
                                 {
                                     label: 'Preprocessing',
@@ -232,8 +232,8 @@ export default defineConfig({
                             label: 'Tutorials',
                             items: [
                                 {
-                                    label: 'Start LAPIS and SILO',
-                                    link: '/maintainer-docs/tutorials/start-lapis-and-silo',
+                                    label: 'Start LAPIS and RhyDB',
+                                    link: '/maintainer-docs/tutorials/start-lapis-and-rhydb',
                                 },
                                 {
                                     label: 'Generate your config',

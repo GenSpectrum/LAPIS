@@ -11,7 +11,7 @@ A documentation website tailored to your LAPIS instance.
   If you want to get started setting up your own LAPIS instance,
   we recommend setting up this documentation first and iterating from there.
 * **Config Generator**: An interactive wizard to help you generate and modify the configuration of your LAPIS instance.
-* **Architecture Overview**: An overview of the LAPIS architecture and how it interacts with SILO.
+* **Architecture Overview**: An overview of the LAPIS architecture and how it interacts with RhyDB.
 
 ## Quickstart
 
@@ -44,7 +44,7 @@ CONFIG_FILE=../lapis-e2e/testData/testDatabaseConfig.yaml REFERENCE_GENOMES_FILE
 ## Deploying
 
 Starlight is meant to be used to generate static HTML files that can be hosted by any standard web server.
-This documentation however is meant to be specific for a given database configuration for LAPIS and SILO.
+This documentation however is meant to be specific for a given database configuration for LAPIS and RhyDB.
 
 Thus, the documentation can only be built at deployment time (i.e. when the config is known), and not ahead of time.
 We provide Docker images that can be used to build the documentation, and then serve it.

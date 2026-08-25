@@ -90,7 +90,7 @@ const maintainerDocsPages = prependToRelativeUrl(
             [
                 { title: 'Database Configuration', relativeUrl: '/database-configuration' },
                 { title: 'Reference Genomes', relativeUrl: '/reference-genomes' },
-                { title: 'Starting SILO and LAPIS', relativeUrl: '/starting-silo-and-lapis' },
+                { title: 'Starting RhyDB and LAPIS', relativeUrl: '/starting-rhydb-and-lapis' },
                 { title: 'Preprocessing', relativeUrl: '/preprocessing' },
                 { title: 'Authentication', relativeUrl: '/authentication' },
             ],
@@ -99,7 +99,7 @@ const maintainerDocsPages = prependToRelativeUrl(
         ...prependToRelativeUrl([{ title: 'Caching', relativeUrl: '/caching' }], '/concepts'),
         ...prependToRelativeUrl(
             [
-                { title: 'Start LAPIS and SILO', relativeUrl: '/start-lapis-and-silo' },
+                { title: 'Start LAPIS and RhyDB', relativeUrl: '/start-lapis-and-rhydb' },
                 { title: 'Generate your config', relativeUrl: '/generate-your-config' },
             ],
             '/tutorials',

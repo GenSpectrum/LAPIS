@@ -1,14 +1,14 @@
 @startuml
 
-node SILO {
-  package "SILO Api" {
+node RhyDB {
+  package "RhyDB Api" {
     component "Query Engine" as query
     component "Runtime Database" as db
     "Web API" -> query
     query -> db
   }
 
-  package "SILO Preprocessing" {
+  package "RhyDB Preprocessing" {
     component "Preprocessing Database"
   }
 }
