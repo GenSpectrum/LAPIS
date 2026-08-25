@@ -2,7 +2,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    id 'org.springframework.boot' version '4.1.0'
+    id 'org.springframework.boot' version '4.1.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.jetbrains.kotlin.jvm' version '2.4.10'
     id 'org.jetbrains.kotlin.plugin.spring' version '2.4.10'
@@ -54,7 +54,7 @@ dependencies {
         exclude group: "org.mockito"
     }
     testImplementation 'com.ninja-squad:springmockk:5.0.1'
-    testImplementation 'org.mock-server:mockserver-netty:7.5.0'
+    testImplementation 'org.mock-server:mockserver-netty:7.6.0'
     testImplementation platform("io.jsonwebtoken:jjwt-bom:0.13.0")
     testImplementation "io.jsonwebtoken:jjwt-api"
     testImplementation "io.jsonwebtoken:jjwt-impl"
