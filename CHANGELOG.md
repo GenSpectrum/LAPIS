@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.7](https://github.com/GenSpectrum/LAPIS/compare/v0.8.6...v0.8.7) (2026-09-03)
+
+
+### Bug Fixes
+
+* **lapis:** do not cache aggregations with many group by fields ([#1850](https://github.com/GenSpectrum/LAPIS/issues/1850)) ([2a46e72](https://github.com/GenSpectrum/LAPIS/commit/2a46e72445657eafc00e3e338c584393e359c9fe))
+
 ## [0.8.6](https://github.com/GenSpectrum/LAPIS/compare/v0.8.5...v0.8.6) (2026-08-19)
 
 
