@@ -3,6 +3,7 @@ package org.genspectrum.lapis.silo
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -51,6 +52,26 @@ class SiloQueryTest {
         val result = objectMapper.writeValueAsString(underTest)
 
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
+    }
+
+    @Test
+    fun `GIVEN an aggregation with few group by fields THEN it is cacheable`() {
+        val action = SiloAction.aggregated(
+            groupByFields = (1..10).map { "field$it" },
+            sequencePositionFields = (1..10).map { SequencePositionField("main", it) },
+        )
+
+        assertThat(action.cacheable, equalTo(true))
+    }
+
+    @Test
+    fun `GIVEN an aggregation with more than 20 group by fields THEN it is not cacheable`() {
+        val action = SiloAction.aggregated(
+            groupByFields = listOf("date"),
+            sequencePositionFields = (1..420).map { SequencePositionField("main", it) },
+        )
+
+        assertThat(action.cacheable, equalTo(false))
     }
 
     @ParameterizedTest(name = "Test SiloFilterExpression {1}")
