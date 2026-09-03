@@ -37,6 +37,15 @@ interface CommonActionFields {
 
 const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 
+/**
+ * Aggregations that group by more than this many columns (plain fields plus sequence-position fields)
+ * are not cached. Their result cardinality grows roughly with the number of matching sequences, so
+ * materializing the full result into a `List` to store it in the cache can exhaust the heap, while
+ * the cache hit rate for such queries is close to zero anyway. Non-cacheable queries are streamed
+ * straight through instead (see [SiloClient.sendQueryAndGetDataVersion]).
+ */
+const val MAX_CACHEABLE_GROUP_BY_FIELD_COUNT = 20
+
 sealed class SiloAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
@@ -234,7 +243,7 @@ sealed class SiloAction<ResponseType>(
         override val offset: Int? = null,
     ) : SiloAction<AggregationData>(
             arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
-            cacheable = true,
+            cacheable = groupByFields.size + sequencePositionFields.size <= MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
         ) {
         val type: String = "Aggregated"
 

@@ -5,6 +5,7 @@ import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.request.toOrderBySpec
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -731,6 +732,13 @@ class SiloClientTest(
             SiloQuery(SiloAction.details(), True),
             SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("sequenceName")), True),
             SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("sequenceName")), True),
+            SiloQuery(
+                SiloAction.aggregated(
+                    groupByFields = listOf("date"),
+                    sequencePositionFields = (1..420).map { SequencePositionField("main", it) },
+                ),
+                True,
+            ),
         )
 
         @JvmStatic
