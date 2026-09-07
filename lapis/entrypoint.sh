@@ -7,16 +7,16 @@ ARGS="${*}"
 # See https://github.com/apache/arrow-java/?tab=readme-ov-file#java-properties
 ARROW_OPTS="-Dio.netty.tryReflectionSetAccessible=true --add-opens=java.base/java.nio=ALL-UNNAMED"
 
+# Terminate the JVM on OutOfMemoryError instead of leaving it in a degraded, GC-thrashing
+# state, so that the orchestrator restarts the container. Override via JVM_OPTS if needed.
+DEFAULT_JVM_OPTS="-XX:+ExitOnOutOfMemoryError"
+
 GENERAL_OPTS="$ARROW_OPTS -jar app.jar \
     --spring.profiles.active=docker \
     --referenceGenomeFilename=./reference_genomes.json \
     $ARGS"
 
-if [ -n "$JVM_OPTS" ]; then
-    CMD="java $JVM_OPTS $GENERAL_OPTS"
-else
-    CMD="java $GENERAL_OPTS"
-fi
+CMD="java $DEFAULT_JVM_OPTS $JVM_OPTS $GENERAL_OPTS"
 echo Running application with command:
 echo "$CMD"
 $CMD
