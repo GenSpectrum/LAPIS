@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.7](https://github.com/GenSpectrum/LAPIS/compare/v0.8.6...v0.8.7) (2026-09-07)
+
+
+### Bug Fixes
+
+* **lapis:** do not cache aggregations with many group by fields ([#1850](https://github.com/GenSpectrum/LAPIS/issues/1850)) ([2a46e72](https://github.com/GenSpectrum/LAPIS/commit/2a46e72445657eafc00e3e338c584393e359c9fe))
+* **lapis:** exit the JVM on OutOfMemoryError ([#1854](https://github.com/GenSpectrum/LAPIS/issues/1854)) ([8724131](https://github.com/GenSpectrum/LAPIS/commit/8724131d3b7d40e6f7187c70270da199004065f5))
+
 ## [0.8.6](https://github.com/GenSpectrum/LAPIS/compare/v0.8.5...v0.8.6) (2026-08-19)
 
 
