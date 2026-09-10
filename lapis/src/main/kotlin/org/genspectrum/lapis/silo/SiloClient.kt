@@ -10,6 +10,7 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.util.YamlObjectMapper
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -92,6 +93,7 @@ open class CachedSiloClient(
     private val requestContext: RequestContext,
     private val config: DatabaseConfig,
     private val rootAllocator: RootAllocator,
+    @param:Value("\${silo.infoTimeout:100ms}") private val infoTimeout: Duration,
 ) {
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
@@ -176,7 +178,7 @@ open class CachedSiloClient(
             bodyHandler = BodyHandlers.ofString(),
             tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
         ) {
-            it.timeout(Duration.ofMillis(100)) // this should never take long, make sure we don't block anything else
+            it.timeout(infoTimeout)
             it.GET()
         }
 
