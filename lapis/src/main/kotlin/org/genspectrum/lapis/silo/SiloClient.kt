@@ -21,11 +21,16 @@ import tools.jackson.module.kotlin.readValue
 import java.io.IOException
 import java.io.InputStream
 import java.net.ConnectException
+import java.net.NoRouteToHostException
+import java.net.PortUnreachableException
 import java.net.URI
+import java.net.UnknownHostException
 import java.net.http.HttpClient
+import java.net.http.HttpConnectTimeoutException
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.HttpTimeoutException
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.stream.Stream
@@ -229,6 +234,8 @@ open class CachedSiloClient(
             }
             .build()
 
+        val startedAtNanos = System.nanoTime()
+
         val response = try {
             try {
                 httpClient.send(request, bodyHandler)
@@ -243,12 +250,20 @@ open class CachedSiloClient(
                     throw ioException
                 }
             }
-        } catch (connectException: ConnectException) {
-            val message = "Could not connect to silo: ${connectException::class} ${connectException.message}"
-            throw SiloNotReachableException(message)
         } catch (exception: Exception) {
-            val message = "Could not connect to silo: ${exception::class} ${exception.message}"
-            throw RuntimeException(message, exception)
+            throw when (exception) {
+                is HttpTimeoutException -> SiloTimeoutException(siloTimeoutMessage(uri, startedAtNanos, exception))
+
+                // none of these is a ConnectException, and a timeout is not unreachability at all
+                is ConnectException,
+                is UnknownHostException,
+                is NoRouteToHostException,
+                is PortUnreachableException,
+                -> SiloNotReachableException(siloNotReachableMessage(uri, exception))
+
+                // we don't know what went wrong here, so don't claim that we couldn't connect
+                else -> RuntimeException(siloErrorMessage(uri, exception), exception)
+            }
         }
 
         if (!uri.toString().endsWith("info")) {
@@ -274,6 +289,28 @@ open class CachedSiloClient(
         }
 
         return response
+    }
+
+    private fun siloNotReachableMessage(
+        uri: URI,
+        exception: Exception,
+    ) = "Could not connect to silo at $uri: ${exception::class} ${exception.message}"
+
+    private fun siloErrorMessage(
+        uri: URI,
+        exception: Exception,
+    ) = "Error talking to silo at $uri: ${exception::class} ${exception.message}"
+
+    private fun siloTimeoutMessage(
+        uri: URI,
+        startedAtNanos: Long,
+        exception: HttpTimeoutException,
+    ): String {
+        val elapsedMillis = (System.nanoTime() - startedAtNanos) / 1_000_000
+        return when (exception) {
+            is HttpConnectTimeoutException -> "Timed out connecting to silo at $uri after ${elapsedMillis}ms"
+            else -> "Timed out waiting for a response from silo at $uri after ${elapsedMillis}ms"
+        }
     }
 
     private fun tryToReadSiloErrorFromString(responseBody: String) =
@@ -308,6 +345,14 @@ class SiloException(
 class SiloUnavailableException(
     override val message: String,
     val retryAfter: String?,
+) : Exception(message)
+
+/**
+ * Indicates that SILO did not answer within the timeout that LAPIS set for the request.
+ * SILO may well be reachable and healthy - the request simply outlived its budget.
+ */
+class SiloTimeoutException(
+    override val message: String,
 ) : Exception(message)
 
 /**

@@ -43,6 +43,7 @@ import tools.jackson.databind.node.IntNode
 import tools.jackson.databind.node.NullNode
 import tools.jackson.databind.node.StringNode
 import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 
 private const val MOCK_SERVER_PORT = 1080
 
@@ -834,6 +835,25 @@ class SiloClientAndCacheInvalidatorTest(
 
         val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery).toList() }
         assertThat(exception.message, containsString(errorMessage))
+    }
+
+    @Test
+    fun `GIVEN silo answers info too slowly THEN throws SiloTimeoutException naming the timeout`() {
+        MockServerClient("localhost", MOCK_SERVER_PORT)
+            .`when`(request().withMethod("GET").withPath("/info"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withHeader(DATA_VERSION_HEADER, "1234")
+                    .withBody("""{"version": "1.2.3"}""")
+                    // must stay longer than the timeout that callInfo() sets on the request
+                    .withDelay(TimeUnit.MILLISECONDS, 500),
+            )
+
+        val exception = assertThrows<SiloTimeoutException> { siloClient.callInfo() }
+
+        assertThat(exception.message, containsString("Timed out"))
+        assertThat(exception.message, containsString("/info"))
     }
 
     private fun expectInfoCallThatReturnsSiloUnavailable() {
