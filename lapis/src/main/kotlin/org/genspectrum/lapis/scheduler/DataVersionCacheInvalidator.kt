@@ -37,7 +37,8 @@ class DataVersionCacheInvalidator(
                 siloVersion = null,
             )
         } catch (e: Exception) {
-            log.debug { "Failed to call info: $e" }
+            // this stops cache invalidation entirely, so it must not be invisible at the default log level
+            log.warn { "Failed to call info: $e" }
             return
         }
         if (info.dataVersion != currentlyCachedDataVersion) {

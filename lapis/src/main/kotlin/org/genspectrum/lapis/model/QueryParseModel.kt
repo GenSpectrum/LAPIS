@@ -25,9 +25,9 @@ class QueryParseModel(
     ): List<ParsedQueryResult> {
         try {
             siloClient.callInfo(DATA_VERSION_TIMEOUT) // populates dataVersion.dataVersion
-        } catch (_: Exception) {
-            // If callInfo fails, log it and continue with null dataVersion
-            log.warn { "Could not get current SILO data version" }
+        } catch (e: Exception) {
+            // continue with a null data version: the queries can still be parsed without it
+            log.warn { "Could not get current SILO data version: $e" }
         }
         return queries.map { query -> parseSingleQuery(query, doFullValidation) }
     }

@@ -10,6 +10,7 @@ import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloNotReachableException
+import org.genspectrum.lapis.silo.SiloTimeoutException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController
@@ -79,6 +80,14 @@ class ExceptionHandler(
     @ExceptionHandler(SiloNotReachableException::class)
     fun handleSiloNotReachableException(e: SiloNotReachableException): ErrorResponse {
         log.warn { "Caught SiloNotReachableException: ${e.message}" } // don't log stack trace for this common case
+
+        return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
+    }
+
+    @ExceptionHandler(SiloTimeoutException::class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    fun handleSiloTimeoutException(e: SiloTimeoutException): ErrorResponse {
+        log.warn { "Caught SiloTimeoutException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
