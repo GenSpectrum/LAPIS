@@ -19,6 +19,9 @@
     "check-format": "prettier --check .",
     "format": "prettier --write ."
   },
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.41.0",
     "@types/chai": "^5.2.3",
