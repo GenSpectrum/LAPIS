@@ -56,7 +56,7 @@ fun mockSiloCallInfo(
     dataVersion: DataVersion,
 ) {
     every {
-        siloClient.callInfo()
+        siloClient.callInfo(any())
     } answers {
         dataVersion.dataVersion = DUMMY_DATA_VERSION
         InfoData(DUMMY_DATA_VERSION, null)

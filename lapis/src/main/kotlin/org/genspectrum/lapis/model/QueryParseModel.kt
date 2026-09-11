@@ -9,6 +9,10 @@ import org.genspectrum.lapis.silo.SiloException
 import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.SiloQuery
 import org.springframework.stereotype.Component
+import java.time.Duration
+
+// only sets a response header, and failure is ignored below - don't stall a request on it
+private val DATA_VERSION_TIMEOUT = Duration.ofSeconds(1)
 
 @Component
 class QueryParseModel(
@@ -20,7 +24,7 @@ class QueryParseModel(
         doFullValidation: Boolean = false,
     ): List<ParsedQueryResult> {
         try {
-            siloClient.callInfo() // populates dataVersion.dataVersion
+            siloClient.callInfo(DATA_VERSION_TIMEOUT) // populates dataVersion.dataVersion
         } catch (_: Exception) {
             // If callInfo fails, log it and continue with null dataVersion
             log.warn { "Could not get current SILO data version" }
