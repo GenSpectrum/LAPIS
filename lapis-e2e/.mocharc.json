@@ -1,4 +1,4 @@
 {
-  "require": "tsx",
+  "require": ["tsx", "./test/nodeVersionGuard.ts"],
   "spec": "test/**/*.spec.ts"
 }
