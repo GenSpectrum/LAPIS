@@ -220,7 +220,7 @@ describe('All endpoints', () => {
         expect(response.headers.get('content-type')).to.equal(expectedContentType(route.servesType));
         expect(response.headers.get('content-encoding')).equals('zstd');
 
-        // fetch automatically decompresses zstd responses as of node 24 (the version pinned in .nvmrc)
+        // fetch automatically decompresses zstd responses as of node 24
         if (route.servesType === 'SEQUENCES') {
           expect(await response.text()).to.match(/^>key_/);
         } else if (route.servesType === 'TREE') {
