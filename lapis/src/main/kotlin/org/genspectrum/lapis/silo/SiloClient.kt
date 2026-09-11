@@ -65,10 +65,10 @@ class SiloClient(
     /**
      * returns the info object and sets the dataVersion.dataVersion.
      */
-    fun callInfo(): InfoData {
+    fun callInfo(timeout: Duration? = null): InfoData {
         log.info { "Calling SILO info" }
 
-        val info = cachedSiloClient.callInfo()
+        val info = cachedSiloClient.callInfo(timeout)
         dataVersion.dataVersion = info.dataVersion
         return info
     }
@@ -170,13 +170,15 @@ open class CachedSiloClient(
             }
     }
 
-    fun callInfo(): InfoData {
+    fun callInfo(timeout: Duration? = null): InfoData {
         val response = send(
             uri = siloUris.info,
             bodyHandler = BodyHandlers.ofString(),
             tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
         ) {
-            it.timeout(Duration.ofMillis(100)) // this should never take long, make sure we don't block anything else
+            if (timeout != null) {
+                it.timeout(timeout)
+            }
             it.GET()
         }
 
