@@ -7,6 +7,9 @@ import org.springframework.boot.health.contributor.Health
 import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.boot.health.contributor.Status
 import org.springframework.stereotype.Component
+import java.time.Duration
+
+private val HEALTH_CHECK_TIMEOUT = Duration.ofMillis(100)
 
 @Component
 class SiloHealthIndicator(
@@ -17,7 +20,7 @@ class SiloHealthIndicator(
             .up() // LAPIS should always be "up", independent of SILO.
             .let {
                 try {
-                    val info = cachedSiloClient.callInfo()
+                    val info = cachedSiloClient.callInfo(HEALTH_CHECK_TIMEOUT)
                     it
                         .withDetail("siloStatus", Status.UP)
                         .withDetail("dataVersion", info.dataVersion)
