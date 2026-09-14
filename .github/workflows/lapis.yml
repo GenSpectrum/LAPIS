@@ -78,7 +78,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: lts/*
+          node-version-file: .nvmrc
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.3.0
