@@ -31,12 +31,16 @@ import org.genspectrum.lapis.silo.SiloFilterExpression
 import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.LocalDate
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 private const val QUERY_TIMEOUT_SECONDS = 60L
+
+// only sets a response header on an otherwise empty result - don't stall a request on it
+private val DATA_VERSION_TIMEOUT = Duration.ofSeconds(1)
 
 @Schema(
     description = "The result in tabular format with mutations as rows (outer array) and date ranges as " +
@@ -262,7 +266,7 @@ class QueriesOverTimeModel(
         remainingRetries: Int = 1,
     ): QueriesOverTimeResult {
         if (queryItems.isEmpty() || dateRanges.isEmpty()) {
-            siloClient.callInfo() // populates dataVersion.dataVersion
+            siloClient.callInfo(DATA_VERSION_TIMEOUT) // populates dataVersion.dataVersion
             return QueriesOverTimeResult(
                 queries = queryItems.map { it.displayLabel },
                 dateRanges = dateRanges,

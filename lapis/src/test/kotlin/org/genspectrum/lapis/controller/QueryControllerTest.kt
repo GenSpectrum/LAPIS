@@ -39,7 +39,7 @@ class QueryControllerTest(
     @BeforeEach
     fun setup() {
         every {
-            siloClient.callInfo()
+            siloClient.callInfo(any())
         } answers {
             dataVersion.dataVersion = "1234"
             InfoData("1234", null)
@@ -205,7 +205,7 @@ class QueryControllerTest(
             .andExpect(jsonPath("$.data[0].type").value("success"))
 
         verify(exactly = 0) { siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any()) }
-        verify(exactly = 1) { siloClient.callInfo() }
+        verify(exactly = 1) { siloClient.callInfo(any()) }
     }
 
     @Test
@@ -219,7 +219,7 @@ class QueryControllerTest(
             .andExpect(jsonPath("$.data[0].type").value("success"))
 
         verify(exactly = 0) { siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any()) }
-        verify(exactly = 1) { siloClient.callInfo() }
+        verify(exactly = 1) { siloClient.callInfo(any()) }
     }
 
     @Test
