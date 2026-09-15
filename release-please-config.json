@@ -3,7 +3,7 @@
     "packages": {
         ".": {
             "release-type": "simple",
-            "component": "lapis",
+            "component": "root",
             "extra-files": [
                 "lapis/build.gradle",
                 {
