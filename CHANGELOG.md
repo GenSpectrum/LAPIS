@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.8](https://github.com/GenSpectrum/LAPIS/compare/v0.8.7...v0.8.8) (2026-09-16)
+
+
+### Bug Fixes
+
+* **lapis:** only timeout /sample/info calls in SILO health indicator's calls ([#1868](https://github.com/GenSpectrum/LAPIS/issues/1868)) ([04e02bc](https://github.com/GenSpectrum/LAPIS/commit/04e02bc0e6db6b8ebda3a3d1a9c61a46f176cf10))
+* **lapis:** set release-please component to lapis to pass commitlint ([#1877](https://github.com/GenSpectrum/LAPIS/issues/1877)) ([24c2ccc](https://github.com/GenSpectrum/LAPIS/commit/24c2cccd34aede428589dabaab70c26f20728fae))
+
 ## [0.8.7](https://github.com/GenSpectrum/LAPIS/compare/v0.8.6...v0.8.7) (2026-09-07)
 
 
