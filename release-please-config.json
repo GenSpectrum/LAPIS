@@ -3,7 +3,7 @@
     "packages": {
         ".": {
             "release-type": "simple",
-            "component": "root",
+            "pull-request-title-pattern": "chore(root): release${component} ${version}",
             "extra-files": [
                 "lapis/build.gradle",
                 {
