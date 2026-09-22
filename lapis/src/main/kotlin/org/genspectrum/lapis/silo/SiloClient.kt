@@ -236,7 +236,7 @@ open class CachedSiloClient(
             }
             .build()
 
-        val startedAtNanos = System.nanoTime()
+        val startedAtMillis = System.currentTimeMillis()
 
         val response = try {
             try {
@@ -254,9 +254,8 @@ open class CachedSiloClient(
             }
         } catch (exception: Exception) {
             throw when (exception) {
-                is HttpTimeoutException -> SiloTimeoutException(siloTimeoutMessage(uri, startedAtNanos, exception))
+                is HttpTimeoutException -> SiloTimeoutException(siloTimeoutMessage(uri, startedAtMillis, exception))
 
-                // siblings of ConnectException, not subtypes, so catching ConnectException alone missed them
                 is ConnectException,
                 is UnknownHostException,
                 is NoRouteToHostException,
@@ -305,10 +304,10 @@ open class CachedSiloClient(
 
     private fun siloTimeoutMessage(
         uri: URI,
-        startedAtNanos: Long,
+        startedAtMillis: Long,
         exception: HttpTimeoutException,
     ): String {
-        val elapsedMillis = (System.nanoTime() - startedAtNanos) / 1_000_000
+        val elapsedMillis = System.currentTimeMillis() - startedAtMillis
         return when (exception) {
             is HttpConnectTimeoutException -> "Timed out connecting to silo at $uri after ${elapsedMillis}ms"
             else -> "Timed out waiting for a response from silo at $uri after ${elapsedMillis}ms"
