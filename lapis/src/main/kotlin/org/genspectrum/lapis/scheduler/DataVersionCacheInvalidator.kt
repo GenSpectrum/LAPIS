@@ -9,7 +9,11 @@ import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.util.concurrent.TimeUnit
+
+// polls once a second on the single scheduler thread - one hung call must not stall all scheduled work
+private val INFO_TIMEOUT = Duration.ofSeconds(2)
 
 @Component
 class DataVersionCacheInvalidator(
@@ -25,7 +29,7 @@ class DataVersionCacheInvalidator(
         log.debug { "checking for data version change" }
 
         val info = try {
-            cachedSiloClient.callInfo()
+            cachedSiloClient.callInfo(INFO_TIMEOUT)
         } catch (e: SiloUnavailableException) {
             log.debug { "Caught ${SiloUnavailableException::class.java} $e" }
             InfoData(
