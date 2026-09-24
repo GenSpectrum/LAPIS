@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.9](https://github.com/GenSpectrum/LAPIS/compare/v0.8.8...v0.8.9) (2026-09-24)
+
+
+### Features
+
+* **lapis:** distinguish a SILO timeout from SILO being unreachable ([#1882](https://github.com/GenSpectrum/LAPIS/issues/1882)) ([d8d7595](https://github.com/GenSpectrum/LAPIS/commit/d8d7595eac4955cec44127044db5bd4f6ff576ae))
+
 ## [0.8.8](https://github.com/GenSpectrum/LAPIS/compare/v0.8.7...v0.8.8) (2026-09-16)
 
 
