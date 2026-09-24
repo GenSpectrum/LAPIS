@@ -27,13 +27,14 @@ class DataVersionCacheInvalidator(
         val info = try {
             cachedSiloClient.callInfo()
         } catch (e: SiloUnavailableException) {
-            log.debug { "Caught ${SiloUnavailableException::class.java} $e" }
+            log.info { "SILO is not available yet: $e" }
             InfoData(
                 dataVersion = "currently unavailable",
                 siloVersion = null,
             )
         } catch (e: Exception) {
-            log.debug { "Failed to call info: $e" }
+            // this stops cache invalidation entirely, so it must not be invisible at the default log level
+            log.warn { "Failed to call info: $e" }
             return
         }
         if (info.dataVersion != currentlyCachedDataVersion) {

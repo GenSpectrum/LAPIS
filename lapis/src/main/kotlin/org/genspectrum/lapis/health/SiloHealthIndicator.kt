@@ -2,6 +2,7 @@ package org.genspectrum.lapis.health
 
 import org.genspectrum.lapis.silo.CachedSiloClient
 import org.genspectrum.lapis.silo.SiloNotReachableException
+import org.genspectrum.lapis.silo.SiloTimeoutException
 import org.genspectrum.lapis.silo.SiloUnavailableException
 import org.springframework.boot.health.contributor.Health
 import org.springframework.boot.health.contributor.HealthIndicator
@@ -29,6 +30,11 @@ class SiloHealthIndicator(
                     it
                         .withDetail("siloStatus", Status.DOWN)
                         .withDetail("error", "SILO not reachable")
+                } catch (_: SiloTimeoutException) {
+                    // not DOWN: exceeding a 100ms budget says nothing about whether SILO is alive
+                    it
+                        .withDetail("siloStatus", Status.UNKNOWN)
+                        .withDetail("error", "SILO did not answer within the health check timeout")
                 } catch (e: SiloUnavailableException) {
                     it
                         .withDetail("siloStatus", Status.DOWN)
