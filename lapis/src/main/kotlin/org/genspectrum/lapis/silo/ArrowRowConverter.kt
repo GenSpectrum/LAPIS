@@ -29,7 +29,7 @@ import tools.jackson.databind.node.StringNode
 /**
  * Converts one row at `rowIndex` from an Arrow [org.apache.arrow.vector.VectorSchemaRoot] to a typed Kotlin object.
  *
- * See https://github.com/RhyOrg/RhyDB/blob/main/documentation/query_documentation.md#action for the RhyDB response schema
+ * See https://github.com/RhyOrg/RhyDB/blob/main/documentation/query_documentation.md for the RhyDB response schema
  */
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
