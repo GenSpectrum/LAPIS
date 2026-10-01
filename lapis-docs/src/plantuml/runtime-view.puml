@@ -4,22 +4,22 @@ cloud {
   file "input files" as input
 }
 folder "Folder with serialized states" as files {
-  file "oldstate.silo"
-  file "newstate.silo"
+  file "old state"
+  file "new state"
 }
-component "SILO Preprocessing" as siloPreprocessing #lightblue
-package "SILO-LAPIS runtime" {
-  component "SILO Api" as siloApi #lightblue
+component "RhyDB Preprocessing" as rhyDbPreprocessing #lightblue
+package "RhyDB-LAPIS runtime" {
+  component "RhyDB Api" as rhyDbApi #lightblue
   component LAPIS #lightblue
 }
 actor User
 
 User -> LAPIS : simplified query
 User <- LAPIS : data
-LAPIS -> siloApi : SILO query
-LAPIS <- siloApi : data
-siloApi <- files : reads newest serialized state
-siloPreprocessing --> files : serializes state
-input --> siloPreprocessing : reads externally provided input files
+LAPIS -> rhyDbApi : RhyDB query
+LAPIS <- rhyDbApi : data
+rhyDbApi <- files : reads newest serialized state
+rhyDbPreprocessing --> files : serializes state
+input --> rhyDbPreprocessing : reads externally provided input files
 
 @enduml
