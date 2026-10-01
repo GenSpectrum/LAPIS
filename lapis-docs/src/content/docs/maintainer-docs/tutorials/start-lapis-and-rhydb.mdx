@@ -23,7 +23,7 @@ You will build a Docker Compose file step by step.
 
 ```shell
 docker pull ghcr.io/genspectrum/lapis
-docker pull ghcr.io/genspectrum/lapis-silo
+docker pull ghcr.io/rhyorg/rhydb
 ```
 
 - Create a directory for the tutorial:
@@ -124,7 +124,7 @@ version: '3.9'
 
 services:
     silo-preprocessing:
-        image: ghcr.io/genspectrum/lapis-silo
+        image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
             - ~/lapisExample/data:/preprocessing/input
@@ -153,7 +153,7 @@ version: '3.9'
 
 services:
     silo-preprocessing:
-        image: ghcr.io/genspectrum/lapis-silo
+        image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
             - ~/lapisExample/data:/preprocessing/input
@@ -162,7 +162,7 @@ services:
             - ~/lapisExample/output:/preprocessing/output
 
     silo-api:
-        image: ghcr.io/genspectrum/lapis-silo
+        image: ghcr.io/rhyorg/rhydb
         command: --api
         ports:
             - '8081:8081'
@@ -207,7 +207,7 @@ services:
             - ~/lapisExample/data/reference_genomes.json:/workspace/reference_genomes.json
 
     silo-preprocessing:
-        image: ghcr.io/genspectrum/lapis-silo
+        image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
             - ~/lapisExample/data:/preprocessing/input
@@ -216,7 +216,7 @@ services:
             - ~/lapisExample/output:/preprocessing/output
 
     silo-api:
-        image: ghcr.io/genspectrum/lapis-silo
+        image: ghcr.io/rhyorg/rhydb
         command: --api
         ports:
             - '8081:8081'
@@ -243,6 +243,6 @@ LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that se
 
 ## Further Reading
 
-- Documentation of RhyDB in its [GitHub repository](https://github.com/GenSpectrum/LAPIS-SILO/).
+- Documentation of RhyDB in its [GitHub repository](https://github.com/RhyOrg/RhyDB/).
 - Our tests also use a [docker compose file](https://github.com/GenSpectrum/LAPIS/blob/main/lapis/docker-compose.yml) that can also serve as an example.
   The CI makes sure that it works at any time.

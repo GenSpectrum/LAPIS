@@ -35,7 +35,7 @@ This approach has the advantage that it doesn't need to be implemented for every
 
 Once the data is extracted from the request, it is passed to the query mapping layer.
 This layer maps the request to a 
-[RhyDB query](https://github.com/GenSpectrum/LAPIS-SILO/blob/main/documentation/query_documentation.md).
+[RhyDB query](https://github.com/RhyOrg/RhyDB/blob/main/documentation/query_documentation.md).
 A RhyDB query consists of two parts:
 
 * the **query action** (aggregated, details, etc.): 

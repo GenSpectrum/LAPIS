@@ -16,7 +16,7 @@ Main features include:
   Sequences are provided as FASTA.
 * **Very fast**: LAPIS was originally developed to query SARS-CoV-2 sequences
   and, therefore, capable to process millions of sequences efficiently.
-  It uses [RhyDB](https://github.com/GenSpectrum/LAPIS-SILO) as its data query engine.
+  It uses [RhyDB](https://github.com/RhyOrg/RhyDB) as its data query engine.
 
 ## Documentation
 
