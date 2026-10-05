@@ -6,7 +6,7 @@ description: LAPIS' caching concept
 import CacheSizeEndpointLink from '../../../../components/CacheSizeEndpointLink.astro';
 
 LAPIS uses Spring Boot's caching capabilities to cache aggregated, insertion and mutation queries.
-We decided to cache SILO actions that are relatively expensive to compute,
+We decided to cache RhyDB actions that are relatively expensive to compute,
 but don't return much data (measured in size of the response body). Details and FASTA actions are expensive, but return
 potentially large amounts of data and are therefore not cached.
 

@@ -3,7 +3,7 @@ x-lapis-common: &lapis-common
   platform: linux/amd64
 
 x-silo-common: &silo-common
-  image: ghcr.io/genspectrum/lapis-silo:${SILO_TAG}
+  image: ghcr.io/rhyorg/rhydb:${SILO_TAG}
   platform: linux/amd64
 
 x-database-config-volume: &database-config-volume
