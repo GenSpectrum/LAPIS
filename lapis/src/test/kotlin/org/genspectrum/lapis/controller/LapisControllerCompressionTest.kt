@@ -17,7 +17,7 @@ import org.genspectrum.lapis.controller.SampleRoute.ALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.SampleRoute.PHYLO_SUBTREE
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
 import org.genspectrum.lapis.controller.middleware.Compression
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
@@ -56,7 +56,7 @@ class LapisControllerCompressionTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var lapisInfo: LapisInfo
@@ -82,7 +82,7 @@ class LapisControllerCompressionTest(
     @ParameterizedTest(name = "{0}")
     @MethodSource("getScenarios")
     fun `endpoints return compressed data`(requestsScenario: RequestScenario) {
-        requestsScenario.mockData.mockWithData(siloQueryModelMock)
+        requestsScenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         val response = mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
@@ -109,7 +109,7 @@ class LapisControllerCompressionTest(
         compressionFormat: String,
     ) {
         val errorMessage = "test message"
-        every { siloQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
+        every { rhyDbQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
 
         val response = mockMvc.perform(getSample("${AGGREGATED.pathSegment}?compression=$compressionFormat"))
             .andExpect(status().isBadRequest)
@@ -129,7 +129,7 @@ class LapisControllerCompressionTest(
         compressionFormat: String,
     ) {
         val errorMessage = "test message"
-        every { siloQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
+        every { rhyDbQueryModelMock.getAggregated(any()) } throws BadRequestException(errorMessage)
 
         val response = mockMvc.perform(getSample(AGGREGATED.pathSegment).header(ACCEPT_ENCODING, compressionFormat))
             .andExpect(status().isBadRequest)
@@ -146,7 +146,7 @@ class LapisControllerCompressionTest(
     @Test
     fun `GIVEN multiple values in accept encoding header THEN it should return compressed data`() {
         val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment).expecting(PLAIN_JSON)
-        mockData.mockWithData(siloQueryModelMock)
+        mockData.mockWithData(rhyDbQueryModelMock)
 
         val acceptEncodingAsBrowsersSendIt = "$COMPRESSION_FORMAT_GZIP, br, deflate"
 

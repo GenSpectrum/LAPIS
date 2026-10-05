@@ -10,8 +10,8 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.ALL_NUCLEOTIDE_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
@@ -60,7 +60,7 @@ const val IS_MULTI_SEGMENT_SEQUENCE_EXPRESSION =
 @ConditionalOnExpression(IS_MULTI_SEGMENT_SEQUENCE_EXPRESSION)
 @RequestMapping("/sample")
 class MultiSegmentedSequenceController(
-    private val siloQueryModel: SiloQueryModel,
+    private val rhyDbQueryModel: RhyDbQueryModel,
     private val requestContext: RequestContext,
     private val sequencesStreamer: SequencesStreamer,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
@@ -128,7 +128,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = segments ?: referenceGenomeSchema.getNucleotideSequenceNames(),
@@ -167,7 +167,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = request.segments,
@@ -246,7 +246,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(segment),
@@ -288,7 +288,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(segment),
@@ -370,7 +370,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = segments ?: referenceGenomeSchema.getNucleotideSequenceNames(),
@@ -409,7 +409,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = request.segments,
@@ -488,7 +488,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(segment),
@@ -530,7 +530,7 @@ class MultiSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(segment),

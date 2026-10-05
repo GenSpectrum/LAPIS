@@ -9,8 +9,8 @@ import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AminoAcidInsertions
 import org.genspectrum.lapis.openApi.AminoAcidMutations
 import org.genspectrum.lapis.openApi.LapisNucleotideSequenceResponse
@@ -53,7 +53,7 @@ const val SHOW_SINGLE_SEGMENTED_CONTROLLER =
 @ConditionalOnExpression(SHOW_SINGLE_SEGMENTED_CONTROLLER)
 @RequestMapping("/sample")
 class SingleSegmentedSequenceController(
-    private val siloQueryModel: SiloQueryModel,
+    private val rhyDbQueryModel: RhyDbQueryModel,
     private val requestContext: RequestContext,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val sequencesStreamer: SequencesStreamer,
@@ -115,7 +115,7 @@ class SingleSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
@@ -154,7 +154,7 @@ class SingleSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
@@ -230,7 +230,7 @@ class SingleSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),
@@ -269,7 +269,7 @@ class SingleSegmentedSequenceController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.UNALIGNED,
             sequenceNames = listOf(referenceGenomeSchema.nucleotideSequences[0].name),

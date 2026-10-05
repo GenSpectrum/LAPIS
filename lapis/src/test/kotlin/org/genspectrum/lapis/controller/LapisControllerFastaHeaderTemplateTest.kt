@@ -7,8 +7,8 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PR
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.response.SequenceData
 import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,7 +60,7 @@ class LapisControllerFastaHeaderTemplateTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloClient: SiloClient
+    lateinit var rhyDbClient: RhyDbClient
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -76,7 +76,7 @@ class LapisControllerFastaHeaderTemplateTest(
     @MethodSource("getNucleotideFastaHeaderScenarios")
     fun `nucleotide fasta header templates`(scenario: FastaHeaderRequestScenario) {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<SequenceData>>())
         } returns Stream.of(
             SequenceData(mapOf(SEGMENT_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
             SequenceData(mapOf(SEGMENT_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),
@@ -91,7 +91,7 @@ class LapisControllerFastaHeaderTemplateTest(
     @MethodSource("getAminoAcidFastaHeaderScenarios")
     fun `amino acid fasta header templates`(scenario: FastaHeaderRequestScenario) {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<SequenceData>>())
         } returns Stream.of(
             SequenceData(mapOf(GENE_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
             SequenceData(mapOf(GENE_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),
@@ -386,7 +386,7 @@ class LapisControllerSingleSegmentedFastaHeaderTemplateTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloClient: SiloClient
+    lateinit var rhyDbClient: RhyDbClient
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -402,7 +402,7 @@ class LapisControllerSingleSegmentedFastaHeaderTemplateTest(
     @MethodSource("getNucleotideFastaHeaderScenarios")
     fun `nucleotide fasta header templates`(scenario: FastaHeaderRequestScenario) {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<SequenceData>>())
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<SequenceData>>())
         } returns Stream.of(
             SequenceData(mapOf(SEGMENT_NAME to StringNode("AAAA"), "primaryKey" to StringNode("1234"))),
             SequenceData(mapOf(SEGMENT_NAME to StringNode("GGGG"), "primaryKey" to StringNode("5678"))),

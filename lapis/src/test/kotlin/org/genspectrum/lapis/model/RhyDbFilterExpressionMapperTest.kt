@@ -33,7 +33,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
@@ -49,14 +49,14 @@ import java.time.LocalDate
 
 private const val SOME_VALUE = "some value"
 
-class SiloFilterExpressionMapperTest {
+class RhyDbFilterExpressionMapperTest {
     private val dummyReferenceGenomeSchema =
         ReferenceGenomeSchema(listOf(ReferenceSequenceSchema("sequenceName")), emptyList())
     private val variantQueryFacade = VariantQueryFacade(dummyReferenceGenomeSchema)
     private val advancedQueryFacade = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     private val underTest =
-        SiloFilterExpressionMapper(
+        RhyDbFilterExpressionMapper(
             dummySequenceFilterFields,
             variantQueryFacade,
             advancedQueryFacade,
@@ -103,10 +103,10 @@ class SiloFilterExpressionMapperTest {
     }
 
     @ParameterizedTest(name = "FilterParameter: {0}, SiloQuery: {1}")
-    @MethodSource("getFilterParametersWithExpectedSiloQuery")
+    @MethodSource("getFilterParametersWithExpectedRhyDbQuery")
     fun `given filter parameters then maps to expected FilterExpression`(
         filterParameter: Map<String, List<String>>,
-        expectedResult: SiloFilterExpression,
+        expectedResult: RhyDbFilterExpression,
     ) {
         val result = underTest.map(DummySequenceFilters(filterParameter))
 
@@ -707,7 +707,7 @@ class SiloFilterExpressionMapperTest {
         )
 
         @JvmStatic
-        fun getFilterParametersWithExpectedSiloQuery() =
+        fun getFilterParametersWithExpectedRhyDbQuery() =
             listOf(
                 Arguments.of(
                     mapOf(

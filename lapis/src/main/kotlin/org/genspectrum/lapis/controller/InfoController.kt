@@ -6,7 +6,7 @@ import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
 import org.genspectrum.lapis.logging.RequestIdContext
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.silo.LineageDefinition
@@ -24,7 +24,7 @@ const val REFERENCE_GENOME_ROUTE = "/referenceGenome"
 @RestController
 @RequestMapping("/sample")
 class InfoController(
-    private val siloQueryModel: SiloQueryModel,
+    private val rhyDbQueryModel: RhyDbQueryModel,
     private val databaseConfig: DatabaseConfig,
     private val referenceGenome: ReferenceGenome,
     private val lapisVersion: LapisVersion,
@@ -34,13 +34,13 @@ class InfoController(
     @GetMapping(INFO_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(description = INFO_ENDPOINT_DESCRIPTION)
     fun getInfo(): LapisInfo {
-        val siloInfo = siloQueryModel.getInfo()
+        val rhyDbInfo = rhyDbQueryModel.getInfo()
         return LapisInfo(
-            dataVersion = siloInfo.dataVersion,
+            dataVersion = rhyDbInfo.dataVersion,
             lapisVersion = lapisVersion.version,
             requestId = requestIdContext.requestId,
             requestInfo = lapisInfoFactory.getRequestInfo(),
-            siloVersion = siloInfo.siloVersion,
+            siloVersion = rhyDbInfo.siloVersion,
         )
     }
 
@@ -55,7 +55,7 @@ class InfoController(
     @Operation(description = LINEAGE_DEFINITION_ENDPOINT_DESCRIPTION)
     fun getLineageDefinition(
         @PathVariable("column") column: String,
-    ): LineageDefinition = siloQueryModel.getLineageDefinition(column)
+    ): LineageDefinition = rhyDbQueryModel.getLineageDefinition(column)
 
     @GetMapping(REFERENCE_GENOME_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(description = REFERENCE_GENOME_ENDPOINT_DESCRIPTION)

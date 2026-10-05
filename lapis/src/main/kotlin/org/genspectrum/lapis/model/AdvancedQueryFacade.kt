@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.springframework.stereotype.Component
 
 @Component
@@ -19,7 +19,7 @@ class AdvancedQueryFacade(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val databaseConfig: DatabaseConfig,
 ) {
-    fun map(advancedQuery: String): SiloFilterExpression {
+    fun map(advancedQuery: String): RhyDbFilterExpression {
         val lexer = AdvancedQueryLexer(CharStreams.fromString(advancedQuery))
         val tokens = CommonTokenStream(lexer)
         val parser = AdvancedQueryParser(tokens)

@@ -1,11 +1,11 @@
 package org.genspectrum.lapis.scheduler
 
-import org.genspectrum.lapis.config.SiloVersion
+import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.InfoData
-import org.genspectrum.lapis.silo.CachedSiloClient
-import org.genspectrum.lapis.silo.SILO_QUERY_CACHE_NAME
-import org.genspectrum.lapis.silo.SiloUnavailableException
+import org.genspectrum.lapis.silo.CachedRhyDbClient
+import org.genspectrum.lapis.silo.RHYDB_QUERY_CACHE_NAME
+import org.genspectrum.lapis.silo.RhyDbUnavailableException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -13,20 +13,20 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class DataVersionCacheInvalidator(
-    private val cachedSiloClient: CachedSiloClient,
+    private val cachedRhyDbClient: CachedRhyDbClient,
     private val cacheClearer: CacheClearer,
-    private val siloVersion: SiloVersion,
+    private val siloVersion: RhyDbVersion,
 ) {
     private var currentlyCachedDataVersion = "uninitialized"
 
     @Scheduled(fixedRate = 1, timeUnit = TimeUnit.SECONDS)
     @Synchronized
-    fun invalidateSiloCache() {
+    fun invalidateRhyDbCache() {
         log.debug { "checking for data version change" }
 
         val info = try {
-            cachedSiloClient.callInfo()
-        } catch (e: SiloUnavailableException) {
+            cachedRhyDbClient.callInfo()
+        } catch (e: RhyDbUnavailableException) {
             log.info { "SILO is not available yet: $e" }
             InfoData(
                 dataVersion = "currently unavailable",
@@ -51,8 +51,8 @@ class DataVersionCacheInvalidator(
 
 @Component
 class CacheClearer {
-    @CacheEvict(SILO_QUERY_CACHE_NAME, allEntries = true)
+    @CacheEvict(RHYDB_QUERY_CACHE_NAME, allEntries = true)
     fun clearCache() {
-        log.info { "Clearing cache $SILO_QUERY_CACHE_NAME" }
+        log.info { "Clearing cache $RHYDB_QUERY_CACHE_NAME" }
     }
 }

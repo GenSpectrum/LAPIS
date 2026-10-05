@@ -23,7 +23,7 @@ import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
-import org.genspectrum.lapis.request.SILO_INSERTION_AMBIGUITY_SYMBOL
+import org.genspectrum.lapis.request.RHYDB_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.STOP_CODON
 import org.genspectrum.lapis.silo.AminoAcidInsertionContains
 import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
@@ -38,16 +38,16 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,
 ) : VariantQueryBaseListener(),
     ParseTreeListener {
-    private val expressionStack = ArrayDeque<SiloFilterExpression>()
+    private val expressionStack = ArrayDeque<RhyDbFilterExpression>()
 
-    fun getVariantQueryExpression(): SiloFilterExpression {
+    fun getVariantQueryExpression(): RhyDbFilterExpression {
         if (expressionStack.size != 1) {
             log.error { "Expected exactly one expression on the stack, but got this stack $expressionStack." }
             throw RuntimeException("Failed to parse variant query.")
@@ -121,7 +121,7 @@ class VariantQueryCustomListener(
         val matchExactly = ctx.nOfMatchExactly() != null
         val nOfExprs = ctx.nOfExprs().expr().size
 
-        val children = mutableListOf<SiloFilterExpression>()
+        val children = mutableListOf<RhyDbFilterExpression>()
         for (i in 1..nOfExprs) {
             children += expressionStack.removeLast()
         }
@@ -205,6 +205,6 @@ class VariantQueryCustomListener(
 fun mapInsertionSymbol(ctx: RuleContext): String =
     when (ctx.text) {
         STOP_CODON -> ESCAPED_STOP_CODON
-        LAPIS_INSERTION_AMBIGUITY_SYMBOL -> SILO_INSERTION_AMBIGUITY_SYMBOL
+        LAPIS_INSERTION_AMBIGUITY_SYMBOL -> RHYDB_INSERTION_AMBIGUITY_SYMBOL
         else -> ctx.text
     }.uppercase()

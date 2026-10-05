@@ -14,8 +14,8 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.logging.RequestContext
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.openApi.AGGREGATED_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
 import org.genspectrum.lapis.openApi.ALL_ALIGNED_AMINO_ACID_SEQUENCE_REQUEST_SCHEMA
@@ -105,7 +105,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/sample")
 class LapisController(
-    private val siloQueryModel: SiloQueryModel,
+    private val rhyDbQueryModel: RhyDbQueryModel,
     private val requestContext: RequestContext,
     private val aggregatedFieldConverter: AggregatedFieldConverter,
     private val plainFieldConverter: PlainFieldConverter,
@@ -373,7 +373,7 @@ class LapisController(
 
     private fun getAggregatedCollection(request: AggregatedFiltersRequest) =
         AggregatedCollection(
-            records = siloQueryModel.getAggregated(request),
+            records = rhyDbQueryModel.getAggregated(request),
             fields = request.fields.map { it.outputColumnName },
         )
 
@@ -635,7 +635,7 @@ class LapisController(
 
     private fun getNucleotideMutationsCollection(request: MutationProportionsRequest) =
         MutationsCollection(
-            records = siloQueryModel.computeNucleotideMutationProportions(request),
+            records = rhyDbQueryModel.computeNucleotideMutationProportions(request),
             fields = when (request.fields.isEmpty()) {
                 true -> MutationsField.entries
                 false -> request.fields
@@ -906,7 +906,7 @@ class LapisController(
 
     private fun getAminoAcidMutationsCollection(request: MutationProportionsRequest) =
         MutationsCollection(
-            records = siloQueryModel.computeAminoAcidMutationProportions(request),
+            records = rhyDbQueryModel.computeAminoAcidMutationProportions(request),
             fields = when (request.fields.isEmpty()) {
                 true -> MutationsField.entries
                 false -> request.fields
@@ -1165,7 +1165,7 @@ class LapisController(
     ): MostRecentCommonAncestorCollection {
         validatePhyloTreeField(request.phyloTreeField, plainFieldConverter, databaseConfig)
         return MostRecentCommonAncestorCollection(
-            records = siloQueryModel.getMostRecentCommonAncestor(request),
+            records = rhyDbQueryModel.getMostRecentCommonAncestor(request),
             fields = listOf("mrcaNode", "missingNodeCount", "missingFromTree"),
         )
     }
@@ -1233,7 +1233,7 @@ class LapisController(
         request: PhyloTreeSequenceFiltersRequest,
         response: HttpServletResponse,
     ) {
-        val treeResponse = siloQueryModel.getNewick(sequenceFilters = request)
+        val treeResponse = rhyDbQueryModel.getNewick(sequenceFilters = request)
         dataVersion.setHeaderOn(response)
         if (response.contentType == null) {
             response.contentType = MediaType(TEXT_NEWICK, Charsets.UTF_8).toString()
@@ -1496,7 +1496,7 @@ class LapisController(
         val fields = request.fields.map { it.fieldName }
 
         return DetailsCollection(
-            records = siloQueryModel.getDetails(request),
+            records = rhyDbQueryModel.getDetails(request),
             fields = when (fields.isEmpty()) {
                 true -> databaseConfig.schema.metadata.map { it.name }
                 false -> fields
@@ -1750,7 +1750,7 @@ class LapisController(
 
     private fun getNucleotideInsertionsCollection(request: SequenceFiltersRequest) =
         InsertionsCollection(
-            records = siloQueryModel.getNucleotideInsertions(request),
+            records = rhyDbQueryModel.getNucleotideInsertions(request),
         )
 
     @GetMapping(AMINO_ACID_INSERTIONS_ROUTE, produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -1999,7 +1999,7 @@ class LapisController(
 
     private fun getAminoAcidInsertionsCollection(request: SequenceFiltersRequest) =
         InsertionsCollection(
-            records = siloQueryModel.getAminoAcidInsertions(request),
+            records = rhyDbQueryModel.getAminoAcidInsertions(request),
         )
 
     @GetMapping(
@@ -2062,7 +2062,7 @@ class LapisController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = genes ?: referenceGenomeSchema.getGeneNames(),
@@ -2099,7 +2099,7 @@ class LapisController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = request.genes,
@@ -2176,7 +2176,7 @@ class LapisController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),
@@ -2216,7 +2216,7 @@ class LapisController(
 
         val sequencesDataFormat = SequencesDataFormat.fromAcceptHeaders(httpHeaders.accept)
 
-        siloQueryModel.getGenomicSequence(
+        rhyDbQueryModel.getGenomicSequence(
             sequenceFilters = request,
             sequenceType = SequenceType.ALIGNED,
             sequenceNames = listOf(gene),

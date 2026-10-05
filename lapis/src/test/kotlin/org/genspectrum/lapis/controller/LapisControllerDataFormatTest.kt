@@ -5,7 +5,7 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_CSV_WITHOUT_HEADERS_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -41,7 +41,7 @@ class LapisControllerDataFormatTest(
     @param:Autowired private val objectMapper: ObjectMapper,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var lapisInfo: LapisInfo
@@ -79,7 +79,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "{0} returns empty JSON")
     @MethodSource("getJsonRequests")
     fun `returns empty json`(requestsScenario: RequestScenario) {
-        requestsScenario.mockDataCollection.mockToReturnEmptyData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockToReturnEmptyData(rhyDbQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
@@ -90,7 +90,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "{0} returns empty CSV")
     @MethodSource("getCsvRequests")
     fun `returns empty CSV`(requestsScenario: RequestScenario) {
-        requestsScenario.mockDataCollection.mockToReturnEmptyData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockToReturnEmptyData(rhyDbQueryModelMock)
 
         val expectedResult = "${requestsScenario.mockDataCollection.expectedCsv.lines().first()}\n"
         mockMvc.perform(requestsScenario.request)
@@ -102,7 +102,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "{0} returns data as CSV")
     @MethodSource("getCsvRequests")
     fun `request returns data as CSV`(requestsScenario: RequestScenario) {
-        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
@@ -113,7 +113,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "{0} returns data as CSV without headers")
     @MethodSource("getCsvWithoutHeadersRequests")
     fun `request returns data as CSV without headers`(requestsScenario: RequestScenario) {
-        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
@@ -124,7 +124,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "{0} returns data as TSV")
     @MethodSource("getTsvRequests")
     fun `request returns data as TSV`(requestsScenario: RequestScenario) {
-        requestsScenario.mockDataCollection.mockWithData(siloQueryModelMock)
+        requestsScenario.mockDataCollection.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(requestsScenario.request)
             .andExpect(status().isOk)
@@ -140,7 +140,7 @@ class LapisControllerDataFormatTest(
 
     @Test
     fun `GIVEN aggregated endpoint returns result with null values THEN CSV contains empty strings instead`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
                 mapOf("primaryKey" to StringNode("someValue"), "date" to NullNode.instance),
@@ -165,7 +165,7 @@ class LapisControllerDataFormatTest(
 
     @Test
     fun `GIVEN details endpoint returns result with null values THEN CSV contains empty strings instead`() {
-        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
                     "primaryKey" to StringNode("some first value"),
@@ -193,7 +193,7 @@ class LapisControllerDataFormatTest(
 
     @Test
     fun `GIVEN fields in request WHEN getting aggregated csv THEN fields are ordered as in request`() {
-        every { siloQueryModelMock.getAggregated(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.getAggregated(any()) } returns Stream.of(
             AggregationData(
                 1,
                 mapOf(
@@ -236,7 +236,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "Details data: {0}")
     @MethodSource("getColumnOrderRequests")
     fun `returns details csv columns in correct order`(scenario: ColumnOrderScenario) {
-        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
                     "date" to StringNode("date1"),
@@ -267,7 +267,7 @@ class LapisControllerDataFormatTest(
     @ParameterizedTest(name = "Details data with special chars: {0}")
     @MethodSource("getEscapingScenarios")
     fun `returns TSV contains escaped newlines`(scenario: EscapingScenario) {
-        every { siloQueryModelMock.getDetails(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.getDetails(any()) } returns Stream.of(
             DetailsData(
                 mapOf(
                     "primaryKey" to StringNode("key1\tfoo"),
@@ -289,7 +289,7 @@ class LapisControllerDataFormatTest(
 
     @Test
     fun `GIVEN fields = position,mutation WHEN getting nucleotide mutations THEN csv contains only those columns`() {
-        every { siloQueryModelMock.computeNucleotideMutationProportions(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.computeNucleotideMutationProportions(any()) } returns Stream.of(
             MutationResponse(
                 mutation = "A123T",
                 count = null,
@@ -324,7 +324,7 @@ class LapisControllerDataFormatTest(
 
     @Test
     fun `GIVEN fields = position,mutation WHEN getting amino acid mutations THEN csv contains only those columns`() {
-        every { siloQueryModelMock.computeAminoAcidMutationProportions(any()) } returns Stream.of(
+        every { rhyDbQueryModelMock.computeAminoAcidMutationProportions(any()) } returns Stream.of(
             MutationResponse(
                 mutation = "gene:A123T",
                 count = null,

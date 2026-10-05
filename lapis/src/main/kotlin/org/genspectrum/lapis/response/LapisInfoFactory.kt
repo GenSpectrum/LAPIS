@@ -5,7 +5,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.LapisVersion
-import org.genspectrum.lapis.config.SiloVersion
+import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.silo.DataVersion
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ class LapisInfoFactory(
     private val databaseConfig: DatabaseConfig,
     private val lapisVersion: LapisVersion,
     private val request: HttpServletRequest,
-    private val siloVersion: SiloVersion,
+    private val siloVersion: RhyDbVersion,
 ) {
     fun create() =
         LapisInfo(

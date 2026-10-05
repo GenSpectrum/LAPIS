@@ -17,13 +17,13 @@ import tools.jackson.databind.ObjectMapper
 import java.time.LocalDate
 
 @SpringBootTest
-class SiloQueryTest {
+class RhyDbQueryTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @Test
     fun `Query is correctly serialized to JSON`() {
-        val underTest = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+        val underTest = RhyDbQuery(RhyDbAction.aggregated(), StringEquals("theColumn", "theValue"))
 
         val result = objectMapper.writeValueAsString(underTest)
 
@@ -44,9 +44,9 @@ class SiloQueryTest {
     }
 
     @ParameterizedTest(name = "Test SiloAction {1}")
-    @MethodSource("getTestSiloActions")
-    fun `SiloAction is correctly serialized to JSON`(
-        underTest: SiloAction<*>,
+    @MethodSource("getTestRhyDbActions")
+    fun `RhyDbAction is correctly serialized to JSON`(
+        underTest: RhyDbAction<*>,
         expected: String,
     ) {
         val result = objectMapper.writeValueAsString(underTest)
@@ -56,7 +56,7 @@ class SiloQueryTest {
 
     @Test
     fun `GIVEN an aggregation with few group by fields THEN it is cacheable`() {
-        val action = SiloAction.aggregated(
+        val action = RhyDbAction.aggregated(
             groupByFields = (1..10).map { "field$it" },
             sequencePositionFields = (1..10).map { SequencePositionField("main", it) },
         )
@@ -66,7 +66,7 @@ class SiloQueryTest {
 
     @Test
     fun `GIVEN an aggregation with more than 20 group by fields THEN it is not cacheable`() {
-        val action = SiloAction.aggregated(
+        val action = RhyDbAction.aggregated(
             groupByFields = listOf("date"),
             sequencePositionFields = (1..420).map { SequencePositionField("main", it) },
         )
@@ -75,9 +75,9 @@ class SiloQueryTest {
     }
 
     @ParameterizedTest(name = "Test SiloFilterExpression {1}")
-    @MethodSource("getTestSiloFilterExpression")
-    fun `SiloFilterExpressions is correctly serialized to JSON`(
-        underTest: SiloFilterExpression,
+    @MethodSource("getTestRhyDbFilterExpression")
+    fun `RhyDbFilterExpressions is correctly serialized to JSON`(
+        underTest: RhyDbFilterExpression,
         expected: String,
     ) {
         val result = objectMapper.writeValueAsString(underTest)
@@ -87,10 +87,10 @@ class SiloQueryTest {
 
     companion object {
         @JvmStatic
-        fun getTestSiloActions() =
+        fun getTestRhyDbActions() =
             listOf(
                 Arguments.of(
-                    SiloAction.aggregated(),
+                    RhyDbAction.aggregated(),
                     """
                         {
                             "type": "Aggregated",
@@ -99,7 +99,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         groupByFields = listOf("field1", "field2"),
                         orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -123,7 +123,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.mutations(),
+                    RhyDbAction.mutations(),
                     """
                         {
                             "type": "Mutations",
@@ -132,7 +132,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.mutations(
+                    RhyDbAction.mutations(
                         0.5,
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -156,7 +156,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidMutations(),
+                    RhyDbAction.aminoAcidMutations(),
                     """
                         {
                             "type": "AminoAcidMutations",
@@ -165,7 +165,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidMutations(
+                    RhyDbAction.aminoAcidMutations(
                         0.5,
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -189,7 +189,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.details(),
+                    RhyDbAction.details(),
                     """
                         {
                             "type": "Details",
@@ -198,7 +198,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         listOf("age", "pango_lineage"),
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -222,7 +222,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.nucleotideInsertions(),
+                    RhyDbAction.nucleotideInsertions(),
                     """
                         {
                             "type": "Insertions",
@@ -231,7 +231,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.nucleotideInsertions(
+                    RhyDbAction.nucleotideInsertions(
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -253,7 +253,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidInsertions(),
+                    RhyDbAction.aminoAcidInsertions(),
                     """
                         {
                             "type": "AminoAcidInsertions",
@@ -262,7 +262,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidInsertions(
+                    RhyDbAction.aminoAcidInsertions(
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -284,7 +284,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
+                    RhyDbAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
                     """
                         {
                             "type": "FastaAligned",
@@ -294,7 +294,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(
+                    RhyDbAction.genomicSequence(
                         type = SequenceType.ALIGNED,
                         sequenceNames = listOf("someSequenceName"),
                         additionalFields = listOf("field1", "field2"),
@@ -321,7 +321,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
+                    RhyDbAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
                     """
                         {
                             "type": "Fasta",
@@ -331,7 +331,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(
+                    RhyDbAction.genomicSequence(
                         type = SequenceType.UNALIGNED,
                         sequenceNames = listOf("someSequenceName"),
                         additionalFields = listOf("field1", "field2"),
@@ -358,7 +358,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.mostRecentCommonAncestor(
+                    RhyDbAction.mostRecentCommonAncestor(
                         "phyloTreeField",
                     ),
                     """
@@ -370,7 +370,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.phyloSubtree(
+                    RhyDbAction.phyloSubtree(
                         "phyloTreeField",
                     ),
                     """
@@ -382,7 +382,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = null),
                     ),
                     """
@@ -393,7 +393,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = 123),
                     ),
                     """
@@ -406,7 +406,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         orderByFields = OrderBySpec.Random(seed = 0),
                     ),
                     """
@@ -419,7 +419,7 @@ class SiloQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         fields = listOf("country", "date"),
                         orderByFields = OrderBySpec.ByFields(
                             listOf(
@@ -443,7 +443,7 @@ class SiloQueryTest {
             )
 
         @JvmStatic
-        fun getTestSiloFilterExpression() =
+        fun getTestRhyDbFilterExpression() =
             listOf(
                 Arguments.of(
                     True,

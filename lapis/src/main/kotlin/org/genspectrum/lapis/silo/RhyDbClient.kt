@@ -37,23 +37,23 @@ import java.util.stream.Stream
 import java.util.stream.StreamSupport
 
 @Component
-class SiloClient(
-    private val cachedSiloClient: CachedSiloClient,
+class RhyDbClient(
+    private val cachedRhyDbClient: CachedRhyDbClient,
     private val dataVersion: DataVersion,
     private val requestContext: RequestContext,
 ) {
     fun <ResponseType> sendQuery(
-        query: SiloQuery<ResponseType>,
+        query: RhyDbQuery<ResponseType>,
         setRequestDataVersion: Boolean = true,
     ): Stream<ResponseType> = sendQueryAndGetDataVersion(query, setRequestDataVersion).queryResult
 
     fun <ResponseType> sendQueryAndGetDataVersion(
-        query: SiloQuery<ResponseType>,
+        query: RhyDbQuery<ResponseType>,
         setRequestDataVersion: Boolean = true,
     ): WithDataVersion<Stream<ResponseType>> {
         val response = when (query.action.cacheable) {
-            true -> cachedSiloClient.sendCachedQuery(query).map { it.stream() }
-            else -> cachedSiloClient.sendQuery(query)
+            true -> cachedRhyDbClient.sendCachedQuery(query).map { it.stream() }
+            else -> cachedRhyDbClient.sendQuery(query)
         }
 
         if (setRequestDataVersion) {
@@ -73,7 +73,7 @@ class SiloClient(
     fun callInfo(timeout: Duration? = null): InfoData {
         log.info { "Calling SILO info" }
 
-        val info = cachedSiloClient.callInfo(timeout)
+        val info = cachedRhyDbClient.callInfo(timeout)
         dataVersion.dataVersion = info.dataVersion
         return info
     }
@@ -81,16 +81,16 @@ class SiloClient(
     fun getLineageDefinition(column: String): LineageDefinition {
         log.info { "Calling SILO lineageDefinition for column '$column'" }
 
-        return cachedSiloClient.getLineageDefinition(column)
+        return cachedRhyDbClient.getLineageDefinition(column)
     }
 }
 
-const val SILO_QUERY_CACHE_NAME = "siloQueryCache"
+const val RHYDB_QUERY_CACHE_NAME = "siloQueryCache"
 const val ARROW_STREAM_MEDIA_TYPE = "application/vnd.apache.arrow.stream"
 
 @Component
-open class CachedSiloClient(
-    private val siloUris: SiloUris,
+open class CachedRhyDbClient(
+    private val rhyDbUris: RhyDbUris,
     private val objectMapper: ObjectMapper,
     private val yamlObjectMapper: YamlObjectMapper,
     private val requestIdContext: RequestIdContext,
@@ -105,18 +105,18 @@ open class CachedSiloClient(
         .build()
 
     @Cacheable(
-        SILO_QUERY_CACHE_NAME,
+        RHYDB_QUERY_CACHE_NAME,
         condition =
             "#query.action.cacheable && " +
                 "(#query.action.randomize == null || " +
                 "#query.action.randomize.class.simpleName == 'Disabled' || " +
                 "#query.action.randomize.class.simpleName == 'WithSeed')",
     )
-    open fun <ResponseType> sendCachedQuery(query: SiloQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
+    open fun <ResponseType> sendCachedQuery(query: RhyDbQuery<ResponseType>): WithDataVersion<List<ResponseType>> =
         sendQuery(query)
             .let { WithDataVersion(it.dataVersion, it.queryResult.use { stream -> stream.toList() }) }
 
-    fun <ResponseType> sendQuery(query: SiloQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
+    fun <ResponseType> sendQuery(query: RhyDbQuery<ResponseType>): WithDataVersion<Stream<ResponseType>> {
         if (RequestContextHolder.getRequestAttributes() != null) {
             requestContext.cached = false
         }
@@ -126,11 +126,11 @@ open class CachedSiloClient(
         log.info { "Calling SILO: $saneQlQuery" }
 
         val response = send(
-            uri = siloUris.query,
+            uri = rhyDbUris.query,
             bodyHandler = BodyHandlers.ofInputStream(),
-            tryToReadSiloErrorFromBody = { body ->
+            tryToReadRhyDbErrorFromBody = { body ->
                 body.use {
-                    tryToReadSiloErrorFromString(it.readBytes().toString(Charsets.UTF_8))
+                    tryToReadRhyDbErrorFromString(it.readBytes().toString(Charsets.UTF_8))
                 }
             },
         ) {
@@ -147,7 +147,7 @@ open class CachedSiloClient(
 
     private fun <ResponseType> parseArrowStream(
         inputStream: InputStream,
-        action: SiloAction<ResponseType>,
+        action: RhyDbAction<ResponseType>,
     ): Stream<ResponseType> {
         val allocator = rootAllocator.newChildAllocator("query-${action.javaClass.simpleName}", 0, Long.MAX_VALUE)
         val reader = ArrowStreamReader(inputStream, allocator)
@@ -177,9 +177,9 @@ open class CachedSiloClient(
 
     fun callInfo(timeout: Duration? = null): InfoData {
         val response = send(
-            uri = siloUris.info,
+            uri = rhyDbUris.info,
             bodyHandler = BodyHandlers.ofString(),
-            tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
+            tryToReadRhyDbErrorFromBody = ::tryToReadRhyDbErrorFromString,
         ) {
             if (timeout != null) {
                 it.timeout(timeout)
@@ -189,15 +189,15 @@ open class CachedSiloClient(
 
         return InfoData(
             dataVersion = getDataVersion(response),
-            siloVersion = objectMapper.readValue<SiloInfo>(response.body()).version,
+            siloVersion = objectMapper.readValue<RhyDbInfo>(response.body()).version,
         )
     }
 
     fun getLineageDefinition(column: String): LineageDefinition {
         val response = send(
-            uri = siloUris.lineageDefinition(column),
+            uri = rhyDbUris.lineageDefinition(column),
             bodyHandler = BodyHandlers.ofString(),
-            tryToReadSiloErrorFromBody = ::tryToReadSiloErrorFromString,
+            tryToReadRhyDbErrorFromBody = ::tryToReadRhyDbErrorFromString,
         ) { it.GET() }
 
         val body = response.body()
@@ -224,7 +224,7 @@ open class CachedSiloClient(
     private fun <ResponseBodyType> send(
         uri: URI,
         bodyHandler: HttpResponse.BodyHandler<ResponseBodyType>,
-        tryToReadSiloErrorFromBody: (ResponseBodyType) -> SiloErrorResponse,
+        tryToReadRhyDbErrorFromBody: (ResponseBodyType) -> RhyDbErrorResponse,
         buildRequest: (HttpRequest.Builder) -> Unit,
     ): HttpResponse<ResponseBodyType> {
         val request = HttpRequest.newBuilder(uri)
@@ -254,16 +254,16 @@ open class CachedSiloClient(
             }
         } catch (exception: Exception) {
             throw when (exception) {
-                is HttpTimeoutException -> SiloTimeoutException(siloTimeoutMessage(uri, startedAtMillis, exception))
+                is HttpTimeoutException -> RhyDbTimeoutException(rhyDbTimeoutMessage(uri, startedAtMillis, exception))
 
                 is ConnectException,
                 is UnknownHostException,
                 is NoRouteToHostException,
                 is PortUnreachableException,
-                -> SiloNotReachableException(siloNotReachableMessage(uri, exception))
+                -> RhyDbNotReachableException(rhyDbNotReachableMessage(uri, exception))
 
                 // we don't know what went wrong here, so don't claim that we couldn't connect
-                else -> RuntimeException(siloErrorMessage(uri, exception), exception)
+                else -> RuntimeException(rhyDbErrorMessage(uri, exception), exception)
             }
         }
 
@@ -272,37 +272,37 @@ open class CachedSiloClient(
         }
 
         if (response.statusCode() != 200) {
-            val siloErrorResponse = tryToReadSiloErrorFromBody(response.body())
+            val rhyDbErrorResponse = tryToReadRhyDbErrorFromBody(response.body())
 
             if (response.statusCode() == 503) {
-                val message = siloErrorResponse.message
-                throw SiloUnavailableException(
+                val message = rhyDbErrorResponse.message
+                throw RhyDbUnavailableException(
                     "SILO is currently unavailable: $message",
                     response.headers().firstValue("retry-after").orElse(null),
                 )
             }
 
-            throw SiloException(
+            throw RhyDbException(
                 response.statusCode(),
-                siloErrorResponse.error,
-                "Error from SILO: " + siloErrorResponse.message,
+                rhyDbErrorResponse.error,
+                "Error from SILO: " + rhyDbErrorResponse.message,
             )
         }
 
         return response
     }
 
-    private fun siloNotReachableMessage(
+    private fun rhyDbNotReachableMessage(
         uri: URI,
         exception: Exception,
     ) = "Could not connect to silo at $uri: ${exception::class} ${exception.message}"
 
-    private fun siloErrorMessage(
+    private fun rhyDbErrorMessage(
         uri: URI,
         exception: Exception,
     ) = "Error talking to silo at $uri: ${exception::class} ${exception.message}"
 
-    private fun siloTimeoutMessage(
+    private fun rhyDbTimeoutMessage(
         uri: URI,
         startedAtMillis: Long,
         exception: HttpTimeoutException,
@@ -314,13 +314,13 @@ open class CachedSiloClient(
         }
     }
 
-    private fun tryToReadSiloErrorFromString(responseBody: String) =
+    private fun tryToReadRhyDbErrorFromString(responseBody: String) =
         try {
-            objectMapper.readValue<SiloErrorResponse>(responseBody)
+            objectMapper.readValue<RhyDbErrorResponse>(responseBody)
         } catch (e: Exception) {
             log.error { "Failed to deserialize error response from SILO: $e" }
 
-            throw SiloException(
+            throw RhyDbException(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
                 "Unexpected error from SILO: $responseBody",
@@ -334,7 +334,7 @@ open class CachedSiloClient(
 /**
  * Indicates that SILO returned an error response and forwards the status code, error title and message.
  */
-class SiloException(
+class RhyDbException(
     val statusCode: Int,
     val title: String,
     override val message: String,
@@ -343,7 +343,7 @@ class SiloException(
 /**
  * Indicates that SILO is reachable but claims that it's currently unavailable (HTTP 503).
  */
-class SiloUnavailableException(
+class RhyDbUnavailableException(
     override val message: String,
     val retryAfter: String?,
 ) : Exception(message)
@@ -352,14 +352,14 @@ class SiloUnavailableException(
  * Indicates that SILO did not answer within the timeout that LAPIS set for the request.
  * SILO may well be reachable and healthy - the request simply outlived its budget.
  */
-class SiloTimeoutException(
+class RhyDbTimeoutException(
     override val message: String,
 ) : Exception(message)
 
 /**
  * Indicates that SILO is not reachable at all (e.g. connection refused).
  */
-class SiloNotReachableException(
+class RhyDbNotReachableException(
     override val message: String,
 ) : Exception(message)
 
@@ -371,12 +371,12 @@ data class WithDataVersion<ResponseType>(
         WithDataVersion(dataVersion, transform(queryResult))
 }
 
-data class SiloErrorResponse(
+data class RhyDbErrorResponse(
     val error: String,
     val message: String,
 )
 
-data class SiloInfo(
+data class RhyDbInfo(
     val version: String,
 )
 

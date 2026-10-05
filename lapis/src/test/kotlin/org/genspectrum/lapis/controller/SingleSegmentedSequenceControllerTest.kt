@@ -5,8 +5,8 @@ import io.mockk.every
 import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
 import org.hamcrest.Matchers.startsWith
@@ -45,7 +45,7 @@ class SingleSegmentedSequenceControllerTest(
         .expectedFasta
 
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -73,7 +73,7 @@ class SingleSegmentedSequenceControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -92,7 +92,7 @@ class SingleSegmentedSequenceControllerTest(
     @MethodSource("getAlignedRequestsWithFilter")
     fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -128,7 +128,7 @@ class SingleSegmentedSequenceControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -147,7 +147,7 @@ class SingleSegmentedSequenceControllerTest(
     @MethodSource("getUnalignedRequestsWithFilter")
     fun `should call unalignedNucleotideSequence with filter`(scenario: SequenceEndpointTestScenario) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),

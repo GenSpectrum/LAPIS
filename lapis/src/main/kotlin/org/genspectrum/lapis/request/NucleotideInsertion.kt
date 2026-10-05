@@ -10,7 +10,7 @@ import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.ValueDeserializer
 
 const val LAPIS_INSERTION_AMBIGUITY_SYMBOL = "?"
-const val SILO_INSERTION_AMBIGUITY_SYMBOL = ".*"
+const val RHYDB_INSERTION_AMBIGUITY_SYMBOL = ".*"
 
 data class NucleotideInsertion(
     val position: Int,
@@ -34,7 +34,7 @@ data class NucleotideInsertion(
 
             val insertions = matchGroups["insertions"]?.value?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
-                SILO_INSERTION_AMBIGUITY_SYMBOL,
+                RHYDB_INSERTION_AMBIGUITY_SYMBOL,
             )?.uppercase()
                 ?: throw BadRequestException(
                     "Invalid nucleotide insertion: $nucleotideInsertion: Did not find insertions",

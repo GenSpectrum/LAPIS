@@ -10,14 +10,14 @@ import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.springframework.stereotype.Component
 
 @Component
 class VariantQueryFacade(
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
-    fun map(variantQuery: String): SiloFilterExpression {
+    fun map(variantQuery: String): RhyDbFilterExpression {
         val lexer = VariantQueryLexer(CharStreams.fromString(variantQuery))
         val tokens = CommonTokenStream(lexer)
         val parser = VariantQueryParser(tokens)

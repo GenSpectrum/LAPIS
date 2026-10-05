@@ -3,7 +3,7 @@ package org.genspectrum.lapis.controller
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.MockDataCollection.DataFormat.NESTED_JSON
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
@@ -44,7 +44,7 @@ class OAuthTest(
     }
 
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var queriesOverTimeModelMock: QueriesOverTimeModel
@@ -99,7 +99,7 @@ class OAuthTest(
     @ParameterizedTest(name = "GIVEN valid access token WHEN I request {0} THEN returns success")
     @MethodSource("getProtectedRouteScenarios")
     fun `GIVEN valid access token WHEN I request THEN returns success`(scenario: ProtectedRouteScenario) {
-        scenario.setupModelMock(siloQueryModelMock, queriesOverTimeModelMock)
+        scenario.setupModelMock(rhyDbQueryModelMock, queriesOverTimeModelMock)
 
         if (scenario.supportsGet) {
             mockMvc.perform(
@@ -138,18 +138,18 @@ class OAuthTest(
             SampleRoute.entries.map {
                 ProtectedRouteScenario(
                     path = "/sample${it.pathSegment}",
-                    setupModelMock = { siloQueryModelMock, _ ->
+                    setupModelMock = { rhyDbQueryModelMock, _ ->
                         when (it.serveType) {
                             ServeType.SEQUENCES -> MockDataForEndpoints.sequenceEndpointMockDataForAllSequences()
-                                .mockToReturnEmptyData(siloQueryModelMock)
+                                .mockToReturnEmptyData(rhyDbQueryModelMock)
 
                             ServeType.NEWICK -> MockDataForEndpoints.treeEndpointMockData()
-                                .mockToReturnEmptyData(siloQueryModelMock)
+                                .mockToReturnEmptyData(rhyDbQueryModelMock)
 
                             ServeType.METADATA -> MockDataForEndpoints.getMockData(
                                 it.pathSegment,
                             ).expecting(NESTED_JSON)
-                                .mockToReturnEmptyData(siloQueryModelMock)
+                                .mockToReturnEmptyData(rhyDbQueryModelMock)
                         }
                     },
                 )
@@ -185,9 +185,9 @@ class OAuthTest(
             ) + ProtectedRouteScenario(
                 path = "/sample$INFO_ROUTE",
                 supportsPost = false,
-                setupModelMock = { siloQueryModelMock, _ ->
+                setupModelMock = { rhyDbQueryModelMock, _ ->
                     every {
-                        siloQueryModelMock.getInfo()
+                        rhyDbQueryModelMock.getInfo()
                     } returns InfoData(dataVersion = "dataVersion", siloVersion = "siloVersion")
                 },
             ) + ProtectedRouteScenario(
@@ -197,9 +197,9 @@ class OAuthTest(
             ) + ProtectedRouteScenario(
                 path = "/sample$LINEAGE_DEFINITION_ROUTE/pangeLineage",
                 supportsPost = false,
-                setupModelMock = { siloQueryModelMock, _ ->
+                setupModelMock = { rhyDbQueryModelMock, _ ->
                     every {
-                        siloQueryModelMock.getLineageDefinition(any())
+                        rhyDbQueryModelMock.getLineageDefinition(any())
                     } returns emptyMap()
                 },
             ) + ProtectedRouteScenario(
@@ -221,5 +221,5 @@ data class ProtectedRouteScenario(
     val path: String,
     val supportsGet: Boolean = true,
     val supportsPost: Boolean = true,
-    val setupModelMock: (SiloQueryModel, QueriesOverTimeModel) -> Unit,
+    val setupModelMock: (RhyDbQueryModel, QueriesOverTimeModel) -> Unit,
 )

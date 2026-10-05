@@ -2,7 +2,7 @@ package org.genspectrum.lapis.controller
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.response.MostCommonAncestorData
 import org.genspectrum.lapis.response.PhyloSubtreeData
@@ -30,7 +30,7 @@ class LapisControllerPhyloTreeTest(
     @param:Autowired private val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var lapisInfo: LapisInfo
@@ -66,7 +66,7 @@ class LapisControllerPhyloTreeTest(
     @Test
     fun `GIVEN call to mostRecentCommonAncestor endpoint with miscapitalized PhyloTreeField returns ok`() {
         every {
-            siloQueryModelMock.getMostRecentCommonAncestor(
+            rhyDbQueryModelMock.getMostRecentCommonAncestor(
                 mrcaSequenceFiltersRequest(
                     phyloTreeField = "primaryKey",
                     sequenceFilters = emptyMap(),
@@ -86,7 +86,7 @@ class LapisControllerPhyloTreeTest(
     @Test
     fun `GIVEN call to phyloSubtree endpoint with miscapitalized PhyloTreeField returns ok`() {
         every {
-            siloQueryModelMock.getNewick(
+            rhyDbQueryModelMock.getNewick(
                 phyloTreeSequenceFiltersRequest(
                     sequenceFilters = emptyMap(),
                     phyloTreeField = "primaryKey",

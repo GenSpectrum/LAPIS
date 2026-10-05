@@ -19,9 +19,9 @@ import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.DateBetween
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbAction
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.True
 import org.genspectrum.lapis.silo.WithDataVersion
 import java.time.LocalDate
@@ -44,35 +44,35 @@ val DUMMY_DATE_BETWEEN_ALL =
     DateBetween(DUMMY_DATE_FIELD, LocalDate.parse("2021-01-01"), LocalDate.parse("2022-12-31"))
 
 const val DUMMY_DATE_FIELD = "date"
-val AGGREGATED_SILO_ACTION = SiloAction.aggregated(
+val AGGREGATED_RHYDB_ACTION = RhyDbAction.aggregated(
     groupByFields = listOf(DUMMY_DATE_FIELD),
     orderByFields = OrderBySpec.EMPTY,
     limit = null,
     offset = null,
 )
 
-fun mockSiloCallInfo(
-    siloClient: SiloClient,
+fun mockRhyDbCallInfo(
+    rhyDbClient: RhyDbClient,
     dataVersion: DataVersion,
 ) {
     every {
-        siloClient.callInfo()
+        rhyDbClient.callInfo()
     } answers {
         dataVersion.dataVersion = DUMMY_DATA_VERSION
         InfoData(DUMMY_DATA_VERSION, null)
     }
 }
 
-fun mockSiloCountQuery(
-    siloClient: SiloClient,
-    mutationFilter: SiloFilterExpression,
+fun mockRhyDbCountQuery(
+    rhyDbClient: RhyDbClient,
+    mutationFilter: RhyDbFilterExpression,
     dateBetweenFilter: DateBetween,
     queryResult: Stream<AggregationData>,
 ) {
     every {
-        siloClient.sendQueryAndGetDataVersion<AggregationData>(
+        rhyDbClient.sendQueryAndGetDataVersion<AggregationData>(
             query = match { query ->
-                query.action == AGGREGATED_SILO_ACTION &&
+                query.action == AGGREGATED_RHYDB_ACTION &&
                     query.filterExpression is And &&
                     query.filterExpression.children.count() == 3 &&
                     query.filterExpression.children.contains(mutationFilter) &&
@@ -85,14 +85,14 @@ fun mockSiloCountQuery(
     }
 }
 
-fun mockSiloNucleotideCoverageQuery(
-    siloClient: SiloClient,
+fun mockRhyDbNucleotideCoverageQuery(
+    rhyDbClient: RhyDbClient,
     sequenceName: String?,
     position: Int,
     dateBetween: DateBetween,
     queryResult: Stream<AggregationData>,
-) = mockSiloCoverageQuery(
-    siloClient,
+) = mockRhyDbCoverageQuery(
+    rhyDbClient,
     dateBetween,
     queryResult,
     {
@@ -106,14 +106,14 @@ fun mockSiloNucleotideCoverageQuery(
     },
 )
 
-fun mockSiloAminoAcidCoverageQuery(
-    siloClient: SiloClient,
+fun mockRhyDbAminoAcidCoverageQuery(
+    rhyDbClient: RhyDbClient,
     sequenceName: String?,
     position: Int,
     dateBetween: DateBetween,
     queryResult: Stream<AggregationData>,
-) = mockSiloCoverageQuery(
-    siloClient,
+) = mockRhyDbCoverageQuery(
+    rhyDbClient,
     dateBetween,
     queryResult,
     {
@@ -127,16 +127,16 @@ fun mockSiloAminoAcidCoverageQuery(
     },
 )
 
-fun mockSiloCoverageQuery(
-    siloClient: SiloClient,
+fun mockRhyDbCoverageQuery(
+    rhyDbClient: RhyDbClient,
     dateBetween: DateBetween,
     queryResult: Stream<AggregationData>,
-    coverageFilterExpressionFn: (SiloFilterExpression) -> Boolean,
+    coverageFilterExpressionFn: (RhyDbFilterExpression) -> Boolean,
 ) {
     every {
-        siloClient.sendQueryAndGetDataVersion<AggregationData>(
+        rhyDbClient.sendQueryAndGetDataVersion<AggregationData>(
             query = match { query ->
-                query.action == AGGREGATED_SILO_ACTION &&
+                query.action == AGGREGATED_RHYDB_ACTION &&
                     query.filterExpression is And &&
                     query.filterExpression.children.count() == 3 &&
                     query.filterExpression.children.any(coverageFilterExpressionFn) &&
@@ -149,15 +149,15 @@ fun mockSiloCoverageQuery(
     }
 }
 
-fun mockSiloTotalCountQuery(
-    siloClient: SiloClient,
+fun mockRhyDbTotalCountQuery(
+    rhyDbClient: RhyDbClient,
     dateBetweenFilter: DateBetween,
     queryResult: Stream<AggregationData>,
 ) {
     every {
-        siloClient.sendQueryAndGetDataVersion<AggregationData>(
+        rhyDbClient.sendQueryAndGetDataVersion<AggregationData>(
             match { query ->
-                query.action == AGGREGATED_SILO_ACTION &&
+                query.action == AGGREGATED_RHYDB_ACTION &&
                     query.filterExpression is And &&
                     query.filterExpression.children.count() == 2 &&
                     query.filterExpression.children.contains(True) &&

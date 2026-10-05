@@ -3,16 +3,16 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.ParsedQueryResult
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloException
-import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.RhyDbAction
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbException
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.springframework.stereotype.Component
 
 @Component
 class QueryParseModel(
-    private val siloClient: SiloClient,
+    private val rhyDbClient: RhyDbClient,
     private val advancedQueryFacade: AdvancedQueryFacade,
 ) {
     fun parseQueries(
@@ -20,7 +20,7 @@ class QueryParseModel(
         doFullValidation: Boolean = false,
     ): List<ParsedQueryResult> {
         try {
-            siloClient.callInfo() // populates dataVersion.dataVersion
+            rhyDbClient.callInfo() // populates dataVersion.dataVersion
         } catch (e: Exception) {
             // continue with a null data version: the queries can still be parsed without it
             log.warn { "Could not get current SILO data version: $e" }
@@ -43,8 +43,8 @@ class QueryParseModel(
 
             if (doFullValidation) {
                 try {
-                    validateAgainstSilo(filter)
-                } catch (e: SiloException) {
+                    validateAgainstRhyDb(filter)
+                } catch (e: RhyDbException) {
                     if (e.statusCode in 400..<500) {
                         return ParsedQueryResult.Failure(error = e.message)
                     }
@@ -58,15 +58,15 @@ class QueryParseModel(
             ParsedQueryResult.Failure(error = "Unexpected error parsing query.")
         }
 
-    private fun validateAgainstSilo(filter: SiloFilterExpression) {
-        val query = SiloQuery(
-            action = SiloAction.aggregated(
+    private fun validateAgainstRhyDb(filter: RhyDbFilterExpression) {
+        val query = RhyDbQuery(
+            action = RhyDbAction.aggregated(
                 groupByFields = emptyList(),
             ),
             filterExpression = filter,
         )
 
-        siloClient.sendQuery(query).use {
+        rhyDbClient.sendQuery(query).use {
             // we don't need the response, but we should consume (and thus close) the returned stream
         }
     }

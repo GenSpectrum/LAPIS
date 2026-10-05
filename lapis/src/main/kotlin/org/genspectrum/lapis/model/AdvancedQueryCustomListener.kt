@@ -36,7 +36,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import java.time.LocalDate
@@ -49,7 +49,7 @@ class AdvancedQueryCustomListener(
     databaseConfig: DatabaseConfig,
 ) : AdvancedQueryBaseListener(),
     ParseTreeListener {
-    private val expressionStack = ArrayDeque<SiloFilterExpression>()
+    private val expressionStack = ArrayDeque<RhyDbFilterExpression>()
 
     companion object {
         private val ESCAPE_SEQUENCE_REGEX = Regex("""\\(.)""")
@@ -58,7 +58,7 @@ class AdvancedQueryCustomListener(
     private val metadataFieldsByName = databaseConfig.schema.metadata
         .associateBy { it.name.lowercase(Locale.US) }
 
-    fun getAdvancedQueryExpression(): SiloFilterExpression {
+    fun getAdvancedQueryExpression(): RhyDbFilterExpression {
         if (expressionStack.size != 1) {
             log.error { "Expected exactly one expression on the stack, but got this stack $expressionStack." }
             throw RuntimeException("Failed to parse advanced query.")
@@ -389,7 +389,7 @@ class AdvancedQueryCustomListener(
         val matchExactly = ctx.nOfMatchExactly() != null
         val nOfExprs = ctx.nOfExprs().expr().size
 
-        val children = mutableListOf<SiloFilterExpression>()
+        val children = mutableListOf<RhyDbFilterExpression>()
         for (i in 1..nOfExprs) {
             children += expressionStack.removeLast()
         }

@@ -3,7 +3,7 @@ package org.genspectrum.lapis.controller
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.genspectrum.lapis.controller.LapisMediaType.APPLICATION_YAML_VALUE
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.response.InfoData
 import org.hamcrest.Matchers.matchesPattern
 import org.hamcrest.Matchers.startsWith
@@ -22,12 +22,12 @@ class InfoControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @Test
     fun `GET info`() {
         every {
-            siloQueryModelMock.getInfo()
+            rhyDbQueryModelMock.getInfo()
         } returns InfoData(
             dataVersion = "1234",
             siloVersion = "1.2.3",

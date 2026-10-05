@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.response
 
 import io.swagger.v3.oas.annotations.media.Schema
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 
 data class QueryParseResponse(
     val data: List<ParsedQueryResult>,
@@ -12,7 +12,7 @@ sealed interface ParsedQueryResult {
     @Schema(description = "Successful query parse result")
     data class Success(
         @field:Schema(description = "The parsed SILO filter expression")
-        val filter: SiloFilterExpression,
+        val filter: RhyDbFilterExpression,
     ) : ParsedQueryResult {
         @get:Schema(
             description = "Discriminator property, always 'success'",

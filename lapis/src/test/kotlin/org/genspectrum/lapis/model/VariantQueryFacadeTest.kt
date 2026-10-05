@@ -36,7 +36,7 @@ class VariantQueryFacadeTest {
     private val underTest = VariantQueryFacade(dummyReferenceGenomeSchema)
 
     @Test
-    fun `given a complex variant query then map should return the corresponding SiloQuery`() {
+    fun `given a complex variant query then map should return the corresponding RhyDbQuery`() {
         val variantQuery =
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
                 "nextcladePangoLineage:jn.1* & A.1.2.3*"
@@ -74,7 +74,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a single entry then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a single entry then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "300G"
 
         val result = underTest.map(variantQuery)
@@ -93,7 +93,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with an 'And' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with an 'And' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "300G & 400-"
 
         val result = underTest.map(variantQuery)
@@ -106,7 +106,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with two 'And' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with two 'And' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "300G & 400- & 500B"
 
         val result = underTest.map(variantQuery)
@@ -120,7 +120,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Not' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'Not' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "!300G"
 
         val result = underTest.map(variantQuery)
@@ -130,7 +130,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variant variantQuery with an 'Or' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variant variantQuery with an 'Or' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "300G | 400-"
 
         val result = underTest.map(variantQuery)
@@ -143,7 +143,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with an bracket expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with an bracket expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "300C & (400A | 500G)"
 
         val result = underTest.map(variantQuery)
@@ -159,7 +159,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Maybe' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'Maybe' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "MAYBE(300G)"
 
         val result = underTest.map(variantQuery)
@@ -169,7 +169,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `GIVEN a variantQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' SiloQuery`() {
+    fun `GIVEN a variantQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' RhyDbQuery`() {
         val variantQuery = "maYbE(T12C)"
 
         val result = underTest.map(variantQuery)
@@ -179,7 +179,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Pangolineage' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'Pangolineage' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "A.1.2.3"
 
         val result = underTest.map(variantQuery)
@@ -190,7 +190,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a variantQuery with a 'Pangolineage' expression (including sublineages) then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'Pangolineage' expression (including sublineages) then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "A.1.2.3*"
 
         val result = underTest.map(variantQuery)
@@ -201,7 +201,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a variantQuery with a 'NextcladePangolineage' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'NextcladePangolineage' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "nextcladePangoLineage:A.1.2.3*"
 
         val result = underTest.map(variantQuery)
@@ -212,7 +212,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a variantQuery with a 'NextcladePangolineage' expression with casing then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'NextcladePangolineage' expression with casing then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "NeXtcladePaNgoLineage:A.1.2.3*"
 
         val result = underTest.map(variantQuery)
@@ -222,7 +222,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Nof' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a 'Nof' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "[3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(variantQuery)
@@ -241,7 +241,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a exact 'Nof' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a exact 'Nof' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "[exactly-3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(variantQuery)
@@ -261,7 +261,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a variantQuery with a nested exact 'Nof' expression then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a nested exact 'Nof' expression then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "[exactly-3-of: 123A, !234G, 345G, 456A]"
 
         val result = underTest.map(variantQuery)
@@ -281,7 +281,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a variantQuery with a exact 'Nof' expression with casing then map should return the corresponding SiloQuery`() {
+    fun `given a variantQuery with a exact 'Nof' expression with casing then map should return the corresponding RhyDbQuery`() {
         val variantQuery = "[exAcTly-3-oF: 123A, 234T, 345G]"
 
         val result = underTest.map(variantQuery)
@@ -299,7 +299,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Insertion' expression then returns SILO query`() {
+    fun `given a variantQuery with a 'Insertion' expression then returns RHYDB query`() {
         val variantQuery = "ins_1234:GAG"
 
         val result = underTest.map(variantQuery)
@@ -316,7 +316,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Insertion' expression with lower case letters then returns SILO query`() {
+    fun `given a variantQuery with a 'Insertion' expression with lower case letters then returns RHYDB query`() {
         val variantQuery = "ins_1234:gAG"
 
         val result = underTest.map(variantQuery)
@@ -325,7 +325,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Insertion' expression with casing letters then returns SILO query`() {
+    fun `given a variantQuery with a 'Insertion' expression with casing letters then returns RHYDB query`() {
         val variantQuery = "iNs_1234:gAG"
 
         val result = underTest.map(variantQuery)
@@ -334,7 +334,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a variantQuery with a 'Insertion' with wildcard expression then returns SILO query`() {
+    fun `given a variantQuery with a 'Insertion' with wildcard expression then returns RHYDB query`() {
         val variantQuery = "ins_1234:G?A?G"
 
         val result = underTest.map(variantQuery)
@@ -397,7 +397,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'AA insertion' expression then returns RHYDB query`() {
         val variantQuery = "ins_S:501:EPE"
 
         val result = underTest.map(variantQuery)
@@ -406,7 +406,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a stop codon expression then returns SILO query`() {
+    fun `given a valid variantQuery with a stop codon expression then returns RHYDB query`() {
         val variantQuery = "ins_S:501:A*C"
 
         val result = underTest.map(variantQuery)
@@ -415,7 +415,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' expression with lower case then returns SILO query`() {
+    fun `given a valid variantQuery with a 'AA insertion' expression with lower case then returns RHYDB query`() {
         val variantQuery = "ins_ORF1a:501:ePe"
 
         val result = underTest.map(variantQuery)
@@ -424,7 +424,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' expression with lower case gene then returns SILO query`() {
+    fun `given a valid variantQuery with a 'AA insertion' expression with lower case gene then returns RHYDB query`() {
         val variantQuery = "ins_orF1a:501:EPE"
 
         val result = underTest.map(variantQuery)
@@ -433,7 +433,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' with wildcard then returns SILO query`() {
+    fun `given a valid variantQuery with a 'AA insertion' with wildcard then returns RHYDB query`() {
         val variantQuery = "ins_S:501:E?E?"
 
         val result = underTest.map(variantQuery)
@@ -442,7 +442,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'AA insertion' with stop codon and wildcard then returns SILO query`() {
+    fun `given a valid variantQuery with a 'AA insertion' with stop codon and wildcard then returns RHYDB query`() {
         val variantQuery = "ins_S:501:E?*E"
 
         val result = underTest.map(variantQuery)
@@ -451,7 +451,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression then returns RHYDB query`() {
         val variantQuery = "nextstrainClade:22B"
 
         val result = underTest.map(variantQuery)
@@ -461,7 +461,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression in lower case then returns SILO query`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' expression in lower case then returns RHYDB query`() {
         val variantQuery = "nextstrainClade:22b"
 
         val result = underTest.map(variantQuery)
@@ -470,7 +470,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression then returns RHYDB query`() {
         val variantQuery = "nextstrainClade:RECOMBINANT"
 
         val result = underTest.map(variantQuery)
@@ -480,7 +480,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression in lower case then returns SILO query`() {
+    fun `given a valid variantQuery with a 'NextstrainCladeLineage' recombinant expression in lower case then returns RHYDB query`() {
         val variantQuery = "nextstrainClade:recombinant"
 
         val result = underTest.map(variantQuery)
@@ -489,7 +489,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression then returns RHYDB query`() {
         val variantQuery = "gisaid:X"
 
         val result = underTest.map(variantQuery)
@@ -499,7 +499,7 @@ class VariantQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression with lower case then returns SILO query`() {
+    fun `given a valid variantQuery with a single letter 'GisaidCladeLineage' expression with lower case then returns RHYDB query`() {
         val variantQuery = "gisaid:x"
 
         val result = underTest.map(variantQuery)
@@ -508,7 +508,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'GisaidCladeLineage' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'GisaidCladeLineage' expression then returns RHYDB query`() {
         val variantQuery = "gisaid:AB"
 
         val result = underTest.map(variantQuery)
@@ -517,7 +517,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'nextcladePangoLineage' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'nextcladePangoLineage' expression then returns RHYDB query`() {
         val variantQuery = "nextcladePangoLineage:jn.1*"
 
         val result = underTest.map(variantQuery)
@@ -529,7 +529,7 @@ class VariantQueryFacadeTest {
     }
 
     @Test
-    fun `given a valid variantQuery with a 'usherTreedescendantOf' expression then returns SILO query`() {
+    fun `given a valid variantQuery with a 'usherTreedescendantOf' expression then returns RHYDB query`() {
         val variantQuery = "usherTree.descendantOf:node_1200"
 
         val result = underTest.map(variantQuery)

@@ -41,7 +41,7 @@ data class AminoAcidInsertion(
 
             val insertions = matchGroups["insertions"]?.value?.replace(STOP_CODON, ESCAPED_STOP_CODON)?.replace(
                 LAPIS_INSERTION_AMBIGUITY_SYMBOL,
-                SILO_INSERTION_AMBIGUITY_SYMBOL,
+                RHYDB_INSERTION_AMBIGUITY_SYMBOL,
             )?.uppercase()
                 ?: throw BadRequestException(
                     "Invalid amino acid insertion: $aminoAcidInsertion: Did not find insertions",

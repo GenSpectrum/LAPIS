@@ -5,8 +5,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
 import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SiloException
-import org.genspectrum.lapis.silo.SiloUnavailableException
+import org.genspectrum.lapis.silo.RhyDbException
+import org.genspectrum.lapis.silo.RhyDbUnavailableException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -76,8 +76,8 @@ class ExceptionHandlerTest(
     }
 
     @Test
-    fun `Passes through exception with status code from SILO`() {
-        every { validControllerCall() } throws SiloException(123, "SomeTitle", "SomeMessage")
+    fun `Passes through exception with status code from RHYDB`() {
+        every { validControllerCall() } throws RhyDbException(123, "SomeTitle", "SomeMessage")
 
         mockMvc.perform(getSample(validRoute))
             .andExpect(status().`is`(123))
@@ -124,10 +124,10 @@ class ExceptionHandlerTest(
     }
 
     @Test
-    fun `GIVEN throws SiloUnavailableException exception with retry-after value THEN sets Retry-After header`() {
+    fun `GIVEN throws RhyDbUnavailableException exception with retry-after value THEN sets Retry-After header`() {
         val retryAfterValue = "60"
         val detailMessage = "SomeMessage"
-        every { validControllerCall() } throws SiloUnavailableException(detailMessage, retryAfterValue)
+        every { validControllerCall() } throws RhyDbUnavailableException(detailMessage, retryAfterValue)
 
         mockMvc.perform(getSample(validRoute))
             .andExpect(status().isServiceUnavailable)
@@ -137,9 +137,9 @@ class ExceptionHandlerTest(
     }
 
     @Test
-    fun `GIVEN throws SiloUnavailableException exception without retry-after value THEN does not set header`() {
+    fun `GIVEN throws RhyDbUnavailableException exception without retry-after value THEN does not set header`() {
         val detailMessage = "SomeMessage"
-        every { validControllerCall() } throws SiloUnavailableException(detailMessage, null)
+        every { validControllerCall() } throws RhyDbUnavailableException(detailMessage, null)
 
         mockMvc.perform(getSample(validRoute))
             .andExpect(status().isServiceUnavailable)
