@@ -146,7 +146,7 @@ private fun renderArgs(
         .joinToString(", ")
 
 /**
- * One pipeline step chained after `default.filter(...)`, e.g. `.groupBy({count:=count()})`.
+ * One pipeline step chained after `default.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
  * Callers that need no step at all (e.g. `DetailsAction` without fields) simply omit it from
  * [SaneQlPipeline.steps] - there is no "empty step" representation.
  */

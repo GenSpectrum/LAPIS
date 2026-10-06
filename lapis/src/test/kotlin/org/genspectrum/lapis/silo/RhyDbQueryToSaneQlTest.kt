@@ -27,7 +27,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter("theColumn" = 'theValue').groupBy({"count":=count()})"""),
+            equalTo("""default.filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -37,7 +37,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("""default.filter(true).groupBy({"count":=count()})"""))
+        assertThat(result, equalTo("""default.filter(true).group(by:={}, aggs:={"count":=count()})"""))
     }
 
     @Test
@@ -74,7 +74,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter($expectedPredicate).groupBy({"count":=count()})"""),
+            equalTo("""default.filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -95,7 +95,7 @@ class RhyDbQueryToSaneQlTest {
         assertThat(
             result,
             equalTo(
-                """default.filter(true).groupBy({"count":=count()}, {"country"})""" +
+                """default.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
                     """.orderBy({"count}).filter(true).groupBy({evil:=count()"})""", // <- the orderBy field is quoted
             ),
         )
@@ -108,18 +108,18 @@ class RhyDbQueryToSaneQlTest {
                 // Aggregated
                 Arguments.of(
                     RhyDbAction.aggregated(),
-                    """.groupBy({"count":=count()})""",
+                    """.group(by:={}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(listOf("field1", "field2")),
-                    """.groupBy({"count":=count()}, {"field1", "field2"})""",
+                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         computedFields = listOf(ComputedField("date", ScalarFunction.ISO_WEEK)),
                     ),
-                    """.map({"date.isoWeek":="date".isoWeek()}).groupBy({"count":=count()}, {"country", "date.isoWeek"})""",
+                    """.map({"date.isoWeek":="date".isoWeek()}).group(by:={"country", "date.isoWeek"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -131,29 +131,29 @@ class RhyDbQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.groupBy({"count":=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
-                    """.groupBy({"count":=count()}).randomize()""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize()""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
-                    """.groupBy({"count":=count()}).randomize(seed:=123)""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize(seed:=123)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = 42),
                         limit = 10,
                     ),
-                    """.groupBy({"count":=count()}).randomize(seed:=42).limit(10)""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize(seed:=42).limit(10)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         sequencePositionFields = listOf(SequencePositionField("S", 501)),
                     ),
-                    """.map({"S[501]":="S".at(501)}).groupBy({"count":=count()}, {"country", "S[501]"})""",
+                    """.map({"S[501]":="S".at(501)}).group(by:={"country", "S[501]"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -162,7 +162,7 @@ class RhyDbQueryToSaneQlTest {
                             SequencePositionField("main", 456),
                         ),
                     ),
-                    """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).groupBy({"count":=count()}, {"S[123]", "main[456]"})""",
+                    """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).group(by:={"S[123]", "main[456]"}, aggs:={"count":=count()})""",
                 ),
                 // Mutations
                 Arguments.of(

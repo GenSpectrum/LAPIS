@@ -25,7 +25,7 @@ data class RhyDbQuery<ResponseType>(
     val action: RhyDbAction<ResponseType>,
     val filterExpression: RhyDbFilterExpression,
 ) {
-    /** Renders this query as a SaneQL query string, e.g. `default.filter(true).groupBy({count:=count()})`. */
+    /** Renders this query as a SaneQL query string, e.g. `default.filter(true).group(by:={}, aggs:={count:=count()})`. */
     fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
 }
 
@@ -51,7 +51,7 @@ sealed class RhyDbAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
-    /** The SaneQL pipeline step(s) specific to this action, e.g. `.groupBy({count:=count()})`. */
+    /** The SaneQL pipeline step(s) specific to this action, e.g. `.group(by:={}, aggs:={count:=count()})`. */
     protected abstract fun ownSaneQlSteps(): List<SaneQlStep>
 
     /**
@@ -283,13 +283,14 @@ sealed class RhyDbAction<ResponseType>(
                         computedFields.map { id(it.outputColumnName) }
                 add(
                     SaneQlStep(
-                        "groupBy",
-                        positionalArgs = buildList {
-                            add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
-                            if (allGroupByColumns.isNotEmpty()) {
-                                add(SaneQlList(allGroupByColumns))
-                            }
-                        },
+                        "group",
+                        namedArgs = listOf(
+                            SaneQlNamedArg("by", SaneQlList(allGroupByColumns)),
+                            SaneQlNamedArg(
+                                "aggs",
+                                SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))),
+                            ),
+                        ),
                     ),
                 )
             }
