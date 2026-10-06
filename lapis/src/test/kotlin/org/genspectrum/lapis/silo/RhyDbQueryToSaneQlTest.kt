@@ -96,7 +96,7 @@ class RhyDbQueryToSaneQlTest {
             result,
             equalTo(
                 """default.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
-                    """.orderBy({"count}).filter(true).groupBy({evil:=count()"})""", // <- the orderBy field is quoted
+                    """.order(by:={"count}).filter(true).groupBy({evil:=count()"})""", // <- the order field is quoted
             ),
         )
     }
@@ -131,7 +131,7 @@ class RhyDbQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
@@ -179,7 +179,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.mutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.mutations(minProportion:=0.5).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.mutations(0.05, fields = listOf("mutation", "count", "proportion")),
@@ -199,7 +199,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.aminoAcidMutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.aminoAcidMutations(minProportion:=0.5).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Details
                 Arguments.of(
@@ -216,7 +216,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.project({"age", "pango_lineage"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.project({"age", "pango_lineage"}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.details(orderByFields = OrderBySpec.Random(seed = 0)),
@@ -232,7 +232,7 @@ class RhyDbQueryToSaneQlTest {
                             ),
                         ),
                     ),
-                    """.project({"country", "date"}).orderBy({"country", "date".desc()})""",
+                    """.project({"country", "date"}).order(by:={"country", "date".desc()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.details(
@@ -256,7 +256,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.insertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.insertions().order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aminoAcidInsertions(),
@@ -271,7 +271,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.aminoAcidInsertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.aminoAcidInsertions().order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Sequence
                 Arguments.of(
@@ -294,7 +294,7 @@ class RhyDbQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.project({"field1", "field2", "someSequenceName"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.project({"field1", "field2", "someSequenceName"}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // MostRecentCommonAncestor
                 Arguments.of(

@@ -56,7 +56,7 @@ sealed class RhyDbAction<ResponseType>(
 
     /**
      * All SaneQL pipeline steps for this action: [ownSaneQlSteps] followed by the steps common to
-     * every action (`orderBy`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
+     * every action (`order`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
      */
     fun toSaneQlSteps(): List<SaneQlStep> = ownSaneQlSteps() + commonSaneQlSuffixSteps()
 
@@ -64,7 +64,12 @@ sealed class RhyDbAction<ResponseType>(
         buildList {
             val orderByFields = this@RhyDbAction.orderByFields
             if (orderByFields.isNotEmpty()) {
-                add(SaneQlStep("orderBy", positionalArgs = listOf(SaneQlList(orderByFields.map { toSaneQl(it) }))))
+                add(
+                    SaneQlStep(
+                        "order",
+                        namedArgs = listOf(SaneQlNamedArg("by", SaneQlList(orderByFields.map { toSaneQl(it) }))),
+                    ),
+                )
             }
             val offset = this@RhyDbAction.offset
             if (offset != null) {
