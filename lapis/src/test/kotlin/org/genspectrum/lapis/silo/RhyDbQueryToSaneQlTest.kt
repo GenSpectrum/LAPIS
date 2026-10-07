@@ -27,7 +27,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
+            equalTo("""data.filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -37,7 +37,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("""default.filter(true).group(by:={}, aggs:={"count":=count()})"""))
+        assertThat(result, equalTo("""data.filter(true).group(by:={}, aggs:={"count":=count()})"""))
     }
 
     @Test
@@ -46,7 +46,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("default.filter(true)"))
+        assertThat(result, equalTo("data.filter(true)"))
     }
 
     @ParameterizedTest(name = "action: {1}")
@@ -59,7 +59,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("default.filter(true)$expectedSaneQl"))
+        assertThat(result, equalTo("data.filter(true)$expectedSaneQl"))
     }
 
     @ParameterizedTest(name = "filter: {1}")
@@ -74,7 +74,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
+            equalTo("""data.filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -95,7 +95,7 @@ class RhyDbQueryToSaneQlTest {
         assertThat(
             result,
             equalTo(
-                """default.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
+                """data.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
                     """.order(by:={"count}).filter(true).groupBy({evil:=count()"})""", // <- the order field is quoted
             ),
         )

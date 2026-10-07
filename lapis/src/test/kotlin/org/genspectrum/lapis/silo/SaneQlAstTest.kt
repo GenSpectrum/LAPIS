@@ -165,7 +165,7 @@ class SaneQlAstTest {
     @Test
     fun `GIVEN pipeline with no steps THEN renders only the filter`() {
         val pipeline = SaneQlPipeline(SaneQlBoolean(true), emptyList())
-        assertThat(pipeline.render(), equalTo("default.filter(true)"))
+        assertThat(pipeline.render(), equalTo("data.filter(true)"))
     }
 
     @Test
@@ -174,6 +174,6 @@ class SaneQlAstTest {
             SaneQlBoolean(true),
             listOf(SaneQlStep("insertions"), SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(10)))),
         )
-        assertThat(pipeline.render(), equalTo("default.filter(true).insertions().limit(10)"))
+        assertThat(pipeline.render(), equalTo("data.filter(true).insertions().limit(10)"))
     }
 }

@@ -146,7 +146,7 @@ private fun renderArgs(
         .joinToString(", ")
 
 /**
- * One pipeline step chained after `default.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
+ * One pipeline step chained after `data.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
  * Callers that need no step at all (e.g. `DetailsAction` without fields) simply omit it from
  * [SaneQlPipeline.steps] - there is no "empty step" representation.
  */
@@ -158,10 +158,10 @@ data class SaneQlStep(
     override fun render() = ".$name(${renderArgs(positionalArgs, namedArgs)})"
 }
 
-/** The full `default.filter(filter).step1.step2...` pipeline. */
+/** The full `data.filter(filter).step1.step2...` pipeline. */
 data class SaneQlPipeline(
     val filter: SaneQlExpression,
     val steps: List<SaneQlStep>,
 ) : SaneQlNode {
-    override fun render() = "default.filter(${filter.render()})" + steps.joinToString("") { it.render() }
+    override fun render() = "data.filter(${filter.render()})" + steps.joinToString("") { it.render() }
 }

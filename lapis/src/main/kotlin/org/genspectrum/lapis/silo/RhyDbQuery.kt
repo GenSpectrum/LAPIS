@@ -25,7 +25,7 @@ data class RhyDbQuery<ResponseType>(
     val action: RhyDbAction<ResponseType>,
     val filterExpression: RhyDbFilterExpression,
 ) {
-    /** Renders this query as a SaneQL query string, e.g. `default.filter(true).group(by:={}, aggs:={count:=count()})`. */
+    /** Renders this query as a SaneQL query string, e.g. `data.filter(true).group(by:={}, aggs:={count:=count()})`. */
     fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
 }
 
