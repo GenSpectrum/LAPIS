@@ -8,10 +8,10 @@ import org.genspectrum.lapis.controller.middleware.RequestCompression
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
-import org.genspectrum.lapis.silo.SiloException
-import org.genspectrum.lapis.silo.SiloNotReachableException
-import org.genspectrum.lapis.silo.SiloTimeoutException
-import org.genspectrum.lapis.silo.SiloUnavailableException
+import org.genspectrum.lapis.silo.RhyDbException
+import org.genspectrum.lapis.silo.RhyDbNotReachableException
+import org.genspectrum.lapis.silo.RhyDbTimeoutException
+import org.genspectrum.lapis.silo.RhyDbUnavailableException
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController
 import org.springframework.boot.webmvc.error.ErrorAttributes
@@ -70,31 +70,31 @@ class ExceptionHandler(
     fun handleForbiddenException(e: AddForbiddenToOpenApiDocsHelper): ErrorResponse =
         responseEntity(HttpStatus.FORBIDDEN, e.message)
 
-    @ExceptionHandler(SiloException::class)
-    fun handleSiloException(e: SiloException): ErrorResponse {
+    @ExceptionHandler(RhyDbException::class)
+    fun handleRhyDbException(e: RhyDbException): ErrorResponse {
         log.warn(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
 
         return responseEntity(e.statusCode, e.title, e.message)
     }
 
-    @ExceptionHandler(SiloNotReachableException::class)
-    fun handleSiloNotReachableException(e: SiloNotReachableException): ErrorResponse {
+    @ExceptionHandler(RhyDbNotReachableException::class)
+    fun handleRhyDbNotReachableException(e: RhyDbNotReachableException): ErrorResponse {
         log.warn { "Caught SiloNotReachableException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
 
-    @ExceptionHandler(SiloTimeoutException::class)
+    @ExceptionHandler(RhyDbTimeoutException::class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    fun handleSiloTimeoutException(e: SiloTimeoutException): ErrorResponse {
+    fun handleRhyDbTimeoutException(e: RhyDbTimeoutException): ErrorResponse {
         log.warn { "Caught SiloTimeoutException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
 
-    @ExceptionHandler(SiloUnavailableException::class)
+    @ExceptionHandler(RhyDbUnavailableException::class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    fun handleSiloUnavailableException(e: SiloUnavailableException): ErrorResponse {
+    fun handleRhyDbUnavailableException(e: RhyDbUnavailableException): ErrorResponse {
         log.warn { "Caught SiloUnavailableException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) {

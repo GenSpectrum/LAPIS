@@ -8,14 +8,14 @@ import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
-import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.RhyDbFilterExpressionMapper
 import org.genspectrum.lapis.request.QueryOverTimeItem
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.And
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.Not
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
-import org.genspectrum.lapis.silo.SiloClient
+import org.genspectrum.lapis.silo.RhyDbClient
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
@@ -53,10 +53,10 @@ private val DUMMY_FILTER_COVERAGE_2 = Not(NucleotideSymbolEquals("other_segment"
 @SpringBootTest
 class QueriesOverTimeModelTest {
     @MockK
-    private lateinit var siloQueryClient: SiloClient
+    private lateinit var rhyDbQueryClient: RhyDbClient
 
     @Autowired
-    private lateinit var siloFilterExpressionMapper: SiloFilterExpressionMapper
+    private lateinit var rhyDbFilterExpressionMapper: RhyDbFilterExpressionMapper
 
     @Autowired
     private lateinit var referenceGenome: ReferenceGenome
@@ -79,8 +79,8 @@ class QueriesOverTimeModelTest {
     fun setup() {
         MockKAnnotations.init(this)
         underTest = QueriesOverTimeModel(
-            siloClient = siloQueryClient,
-            siloFilterExpressionMapper = siloFilterExpressionMapper,
+            rhyDbClient = rhyDbQueryClient,
+            rhyDbFilterExpressionMapper = rhyDbFilterExpressionMapper,
             referenceGenome = referenceGenome,
             referenceGenomeSchema = referenceGenomeSchema,
             dataVersion = dataVersion,
@@ -91,7 +91,7 @@ class QueriesOverTimeModelTest {
 
     @Test
     fun `GIVEN an empty list of queries THEN it returns an empty list`() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
         val result = underTest.evaluateQueriesOverTime(
             queries = emptyList(),
@@ -109,7 +109,7 @@ class QueriesOverTimeModelTest {
 
     @Test
     fun `GIVEN an empty list of date ranges THEN it returns an empty list`() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
         val result = underTest.evaluateQueriesOverTime(
             queries = listOf(QueryOverTimeItem("label", "main:123T", "!main:123N")),
             dateRanges = emptyList(),
@@ -139,9 +139,9 @@ class QueriesOverTimeModelTest {
     }
 
     private fun commonSetup() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
-        mockSiloCountQuery(
-            siloClient = siloQueryClient,
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
+        mockRhyDbCountQuery(
+            rhyDbClient = rhyDbQueryClient,
             mutationFilter = DUMMY_FILTER_1,
             dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
@@ -149,8 +149,8 @@ class QueriesOverTimeModelTest {
                 AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
-        mockSiloCountQuery(
-            siloClient = siloQueryClient,
+        mockRhyDbCountQuery(
+            rhyDbClient = rhyDbQueryClient,
             mutationFilter = DUMMY_FILTER_2,
             dateBetweenFilter = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
@@ -159,8 +159,8 @@ class QueriesOverTimeModelTest {
                 AggregationData(2, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
-        mockSiloCoverageQuery(
-            siloClient = siloQueryClient,
+        mockRhyDbCoverageQuery(
+            rhyDbClient = rhyDbQueryClient,
             dateBetween = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
                 AggregationData(5, fields = mapOf("date" to StringNode("2021-06-01"))),
@@ -168,8 +168,8 @@ class QueriesOverTimeModelTest {
             ),
             coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_1 },
         )
-        mockSiloCoverageQuery(
-            siloClient = siloQueryClient,
+        mockRhyDbCoverageQuery(
+            rhyDbClient = rhyDbQueryClient,
             dateBetween = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
                 AggregationData(0, fields = mapOf("date" to StringNode("2021-06-01"))),
@@ -178,8 +178,8 @@ class QueriesOverTimeModelTest {
             ),
             coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_2 },
         )
-        mockSiloTotalCountQuery(
-            siloQueryClient,
+        mockRhyDbTotalCountQuery(
+            rhyDbQueryClient,
             DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
                 AggregationData(10, fields = mapOf("date" to StringNode("2021-06-01"))),
@@ -241,14 +241,14 @@ class QueriesOverTimeModelTest {
 
     @Test
     fun `GIVEN a list of queries and date ranges and no data for a mutation THEN it returns zero`() {
-        mockSiloCountQuery(siloQueryClient, DUMMY_FILTER_1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloCoverageQuery(
-            siloClient = siloQueryClient,
+        mockRhyDbCountQuery(rhyDbQueryClient, DUMMY_FILTER_1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockRhyDbCoverageQuery(
+            rhyDbClient = rhyDbQueryClient,
             dateBetween = DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.empty(),
             coverageFilterExpressionFn = { it == DUMMY_FILTER_COVERAGE_1 },
         )
-        mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockRhyDbTotalCountQuery(rhyDbQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val queries = listOf(DUMMY_QUERY_ITEM_1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -280,7 +280,7 @@ class QueriesOverTimeModelTest {
     fun `GIVEN one data version change THEN it succeeds`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+            rhyDbQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = if (callCount++ == 0) "1" else "2"
             WithDataVersion(
@@ -308,7 +308,7 @@ class QueriesOverTimeModelTest {
     fun `GIVEN more than once data version change THEN it throws`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+            rhyDbQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = (callCount++).toString()
             WithDataVersion(

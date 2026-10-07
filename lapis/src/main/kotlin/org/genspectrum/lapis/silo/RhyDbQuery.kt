@@ -21,9 +21,9 @@ import tools.jackson.databind.ValueSerializer
 import tools.jackson.databind.annotation.JsonSerialize
 import java.time.LocalDate
 
-data class SiloQuery<ResponseType>(
-    val action: SiloAction<ResponseType>,
-    val filterExpression: SiloFilterExpression,
+data class RhyDbQuery<ResponseType>(
+    val action: RhyDbAction<ResponseType>,
+    val filterExpression: RhyDbFilterExpression,
 ) {
     /** Renders this query as a SaneQL query string, e.g. `default.filter(true).groupBy({count:=count()})`. */
     fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
@@ -43,11 +43,11 @@ const val ORDER_BY_RANDOM_FIELD_NAME = "random"
  * are not cached. Their result cardinality grows roughly with the number of matching sequences, so
  * materializing the full result into a `List` to store it in the cache can exhaust the heap, while
  * the cache hit rate for such queries is close to zero anyway. Non-cacheable queries are streamed
- * straight through instead (see [SiloClient.sendQueryAndGetDataVersion]).
+ * straight through instead (see [RhyDbClient.sendQueryAndGetDataVersion]).
  */
 const val MAX_CACHEABLE_GROUP_BY_FIELD_COUNT = 20
 
-sealed class SiloAction<ResponseType>(
+sealed class RhyDbAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
@@ -62,15 +62,15 @@ sealed class SiloAction<ResponseType>(
 
     private fun commonSaneQlSuffixSteps(): List<SaneQlStep> =
         buildList {
-            val orderByFields = this@SiloAction.orderByFields
+            val orderByFields = this@RhyDbAction.orderByFields
             if (orderByFields.isNotEmpty()) {
                 add(SaneQlStep("orderBy", positionalArgs = listOf(SaneQlList(orderByFields.map { toSaneQl(it) }))))
             }
-            val offset = this@SiloAction.offset
+            val offset = this@RhyDbAction.offset
             if (offset != null) {
                 add(SaneQlStep("offset", positionalArgs = listOf(SaneQlInt(offset))))
             }
-            when (val randomize = this@SiloAction.randomize) {
+            when (val randomize = this@RhyDbAction.randomize) {
                 is RandomizeConfig.Enabled -> {
                     add(SaneQlStep("randomize"))
                 }
@@ -86,7 +86,7 @@ sealed class SiloAction<ResponseType>(
 
                 is RandomizeConfig.Disabled, null -> {}
             }
-            val limit = this@SiloAction.limit
+            val limit = this@RhyDbAction.limit
             if (limit != null) {
                 add(SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(limit))))
             }
@@ -100,7 +100,7 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
             sequencePositionFields: List<SequencePositionField> = emptyList(),
-        ): SiloAction<AggregationData> =
+        ): RhyDbAction<AggregationData> =
             AggregatedAction(
                 groupByFields = groupByFields,
                 sequencePositionFields = sequencePositionFields,
@@ -117,7 +117,7 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
-        ): SiloAction<MutationData> =
+        ): RhyDbAction<MutationData> =
             MutationsAction(
                 minProportion = minProportion,
                 orderByFields = getOrderByFieldsList(orderByFields),
@@ -133,7 +133,7 @@ sealed class SiloAction<ResponseType>(
             limit: Int? = null,
             offset: Int? = null,
             fields: List<String> = emptyList(),
-        ): SiloAction<MutationData> =
+        ): RhyDbAction<MutationData> =
             AminoAcidMutationsAction(
                 minProportion = minProportion,
                 orderByFields = getOrderByFieldsList(orderByFields),
@@ -148,7 +148,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<DetailsData> =
+        ): RhyDbAction<DetailsData> =
             DetailsAction(
                 fields = fields,
                 orderByFields = getOrderByFieldsList(orderByFields),
@@ -160,7 +160,7 @@ sealed class SiloAction<ResponseType>(
         fun mostRecentCommonAncestor(
             phyloTreeField: String,
             printNodesNotInTree: Boolean = false,
-        ): SiloAction<MostCommonAncestorData> =
+        ): RhyDbAction<MostCommonAncestorData> =
             MostRecentCommonAncestorAction(
                 columnName = phyloTreeField,
                 printNodesNotInTree = printNodesNotInTree,
@@ -169,7 +169,7 @@ sealed class SiloAction<ResponseType>(
         fun phyloSubtree(
             phyloTreeField: String,
             printNodesNotInTree: Boolean = false,
-        ): SiloAction<PhyloSubtreeData> =
+        ): RhyDbAction<PhyloSubtreeData> =
             PhyloSubtreeAction(
                 columnName = phyloTreeField,
                 printNodesNotInTree = printNodesNotInTree,
@@ -179,7 +179,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<InsertionData> =
+        ): RhyDbAction<InsertionData> =
             NucleotideInsertionsAction(
                 orderByFields = getOrderByFieldsList(orderByFields),
                 limit = limit,
@@ -191,7 +191,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<InsertionData> =
+        ): RhyDbAction<InsertionData> =
             AminoAcidInsertionsAction(
                 orderByFields = getOrderByFieldsList(orderByFields),
                 limit = limit,
@@ -206,7 +206,7 @@ sealed class SiloAction<ResponseType>(
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
-        ): SiloAction<SequenceData> =
+        ): RhyDbAction<SequenceData> =
             SequenceAction(
                 type = type,
                 sequenceNames = sequenceNames,
@@ -245,7 +245,7 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<AggregationData>(
+    ) : RhyDbAction<AggregationData>(
             arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
             cacheable = groupByFields.size + sequencePositionFields.size <= MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
         ) {
@@ -303,7 +303,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
-    ) : SiloAction<MutationData>(
+    ) : RhyDbAction<MutationData>(
             arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -321,7 +321,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         val fields: List<String> = emptyList(),
-    ) : SiloAction<MutationData>(
+    ) : RhyDbAction<MutationData>(
             arrowConverter = MUTATION_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -338,7 +338,7 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<DetailsData>(
+    ) : RhyDbAction<DetailsData>(
             arrowConverter = DETAILS_DATA_ARROW_CONVERTER,
             cacheable = false,
         ) {
@@ -358,7 +358,7 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<InsertionData>(
+    ) : RhyDbAction<InsertionData>(
             arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -375,7 +375,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
-    ) : SiloAction<MostCommonAncestorData>(
+    ) : RhyDbAction<MostCommonAncestorData>(
             arrowConverter = MOST_COMMON_ANCESTOR_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -399,7 +399,7 @@ sealed class SiloAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
         override val randomize: RandomizeConfig? = null,
-    ) : SiloAction<PhyloSubtreeData>(
+    ) : RhyDbAction<PhyloSubtreeData>(
             arrowConverter = PHYLO_SUBTREE_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -421,7 +421,7 @@ sealed class SiloAction<ResponseType>(
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
-    ) : SiloAction<InsertionData>(
+    ) : RhyDbAction<InsertionData>(
             arrowConverter = INSERTION_DATA_ARROW_CONVERTER,
             cacheable = true,
         ) {
@@ -439,7 +439,7 @@ sealed class SiloAction<ResponseType>(
         val type: SequenceType,
         val sequenceNames: List<String>,
         val additionalFields: List<String> = emptyList(),
-    ) : SiloAction<SequenceData>(
+    ) : RhyDbAction<SequenceData>(
             arrowConverter = SEQUENCE_DATA_ARROW_CONVERTER,
             cacheable = false,
         ) {
@@ -476,7 +476,7 @@ private fun toSaneQl(field: OrderByField): SaneQlExpression =
         Order.DESCENDING -> SaneQlMethodCall(id(field.field), "desc")
     }
 
-sealed class SiloFilterExpression(
+sealed class RhyDbFilterExpression(
     val type: String,
 ) {
     /** Renders this filter expression as a SaneQL expression, e.g. `"theColumn" = 'theValue'`. */
@@ -486,14 +486,14 @@ sealed class SiloFilterExpression(
 data class StringEquals(
     val column: String,
     val value: String?,
-) : SiloFilterExpression("StringEquals") {
+) : RhyDbFilterExpression("StringEquals") {
     override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), str(value))
 }
 
 data class BooleanEquals(
     val column: String,
     val value: Boolean?,
-) : SiloFilterExpression("BooleanEquals") {
+) : RhyDbFilterExpression("BooleanEquals") {
     override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlBoolean(value))
 }
 
@@ -501,7 +501,7 @@ data class LineageEquals(
     val column: String,
     val value: String?,
     val includeSublineages: Boolean,
-) : SiloFilterExpression("Lineage") {
+) : RhyDbFilterExpression("Lineage") {
     override fun toSaneQl() =
         SaneQlMethodCall(
             receiver = id(column),
@@ -516,7 +516,7 @@ data class NucleotideSymbolEquals(
     val sequenceName: String,
     val position: Int,
     val symbol: String,
-) : SiloFilterExpression("NucleotideEquals") {
+) : RhyDbFilterExpression("NucleotideEquals") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "nucleotideEquals",
@@ -532,7 +532,7 @@ data class NucleotideSymbolEquals(
 data class HasNucleotideMutation(
     val sequenceName: String,
     val position: Int,
-) : SiloFilterExpression("HasNucleotideMutation") {
+) : RhyDbFilterExpression("HasNucleotideMutation") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "hasMutation",
@@ -547,7 +547,7 @@ data class AminoAcidSymbolEquals(
     val sequenceName: String,
     val position: Int,
     val symbol: String,
-) : SiloFilterExpression("AminoAcidEquals") {
+) : RhyDbFilterExpression("AminoAcidEquals") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "aminoAcidEquals",
@@ -562,7 +562,7 @@ data class AminoAcidSymbolEquals(
 data class HasAminoAcidMutation(
     val sequenceName: String,
     val position: Int,
-) : SiloFilterExpression("HasAminoAcidMutation") {
+) : RhyDbFilterExpression("HasAminoAcidMutation") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "hasAAMutation",
@@ -577,7 +577,7 @@ data class DateBetween(
     val column: String,
     val from: LocalDate?,
     val to: LocalDate?,
-) : SiloFilterExpression("DateBetween") {
+) : RhyDbFilterExpression("DateBetween") {
     override fun toSaneQl() =
         SaneQlMethodCall(
             receiver = id(column),
@@ -591,7 +591,7 @@ data class NucleotideInsertionContains(
     val position: Int,
     val value: String,
     val sequenceName: String,
-) : SiloFilterExpression("InsertionContains") {
+) : RhyDbFilterExpression("InsertionContains") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "insertionContains",
@@ -607,7 +607,7 @@ data class AminoAcidInsertionContains(
     val position: Int,
     val value: String,
     val sequenceName: String,
-) : SiloFilterExpression(
+) : RhyDbFilterExpression(
         "AminoAcidInsertionContains",
     ) {
     override fun toSaneQl() =
@@ -621,43 +621,43 @@ data class AminoAcidInsertionContains(
         )
 }
 
-data object True : SiloFilterExpression("True") {
+data object True : RhyDbFilterExpression("True") {
     override fun toSaneQl() = SaneQlBoolean(true)
 }
 
 data class And(
-    val children: List<SiloFilterExpression>,
-) : SiloFilterExpression("And") {
-    constructor(vararg children: SiloFilterExpression) : this(children.toList())
+    val children: List<RhyDbFilterExpression>,
+) : RhyDbFilterExpression("And") {
+    constructor(vararg children: RhyDbFilterExpression) : this(children.toList())
 
     override fun toSaneQl() = SaneQlAnd(children.map { it.toSaneQl() })
 }
 
 data class Or(
-    val children: List<SiloFilterExpression>,
-) : SiloFilterExpression("Or") {
-    constructor(vararg children: SiloFilterExpression) : this(children.toList())
+    val children: List<RhyDbFilterExpression>,
+) : RhyDbFilterExpression("Or") {
+    constructor(vararg children: RhyDbFilterExpression) : this(children.toList())
 
     override fun toSaneQl() = SaneQlOr(children.map { it.toSaneQl() })
 }
 
 data class Not(
-    val child: SiloFilterExpression,
-) : SiloFilterExpression("Not") {
+    val child: RhyDbFilterExpression,
+) : RhyDbFilterExpression("Not") {
     override fun toSaneQl() = SaneQlNot(child.toSaneQl())
 }
 
 data class Maybe(
-    val child: SiloFilterExpression,
-) : SiloFilterExpression("Maybe") {
+    val child: RhyDbFilterExpression,
+) : RhyDbFilterExpression("Maybe") {
     override fun toSaneQl() = SaneQlFunctionCall("maybe", positionalArgs = listOf(child.toSaneQl()))
 }
 
 data class NOf(
     val numberOfMatchers: Int,
     val matchExactly: Boolean,
-    val children: List<SiloFilterExpression>,
-) : SiloFilterExpression("N-Of") {
+    val children: List<RhyDbFilterExpression>,
+) : RhyDbFilterExpression("N-Of") {
     override fun toSaneQl() =
         SaneQlFunctionCall(
             "nOf",
@@ -673,7 +673,7 @@ data class NOf(
 data class IntEquals(
     val column: String,
     val value: Int?,
-) : SiloFilterExpression("IntEquals") {
+) : RhyDbFilterExpression("IntEquals") {
     override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlInt(value))
 }
 
@@ -681,7 +681,7 @@ data class IntBetween(
     val column: String,
     val from: Int?,
     val to: Int?,
-) : SiloFilterExpression("IntBetween") {
+) : RhyDbFilterExpression("IntBetween") {
     override fun toSaneQl() =
         SaneQlMethodCall(
             receiver = id(column),
@@ -693,7 +693,7 @@ data class IntBetween(
 data class FloatEquals(
     val column: String,
     val value: Double?,
-) : SiloFilterExpression("FloatEquals") {
+) : RhyDbFilterExpression("FloatEquals") {
     override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlFloat(value))
 }
 
@@ -701,7 +701,7 @@ data class FloatBetween(
     val column: String,
     val from: Double?,
     val to: Double?,
-) : SiloFilterExpression("FloatBetween") {
+) : RhyDbFilterExpression("FloatBetween") {
     override fun toSaneQl() =
         SaneQlMethodCall(
             receiver = id(column),
@@ -713,7 +713,7 @@ data class FloatBetween(
 data class StringSearch(
     val column: String,
     val searchExpression: String,
-) : SiloFilterExpression("StringSearch") {
+) : RhyDbFilterExpression("StringSearch") {
     override fun toSaneQl() =
         SaneQlMethodCall(receiver = id(column), name = "like", positionalArgs = listOf(str(searchExpression)))
 }
@@ -721,20 +721,20 @@ data class StringSearch(
 data class PhyloDescendantOf(
     val column: String,
     val internalNode: String,
-) : SiloFilterExpression("PhyloDescendantOf") {
+) : RhyDbFilterExpression("PhyloDescendantOf") {
     override fun toSaneQl() =
         SaneQlMethodCall(receiver = id(column), name = "phyloDescendantOf", positionalArgs = listOf(str(internalNode)))
 }
 
 data class IsNull(
     val column: String,
-) : SiloFilterExpression("IsNull") {
+) : RhyDbFilterExpression("IsNull") {
     override fun toSaneQl() = isNull(column)
 }
 
 data class IsNotNull(
     val column: String,
-) : SiloFilterExpression("IsNotNull") {
+) : RhyDbFilterExpression("IsNotNull") {
     override fun toSaneQl() = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
 }
 

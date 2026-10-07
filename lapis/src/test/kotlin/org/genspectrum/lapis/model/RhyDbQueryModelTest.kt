@@ -34,10 +34,10 @@ import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
+import org.genspectrum.lapis.silo.RhyDbAction
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.genspectrum.lapis.silo.SequenceType
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.silo.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -62,17 +62,17 @@ val someInsertionData = InsertionData(
     sequenceName = "sequenceName",
 )
 
-class SiloQueryModelTest {
+class RhyDbQueryModelTest {
     @MockK
-    lateinit var siloClientMock: SiloClient
+    lateinit var rhyDbClientMock: RhyDbClient
 
     @MockK
     lateinit var referenceGenomeSchemaMock: ReferenceGenomeSchema
 
     @MockK
-    lateinit var siloFilterExpressionMapperMock: SiloFilterExpressionMapper
+    lateinit var rhyDbFilterExpressionMapperMock: RhyDbFilterExpressionMapper
 
-    private lateinit var underTest: SiloQueryModel
+    private lateinit var underTest: RhyDbQueryModel
 
     private val testDatabaseConfig = databaseConfig(
         metadata = listOf(
@@ -95,9 +95,9 @@ class SiloQueryModelTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        underTest = SiloQueryModel(
-            siloClient = siloClientMock,
-            siloFilterExpressionMapper = siloFilterExpressionMapperMock,
+        underTest = RhyDbQueryModel(
+            rhyDbClient = rhyDbClientMock,
+            rhyDbFilterExpressionMapper = rhyDbFilterExpressionMapperMock,
             referenceGenomeSchema = referenceGenomeSchemaMock,
             fastaHeaderTemplateParser = fastaHeaderTemplateParser,
             databaseConfig = testDatabaseConfig,
@@ -105,9 +105,9 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `aggregate calls the SILO client with an aggregated action`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+    fun `aggregate calls the RHYDB client with an aggregated action`() {
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<AggregationData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.getAggregated(
@@ -123,16 +123,16 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(SiloAction.aggregated(emptyList()), True),
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(RhyDbAction.aggregated(emptyList()), True),
             )
         }
     }
 
     @Test
     fun `GIVEN no fields specified THEN getDetails uses all metadata fields`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<DetailsData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<DetailsData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getDetails(
             DetailsFiltersRequest(
@@ -147,9 +147,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.details(
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.details(
                         listOf("accession", "age", "qc", "isBoolean", "date", "primaryKey"),
                     ),
                     True,
@@ -160,8 +160,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN fields specified THEN getDetails uses only those fields`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<DetailsData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<DetailsData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getDetails(
             DetailsFiltersRequest(
@@ -176,9 +176,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.details(listOf("accession", "date")),
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.details(listOf("accession", "date")),
                     True,
                 ),
             )
@@ -186,24 +186,24 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `computeNucleotideMutationProportions calls the SILO client with a mutations action`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+    fun `computeNucleotideMutationProportions calls the RHYDB client with a mutations action`() {
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.computeNucleotideMutationProportions(mutationProportionsRequest(minProportion = 0.5))
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(SiloAction.mutations(0.5), True),
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(RhyDbAction.mutations(0.5), True),
             )
         }
     }
 
     @Test
     fun `computeNucleotideMutationProportions ignores the segmentName if singleSegmentedSequenceFeature is enabled`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(someMutationData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns Stream.of(someMutationData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result = underTest.computeNucleotideMutationProportions(mutationProportionsRequest()).toList()
@@ -224,9 +224,9 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN singleSegmented and fields = position WHEN get nuc mutations THEN sequence name is null`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns
             Stream.of(mutationData(position = 123))
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result =
@@ -251,12 +251,12 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN singleSegmented and fields=sequenceName WHEN get nuc mutations THEN has explicit null sequence name`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns Stream.of(
             mutationData(
                 sequenceName = "sequenceName",
             ),
         )
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result = underTest.computeNucleotideMutationProportions(
@@ -279,10 +279,10 @@ class SiloQueryModelTest {
     @Test
     fun `GIVEN multiSegmented and fields = mutation WHEN get nuc mutations THEN sequence name is null`() {
         every {
-            siloClientMock.sendQuery(
-                match<SiloQuery<MutationData>> {
+            rhyDbClientMock.sendQuery(
+                match<RhyDbQuery<MutationData>> {
                     when (val action = it.action) {
-                        is SiloAction.MutationsAction -> action.fields.contains(MutationsField.SEQUENCE_NAME.value)
+                        is RhyDbAction.MutationsAction -> action.fields.contains(MutationsField.SEQUENCE_NAME.value)
                         else -> false
                     }
                 },
@@ -295,7 +295,7 @@ class SiloQueryModelTest {
                 mutationTo = "B",
             ),
         )
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
         val result = underTest.computeNucleotideMutationProportions(
@@ -317,8 +317,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `computeNucleotideMutationProportions includes segmentName if singleSegmentedSequenceFeature is not enabled`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(someMutationData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns Stream.of(someMutationData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
         val result = underTest.computeNucleotideMutationProportions(mutationProportionsRequest()).toList()
@@ -338,8 +338,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `computeAminoAcidMutationsProportions returns the sequenceName with the position`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<MutationData>>()) } returns Stream.of(someMutationData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<MutationData>>()) } returns Stream.of(someMutationData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.computeAminoAcidMutationProportions(mutationProportionsRequest()).toList()
 
@@ -359,10 +359,10 @@ class SiloQueryModelTest {
     @Test
     fun `GIVEN fields = mutation WHEN getting amino acid mutations THEN sequence name is null`() {
         every {
-            siloClientMock.sendQuery(
-                match<SiloQuery<MutationData>> {
+            rhyDbClientMock.sendQuery(
+                match<RhyDbQuery<MutationData>> {
                     when (val action = it.action) {
-                        is SiloAction.AminoAcidMutationsAction -> action.fields.contains(
+                        is RhyDbAction.AminoAcidMutationsAction -> action.fields.contains(
                             MutationsField.SEQUENCE_NAME.value,
                         )
 
@@ -378,7 +378,7 @@ class SiloQueryModelTest {
                 mutationTo = "B",
             ),
         )
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.computeAminoAcidMutationProportions(
             mutationProportionsRequest(fields = listOf(MutationsField.MUTATION)),
@@ -399,8 +399,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `getNucleotideInsertions ignores the field sequenceName if the nucleotide sequence has one segment`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         val result = underTest.getNucleotideInsertions(
@@ -426,8 +426,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `getNucleotideInsertions includes the segment name if the nucleotide sequence has multiple segments`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns false
 
         val result = underTest.getNucleotideInsertions(
@@ -453,9 +453,9 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN orderBy mutation WHEN computing nuc mutations THEN expands to component fields in order`() {
-        val querySlot = slot<SiloQuery<MutationData>>()
-        every { siloClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        val querySlot = slot<RhyDbQuery<MutationData>>()
+        every { rhyDbClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.computeNucleotideMutationProportions(
@@ -464,7 +464,7 @@ class SiloQueryModelTest {
             ),
         ).toList()
 
-        val action = querySlot.captured.action as SiloAction.MutationsAction
+        val action = querySlot.captured.action as RhyDbAction.MutationsAction
         assertThat(
             action.orderByFields,
             equalTo(
@@ -480,9 +480,9 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN orderBy insertion WHEN computing nuc insertions THEN expands to component fields in order`() {
-        val querySlot = slot<SiloQuery<InsertionData>>()
-        every { siloClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        val querySlot = slot<RhyDbQuery<InsertionData>>()
+        every { rhyDbClientMock.sendQuery(capture(querySlot)) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.isSingleSegmented() } returns true
 
         underTest.getNucleotideInsertions(
@@ -496,7 +496,7 @@ class SiloQueryModelTest {
             ),
         ).toList()
 
-        val action = querySlot.captured.action as SiloAction.NucleotideInsertionsAction
+        val action = querySlot.captured.action as RhyDbAction.NucleotideInsertionsAction
         assertThat(
             action.orderByFields,
             equalTo(
@@ -511,8 +511,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `getAminoAcidInsertions returns the sequenceName with the position`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<InsertionData>>()) } returns Stream.of(someInsertionData)
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         val result = underTest.getAminoAcidInsertions(
             SequenceFiltersRequest(
@@ -536,9 +536,9 @@ class SiloQueryModelTest {
     }
 
     @Test
-    fun `getGenomicSequence calls the SILO client with a sequence action`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<SequenceData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+    fun `getGenomicSequence calls the RHYDB client with a sequence action`() {
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<SequenceData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
         every { referenceGenomeSchemaMock.getSequenceNameFromCaseInsensitiveName("someSequenceName") } returns
             "someSequenceName"
 
@@ -558,9 +558,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.genomicSequence(
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.genomicSequence(
                         type = SequenceType.ALIGNED,
                         sequenceNames = listOf("someSequenceName"),
                         additionalFields = listOf("primaryKey", "date"),
@@ -573,16 +573,16 @@ class SiloQueryModelTest {
 
     @Test
     fun `GIVEN request with unaligned sequences WHEN getting genomic sequences THEN maps sequence names`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<SequenceData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<SequenceData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         referenceGenomeSchemaMock = ReferenceGenomeSchema(
             nucleotideSequences = listOf(ReferenceSequenceSchema("Segment1"), ReferenceSequenceSchema("Segment2")),
             genes = emptyList(),
         )
-        underTest = SiloQueryModel(
-            siloClient = siloClientMock,
-            siloFilterExpressionMapper = siloFilterExpressionMapperMock,
+        underTest = RhyDbQueryModel(
+            rhyDbClient = rhyDbClientMock,
+            rhyDbFilterExpressionMapper = rhyDbFilterExpressionMapperMock,
             referenceGenomeSchema = referenceGenomeSchemaMock,
             fastaHeaderTemplateParser = fastaHeaderTemplateParser,
             databaseConfig = testDatabaseConfig,
@@ -603,9 +603,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.genomicSequence(
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.genomicSequence(
                         type = SequenceType.UNALIGNED,
                         sequenceNames = listOf("unaligned_Segment1", "unaligned_Segment2"),
                         additionalFields = listOf("primaryKey", "date"),
@@ -622,8 +622,8 @@ class SiloQueryModelTest {
 
     @Test
     fun `getAggregated splits plain and computed fields into groupByFields and computedFields`() {
-        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<AggregationData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
 
         underTest.getAggregated(
             AggregatedFiltersRequest(
@@ -641,9 +641,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.aggregated(
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.aggregated(
                         groupByFields = listOf("date"),
                         computedFields = listOf(ComputedField("date", ScalarFunction.ISO_WEEK)),
                     ),
@@ -656,8 +656,8 @@ class SiloQueryModelTest {
     @Test
     fun `getAggregated passes orderBy fields through unchanged for computed fields`() {
         val isoWeekField = ComputedField("date", ScalarFunction.ISO_WEEK)
-        every { siloFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
-        every { siloClientMock.sendQuery(any<SiloQuery<AggregationData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<AggregationData>>()) } returns Stream.empty()
 
         val orderByFields = OrderBySpec.ByFields(
             listOf(OrderByField(field = isoWeekField.outputColumnName, order = Order.ASCENDING)),
@@ -676,9 +676,9 @@ class SiloQueryModelTest {
         )
 
         verify {
-            siloClientMock.sendQuery(
-                SiloQuery(
-                    SiloAction.aggregated(
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.aggregated(
                         groupByFields = emptyList(),
                         computedFields = listOf(isoWeekField),
                         orderByFields = orderByFields,

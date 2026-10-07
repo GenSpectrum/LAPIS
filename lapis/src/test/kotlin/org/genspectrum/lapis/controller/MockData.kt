@@ -6,8 +6,8 @@ import org.genspectrum.lapis.controller.LapisMediaType.TEXT_NEWICK_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_TSV_VALUE
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA_VALUE
 import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequencesResponse
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.model.TemplateField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
@@ -30,8 +30,8 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.stream.Stream
 
 data class MockDataCollection(
-    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
-    val mockWithData: (SiloQueryModel) -> Unit,
+    val mockToReturnEmptyData: (RhyDbQueryModel) -> Unit,
+    val mockWithData: (RhyDbQueryModel) -> Unit,
     val expectedJson: String,
     val expectedCsv: String,
     val expectedTsv: String,
@@ -51,7 +51,7 @@ data class MockDataCollection(
 
     companion object {
         inline fun <reified Arg, Data> create(
-            crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> Stream<Data>,
+            crossinline rhyDbQueryModelMockCall: (RhyDbQueryModel) -> (Arg) -> Stream<Data>,
             modelData: List<Data>,
             expectedJson: String,
             expectedCsv: String,
@@ -59,8 +59,8 @@ data class MockDataCollection(
             fields: List<String>? = null,
             phyloTreeField: String? = null,
         ) = MockDataCollection(
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { Stream.empty() } },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
+            { modelMock -> every { rhyDbQueryModelMockCall(modelMock)(any()) } answers { Stream.empty() } },
+            { modelMock -> every { rhyDbQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
             expectedJson,
             expectedCsv,
             expectedTsv,
@@ -111,8 +111,8 @@ data class MockDataCollection(
 
 data class SequenceEndpointMockDataCollection(
     val getSequencesResponse: () -> SequencesResponse,
-    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
-    val mockWithData: (SiloQueryModel) -> Unit,
+    val mockToReturnEmptyData: (RhyDbQueryModel) -> Unit,
+    val mockWithData: (RhyDbQueryModel) -> Unit,
     val expectedFasta: String,
     val expectedJson: String,
     val expectedNdjson: String,
@@ -202,8 +202,8 @@ data class SequenceEndpointMockDataCollection(
 }
 
 data class TreeEndpointMockDataCollection(
-    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
-    val mockWithData: (SiloQueryModel) -> Unit,
+    val mockToReturnEmptyData: (RhyDbQueryModel) -> Unit,
+    val mockWithData: (RhyDbQueryModel) -> Unit,
     val expectedNewick: String,
     val fields: List<String>?,
     val phyloTreeField: String? = null,
@@ -217,18 +217,18 @@ data class TreeEndpointMockDataCollection(
 
     companion object {
         inline fun <reified Arg> create(
-            crossinline siloQueryModelMockCall: (SiloQueryModel) -> (Arg) -> Stream<PhyloSubtreeData>,
+            crossinline rhyDbQueryModelMockCall: (RhyDbQueryModel) -> (Arg) -> Stream<PhyloSubtreeData>,
             modelData: List<PhyloSubtreeData>,
             expectedNewick: String,
             fields: List<String>? = null,
             phyloTreeField: String? = null,
         ) = TreeEndpointMockDataCollection(
             { modelMock ->
-                every { siloQueryModelMockCall(modelMock)(any()) } answers {
+                every { rhyDbQueryModelMockCall(modelMock)(any()) } answers {
                     Stream.of(PhyloSubtreeData(subtreeNewick = "", missingNodeCount = 0, missingFromTree = null))
                 }
             },
-            { modelMock -> every { siloQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
+            { modelMock -> every { rhyDbQueryModelMockCall(modelMock)(any()) } answers { modelData.stream() } },
             expectedNewick,
             fields,
             phyloTreeField,
@@ -250,8 +250,8 @@ data class TreeEndpointMockDataCollection(
 }
 
 data class MockData(
-    val mockToReturnEmptyData: (SiloQueryModel) -> Unit,
-    val mockWithData: (SiloQueryModel) -> Unit,
+    val mockToReturnEmptyData: (RhyDbQueryModel) -> Unit,
+    val mockWithData: (RhyDbQueryModel) -> Unit,
     val assertDataMatches: (String) -> Unit,
     val fields: List<String>? = null,
     val phyloTreeField: String? = null,
@@ -272,7 +272,7 @@ object MockDataForEndpoints {
 
     fun treeEndpointMockData() =
         TreeEndpointMockDataCollection.create(
-            siloQueryModelMockCall = { it::getNewick },
+            rhyDbQueryModelMockCall = { it::getNewick },
             modelData = listOf(
                 PhyloSubtreeData(
                     subtreeNewick = "((node1,node2),node3);",
@@ -406,7 +406,7 @@ object MockDataForEndpoints {
         )
 
     private val aggregated = MockDataCollection.create(
-        siloQueryModelMockCall = { it::getAggregated },
+        rhyDbQueryModelMockCall = { it::getAggregated },
         modelData = listOf(
             AggregationData(
                 0,
@@ -436,7 +436,7 @@ object MockDataForEndpoints {
     )
 
     private val details = MockDataCollection.create(
-        siloQueryModelMockCall = { it::getDetails },
+        rhyDbQueryModelMockCall = { it::getDetails },
         modelData = listOf(
             DetailsData(
                 mapOf(
@@ -483,7 +483,7 @@ object MockDataForEndpoints {
     )
 
     private val nucleotideMutations = MockDataCollection.create(
-        siloQueryModelMockCall = { it::computeNucleotideMutationProportions },
+        rhyDbQueryModelMockCall = { it::computeNucleotideMutationProportions },
         modelData = listOf(
             MutationResponse(
                 mutation = "sequenceName:A1234T",
@@ -523,7 +523,7 @@ object MockDataForEndpoints {
     )
 
     private val aminoAcidMutations = MockDataCollection.create(
-        siloQueryModelMockCall = { it::computeAminoAcidMutationProportions },
+        rhyDbQueryModelMockCall = { it::computeAminoAcidMutationProportions },
         modelData = listOf(
             MutationResponse(
                 mutation = "sequenceName:A1234T",
@@ -563,7 +563,7 @@ object MockDataForEndpoints {
     )
 
     private val nucleotideInsertions = MockDataCollection.create(
-        siloQueryModelMockCall = { it::getNucleotideInsertions },
+        rhyDbQueryModelMockCall = { it::getNucleotideInsertions },
         modelData = listOf(
             InsertionResponse(
                 insertion = "ins_1234:CAGAA",
@@ -597,7 +597,7 @@ object MockDataForEndpoints {
     )
 
     private val mostRecentCommonAncestor = MockDataCollection.create(
-        siloQueryModelMockCall = { it::getMostRecentCommonAncestor },
+        rhyDbQueryModelMockCall = { it::getMostRecentCommonAncestor },
         modelData = listOf(
             MostCommonAncestorData(
                 mrcaNode = "node1",
@@ -628,7 +628,7 @@ object MockDataForEndpoints {
     )
 
     private val aminoAcidInsertions = MockDataCollection.create(
-        siloQueryModelMockCall = { it::getAminoAcidInsertions },
+        rhyDbQueryModelMockCall = { it::getAminoAcidInsertions },
         modelData = listOf(
             InsertionResponse(
                 insertion = "ins_ORF1a:1234:CAGAA",

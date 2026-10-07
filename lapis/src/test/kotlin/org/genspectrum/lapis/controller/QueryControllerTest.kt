@@ -6,9 +6,9 @@ import io.mockk.verify
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloException
-import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbException
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ class QueryControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloClient: SiloClient
+    lateinit var rhyDbClient: RhyDbClient
 
     @Autowired
     lateinit var dataVersion: DataVersion
@@ -39,7 +39,7 @@ class QueryControllerTest(
     @BeforeEach
     fun setup() {
         every {
-            siloClient.callInfo()
+            rhyDbClient.callInfo()
         } answers {
             dataVersion.dataVersion = "1234"
             InfoData("1234", null)
@@ -204,12 +204,12 @@ class QueryControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.data[0].type").value("success"))
 
-        verify(exactly = 0) { siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any()) }
-        verify(exactly = 1) { siloClient.callInfo() }
+        verify(exactly = 0) { rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any()) }
+        verify(exactly = 1) { rhyDbClient.callInfo() }
     }
 
     @Test
-    fun `doFullValidation false does not call SILO for validation`() {
+    fun `doFullValidation false does not call RHYDB for validation`() {
         mockMvc.perform(
             post(route)
                 .content("""{"queries": ["country = 'USA'"], "doFullValidation": false}""")
@@ -218,14 +218,14 @@ class QueryControllerTest(
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.data[0].type").value("success"))
 
-        verify(exactly = 0) { siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any()) }
-        verify(exactly = 1) { siloClient.callInfo() }
+        verify(exactly = 0) { rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any()) }
+        verify(exactly = 1) { rhyDbClient.callInfo() }
     }
 
     @Test
-    fun `doFullValidation true calls SILO for validation and succeeds for valid query`() {
+    fun `doFullValidation true calls RHYDB for validation and succeeds for valid query`() {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any())
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any())
         } returns Stream.empty()
 
         mockMvc.perform(
@@ -238,14 +238,14 @@ class QueryControllerTest(
             .andExpect(jsonPath("$.data[0].filter").exists())
             .andExpect(jsonPath("$.data[0].error").doesNotExist())
 
-        verify(atLeast = 1) { siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any()) }
+        verify(atLeast = 1) { rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any()) }
     }
 
     @Test
-    fun `doFullValidation true returns failure when SILO rejects query`() {
+    fun `doFullValidation true returns failure when RHYDB rejects query`() {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any())
-        } throws SiloException(400, "Bad Request", "Unknown field: invalidField")
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any())
+        } throws RhyDbException(400, "Bad Request", "Unknown field: invalidField")
 
         mockMvc.perform(
             post(route)
@@ -259,10 +259,10 @@ class QueryControllerTest(
     }
 
     @Test
-    fun `doFullValidation true returns failure when SILO throws 500 error`() {
+    fun `doFullValidation true returns failure when RHYDB throws 500 error`() {
         every {
-            siloClient.sendQuery(query = any<SiloQuery<AggregationData>>(), any())
-        } throws SiloException(500, "Internal Server Error", "Something unexpected happened")
+            rhyDbClient.sendQuery(query = any<RhyDbQuery<AggregationData>>(), any())
+        } throws RhyDbException(500, "Internal Server Error", "Something unexpected happened")
 
         mockMvc.perform(
             post(route)
@@ -278,8 +278,8 @@ class QueryControllerTest(
     @Test
     fun `doFullValidation true returns partial results for mixed valid and invalid queries`() {
         every {
-            siloClient.sendQuery(
-                query = match<SiloQuery<AggregationData>> { query ->
+            rhyDbClient.sendQuery(
+                query = match<RhyDbQuery<AggregationData>> { query ->
                     query.filterExpression.toString().contains("USA")
                 },
                 any(),
@@ -287,17 +287,17 @@ class QueryControllerTest(
         } returns Stream.empty()
 
         every {
-            siloClient.sendQuery(
-                query = match<SiloQuery<AggregationData>> { query ->
+            rhyDbClient.sendQuery(
+                query = match<RhyDbQuery<AggregationData>> { query ->
                     query.filterExpression.toString().contains("invalidField")
                 },
                 any(),
             )
-        } throws SiloException(400, "Bad Request", "Unknown field: invalidField")
+        } throws RhyDbException(400, "Bad Request", "Unknown field: invalidField")
 
         every {
-            siloClient.sendQuery(
-                query = match<SiloQuery<AggregationData>> { query ->
+            rhyDbClient.sendQuery(
+                query = match<RhyDbQuery<AggregationData>> { query ->
                     query.filterExpression.toString().contains("age")
                 },
                 any(),

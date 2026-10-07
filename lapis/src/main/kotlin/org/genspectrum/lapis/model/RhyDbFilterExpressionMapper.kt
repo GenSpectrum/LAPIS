@@ -31,7 +31,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.genspectrum.lapis.silo.True
@@ -49,13 +49,13 @@ data class SequenceFilterValue(
 typealias SequenceFilterFieldName = String
 
 @Component
-class SiloFilterExpressionMapper(
+class RhyDbFilterExpressionMapper(
     private val allowedSequenceFilterFields: SequenceFilterFields,
     private val variantQueryFacade: VariantQueryFacade,
     private val advancedQueryFacade: AdvancedQueryFacade,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
 ) {
-    fun map(sequenceFilters: BaseSequenceFilters): SiloFilterExpression {
+    fun map(sequenceFilters: BaseSequenceFilters): RhyDbFilterExpression {
         if (sequenceFilters.isEmpty()) {
             return True
         }
@@ -75,21 +75,21 @@ class SiloFilterExpressionMapper(
         )
 
         val filterExpressions = allowedSequenceFiltersWithType.map { (key, values) ->
-            val (siloColumnName, filter) = key
+            val (rhyDbColumnName, filter) = key
             when (filter) {
-                Filter.StringEquals -> mapToStringEqualsFilters(siloColumnName, values)
-                Filter.PangoLineage -> mapToPangoLineageFilter(siloColumnName, values)
-                Filter.DateBetween -> mapToDateBetweenFilter(siloColumnName, values)
+                Filter.StringEquals -> mapToStringEqualsFilters(rhyDbColumnName, values)
+                Filter.PangoLineage -> mapToPangoLineageFilter(rhyDbColumnName, values)
+                Filter.DateBetween -> mapToDateBetweenFilter(rhyDbColumnName, values)
                 Filter.VariantQuery -> mapToVariantQueryFilter(values)
-                Filter.IntEquals -> mapToIntEqualsFilter(siloColumnName, values)
-                Filter.IntBetween -> mapToIntBetweenFilter(siloColumnName, values)
-                Filter.FloatEquals -> mapToFloatEqualsFilter(siloColumnName, values)
-                Filter.FloatBetween -> mapToFloatBetweenFilter(siloColumnName, values)
-                Filter.BooleanEquals -> mapToBooleanEqualsFilters(siloColumnName, values)
-                Filter.StringSearch -> mapToStringSearchFilters(siloColumnName, values)
+                Filter.IntEquals -> mapToIntEqualsFilter(rhyDbColumnName, values)
+                Filter.IntBetween -> mapToIntBetweenFilter(rhyDbColumnName, values)
+                Filter.FloatEquals -> mapToFloatEqualsFilter(rhyDbColumnName, values)
+                Filter.FloatBetween -> mapToFloatBetweenFilter(rhyDbColumnName, values)
+                Filter.BooleanEquals -> mapToBooleanEqualsFilters(rhyDbColumnName, values)
+                Filter.StringSearch -> mapToStringSearchFilters(rhyDbColumnName, values)
                 Filter.AdvancedQuery -> mapToAdvancedQueryFilter(values)
-                Filter.PhyloDescendantOf -> mapToPhyloDescendantOfFilter(siloColumnName, values)
-                Filter.IsNull -> mapToIsNullOrNotFilter(siloColumnName, values)
+                Filter.PhyloDescendantOf -> mapToPhyloDescendantOfFilter(rhyDbColumnName, values)
+                Filter.IsNull -> mapToIsNullOrNotFilter(rhyDbColumnName, values)
             }
         }
 
@@ -224,35 +224,35 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToStringEqualsFilters(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ) = Or(
         values[0].values.map {
             when (it) {
-                null -> IsNull(column = siloColumnName)
-                else -> StringEquals(column = siloColumnName, value = it)
+                null -> IsNull(column = rhyDbColumnName)
+                else -> StringEquals(column = rhyDbColumnName, value = it)
             }
         },
     )
 
     private fun mapToBooleanEqualsFilters(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ) = Or(
         values[0].values.map {
             if (it == null) {
-                return@map IsNull(column = siloColumnName)
+                return@map IsNull(column = rhyDbColumnName)
             }
             val value = try {
                 it.lowercase().toBooleanStrict()
             } catch (_: IllegalArgumentException) {
                 throw BadRequestException("'$it' is not a valid boolean.")
             }
-            BooleanEquals(siloColumnName, value)
+            BooleanEquals(rhyDbColumnName, value)
         },
     )
 
-    private fun mapToVariantQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
+    private fun mapToVariantQueryFilter(values: List<SequenceFilterValue>): RhyDbFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
                 "$VARIANT_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
@@ -268,7 +268,7 @@ class SiloFilterExpressionMapper(
         return variantQueryFacade.map(variantQuery)
     }
 
-    private fun mapToAdvancedQueryFilter(values: List<SequenceFilterValue>): SiloFilterExpression {
+    private fun mapToAdvancedQueryFilter(values: List<SequenceFilterValue>): RhyDbFilterExpression {
         if (values[0].values.size != 1) {
             throw BadRequestException(
                 "$ADVANCED_QUERY_FIELD must have exactly one value, found ${values[0].values.size} values.",
@@ -285,9 +285,9 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToDateBetweenFilter(
-        siloColumnName: String,
+        rhyDbColumnName: String,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
+    ): RhyDbFilterExpression {
         val (exactDateFilters, dateRangeFilters) = values.partition { (fieldType, _) ->
             fieldType == SequenceFilterFieldType.Date
         }
@@ -303,15 +303,15 @@ class SiloFilterExpressionMapper(
             return Or(
                 exactDateFilters[0].values.map {
                     when (val date = parseDate(it, exactDateFilters[0].originalKey)) {
-                        null -> IsNull(column = siloColumnName)
-                        else -> DateBetween(column = siloColumnName, from = date, to = date)
+                        null -> IsNull(column = rhyDbColumnName)
+                        else -> DateBetween(column = rhyDbColumnName, from = date, to = date)
                     }
                 },
             )
         }
 
         return DateBetween(
-            siloColumnName,
+            rhyDbColumnName,
             from = findDateOfFilterType<SequenceFilterFieldType.DateFrom>(dateRangeFilters),
             to = findDateOfFilterType<SequenceFilterFieldType.DateTo>(dateRangeFilters),
         )
@@ -361,19 +361,19 @@ class SiloFilterExpressionMapper(
     )
 
     private fun mapToIntEqualsFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression =
+    ): RhyDbFilterExpression =
         Or(
             values[0].values.map {
                 when (it) {
-                    null -> IsNull(column = siloColumnName)
+                    null -> IsNull(column = rhyDbColumnName)
 
                     else -> try {
-                        IntEquals(siloColumnName, it.toInt())
+                        IntEquals(rhyDbColumnName, it.toInt())
                     } catch (exception: NumberFormatException) {
                         throw BadRequestException(
-                            "$siloColumnName '$it' is not a valid integer: ${exception.message}",
+                            "$rhyDbColumnName '$it' is not a valid integer: ${exception.message}",
                             exception,
                         )
                     }
@@ -382,19 +382,19 @@ class SiloFilterExpressionMapper(
         )
 
     private fun mapToFloatEqualsFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression =
+    ): RhyDbFilterExpression =
         Or(
             values[0].values.map {
                 when (it) {
-                    null -> IsNull(column = siloColumnName)
+                    null -> IsNull(column = rhyDbColumnName)
 
                     else -> try {
-                        FloatEquals(siloColumnName, it.toDouble())
+                        FloatEquals(rhyDbColumnName, it.toDouble())
                     } catch (exception: NumberFormatException) {
                         throw BadRequestException(
-                            "$siloColumnName '$it' is not a valid float: ${exception.message}",
+                            "$rhyDbColumnName '$it' is not a valid float: ${exception.message}",
                             exception,
                         )
                     }
@@ -403,11 +403,11 @@ class SiloFilterExpressionMapper(
         )
 
     private fun mapToIntBetweenFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression =
+    ): RhyDbFilterExpression =
         IntBetween(
-            siloColumnName,
+            rhyDbColumnName,
             from = findIntOfFilterType<SequenceFilterFieldType.IntFrom>(values),
             to = findIntOfFilterType<SequenceFilterFieldType.IntTo>(values),
         )
@@ -429,37 +429,37 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToFloatBetweenFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression =
+    ): RhyDbFilterExpression =
         FloatBetween(
-            siloColumnName,
+            rhyDbColumnName,
             from = findFloatOfFilterType<SequenceFilterFieldType.FloatFrom>(values),
             to = findFloatOfFilterType<SequenceFilterFieldType.FloatTo>(values),
         )
 
     private fun mapToPhyloDescendantOfFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
+    ): RhyDbFilterExpression {
         if (values.size != 1 || values[0].values.size != 1) {
             throw BadRequestException(
-                "Expected exactly one value for internal node '$siloColumnName' but got ${values.size} values.",
+                "Expected exactly one value for internal node '$rhyDbColumnName' but got ${values.size} values.",
             )
         }
         val value = values[0].values[0]
-        return PhyloDescendantOf(siloColumnName, value.toString())
+        return PhyloDescendantOf(rhyDbColumnName, value.toString())
     }
 
     private fun mapToStringSearchFilters(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
     ): Or {
         val filterValue = values[0]
         return Or(
             filterValue.values.map {
                 StringSearch(
-                    column = siloColumnName,
+                    column = rhyDbColumnName,
                     searchExpression = it
                         ?: throw BadRequestException(
                             "String search value for '${filterValue.originalKey}' must not be null",
@@ -470,16 +470,16 @@ class SiloFilterExpressionMapper(
     }
 
     private fun mapToIsNullOrNotFilter(
-        siloColumnName: SequenceFilterFieldName,
+        rhyDbColumnName: SequenceFilterFieldName,
         values: List<SequenceFilterValue>,
-    ): SiloFilterExpression {
+    ): RhyDbFilterExpression {
         val value = extractSingleFilterValue(values[0])
         val isNullValue = value?.lowercase(Locale.US)?.toBooleanStrictOrNull()
             ?: throw BadRequestException("'$value' is not a valid boolean value for '${values[0].originalKey}'")
 
         return when (isNullValue) {
-            true -> IsNull(siloColumnName)
-            false -> IsNotNull(siloColumnName)
+            true -> IsNull(rhyDbColumnName)
+            false -> IsNotNull(rhyDbColumnName)
         }
     }
 
@@ -532,7 +532,7 @@ class SiloFilterExpressionMapper(
 
     private fun wrapInMaybe(
         maybeMutation: MaybeMutation<*>,
-        expression: SiloFilterExpression,
+        expression: RhyDbFilterExpression,
     ) = when (maybeMutation.maybe) {
         true -> Maybe(expression)
         false -> expression

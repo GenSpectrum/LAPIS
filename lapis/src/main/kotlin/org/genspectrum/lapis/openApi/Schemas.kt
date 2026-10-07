@@ -115,7 +115,7 @@ const val REQUEST_INFO_STRING_DESCRIPTION =
 
 const val VERSION_DESCRIPTION = "The version of LAPIS that processed the request."
 
-const val SILO_VERSION_DESCRIPTION = "The version of SILO that processed the request."
+const val RHYDB_VERSION_DESCRIPTION = "The version of SILO that processed the request."
 
 const val DOWNLOAD_AS_FILE_DESCRIPTION =
     """

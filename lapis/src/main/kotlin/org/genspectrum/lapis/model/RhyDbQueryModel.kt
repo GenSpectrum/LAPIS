@@ -22,10 +22,10 @@ import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
+import org.genspectrum.lapis.silo.RhyDbAction
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.genspectrum.lapis.silo.SequenceType
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloQuery
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream
@@ -34,9 +34,9 @@ private const val INSERTION_FIELD = "insertion"
 private val INSERTION_COMPONENT_FIELDS = listOf("sequenceName", "position", "insertedSymbols")
 
 @Component
-class SiloQueryModel(
-    private val siloClient: SiloClient,
-    private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
+class RhyDbQueryModel(
+    private val rhyDbClient: RhyDbClient,
+    private val rhyDbFilterExpressionMapper: RhyDbFilterExpressionMapper,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val fastaHeaderTemplateParser: FastaHeaderTemplateParser,
     databaseConfig: DatabaseConfig,
@@ -44,9 +44,9 @@ class SiloQueryModel(
     private val allMetadataFields = databaseConfig.schema.metadata.map { it.name }
 
     fun getAggregated(sequenceFilters: AggregatedFiltersRequest) =
-        siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.aggregated(
+        rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.aggregated(
                     groupByFields = sequenceFilters.fields.filterIsInstance<PlainField>().map { it.fieldName },
                     orderByFields = sequenceFilters.orderByFields,
                     limit = sequenceFilters.limit,
@@ -54,7 +54,7 @@ class SiloQueryModel(
                     sequencePositionFields = sequenceFilters.fields.filterIsInstance<SequencePositionField>(),
                     computedFields = sequenceFilters.fields.filterIsInstance<ComputedField>(),
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
@@ -64,7 +64,7 @@ class SiloQueryModel(
             if (referenceGenomeSchema.isSingleSegmented()) core else "${data.sequenceName}:$core"
         }
 
-        return queryMutationData(sequenceFilters, SiloAction.Companion::mutations).map {
+        return queryMutationData(sequenceFilters, RhyDbAction.Companion::mutations).map {
             MutationResponse(
                 mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
@@ -89,7 +89,7 @@ class SiloQueryModel(
             "${data.sequenceName}:${data.mutationFrom}${data.position}${data.mutationTo}"
         }
 
-        return queryMutationData(sequenceFilters, SiloAction.Companion::aminoAcidMutations).map {
+        return queryMutationData(sequenceFilters, RhyDbAction.Companion::aminoAcidMutations).map {
             MutationResponse(
                 mutation = sequenceFilters.ifRequested(MutationsField.MUTATION, assembleMutation(it)),
                 count = it.count,
@@ -108,38 +108,38 @@ class SiloQueryModel(
     }
 
     fun getDetails(sequenceFilters: DetailsFiltersRequest) =
-        siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.details(
+        rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.details(
                     sequenceFilters.fields.map { it.fieldName }.ifEmpty { allMetadataFields },
                     sequenceFilters.orderByFields,
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
     fun getMostRecentCommonAncestor(sequenceFilters: MRCASequenceFiltersRequest) =
-        siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.mostRecentCommonAncestor(
+        rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.mostRecentCommonAncestor(
                     sequenceFilters.phyloTreeField,
                     sequenceFilters.printNodesNotInTree,
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
     fun getNucleotideInsertions(sequenceFilters: SequenceFiltersRequest): Stream<InsertionResponse> {
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.nucleotideInsertions(
+        val data = rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.nucleotideInsertions(
                     expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
@@ -159,14 +159,14 @@ class SiloQueryModel(
     }
 
     fun getAminoAcidInsertions(sequenceFilters: SequenceFiltersRequest): Stream<InsertionResponse> {
-        val data = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.aminoAcidInsertions(
+        val data = rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.aminoAcidInsertions(
                     expandInsertionOrderBy(sequenceFilters.orderByFields),
                     sequenceFilters.limit,
                     sequenceFilters.offset,
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
@@ -183,12 +183,12 @@ class SiloQueryModel(
 
     fun getNewick(sequenceFilters: PhyloTreeSequenceFiltersRequest): Stream<PhyloSubtreeData> =
         try {
-            siloClient.sendQuery(
-                SiloQuery(
-                    SiloAction.phyloSubtree(
+            rhyDbClient.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.phyloSubtree(
                         sequenceFilters.phyloTreeField,
                     ),
-                    siloFilterExpressionMapper.map(sequenceFilters),
+                    rhyDbFilterExpressionMapper.map(sequenceFilters),
                 ),
             )
         } catch (exception: Exception) {
@@ -218,9 +218,9 @@ class SiloQueryModel(
         val cleanedSequenceNames = sequenceNames
             .map { referenceGenomeSchema.getSequenceNameFromCaseInsensitiveName(it) ?: it }
 
-        val sequenceData = siloClient.sendQuery(
-            SiloQuery(
-                SiloAction.genomicSequence(
+        val sequenceData = rhyDbClient.sendQuery(
+            RhyDbQuery(
+                RhyDbAction.genomicSequence(
                     type = sequenceType,
                     sequenceNames = mapSequenceNames(cleanedSequenceNames, sequenceType),
                     additionalFields = fastaHeaderTemplate.metadataFieldNames,
@@ -231,7 +231,7 @@ class SiloQueryModel(
                     limit = sequenceFilters.limit,
                     offset = sequenceFilters.offset,
                 ),
-                siloFilterExpressionMapper.map(sequenceFilters),
+                rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
         )
 
@@ -282,9 +282,9 @@ class SiloQueryModel(
             is OrderBySpec.Random -> orderBySpec
         }
 
-    fun getInfo(): InfoData = siloClient.callInfo()
+    fun getInfo(): InfoData = rhyDbClient.callInfo()
 
-    fun getLineageDefinition(column: String) = siloClient.getLineageDefinition(column)
+    fun getLineageDefinition(column: String) = rhyDbClient.getLineageDefinition(column)
 
     private fun queryMutationData(
         sequenceFilters: MutationProportionsRequest,
@@ -294,9 +294,9 @@ class SiloQueryModel(
             limit: Int?,
             offset: Int?,
             fields: List<String>,
-        ) -> SiloAction<MutationData>,
+        ) -> RhyDbAction<MutationData>,
     ): Stream<MutationData> {
-        val fields = siloMutationFields(sequenceFilters)
+        val fields = rhyDbMutationFields(sequenceFilters)
 
         val action = actionConstructor(
             sequenceFilters.minProportion,
@@ -305,7 +305,7 @@ class SiloQueryModel(
             sequenceFilters.offset,
             fields,
         )
-        return siloClient.sendQuery(SiloQuery(action, siloFilterExpressionMapper.map(sequenceFilters)))
+        return rhyDbClient.sendQuery(RhyDbQuery(action, rhyDbFilterExpressionMapper.map(sequenceFilters)))
     }
 
     /**
@@ -351,7 +351,7 @@ class SiloQueryModel(
             is OrderBySpec.Random -> orderByFields
         }
 
-    private fun siloMutationFields(request: MutationProportionsRequest): List<String> {
+    private fun rhyDbMutationFields(request: MutationProportionsRequest): List<String> {
         val fields = request.fields
         if (fields.isEmpty()) {
             return emptyList()

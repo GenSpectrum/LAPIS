@@ -5,9 +5,9 @@ import io.mockk.every
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SequencesResponse
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GENES_PROPERTY
 import org.genspectrum.lapis.response.AggregationData
@@ -46,7 +46,7 @@ class LapisControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -65,7 +65,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getAggregated(aggregatedFiltersRequest(mapOf("country" to "Switzerland")))
+            rhyDbQueryModelMock.getAggregated(aggregatedFiltersRequest(mapOf("country" to "Switzerland")))
         } returns Stream.of(
             AggregationData(
                 0,
@@ -89,7 +89,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getAggregated(
+            rhyDbQueryModelMock.getAggregated(
                 aggregatedFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country", "date"),
@@ -116,7 +116,7 @@ class LapisControllerTest(
         request: MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getAggregated(
+            rhyDbQueryModelMock.getAggregated(
                 sequenceFiltersRequestWithArrayValuedFilters(
                     mapOf("country" to listOf("Switzerland", "Germany")),
                 ),
@@ -139,9 +139,9 @@ class LapisControllerTest(
     fun `mutations without explicit minProportion`(
         testName: String,
         requestWithMinProportion: (Double?) -> MockHttpServletRequestBuilder,
-        setupMutationMock: (siloQueryModelMock: SiloQueryModel, minProportion: Double) -> Unit,
+        setupMutationMock: (rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double) -> Unit,
     ) {
-        setupMutationMock(siloQueryModelMock, DEFAULT_MIN_PROPORTION)
+        setupMutationMock(rhyDbQueryModelMock, DEFAULT_MIN_PROPORTION)
 
         mockMvc.perform(requestWithMinProportion(null))
             .andExpect(status().isOk)
@@ -158,9 +158,9 @@ class LapisControllerTest(
     fun `mutations with minProportion`(
         testName: String,
         requestWithMinProportion: (Double?) -> MockHttpServletRequestBuilder,
-        setupMutationMock: (siloQueryModelMock: SiloQueryModel, minProportion: Double) -> Unit,
+        setupMutationMock: (rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double) -> Unit,
     ) {
-        setupMutationMock(siloQueryModelMock, 0.3)
+        setupMutationMock(rhyDbQueryModelMock, 0.3)
 
         mockMvc.perform(requestWithMinProportion(0.3))
             .andExpect(status().isOk)
@@ -174,7 +174,7 @@ class LapisControllerTest(
     fun `mutations with invalid minProportion returns bad request`(
         testName: String,
         requestWithMinProportion: (Any?) -> MockHttpServletRequestBuilder,
-        setupMutationMock: (siloQueryModelMock: SiloQueryModel, minProportion: Double) -> Unit,
+        setupMutationMock: (rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double) -> Unit,
     ) {
         mockMvc.perform(requestWithMinProportion("this is not a float"))
             .andExpect(status().isBadRequest)
@@ -192,9 +192,9 @@ class LapisControllerTest(
     fun `GET mutations only returns expected fields`(
         testName: String,
         requestWithMinProportion: (Any?) -> MockHttpServletRequestBuilder,
-        setupMutationMock: (siloQueryModelMock: SiloQueryModel, minProportion: Double) -> Unit,
+        setupMutationMock: (rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double) -> Unit,
     ) {
-        setupMutationMock(siloQueryModelMock, DEFAULT_MIN_PROPORTION)
+        setupMutationMock(rhyDbQueryModelMock, DEFAULT_MIN_PROPORTION)
 
         mockMvc.perform(requestWithMinProportion(null))
             .andExpect(status().isOk)
@@ -220,9 +220,9 @@ class LapisControllerTest(
     fun insertions(
         testName: String,
         request: MockHttpServletRequestBuilder,
-        setupInsertionMock: (siloQueryModelMock: SiloQueryModel) -> Unit,
+        setupInsertionMock: (rhyDbQueryModelMock: RhyDbQueryModel) -> Unit,
     ) {
-        setupInsertionMock(siloQueryModelMock)
+        setupInsertionMock(rhyDbQueryModelMock)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -237,9 +237,9 @@ class LapisControllerTest(
     fun `insertions only returns expected fields`(
         testName: String,
         request: MockHttpServletRequestBuilder,
-        setupInsertionMock: (siloQueryModelMock: SiloQueryModel) -> Unit,
+        setupInsertionMock: (rhyDbQueryModelMock: RhyDbQueryModel) -> Unit,
     ) {
-        setupInsertionMock(siloQueryModelMock)
+        setupInsertionMock(rhyDbQueryModelMock)
 
         mockMvc.perform(request)
             .andExpect(status().isOk)
@@ -255,7 +255,7 @@ class LapisControllerTest(
     @MethodSource("getAlignedAminoAcidSequencesScenarios")
     fun alignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf("geneName"),
@@ -279,7 +279,7 @@ class LapisControllerTest(
     @ParameterizedTest(name = "{0}")
     @MethodSource("getAllAlignedAminoAcidSequencesScenarios")
     fun allAlignedAminoAcidSequences(scenario: SequenceEndpointTestScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        scenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -294,7 +294,7 @@ class LapisControllerTest(
     @Test
     fun `WHEN getting all amino acid sequences with gene THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf("gene1"),
@@ -318,7 +318,7 @@ class LapisControllerTest(
     @Test
     fun `WHEN posting all aligned sequences with segment THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithGenes(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     genes = listOf("gene1"),
@@ -371,9 +371,9 @@ class LapisControllerTest(
                     Arguments.of(
                         description,
                         request,
-                        { siloQueryModelMock: SiloQueryModel, minProportion: Double ->
+                        { rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double ->
                             every {
-                                siloQueryModelMock.computeNucleotideMutationProportions(
+                                rhyDbQueryModelMock.computeNucleotideMutationProportions(
                                     mutationProportionsRequest(
                                         mapOf("country" to "Switzerland"),
                                         minProportion,
@@ -388,9 +388,9 @@ class LapisControllerTest(
                         Arguments.of(
                             description,
                             request,
-                            { siloQueryModelMock: SiloQueryModel, minProportion: Double ->
+                            { rhyDbQueryModelMock: RhyDbQueryModel, minProportion: Double ->
                                 every {
-                                    siloQueryModelMock.computeAminoAcidMutationProportions(
+                                    rhyDbQueryModelMock.computeAminoAcidMutationProportions(
                                         mutationProportionsRequest(
                                             mapOf("country" to "Switzerland"),
                                             minProportion,
@@ -407,9 +407,9 @@ class LapisControllerTest(
                 Arguments.of(
                     "$description $NUCLEOTIDE_INSERTIONS_ROUTE",
                     request(NUCLEOTIDE_INSERTIONS_ROUTE),
-                    { siloQueryModelMock: SiloQueryModel ->
+                    { rhyDbQueryModelMock: RhyDbQueryModel ->
                         every {
-                            siloQueryModelMock.getNucleotideInsertions(
+                            rhyDbQueryModelMock.getNucleotideInsertions(
                                 sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                             )
                         } returns Stream.of(someNucleotideInsertion())
@@ -420,9 +420,9 @@ class LapisControllerTest(
                     Arguments.of(
                         "$description $AMINO_ACID_INSERTIONS_ROUTE",
                         request(AMINO_ACID_INSERTIONS_ROUTE),
-                        { siloQueryModelMock: SiloQueryModel ->
+                        { rhyDbQueryModelMock: RhyDbQueryModel ->
                             every {
-                                siloQueryModelMock.getAminoAcidInsertions(
+                                rhyDbQueryModelMock.getAminoAcidInsertions(
                                     sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                                 )
                             } returns Stream.of(someAminoAcidInsertion())
@@ -502,7 +502,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getDetails(detailsFiltersRequest(mapOf("country" to "Switzerland")))
+            rhyDbQueryModelMock.getDetails(detailsFiltersRequest(mapOf("country" to "Switzerland")))
         } returns Stream.of(DetailsData(mapOf("country" to StringNode("Switzerland"), "age" to IntNode(42))))
 
         mockMvc.perform(request(DETAILS_ROUTE))
@@ -520,7 +520,7 @@ class LapisControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getDetails(
+            rhyDbQueryModelMock.getDetails(
                 detailsFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country", "date"),
@@ -559,7 +559,7 @@ class LapisControllerTest(
     @Test
     fun `GET aggregated with duplicate fields deduplicates them`() {
         every {
-            siloQueryModelMock.getAggregated(
+            rhyDbQueryModelMock.getAggregated(
                 aggregatedFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country"),
@@ -578,7 +578,7 @@ class LapisControllerTest(
     @Test
     fun `GET details with duplicate fields deduplicates them`() {
         every {
-            siloQueryModelMock.getDetails(
+            rhyDbQueryModelMock.getDetails(
                 detailsFiltersRequest(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     fields = listOf("country"),

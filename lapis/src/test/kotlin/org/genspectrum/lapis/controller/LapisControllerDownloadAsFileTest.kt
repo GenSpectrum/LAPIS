@@ -15,7 +15,7 @@ import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_INSERTIONS
 import org.genspectrum.lapis.controller.SampleRoute.NUCLEOTIDE_MUTATIONS
 import org.genspectrum.lapis.controller.SampleRoute.PHYLO_SUBTREE
 import org.genspectrum.lapis.controller.SampleRoute.UNALIGNED_NUCLEOTIDE_SEQUENCES
-import org.genspectrum.lapis.model.SiloQueryModel
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.request.COMPRESSION_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_AS_FILE_PROPERTY
 import org.genspectrum.lapis.request.DOWNLOAD_FILE_BASENAME_PROPERTY
@@ -48,7 +48,7 @@ class LapisControllerDownloadAsFileTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var lapisInfo: LapisInfo
@@ -63,7 +63,7 @@ class LapisControllerDownloadAsFileTest(
     @ParameterizedTest(name = "GET data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
     fun `GET data as file`(scenario: DownloadAsFileScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        scenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         var queryString = "$DOWNLOAD_AS_FILE_PROPERTY=true"
         if (scenario.requestedDataFormat != null) {
@@ -88,7 +88,7 @@ class LapisControllerDownloadAsFileTest(
     @ParameterizedTest(name = "POST JSON data from {0} as file")
     @MethodSource("getDownloadAsFileScenarios")
     fun `POST JSON data as file`(scenario: DownloadAsFileScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        scenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         val maybeDataFormat = when {
             scenario.requestedDataFormat != null -> """, "$FORMAT_PROPERTY": "${scenario.requestedDataFormat}" """
@@ -121,7 +121,7 @@ class LapisControllerDownloadAsFileTest(
     @MethodSource("getDownloadAsFileScenarios")
     fun `POST form url encoded data as file`(scenario: DownloadAsFileScenario) {
         val mockData = scenario.mockData
-        mockData.mockWithData(siloQueryModelMock)
+        mockData.mockWithData(rhyDbQueryModelMock)
 
         val request = postSample(scenario.endpoint)
             .param(DOWNLOAD_AS_FILE_PROPERTY, "true")
@@ -150,7 +150,7 @@ class LapisControllerDownloadAsFileTest(
     fun `WHEN I request compressed files THEN the filenames have a corresponding suffix`(
         scenario: DownloadCompressedFileScenario,
     ) {
-        scenario.mockData.mockToReturnEmptyData(siloQueryModelMock)
+        scenario.mockData.mockToReturnEmptyData(rhyDbQueryModelMock)
 
         mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -164,7 +164,7 @@ class LapisControllerDownloadAsFileTest(
         acceptEncodingHeader: String,
     ) {
         val mockData = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment).expecting(PLAIN_JSON)
-        mockData.mockWithData(siloQueryModelMock)
+        mockData.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(
             getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")
@@ -181,7 +181,7 @@ class LapisControllerDownloadAsFileTest(
     fun `GIVEN accept header contains several media types THEN picks the first one that matches`() {
         val mockDataCollection = MockDataForEndpoints.getMockData(MOST_RECENT_COMMON_ANCESTOR_ROUTE)
         val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.PLAIN_JSON)
-        mockData.mockWithData(siloQueryModelMock)
+        mockData.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(
             getSample("${MOST_RECENT_COMMON_ANCESTOR_ROUTE}?$DOWNLOAD_AS_FILE_PROPERTY=true")
@@ -200,7 +200,7 @@ class LapisControllerDownloadAsFileTest(
     fun `GIVEN accept headers with quality values THEN picks the matching one with the highest quality`() {
         val mockDataCollection = MockDataForEndpoints.getMockData(AGGREGATED.pathSegment)
         val mockData = mockDataCollection.expecting(MockDataCollection.DataFormat.TSV)
-        mockData.mockWithData(siloQueryModelMock)
+        mockData.mockWithData(rhyDbQueryModelMock)
 
         mockMvc.perform(
             getSample("${AGGREGATED.pathSegment}?$DOWNLOAD_AS_FILE_PROPERTY=true")

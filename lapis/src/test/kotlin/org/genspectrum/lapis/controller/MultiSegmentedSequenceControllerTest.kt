@@ -7,9 +7,9 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PR
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.AllSequences
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.FastaHeaderTemplate
+import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SequencesResponse
-import org.genspectrum.lapis.model.SiloQueryModel
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.SequenceType
@@ -60,7 +60,7 @@ class MultiSegmentedSequenceControllerTest(
     )
 
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
 
     @MockkBean
     lateinit var dataVersion: DataVersion
@@ -111,7 +111,7 @@ class MultiSegmentedSequenceControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -130,7 +130,7 @@ class MultiSegmentedSequenceControllerTest(
     @MethodSource("getAlignedRequestsWithFilter")
     fun `should call alignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -152,7 +152,7 @@ class MultiSegmentedSequenceControllerTest(
     @ParameterizedTest(name = "{0}")
     @MethodSource("getAlignedRequestsForAllSequencesWithFilter")
     fun `should call allAlignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        scenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -167,7 +167,7 @@ class MultiSegmentedSequenceControllerTest(
     @Test
     fun `WHEN getting all aligned sequences with segment THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.ALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -191,7 +191,7 @@ class MultiSegmentedSequenceControllerTest(
     @Test
     fun `WHEN posting all aligned sequences with segment THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithSegments(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     segments = listOf(SEGMENT_NAME),
@@ -222,7 +222,7 @@ class MultiSegmentedSequenceControllerTest(
         request: (String) -> MockHttpServletRequestBuilder,
     ) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(emptyMap()),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -241,7 +241,7 @@ class MultiSegmentedSequenceControllerTest(
     @MethodSource("getUnalignedRequestsWithFilter")
     fun `should call unalignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME),
@@ -263,7 +263,7 @@ class MultiSegmentedSequenceControllerTest(
     @ParameterizedTest(name = "{0}")
     @MethodSource("getUnalignedRequestsForAllSequencesWithFilter")
     fun `should call allUnalignedNucleotideSequences with filter`(scenario: SequenceEndpointTestScenario) {
-        scenario.mockData.mockWithData(siloQueryModelMock)
+        scenario.mockData.mockWithData(rhyDbQueryModelMock)
 
         val responseContent = mockMvc.perform(scenario.request)
             .andExpect(status().isOk)
@@ -278,7 +278,7 @@ class MultiSegmentedSequenceControllerTest(
     @Test
     fun `WHEN getting all unaligned sequences with segment THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequest(mapOf("country" to "Switzerland")),
                 sequenceType = SequenceType.UNALIGNED,
                 sequenceNames = listOf(SEGMENT_NAME, otherSegment),
@@ -299,7 +299,7 @@ class MultiSegmentedSequenceControllerTest(
     @Test
     fun `WHEN posting all unaligned sequences with segment THEN calls model with correct arguments`() {
         every {
-            siloQueryModelMock.getGenomicSequence(
+            rhyDbQueryModelMock.getGenomicSequence(
                 sequenceFilters = sequenceFiltersRequestWithSegments(
                     sequenceFilters = mapOf("country" to "Switzerland"),
                     segments = listOf(SEGMENT_NAME, otherSegment),

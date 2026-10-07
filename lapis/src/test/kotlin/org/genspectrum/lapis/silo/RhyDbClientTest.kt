@@ -1,6 +1,6 @@
 package org.genspectrum.lapis.silo
 
-import org.genspectrum.lapis.config.SiloVersion
+import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
@@ -53,14 +53,14 @@ private const val REQUEST_ID_VALUE = "someRequestId"
 private const val DATA_VERSION_HEADER = "data-version"
 
 @SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
-class SiloClientTest(
-    @param:Autowired private val underTest: SiloClient,
+class RhyDbClientTest(
+    @param:Autowired private val underTest: RhyDbClient,
     @param:Autowired private val requestIdContext: RequestIdContext,
     @param:Autowired private val dataVersion: DataVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
-    private lateinit var someQuery: SiloQuery<*>
+    private lateinit var someQuery: RhyDbQuery<*>
 
     private var counter = 0
 
@@ -71,8 +71,8 @@ class SiloClientTest(
         mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
         requestIdContext.requestId = REQUEST_ID_VALUE
 
-        someQuery = SiloQuery(
-            SiloAction.aggregated(),
+        someQuery = RhyDbQuery(
+            RhyDbAction.aggregated(),
             StringEquals("theColumn", "a value that is different for each test method: $counter"),
         )
         counter++
@@ -98,7 +98,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(SiloAction.aggregated(), StringEquals("theColumn", "theValue"))
+        val query = RhyDbQuery(RhyDbAction.aggregated(), StringEquals("theColumn", "theValue"))
         val result = sendQuery(query)
 
         assertThat(
@@ -114,7 +114,7 @@ class SiloClientTest(
 
     @ParameterizedTest
     @MethodSource("getMutationActions")
-    fun `GIVEN server returns mutations response THEN response can be deserialized`(action: SiloAction<MutationData>) {
+    fun `GIVEN server returns mutations response THEN response can be deserialized`(action: RhyDbAction<MutationData>) {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(parse(ARROW_STREAM_MEDIA_TYPE))
@@ -144,7 +144,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(action, StringEquals("theColumn", "theValue"))
+        val query = RhyDbQuery(action, StringEquals("theColumn", "theValue"))
         val result = sendQuery(query)
 
         assertThat(result, hasSize(2))
@@ -189,8 +189,8 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(
-            SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
+        val query = RhyDbQuery(
+            RhyDbAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
             StringEquals("theColumn", "theValue"),
         )
         val result = sendQuery(query)
@@ -222,8 +222,8 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(
-            SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("unaligned_someSequenceName")),
+        val query = RhyDbQuery(
+            RhyDbAction.genomicSequence(SequenceType.UNALIGNED, listOf("unaligned_someSequenceName")),
             StringEquals("theColumn", "theValue"),
         )
         val result = sendQuery(query)
@@ -266,7 +266,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val query = RhyDbQuery(RhyDbAction.details(), StringEquals("theColumn", "theValue"))
         val result = sendQuery(query)
 
         assertThat(result, hasSize(2))
@@ -311,7 +311,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(SiloAction.details(), StringEquals("theColumn", "theValue"))
+        val query = RhyDbQuery(RhyDbAction.details(), StringEquals("theColumn", "theValue"))
         val result = sendQuery(query)
 
         assertThat(result, hasSize(3))
@@ -343,8 +343,8 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(
-            SiloAction.mostRecentCommonAncestor(
+        val query = RhyDbQuery(
+            RhyDbAction.mostRecentCommonAncestor(
                 phyloTreeField = "phyloTreeField",
                 printNodesNotInTree = true,
             ),
@@ -383,8 +383,8 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(
-            SiloAction.phyloSubtree(
+        val query = RhyDbQuery(
+            RhyDbAction.phyloSubtree(
                 phyloTreeField = "phyloTreeField",
                 printNodesNotInTree = true,
             ),
@@ -408,7 +408,7 @@ class SiloClientTest(
     @ParameterizedTest
     @MethodSource("getInsertionActions")
     fun `GIVEN server returns insertions response THEN response can be deserialized`(
-        action: SiloAction<InsertionData>,
+        action: RhyDbAction<InsertionData>,
     ) {
         expectQueryRequestAndRespondWith(
             response()
@@ -433,7 +433,7 @@ class SiloClientTest(
                 ),
         )
 
-        val query = SiloQuery(action, True)
+        val query = RhyDbQuery(action, True)
         val result = sendQuery(query)
 
         assertThat(result, hasSize(2))
@@ -465,7 +465,7 @@ class SiloClientTest(
                 .withBody("""{"unexpectedKey":  "some unexpected message"}"""),
         )
 
-        val exception = assertThrows<SiloException> { sendQuery(someQuery) }
+        val exception = assertThrows<RhyDbException> { sendQuery(someQuery) }
 
         assertThat(exception.statusCode, equalTo(500))
         assertThat(
@@ -475,7 +475,7 @@ class SiloClientTest(
     }
 
     @Test
-    fun `GIVEN server returns SILO error THEN throws exception with details and response code`() {
+    fun `GIVEN server returns RHYDB error THEN throws exception with details and response code`() {
         expectQueryRequestAndRespondWith(
             response()
                 .withContentType(MediaType.APPLICATION_JSON_UTF_8)
@@ -483,7 +483,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "test message with details"}"""),
         )
 
-        val exception = assertThrows<SiloException> { sendQuery(someQuery) }
+        val exception = assertThrows<RhyDbException> { sendQuery(someQuery) }
         assertThat(exception.statusCode, equalTo(432))
         assertThat(exception.message, equalTo("Error from SILO: test message with details"))
     }
@@ -513,7 +513,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
         )
 
-        val exception = assertThrows<SiloUnavailableException> { sendQuery(someQuery) }
+        val exception = assertThrows<RhyDbUnavailableException> { sendQuery(someQuery) }
 
         assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(retryAfterValue))
@@ -529,7 +529,7 @@ class SiloClientTest(
                 .withBody("""{"error":  "Test Error", "message": "$errorMessage"}"""),
         )
 
-        val exception = assertThrows<SiloUnavailableException> { sendQuery(someQuery) }
+        val exception = assertThrows<RhyDbUnavailableException> { sendQuery(someQuery) }
 
         assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(nullValue()))
@@ -538,7 +538,7 @@ class SiloClientTest(
     @ParameterizedTest
     @MethodSource("getQueriesThatShouldNotBeCached")
     fun `GIVEN an action that should not be cached WHEN I send the same request twice THEN server is called twice`(
-        query: SiloQuery<*>,
+        query: RhyDbQuery<*>,
     ) {
         val errorMessage = "make this fail so that we see a difference on the second call"
 
@@ -555,14 +555,14 @@ class SiloClientTest(
 
         sendQuery(query)
 
-        val exception = assertThrows<SiloException> { sendQuery(query) }
+        val exception = assertThrows<RhyDbException> { sendQuery(query) }
         assertThat(exception.message, containsString(errorMessage))
     }
 
     @ParameterizedTest
     @MethodSource("getQueriesThatShouldBeCached")
     fun `GIVEN an action that should be cached WHEN I send the same request twice THEN second time is cached`(
-        query: SiloQuery<*>,
+        query: RhyDbQuery<*>,
     ) {
         expectQueryRequestAndRespondWith(
             emptyArrowResponse(),
@@ -618,13 +618,13 @@ class SiloClientTest(
             ORDER_BY_RANDOM_FIELD_NAME,
             Order.ASCENDING,
         )
-        val query = SiloQuery(SiloAction.mutations(orderByFields = listOf(orderByRandom).toOrderBySpec()), True)
+        val query = RhyDbQuery(RhyDbAction.mutations(orderByFields = listOf(orderByRandom).toOrderBySpec()), True)
         assertThat(query.action.cacheable, `is`(true))
 
         val result = sendQuery(query)
         assertThat(result, hasSize(0))
 
-        val exception = assertThrows<SiloException> { sendQuery(query) }
+        val exception = assertThrows<RhyDbException> { sendQuery(query) }
         assertThat(exception.message, containsString(errorMessage))
     }
 
@@ -635,7 +635,7 @@ class SiloClientTest(
             Times.once(),
         )
 
-        val query = SiloQuery(SiloAction.mutations(orderByFields = OrderBySpec.Random(123)), True)
+        val query = RhyDbQuery(RhyDbAction.mutations(orderByFields = OrderBySpec.Random(123)), True)
         assertThat(query.action.cacheable, `is`(true))
 
         val result1 = sendQuery(query)
@@ -706,28 +706,28 @@ class SiloClientTest(
             )
     }
 
-    private fun <R> sendQuery(query: SiloQuery<R>): List<R> = underTest.sendQuery(query).use { it.toList() }
+    private fun <R> sendQuery(query: RhyDbQuery<R>): List<R> = underTest.sendQuery(query).use { it.toList() }
 
     companion object {
         @JvmStatic
         val mutationActions = listOf(
-            SiloAction.mutations(),
-            SiloAction.aminoAcidMutations(),
+            RhyDbAction.mutations(),
+            RhyDbAction.aminoAcidMutations(),
         )
 
         @JvmStatic
         val insertionActions = listOf(
-            SiloAction.nucleotideInsertions(),
-            SiloAction.aminoAcidInsertions(),
+            RhyDbAction.nucleotideInsertions(),
+            RhyDbAction.aminoAcidInsertions(),
         )
 
         @JvmStatic
         val queriesThatShouldNotBeCached = listOf(
-            SiloQuery(SiloAction.details(), True),
-            SiloQuery(SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("sequenceName")), True),
-            SiloQuery(SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("sequenceName")), True),
-            SiloQuery(
-                SiloAction.aggregated(
+            RhyDbQuery(RhyDbAction.details(), True),
+            RhyDbQuery(RhyDbAction.genomicSequence(SequenceType.ALIGNED, listOf("sequenceName")), True),
+            RhyDbQuery(RhyDbAction.genomicSequence(SequenceType.UNALIGNED, listOf("sequenceName")), True),
+            RhyDbQuery(
+                RhyDbAction.aggregated(
                     groupByFields = listOf("date"),
                     sequencePositionFields = (1..420).map { SequencePositionField("main", it) },
                 ),
@@ -737,26 +737,26 @@ class SiloClientTest(
 
         @JvmStatic
         val queriesThatShouldBeCached = listOf(
-            SiloQuery(SiloAction.aggregated(), True),
-            SiloQuery(SiloAction.mutations(), True),
-            SiloQuery(SiloAction.aminoAcidMutations(), True),
-            SiloQuery(SiloAction.nucleotideInsertions(), True),
-            SiloQuery(SiloAction.aminoAcidInsertions(), True),
+            RhyDbQuery(RhyDbAction.aggregated(), True),
+            RhyDbQuery(RhyDbAction.mutations(), True),
+            RhyDbQuery(RhyDbAction.aminoAcidMutations(), True),
+            RhyDbQuery(RhyDbAction.nucleotideInsertions(), True),
+            RhyDbQuery(RhyDbAction.aminoAcidInsertions(), True),
         )
     }
 }
 
 @SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
-class SiloClientAndCacheInvalidatorTest(
-    @param:Autowired private val siloClient: SiloClient,
+class RhyDbClientAndCacheInvalidatorTest(
+    @param:Autowired private val rhyDbClient: RhyDbClient,
     @param:Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
     @param:Autowired private val requestIdContext: RequestIdContext,
     @param:Autowired private val dataVersion: DataVersion,
-    @param:Autowired private val siloVersion: SiloVersion,
+    @param:Autowired private val siloVersion: RhyDbVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
-    val someQuery = SiloQuery(SiloAction.mutations(), True)
+    val someQuery = RhyDbQuery(RhyDbAction.mutations(), True)
     val firstDataVersion = "1"
     val secondDataVersion = "2"
 
@@ -778,7 +778,7 @@ class SiloClientAndCacheInvalidatorTest(
             siloVersion = "1.2.3",
             times = Times.once(),
         )
-        dataVersionCacheInvalidator.invalidateSiloCache()
+        dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatResultIsCachedOnSecondRequest()
         assertThat(siloVersion.version, `is`("1.2.3"))
@@ -788,25 +788,25 @@ class SiloClientAndCacheInvalidatorTest(
             siloVersion = "2.3.4",
             times = Times.once(),
         )
-        dataVersionCacheInvalidator.invalidateSiloCache()
+        dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatCacheIsNotHit()
         assertThat(siloVersion.version, `is`("2.3.4"))
     }
 
     @Test
-    fun `GIVEN SILO is restarting WHEN the cache invalidator checks THEN the cache should be cleared`() {
+    fun `GIVEN RHYDB is restarting WHEN the cache invalidator checks THEN the cache should be cleared`() {
         expectInfoCallAndReturnDataVersion(
             dataVersion = firstDataVersion,
             siloVersion = "1.2.3",
             times = Times.once(),
         )
-        dataVersionCacheInvalidator.invalidateSiloCache()
+        dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatResultIsCachedOnSecondRequest()
 
-        expectInfoCallThatReturnsSiloUnavailable()
-        dataVersionCacheInvalidator.invalidateSiloCache()
+        expectInfoCallThatReturnsRhyDbUnavailable()
+        dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatCacheIsNotHit()
         assertThat(siloVersion.version, `is`(nullValue()))
@@ -819,8 +819,8 @@ class SiloClientAndCacheInvalidatorTest(
             Times.once(),
         )
 
-        siloClient.sendQuery(someQuery).use { it.toList() }
-        siloClient.sendQuery(someQuery).use { it.toList() }
+        rhyDbClient.sendQuery(someQuery).use { it.toList() }
+        rhyDbClient.sendQuery(someQuery).use { it.toList() }
         assertThat(dataVersion.dataVersion, `is`(firstDataVersion))
     }
 
@@ -834,12 +834,12 @@ class SiloClientAndCacheInvalidatorTest(
             Times.once(),
         )
 
-        val exception = assertThrows<SiloException> { siloClient.sendQuery(someQuery).toList() }
+        val exception = assertThrows<RhyDbException> { rhyDbClient.sendQuery(someQuery).toList() }
         assertThat(exception.message, containsString(errorMessage))
     }
 
     @Test
-    fun `GIVEN silo answers info too slowly THEN throws SiloTimeoutException naming the timeout`() {
+    fun `GIVEN silo answers info too slowly THEN throws RhyDbTimeoutException naming the timeout`() {
         MockServerClient("localhost", MOCK_SERVER_PORT)
             .`when`(request().withMethod("GET").withPath("/info"))
             .respond(
@@ -850,13 +850,13 @@ class SiloClientAndCacheInvalidatorTest(
                     .withDelay(TimeUnit.MILLISECONDS, 500),
             )
 
-        val exception = assertThrows<SiloTimeoutException> { siloClient.callInfo(Duration.ofMillis(50)) }
+        val exception = assertThrows<RhyDbTimeoutException> { rhyDbClient.callInfo(Duration.ofMillis(50)) }
 
         assertThat(exception.message, containsString("Timed out"))
         assertThat(exception.message, containsString("/info"))
     }
 
-    private fun expectInfoCallThatReturnsSiloUnavailable() {
+    private fun expectInfoCallThatReturnsRhyDbUnavailable() {
         MockServerClient("localhost", MOCK_SERVER_PORT)
             .`when`(
                 request()

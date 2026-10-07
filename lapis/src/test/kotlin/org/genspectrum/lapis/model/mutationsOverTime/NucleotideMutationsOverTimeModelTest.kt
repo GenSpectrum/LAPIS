@@ -8,12 +8,12 @@ import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
-import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.RhyDbFilterExpressionMapper
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.silo.DataVersion
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
-import org.genspectrum.lapis.silo.SiloClient
+import org.genspectrum.lapis.silo.RhyDbClient
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
@@ -36,10 +36,10 @@ private val DUMMY_MUTATION_EQUALS2 = NucleotideSymbolEquals("main", 2, "G")
 @SpringBootTest
 class NucleotideMutationsOverTimeModelTest {
     @MockK
-    private lateinit var siloQueryClient: SiloClient
+    private lateinit var rhyDbQueryClient: RhyDbClient
 
     @Autowired
-    private lateinit var siloFilterExpressionMapper: SiloFilterExpressionMapper
+    private lateinit var rhyDbFilterExpressionMapper: RhyDbFilterExpressionMapper
 
     @Autowired
     private lateinit var referenceGenome: ReferenceGenome
@@ -62,8 +62,8 @@ class NucleotideMutationsOverTimeModelTest {
     fun setup() {
         MockKAnnotations.init(this)
         underTest = QueriesOverTimeModel(
-            siloClient = siloQueryClient,
-            siloFilterExpressionMapper = siloFilterExpressionMapper,
+            rhyDbClient = rhyDbQueryClient,
+            rhyDbFilterExpressionMapper = rhyDbFilterExpressionMapper,
             referenceGenome = referenceGenome,
             referenceGenomeSchema = referenceGenomeSchema,
             dataVersion = dataVersion,
@@ -74,7 +74,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of mutations, then it returns an empty list`() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
         val mutations = emptyList<NucleotideMutation>()
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
         val result = underTest.evaluateNucleotideMutations(
@@ -93,7 +93,7 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given an empty list of date ranges, then it returns an empty list`() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
         val mutations = listOf(DUMMY_MUTATION1, DUMMY_MUTATION2)
         val dateRanges = emptyList<DateRange>()
         val result = underTest.evaluateNucleotideMutations(
@@ -111,9 +111,9 @@ class NucleotideMutationsOverTimeModelTest {
     }
 
     private fun commonSetup() {
-        mockSiloCallInfo(siloQueryClient, dataVersion)
-        mockSiloCountQuery(
-            siloQueryClient,
+        mockRhyDbCallInfo(rhyDbQueryClient, dataVersion)
+        mockRhyDbCountQuery(
+            rhyDbQueryClient,
             DUMMY_MUTATION_EQUALS1,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -121,8 +121,8 @@ class NucleotideMutationsOverTimeModelTest {
                 AggregationData(2, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
-        mockSiloCountQuery(
-            siloQueryClient,
+        mockRhyDbCountQuery(
+            rhyDbQueryClient,
             DUMMY_MUTATION_EQUALS2,
             DUMMY_DATE_BETWEEN_ALL,
             Stream.of(
@@ -131,8 +131,8 @@ class NucleotideMutationsOverTimeModelTest {
                 AggregationData(2, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
-        mockSiloNucleotideCoverageQuery(
-            siloQueryClient,
+        mockRhyDbNucleotideCoverageQuery(
+            rhyDbQueryClient,
             "main",
             1,
             DUMMY_DATE_BETWEEN_ALL,
@@ -141,8 +141,8 @@ class NucleotideMutationsOverTimeModelTest {
                 AggregationData(6, fields = mapOf("date" to StringNode("2022-06-01"))),
             ),
         )
-        mockSiloNucleotideCoverageQuery(
-            siloQueryClient,
+        mockRhyDbNucleotideCoverageQuery(
+            rhyDbQueryClient,
             "main",
             2,
             DUMMY_DATE_BETWEEN_ALL,
@@ -152,8 +152,8 @@ class NucleotideMutationsOverTimeModelTest {
                 AggregationData(1, fields = mapOf("date" to StringNode("2022-07-01"))),
             ),
         )
-        mockSiloTotalCountQuery(
-            siloQueryClient,
+        mockRhyDbTotalCountQuery(
+            rhyDbQueryClient,
             DUMMY_DATE_BETWEEN_ALL,
             queryResult = Stream.of(
                 AggregationData(10, fields = mapOf("date" to StringNode("2021-06-01"))),
@@ -215,9 +215,9 @@ class NucleotideMutationsOverTimeModelTest {
 
     @Test
     fun `given a list of mutations and date ranges and no data for a mutation, then it returns zero`() {
-        mockSiloCountQuery(siloQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloNucleotideCoverageQuery(siloQueryClient, "main", 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
-        mockSiloTotalCountQuery(siloQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockRhyDbCountQuery(rhyDbQueryClient, DUMMY_MUTATION_EQUALS1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockRhyDbNucleotideCoverageQuery(rhyDbQueryClient, "main", 1, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
+        mockRhyDbTotalCountQuery(rhyDbQueryClient, DUMMY_DATE_BETWEEN_ALL, Stream.empty())
 
         val mutations = listOf(DUMMY_MUTATION1)
         val dateRanges = listOf(DUMMY_DATE_RANGE1, DUMMY_DATE_RANGE2)
@@ -249,7 +249,7 @@ class NucleotideMutationsOverTimeModelTest {
     fun `given one data version change, then it succeeds`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+            rhyDbQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = if (callCount++ == 0) "1" else "2"
             WithDataVersion(
@@ -277,7 +277,7 @@ class NucleotideMutationsOverTimeModelTest {
     fun `given more than once data version change, then it throws`() {
         var callCount = 0
         every {
-            siloQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
+            rhyDbQueryClient.sendQueryAndGetDataVersion<AggregationData>(any(), false)
         } answers {
             val version = (callCount++).toString()
             WithDataVersion(

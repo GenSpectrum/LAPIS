@@ -15,11 +15,11 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 
-class SiloQueryToSaneQlTest {
+class RhyDbQueryToSaneQlTest {
     @Test
     fun `GIVEN full query THEN is correctly serialized to SaneQL`() {
-        val query = SiloQuery(
-            SiloAction.aggregated(),
+        val query = RhyDbQuery(
+            RhyDbAction.aggregated(),
             StringEquals("theColumn", "theValue"),
         )
 
@@ -33,7 +33,7 @@ class SiloQueryToSaneQlTest {
 
     @Test
     fun `GIVEN query with True filter THEN filters for true`() {
-        val query = SiloQuery(SiloAction.aggregated(), True)
+        val query = RhyDbQuery(RhyDbAction.aggregated(), True)
 
         val result = query.toSaneQl()
 
@@ -42,7 +42,7 @@ class SiloQueryToSaneQlTest {
 
     @Test
     fun `GIVEN query with details action and no fields THEN produces no action`() {
-        val query = SiloQuery(SiloAction.details(), True)
+        val query = RhyDbQuery(RhyDbAction.details(), True)
 
         val result = query.toSaneQl()
 
@@ -50,12 +50,12 @@ class SiloQueryToSaneQlTest {
     }
 
     @ParameterizedTest(name = "action: {1}")
-    @MethodSource("getSiloActionTestCases")
-    fun `SiloAction is correctly serialized to SaneQL`(
-        action: SiloAction<*>,
+    @MethodSource("getRhyDbActionTestCases")
+    fun `RhyDbAction is correctly serialized to SaneQL`(
+        action: RhyDbAction<*>,
         expectedSaneQl: String,
     ) {
-        val query = SiloQuery(action, True)
+        val query = RhyDbQuery(action, True)
 
         val result = query.toSaneQl()
 
@@ -64,11 +64,11 @@ class SiloQueryToSaneQlTest {
 
     @ParameterizedTest(name = "filter: {1}")
     @MethodSource("getFilterExpressionTestCases")
-    fun `SiloFilterExpression is correctly serialized to SaneQL`(
-        filter: SiloFilterExpression,
+    fun `RhyDbFilterExpression is correctly serialized to SaneQL`(
+        filter: RhyDbFilterExpression,
         expectedPredicate: String,
     ) {
-        val query = SiloQuery(SiloAction.aggregated(), filter)
+        val query = RhyDbQuery(RhyDbAction.aggregated(), filter)
 
         val result = query.toSaneQl()
 
@@ -80,8 +80,8 @@ class SiloQueryToSaneQlTest {
 
     @Test
     fun `GIVEN orderBy field with injection attempt THEN payload is quoted as identifier`() {
-        val query = SiloQuery(
-            SiloAction.aggregated(
+        val query = RhyDbQuery(
+            RhyDbAction.aggregated(
                 groupByFields = listOf("country"),
                 orderByFields = listOf(
                     OrderByField("count}).filter(true).groupBy({evil:=count()", Order.ASCENDING),
@@ -103,26 +103,26 @@ class SiloQueryToSaneQlTest {
 
     companion object {
         @JvmStatic
-        fun getSiloActionTestCases() =
+        fun getRhyDbActionTestCases() =
             listOf(
                 // Aggregated
                 Arguments.of(
-                    SiloAction.aggregated(),
+                    RhyDbAction.aggregated(),
                     """.groupBy({"count":=count()})""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(listOf("field1", "field2")),
+                    RhyDbAction.aggregated(listOf("field1", "field2")),
                     """.groupBy({"count":=count()}, {"field1", "field2"})""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         computedFields = listOf(ComputedField("date", ScalarFunction.ISO_WEEK)),
                     ),
                     """.map({"date.isoWeek":="date".isoWeek()}).groupBy({"count":=count()}, {"country", "date.isoWeek"})""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         groupByFields = listOf("field1", "field2"),
                         orderByFields = listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -134,29 +134,29 @@ class SiloQueryToSaneQlTest {
                     """.groupBy({"count":=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
+                    RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
                     """.groupBy({"count":=count()}).randomize()""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
+                    RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
                     """.groupBy({"count":=count()}).randomize(seed:=123)""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = 42),
                         limit = 10,
                     ),
                     """.groupBy({"count":=count()}).randomize(seed:=42).limit(10)""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         sequencePositionFields = listOf(SequencePositionField("S", 501)),
                     ),
                     """.map({"S[501]":="S".at(501)}).groupBy({"count":=count()}, {"country", "S[501]"})""",
                 ),
                 Arguments.of(
-                    SiloAction.aggregated(
+                    RhyDbAction.aggregated(
                         sequencePositionFields = listOf(
                             SequencePositionField("S", 123),
                             SequencePositionField("main", 456),
@@ -166,11 +166,11 @@ class SiloQueryToSaneQlTest {
                 ),
                 // Mutations
                 Arguments.of(
-                    SiloAction.mutations(),
+                    RhyDbAction.mutations(),
                     ".mutations()",
                 ),
                 Arguments.of(
-                    SiloAction.mutations(
+                    RhyDbAction.mutations(
                         0.5,
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -182,15 +182,15 @@ class SiloQueryToSaneQlTest {
                     """.mutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
-                    SiloAction.mutations(0.05, fields = listOf("mutation", "count", "proportion")),
+                    RhyDbAction.mutations(0.05, fields = listOf("mutation", "count", "proportion")),
                     """.mutations(minProportion:=0.05, fields:={"mutation", "count", "proportion"})""",
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidMutations(),
+                    RhyDbAction.aminoAcidMutations(),
                     ".aminoAcidMutations()",
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidMutations(
+                    RhyDbAction.aminoAcidMutations(
                         0.5,
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -203,11 +203,11 @@ class SiloQueryToSaneQlTest {
                 ),
                 // Details
                 Arguments.of(
-                    SiloAction.details(),
+                    RhyDbAction.details(),
                     "",
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         listOf("age", "pango_lineage"),
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
@@ -219,11 +219,11 @@ class SiloQueryToSaneQlTest {
                     """.project({"age", "pango_lineage"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
-                    SiloAction.details(orderByFields = OrderBySpec.Random(seed = 0)),
+                    RhyDbAction.details(orderByFields = OrderBySpec.Random(seed = 0)),
                     ".randomize(seed:=0)",
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         fields = listOf("country", "date"),
                         orderByFields = OrderBySpec.ByFields(
                             listOf(
@@ -235,7 +235,7 @@ class SiloQueryToSaneQlTest {
                     """.project({"country", "date"}).orderBy({"country", "date".desc()})""",
                 ),
                 Arguments.of(
-                    SiloAction.details(
+                    RhyDbAction.details(
                         fields = listOf("country"),
                         orderByFields = OrderBySpec.Random(seed = null),
                         limit = 5,
@@ -244,11 +244,11 @@ class SiloQueryToSaneQlTest {
                 ),
                 // NucleotideInsertions
                 Arguments.of(
-                    SiloAction.nucleotideInsertions(),
+                    RhyDbAction.nucleotideInsertions(),
                     ".insertions()",
                 ),
                 Arguments.of(
-                    SiloAction.nucleotideInsertions(
+                    RhyDbAction.nucleotideInsertions(
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -259,11 +259,11 @@ class SiloQueryToSaneQlTest {
                     """.insertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidInsertions(),
+                    RhyDbAction.aminoAcidInsertions(),
                     ".aminoAcidInsertions()",
                 ),
                 Arguments.of(
-                    SiloAction.aminoAcidInsertions(
+                    RhyDbAction.aminoAcidInsertions(
                         listOf(
                             OrderByField("field3", Order.ASCENDING),
                             OrderByField("field4", Order.DESCENDING),
@@ -275,15 +275,15 @@ class SiloQueryToSaneQlTest {
                 ),
                 // Sequence
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
+                    RhyDbAction.genomicSequence(SequenceType.ALIGNED, listOf("someSequenceName")),
                     """.project({"someSequenceName"})""",
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
+                    RhyDbAction.genomicSequence(SequenceType.UNALIGNED, listOf("someSequenceName")),
                     """.project({"someSequenceName"})""",
                 ),
                 Arguments.of(
-                    SiloAction.genomicSequence(
+                    RhyDbAction.genomicSequence(
                         type = SequenceType.ALIGNED,
                         sequenceNames = listOf("someSequenceName"),
                         additionalFields = listOf("field1", "field2"),
@@ -298,20 +298,20 @@ class SiloQueryToSaneQlTest {
                 ),
                 // MostRecentCommonAncestor
                 Arguments.of(
-                    SiloAction.mostRecentCommonAncestor("phyloTreeField"),
+                    RhyDbAction.mostRecentCommonAncestor("phyloTreeField"),
                     ".mostRecentCommonAncestor('phyloTreeField')",
                 ),
                 Arguments.of(
-                    SiloAction.mostRecentCommonAncestor("phyloTreeField", printNodesNotInTree = true),
+                    RhyDbAction.mostRecentCommonAncestor("phyloTreeField", printNodesNotInTree = true),
                     ".mostRecentCommonAncestor('phyloTreeField', printNodesNotInTree:=true)",
                 ),
                 // PhyloSubtree
                 Arguments.of(
-                    SiloAction.phyloSubtree("phyloTreeField"),
+                    RhyDbAction.phyloSubtree("phyloTreeField"),
                     ".phyloSubtree('phyloTreeField')",
                 ),
                 Arguments.of(
-                    SiloAction.phyloSubtree("phyloTreeField", printNodesNotInTree = true),
+                    RhyDbAction.phyloSubtree("phyloTreeField", printNodesNotInTree = true),
                     ".phyloSubtree('phyloTreeField', printNodesNotInTree:=true)",
                 ),
             )

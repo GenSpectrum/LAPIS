@@ -40,7 +40,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     private val underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     @Test
-    fun `given a complex advanced query THEN map should return the corresponding SiloQuery`() {
+    fun `given a complex advanced query THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery =
             "seg1:300G & (seg1:400- | seg1:500B) & !seg1:600 & MAYBE(seg1:700B | seg2:800-) " +
                 "& [3-of: seg1:123A, seg2:234T, seg1:345G] & " +
@@ -96,7 +96,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a complex advanced query with MAYBE THEN map should return the corresponding SiloQuery`() {
+    fun `given a complex advanced query with MAYBE THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery =
             "MAYBE((seg1:700B | seg1:800-) & !seg2:600 & [3-of: seg1:123A, seg2:234T, seg1:345G]) & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
@@ -197,7 +197,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a single entry THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a single entry THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "seg1:300G"
         val advancedQueryWithFrom = "seg1:A300G"
 
@@ -219,7 +219,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an 'And' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with an 'And' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "seg1:300G & seg2:400-"
 
         val result = underTest.map(advancedQuery)
@@ -238,7 +238,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with two 'And' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with two 'And' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "seg1:300G & seg2:400- & seg1:500B"
 
         val result = underTest.map(advancedQuery)
@@ -258,7 +258,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Not' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a 'Not' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "!seg1:300G"
 
         val result = underTest.map(advancedQuery)
@@ -274,7 +274,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a variant advancedQuery with an 'Or' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a variant advancedQuery with an 'Or' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "seg1:300G | seg2:400-"
 
         val result = underTest.map(advancedQuery)
@@ -293,7 +293,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with an bracket expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with an bracket expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "seg1:300C & (seg1:400A | seg2:500G)"
 
         val result = underTest.map(advancedQuery)
@@ -315,7 +315,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Maybe' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a 'Maybe' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "MAYBE(seg1:300G)"
 
         val result = underTest.map(advancedQuery)
@@ -325,7 +325,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `GIVEN a advancedQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' SiloQuery`() {
+    fun `GIVEN a advancedQuery with a mixed-case 'Maybe' expression THEN map should return 'Maybe' RhyDbQuery`() {
         val advancedQuery = "maYbE(seg2:T12C)"
 
         val result = underTest.map(advancedQuery)
@@ -335,7 +335,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Nof' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a 'Nof' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "[3-of: seg1:123A, seg2:234T, seg1:345G, seg1:456A]"
 
         val result = underTest.map(advancedQuery)
@@ -354,7 +354,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a exact 'Nof' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a exact 'Nof' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "[exactly-3-of: seg1:123A, seg2:234T, seg1:345G, seg1:456A]"
 
         val result = underTest.map(advancedQuery)
@@ -374,7 +374,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a nested exact 'Nof' expression THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a nested exact 'Nof' expression THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "[exactly-3-of: seg1:123A, !seg2:234G, seg1:345G, seg2:456A]"
 
         val result = underTest.map(advancedQuery)
@@ -394,7 +394,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a exact 'Nof' expression with casing THEN map should return the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a exact 'Nof' expression with casing THEN map should return the corresponding RhyDbQuery`() {
         val advancedQuery = "[exAcTly-3-oF: seg1:123A, seg1:234T, seg1:345G]"
 
         val result = underTest.map(advancedQuery)
@@ -412,7 +412,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Insertion' expression THEN returns SILO query`() {
+    fun `given a advancedQuery with a 'Insertion' expression THEN returns RHYDB query`() {
         val advancedQuery = "ins_seg1:1234:GAG"
 
         val result = underTest.map(advancedQuery)
@@ -421,7 +421,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Insertion' expression with lower case letters THEN returns SILO query`() {
+    fun `given a advancedQuery with a 'Insertion' expression with lower case letters THEN returns RHYDB query`() {
         val advancedQuery = "ins_seg2:1234:gAG"
 
         val result = underTest.map(advancedQuery)
@@ -430,7 +430,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Insertion' expression with casing letters THEN returns SILO query`() {
+    fun `given a advancedQuery with a 'Insertion' expression with casing letters THEN returns RHYDB query`() {
         val advancedQuery = "iNs_Seg1:1234:gAG"
 
         val result = underTest.map(advancedQuery)
@@ -439,7 +439,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Insertion' with wildcard expression THEN returns SILO query`() {
+    fun `given a advancedQuery with a 'Insertion' with wildcard expression THEN returns RHYDB query`() {
         val advancedQuery = "ins_seg1:1234:G?A?G"
 
         val result = underTest.map(advancedQuery)
@@ -502,7 +502,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a 'AA insertion' expression THEN returns RHYDB query`() {
         val advancedQuery = "ins_S:501:EPE"
 
         val result = underTest.map(advancedQuery)
@@ -511,7 +511,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a stop codon expression THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a stop codon expression THEN returns RHYDB query`() {
         val advancedQuery = "ins_S:501:A*C"
 
         val result = underTest.map(advancedQuery)
@@ -520,7 +520,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case THEN returns RHYDB query`() {
         val advancedQuery = "ins_ORF1a:501:ePe"
 
         val result = underTest.map(advancedQuery)
@@ -538,7 +538,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case gene THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a 'AA insertion' expression with lower case gene THEN returns RHYDB query`() {
         val advancedQuery = "ins_orF1a:501:EPE"
 
         val result = underTest.map(advancedQuery)
@@ -547,7 +547,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'AA insertion' with wildcard THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a 'AA insertion' with wildcard THEN returns RHYDB query`() {
         val advancedQuery = "ins_S:501:E?E?"
 
         val result = underTest.map(advancedQuery)
@@ -556,7 +556,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with a 'AA insertion' with stop codon and wildcard THEN returns SILO query`() {
+    fun `given a valid advancedQuery with a 'AA insertion' with stop codon and wildcard THEN returns RHYDB query`() {
         val advancedQuery = "ins_S:501:E?*E"
 
         val result = underTest.map(advancedQuery)
@@ -565,7 +565,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with mutation and metadata expression THEN returns SILO query`() {
+    fun `given a valid advancedQuery with mutation and metadata expression THEN returns RHYDB query`() {
         val advancedQuery = "(NOT some_metadata=AB) & seg1:300G"
 
         val result = underTest.map(advancedQuery)
@@ -579,7 +579,7 @@ class AdvancedQueryFacadeMultiSegmentTest {
     }
 
     @Test
-    fun `given a valid advancedQuery with mutation and regex metadata expression THEN returns SILO query`() {
+    fun `given a valid advancedQuery with mutation and regex metadata expression THEN returns RHYDB query`() {
         val advancedQuery = "(some_metadata=BANGALOR AND seg1:300G)&(some_metadata.regex='BANGALOR' OR NOT S:501Y)"
 
         val result = underTest.map(advancedQuery)

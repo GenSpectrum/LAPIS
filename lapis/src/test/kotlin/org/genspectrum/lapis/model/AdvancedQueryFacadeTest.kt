@@ -25,7 +25,7 @@ import org.genspectrum.lapis.silo.NucleotideInsertionContains
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
 import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.SiloFilterExpression
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
 import org.genspectrum.lapis.silo.StringEquals
 import org.genspectrum.lapis.silo.StringSearch
 import org.hamcrest.MatcherAssert.assertThat
@@ -51,7 +51,7 @@ class AdvancedQueryFacadeTest {
     private val underTest = AdvancedQueryFacade(dummyReferenceGenomeSchema, dummyDatabaseConfig)
 
     @Test
-    fun `given a complex advanced query THEN returns the corresponding SiloQuery`() {
+    fun `given a complex advanced query THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery =
             "300G & (400- | 500B) & !600 & MAYBE(700B | 800-) & [3-of: 123A, 234T, 345G] & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*' & " +
@@ -93,7 +93,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a complex advanced query with MAYBE THEN returns the corresponding SiloQuery`() {
+    fun `given a complex advanced query with MAYBE THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery =
             "MAYBE((700B | 800-) & !600 & [3-of: 123A, 234T, 345G]) & " +
                 "pangoLineage=jn.1* & some_metadata.regex='^Democratic.*'"
@@ -127,7 +127,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding SiloQuery`() {
+    fun `given a variant advancedQuery with an 'Or' expression THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "300G | 400-"
 
         val result = underTest.map(advancedQuery)
@@ -146,7 +146,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with an bracket expression THEN returns the corresponding SiloQuery`() {
+    fun `given a advancedQuery with an bracket expression THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "300C & (400A | 500G)"
 
         val result = underTest.map(advancedQuery)
@@ -168,7 +168,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a 'Nof' expression THEN returns the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a 'Nof' expression THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "[3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(advancedQuery)
@@ -187,7 +187,7 @@ class AdvancedQueryFacadeTest {
     }
 
     @Test
-    fun `given a advancedQuery with a exact 'Nof' expression THEN returns the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a exact 'Nof' expression THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "[exactly-3-of: 123A, 234T, 345G, 456A]"
 
         val result = underTest.map(advancedQuery)
@@ -207,7 +207,7 @@ class AdvancedQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a nested exact 'Nof' expression THEN returns the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a nested exact 'Nof' expression THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "[exactly-3-of: 123A, !234G, 345G, 456A]"
 
         val result = underTest.map(advancedQuery)
@@ -227,7 +227,7 @@ class AdvancedQueryFacadeTest {
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `given a advancedQuery with a exact 'Nof' expression with casing THEN returns the corresponding SiloQuery`() {
+    fun `given a advancedQuery with a exact 'Nof' expression with casing THEN returns the corresponding RhyDbQuery`() {
         val advancedQuery = "[exAcTly-3-oF: 123A, 234T, 345G]"
 
         val result = underTest.map(advancedQuery)
@@ -1022,7 +1022,7 @@ class AdvancedQueryFacadeTest {
 data class ValidTestCase(
     val description: String,
     val query: String,
-    val expected: SiloFilterExpression,
+    val expected: RhyDbFilterExpression,
 ) {
     override fun toString(): String = description
 }

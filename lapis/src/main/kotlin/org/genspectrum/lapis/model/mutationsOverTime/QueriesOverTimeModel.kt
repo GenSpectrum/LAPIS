@@ -7,7 +7,7 @@ import org.genspectrum.lapis.config.ReferenceGenome
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.model.AdvancedQueryFacade
-import org.genspectrum.lapis.model.SiloFilterExpressionMapper
+import org.genspectrum.lapis.model.RhyDbFilterExpressionMapper
 import org.genspectrum.lapis.model.aaSymbols
 import org.genspectrum.lapis.model.deletionSymbols
 import org.genspectrum.lapis.model.nucleotideSymbols
@@ -25,10 +25,10 @@ import org.genspectrum.lapis.silo.HasAminoAcidMutation
 import org.genspectrum.lapis.silo.HasNucleotideMutation
 import org.genspectrum.lapis.silo.NucleotideSymbolEquals
 import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.SiloAction
-import org.genspectrum.lapis.silo.SiloClient
-import org.genspectrum.lapis.silo.SiloFilterExpression
-import org.genspectrum.lapis.silo.SiloQuery
+import org.genspectrum.lapis.silo.RhyDbAction
+import org.genspectrum.lapis.silo.RhyDbClient
+import org.genspectrum.lapis.silo.RhyDbFilterExpression
+import org.genspectrum.lapis.silo.RhyDbQuery
 import org.genspectrum.lapis.silo.WithDataVersion
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -124,8 +124,8 @@ data class QueryOverTimeCell(
 
 @Component
 class QueriesOverTimeModel(
-    private val siloClient: SiloClient,
-    private val siloFilterExpressionMapper: SiloFilterExpressionMapper,
+    private val rhyDbClient: RhyDbClient,
+    private val rhyDbFilterExpressionMapper: RhyDbFilterExpressionMapper,
     private val referenceGenome: ReferenceGenome,
     private val referenceGenomeSchema: ReferenceGenomeSchema,
     private val dataVersion: DataVersion,
@@ -262,7 +262,7 @@ class QueriesOverTimeModel(
         remainingRetries: Int = 1,
     ): QueriesOverTimeResult {
         if (queryItems.isEmpty() || dateRanges.isEmpty()) {
-            siloClient.callInfo() // populates dataVersion.dataVersion
+            rhyDbClient.callInfo() // populates dataVersion.dataVersion
             return QueriesOverTimeResult(
                 queries = queryItems.map { it.displayLabel },
                 dateRanges = dateRanges,
@@ -277,7 +277,7 @@ class QueriesOverTimeModel(
             to = dateRanges.mapNotNull { it.dateTo }.maxOrNull(),
         )
 
-        val baseFilter = siloFilterExpressionMapper.map(lapisFilter)
+        val baseFilter = rhyDbFilterExpressionMapper.map(lapisFilter)
 
         val dailyTotalsWithDataVersion = sendQuery(baseFilter, dateQuery, null, dateField)
         val dailyTotalsDataVersion = dailyTotalsWithDataVersion.dataVersion
@@ -336,14 +336,14 @@ class QueriesOverTimeModel(
     }
 
     private fun sendQuery(
-        baseSiloFilterExpression: SiloFilterExpression,
-        dateQuery: SiloFilterExpression,
-        mutationQuery: SiloFilterExpression?,
+        baseRhyDbFilterExpression: RhyDbFilterExpression,
+        dateQuery: RhyDbFilterExpression,
+        mutationQuery: RhyDbFilterExpression?,
         dateField: String,
     ): WithDataVersion<List<AggregationData>> =
-        siloClient.sendQueryAndGetDataVersion(
-            SiloQuery(
-                SiloAction.aggregated(
+        rhyDbClient.sendQueryAndGetDataVersion(
+            RhyDbQuery(
+                RhyDbAction.aggregated(
                     groupByFields = listOf(dateField),
                     orderByFields = OrderBySpec.EMPTY,
                     limit = null,
@@ -351,7 +351,7 @@ class QueriesOverTimeModel(
                 ),
                 And(
                     children = listOfNotNull(
-                        baseSiloFilterExpression,
+                        baseRhyDbFilterExpression,
                         mutationQuery,
                         dateQuery,
                     ),
@@ -434,6 +434,6 @@ class QueriesOverTimeModel(
  */
 private data class ParsedQueryItem(
     val displayLabel: String,
-    val countQuery: SiloFilterExpression,
-    val coverageQuery: SiloFilterExpression,
+    val countQuery: RhyDbFilterExpression,
+    val coverageQuery: RhyDbFilterExpression,
 )
