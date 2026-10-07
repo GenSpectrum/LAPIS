@@ -27,7 +27,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter("theColumn" = 'theValue').groupBy({"count":=count()})"""),
+            equalTo("""data.filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -37,7 +37,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("""default.filter(true).groupBy({"count":=count()})"""))
+        assertThat(result, equalTo("""data.filter(true).group(by:={}, aggs:={"count":=count()})"""))
     }
 
     @Test
@@ -46,7 +46,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("default.filter(true)"))
+        assertThat(result, equalTo("data.filter(true)"))
     }
 
     @ParameterizedTest(name = "action: {1}")
@@ -59,7 +59,7 @@ class RhyDbQueryToSaneQlTest {
 
         val result = query.toSaneQl()
 
-        assertThat(result, equalTo("default.filter(true)$expectedSaneQl"))
+        assertThat(result, equalTo("data.filter(true)$expectedSaneQl"))
     }
 
     @ParameterizedTest(name = "filter: {1}")
@@ -74,7 +74,7 @@ class RhyDbQueryToSaneQlTest {
 
         assertThat(
             result,
-            equalTo("""default.filter($expectedPredicate).groupBy({"count":=count()})"""),
+            equalTo("""data.filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -95,8 +95,8 @@ class RhyDbQueryToSaneQlTest {
         assertThat(
             result,
             equalTo(
-                """default.filter(true).groupBy({"count":=count()}, {"country"})""" +
-                    """.orderBy({"count}).filter(true).groupBy({evil:=count()"})""", // <- the orderBy field is quoted
+                """data.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
+                    """.order(by:={"count}).filter(true).groupBy({evil:=count()"})""", // <- the order field is quoted
             ),
         )
     }
@@ -108,18 +108,18 @@ class RhyDbQueryToSaneQlTest {
                 // Aggregated
                 Arguments.of(
                     RhyDbAction.aggregated(),
-                    """.groupBy({"count":=count()})""",
+                    """.group(by:={}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(listOf("field1", "field2")),
-                    """.groupBy({"count":=count()}, {"field1", "field2"})""",
+                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         computedFields = listOf(ComputedField("date", ScalarFunction.ISO_WEEK)),
                     ),
-                    """.map({"date.isoWeek":="date".isoWeek()}).groupBy({"count":=count()}, {"country", "date.isoWeek"})""",
+                    """.map({"date.isoWeek":="date".isoWeek()}).group(by:={"country", "date.isoWeek"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -131,29 +131,29 @@ class RhyDbQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.groupBy({"count":=count()}, {"field1", "field2"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.group(by:={"field1", "field2"}, aggs:={"count":=count()}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = null)),
-                    """.groupBy({"count":=count()}).randomize()""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize()""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(orderByFields = OrderBySpec.Random(seed = 123)),
-                    """.groupBy({"count":=count()}).randomize(seed:=123)""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize(seed:=123)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         orderByFields = OrderBySpec.Random(seed = 42),
                         limit = 10,
                     ),
-                    """.groupBy({"count":=count()}).randomize(seed:=42).limit(10)""",
+                    """.group(by:={}, aggs:={"count":=count()}).randomize(seed:=42).limit(10)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
                         groupByFields = listOf("country"),
                         sequencePositionFields = listOf(SequencePositionField("S", 501)),
                     ),
-                    """.map({"S[501]":="S".at(501)}).groupBy({"count":=count()}, {"country", "S[501]"})""",
+                    """.map({"S[501]":="S".at(501)}).group(by:={"country", "S[501]"}, aggs:={"count":=count()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -162,7 +162,7 @@ class RhyDbQueryToSaneQlTest {
                             SequencePositionField("main", 456),
                         ),
                     ),
-                    """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).groupBy({"count":=count()}, {"S[123]", "main[456]"})""",
+                    """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).group(by:={"S[123]", "main[456]"}, aggs:={"count":=count()})""",
                 ),
                 // Mutations
                 Arguments.of(
@@ -179,7 +179,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.mutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.mutations(minProportion:=0.5).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.mutations(0.05, fields = listOf("mutation", "count", "proportion")),
@@ -199,7 +199,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.aminoAcidMutations(minProportion:=0.5).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.aminoAcidMutations(minProportion:=0.5).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Details
                 Arguments.of(
@@ -216,7 +216,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.project({"age", "pango_lineage"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.project({"age", "pango_lineage"}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.details(orderByFields = OrderBySpec.Random(seed = 0)),
@@ -232,7 +232,7 @@ class RhyDbQueryToSaneQlTest {
                             ),
                         ),
                     ),
-                    """.project({"country", "date"}).orderBy({"country", "date".desc()})""",
+                    """.project({"country", "date"}).order(by:={"country", "date".desc()})""",
                 ),
                 Arguments.of(
                     RhyDbAction.details(
@@ -256,7 +256,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.insertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.insertions().order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aminoAcidInsertions(),
@@ -271,7 +271,7 @@ class RhyDbQueryToSaneQlTest {
                         100,
                         50,
                     ),
-                    """.aminoAcidInsertions().orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.aminoAcidInsertions().order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // Sequence
                 Arguments.of(
@@ -294,7 +294,7 @@ class RhyDbQueryToSaneQlTest {
                         limit = 100,
                         offset = 50,
                     ),
-                    """.project({"field1", "field2", "someSequenceName"}).orderBy({"field3", "field4".desc()}).offset(50).limit(100)""",
+                    """.project({"field1", "field2", "someSequenceName"}).order(by:={"field3", "field4".desc()}).offset(50).limit(100)""",
                 ),
                 // MostRecentCommonAncestor
                 Arguments.of(

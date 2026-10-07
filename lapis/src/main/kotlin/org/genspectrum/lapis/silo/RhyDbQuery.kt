@@ -25,7 +25,7 @@ data class RhyDbQuery<ResponseType>(
     val action: RhyDbAction<ResponseType>,
     val filterExpression: RhyDbFilterExpression,
 ) {
-    /** Renders this query as a SaneQL query string, e.g. `default.filter(true).groupBy({count:=count()})`. */
+    /** Renders this query as a SaneQL query string, e.g. `data.filter(true).group(by:={}, aggs:={count:=count()})`. */
     fun toSaneQl(): String = SaneQlPipeline(filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
 }
 
@@ -51,12 +51,12 @@ sealed class RhyDbAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
-    /** The SaneQL pipeline step(s) specific to this action, e.g. `.groupBy({count:=count()})`. */
+    /** The SaneQL pipeline step(s) specific to this action, e.g. `.group(by:={}, aggs:={count:=count()})`. */
     protected abstract fun ownSaneQlSteps(): List<SaneQlStep>
 
     /**
      * All SaneQL pipeline steps for this action: [ownSaneQlSteps] followed by the steps common to
-     * every action (`orderBy`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
+     * every action (`order`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
      */
     fun toSaneQlSteps(): List<SaneQlStep> = ownSaneQlSteps() + commonSaneQlSuffixSteps()
 
@@ -64,7 +64,12 @@ sealed class RhyDbAction<ResponseType>(
         buildList {
             val orderByFields = this@RhyDbAction.orderByFields
             if (orderByFields.isNotEmpty()) {
-                add(SaneQlStep("orderBy", positionalArgs = listOf(SaneQlList(orderByFields.map { toSaneQl(it) }))))
+                add(
+                    SaneQlStep(
+                        "order",
+                        namedArgs = listOf(SaneQlNamedArg("by", SaneQlList(orderByFields.map { toSaneQl(it) }))),
+                    ),
+                )
             }
             val offset = this@RhyDbAction.offset
             if (offset != null) {
@@ -283,13 +288,14 @@ sealed class RhyDbAction<ResponseType>(
                         computedFields.map { id(it.outputColumnName) }
                 add(
                     SaneQlStep(
-                        "groupBy",
-                        positionalArgs = buildList {
-                            add(SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))))
-                            if (allGroupByColumns.isNotEmpty()) {
-                                add(SaneQlList(allGroupByColumns))
-                            }
-                        },
+                        "group",
+                        namedArgs = listOf(
+                            SaneQlNamedArg("by", SaneQlList(allGroupByColumns)),
+                            SaneQlNamedArg(
+                                "aggs",
+                                SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))),
+                            ),
+                        ),
                     ),
                 )
             }
