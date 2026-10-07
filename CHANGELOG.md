@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.9](https://github.com/GenSpectrum/LAPIS/compare/v0.8.8...v0.8.9) (2026-10-07)
+
+
+### Features
+
+* **lapis:** distinguish a SILO timeout from SILO being unreachable ([#1882](https://github.com/GenSpectrum/LAPIS/issues/1882)) ([d8d7595](https://github.com/GenSpectrum/LAPIS/commit/d8d7595eac4955cec44127044db5bd4f6ff576ae))
+
+
+### Bug Fixes
+
+* **lapis-docs:** rename silo to rhydb in docs ([#1823](https://github.com/GenSpectrum/LAPIS/issues/1823)) ([5369384](https://github.com/GenSpectrum/LAPIS/commit/53693843b1116461ca7719ddd25a683fe630fe7b))
+* **lapis:** use RhyDB's renamed SaneQL operators and new default table name ([#1898](https://github.com/GenSpectrum/LAPIS/issues/1898)) ([5ad5551](https://github.com/GenSpectrum/LAPIS/commit/5ad55517d9312434df8b3b30065363e1d9453067))
+
 ## [0.8.8](https://github.com/GenSpectrum/LAPIS/compare/v0.8.7...v0.8.8) (2026-09-16)
 
 
