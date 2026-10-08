@@ -190,7 +190,7 @@ describe('The /alignedAminoAcidSequence endpoint', () => {
 
       const errorResponse = await response.json();
       expect(errorResponse.error.detail).to.match(
-        /Error from SILO: project field 'unknownGene' is not present/
+        /Error from RhyDB: project field 'unknownGene' is not present/
       );
     });
 
