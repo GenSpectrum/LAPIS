@@ -101,7 +101,7 @@ open class CachedRhyDbClient(
     private val httpClient = HttpClient.newBuilder()
         // Create our own thread pool explicitly to not use the ForkJoinPool.commonPool()
         // Use fixed pool with unbounded queue to prevent RejectedExecutionExeceptions
-        .executor(Executors.newFixedThreadPool(config.siloClientThreadCount))
+        .executor(Executors.newFixedThreadPool(config.rhydbClientThreadCount))
         .build()
 
     @Cacheable(

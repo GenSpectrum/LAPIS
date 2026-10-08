@@ -26,7 +26,7 @@ SILO_TAG=latest LAPIS_TAG=local docker compose up --pull missing
 
 When running LAPIS, you need to pass the following arguments:
 
-* the RhyDB url `--silo.url=http://<url>:<port>`
+* the RhyDB url `--rhydb.url=http://<url>:<port>`
 * the path to the database config `--lapis.databaseConfig.path=<path/to/config>`,
  in the Docker image this is already set to `/workspace/database_config.yaml`.
 * the path to the reference genome `--referenceGenomeFilename=<path/to/referenceGenome>`
@@ -100,11 +100,11 @@ Run tests:
 e.g. when running via gradle:
 
 ```bash
-./gradlew bootRun --args='--silo.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>'
+./gradlew bootRun --args='--rhydb.url=http://<url>:<port> --lapis.databaseConfig.path=<path/to/config> --referenceGenomeFilename=<path/to/referenceGenome>'
 ```
 For example:
 ```
-./gradlew bootRun --args='--silo.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
+./gradlew bootRun --args='--rhydb.url=http://localhost:8091 --lapis.databaseConfig.path=../lapis-e2e/testData/singleSegmented/testDatabaseConfig.yaml --referenceGenomeFilename=../lapis-e2e/testData/singleSegmented/reference_genomes.json  --server.port=8090'
 ```
 
 bootRun rebuilds the code as needed - if you want to ensure a fresh build you can first explicitly build lapis

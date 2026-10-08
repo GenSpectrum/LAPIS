@@ -149,7 +149,7 @@ openApi {
 
     customBootRun {
         def bootRunArgs = [
-                "--silo.url=does.not.matter.here",
+                "--rhydb.url=does.not.matter.here",
                 "--lapis.databaseConfig.path=$customLapisConfig",
                 "--referenceGenomeFilename=$referenceGenomeFilename",
         ]

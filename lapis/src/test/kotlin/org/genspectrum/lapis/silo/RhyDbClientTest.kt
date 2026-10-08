@@ -52,7 +52,7 @@ private const val REQUEST_ID_VALUE = "someRequestId"
 
 private const val DATA_VERSION_HEADER = "data-version"
 
-@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
+@SpringBootTest(properties = ["rhydb.url=http://localhost:$MOCK_SERVER_PORT"])
 class RhyDbClientTest(
     @param:Autowired private val underTest: RhyDbClient,
     @param:Autowired private val requestIdContext: RequestIdContext,
@@ -746,7 +746,7 @@ class RhyDbClientTest(
     }
 }
 
-@SpringBootTest(properties = ["silo.url=http://localhost:$MOCK_SERVER_PORT"])
+@SpringBootTest(properties = ["rhydb.url=http://localhost:$MOCK_SERVER_PORT"])
 class RhyDbClientAndCacheInvalidatorTest(
     @param:Autowired private val rhyDbClient: RhyDbClient,
     @param:Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
