@@ -72,14 +72,14 @@ class ExceptionHandler(
 
     @ExceptionHandler(RhyDbException::class)
     fun handleRhyDbException(e: RhyDbException): ErrorResponse {
-        log.warn(e) { "Caught SiloException: ${e.statusCode} - ${e.message}" }
+        log.warn(e) { "Caught RhyDbException: ${e.statusCode} - ${e.message}" }
 
         return responseEntity(e.statusCode, e.title, e.message)
     }
 
     @ExceptionHandler(RhyDbNotReachableException::class)
     fun handleRhyDbNotReachableException(e: RhyDbNotReachableException): ErrorResponse {
-        log.warn { "Caught SiloNotReachableException: ${e.message}" } // don't log stack trace for this common case
+        log.warn { "Caught RhyDbNotReachableException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
@@ -87,7 +87,7 @@ class ExceptionHandler(
     @ExceptionHandler(RhyDbTimeoutException::class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     fun handleRhyDbTimeoutException(e: RhyDbTimeoutException): ErrorResponse {
-        log.warn { "Caught SiloTimeoutException: ${e.message}" } // don't log stack trace for this common case
+        log.warn { "Caught RhyDbTimeoutException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message)
     }
@@ -95,7 +95,7 @@ class ExceptionHandler(
     @ExceptionHandler(RhyDbUnavailableException::class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     fun handleRhyDbUnavailableException(e: RhyDbUnavailableException): ErrorResponse {
-        log.warn { "Caught SiloUnavailableException: ${e.message}" } // don't log stack trace for this common case
+        log.warn { "Caught RhyDbUnavailableException: ${e.message}" } // don't log stack trace for this common case
 
         return responseEntity(HttpStatus.SERVICE_UNAVAILABLE, e.message) {
             e.retryAfter?.let { header(RETRY_AFTER, it) }

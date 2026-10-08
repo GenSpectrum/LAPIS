@@ -1,7 +1,7 @@
 import { z } from 'astro/zod';
 import { featureSchema, metadataTypeSchema, opennessLevelSchema } from './configContext.tsx';
 
-export const siloConfigSchema = z.object({
+export const rhyDbConfigSchema = z.object({
     instanceName: z.string(),
     opennessLevel: opennessLevelSchema,
     metadata: z.array(

@@ -675,7 +675,7 @@ class RhyDbClientTest(
     }
 
     @Test
-    fun `GIVEN silo returns empty lineage definition file THEN returns empty object`() {
+    fun `GIVEN RhyDB returns empty lineage definition file THEN returns empty object`() {
         expectLineageDefinitionRequestAndRespondWith("")
 
         val actual = underTest.getLineageDefinition(columnName)
@@ -684,7 +684,7 @@ class RhyDbClientTest(
     }
 
     @Test
-    fun `GIVEN silo returns invalid lineage definition file THEN returns appropriate error`() {
+    fun `GIVEN RhyDB returns invalid lineage definition file THEN returns appropriate error`() {
         expectLineageDefinitionRequestAndRespondWith("not an object")
 
         val exception = assertThrows<RuntimeException> { underTest.getLineageDefinition(columnName) }
@@ -839,7 +839,7 @@ class RhyDbClientAndCacheInvalidatorTest(
     }
 
     @Test
-    fun `GIVEN silo answers info too slowly THEN throws RhyDbTimeoutException naming the timeout`() {
+    fun `GIVEN RhyDB answers info too slowly THEN throws RhyDbTimeoutException naming the timeout`() {
         MockServerClient("localhost", MOCK_SERVER_PORT)
             .`when`(request().withMethod("GET").withPath("/info"))
             .respond(

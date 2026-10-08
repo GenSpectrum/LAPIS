@@ -295,12 +295,12 @@ open class CachedRhyDbClient(
     private fun rhyDbNotReachableMessage(
         uri: URI,
         exception: Exception,
-    ) = "Could not connect to silo at $uri: ${exception::class} ${exception.message}"
+    ) = "Could not connect to RhyDB at $uri: ${exception::class} ${exception.message}"
 
     private fun rhyDbErrorMessage(
         uri: URI,
         exception: Exception,
-    ) = "Error talking to silo at $uri: ${exception::class} ${exception.message}"
+    ) = "Error talking to RhyDB at $uri: ${exception::class} ${exception.message}"
 
     private fun rhyDbTimeoutMessage(
         uri: URI,
@@ -309,8 +309,8 @@ open class CachedRhyDbClient(
     ): String {
         val elapsedMillis = System.currentTimeMillis() - startedAtMillis
         return when (exception) {
-            is HttpConnectTimeoutException -> "Timed out connecting to silo at $uri after ${elapsedMillis}ms"
-            else -> "Timed out waiting for a response from silo at $uri after ${elapsedMillis}ms"
+            is HttpConnectTimeoutException -> "Timed out connecting to RhyDB at $uri after ${elapsedMillis}ms"
+            else -> "Timed out waiting for a response from RhyDB at $uri after ${elapsedMillis}ms"
         }
     }
 

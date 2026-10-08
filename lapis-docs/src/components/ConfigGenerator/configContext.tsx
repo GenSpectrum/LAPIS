@@ -1,7 +1,7 @@
 import { createContext, type FC, type PropsWithChildren, useState } from 'react';
 import { z } from 'astro/zod';
 
-export type ConfigType = 'SILO' | 'Pathoplexus';
+export type ConfigType = 'RhyDB' | 'Pathoplexus';
 
 export const LAPIS_OPENNESS_OPEN = 'OPEN';
 
@@ -71,7 +71,7 @@ export type ConfigContextType = {
 };
 
 export const ConfigContext = createContext<ConfigContextType>({
-    configType: 'SILO',
+    configType: 'RhyDB',
     setConfigType: () => {},
     config: { metadata: [], primaryKey: '', tableColumns: [] },
     addNewMetadata: () => {},
@@ -90,7 +90,7 @@ export const ConfigProvider: FC<PropsWithChildren<{ initialConfig: PartialConfig
     initialConfig,
 }) => {
     const [config, setConfig] = useState(initialConfig);
-    const [configType, setConfigType] = useState<ConfigType>('SILO');
+    const [configType, setConfigType] = useState<ConfigType>('RhyDB');
 
     const addNewMetadata = () => {
         const metadata: Metadata = {

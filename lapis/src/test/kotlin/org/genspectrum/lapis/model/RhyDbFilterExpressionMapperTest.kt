@@ -102,7 +102,7 @@ class RhyDbFilterExpressionMapperTest {
         assertThat(result, equalTo(True))
     }
 
-    @ParameterizedTest(name = "FilterParameter: {0}, SiloQuery: {1}")
+    @ParameterizedTest(name = "FilterParameter: {0}, RhyDbQuery: {1}")
     @MethodSource("getFilterParametersWithExpectedRhyDbQuery")
     fun `given filter parameters then maps to expected FilterExpression`(
         filterParameter: Map<String, List<String>>,

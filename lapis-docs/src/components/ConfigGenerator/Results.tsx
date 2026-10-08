@@ -2,7 +2,7 @@ import { type FC, type ReactNode, useContext, useMemo } from 'react';
 import { ConfigContext } from './configContext';
 import { dump } from 'js-yaml';
 import { pathoplexusConfigSchema } from './pathoplexusConfig.ts';
-import { siloConfigSchema } from './siloConfig.ts';
+import { rhyDbConfigSchema } from './rhyDbConfig.ts';
 
 export const Results: FC = () => {
     const { config, configType } = useContext(ConfigContext);
@@ -25,7 +25,7 @@ export const Results: FC = () => {
         zodParseResult = pathoplexusConfigSchema.safeParse(configToExport);
     } else {
         configToExport = config;
-        zodParseResult = siloConfigSchema.safeParse(configToExport);
+        zodParseResult = rhyDbConfigSchema.safeParse(configToExport);
     }
 
     if (zodParseResult.success) {
