@@ -23,7 +23,7 @@ class QueryParseModel(
             rhyDbClient.callInfo() // populates dataVersion.dataVersion
         } catch (e: Exception) {
             // continue with a null data version: the queries can still be parsed without it
-            log.warn { "Could not get current SILO data version: $e" }
+            log.warn { "Could not get current RhyDB data version: $e" }
         }
         return queries.map { query -> parseSingleQuery(query, doFullValidation) }
     }

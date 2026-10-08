@@ -96,7 +96,7 @@ const val SEGMENT_SCHEMA = "Segment"
 
 const val LAPIS_INFO_DESCRIPTION = "Information about LAPIS."
 const val LAPIS_DATA_VERSION_EXAMPLE = "1702305399"
-const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in SILO."
+const val LAPIS_DATA_VERSION_DESCRIPTION = "The data version of data in RhyDB."
 const val LAPIS_DATA_VERSION_HEADER_DESCRIPTION =
     "$LAPIS_DATA_VERSION_DESCRIPTION " +
         "Same as the value returned in the info object in the response body."
@@ -115,7 +115,7 @@ const val REQUEST_INFO_STRING_DESCRIPTION =
 
 const val VERSION_DESCRIPTION = "The version of LAPIS that processed the request."
 
-const val RHYDB_VERSION_DESCRIPTION = "The version of SILO that processed the request."
+const val RHYDB_VERSION_DESCRIPTION = "The version of RhyDB that processed the request."
 
 const val DOWNLOAD_AS_FILE_DESCRIPTION =
     """

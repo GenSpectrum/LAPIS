@@ -3,7 +3,7 @@ package org.genspectrum.lapis.request
 import org.genspectrum.lapis.config.MetadataType
 
 /**
- * An enum of scalar functions supported by SILO.
+ * An enum of scalar functions supported by RhyDB.
  * New functions need to be whitelisted here explicitly.
  */
 enum class ScalarFunction(

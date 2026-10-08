@@ -488,7 +488,7 @@ private fun infoResponseSchema() =
                 "requestInfo" to Schema<String>().types(setOf("string")).description(REQUEST_INFO_STRING_DESCRIPTION),
                 "reportTo" to Schema<String>().types(setOf("string")),
                 "lapisVersion" to StringSchema().description(VERSION_DESCRIPTION),
-                "siloVersion" to StringSchema().description(RHYDB_VERSION_DESCRIPTION),
+                "rhydbVersion" to StringSchema().description(RHYDB_VERSION_DESCRIPTION),
             ),
         )
         .required(listOf("reportTo"))

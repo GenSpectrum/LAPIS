@@ -133,7 +133,7 @@ class QueriesOverTimeModel(
     config: DatabaseConfig,
 ) {
     /**
-     * Thread pool used for parallel queries to SILO.
+     * Thread pool used for parallel queries to RhyDB.
      */
     private val threadPool = Executors.newFixedThreadPool(config.rhydbClientThreadCount)
 
@@ -363,7 +363,7 @@ class QueriesOverTimeModel(
     /**
      * Builds a result row for one particular mutation.
      * The date ranges are the 'columns' of the row, there is one cell per date range.
-     * `counts` and `coverage` are data from SILO, for every day in the overall range of dates
+     * `counts` and `coverage` are data from RhyDB, for every day in the overall range of dates
      * defined by the list of date ranges.
      */
     private fun aggregateDailyMutationDataIntoDateRanges(

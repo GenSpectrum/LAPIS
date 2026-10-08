@@ -470,7 +470,7 @@ class RhyDbClientTest(
         assertThat(exception.statusCode, equalTo(500))
         assertThat(
             exception.message,
-            equalTo("""Unexpected error from SILO: {"unexpectedKey":  "some unexpected message"}"""),
+            equalTo("""Unexpected error from RhyDB: {"unexpectedKey":  "some unexpected message"}"""),
         )
     }
 
@@ -485,7 +485,7 @@ class RhyDbClientTest(
 
         val exception = assertThrows<RhyDbException> { sendQuery(someQuery) }
         assertThat(exception.statusCode, equalTo(432))
-        assertThat(exception.message, equalTo("Error from SILO: test message with details"))
+        assertThat(exception.message, equalTo("Error from RhyDB: test message with details"))
     }
 
     @Test
@@ -498,7 +498,7 @@ class RhyDbClientTest(
         )
 
         val exception = assertThrows<RuntimeException> { sendQuery(someQuery) }
-        assertThat(exception.message, containsString("Could not parse Arrow IPC response from SILO"))
+        assertThat(exception.message, containsString("Could not parse Arrow IPC response from RhyDB"))
     }
 
     @Test
@@ -515,7 +515,7 @@ class RhyDbClientTest(
 
         val exception = assertThrows<RhyDbUnavailableException> { sendQuery(someQuery) }
 
-        assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
+        assertThat(exception.message, `is`("RhyDB is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(retryAfterValue))
     }
 
@@ -531,7 +531,7 @@ class RhyDbClientTest(
 
         val exception = assertThrows<RhyDbUnavailableException> { sendQuery(someQuery) }
 
-        assertThat(exception.message, `is`("SILO is currently unavailable: $errorMessage"))
+        assertThat(exception.message, `is`("RhyDB is currently unavailable: $errorMessage"))
         assertThat(exception.retryAfter, `is`(nullValue()))
     }
 
@@ -580,7 +580,7 @@ class RhyDbClientTest(
         val dataVersionValue = "someDataVersion"
         expectInfoCallAndReturnDataVersion(
             dataVersion = dataVersionValue,
-            siloVersion = "1.2.3",
+            rhydbVersion = "1.2.3",
         )
 
         expectQueryRequestAndRespondWith(
@@ -688,7 +688,7 @@ class RhyDbClientTest(
         expectLineageDefinitionRequestAndRespondWith("not an object")
 
         val exception = assertThrows<RuntimeException> { underTest.getLineageDefinition(columnName) }
-        assertThat(exception.message, containsString("Failed to parse lineage definition from SILO: "))
+        assertThat(exception.message, containsString("Failed to parse lineage definition from RhyDB: "))
     }
 
     private fun expectLineageDefinitionRequestAndRespondWith(lineageDefinition: String) {
@@ -752,7 +752,7 @@ class RhyDbClientAndCacheInvalidatorTest(
     @param:Autowired private val dataVersionCacheInvalidator: DataVersionCacheInvalidator,
     @param:Autowired private val requestIdContext: RequestIdContext,
     @param:Autowired private val dataVersion: DataVersion,
-    @param:Autowired private val siloVersion: RhyDbVersion,
+    @param:Autowired private val rhydbVersion: RhyDbVersion,
 ) {
     private lateinit var mockServer: ClientAndServer
 
@@ -775,30 +775,30 @@ class RhyDbClientAndCacheInvalidatorTest(
     fun `GIVEN there is a new data version WHEN the cache invalidator checks THEN the cache should be cleared`() {
         expectInfoCallAndReturnDataVersion(
             dataVersion = firstDataVersion,
-            siloVersion = "1.2.3",
+            rhydbVersion = "1.2.3",
             times = Times.once(),
         )
         dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatResultIsCachedOnSecondRequest()
-        assertThat(siloVersion.version, `is`("1.2.3"))
+        assertThat(rhydbVersion.version, `is`("1.2.3"))
 
         expectInfoCallAndReturnDataVersion(
             dataVersion = secondDataVersion,
-            siloVersion = "2.3.4",
+            rhydbVersion = "2.3.4",
             times = Times.once(),
         )
         dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatCacheIsNotHit()
-        assertThat(siloVersion.version, `is`("2.3.4"))
+        assertThat(rhydbVersion.version, `is`("2.3.4"))
     }
 
     @Test
     fun `GIVEN RHYDB is restarting WHEN the cache invalidator checks THEN the cache should be cleared`() {
         expectInfoCallAndReturnDataVersion(
             dataVersion = firstDataVersion,
-            siloVersion = "1.2.3",
+            rhydbVersion = "1.2.3",
             times = Times.once(),
         )
         dataVersionCacheInvalidator.invalidateRhyDbCache()
@@ -809,7 +809,7 @@ class RhyDbClientAndCacheInvalidatorTest(
         dataVersionCacheInvalidator.invalidateRhyDbCache()
 
         assertThatCacheIsNotHit()
-        assertThat(siloVersion.version, `is`(nullValue()))
+        assertThat(rhydbVersion.version, `is`(nullValue()))
     }
 
     private fun assertThatResultIsCachedOnSecondRequest() {
@@ -897,7 +897,7 @@ private fun emptyArrowResponse() =
 
 private fun expectInfoCallAndReturnDataVersion(
     dataVersion: String,
-    siloVersion: String,
+    rhydbVersion: String,
     times: Times = Times.unlimited(),
 ) {
     MockServerClient("localhost", MOCK_SERVER_PORT)
@@ -914,7 +914,7 @@ private fun expectInfoCallAndReturnDataVersion(
                 .withBody(
                     """
                         {
-                            "version": "$siloVersion"
+                            "version": "$rhydbVersion"
                         }
                     """.trimIndent(),
                 ),

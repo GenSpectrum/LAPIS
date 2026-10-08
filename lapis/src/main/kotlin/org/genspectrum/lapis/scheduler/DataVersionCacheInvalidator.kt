@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 class DataVersionCacheInvalidator(
     private val cachedRhyDbClient: CachedRhyDbClient,
     private val cacheClearer: CacheClearer,
-    private val siloVersion: RhyDbVersion,
+    private val rhydbVersion: RhyDbVersion,
 ) {
     private var currentlyCachedDataVersion = "uninitialized"
 
@@ -27,10 +27,10 @@ class DataVersionCacheInvalidator(
         val info = try {
             cachedRhyDbClient.callInfo()
         } catch (e: RhyDbUnavailableException) {
-            log.info { "SILO is not available yet: $e" }
+            log.info { "RhyDB is not available yet: $e" }
             InfoData(
                 dataVersion = "currently unavailable",
-                siloVersion = null,
+                rhydbVersion = null,
             )
         } catch (e: Exception) {
             // this stops cache invalidation entirely, so it must not be invisible at the default log level
@@ -44,7 +44,7 @@ class DataVersionCacheInvalidator(
             }
             cacheClearer.clearCache()
             currentlyCachedDataVersion = info.dataVersion
-            siloVersion.version = info.siloVersion
+            rhydbVersion.version = info.rhydbVersion
         }
     }
 }

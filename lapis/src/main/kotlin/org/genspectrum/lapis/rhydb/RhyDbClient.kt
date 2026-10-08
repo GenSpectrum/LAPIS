@@ -71,7 +71,7 @@ class RhyDbClient(
      * returns the info object and sets the dataVersion.dataVersion.
      */
     fun callInfo(timeout: Duration? = null): InfoData {
-        log.info { "Calling SILO info" }
+        log.info { "Calling RhyDB info" }
 
         val info = cachedRhyDbClient.callInfo(timeout)
         dataVersion.dataVersion = info.dataVersion
@@ -79,7 +79,7 @@ class RhyDbClient(
     }
 
     fun getLineageDefinition(column: String): LineageDefinition {
-        log.info { "Calling SILO lineageDefinition for column '$column'" }
+        log.info { "Calling RhyDB lineageDefinition for column '$column'" }
 
         return cachedRhyDbClient.getLineageDefinition(column)
     }
@@ -123,7 +123,7 @@ open class CachedRhyDbClient(
 
         val saneQlQuery = query.toSaneQl()
 
-        log.info { "Calling SILO: $saneQlQuery" }
+        log.info { "Calling RhyDB: $saneQlQuery" }
 
         val response = send(
             uri = rhyDbUris.query,
@@ -162,7 +162,7 @@ open class CachedRhyDbClient(
                     }
                 }
             } catch (exception: Exception) {
-                val message = "Could not parse Arrow IPC response from SILO: " +
+                val message = "Could not parse Arrow IPC response from RhyDB: " +
                     exception::class.toString() + " " + exception.message
                 throw RuntimeException(message, exception)
             }
@@ -189,7 +189,7 @@ open class CachedRhyDbClient(
 
         return InfoData(
             dataVersion = getDataVersion(response),
-            siloVersion = objectMapper.readValue<RhyDbInfo>(response.body()).version,
+            rhydbVersion = objectMapper.readValue<RhyDbInfo>(response.body()).version,
         )
     }
 
@@ -215,9 +215,9 @@ open class CachedRhyDbClient(
                     body.length > truncateLength -> body.substring(0, truncateLength) + "... (truncated)"
                     else -> body
                 }
-                "Failed to parse lineage definition from SILO, it was: '$bodyToLog'"
+                "Failed to parse lineage definition from RhyDB, it was: '$bodyToLog'"
             }
-            throw RuntimeException("Failed to parse lineage definition from SILO: ${e.message}", e)
+            throw RuntimeException("Failed to parse lineage definition from RhyDB: ${e.message}", e)
         }
     }
 
@@ -242,7 +242,7 @@ open class CachedRhyDbClient(
             try {
                 httpClient.send(request, bodyHandler)
             } catch (ioException: IOException) {
-                // When sending requests to SILO behind an NGINX, NGINX will send GOAWAY
+                // When sending requests to RhyDB behind an NGINX, NGINX will send GOAWAY
                 // after 1000 requests through the same connection. The HTTPClient will
                 // retry GET requests (idempotent) but not POST requests. Our POST requests
                 // are idempotent as well, so we can do a retry.
@@ -268,7 +268,7 @@ open class CachedRhyDbClient(
         }
 
         if (!uri.toString().endsWith("info")) {
-            log.info { "Response from SILO: ${response.statusCode()}" }
+            log.info { "Response from RhyDB: ${response.statusCode()}" }
         }
 
         if (response.statusCode() != 200) {
@@ -277,7 +277,7 @@ open class CachedRhyDbClient(
             if (response.statusCode() == 503) {
                 val message = rhyDbErrorResponse.message
                 throw RhyDbUnavailableException(
-                    "SILO is currently unavailable: $message",
+                    "RhyDB is currently unavailable: $message",
                     response.headers().firstValue("retry-after").orElse(null),
                 )
             }
@@ -285,7 +285,7 @@ open class CachedRhyDbClient(
             throw RhyDbException(
                 response.statusCode(),
                 rhyDbErrorResponse.error,
-                "Error from SILO: " + rhyDbErrorResponse.message,
+                "Error from RhyDB: " + rhyDbErrorResponse.message,
             )
         }
 
@@ -318,12 +318,12 @@ open class CachedRhyDbClient(
         try {
             objectMapper.readValue<RhyDbErrorResponse>(responseBody)
         } catch (e: Exception) {
-            log.error { "Failed to deserialize error response from SILO: $e" }
+            log.error { "Failed to deserialize error response from RhyDB: $e" }
 
             throw RhyDbException(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
-                "Unexpected error from SILO: $responseBody",
+                "Unexpected error from RhyDB: $responseBody",
             )
         }
 
@@ -332,7 +332,7 @@ open class CachedRhyDbClient(
 }
 
 /**
- * Indicates that SILO returned an error response and forwards the status code, error title and message.
+ * Indicates that RhyDB returned an error response and forwards the status code, error title and message.
  */
 class RhyDbException(
     val statusCode: Int,
@@ -341,7 +341,7 @@ class RhyDbException(
 ) : Exception(message)
 
 /**
- * Indicates that SILO is reachable but claims that it's currently unavailable (HTTP 503).
+ * Indicates that RhyDB is reachable but claims that it's currently unavailable (HTTP 503).
  */
 class RhyDbUnavailableException(
     override val message: String,
@@ -349,15 +349,15 @@ class RhyDbUnavailableException(
 ) : Exception(message)
 
 /**
- * Indicates that SILO did not answer within the timeout that LAPIS set for the request.
- * SILO may well be reachable and healthy - the request simply outlived its budget.
+ * Indicates that RhyDB did not answer within the timeout that LAPIS set for the request.
+ * RhyDB may well be reachable and healthy - the request simply outlived its budget.
  */
 class RhyDbTimeoutException(
     override val message: String,
 ) : Exception(message)
 
 /**
- * Indicates that SILO is not reachable at all (e.g. connection refused).
+ * Indicates that RhyDB is not reachable at all (e.g. connection refused).
  */
 class RhyDbNotReachableException(
     override val message: String,

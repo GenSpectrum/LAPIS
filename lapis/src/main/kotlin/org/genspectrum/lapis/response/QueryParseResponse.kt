@@ -11,7 +11,7 @@ data class QueryParseResponse(
 sealed interface ParsedQueryResult {
     @Schema(description = "Successful query parse result")
     data class Success(
-        @field:Schema(description = "The parsed SILO filter expression")
+        @field:Schema(description = "The parsed RhyDB filter expression")
         val filter: RhyDbFilterExpression,
     ) : ParsedQueryResult {
         @get:Schema(
