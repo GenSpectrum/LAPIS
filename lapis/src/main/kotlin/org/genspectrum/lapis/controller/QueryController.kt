@@ -5,8 +5,8 @@ import org.genspectrum.lapis.model.QueryParseModel
 import org.genspectrum.lapis.request.QueryParseRequest
 import org.genspectrum.lapis.response.LapisInfoFactory
 import org.genspectrum.lapis.response.QueryParseResponse
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.setHeaderOn
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

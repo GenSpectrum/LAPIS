@@ -43,7 +43,7 @@ LAPIS follows a three-layer architecture:
    - Maps dynamic metadata fields to query parameters
 
 3. **RhyDB Client Layer** - Communicates with RhyDB, handles caching
-   - Located in `org.genspectrum.lapis.silo`
+   - Located in `org.genspectrum.lapis.rhydb`
    - HTTP client for RhyDB communication
    - Caffeine cache for performance
 

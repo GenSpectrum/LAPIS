@@ -11,10 +11,10 @@ import org.genspectrum.lapis.model.AdvancedQueryFacade
 import org.genspectrum.lapis.model.RhyDbFilterExpressionMapper
 import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.response.AggregationData
-import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.WithDataVersion
+import org.genspectrum.lapis.rhydb.AminoAcidSymbolEquals
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.WithDataVersion
 import org.hamcrest.CoreMatchers.containsString
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`

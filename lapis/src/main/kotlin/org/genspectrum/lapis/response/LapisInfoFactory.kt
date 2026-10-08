@@ -7,7 +7,7 @@ import org.genspectrum.lapis.config.DatabaseConfig
 import org.genspectrum.lapis.config.LapisVersion
 import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.logging.RequestIdContext
-import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.rhydb.DataVersion
 import org.springframework.stereotype.Component
 import java.net.URI
 import kotlin.time.Clock

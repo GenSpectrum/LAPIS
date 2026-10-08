@@ -9,7 +9,7 @@ import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.response.LapisInfo
 import org.genspectrum.lapis.response.LapisInfoFactory
-import org.genspectrum.lapis.silo.LineageDefinition
+import org.genspectrum.lapis.rhydb.LineageDefinition
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

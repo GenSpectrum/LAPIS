@@ -3,9 +3,9 @@ package org.genspectrum.lapis.scheduler
 import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.InfoData
-import org.genspectrum.lapis.silo.CachedRhyDbClient
-import org.genspectrum.lapis.silo.RHYDB_QUERY_CACHE_NAME
-import org.genspectrum.lapis.silo.RhyDbUnavailableException
+import org.genspectrum.lapis.rhydb.CachedRhyDbClient
+import org.genspectrum.lapis.rhydb.RHYDB_QUERY_CACHE_NAME
+import org.genspectrum.lapis.rhydb.RhyDbUnavailableException
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component

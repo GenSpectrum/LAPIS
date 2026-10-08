@@ -1,9 +1,9 @@
 package org.genspectrum.lapis.health
 
-import org.genspectrum.lapis.silo.CachedRhyDbClient
-import org.genspectrum.lapis.silo.RhyDbNotReachableException
-import org.genspectrum.lapis.silo.RhyDbTimeoutException
-import org.genspectrum.lapis.silo.RhyDbUnavailableException
+import org.genspectrum.lapis.rhydb.CachedRhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbNotReachableException
+import org.genspectrum.lapis.rhydb.RhyDbTimeoutException
+import org.genspectrum.lapis.rhydb.RhyDbUnavailableException
 import org.springframework.boot.health.contributor.Health
 import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.boot.health.contributor.Status

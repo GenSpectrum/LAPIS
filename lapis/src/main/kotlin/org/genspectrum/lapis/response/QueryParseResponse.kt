@@ -1,7 +1,7 @@
 package org.genspectrum.lapis.response
 
 import io.swagger.v3.oas.annotations.media.Schema
-import org.genspectrum.lapis.silo.RhyDbFilterExpression
+import org.genspectrum.lapis.rhydb.RhyDbFilterExpression
 
 data class QueryParseResponse(
     val data: List<ParsedQueryResult>,

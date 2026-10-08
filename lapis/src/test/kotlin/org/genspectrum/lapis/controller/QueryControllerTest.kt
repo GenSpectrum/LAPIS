@@ -5,10 +5,10 @@ import io.mockk.every
 import io.mockk.verify
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.InfoData
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.RhyDbException
-import org.genspectrum.lapis.silo.RhyDbQuery
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbException
+import org.genspectrum.lapis.rhydb.RhyDbQuery
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

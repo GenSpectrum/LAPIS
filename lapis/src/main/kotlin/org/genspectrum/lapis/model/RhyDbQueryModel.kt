@@ -22,10 +22,10 @@ import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.PhyloSubtreeData
 import org.genspectrum.lapis.response.SequenceData
-import org.genspectrum.lapis.silo.RhyDbAction
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.RhyDbQuery
-import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.rhydb.RhyDbAction
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbQuery
+import org.genspectrum.lapis.rhydb.SequenceType
 import org.genspectrum.lapis.util.toUnalignedSequenceName
 import org.springframework.stereotype.Component
 import java.util.stream.Stream

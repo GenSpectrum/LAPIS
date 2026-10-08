@@ -8,7 +8,7 @@ import org.genspectrum.lapis.model.mutationsOverTime.MutationsOverTimeResult
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeModel
 import org.genspectrum.lapis.model.mutationsOverTime.QueriesOverTimeResult
 import org.genspectrum.lapis.response.InfoData
-import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.rhydb.DataVersion
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest

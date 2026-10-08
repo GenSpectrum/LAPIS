@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component

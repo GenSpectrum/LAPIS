@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.apache.arrow.vector.BigIntVector
 import org.apache.arrow.vector.BitVector

@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisHeaders.LAPIS_DATA_VERSION

@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletResponse
 import org.genspectrum.lapis.controller.LapisMediaType.TEXT_X_FASTA
 import org.genspectrum.lapis.controller.middleware.SequencesDataFormat
 import org.genspectrum.lapis.model.SequencesResponse
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.setHeaderOn
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.setHeaderOn
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import tools.jackson.databind.ObjectMapper
