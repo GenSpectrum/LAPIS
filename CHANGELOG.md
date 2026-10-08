@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/GenSpectrum/LAPIS/compare/v0.8.9...v0.9.0) (2026-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** deployment args: `--silo.url` is renamed to `--rhydb.url`, and the database-config key `siloClientThreadCount` to `rhydbClientThreadCount`.
+
+### Features
+
+* **lapis:** rename config silo.url to rhydb.url and siloClientThreadCount to rhydbClientThreadCount ([#1906](https://github.com/GenSpectrum/LAPIS/issues/1906)) ([36226b5](https://github.com/GenSpectrum/LAPIS/commit/36226b5575afa5ed9bb7b5f69d199e44f8f4edcb))
+
 ## [0.8.9](https://github.com/GenSpectrum/LAPIS/compare/v0.8.8...v0.8.9) (2026-10-07)
 
 
