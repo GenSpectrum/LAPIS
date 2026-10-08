@@ -6,7 +6,7 @@ import java.net.URI
 
 @Component
 class RhyDbUris(
-    @param:Value("\${silo.url}") private val rhyDbUrl: String,
+    @param:Value("\${rhydb.url}") private val rhyDbUrl: String,
 ) {
     val query = URI("$rhyDbUrl/query")
     val info = URI("$rhyDbUrl/info")

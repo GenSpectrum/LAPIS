@@ -33,4 +33,4 @@ schema:
     - name: generalizedAdvancedQuery
   primaryKey: primaryKey
 defaultNucleotideSequence: main
-siloClientThreadCount: 64
+rhydbClientThreadCount: 64

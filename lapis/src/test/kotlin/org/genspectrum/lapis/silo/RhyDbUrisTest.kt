@@ -8,15 +8,15 @@ import java.net.URISyntaxException
 
 class RhyDbUrisTest {
     @Test
-    fun `GIVEN valid silo url THEN returns uris`() {
-        val underTest = RhyDbUris("http://dummy.silo.url")
+    fun `GIVEN valid rhydb url THEN returns uris`() {
+        val underTest = RhyDbUris("http://dummy.rhydb.url")
 
-        assertThat(underTest.query.toString(), `is`("http://dummy.silo.url/query"))
-        assertThat(underTest.info.toString(), `is`("http://dummy.silo.url/info"))
+        assertThat(underTest.query.toString(), `is`("http://dummy.rhydb.url/query"))
+        assertThat(underTest.info.toString(), `is`("http://dummy.rhydb.url/info"))
     }
 
     @Test
-    fun `GIVEN invalid silo url THEN throws exception`() {
+    fun `GIVEN invalid rhydb url THEN throws exception`() {
         assertThrows<URISyntaxException> {
             RhyDbUris("this is not a url")
         }

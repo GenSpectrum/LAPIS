@@ -135,7 +135,7 @@ class QueriesOverTimeModel(
     /**
      * Thread pool used for parallel queries to SILO.
      */
-    private val threadPool = Executors.newFixedThreadPool(config.siloClientThreadCount)
+    private val threadPool = Executors.newFixedThreadPool(config.rhydbClientThreadCount)
 
     fun evaluateQueriesOverTime(
         queries: List<QueryOverTimeItem>,

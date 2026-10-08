@@ -76,7 +76,7 @@ i.e. you only need to mount the result of the preprocessing to `/data`.
 
 To start LAPIS you need to provide the following parameters:
 
-- `--silo.url`: The URL where RhyDB is running, e.g. `http://localhost:8081`.
+- `--rhydb.url`: The URL where RhyDB is running, e.g. `http://localhost:8081`.
 - `--lapis.databaseConfig.path`:
   The path to the [database config](../references/database-configuration) file that LAPIS should use,
   e.g. `~/LAPIS/database_config.yaml`.
@@ -106,5 +106,5 @@ The provided Docker images already contain reasonable default values for
 
 :::note
 You simply need to mount the config files to those locations in the container
-and start the container with `--silo.url=<your RhyDB URL>`.
+and start the container with `--rhydb.url=<your RhyDB URL>`.
 :::

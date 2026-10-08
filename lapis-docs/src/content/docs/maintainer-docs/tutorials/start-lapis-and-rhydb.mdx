@@ -199,7 +199,7 @@ version: '3.9'
 services:
     lapis:
         image: ghcr.io/genspectrum/lapis
-        command: --silo.url=http://silo-api:8081
+        command: --rhydb.url=http://silo-api:8081
         ports:
             - '8080:8080'
         volumes:
@@ -238,7 +238,7 @@ Now LAPIS should be available at http://localhost:8080.
 LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that serves as a good starting point for exploring its functionalities.
 
 :::note
-`--silo.url=http://silo-api:8081` makes use of Docker Compose's internal network.
+`--rhydb.url=http://silo-api:8081` makes use of Docker Compose's internal network.
 :::
 
 ## Further Reading
