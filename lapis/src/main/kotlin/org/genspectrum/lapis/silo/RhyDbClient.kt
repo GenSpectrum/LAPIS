@@ -85,7 +85,7 @@ class RhyDbClient(
     }
 }
 
-const val RHYDB_QUERY_CACHE_NAME = "siloQueryCache"
+const val RHYDB_QUERY_CACHE_NAME = "rhydbQueryCache"
 const val ARROW_STREAM_MEDIA_TYPE = "application/vnd.apache.arrow.stream"
 
 @Component
