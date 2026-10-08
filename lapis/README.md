@@ -10,7 +10,7 @@ Check the [Docker compose file](docker-compose.yml) for an example on how to run
 Use Docker Compose to run RhyDB and LAPIS:
 
 ```bash
-LAPIS_TAG=latest SILO_TAG=latest DATABASE_CONFIG=path/to/config docker compose up --pull always
+LAPIS_TAG=latest RHYDB_TAG=latest DATABASE_CONFIG=path/to/config docker compose up --pull always
 ```
 
 ### Running your local LAPIS changes
@@ -19,7 +19,7 @@ To test local changes to LAPIS, build the Docker image and run it with the compo
 
 ```bash
 docker build --platform linux/amd64 -t ghcr.io/genspectrum/lapis:local .
-SILO_TAG=latest LAPIS_TAG=local docker compose up --pull missing
+RHYDB_TAG=latest LAPIS_TAG=local docker compose up --pull missing
 ```
 
 ## Configuration

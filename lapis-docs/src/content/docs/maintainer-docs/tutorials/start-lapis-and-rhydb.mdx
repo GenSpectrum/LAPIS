@@ -123,7 +123,7 @@ Add a corresponding service to the `docker-compose.yaml`:
 version: '3.9'
 
 services:
-    silo-preprocessing:
+    rhydb-preprocessing:
         image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
@@ -152,7 +152,7 @@ Add a corresponding service to the `docker-compose.yaml`:
 version: '3.9'
 
 services:
-    silo-preprocessing:
+    rhydb-preprocessing:
         image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
@@ -161,7 +161,7 @@ services:
             - ~/lapisExample/config/database_config.yaml:/app/database_config.yaml
             - ~/lapisExample/output:/preprocessing/output
 
-    silo-api:
+    rhydb-api:
         image: ghcr.io/rhyorg/rhydb
         command: --api
         ports:
@@ -169,7 +169,7 @@ services:
         volumes:
             - ~/lapisExample/output:/data
         depends_on:
-            silo-preprocessing:
+            rhydb-preprocessing:
                 condition: service_completed_successfully
 ```
 
@@ -199,14 +199,14 @@ version: '3.9'
 services:
     lapis:
         image: ghcr.io/genspectrum/lapis
-        command: --rhydb.url=http://silo-api:8081
+        command: --rhydb.url=http://rhydb-api:8081
         ports:
             - '8080:8080'
         volumes:
             - ~/lapisExample/config/database_config.yaml:/workspace/database_config.yaml
             - ~/lapisExample/data/reference_genomes.json:/workspace/reference_genomes.json
 
-    silo-preprocessing:
+    rhydb-preprocessing:
         image: ghcr.io/rhyorg/rhydb
         command: --preprocessing
         volumes:
@@ -215,7 +215,7 @@ services:
             - ~/lapisExample/config/database_config.yaml:/app/database_config.yaml
             - ~/lapisExample/output:/preprocessing/output
 
-    silo-api:
+    rhydb-api:
         image: ghcr.io/rhyorg/rhydb
         command: --api
         ports:
@@ -223,7 +223,7 @@ services:
         volumes:
             - ~/lapisExample/output:/data
         depends_on:
-            silo-preprocessing:
+            rhydb-preprocessing:
                 condition: service_completed_successfully
 ```
 
@@ -238,7 +238,7 @@ Now LAPIS should be available at http://localhost:8080.
 LAPIS offers a [Swagger UI](http://localhost:8080/swagger-ui/index.html) that serves as a good starting point for exploring its functionalities.
 
 :::note
-`--rhydb.url=http://silo-api:8081` makes use of Docker Compose's internal network.
+`--rhydb.url=http://rhydb-api:8081` makes use of Docker Compose's internal network.
 :::
 
 ## Further Reading

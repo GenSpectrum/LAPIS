@@ -4,7 +4,7 @@ on: [ push ]
 
 env:
   DOCKER_IMAGE_NAME: ghcr.io/genspectrum/lapis
-  SILO_TAG: latest
+  RHYDB_TAG: latest
 
 jobs:
   Tests:
@@ -136,7 +136,7 @@ jobs:
         run: |
           cd lapis
           mkdir -p e2e-logs
-          for service in silo siloPreprocessing siloMultisegmented siloPreprocessingMultisegmented \
+          for service in rhydb rhydbPreprocessing rhydbMultisegmented rhydbPreprocessingMultisegmented \
                          lapisOpen lapisMultiSegmented lapisPublicKey lapisJwkSetUri lapisIssuerUri keycloak; do
             docker compose logs "$service" > "e2e-logs/${service}.log"
           done
