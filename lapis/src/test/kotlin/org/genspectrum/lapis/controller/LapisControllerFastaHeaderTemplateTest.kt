@@ -6,9 +6,9 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_GENES_APPLICATION_ARG_PREFI
 import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PREFIX
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
 import org.genspectrum.lapis.response.SequenceData
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.RhyDbQuery
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbQuery
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

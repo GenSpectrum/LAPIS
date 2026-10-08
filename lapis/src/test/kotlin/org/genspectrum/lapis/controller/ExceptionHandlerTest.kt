@@ -4,9 +4,9 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.MockKAnnotations
 import io.mockk.MockKMatcherScope
 import io.mockk.every
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.RhyDbException
-import org.genspectrum.lapis.silo.RhyDbUnavailableException
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.RhyDbException
+import org.genspectrum.lapis.rhydb.RhyDbUnavailableException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

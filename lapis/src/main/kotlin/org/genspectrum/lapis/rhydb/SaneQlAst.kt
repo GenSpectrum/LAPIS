@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import java.time.LocalDate
 

@@ -37,7 +37,7 @@ import org.genspectrum.lapis.controller.PHYLO_TREE_FIELD_DESCRIPTION
 import org.genspectrum.lapis.controller.SEQUENCES_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.controller.TREE_DATA_FORMAT_DESCRIPTION
 import org.genspectrum.lapis.request.FASTA_HEADER_TEMPLATE_PROPERTY
-import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
+import org.genspectrum.lapis.rhydb.ORDER_BY_RANDOM_FIELD_NAME
 import org.springframework.core.annotation.AliasFor
 import org.springframework.http.HttpHeaders.ACCEPT_ENCODING
 import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION

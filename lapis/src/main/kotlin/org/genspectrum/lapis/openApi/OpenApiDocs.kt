@@ -63,7 +63,7 @@ import org.genspectrum.lapis.request.PRINT_NODES_NOT_IN_TREE_FIELD_PROPERTY
 import org.genspectrum.lapis.request.SEGMENTS_PROPERTY
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.LapisInfo
-import org.genspectrum.lapis.silo.ORDER_BY_RANDOM_FIELD_NAME
+import org.genspectrum.lapis.rhydb.ORDER_BY_RANDOM_FIELD_NAME
 import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties
 
 const val SECURITY_SCHEMA_NAME = "bearerAuth"

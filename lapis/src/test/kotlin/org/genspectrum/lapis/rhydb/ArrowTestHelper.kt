@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.vector.BigIntVector

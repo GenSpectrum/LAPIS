@@ -15,7 +15,7 @@ import org.genspectrum.lapis.request.AminoAcidMutation
 import org.genspectrum.lapis.request.BaseSequenceFilters
 import org.genspectrum.lapis.request.NucleotideMutation
 import org.genspectrum.lapis.request.QueryOverTimeItem
-import org.genspectrum.lapis.silo.DataVersion
+import org.genspectrum.lapis.rhydb.DataVersion
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize

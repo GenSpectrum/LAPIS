@@ -9,8 +9,8 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.response.Delimiter.COMMA
 import org.genspectrum.lapis.response.Delimiter.TAB
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.setHeaderOn
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component

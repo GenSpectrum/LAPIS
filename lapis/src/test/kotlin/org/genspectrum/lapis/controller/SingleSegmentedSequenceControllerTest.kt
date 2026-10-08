@@ -7,8 +7,8 @@ import org.genspectrum.lapis.config.REFERENCE_GENOME_SEGMENTS_APPLICATION_ARG_PR
 import org.genspectrum.lapis.controller.SequenceEndpointTestScenario.Mode.SingleSequence
 import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.SequenceType
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

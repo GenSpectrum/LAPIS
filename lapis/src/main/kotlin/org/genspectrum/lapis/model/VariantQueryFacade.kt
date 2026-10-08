@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.Recognizer
 import org.antlr.v4.runtime.tree.ParseTreeWalker
 import org.genspectrum.lapis.config.ReferenceGenomeSchema
 import org.genspectrum.lapis.controller.BadRequestException
-import org.genspectrum.lapis.silo.RhyDbFilterExpression
+import org.genspectrum.lapis.rhydb.RhyDbFilterExpression
 import org.springframework.stereotype.Component
 
 @Component

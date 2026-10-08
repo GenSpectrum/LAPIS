@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat

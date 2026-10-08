@@ -8,10 +8,10 @@ import org.genspectrum.lapis.controller.middleware.RequestCompression
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.LapisErrorResponse
 import org.genspectrum.lapis.response.LapisInfoFactory
-import org.genspectrum.lapis.silo.RhyDbException
-import org.genspectrum.lapis.silo.RhyDbNotReachableException
-import org.genspectrum.lapis.silo.RhyDbTimeoutException
-import org.genspectrum.lapis.silo.RhyDbUnavailableException
+import org.genspectrum.lapis.rhydb.RhyDbException
+import org.genspectrum.lapis.rhydb.RhyDbNotReachableException
+import org.genspectrum.lapis.rhydb.RhyDbTimeoutException
+import org.genspectrum.lapis.rhydb.RhyDbUnavailableException
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController
 import org.springframework.boot.webmvc.error.ErrorAttributes

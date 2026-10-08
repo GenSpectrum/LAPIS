@@ -15,8 +15,8 @@ import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
 import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SequenceType
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.SequenceType
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach

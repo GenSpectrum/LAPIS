@@ -25,21 +25,21 @@ import org.genspectrum.lapis.request.ESCAPED_STOP_CODON
 import org.genspectrum.lapis.request.LAPIS_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.RHYDB_INSERTION_AMBIGUITY_SYMBOL
 import org.genspectrum.lapis.request.STOP_CODON
-import org.genspectrum.lapis.silo.AminoAcidInsertionContains
-import org.genspectrum.lapis.silo.AminoAcidSymbolEquals
-import org.genspectrum.lapis.silo.And
-import org.genspectrum.lapis.silo.HasAminoAcidMutation
-import org.genspectrum.lapis.silo.HasNucleotideMutation
-import org.genspectrum.lapis.silo.LineageEquals
-import org.genspectrum.lapis.silo.Maybe
-import org.genspectrum.lapis.silo.NOf
-import org.genspectrum.lapis.silo.Not
-import org.genspectrum.lapis.silo.NucleotideInsertionContains
-import org.genspectrum.lapis.silo.NucleotideSymbolEquals
-import org.genspectrum.lapis.silo.Or
-import org.genspectrum.lapis.silo.PhyloDescendantOf
-import org.genspectrum.lapis.silo.RhyDbFilterExpression
-import org.genspectrum.lapis.silo.StringEquals
+import org.genspectrum.lapis.rhydb.AminoAcidInsertionContains
+import org.genspectrum.lapis.rhydb.AminoAcidSymbolEquals
+import org.genspectrum.lapis.rhydb.And
+import org.genspectrum.lapis.rhydb.HasAminoAcidMutation
+import org.genspectrum.lapis.rhydb.HasNucleotideMutation
+import org.genspectrum.lapis.rhydb.LineageEquals
+import org.genspectrum.lapis.rhydb.Maybe
+import org.genspectrum.lapis.rhydb.NOf
+import org.genspectrum.lapis.rhydb.Not
+import org.genspectrum.lapis.rhydb.NucleotideInsertionContains
+import org.genspectrum.lapis.rhydb.NucleotideSymbolEquals
+import org.genspectrum.lapis.rhydb.Or
+import org.genspectrum.lapis.rhydb.PhyloDescendantOf
+import org.genspectrum.lapis.rhydb.RhyDbFilterExpression
+import org.genspectrum.lapis.rhydb.StringEquals
 
 class VariantQueryCustomListener(
     val referenceGenomeSchema: ReferenceGenomeSchema,

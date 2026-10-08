@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.Order

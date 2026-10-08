@@ -1,4 +1,4 @@
-package org.genspectrum.lapis.silo
+package org.genspectrum.lapis.rhydb
 
 import org.genspectrum.lapis.config.RhyDbVersion
 import org.genspectrum.lapis.logging.RequestIdContext

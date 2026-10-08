@@ -3,11 +3,11 @@ package org.genspectrum.lapis.model
 import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.log
 import org.genspectrum.lapis.response.ParsedQueryResult
-import org.genspectrum.lapis.silo.RhyDbAction
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.RhyDbException
-import org.genspectrum.lapis.silo.RhyDbFilterExpression
-import org.genspectrum.lapis.silo.RhyDbQuery
+import org.genspectrum.lapis.rhydb.RhyDbAction
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbException
+import org.genspectrum.lapis.rhydb.RhyDbFilterExpression
+import org.genspectrum.lapis.rhydb.RhyDbQuery
 import org.springframework.stereotype.Component
 
 @Component

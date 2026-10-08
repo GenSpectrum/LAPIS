@@ -88,9 +88,9 @@ import org.genspectrum.lapis.response.MostRecentCommonAncestorCollection
 import org.genspectrum.lapis.response.MutationsCollection
 import org.genspectrum.lapis.response.ResponseFormat
 import org.genspectrum.lapis.response.SequencesStreamer
-import org.genspectrum.lapis.silo.DataVersion
-import org.genspectrum.lapis.silo.SequenceType
-import org.genspectrum.lapis.silo.setHeaderOn
+import org.genspectrum.lapis.rhydb.DataVersion
+import org.genspectrum.lapis.rhydb.SequenceType
+import org.genspectrum.lapis.rhydb.setHeaderOn
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping

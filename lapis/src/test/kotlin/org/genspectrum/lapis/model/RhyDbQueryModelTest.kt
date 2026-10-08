@@ -34,11 +34,11 @@ import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationData
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.response.SequenceData
-import org.genspectrum.lapis.silo.RhyDbAction
-import org.genspectrum.lapis.silo.RhyDbClient
-import org.genspectrum.lapis.silo.RhyDbQuery
-import org.genspectrum.lapis.silo.SequenceType
-import org.genspectrum.lapis.silo.True
+import org.genspectrum.lapis.rhydb.RhyDbAction
+import org.genspectrum.lapis.rhydb.RhyDbClient
+import org.genspectrum.lapis.rhydb.RhyDbQuery
+import org.genspectrum.lapis.rhydb.SequenceType
+import org.genspectrum.lapis.rhydb.True
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeEach
