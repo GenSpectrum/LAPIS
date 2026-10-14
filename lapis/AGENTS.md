@@ -140,7 +140,7 @@ class LapisControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var rhydbQueryModelMock: RhyDbQueryModel
+    lateinit var rhyDbQueryModelMock: RhyDbQueryModel
     
     @BeforeEach
     fun setup() {
@@ -149,7 +149,7 @@ class LapisControllerTest(
     
     @Test
     fun `GIVEN some setup WHEN I do something THEN something should happen`() {
-        every { rhydbQueryModelMock.getAggregated(...) } returns Stream.of(...)
+        every { rhyDbQueryModelMock.getAggregated(...) } returns Stream.of(...)
         
         mockMvc.perform(post(AGGREGATED_ROUTE).contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
