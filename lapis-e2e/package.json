@@ -1,7 +1,7 @@
 {
   "name": "lapis-e2e",
   "version": "1.0.0",
-  "description": "End to end tests for LAPIS backed by SILO",
+  "description": "End to end tests for LAPIS backed by RhyDB",
   "scripts": {
     "test": "mocha --exit",
     "generateLapisClient": "npm run runOpenApiGenerator && npm run copyGeneratedFiles && npm run cleanUpGeneratedFiles",

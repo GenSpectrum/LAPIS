@@ -19,7 +19,7 @@ class LapisInfoFactory(
     private val databaseConfig: DatabaseConfig,
     private val lapisVersion: LapisVersion,
     private val request: HttpServletRequest,
-    private val siloVersion: RhyDbVersion,
+    private val rhydbVersion: RhyDbVersion,
 ) {
     fun create() =
         LapisInfo(
@@ -27,7 +27,7 @@ class LapisInfoFactory(
             requestId = requestIdContext.requestId,
             requestInfo = getRequestInfo(),
             lapisVersion = lapisVersion.version,
-            siloVersion = siloVersion.version,
+            rhydbVersion = rhydbVersion.version,
         )
 
     fun getRequestInfo() =

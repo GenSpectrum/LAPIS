@@ -49,7 +49,7 @@ data class LapisInfo(
         description = RHYDB_VERSION_DESCRIPTION,
         example = "2.3.4",
     )
-    val siloVersion: String? = null,
+    val rhydbVersion: String? = null,
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -188,7 +188,7 @@ class OAuthTest(
                 setupModelMock = { rhyDbQueryModelMock, _ ->
                     every {
                         rhyDbQueryModelMock.getInfo()
-                    } returns InfoData(dataVersion = "dataVersion", siloVersion = "siloVersion")
+                    } returns InfoData(dataVersion = "dataVersion", rhydbVersion = "rhydbVersion")
                 },
             ) + ProtectedRouteScenario(
                 path = "/sample$DATABASE_CONFIG_ROUTE",
