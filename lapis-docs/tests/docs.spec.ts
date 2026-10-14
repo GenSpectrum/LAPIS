@@ -98,10 +98,7 @@ const maintainerDocsPages = prependToRelativeUrl(
         ),
         ...prependToRelativeUrl([{ title: 'Caching', relativeUrl: '/caching' }], '/concepts'),
         ...prependToRelativeUrl(
-            [
-                { title: 'Start LAPIS and RhyDB', relativeUrl: '/start-lapis-and-rhydb' },
-                { title: 'Generate your config', relativeUrl: '/generate-your-config' },
-            ],
+            [{ title: 'Start LAPIS and RhyDB', relativeUrl: '/start-lapis-and-rhydb' }],
             '/tutorials',
         ),
     ],

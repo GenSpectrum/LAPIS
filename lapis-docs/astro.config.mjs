@@ -235,10 +235,6 @@ export default defineConfig({
                                     label: 'Start LAPIS and RhyDB',
                                     link: '/maintainer-docs/tutorials/start-lapis-and-rhydb',
                                 },
-                                {
-                                    label: 'Generate your config',
-                                    link: '/maintainer-docs/tutorials/generate-your-config',
-                                },
                             ],
                         },
                     ],
