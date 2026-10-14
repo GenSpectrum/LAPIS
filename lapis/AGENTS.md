@@ -104,7 +104,7 @@ data class SequenceFiltersRequest(
 
 ### Error Handling
 
-- Use custom exception hierarchy: `BadRequestException`, `SiloException`, etc.
+- Use custom exception hierarchy: `BadRequestException`, etc.
 - Global exception handler with `@ControllerAdvice`
 - Return structured error responses with `ProblemDetail`
 - Log with appropriate levels (warn for expected errors)
@@ -140,7 +140,7 @@ class LapisControllerTest(
     @param:Autowired val mockMvc: MockMvc,
 ) {
     @MockkBean
-    lateinit var siloQueryModelMock: SiloQueryModel
+    lateinit var rhydbQueryModelMock: RhyDbQueryModel
     
     @BeforeEach
     fun setup() {
@@ -149,7 +149,7 @@ class LapisControllerTest(
     
     @Test
     fun `GIVEN some setup WHEN I do something THEN something should happen`() {
-        every { siloQueryModelMock.getAggregated(...) } returns Stream.of(...)
+        every { rhydbQueryModelMock.getAggregated(...) } returns Stream.of(...)
         
         mockMvc.perform(post(AGGREGATED_ROUTE).contentType(APPLICATION_JSON))
             .andExpect(status().isOk)
@@ -174,7 +174,7 @@ class LapisControllerTest(
 
 ### Key Testing Patterns
 
-- **Controller tests** mock the service layer (SiloQueryModel)
+- **Controller tests** mock the service layer (RhyDbQueryModel)
 - **Use MockMvc** to test full HTTP layer including Spring processing
 - **Test both GET and POST endpoints**
 - **Test various data formats** (JSON, CSV, TSV, FASTA)
@@ -183,7 +183,7 @@ class LapisControllerTest(
 
 ### Testing Best Practices
 
-1. Mock at the service layer boundary (SiloQueryModel)
+1. Mock at the service layer boundary (RhyDbQueryModel)
 2. Test the full Spring request/response cycle with MockMvc
 3. Verify HTTP status codes, headers, and response bodies
 4. Test error handling and validation
