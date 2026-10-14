@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/GenSpectrum/LAPIS/compare/v0.8.9...v0.9.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lapis:** The `/info` (and `/sample/info`) response field `siloVersion` is renamed to `rhydbVersion`. The `/actuator/health` component `silo` is renamed to `rhydb`, with detail keys `rhydbStatus` and `rhydbVersion`.
+* **lapis:** deployment args: `--silo.url` is renamed to `--rhydb.url`, and the database-config key `siloClientThreadCount` to `rhydbClientThreadCount`.
+
+### Features
+
+* **lapis-docs:** delete config generator ([#1914](https://github.com/GenSpectrum/LAPIS/issues/1914)) ([012a8c7](https://github.com/GenSpectrum/LAPIS/commit/012a8c742ed42493e3ba5a610a2e963ff2106989))
+* **lapis:** rename config silo.url to rhydb.url and siloClientThreadCount to rhydbClientThreadCount ([#1906](https://github.com/GenSpectrum/LAPIS/issues/1906)) ([36226b5](https://github.com/GenSpectrum/LAPIS/commit/36226b5575afa5ed9bb7b5f69d199e44f8f4edcb))
+* **lapis:** rename public siloVersion field and silo health component to rhydb ([#1913](https://github.com/GenSpectrum/LAPIS/issues/1913)) ([2b9b0eb](https://github.com/GenSpectrum/LAPIS/commit/2b9b0ebf5f21778ae9b5ab0830dc06e115f57f03))
+
 ## [0.8.9](https://github.com/GenSpectrum/LAPIS/compare/v0.8.8...v0.8.9) (2026-10-07)
 
 
