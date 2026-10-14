@@ -43,7 +43,7 @@ class RhyDbQueryTest {
         assertThat(objectMapper.readTree(result), equalTo(objectMapper.readTree(expected)))
     }
 
-    @ParameterizedTest(name = "Test SiloAction {1}")
+    @ParameterizedTest(name = "Test RhyDbAction {1}")
     @MethodSource("getTestRhyDbActions")
     fun `RhyDbAction is correctly serialized to JSON`(
         underTest: RhyDbAction<*>,
@@ -74,7 +74,7 @@ class RhyDbQueryTest {
         assertThat(action.cacheable, equalTo(false))
     }
 
-    @ParameterizedTest(name = "Test SiloFilterExpression {1}")
+    @ParameterizedTest(name = "Test RhyDbFilterExpression {1}")
     @MethodSource("getTestRhyDbFilterExpression")
     fun `RhyDbFilterExpressions is correctly serialized to JSON`(
         underTest: RhyDbFilterExpression,

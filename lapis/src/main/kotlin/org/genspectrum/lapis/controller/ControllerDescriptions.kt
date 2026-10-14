@@ -154,7 +154,7 @@ You can also use \"random\" or \"random(SEED)\" where SEED is an integer.
 """
 
 const val QUERY_PARSE_ENDPOINT_DESCRIPTION = """
-Parses a list of advanced query strings into SILO filter expressions.
+Parses a list of advanced query strings into RhyDB filter expressions.
 Returns partial results: successfully parsed queries will have a "filter" field,
 while failed queries will have an "error" field with the error message.
 The endpoint returns HTTP 200 OK even when some queries fail to parse.

@@ -309,7 +309,7 @@ class RhyDbQueryModel(
     }
 
     /**
-     * Since SILO can't order by the assembled `mutation` field, replace any `mutation` order-by entry with its
+     * Since RhyDB can't order by the assembled `mutation` field, replace any `mutation` order-by entry with its
      * component fields (in `sequenceName`, `mutationFrom`, `position`, `mutationTo` order), keeping the direction.
      */
     private fun expandMutationOrderBy(orderByFields: OrderBySpec): OrderBySpec =
@@ -333,7 +333,7 @@ class RhyDbQueryModel(
         }
 
     /**
-     * Since SILO can't order by the assembled `insertion` field, replace any `insertion` order-by entry with its
+     * Since RhyDB can't order by the assembled `insertion` field, replace any `insertion` order-by entry with its
      * component fields (in `sequenceName`, `position`, `insertedSymbols` order), keeping the direction.
      */
     private fun expandInsertionOrderBy(orderByFields: OrderBySpec): OrderBySpec =

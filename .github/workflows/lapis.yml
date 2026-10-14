@@ -123,7 +123,7 @@ jobs:
           check-name: Build Docker Image
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Start SILO and LAPIS and Run Tests
+      - name: Start RhyDB and LAPIS and Run Tests
         run: |
           docker compose -f lapis/docker-compose.yml pull
           docker compose -f lapis/docker-compose.yml up -d --wait
