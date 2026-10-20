@@ -6,7 +6,7 @@ import org.apache.arrow.vector.BitVector
 import org.apache.arrow.vector.DateDayVector
 import org.apache.arrow.vector.Float8Vector
 import org.apache.arrow.vector.IntVector
-import org.apache.arrow.vector.VarCharVector
+import org.apache.arrow.vector.LargeVarCharVector
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.apache.arrow.vector.ipc.ArrowStreamWriter
 import org.apache.arrow.vector.types.DateUnit
@@ -56,11 +56,12 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
 
             is LocalDate -> Field(name, FieldType.nullable(ArrowType.Date(DateUnit.DAY)), null)
 
-            // Note: null values (and any unrecognized types) are typed as Utf8.
+            // Note: null values (and any unrecognized types) are typed as LargeUtf8.
             // If the first row has null for a column that later rows fill with a typed value (e.g. Int, Long),
-            // the column will be inferred as Utf8 and the converter will throw a cast error at runtime.
+            // the column will be inferred as LargeUtf8 and the converter will throw a cast error at runtime.
             // Avoid this in tests by ensuring the first row contains non-null values for all typed columns.
-            else -> Field(name, FieldType.nullable(ArrowType.Utf8()), null)
+            // RhyDB emits string columns as LargeUtf8.
+            else -> Field(name, FieldType.nullable(ArrowType.LargeUtf8()), null)
         }
     }
 
@@ -114,7 +115,7 @@ fun buildArrowIpcStream(rows: List<Map<String, Any?>>): ByteArray {
                     }
                 }
 
-                is VarCharVector -> {
+                is LargeVarCharVector -> {
                     if (value == null) {
                         vector.setNull(rowIdx)
                     } else {
