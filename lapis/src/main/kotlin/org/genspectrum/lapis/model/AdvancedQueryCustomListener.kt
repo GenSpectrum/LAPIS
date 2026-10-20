@@ -252,34 +252,8 @@ class AdvancedQueryCustomListener(
     }
 
     override fun enterIsNullQuery(ctx: AdvancedQueryParser.IsNullQueryContext) {
-        val metadataName = ctx.name().text
-
-        val field: DatabaseMetadata = getFieldOrThrow(metadataName)
-        when (field.type) {
-            MetadataType.STRING -> {
-                if (field.generateLineageIndex == null) {
-                    expressionStack.addLast(StringEquals(field.name, null))
-                } else {
-                    expressionStack.addLast(LineageEquals(field.name, null, false))
-                }
-            }
-
-            MetadataType.BOOLEAN -> {
-                expressionStack.addLast(BooleanEquals(field.name, null))
-            }
-
-            MetadataType.DATE -> {
-                expressionStack.addLast(IsNull(field.name))
-            }
-
-            MetadataType.FLOAT -> {
-                expressionStack.addLast(FloatEquals(field.name, null))
-            }
-
-            MetadataType.INT -> {
-                expressionStack.addLast(IntEquals(field.name, null))
-            }
-        }
+        val field = getFieldOrThrow(ctx.name().text)
+        expressionStack.addLast(IsNull(field.name))
     }
 
     override fun enterSingleSegmentedMutationQuery(ctx: SingleSegmentedMutationQueryContext) {

@@ -491,28 +491,28 @@ sealed class RhyDbFilterExpression(
 
 data class StringEquals(
     val column: String,
-    val value: String?,
+    val value: String,
 ) : RhyDbFilterExpression("StringEquals") {
-    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), str(value))
+    override fun toSaneQl() = SaneQlEquals(id(column), str(value))
 }
 
 data class BooleanEquals(
     val column: String,
-    val value: Boolean?,
+    val value: Boolean,
 ) : RhyDbFilterExpression("BooleanEquals") {
-    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlBoolean(value))
+    override fun toSaneQl() = SaneQlEquals(id(column), SaneQlBoolean(value))
 }
 
 data class LineageEquals(
     val column: String,
-    val value: String?,
+    val value: String,
     val includeSublineages: Boolean,
 ) : RhyDbFilterExpression("Lineage") {
     override fun toSaneQl() =
         SaneQlMethodCall(
             receiver = id(column),
             name = "lineage",
-            positionalArgs = listOf(if (value == null) SaneQlNull else str(value)),
+            positionalArgs = listOf(str(value)),
             namedArgs = listOf(SaneQlNamedArg("includeSublineages", SaneQlBoolean(includeSublineages))),
         )
 }
@@ -678,9 +678,9 @@ data class NOf(
 
 data class IntEquals(
     val column: String,
-    val value: Int?,
+    val value: Int,
 ) : RhyDbFilterExpression("IntEquals") {
-    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlInt(value))
+    override fun toSaneQl() = SaneQlEquals(id(column), SaneQlInt(value))
 }
 
 data class IntBetween(
@@ -698,9 +698,9 @@ data class IntBetween(
 
 data class FloatEquals(
     val column: String,
-    val value: Double?,
+    val value: Double,
 ) : RhyDbFilterExpression("FloatEquals") {
-    override fun toSaneQl() = if (value == null) isNull(column) else SaneQlEquals(id(column), SaneQlFloat(value))
+    override fun toSaneQl() = SaneQlEquals(id(column), SaneQlFloat(value))
 }
 
 data class FloatBetween(
