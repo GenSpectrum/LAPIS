@@ -3,9 +3,11 @@ package org.genspectrum.lapis.rhydb
 import org.apache.arrow.vector.BigIntVector
 import org.apache.arrow.vector.BitVector
 import org.apache.arrow.vector.DateDayVector
+import org.apache.arrow.vector.FieldVector
 import org.apache.arrow.vector.Float4Vector
 import org.apache.arrow.vector.Float8Vector
 import org.apache.arrow.vector.IntVector
+import org.apache.arrow.vector.LargeVarCharVector
 import org.apache.arrow.vector.VarCharVector
 import org.apache.arrow.vector.VectorSchemaRoot
 import org.genspectrum.lapis.response.AggregationData
@@ -102,28 +104,29 @@ val SEQUENCE_DATA_ARROW_CONVERTER: ArrowRowConverter<SequenceData> = { root, row
     )
 }
 
+private fun readStringOrNull(
+    vector: FieldVector?,
+    name: String,
+    rowIndex: Int,
+): String? =
+    when (vector) {
+        is LargeVarCharVector -> if (vector.isNull(rowIndex)) null else String(vector.get(rowIndex), Charsets.UTF_8)
+        is VarCharVector -> if (vector.isNull(rowIndex)) null else String(vector.get(rowIndex), Charsets.UTF_8)
+        null -> null
+        else -> error("Expected a string column for '$name' but got ${vector.javaClass.simpleName}")
+    }
+
 private fun VectorSchemaRoot.getOptionalString(
     name: String,
     rowIndex: Int,
-): String? {
-    val rawVector = getVector(name) ?: return null
-    val vector = rawVector as? VarCharVector
-        ?: error("Expected VarCharVector for column '$name' but got ${rawVector.javaClass.simpleName}")
-    if (vector.isNull(rowIndex)) {
-        return null
-    }
-    return String(vector.get(rowIndex), Charsets.UTF_8)
-}
+): String? = readStringOrNull(getVector(name), name, rowIndex)
 
 private fun VectorSchemaRoot.getString(
     name: String,
     rowIndex: Int,
 ): String {
-    val rawVector = getVector(name)
-    val vector = rawVector as? VarCharVector
-        ?: error("Expected VarCharVector for column '$name' but got ${rawVector?.javaClass?.simpleName}")
-    check(!vector.isNull(rowIndex)) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
-    return String(vector.get(rowIndex), Charsets.UTF_8)
+    val value = readStringOrNull(getVector(name), name, rowIndex)
+    return checkNotNull(value) { "Unexpected null value in non-nullable column '$name' at row $rowIndex" }
 }
 
 private fun VectorSchemaRoot.getOptionalInt(
@@ -181,6 +184,7 @@ private fun VectorSchemaRoot.fieldValueAsJsonNode(
     val vector = fieldVectors[columnIndex]
     if (vector.isNull(rowIndex)) return NullNode.instance
     return when (vector) {
+        is LargeVarCharVector -> StringNode(String(vector.get(rowIndex), Charsets.UTF_8))
         is VarCharVector -> StringNode(String(vector.get(rowIndex), Charsets.UTF_8))
         is IntVector -> IntNode(vector.get(rowIndex))
         is BigIntVector -> LongNode(vector.get(rowIndex))
