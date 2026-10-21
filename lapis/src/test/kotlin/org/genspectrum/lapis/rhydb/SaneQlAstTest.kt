@@ -110,6 +110,22 @@ class SaneQlAstTest {
     }
 
     @Test
+    fun `GIVEN empty or THEN renders false`() {
+        assertThat(SaneQlOr(emptyList()).render(), equalTo("false"))
+    }
+
+    @Test
+    fun `GIVEN empty and THEN renders true`() {
+        assertThat(SaneQlAnd(emptyList()).render(), equalTo("true"))
+    }
+
+    @Test
+    fun `GIVEN and with empty or child THEN renders valid SaneQL`() {
+        val and = SaneQlAnd(listOf(SaneQlOr(emptyList()), SaneQlBoolean(true)))
+        assertThat(and.render(), equalTo("(false) && true"))
+    }
+
+    @Test
     fun `GIVEN and with flat non-and-or children THEN does not add parentheses`() {
         val and = SaneQlAnd(listOf(SaneQlBoolean(true), SaneQlBoolean(false)))
         assertThat(and.render(), equalTo("true && false"))

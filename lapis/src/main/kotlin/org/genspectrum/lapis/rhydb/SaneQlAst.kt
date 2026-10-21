@@ -94,21 +94,29 @@ data class SaneQlNot(
 }
 
 /**
- * Variadic `&&` conjunction.
+ * Variadic `&&` conjunction. Without children, it is `true`.
  */
 data class SaneQlAnd(
     val children: List<SaneQlExpression>,
 ) : SaneQlExpression {
-    override fun render() = children.joinToString(" && ") { wrapIfNeeded(it) }
+    override fun render() =
+        when {
+            children.isEmpty() -> "true"
+            else -> children.joinToString(" && ") { wrapIfNeeded(it) }
+        }
 }
 
 /**
- * Variadic `||` disjunction.
+ * Variadic `||` disjunction. Without children (e.g. for a filter by an empty list), it is `false`.
  */
 data class SaneQlOr(
     val children: List<SaneQlExpression>,
 ) : SaneQlExpression {
-    override fun render() = children.joinToString(" || ") { wrapIfNeeded(it) }
+    override fun render() =
+        when {
+            children.isEmpty() -> "false"
+            else -> children.joinToString(" || ") { wrapIfNeeded(it) }
+        }
 }
 
 private fun wrapIfNeeded(expression: SaneQlExpression): String {
