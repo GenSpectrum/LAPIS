@@ -464,16 +464,6 @@ class RhyDbQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    StringEquals("theColumn", null),
-                    """
-                        {
-                            "type": "StringEquals",
-                            "column": "theColumn",
-                            "value": null
-                        }
-                    """,
-                ),
-                Arguments.of(
                     LineageEquals("fieldName", "ABC", includeSublineages = false),
                     """
                         {
@@ -492,17 +482,6 @@ class RhyDbQueryTest {
                             "column": "fieldName",
                             "value": "ABC",
                             "includeSublineages": true
-                        }
-                    """,
-                ),
-                Arguments.of(
-                    LineageEquals("fieldName", null, includeSublineages = false),
-                    """
-                        {
-                            "type": "Lineage",
-                            "column": "fieldName",
-                            "value": null,
-                            "includeSublineages": false
                         }
                     """,
                 ),
@@ -723,19 +702,6 @@ class RhyDbQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    BooleanEquals(
-                        column = "theColumn",
-                        value = null,
-                    ),
-                    """
-                        {
-                            "type": "BooleanEquals",
-                            "column": "theColumn",
-                            "value": null
-                        }
-                    """,
-                ),
-                Arguments.of(
                     FloatEquals(
                         column = "theColumn",
                         value = 1.0,
@@ -749,19 +715,6 @@ class RhyDbQueryTest {
                     """,
                 ),
                 Arguments.of(
-                    FloatEquals(
-                        column = "theColumn",
-                        value = null,
-                    ),
-                    """
-                        {
-                            "type": "FloatEquals",
-                            "column": "theColumn",
-                            "value": null
-                        }
-                    """,
-                ),
-                Arguments.of(
                     IntEquals(
                         column = "theColumn",
                         value = 1,
@@ -771,19 +724,6 @@ class RhyDbQueryTest {
                             "type": "IntEquals",
                             "column": "theColumn",
                             "value": 1
-                        }
-                    """,
-                ),
-                Arguments.of(
-                    IntEquals(
-                        column = "theColumn",
-                        value = null,
-                    ),
-                    """
-                        {
-                            "type": "IntEquals",
-                            "column": "theColumn",
-                            "value": null
                         }
                     """,
                 ),

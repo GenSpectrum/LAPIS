@@ -364,13 +364,13 @@ class AdvancedQueryFacadeTest {
                     "isNull(some_metadata) OR some_metadata='country'",
                     Or(
                         StringEquals("some_metadata", "country"),
-                        StringEquals("some_metadata", null),
+                        IsNull("some_metadata"),
                     ),
                 ),
                 ValidTestCase(
                     "lineage metadata with isNull",
                     "isNull(PangoLineage)",
-                    LineageEquals("pangoLineage", null, false),
+                    IsNull("pangoLineage"),
                 ),
                 ValidTestCase(
                     "date metadata with isNull",
@@ -382,7 +382,7 @@ class AdvancedQueryFacadeTest {
                     "isNull(intField) OR intField=5",
                     Or(
                         IntEquals("intField", 5),
-                        IntEquals("intField", null),
+                        IsNull("intField"),
                     ),
                 ),
                 ValidTestCase(
@@ -390,7 +390,7 @@ class AdvancedQueryFacadeTest {
                     "isNull(floatField) OR floatField=5",
                     Or(
                         FloatEquals("floatField", 5.0),
-                        FloatEquals("floatField", null),
+                        IsNull("floatField"),
                     ),
                 ),
             ),

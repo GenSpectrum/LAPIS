@@ -52,6 +52,7 @@ Higher versions will also work if they are not specified in the table.
 
 | LAPIS  | RhyDB  |
 |--------|--------|
+| 0.9.1  | 0.17.0 |
 | 0.8.9  | 0.15.0 |
 | 0.8.5  | 0.13.0 |
 | 0.8.4  | 0.12.0 |

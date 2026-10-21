@@ -324,10 +324,6 @@ class RhyDbQueryToSaneQlTest {
                     StringEquals("theColumn", "theValue"),
                     """"theColumn" = 'theValue'""",
                 ),
-                Arguments.of(
-                    StringEquals("theColumn", null),
-                    """isNull("theColumn")""",
-                ),
                 // StringEquals with single quote in value
                 Arguments.of(
                     StringEquals("country", "Côte d'Ivoire"),
@@ -342,27 +338,15 @@ class RhyDbQueryToSaneQlTest {
                     BooleanEquals("theColumn", false),
                     """"theColumn" = false""",
                 ),
-                Arguments.of(
-                    BooleanEquals("theColumn", null),
-                    """isNull("theColumn")""",
-                ),
                 // IntEquals
                 Arguments.of(
                     IntEquals("theColumn", 42),
                     """"theColumn" = 42""",
                 ),
-                Arguments.of(
-                    IntEquals("theColumn", null),
-                    """isNull("theColumn")""",
-                ),
                 // FloatEquals
                 Arguments.of(
                     FloatEquals("theColumn", 1.0),
                     """"theColumn" = 1.0""",
-                ),
-                Arguments.of(
-                    FloatEquals("theColumn", null),
-                    """isNull("theColumn")""",
                 ),
                 // DateBetween
                 Arguments.of(
@@ -407,10 +391,6 @@ class RhyDbQueryToSaneQlTest {
                 Arguments.of(
                     LineageEquals("fieldName", "ABC", includeSublineages = true),
                     """"fieldName".lineage('ABC', includeSublineages:=true)""",
-                ),
-                Arguments.of(
-                    LineageEquals("fieldName", null, includeSublineages = false),
-                    """"fieldName".lineage(null, includeSublineages:=false)""",
                 ),
                 // StringSearch
                 Arguments.of(
