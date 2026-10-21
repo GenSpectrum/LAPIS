@@ -455,6 +455,16 @@ class RhyDbQueryToSaneQlTest {
                     Or(StringEquals("theColumn", "theValue"), StringEquals("theOtherColumn", "theOtherValue")),
                     """"theColumn" = 'theValue' || "theOtherColumn" = 'theOtherValue'""",
                 ),
+                // Empty Or, e.g. from a filter by an empty list
+                Arguments.of(
+                    Or(emptyList()),
+                    "false",
+                ),
+                // Empty And
+                Arguments.of(
+                    And(emptyList()),
+                    "true",
+                ),
                 // Not
                 Arguments.of(
                     Not(StringEquals("theColumn", "theValue")),
