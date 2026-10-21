@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.genspectrum.lapis.request.ComputedField
+import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
 import org.genspectrum.lapis.request.SequencePositionField
 import org.genspectrum.lapis.response.AggregationData
+import org.genspectrum.lapis.response.COUNT_PROPERTY
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.InsertionData
 import org.genspectrum.lapis.response.MostCommonAncestorData
@@ -39,8 +41,8 @@ interface CommonActionFields {
 const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 
 /**
- * Aggregations that group by more than this many columns (plain fields plus sequence-position fields)
- * are not cached. Their result cardinality grows roughly with the number of matching sequences, so
+ * Aggregations that group by more than this many columns (plain fields, sequence-position fields and
+ * sublineage-inclusive lineage fields) are not cached. Their result cardinality grows roughly with the number of matching sequences, so
  * materializing the full result into a `List` to store it in the cache can exhaust the heap, while
  * the cache hit rate for such queries is close to zero anyway. Non-cacheable queries are streamed
  * straight through instead (see [RhyDbClient.sendQueryAndGetDataVersion]).
@@ -101,6 +103,7 @@ sealed class RhyDbAction<ResponseType>(
         fun aggregated(
             groupByFields: List<String> = emptyList(),
             computedFields: List<ComputedField> = emptyList(),
+            lineageFields: List<LineageWithSublineagesField> = emptyList(),
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
@@ -110,6 +113,7 @@ sealed class RhyDbAction<ResponseType>(
                 groupByFields = groupByFields,
                 sequencePositionFields = sequencePositionFields,
                 computedFields = computedFields,
+                lineageFields = lineageFields,
                 orderByFields = getOrderByFieldsList(orderByFields),
                 randomize = getRandomize(orderByFields),
                 limit = limit,
@@ -246,59 +250,170 @@ sealed class RhyDbAction<ResponseType>(
         val groupByFields: List<String>,
         val sequencePositionFields: List<SequencePositionField> = emptyList(),
         val computedFields: List<ComputedField> = emptyList(),
+        val lineageFields: List<LineageWithSublineagesField> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : RhyDbAction<AggregationData>(
-            arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
-            cacheable = groupByFields.size + sequencePositionFields.size <= MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
+            arrowConverter = aggregationDataArrowConverter(
+                sublineageColumnNames = lineageFields.map { it.outputColumnName }.toSet(),
+            ),
+            cacheable = groupByFields.size + sequencePositionFields.size + lineageFields.size <=
+                MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
         ) {
         val type: String = "Aggregated"
 
         override fun ownSaneQlSteps() =
+            if (lineageFields.isEmpty()) {
+                plainAggregationSteps()
+            } else {
+                sublineageAggregationSteps()
+            }
+
+        private fun plainAggregationSteps() =
             buildList {
-                val allComputedMappings =
-                    sequencePositionFields.map { field ->
-                        SaneQlAssignment(
-                            field.outputColumnName,
-                            SaneQlMethodCall(
-                                SaneQlIdentifier(field.sequenceName),
-                                "at",
-                                listOf(SaneQlInt(field.position)),
-                            ),
-                        )
-                    } + computedFields.map { field ->
-                        SaneQlAssignment(
-                            field.outputColumnName,
-                            SaneQlMethodCall(id(field.sourceField), field.function.saneQlMethodName),
-                        )
-                    }
-                if (allComputedMappings.isNotEmpty()) {
+                computedMappingsStep()?.let { add(it) }
+                add(groupStep(by = plainGroupByColumns(), countAggName = COUNT_PROPERTY))
+            }
+
+        /**
+         * For sublineage-inclusive aggregation we first count by the raw lineage value(s), then for each lineage
+         * field join the (reflexive) transitive closure of its lineage tree and re-aggregate the counts under each
+         * ancestor. See [sublineageClosureRelation] for the per-field closure. A left join keeps the `null`/unknown
+         * lineage group, matching plain aggregation.
+         */
+        private fun sublineageAggregationSteps() =
+            buildList {
+                computedMappingsStep()?.let { add(it) }
+                // A lineage field can also be requested as a plain group-by field at the same time; group by each
+                // source column only once so RhyDB does not reject a duplicate group field.
+                val extraLineageSourceColumns = lineageFields
+                    .map { it.fieldName }
+                    .filterNot { it in groupByFields }
+                    .distinct()
+                    .map { id(it) }
+                add(groupStep(by = plainGroupByColumns() + extraLineageSourceColumns, countAggName = "c"))
+                lineageFields.forEach { field ->
                     add(
                         SaneQlStep(
-                            "map",
-                            positionalArgs = listOf(SaneQlList(allComputedMappings)),
+                            "join",
+                            positionalArgs = listOf(
+                                sublineageClosureRelation(field),
+                                SaneQlEquals(id(joinOnColumnName(field)), id(field.fieldName)),
+                            ),
+                            namedArgs = listOf(SaneQlNamedArg("type", SaneQlKeyword("left"))),
                         ),
                     )
                 }
-                val allGroupByColumns =
-                    groupByFields.map { id(it) } +
-                        sequencePositionFields.map { id(it.outputColumnName) } +
-                        computedFields.map { id(it.outputColumnName) }
-                add(
-                    SaneQlStep(
-                        "group",
-                        namedArgs = listOf(
-                            SaneQlNamedArg("by", SaneQlList(allGroupByColumns)),
-                            SaneQlNamedArg(
-                                "aggs",
-                                SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))),
-                            ),
+                val groupByColumns = plainGroupByColumns() + lineageFields.map { id(it.outputColumnName) }
+                add(groupStep(by = groupByColumns, countAggName = COUNT_PROPERTY, aggregate = ::sumOfCounts))
+            }
+
+        private fun computedMappingsStep(): SaneQlStep? {
+            val allComputedMappings =
+                sequencePositionFields.map { field ->
+                    SaneQlAssignment(
+                        field.outputColumnName,
+                        SaneQlMethodCall(
+                            SaneQlIdentifier(field.sequenceName),
+                            "at",
+                            listOf(SaneQlInt(field.position)),
+                        ),
+                    )
+                } + computedFields.map { field ->
+                    SaneQlAssignment(
+                        field.outputColumnName,
+                        SaneQlMethodCall(id(field.sourceField), field.function.saneQlMethodName),
+                    )
+                }
+            return if (allComputedMappings.isEmpty()) {
+                null
+            } else {
+                SaneQlStep("map", positionalArgs = listOf(SaneQlList(allComputedMappings)))
+            }
+        }
+
+        private fun plainGroupByColumns() =
+            groupByFields.map { id(it) } +
+                sequencePositionFields.map { id(it.outputColumnName) } +
+                computedFields.map { id(it.outputColumnName) }
+
+        companion object {
+            private fun groupStep(
+                by: List<SaneQlExpression>,
+                countAggName: String,
+                aggregate: () -> SaneQlExpression = { SaneQlFunctionCall("count") },
+            ) = SaneQlStep(
+                "group",
+                namedArgs = listOf(
+                    SaneQlNamedArg("by", SaneQlList(by)),
+                    SaneQlNamedArg("aggs", SaneQlList(listOf(SaneQlAssignment(countAggName, aggregate())))),
+                ),
+            )
+
+            private fun sumOfCounts() = SaneQlFunctionCall("sum", positionalArgs = listOf(id("c")))
+
+            /** The join key column into which a lineage field's closure maps its matched (alias) lineage values. */
+            private fun joinOnColumnName(field: LineageWithSublineagesField) = "_to_${field.fieldName}"
+
+            /**
+             * The reflexive transitive closure of a lineage field's tree, one row per (ancestor, descendant) pair,
+             * plus extra rows mapping each descendant's aliases, so that data stored under an alias still matches.
+             * Recombinant edges are excluded (matching the `*` filter's `doNotFollow` default). The ancestor is
+             * exposed under the field's output column name (e.g. `pangoLineage*`) and the matched value under
+             * [joinOnColumnName]. See lineage_definitions.md for the relation/alias table schema.
+             */
+            private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQlRelation {
+                val outputColumn = field.outputColumnName
+                val joinColumn = joinOnColumnName(field)
+                val closure = SaneQlRelation(
+                    receiver = id(field.fieldName),
+                    steps = listOf(
+                        SaneQlStep("filter", positionalArgs = listOf(SaneQlNot(id("is_recombinant_edge")))),
+                        SaneQlStep(
+                            "transitiveClosure",
+                            positionalArgs = listOf(SaneQlKeyword("parent"), SaneQlKeyword("lineage")),
+                            namedArgs = listOf(SaneQlNamedArg("includeVertices", SaneQlBoolean(true))),
                         ),
                     ),
                 )
+                val canonicalEdges = SaneQlRelation(
+                    receiver = closure,
+                    steps = listOf(
+                        mapStep(outputColumn to id("from"), joinColumn to id("to")),
+                        projectStep(outputColumn, joinColumn),
+                    ),
+                )
+                val aliasEdges = SaneQlRelation(
+                    receiver = closure,
+                    steps = listOf(
+                        SaneQlStep(
+                            "join",
+                            positionalArgs = listOf(
+                                id("${field.fieldName}_aliases"),
+                                SaneQlEquals(id("to"), id("lineage")),
+                            ),
+                        ),
+                        mapStep(outputColumn to id("from"), joinColumn to id("alias")),
+                        projectStep(outputColumn, joinColumn),
+                    ),
+                )
+                return SaneQlRelation(
+                    receiver = SaneQlFunctionCall("unionall", positionalArgs = listOf(canonicalEdges, aliasEdges)),
+                    steps = emptyList(),
+                )
             }
+
+            private fun mapStep(vararg assignments: Pair<String, SaneQlExpression>) =
+                SaneQlStep(
+                    "map",
+                    positionalArgs = listOf(SaneQlList(assignments.map { SaneQlAssignment(it.first, it.second) })),
+                )
+
+            private fun projectStep(vararg columns: String) =
+                SaneQlStep("project", positionalArgs = listOf(SaneQlList(columns.map { id(it) })))
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

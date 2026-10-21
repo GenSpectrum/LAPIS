@@ -61,6 +61,28 @@ data class SaneQlIdentifier(
 }
 
 /**
+ * A bare SaneQL keyword rendered verbatim without quoting, e.g. the join type `left` in `type:=left`, or a built-in
+ * table name such as `data`. Only use with values that are known to be safe keywords, never with user input.
+ */
+data class SaneQlKeyword(
+    val keyword: String,
+) : SaneQlExpression {
+    override fun render() = keyword
+}
+
+/**
+ * A relation-producing pipeline used as a value, e.g. the right-hand side of a `join`:
+ * `"pangoLineage".filter(...).transitiveClosure(...).map(...).project(...)`. Unlike [SaneQlPipeline] (which is
+ * always rooted at `data`), the receiver is explicit, so this can start from a lineage relation table.
+ */
+data class SaneQlRelation(
+    val receiver: SaneQlExpression,
+    val steps: List<SaneQlStep>,
+) : SaneQlExpression {
+    override fun render() = receiver.render() + steps.joinToString("") { it.render() }
+}
+
+/**
  * A `{item1, item2, ...}` list literal. Acts as a record when its [items] are [SaneQlAssignment]s,
  * e.g. `{"count":=count()}`.
  */

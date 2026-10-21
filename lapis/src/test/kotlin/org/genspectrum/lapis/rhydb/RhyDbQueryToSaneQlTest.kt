@@ -1,6 +1,7 @@
 package org.genspectrum.lapis.rhydb
 
 import org.genspectrum.lapis.request.ComputedField
+import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
@@ -102,6 +103,24 @@ class RhyDbQueryToSaneQlTest {
     }
 
     companion object {
+        /**
+         * The `join`'d relation for the sublineage-inclusive aggregation of [field]: the recombinant-free reflexive
+         * transitive closure of the lineage tree, unioned with alias edges so that alias-stored values still match.
+         */
+        private fun sublineageClosure(field: String): String {
+            val out = "$field*"
+            val joinCol = "_to_$field"
+            val closure =
+                """"$field".filter(!("is_recombinant_edge"))""" +
+                    """.transitiveClosure(parent, lineage, includeVertices:=true)"""
+            val canonicalEdges =
+                """$closure.map({"$out":="from", "$joinCol":="to"}).project({"$out", "$joinCol"})"""
+            val aliasEdges =
+                """$closure.join("${field}_aliases", "to" = "lineage")""" +
+                    """.map({"$out":="from", "$joinCol":="alias"}).project({"$out", "$joinCol"})"""
+            return "unionall($canonicalEdges, $aliasEdges)"
+        }
+
         @JvmStatic
         fun getRhyDbActionTestCases() =
             listOf(
@@ -163,6 +182,53 @@ class RhyDbQueryToSaneQlTest {
                         ),
                     ),
                     """.map({"S[123]":="S".at(123), "main[456]":="main".at(456)}).group(by:={"S[123]", "main[456]"}, aggs:={"count":=count()})""",
+                ),
+                // Sublineage-inclusive aggregation
+                Arguments.of(
+                    RhyDbAction.aggregated(
+                        lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
+                    ),
+                    """.group(by:={"pangoLineage"}, aggs:={"c":=count()})""" +
+                        """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
+                        """type:=left)""" +
+                        """.group(by:={"pangoLineage*"}, aggs:={"count":=sum("c")})""",
+                ),
+                Arguments.of(
+                    RhyDbAction.aggregated(
+                        groupByFields = listOf("country"),
+                        lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
+                        limit = 5,
+                    ),
+                    """.group(by:={"country", "pangoLineage"}, aggs:={"c":=count()})""" +
+                        """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
+                        """type:=left)""" +
+                        """.group(by:={"country", "pangoLineage*"}, aggs:={"count":=sum("c")}).limit(5)""",
+                ),
+                Arguments.of(
+                    RhyDbAction.aggregated(
+                        groupByFields = listOf("pangoLineage"),
+                        lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
+                    ),
+                    // "pangoLineage" is both a plain group-by field and a sublineage field, so it must only appear
+                    // once in the first group's `by` list.
+                    """.group(by:={"pangoLineage"}, aggs:={"c":=count()})""" +
+                        """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
+                        """type:=left)""" +
+                        """.group(by:={"pangoLineage", "pangoLineage*"}, aggs:={"count":=sum("c")})""",
+                ),
+                Arguments.of(
+                    RhyDbAction.aggregated(
+                        lineageFields = listOf(
+                            LineageWithSublineagesField("pangoLineage"),
+                            LineageWithSublineagesField("nextcladePangoLineage"),
+                        ),
+                    ),
+                    """.group(by:={"pangoLineage", "nextcladePangoLineage"}, aggs:={"c":=count()})""" +
+                        """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
+                        """type:=left)""" +
+                        """.join(${sublineageClosure("nextcladePangoLineage")}, """ +
+                        """"_to_nextcladePangoLineage" = "nextcladePangoLineage", type:=left)""" +
+                        """.group(by:={"pangoLineage*", "nextcladePangoLineage*"}, aggs:={"count":=sum("c")})""",
                 ),
                 // Mutations
                 Arguments.of(

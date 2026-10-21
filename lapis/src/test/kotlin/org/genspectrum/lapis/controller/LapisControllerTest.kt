@@ -8,8 +8,12 @@ import org.genspectrum.lapis.model.FastaHeaderTemplate
 import org.genspectrum.lapis.model.RhyDbQueryModel
 import org.genspectrum.lapis.model.SequenceSymbolType
 import org.genspectrum.lapis.model.SequencesResponse
+import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.DEFAULT_MIN_PROPORTION
 import org.genspectrum.lapis.request.GENES_PROPERTY
+import org.genspectrum.lapis.request.LineageWithSublineagesField
+import org.genspectrum.lapis.request.OrderBySpec
+import org.genspectrum.lapis.request.PlainField
 import org.genspectrum.lapis.response.AggregationData
 import org.genspectrum.lapis.response.DetailsData
 import org.genspectrum.lapis.response.ExplicitlyNullable
@@ -17,6 +21,7 @@ import org.genspectrum.lapis.response.InsertionResponse
 import org.genspectrum.lapis.response.MutationResponse
 import org.genspectrum.lapis.rhydb.DataVersion
 import org.genspectrum.lapis.rhydb.SequenceType
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.BeforeEach
@@ -107,6 +112,65 @@ class LapisControllerTest(
             .andExpect(jsonPath("\$.data[0].count").value(0))
             .andExpect(jsonPath("\$.data[0].country").value("Switzerland"))
             .andExpect(jsonPath("\$.data[0].date").value("a date"))
+    }
+
+    @Test
+    fun `GIVEN GET aggregated with a sublineage-inclusive lineage field THEN parses it and suffixes values`() {
+        every {
+            rhyDbQueryModelMock.getAggregated(
+                AggregatedFiltersRequest(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(LineageWithSublineagesField("pangoLineage")),
+                    OrderBySpec.EMPTY,
+                ),
+            )
+        } returns Stream.of(
+            AggregationData(5, mapOf("pangoLineage*" to StringNode("B.1.1*"))),
+        )
+
+        mockMvc.perform(getSample("aggregated").queryParam("fields", "pangoLineage*"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].count").value(5))
+            .andExpect(jsonPath("\$.data[0].['pangoLineage*']").value("B.1.1*"))
+    }
+
+    @Test
+    fun `GIVEN POST aggregated with a sublineage-inclusive lineage field THEN parses it`() {
+        every {
+            rhyDbQueryModelMock.getAggregated(
+                AggregatedFiltersRequest(
+                    emptyMap(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    listOf(PlainField("country"), LineageWithSublineagesField("pangoLineage")),
+                    OrderBySpec.EMPTY,
+                ),
+            )
+        } returns Stream.of(
+            AggregationData(5, mapOf("country" to StringNode("Switzerland"), "pangoLineage*" to StringNode("B.1.1*"))),
+        )
+
+        mockMvc.perform(
+            postSample("aggregated")
+                .contentType(APPLICATION_JSON)
+                .content("""{"fields": ["country", "pangoLineage*"]}"""),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("\$.data[0].['pangoLineage*']").value("B.1.1*"))
+    }
+
+    @Test
+    fun `GIVEN aggregated with star on a non-lineage field THEN returns bad request`() {
+        val response = mockMvc.perform(getSample("aggregated").queryParam("fields", "country*"))
+            .andExpect(status().isBadRequest)
+            .andReturn().response.contentAsString
+        assertThat(response, containsString("only allowed for fields with a lineage index"))
     }
 
     @ParameterizedTest(name = "{0} aggregated with multiple values for filter field")

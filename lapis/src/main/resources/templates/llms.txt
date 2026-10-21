@@ -70,6 +70,17 @@ Available functions:
 
 Example: `{"fields": ["date.isoWeek"]}` groups sequences by ISO week of the date field.
 
+[# th:if="${lineageField != null}"]### Sublineage-inclusive Aggregation
+
+The `fields` parameter of [sample/aggregated](sample/aggregated) (not [sample/details](sample/details)) also accepts
+a lineage field (a field with a lineage index) suffixed with `*`, e.g. `[(${lineageField})]*`.
+This counts, for every lineage, the sequences in that lineage together with all of its sublineages.
+The response column is named `[(${lineageField})]*` and its values carry a trailing `*`, e.g. `B.1.1*`.
+Note that these counts do not partition the data: a sequence in `B.1.1` is counted under `B.1.1*`, `B.1*` and `B*`,
+so the counts do not sum to the total.
+
+Example: `{"fields": ["[(${lineageField})]*"]}` returns one count per lineage including its sublineages.
+[/]
 ### How to Filter by Mutations
 
 You can filter sequences by nucleotide and amino acid mutations.
