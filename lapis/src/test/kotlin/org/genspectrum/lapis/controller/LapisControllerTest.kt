@@ -173,6 +173,28 @@ class LapisControllerTest(
         assertThat(response, containsString("only allowed for fields with a lineage index"))
     }
 
+    @Test
+    fun `GIVEN GET aggregated with the same field both plainly and with star THEN returns bad request`() {
+        val response = mockMvc.perform(
+            getSample("aggregated").queryParam("fields", "pangoLineage").queryParam("fields", "pangoLineage*"),
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn().response.contentAsString
+        assertThat(response, containsString("Cannot request the same field both plainly and with a trailing '*'"))
+    }
+
+    @Test
+    fun `GIVEN POST aggregated with the same field both plainly and with star THEN returns bad request`() {
+        val response = mockMvc.perform(
+            postSample("aggregated")
+                .contentType(APPLICATION_JSON)
+                .content("""{"fields": ["pangoLineage", "pangoLineage*"]}"""),
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn().response.contentAsString
+        assertThat(response, containsString("Cannot request the same field both plainly and with a trailing '*'"))
+    }
+
     @ParameterizedTest(name = "{0} aggregated with multiple values for filter field")
     @MethodSource("getRequestsWithMultipleValuesForField")
     fun `aggregated with multiple values for filter field`(

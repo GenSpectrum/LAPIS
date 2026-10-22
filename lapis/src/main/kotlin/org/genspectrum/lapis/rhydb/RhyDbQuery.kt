@@ -286,14 +286,8 @@ sealed class RhyDbAction<ResponseType>(
         private fun sublineageAggregationSteps() =
             buildList {
                 computedMappingsStep()?.let { add(it) }
-                // A lineage field can also be requested as a plain group-by field at the same time; group by each
-                // source column only once so RhyDB does not reject a duplicate group field.
-                val extraLineageSourceColumns = lineageFields
-                    .map { it.fieldName }
-                    .filterNot { it in groupByFields }
-                    .distinct()
-                    .map { id(it) }
-                add(groupStep(by = plainGroupByColumns() + extraLineageSourceColumns, countAggName = "c"))
+                val lineageSourceColumns = lineageFields.map { id(it.fieldName) }
+                add(groupStep(by = plainGroupByColumns() + lineageSourceColumns, countAggName = "c"))
                 lineageFields.forEach { field ->
                     add(
                         SaneQlStep(

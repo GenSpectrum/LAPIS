@@ -206,18 +206,6 @@ class RhyDbQueryToSaneQlTest {
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
-                        groupByFields = listOf("pangoLineage"),
-                        lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
-                    ),
-                    // "pangoLineage" is both a plain group-by field and a sublineage field, so it must only appear
-                    // once in the first group's `by` list.
-                    """.group(by:={"pangoLineage"}, aggs:={"c":=count()})""" +
-                        """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
-                        """type:=left)""" +
-                        """.group(by:={"pangoLineage", "pangoLineage*"}, aggs:={"count":=sum("c")})""",
-                ),
-                Arguments.of(
-                    RhyDbAction.aggregated(
                         lineageFields = listOf(
                             LineageWithSublineagesField("pangoLineage"),
                             LineageWithSublineagesField("nextcladePangoLineage"),
