@@ -471,4 +471,39 @@ age	country	count
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 1);
   });
+
+  // The `pangoLineage*` aggregation column and the `pangoLineage=X*` sublineage filter must agree: both resolve
+  // the same transitive closure (including aliases, excluding recombinant edges). This pins that parity so a
+  // future divergence between the two RhyDB code paths is caught here.
+  it('should count each lineage including sublineages consistently with the sublineage filter', async () => {
+    const aggregated = await lapisClient.postAggregated({
+      aggregatedPostRequest: { fields: ['pangoLineage*'] },
+    });
+
+    const lineageCounts = aggregated.data
+      .map(row => (row as Record<string, string | number | null>)['pangoLineage*'])
+      .filter((value): value is string => typeof value === 'string');
+
+    expect(lineageCounts.length).to.be.greaterThan(0);
+
+    for (const starredValue of lineageCounts) {
+      // Strip the trailing "*" that marks the value as sublineage-inclusive, e.g. "B.1.1*" -> "B.1.1".
+      const lineage = starredValue.slice(0, -1);
+
+      const aggregatedCount = (
+        aggregated.data.find(
+          row => (row as Record<string, string | null>)['pangoLineage*'] === starredValue
+        ) as Record<string, number>
+      ).count;
+
+      const filtered = await lapisClient.postAggregated({
+        aggregatedPostRequest: { pangoLineage: `${lineage}*` },
+      });
+
+      expect(
+        filtered.data[0].count,
+        `count for ${lineage}* via filter should match the aggregation`
+      ).to.equal(aggregatedCount);
+    }
+  });
 });
