@@ -114,10 +114,10 @@ class RhyDbQueryToSaneQlTest {
                 """"$field".filter(!("is_recombinant_edge"))""" +
                     """.transitiveClosure(parent, lineage, includeVertices:=true)"""
             val canonicalEdges =
-                """$closure.map({"$out":="from", "$joinCol":="to"}).project({"$out", "$joinCol"})"""
+                """$closure.map({"$out":=concat("from", '*'), "$joinCol":="to"}).project({"$out", "$joinCol"})"""
             val aliasEdges =
                 """$closure.join("${field}_aliases", "to" = "lineage")""" +
-                    """.map({"$out":="from", "$joinCol":="alias"}).project({"$out", "$joinCol"})"""
+                    """.map({"$out":=concat("from", '*'), "$joinCol":="alias"}).project({"$out", "$joinCol"})"""
             return "unionall($canonicalEdges, $aliasEdges)"
         }
 

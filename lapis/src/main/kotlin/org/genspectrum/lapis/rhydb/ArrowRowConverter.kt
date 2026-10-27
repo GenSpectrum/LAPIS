@@ -35,33 +35,19 @@ import tools.jackson.databind.node.StringNode
  */
 typealias ArrowRowConverter<T> = (root: VectorSchemaRoot, rowIndex: Int) -> T
 
-val AGGREGATION_DATA_ARROW_CONVERTER: ArrowRowConverter<AggregationData> = aggregationDataArrowConverter(emptySet())
-
-/**
- * Builds the aggregated-response converter. Values of columns in [sublineageColumnNames] (the output columns of
- * `<field>*` sublineage-inclusive aggregation) get a trailing `*` appended to their non-null string value, so that
- * each value reads as e.g. `B.1.1*`. SaneQL has no string concatenation, so this suffix is applied here rather than
- * in the query.
- */
-fun aggregationDataArrowConverter(sublineageColumnNames: Set<String>): ArrowRowConverter<AggregationData> =
-    { root, rowIndex ->
-        val count = root.getLong(COUNT_PROPERTY, rowIndex)
-        val fields = root.schema.fields
-            .mapIndexedNotNull { colIdx, field ->
-                if (field.name == COUNT_PROPERTY) {
-                    null
-                } else {
-                    val value = root.fieldValueAsJsonNode(colIdx, rowIndex)
-                    field.name to if (field.name in sublineageColumnNames && value is StringNode) {
-                        StringNode(value.asString() + "*")
-                    } else {
-                        value
-                    }
-                }
+val AGGREGATION_DATA_ARROW_CONVERTER: ArrowRowConverter<AggregationData> = { root, rowIndex ->
+    val count = root.getLong(COUNT_PROPERTY, rowIndex)
+    val fields = root.schema.fields
+        .mapIndexedNotNull { colIdx, field ->
+            if (field.name == COUNT_PROPERTY) {
+                null
+            } else {
+                field.name to root.fieldValueAsJsonNode(colIdx, rowIndex)
             }
-            .toMap()
-        AggregationData(count, fields)
-    }
+        }
+        .toMap()
+    AggregationData(count, fields)
+}
 
 val DETAILS_DATA_ARROW_CONVERTER: ArrowRowConverter<DetailsData> = { root, rowIndex ->
     DetailsData(

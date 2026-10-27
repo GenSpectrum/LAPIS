@@ -256,9 +256,7 @@ sealed class RhyDbAction<ResponseType>(
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : RhyDbAction<AggregationData>(
-            arrowConverter = aggregationDataArrowConverter(
-                sublineageColumnNames = lineageFields.map { it.outputColumnName }.toSet(),
-            ),
+            arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
             cacheable = groupByFields.size + sequencePositionFields.size + lineageFields.size <=
                 MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
         ) {
@@ -355,8 +353,9 @@ sealed class RhyDbAction<ResponseType>(
              * The reflexive transitive closure of a lineage field's tree, one row per (ancestor, descendant) pair,
              * plus extra rows mapping each descendant's aliases, so that data stored under an alias still matches.
              * Recombinant edges are excluded (matching the `*` filter's `doNotFollow` default). The ancestor is
-             * exposed under the field's output column name (e.g. `pangoLineage*`) and the matched value under
-             * [joinOnColumnName]. See lineage_definitions.md for the relation/alias table schema.
+             * exposed under the field's output column name (e.g. `pangoLineage*`), with a trailing `*` appended via
+             * `concat` so values read as e.g. `B.1.1*`, and the matched value under [joinOnColumnName]. See
+             * lineage_definitions.md for the relation/alias table schema.
              */
             private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQlRelation {
                 val outputColumn = field.outputColumnName
@@ -375,7 +374,7 @@ sealed class RhyDbAction<ResponseType>(
                 val canonicalEdges = SaneQlRelation(
                     receiver = closure,
                     steps = listOf(
-                        mapStep(outputColumn to id("from"), joinColumn to id("to")),
+                        mapStep(outputColumn to starSuffixed(id("from")), joinColumn to id("to")),
                         projectStep(outputColumn, joinColumn),
                     ),
                 )
@@ -389,7 +388,7 @@ sealed class RhyDbAction<ResponseType>(
                                 SaneQlEquals(id("to"), id("lineage")),
                             ),
                         ),
-                        mapStep(outputColumn to id("from"), joinColumn to id("alias")),
+                        mapStep(outputColumn to starSuffixed(id("from")), joinColumn to id("alias")),
                         projectStep(outputColumn, joinColumn),
                     ),
                 )
@@ -398,6 +397,10 @@ sealed class RhyDbAction<ResponseType>(
                     steps = emptyList(),
                 )
             }
+
+            /** Wraps a string expression in `concat(expr, '*')` so each ancestor value reads as e.g. `B.1.1*`. */
+            private fun starSuffixed(expression: SaneQlExpression) =
+                SaneQlFunctionCall("concat", positionalArgs = listOf(expression, SaneQlString("*")))
 
             private fun mapStep(vararg assignments: Pair<String, SaneQlExpression>) =
                 SaneQlStep(
