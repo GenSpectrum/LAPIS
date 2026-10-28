@@ -180,16 +180,23 @@ class SaneQlAstTest {
 
     @Test
     fun `GIVEN pipeline with no steps THEN renders only the filter`() {
-        val pipeline = SaneQlPipeline(SaneQlBoolean(true), emptyList())
-        assertThat(pipeline.render(), equalTo("data.filter(true)"))
+        val pipeline = SaneQlPipeline("data", SaneQlBoolean(true), emptyList())
+        assertThat(pipeline.render(), equalTo("\"data\".filter(true)"))
     }
 
     @Test
     fun `GIVEN pipeline with steps THEN chains them after the filter`() {
         val pipeline = SaneQlPipeline(
+            "data",
             SaneQlBoolean(true),
             listOf(SaneQlStep("insertions"), SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(10)))),
         )
-        assertThat(pipeline.render(), equalTo("data.filter(true).insertions().limit(10)"))
+        assertThat(pipeline.render(), equalTo("\"data\".filter(true).insertions().limit(10)"))
+    }
+
+    @Test
+    fun `GIVEN pipeline with other table THEN uses that table as source`() {
+        val pipeline = SaneQlPipeline("other table", SaneQlBoolean(true), emptyList())
+        assertThat(pipeline.render(), equalTo("\"other table\".filter(true)"))
     }
 }

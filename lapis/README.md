@@ -32,6 +32,8 @@ When running LAPIS, you need to pass the following arguments:
 * the path to the reference genome `--referenceGenomeFilename=<path/to/referenceGenome>`
   in the Docker image this is already set to `/workspace/reference_genomes.yaml`.
 
+Optionally, you can pass the RhyDB table that this LAPIS instance serves `--rhydb.table=<table>` (default: `data`).
+
 Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
   If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
