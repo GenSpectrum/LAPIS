@@ -107,7 +107,7 @@ export const processPanels = (html: string) => {
     const file = tabsProcessor.processSync({ value: html });
     return {
         /** Data for each tab panel. */
-        panels: file.data.panels,
+        panels: file.data.panels as Panel[],
         /** Processed HTML for the tab panels. */
         html: file.toString(),
     };
