@@ -1,0 +1,53 @@
+{
+  "testCaseName": "Group by pangoLineage* (sublineage-inclusive) with a date filter on an unrelated field",
+  "lapisRequest": {
+    "dateFrom": "2021-06-01",
+    "fields": ["pangoLineage*"]
+  },
+  "expected": [
+    {
+      "pangoLineage*": null,
+      "count": 1
+    },
+    {
+      "pangoLineage*": "AY.122*",
+      "count": 1
+    },
+    {
+      "pangoLineage*": "AY.43*",
+      "count": 4
+    },
+    {
+      "pangoLineage*": "AY.9*",
+      "count": 1
+    },
+    {
+      "pangoLineage*": "AY.9.2*",
+      "count": 1
+    },
+    {
+      "pangoLineage*": "B*",
+      "count": 13
+    },
+    {
+      "pangoLineage*": "B.1*",
+      "count": 13
+    },
+    {
+      "pangoLineage*": "B.1.1*",
+      "count": 5
+    },
+    {
+      "pangoLineage*": "B.1.1.7*",
+      "count": 5
+    },
+    {
+      "pangoLineage*": "B.1.617*",
+      "count": 8
+    },
+    {
+      "pangoLineage*": "B.1.617.2*",
+      "count": 8
+    }
+  ]
+}

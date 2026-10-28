@@ -1,0 +1,320 @@
+{
+  "testCaseName": "Group by division and pangoLineage* (sublineage-inclusive), filtered to B.1.1.7 and its sublineages",
+  "lapisRequest": {
+    "pangoLineage": "B.1.1.7*",
+    "fields": ["division", "pangoLineage*"],
+    "orderBy": ["pangoLineage*"]
+  },
+  "expected": [
+    {
+      "count": 2,
+      "division": "Aargau",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 7,
+      "division": "Basel-Land",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 5,
+      "division": "Basel-Stadt",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 5,
+      "division": "Bern",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 4,
+      "division": "Geneva",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 1,
+      "division": "Graubünden",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 1,
+      "division": "Jura",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 1,
+      "division": "Obwalden",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 2,
+      "division": "Sankt Gallen",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 1,
+      "division": "Schwyz",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 8,
+      "division": "Solothurn",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 5,
+      "division": "Ticino",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 5,
+      "division": "Valais",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 2,
+      "division": "Vaud",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 2,
+      "division": "Zürich",
+      "pangoLineage*": "B*"
+    },
+    {
+      "count": 2,
+      "division": "Aargau",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 7,
+      "division": "Basel-Land",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 5,
+      "division": "Basel-Stadt",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 5,
+      "division": "Bern",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 4,
+      "division": "Geneva",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 1,
+      "division": "Graubünden",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 1,
+      "division": "Jura",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 1,
+      "division": "Obwalden",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 2,
+      "division": "Sankt Gallen",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 1,
+      "division": "Schwyz",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 8,
+      "division": "Solothurn",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 5,
+      "division": "Ticino",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 5,
+      "division": "Valais",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 2,
+      "division": "Vaud",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 2,
+      "division": "Zürich",
+      "pangoLineage*": "B.1*"
+    },
+    {
+      "count": 2,
+      "division": "Aargau",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 7,
+      "division": "Basel-Land",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 5,
+      "division": "Basel-Stadt",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 5,
+      "division": "Bern",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 4,
+      "division": "Geneva",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 1,
+      "division": "Graubünden",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 1,
+      "division": "Jura",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 1,
+      "division": "Obwalden",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 2,
+      "division": "Sankt Gallen",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 1,
+      "division": "Schwyz",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 8,
+      "division": "Solothurn",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 5,
+      "division": "Ticino",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 5,
+      "division": "Valais",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 2,
+      "division": "Vaud",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 2,
+      "division": "Zürich",
+      "pangoLineage*": "B.1.1*"
+    },
+    {
+      "count": 2,
+      "division": "Aargau",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 7,
+      "division": "Basel-Land",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 5,
+      "division": "Basel-Stadt",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 5,
+      "division": "Bern",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 4,
+      "division": "Geneva",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 1,
+      "division": "Graubünden",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 1,
+      "division": "Jura",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 1,
+      "division": "Obwalden",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 2,
+      "division": "Sankt Gallen",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 1,
+      "division": "Schwyz",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 8,
+      "division": "Solothurn",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 5,
+      "division": "Ticino",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 5,
+      "division": "Valais",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 2,
+      "division": "Vaud",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 2,
+      "division": "Zürich",
+      "pangoLineage*": "B.1.1.7*"
+    },
+    {
+      "count": 1,
+      "division": "Geneva",
+      "pangoLineage*": "Q.7*"
+    },
+    {
+      "count": 2,
+      "division": "Ticino",
+      "pangoLineage*": "Q.7*"
+    }
+  ]
+}
