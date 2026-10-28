@@ -109,6 +109,15 @@ ktlint {
     version.set("1.4.1")
 }
 
+configurations.matching { it.name.startsWith("ktlint") }.configureEach {
+    resolutionStrategy.eachDependency {
+        // ktlint must use its own Kotlin compiler, not the version managed by Spring Boot.
+        if (requested.group == "org.jetbrains.kotlin" && requested.version != null) {
+            useVersion(requested.version)
+        }
+    }
+}
+
 openApi {
     outputDir.set(file("$rootDir"))
 
