@@ -505,4 +505,25 @@ age	country	count
       ).to.equal(aggregatedCount);
     }
   });
+
+  it('should count a lineage including sublineages identically for all of its alias synonyms', async () => {
+    const aggregated = await lapisClient.postAggregated({
+      aggregatedPostRequest: { fields: ['pangoLineage*'] },
+    });
+
+    const aggregationBucket = aggregated.data.find(row => row['pangoLineage*'] === 'B.1.617.2*').count;
+    expect(aggregationBucket).to.equal(8);
+
+    // "AY" is an alis of "B.1.617.2"
+    for (const synonym of ['B.1.617.2', 'AY']) {
+      const filtered = await lapisClient.postAggregated({
+        aggregatedPostRequest: { pangoLineage: `${synonym}*` },
+      });
+
+      expect(
+        filtered.data[0].count,
+        `count for ${synonym}* should match the B.1.617.2* aggregation bucket`
+      ).to.equal(aggregationBucket);
+    }
+  });
 });
