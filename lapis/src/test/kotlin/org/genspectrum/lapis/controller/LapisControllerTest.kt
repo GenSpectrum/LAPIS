@@ -119,13 +119,13 @@ class LapisControllerTest(
         every {
             rhyDbQueryModelMock.getAggregated(
                 AggregatedFiltersRequest(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(LineageWithSublineagesField("pangoLineage")),
-                    OrderBySpec.EMPTY,
+                    sequenceFilters = emptyMap(),
+                    nucleotideMutations = emptyList(),
+                    aminoAcidMutations = emptyList(),
+                    nucleotideInsertions = emptyList(),
+                    aminoAcidInsertions = emptyList(),
+                    fields = listOf(LineageWithSublineagesField("pangoLineage")),
+                    orderByFields = OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(
@@ -143,13 +143,13 @@ class LapisControllerTest(
         every {
             rhyDbQueryModelMock.getAggregated(
                 AggregatedFiltersRequest(
-                    emptyMap(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    emptyList(),
-                    listOf(PlainField("country"), LineageWithSublineagesField("pangoLineage")),
-                    OrderBySpec.EMPTY,
+                    sequenceFilters = emptyMap(),
+                    nucleotideMutations = emptyList(),
+                    aminoAcidMutations = emptyList(),
+                    nucleotideInsertions = emptyList(),
+                    aminoAcidInsertions = emptyList(),
+                    fields = listOf(PlainField("country"), LineageWithSublineagesField("pangoLineage")),
+                    orderByFields = OrderBySpec.EMPTY,
                 ),
             )
         } returns Stream.of(

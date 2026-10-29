@@ -5,11 +5,6 @@ import org.genspectrum.lapis.controller.BadRequestException
 import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.springframework.stereotype.Component
 
-/**
- * Recognizes the sublineage-inclusive aggregation syntax `<lineageField>*` (e.g. `pangoLineage*`) used by
- * `/aggregated`. [tryConvert] returns `null` for strings without a trailing `*`, so callers can fall back to
- * plain field handling; it throws when the field before the `*` is unknown or has no lineage index.
- */
 @Component
 class LineageFieldConverter(
     databaseConfig: DatabaseConfig,
@@ -19,6 +14,11 @@ class LineageFieldConverter(
             .filter { it.generateLineageIndex != null }
             .associateBy({ it.name.lowercase() }, { it.name })
 
+    /**
+     * Recognizes the sublineage-inclusive aggregation syntax `<lineageField>*` (e.g. `pangoLineage*`) used by `/aggregated`.
+     * Returns `null` for strings without a trailing `*`,
+     * throws when the field before the `*` is unknown or has no lineage index.
+     */
     fun tryConvert(source: String): LineageWithSublineagesField? {
         if (!source.endsWith('*')) {
             return null

@@ -11,6 +11,8 @@ import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+private const val COUNTRY = "country"
+
 class LineageFieldConverterTest {
     private val underTest = LineageFieldConverter(
         databaseConfig = databaseConfig(
@@ -22,7 +24,7 @@ class LineageFieldConverterTest {
                     type = MetadataType.STRING,
                     generateLineageIndex = "lineage_definitions",
                 ),
-                DatabaseMetadata(name = "country", type = MetadataType.STRING),
+                DatabaseMetadata(name = COUNTRY, type = MetadataType.STRING),
             ),
         ),
     )
@@ -40,13 +42,13 @@ class LineageFieldConverterTest {
     @Test
     fun `GIVEN a field without trailing star THEN returns null so plain handling can take over`() {
         assertThat(underTest.tryConvert("pangoLineage"), nullValue())
-        assertThat(underTest.tryConvert("country"), nullValue())
+        assertThat(underTest.tryConvert(COUNTRY), nullValue())
     }
 
     @Test
     fun `GIVEN a non-lineage field with trailing star THEN throws`() {
-        val exception = assertThrows<BadRequestException> { underTest.tryConvert("country*") }
-        assertThat(exception.message!!.contains("only allowed for fields with a lineage index"), equalTo(true))
+        val exception = assertThrows<BadRequestException> { underTest.tryConvert("$COUNTRY*") }
+        assertThat(exception.message.contains("only allowed for fields with a lineage index"), equalTo(true))
     }
 
     @Test

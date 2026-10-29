@@ -15,7 +15,7 @@ class OrderByFieldsCleaner(
                 ?: scalarFunctionFieldConverter.tryConvert(fieldName)?.outputColumnName
                 ?: caseInsensitiveFieldsCleaner.clean(fieldName)
                 ?: fieldName
-        } catch (e: BadRequestException) {
+        } catch (_: BadRequestException) {
             fieldName
         }
 }
