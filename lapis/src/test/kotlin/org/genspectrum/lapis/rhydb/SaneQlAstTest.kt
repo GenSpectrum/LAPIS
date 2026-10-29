@@ -179,24 +179,21 @@ class SaneQlAstTest {
     }
 
     @Test
-    fun `GIVEN pipeline with no steps THEN renders only the filter`() {
-        val pipeline = SaneQlPipeline("data", SaneQlBoolean(true), emptyList())
-        assertThat(pipeline.render(), equalTo("\"data\".filter(true)"))
+    fun `GIVEN pipeline with no steps THEN renders only the receiver`() {
+        val relation = SaneQlPipeline(SaneQlIdentifier("data"), emptyList())
+        assertThat(relation.render(), equalTo("\"data\""))
     }
 
     @Test
-    fun `GIVEN pipeline with steps THEN chains them after the filter`() {
-        val pipeline = SaneQlPipeline(
-            "data",
-            SaneQlBoolean(true),
-            listOf(SaneQlStep("insertions"), SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(10)))),
+    fun `GIVEN pipeline with steps THEN chains them after the receiver`() {
+        val relation = SaneQlPipeline(
+            SaneQlIdentifier("data"),
+            listOf(
+                SaneQlStep("filter", positionalArgs = listOf(SaneQlBoolean(true))),
+                SaneQlStep("insertions"),
+                SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(10))),
+            ),
         )
-        assertThat(pipeline.render(), equalTo("\"data\".filter(true).insertions().limit(10)"))
-    }
-
-    @Test
-    fun `GIVEN pipeline with other table THEN uses that table as source`() {
-        val pipeline = SaneQlPipeline("other table", SaneQlBoolean(true), emptyList())
-        assertThat(pipeline.render(), equalTo("\"other table\".filter(true)"))
+        assertThat(relation.render(), equalTo("\"data\".filter(true).insertions().limit(10)"))
     }
 }

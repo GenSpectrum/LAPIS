@@ -29,7 +29,11 @@ data class RhyDbQuery<ResponseType>(
 ) {
     /** Renders this query as a SaneQL query string, e.g. `"data".filter(true).group(by:={}, aggs:={count:=count()})`. */
     fun toSaneQl(table: String): String =
-        SaneQlPipeline(table, filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
+        SaneQlPipeline(
+            receiver = SaneQlIdentifier(table),
+            steps = listOf(SaneQlStep("filter", positionalArgs = listOf(filterExpression.toSaneQl()))) +
+                action.toSaneQlSteps(),
+        ).render()
 }
 
 interface CommonActionFields {
@@ -358,10 +362,10 @@ sealed class RhyDbAction<ResponseType>(
              * `concat` so values read as e.g. `B.1.1*`, and the matched value under [joinOnColumnName]. See
              * lineage_definitions.md for the relation/alias table schema.
              */
-            private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQlRelation {
+            private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQlPipeline {
                 val outputColumn = field.outputColumnName
                 val joinColumn = joinOnColumnName(field)
-                val closure = SaneQlRelation(
+                val closure = SaneQlPipeline(
                     receiver = id(field.fieldName),
                     steps = listOf(
                         SaneQlStep("filter", positionalArgs = listOf(SaneQlNot(id("is_recombinant_edge")))),
@@ -372,14 +376,14 @@ sealed class RhyDbAction<ResponseType>(
                         ),
                     ),
                 )
-                val canonicalEdges = SaneQlRelation(
+                val canonicalEdges = SaneQlPipeline(
                     receiver = closure,
                     steps = listOf(
                         mapStep(outputColumn to starSuffixed(id("from")), joinColumn to id("to")),
                         projectStep(outputColumn, joinColumn),
                     ),
                 )
-                val aliasEdges = SaneQlRelation(
+                val aliasEdges = SaneQlPipeline(
                     receiver = closure,
                     steps = listOf(
                         SaneQlStep(
@@ -393,7 +397,7 @@ sealed class RhyDbAction<ResponseType>(
                         projectStep(outputColumn, joinColumn),
                     ),
                 )
-                return SaneQlRelation(
+                return SaneQlPipeline(
                     receiver = SaneQlFunctionCall("unionall", positionalArgs = listOf(canonicalEdges, aliasEdges)),
                     steps = emptyList(),
                 )

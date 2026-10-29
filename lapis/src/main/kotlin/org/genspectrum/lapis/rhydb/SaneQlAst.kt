@@ -71,18 +71,6 @@ data class SaneQlKeyword(
 }
 
 /**
- * A relation-producing pipeline used as a value, e.g. the right-hand side of a `join`:
- * `"pangoLineage".filter(...).transitiveClosure(...).map(...).project(...)`. Unlike [SaneQlPipeline] (which is
- * always rooted at `data`), the receiver is explicit, so this can start from a lineage relation table.
- */
-data class SaneQlRelation(
-    val receiver: SaneQlExpression,
-    val steps: List<SaneQlStep>,
-) : SaneQlExpression {
-    override fun render() = receiver.render() + steps.joinToString("") { it.render() }
-}
-
-/**
  * A `{item1, item2, ...}` list literal. Acts as a record when its [items] are [SaneQlAssignment]s,
  * e.g. `{"count":=count()}`.
  */
@@ -176,9 +164,7 @@ private fun renderArgs(
         .joinToString(", ")
 
 /**
- * One pipeline step chained after `<table>.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
- * Callers that need no step at all (e.g. `DetailsAction` without fields) simply omit it from
- * [SaneQlPipeline.steps] - there is no "empty step" representation.
+ * One pipeline step chained after a receiver, e.g. `.group(by:={}, aggs:={count:=count()})`.
  */
 data class SaneQlStep(
     val name: String,
@@ -188,12 +174,15 @@ data class SaneQlStep(
     override fun render() = ".$name(${renderArgs(positionalArgs, namedArgs)})"
 }
 
-/** The full `<table>.filter(filter).step1.step2...` pipeline. */
+/**
+ * A relation-producing pipeline with a receiver and a chain of steps.
+ * Used e.g. as the top-level query ("data".filter(...).group(...)`) or the right-hand side of a `join``.
+ * The receiver can be any expression,
+ * so a relation can start from the data table, a lineage relation table, or another relation.
+ */
 data class SaneQlPipeline(
-    val table: String,
-    val filter: SaneQlExpression,
+    val receiver: SaneQlExpression,
     val steps: List<SaneQlStep>,
-) : SaneQlNode {
-    override fun render() =
-        SaneQlIdentifier(table).render() + ".filter(${filter.render()})" + steps.joinToString("") { it.render() }
+) : SaneQlExpression {
+    override fun render() = receiver.render() + steps.joinToString("") { it.render() }
 }
