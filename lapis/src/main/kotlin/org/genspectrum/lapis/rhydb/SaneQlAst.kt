@@ -53,7 +53,7 @@ data class SaneQlDate(
     override fun render() = if (value == null) "null" else "'$value'::date"
 }
 
-/** A double-quoted column identifier; embedded double quotes are escaped by doubling. Prevents SaneQL injection. */
+/** A double-quoted column or table identifier; embedded double quotes are escaped by doubling. Prevents SaneQL injection. */
 data class SaneQlIdentifier(
     val name: String,
 ) : SaneQlExpression {
@@ -176,7 +176,7 @@ private fun renderArgs(
         .joinToString(", ")
 
 /**
- * One pipeline step chained after `data.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
+ * One pipeline step chained after `<table>.filter(...)`, e.g. `.group(by:={}, aggs:={count:=count()})`.
  * Callers that need no step at all (e.g. `DetailsAction` without fields) simply omit it from
  * [SaneQlPipeline.steps] - there is no "empty step" representation.
  */
@@ -188,10 +188,12 @@ data class SaneQlStep(
     override fun render() = ".$name(${renderArgs(positionalArgs, namedArgs)})"
 }
 
-/** The full `data.filter(filter).step1.step2...` pipeline. */
+/** The full `<table>.filter(filter).step1.step2...` pipeline. */
 data class SaneQlPipeline(
+    val table: String,
     val filter: SaneQlExpression,
     val steps: List<SaneQlStep>,
 ) : SaneQlNode {
-    override fun render() = "data.filter(${filter.render()})" + steps.joinToString("") { it.render() }
+    override fun render() =
+        SaneQlIdentifier(table).render() + ".filter(${filter.render()})" + steps.joinToString("") { it.render() }
 }

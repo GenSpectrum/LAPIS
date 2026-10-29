@@ -872,6 +872,38 @@ class RhyDbClientAndCacheInvalidatorTest(
     }
 }
 
+@SpringBootTest(properties = ["rhydb.url=http://localhost:$MOCK_SERVER_PORT", "rhydb.table=other table"])
+class RhyDbClientWithConfiguredTableTest(
+    @param:Autowired private val underTest: RhyDbClient,
+    @param:Autowired private val requestIdContext: RequestIdContext,
+) {
+    private lateinit var mockServer: ClientAndServer
+
+    @BeforeEach
+    fun setup() {
+        mockServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT)
+        requestIdContext.requestId = REQUEST_ID_VALUE
+    }
+
+    @AfterEach
+    fun stopServer() {
+        mockServer.stop()
+    }
+
+    @Test
+    fun `GIVEN rhydb table is configured THEN queries that table`() {
+        expectQueryRequestAndRespondWith(emptyArrowResponse())
+
+        underTest.sendQuery(RhyDbQuery(RhyDbAction.aggregated(), True)).use { it.toList() }
+
+        mockServer.verify(
+            request()
+                .withPath("/query")
+                .withBody(""""other table".filter(true).group(by:={}, aggs:={"count":=count()})"""),
+        )
+    }
+}
+
 private fun expectQueryRequestAndRespondWith(
     httpResponse: HttpResponse,
     times: Times = Times.unlimited(),

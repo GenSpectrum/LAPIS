@@ -24,11 +24,11 @@ class RhyDbQueryToSaneQlTest {
             StringEquals("theColumn", "theValue"),
         )
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
         assertThat(
             result,
-            equalTo("""data.filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
+            equalTo(""""data".filter("theColumn" = 'theValue').group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -36,18 +36,18 @@ class RhyDbQueryToSaneQlTest {
     fun `GIVEN query with True filter THEN filters for true`() {
         val query = RhyDbQuery(RhyDbAction.aggregated(), True)
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
-        assertThat(result, equalTo("""data.filter(true).group(by:={}, aggs:={"count":=count()})"""))
+        assertThat(result, equalTo(""""data".filter(true).group(by:={}, aggs:={"count":=count()})"""))
     }
 
     @Test
     fun `GIVEN query with details action and no fields THEN produces no action`() {
         val query = RhyDbQuery(RhyDbAction.details(), True)
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
-        assertThat(result, equalTo("data.filter(true)"))
+        assertThat(result, equalTo("\"data\".filter(true)"))
     }
 
     @ParameterizedTest(name = "action: {1}")
@@ -58,9 +58,9 @@ class RhyDbQueryToSaneQlTest {
     ) {
         val query = RhyDbQuery(action, True)
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
-        assertThat(result, equalTo("data.filter(true)$expectedSaneQl"))
+        assertThat(result, equalTo("\"data\".filter(true)$expectedSaneQl"))
     }
 
     @ParameterizedTest(name = "filter: {1}")
@@ -71,11 +71,11 @@ class RhyDbQueryToSaneQlTest {
     ) {
         val query = RhyDbQuery(RhyDbAction.aggregated(), filter)
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
         assertThat(
             result,
-            equalTo("""data.filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
+            equalTo(""""data".filter($expectedPredicate).group(by:={}, aggs:={"count":=count()})"""),
         )
     }
 
@@ -91,12 +91,12 @@ class RhyDbQueryToSaneQlTest {
             True,
         )
 
-        val result = query.toSaneQl()
+        val result = query.toSaneQl("data")
 
         assertThat(
             result,
             equalTo(
-                """data.filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
+                """"data".filter(true).group(by:={"country"}, aggs:={"count":=count()})""" +
                     """.order(by:={"count}).filter(true).groupBy({evil:=count()"})""", // <- the order field is quoted
             ),
         )

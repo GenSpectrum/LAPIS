@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.1](https://github.com/GenSpectrum/LAPIS/compare/v0.9.0...v0.9.1) (2026-10-21)
+
+
+### Bug Fixes
+
+* **lapis:** `isNull()` advanced queries now also produce `isNull` RhyDB queries ([#1918](https://github.com/GenSpectrum/LAPIS/issues/1918)) ([76beb2d](https://github.com/GenSpectrum/LAPIS/commit/76beb2d62b5456425a328960778f96b44b80e9af))
+* **lapis:** handle large arrow strings from RhyDB ([#1919](https://github.com/GenSpectrum/LAPIS/issues/1919)) ([ba73ea3](https://github.com/GenSpectrum/LAPIS/commit/ba73ea31e6b8d98f90a256fb59728f5afcc7ea51))
+* **lapis:** render empty Or and And as valid SaneQL ([#1925](https://github.com/GenSpectrum/LAPIS/issues/1925)) ([7b15acb](https://github.com/GenSpectrum/LAPIS/commit/7b15acbc96f43b11e6dcd25a6f7d233950dd13be))
+
 ## [0.9.0](https://github.com/GenSpectrum/LAPIS/compare/v0.8.9...v0.9.0) (2026-10-14)
 
 

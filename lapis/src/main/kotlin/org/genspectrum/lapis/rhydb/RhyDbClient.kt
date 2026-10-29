@@ -10,6 +10,7 @@ import org.genspectrum.lapis.logging.RequestContext
 import org.genspectrum.lapis.logging.RequestIdContext
 import org.genspectrum.lapis.response.InfoData
 import org.genspectrum.lapis.util.YamlObjectMapper
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -91,6 +92,7 @@ const val ARROW_STREAM_MEDIA_TYPE = "application/vnd.apache.arrow.stream"
 @Component
 open class CachedRhyDbClient(
     private val rhyDbUris: RhyDbUris,
+    @param:Value("\${rhydb.table:data}") private val rhyDbTable: String,
     private val objectMapper: ObjectMapper,
     private val yamlObjectMapper: YamlObjectMapper,
     private val requestIdContext: RequestIdContext,
@@ -121,7 +123,7 @@ open class CachedRhyDbClient(
             requestContext.cached = false
         }
 
-        val saneQlQuery = query.toSaneQl()
+        val saneQlQuery = query.toSaneQl(rhyDbTable)
 
         log.info { "Calling RhyDB: $saneQlQuery" }
 

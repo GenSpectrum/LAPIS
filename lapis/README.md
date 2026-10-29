@@ -35,6 +35,7 @@ When running LAPIS, you need to pass the following arguments:
 Optionally, you can pass:
 * `lapis.docs.url` to make the "Documentation" link on the landing page (`/`) point to your self-hosted [lapis docs](../lapis-docs/README.md).
   If `lapis.docs.url` is not set or empty, then the "Documentation" link will not be shown.
+* `--rhydb.table=<table>` : the RhyDB table that this LAPIS instance reads from (default: `data`).
 
 Additionally, Apache Arrow requires these flags to be set on the JVM:
 ```

@@ -23,12 +23,12 @@
     "node": ">=24"
   },
   "dependencies": {
-    "@openapitools/openapi-generator-cli": "^2.41.0",
+    "@openapitools/openapi-generator-cli": "^2.42.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.5",
     "chai": "^6.3.0",
-    "js-yaml": "^5.4.3",
+    "js-yaml": "^5.5.0",
     "mocha": "^12.0.3",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
