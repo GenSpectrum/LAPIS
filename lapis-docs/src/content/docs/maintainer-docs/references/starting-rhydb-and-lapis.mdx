@@ -90,6 +90,9 @@ LAPIS listens on port 8080.
 
 LAPIS provides the following optional parameters:
 
+- `--rhydb.table`:
+  The RhyDB table that this LAPIS instance serves. All queries of this LAPIS instance are run against this table.
+  Defaults to `data`.
 - `--lapis.docs.url`:
   If set, the landing page (`/`) will show a "Documentation" link to the provided value.
   It is meant to point to your self-hosted version of this LAPIS documentation.
