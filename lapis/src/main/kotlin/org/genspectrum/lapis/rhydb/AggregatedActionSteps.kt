@@ -20,10 +20,46 @@ private fun RhyDbAction.AggregatedAction.plainAggregationSteps(builder: Pipeline
         .group(by = plainGroupByColumns(), aggs = listOf(COUNT_PROPERTY to count()))
 
 /**
- * For sublineage-inclusive aggregation we first count by the raw lineage value(s), then for each lineage field join
- * the (reflexive) transitive closure of its lineage tree and re-aggregate the counts under each ancestor. See
- * [sublineageClosureRelation] for the per-field closure. A left join keeps the `null`/unknown lineage group, matching
- * plain aggregation.
+ * For sublineage-inclusive aggregation, schematically:
+ *
+ * ```
+ * data
+ *     .group(by = lineageField) # count raw lineage values
+ *     .join( # to each raw count, add all parent lineages
+ *         unionall(
+ *             unaliasedLineages, # covers plain lineage relations: B.1.1.7 -parent-> B.1
+ *             resolvesAliases, # covers relations that include aliases: JN.1 -parent-> B.1
+ *         ),
+ *         type = LEFT # keep nulls and unknown raw lineages
+ *     )
+ *     .group(by = parentLineage)
+ * ```
+ *
+ * After first group:
+ * ```
+ * { count: 5, lineage: "B.1" }
+ * { count: 3, lineage: "B.1.7" }
+ * { count: 7, lineage: "B.2" }
+ * ```
+ *
+ * After join:
+ * ```
+ * { count: 5, lineage: "B.1", parent: "B*" }
+ * { count: 5, lineage: "B.1", parent: "B.1*" }
+ * { count: 3, lineage: "B.1.7", parent: "B*" }
+ * { count: 3, lineage: "B.1.7", parent: "B.1*" }
+ * { count: 3, lineage: "B.1.7", parent: "B.1.7*" }
+ * { count: 7, lineage: "B.2", parent: "B*" }
+ * { count: 7, lineage: "B.2", parent: "B.2*" }
+ * ```
+ *
+ * Group by parent:
+ * ```
+ * { count: 15, parent: "B*" }
+ * { count: 8, parent: "B.1*" }
+ * { count: 3, parent: "B.1.7*" }
+ * { count: 7, parent: "B.2*" }
+ * ```
  */
 private fun RhyDbAction.AggregatedAction.sublineageAggregationSteps(builder: PipelineBuilder): PipelineBuilder {
     var result = builder.applyComputedMappings(this)
@@ -65,11 +101,10 @@ private fun RhyDbAction.AggregatedAction.plainGroupByColumns() =
 private fun joinOnColumnName(field: LineageWithSublineagesField) = "_to_${field.fieldName}"
 
 /**
- * The reflexive transitive closure of a lineage field's tree, one row per (ancestor, descendant) pair, plus extra
- * rows mapping each descendant's aliases, so that data stored under an alias still matches. Recombinant edges are
- * excluded (matching the `*` filter's `doNotFollow` default). The ancestor is exposed under the field's output column
- * name (e.g. `pangoLineage*`), with a trailing `*` appended via `concat` so values read as e.g. `B.1.1*`, and the
- * matched value under [joinOnColumnName]. See lineage_definitions.md for the relation/alias table schema.
+ * The reflexive transitive closure of a lineage field's tree, one row per (ancestor, descendant) pair,
+ * plus extra rows mapping each descendant's aliases, so that data stored under an alias still matches.
+ * The ancestor is exposed under the field's output column name (e.g. `pangoLineage*`),
+ * with a trailing `*` appended via `concat`.
  */
 private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQlExpression {
     val outputColumn = field.outputColumnName
@@ -91,5 +126,4 @@ private fun sublineageClosureRelation(field: LineageWithSublineagesField): SaneQ
     return unionAll(canonicalEdges, aliasEdges)
 }
 
-/** Wraps a string expression in `concat(expr, '*')` so each ancestor value reads as e.g. `B.1.1*`. */
 private fun starSuffixed(expression: SaneQlExpression) = concat(expression, "*")
