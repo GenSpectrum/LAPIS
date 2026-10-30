@@ -112,6 +112,8 @@ ktlint {
 configurations.matching { it.name.startsWith("ktlint") }.configureEach {
     resolutionStrategy.eachDependency {
         // ktlint must use its own Kotlin compiler, not the version managed by Spring Boot.
+        // ktlintCheck failed: Dependency update replaced ktlint 1.4.1’s required Kotlin compiler 2.0.21 with 2.4.21,
+        // causing `Extensions storage is not registered` error.
         if (requested.group == "org.jetbrains.kotlin" && requested.version != null) {
             useVersion(requested.version)
         }
