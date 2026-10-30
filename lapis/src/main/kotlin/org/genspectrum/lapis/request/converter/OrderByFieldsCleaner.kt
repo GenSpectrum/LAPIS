@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component
 class OrderByFieldsCleaner(
     private val caseInsensitiveFieldsCleaner: CaseInsensitiveFieldsCleaner,
     private val scalarFunctionFieldConverter: ScalarFunctionFieldConverter,
+    private val lineageFieldConverter: LineageFieldConverter,
 ) {
     fun clean(fieldName: String): String =
         try {
-            scalarFunctionFieldConverter.tryConvert(fieldName)?.outputColumnName
+            lineageFieldConverter.tryConvert(fieldName)?.outputColumnName
+                ?: scalarFunctionFieldConverter.tryConvert(fieldName)?.outputColumnName
                 ?: caseInsensitiveFieldsCleaner.clean(fieldName)
                 ?: fieldName
-        } catch (e: BadRequestException) {
+        } catch (_: BadRequestException) {
             fieldName
         }
 }

@@ -7,11 +7,13 @@ import org.springframework.stereotype.Component
 @Component
 class AggregatedFieldConverter(
     private val sequencePositionFieldConverter: SequencePositionFieldConverter,
+    private val lineageFieldConverter: LineageFieldConverter,
     private val scalarFunctionFieldConverter: ScalarFunctionFieldConverter,
     private val metadataFieldConverter: MetadataFieldConverter,
 ) : FieldConverter<Field> {
     override fun convert(source: String): Field =
         sequencePositionFieldConverter.tryConvert(source)
+            ?: lineageFieldConverter.tryConvert(source)
             ?: scalarFunctionFieldConverter.tryConvert(source)
             ?: metadataFieldConverter.convert(source)
 }

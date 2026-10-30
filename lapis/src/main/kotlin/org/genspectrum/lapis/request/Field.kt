@@ -25,3 +25,14 @@ data class ComputedField(
 ) : Field {
     override val outputColumnName: String get() = "$sourceField.${function.saneQlMethodName}"
 }
+
+/**
+ * A lineage field requested with a trailing `*` (e.g. `pangoLineage*`), which aggregates the count of each lineage
+ * together with all of its sublineages. Only valid on `/aggregated` and only for fields that have a lineage index.
+ */
+data class LineageWithSublineagesField(
+    val fieldName: String,
+) : Field {
+    /** Used both as the SaneQL alias and as the response column key, e.g. `pangoLineage*`. */
+    override val outputColumnName: String get() = "$fieldName*"
+}

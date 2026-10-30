@@ -37,6 +37,39 @@ To include sub-lineages, add `*` at the end of the lineage:
 `B.1.1*` and `B.1.1.*` are equivalent.
 Both match `B.1.1` itself and descendants such as `B.1.1.7`.
 
+## Counting Every Lineage Including Its Sublineages
+
+On the `/sample/aggregated` endpoint you can add a lineage field suffixed with `*` to the `fields` parameter
+(for example {lineageField}\*). This returns, for every lineage, the count of sequences in that lineage together
+with all of its sublineages — in a single query.
+
+<Code lang='http' code={`GET /sample/aggregated?fields=${lineageField}*`} />
+
+The response column is named {lineageField}\*, and its values carry a trailing `*` to indicate that they are
+sublineage-inclusive, for example `B.1.1*`:
+
+<Code
+    lang='json'
+    code={JSON.stringify(
+        {
+            data: [
+                { [`${lineageField}*`]: 'B*', count: 97 },
+                { [`${lineageField}*`]: 'B.1*', count: 97 },
+                { [`${lineageField}*`]: 'B.1.1*', count: 61 },
+            ],
+        },
+        null,
+        4,
+    )}
+/>
+
+You can combine it with other fields and with filters as usual.
+
+:::caution
+These counts do not partition the data: a sequence in `B.1.1` is counted under `B.1.1*`, `B.1*` and `B*`.
+The counts therefore do not sum to the total number of matching sequences.
+:::
+
 ## Advanced Queries
 
 Lineage-indexed fields can also be used in [advanced queries](../concepts/advanced-query):

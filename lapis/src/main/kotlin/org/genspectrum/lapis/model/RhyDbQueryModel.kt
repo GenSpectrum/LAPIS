@@ -6,6 +6,7 @@ import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.DetailsFiltersRequest
+import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.request.MRCASequenceFiltersRequest
 import org.genspectrum.lapis.request.MutationProportionsRequest
 import org.genspectrum.lapis.request.MutationsField
@@ -53,6 +54,7 @@ class RhyDbQueryModel(
                     offset = sequenceFilters.offset,
                     sequencePositionFields = sequenceFilters.fields.filterIsInstance<SequencePositionField>(),
                     computedFields = sequenceFilters.fields.filterIsInstance<ComputedField>(),
+                    lineageFields = sequenceFilters.fields.filterIsInstance<LineageWithSublineagesField>(),
                 ),
                 rhyDbFilterExpressionMapper.map(sequenceFilters),
             ),
