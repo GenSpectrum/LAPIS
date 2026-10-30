@@ -272,7 +272,7 @@ sealed class RhyDbAction<ResponseType>(
             lineageFields.forEach { field ->
                 result = result.join(
                     relation = sublineageClosureRelation(field),
-                    on = SaneQlEquals(id(joinOnColumnName(field)), id(field.fieldName)),
+                    on = id(joinOnColumnName(field)) eq id(field.fieldName),
                     type = JoinType.LEFT,
                 )
             }
@@ -326,7 +326,7 @@ sealed class RhyDbAction<ResponseType>(
                     .project(listOf(id(outputColumn), id(joinColumn)))
 
                 val aliasEdges = transitiveClosure
-                    .join(relation = id("${field.fieldName}_aliases"), on = SaneQlEquals(id("to"), id("lineage")))
+                    .join(relation = id("${field.fieldName}_aliases"), on = id("to") eq id("lineage"))
                     .map(listOf(outputColumn to starSuffixed(id("from")), joinColumn to id("alias")))
                     .project(listOf(id(outputColumn), id(joinColumn)))
 

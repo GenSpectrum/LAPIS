@@ -23,6 +23,9 @@ fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNul
 /** `isNull("column")`. */
 fun isNull(column: String) = SaneQlFunctionCall("isNull", positionalArgs = listOf(id(column)))
 
+/** `left = right`, e.g. `id("a") eq id("b")` renders `"a" = "b"`. */
+infix fun SaneQlExpression.eq(other: SaneQlExpression) = SaneQlEquals(this, other)
+
 /** `concat(expr, suffix)`, e.g. `concat("from", '*')`. */
 fun concat(
     expression: SaneQlExpression,
