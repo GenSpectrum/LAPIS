@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/GenSpectrum/LAPIS/compare/v0.9.1...v0.9.2) (2026-10-30)
+
+
+### Features
+
+* **lapis:** make the RhyDB table configurable via rhydb.table ([#1943](https://github.com/GenSpectrum/LAPIS/issues/1943)) ([7029b16](https://github.com/GenSpectrum/LAPIS/commit/7029b165b89e244f7d20e9bad2bca980ad53e3e1))
+
 ## [0.9.1](https://github.com/GenSpectrum/LAPIS/compare/v0.9.0...v0.9.1) (2026-10-21)
 
 
