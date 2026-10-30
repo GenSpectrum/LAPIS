@@ -188,10 +188,10 @@ class RhyDbQueryToSaneQlTest {
                     RhyDbAction.aggregated(
                         lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
                     ),
-                    """.group(by:={"pangoLineage"}, aggs:={"c":=count()})""" +
+                    """.group(by:={"pangoLineage"}, aggs:={"_raw_count":=count()})""" +
                         """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
                         """type:=left)""" +
-                        """.group(by:={"pangoLineage*"}, aggs:={"count":=sum("c")})""",
+                        """.group(by:={"pangoLineage*"}, aggs:={"count":=sum("_raw_count")})""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -199,10 +199,10 @@ class RhyDbQueryToSaneQlTest {
                         lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
                         limit = 5,
                     ),
-                    """.group(by:={"country", "pangoLineage"}, aggs:={"c":=count()})""" +
+                    """.group(by:={"country", "pangoLineage"}, aggs:={"_raw_count":=count()})""" +
                         """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
                         """type:=left)""" +
-                        """.group(by:={"country", "pangoLineage*"}, aggs:={"count":=sum("c")}).limit(5)""",
+                        """.group(by:={"country", "pangoLineage*"}, aggs:={"count":=sum("_raw_count")}).limit(5)""",
                 ),
                 Arguments.of(
                     RhyDbAction.aggregated(
@@ -211,12 +211,12 @@ class RhyDbQueryToSaneQlTest {
                             LineageWithSublineagesField("nextcladePangoLineage"),
                         ),
                     ),
-                    """.group(by:={"pangoLineage", "nextcladePangoLineage"}, aggs:={"c":=count()})""" +
+                    """.group(by:={"pangoLineage", "nextcladePangoLineage"}, aggs:={"_raw_count":=count()})""" +
                         """.join(${sublineageClosure("pangoLineage")}, "_to_pangoLineage" = "pangoLineage", """ +
                         """type:=left)""" +
                         """.join(${sublineageClosure("nextcladePangoLineage")}, """ +
                         """"_to_nextcladePangoLineage" = "nextcladePangoLineage", type:=left)""" +
-                        """.group(by:={"pangoLineage*", "nextcladePangoLineage*"}, aggs:={"count":=sum("c")})""",
+                        """.group(by:={"pangoLineage*", "nextcladePangoLineage*"}, aggs:={"count":=sum("_raw_count")})""",
                 ),
                 // Mutations
                 Arguments.of(

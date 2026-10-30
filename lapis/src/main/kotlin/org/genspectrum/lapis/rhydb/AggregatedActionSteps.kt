@@ -3,6 +3,8 @@ package org.genspectrum.lapis.rhydb
 import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.response.COUNT_PROPERTY
 
+private const val RAW_COUNT_COLUMN = "_raw_count"
+
 /**
  * Appends the aggregation pipeline steps for this [RhyDbAction.AggregatedAction] to [builder]: a plain `group`, or,
  * when sublineage-inclusive lineage fields are requested, the closure-join pipeline from [sublineageAggregationSteps].
@@ -64,7 +66,10 @@ private fun RhyDbAction.AggregatedAction.plainAggregationSteps(builder: Pipeline
 private fun RhyDbAction.AggregatedAction.sublineageAggregationSteps(builder: PipelineBuilder): PipelineBuilder {
     var result = builder.applyComputedMappings(this)
     val lineageSourceColumns = lineageFields.map { id(it.fieldName) }
-    result = result.group(by = plainGroupByColumns() + lineageSourceColumns, aggs = listOf("c" to count()))
+    result = result.group(
+        by = plainGroupByColumns() + lineageSourceColumns,
+        aggs = listOf(RAW_COUNT_COLUMN to count()),
+    )
     lineageFields.forEach { field ->
         result = result.join(
             relation = sublineageClosureRelation(field),
@@ -73,7 +78,7 @@ private fun RhyDbAction.AggregatedAction.sublineageAggregationSteps(builder: Pip
         )
     }
     val groupByColumns = plainGroupByColumns() + lineageFields.map { id(it.outputColumnName) }
-    return result.group(by = groupByColumns, aggs = listOf(COUNT_PROPERTY to sum("c")))
+    return result.group(by = groupByColumns, aggs = listOf(COUNT_PROPERTY to sum(RAW_COUNT_COLUMN)))
 }
 
 private fun PipelineBuilder.applyComputedMappings(action: RhyDbAction.AggregatedAction): PipelineBuilder {
