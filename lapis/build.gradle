@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin' // needed by springdoc/swagger-core (still on Jackson 2)
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'tools.jackson.dataformat:jackson-dataformat-yaml'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0'
     implementation 'io.github.microutils:kotlin-logging-jvm:3.0.5'
     antlr 'org.antlr:antlr4:4.13.2'
     implementation 'org.antlr:antlr4-runtime:4.13.2'
