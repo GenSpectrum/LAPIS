@@ -1,9 +1,9 @@
 ---
-import yaml from 'js-yaml';
+import { dump } from 'js-yaml';
 import { getConfig } from '../config';
 const databaseConfig = getConfig();
 
-const yamlString = yaml.dump(databaseConfig);
+const yamlString = dump(databaseConfig);
 ---
 
 <div>
