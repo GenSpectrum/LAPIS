@@ -8,23 +8,21 @@ const { html, panels } = processPanels(panelHtml);
 ---
 
 <tabs-box>
-    {
-        panels && (
-            <div class='tabs not-content mt-6' role='tablist'>
-                {panels.map(({ label, tabId }, index) => (
-                    <a
-                        role='tab'
-                        id={tabId}
-                        class={`tab tab-lifted ${index === 0 ? 'tab-active' : ''}`}
-                        aria-selected={index === 0 && 'true'}
-                        tabindex={index !== 0 ? -1 : 0}
-                    >
-                        {label}
-                    </a>
-                ))}
-            </div>
-        )
-    }
+    {panels && (
+        <div class='tabs not-content mt-6' role='tablist'>
+            {panels.map(({ label, tabId }, index) => (
+                <a
+                    role='tab'
+                    id={tabId}
+                    class={`tab tab-lifted ${index === 0 ? 'tab-active' : ''}`}
+                    aria-selected={index === 0 && 'true'}
+                    tabindex={index !== 0 ? -1 : 0}
+                >
+                    {label}
+                </a>
+            ))}
+        </div>
+    )}
     <div class='-mt-px! border border-solid border-gray-200 p-8 pt-2'>
         <!-- Starlight adds a margin-top to sections that are not the first. To ensure that all tabs have the
         margin-top, we add an empty div here. -->

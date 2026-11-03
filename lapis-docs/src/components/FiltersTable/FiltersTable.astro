@@ -19,25 +19,23 @@ const commonFilters = getCommonFilterDescription(getReferenceGenomes());
         </tr>
     </thead>
     <tbody>
-        {
-            [...filters, ...commonFilters].map((filter) => (
-                <tr>
-                    <td>{filter.name}</td>
-                    <td>
-                        {filter.type}
-                        {filter.name === config.schema.primaryKey && <> (primary key)</>}
-                    </td>
-                    <td>
-                        {filter.description}
-                        {filter.link !== undefined && (
-                            <>
-                                see
-                                <BaseAwareLink href={filter.link.href}>{filter.link.text}</BaseAwareLink>
-                            </>
-                        )}
-                    </td>
-                </tr>
-            ))
-        }
+        {[...filters, ...commonFilters].map((filter) => (
+            <tr>
+                <td>{filter.name}</td>
+                <td>
+                    {filter.type}
+                    {filter.name === config.schema.primaryKey && <> (primary key)</>}
+                </td>
+                <td>
+                    {filter.description}
+                    {filter.link !== undefined && (
+                        <>
+                            see
+                            <BaseAwareLink href={filter.link.href}>{filter.link.text}</BaseAwareLink>
+                        </>
+                    )}
+                </td>
+            </tr>
+        ))}
     </tbody>
 </table>
