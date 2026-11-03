@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.2](https://github.com/GenSpectrum/LAPIS/compare/v0.9.1...v0.9.2) (2026-11-03)
+
+
+### Features
+
+* **lapis:** api to compute the count for every lineage including sub lineages ([#1931](https://github.com/GenSpectrum/LAPIS/issues/1931)) ([d8ef6d4](https://github.com/GenSpectrum/LAPIS/commit/d8ef6d4a2377f9079a8460354d41776f1bc80c67))
+* **lapis:** make the RhyDB table configurable via rhydb.table ([#1943](https://github.com/GenSpectrum/LAPIS/issues/1943)) ([7029b16](https://github.com/GenSpectrum/LAPIS/commit/7029b165b89e244f7d20e9bad2bca980ad53e3e1))
+
 ## [0.9.1](https://github.com/GenSpectrum/LAPIS/compare/v0.9.0...v0.9.1) (2026-10-21)
 
 
