@@ -1,0 +1,30 @@
+{
+  "testCaseName": "Group by pangoLineage* (each lineage including its sublineages), filtered to B.1.1.7 and its sublineages",
+  "lapisRequest": {
+    "pangoLineage": "B.1.1.7*",
+    "fields": ["pangoLineage*"],
+    "orderBy": ["pangoLineage*"]
+  },
+  "expected": [
+    {
+      "pangoLineage*": "B*",
+      "count": 51
+    },
+    {
+      "pangoLineage*": "B.1*",
+      "count": 51
+    },
+    {
+      "pangoLineage*": "B.1.1*",
+      "count": 51
+    },
+    {
+      "pangoLineage*": "B.1.1.7*",
+      "count": 51
+    },
+    {
+      "pangoLineage*": "Q.7*",
+      "count": 3
+    }
+  ]
+}

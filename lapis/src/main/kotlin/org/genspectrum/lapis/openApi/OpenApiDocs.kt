@@ -230,7 +230,10 @@ fun buildOpenApiSchema(
                                     "If a sequence position field (e.g. `S[501]`) was specified, " +
                                     "it is also a key in the result, holding the symbol at that position " +
                                     "as its value; such keys are not enumerable ahead of time, " +
-                                    "so they are not listed as named properties here.",
+                                    "so they are not listed as named properties here. " +
+                                    "If a sublineage-inclusive lineage field (e.g. `pangoLineage*`) was specified, " +
+                                    "it is also a key in the result, holding the lineage " +
+                                    "(suffixed with `*`, e.g. `B.1.1*`) as its value.",
                             )
                             .required(listOf(COUNT_PROPERTY))
                             .properties(
@@ -1127,12 +1130,20 @@ private fun aggregatedFieldsArraySchema(databaseConfig: List<DatabaseMetadata>) 
                 "A metadata field name (" +
                     databaseConfig.joinToString(", ") { it.name } +
                     "), or a sequence position field in the form `SequenceName[position]` " +
-                    "(e.g. `S[501]`), or the shorthand `[position]` for single-segmented genomes.",
+                    "(e.g. `S[501]`), or the shorthand `[position]` for single-segmented genomes, " +
+                    "or a lineage field suffixed with `*` (e.g. `pangoLineage*`) to count each lineage " +
+                    "together with all of its sublineages.",
             ),
     )
 
 private fun aggregatedOrderByFieldsEnum(databaseConfig: DatabaseConfig) =
-    orderByFieldsEnum(databaseConfig.schema.metadata, listOf("count"))
+    orderByFieldsEnum(
+        databaseConfig.schema.metadata,
+        listOf("count") + sublineageAggregationFieldNames(databaseConfig.schema.metadata),
+    )
+
+private fun sublineageAggregationFieldNames(metadata: List<DatabaseMetadata>) =
+    metadata.filter { it.generateLineageIndex != null }.map { "${it.name}*" }
 
 private fun mutationsOrderByFieldsEnum() =
     orderByFieldsEnum(

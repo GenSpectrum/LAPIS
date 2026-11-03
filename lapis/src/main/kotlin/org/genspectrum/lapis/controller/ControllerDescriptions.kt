@@ -72,7 +72,11 @@ If requesting CSV or TSV data, the columns are ordered in the same order as the 
 You can provide metadata fields.
 A field can also be a computed field of the form "<field>.<function>" (e.g. "date.isoWeek"), which applies a
 scalar function to the field and stratifies by the result. The response uses the full "<field>.<function>" string
-as the field name. Currently, the only supported function is "isoWeek", which is only valid for date fields."""
+as the field name. Currently, the only supported function is "isoWeek", which is only valid for date fields.
+A lineage field (a field with a lineage index) can be suffixed with "*" (e.g. "pangoLineage*") to count every
+lineage together with all of its sublineages. The response field is named "<field>*" and its values carry a
+trailing "*" (e.g. "B.1.1*"). Note that these counts do not partition the data: a sequence in "B.1.1" is counted
+under "B.1.1*", "B.1*" and "B*", so the counts do not sum to the total."""
 const val AGGREGATED_ORDER_BY_FIELDS_DESCRIPTION =
     """The fields of the response to order by.
     Fields specified here must either be "count" or also be present in "fields".

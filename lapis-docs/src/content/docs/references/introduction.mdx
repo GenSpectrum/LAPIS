@@ -30,3 +30,5 @@ For example, to find out the number of sequences from each country,you would use
 The available fields are documented in [Fields](../references/fields),
 and you can test them at [Open API / Swagger](../references/open-api-definition).
 Some fields also support [computed fields](../concepts/computed-fields), e.g. `fields=date.isoWeek`.
+A lineage field can be suffixed with `*` (e.g. `fields=pangoLineage*`) to count each lineage together with all of its
+sublineages; see [Lineage queries](../concepts/lineage-queries).

@@ -471,4 +471,59 @@ age	country	count
     const resultJson = await result.json();
     expect(resultJson.data[0]).to.have.property('count', 1);
   });
+
+  it('should count each lineage including sublineages consistently with the sublineage filter', async () => {
+    const aggregated = await lapisClient.postAggregated({
+      aggregatedPostRequest: { fields: ['pangoLineage*'] },
+    });
+
+    const nullCount = aggregated.data.find(row => row['pangoLineage*'] === null).count;
+    expect(nullCount).to.equal(1);
+
+    const someLineageCount = aggregated.data.find(row => row['pangoLineage*'] === 'B.1.617.2*').count;
+    expect(someLineageCount).to.equal(8);
+
+    const lineageCounts = aggregated.data
+      .map(row => row['pangoLineage*'])
+      .filter((value): value is string => typeof value === 'string');
+
+    expect(lineageCounts.length).to.be.greaterThan(0);
+
+    for (const starredValue of lineageCounts) {
+      // Strip the trailing "*", e.g. "B.1.1*" -> "B.1.1".
+      const lineage = starredValue.slice(0, -1);
+
+      const aggregatedCount = aggregated.data.find(row => row['pangoLineage*'] === starredValue).count;
+
+      const filtered = await lapisClient.postAggregated({
+        aggregatedPostRequest: { pangoLineage: `${lineage}*` },
+      });
+
+      expect(
+        filtered.data[0].count,
+        `count for ${lineage}* via filter should match the aggregation`
+      ).to.equal(aggregatedCount);
+    }
+  });
+
+  it('should count a lineage including sublineages identically for all of its alias synonyms', async () => {
+    const aggregated = await lapisClient.postAggregated({
+      aggregatedPostRequest: { fields: ['pangoLineage*'] },
+    });
+
+    const aggregationBucket = aggregated.data.find(row => row['pangoLineage*'] === 'B.1.617.2*').count;
+    expect(aggregationBucket).to.equal(8);
+
+    // "AY" is an alis of "B.1.617.2"
+    for (const synonym of ['B.1.617.2', 'AY']) {
+      const filtered = await lapisClient.postAggregated({
+        aggregatedPostRequest: { pangoLineage: `${synonym}*` },
+      });
+
+      expect(
+        filtered.data[0].count,
+        `count for ${synonym}* should match the B.1.617.2* aggregation bucket`
+      ).to.equal(aggregationBucket);
+    }
+  });
 });

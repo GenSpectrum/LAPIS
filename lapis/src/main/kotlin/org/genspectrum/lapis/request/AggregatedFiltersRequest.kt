@@ -20,7 +20,28 @@ data class AggregatedFiltersRequest(
     override val orderByFields: OrderBySpec = OrderBySpec.EMPTY,
     override val limit: Int? = null,
     override val offset: Int? = null,
-) : CommonSequenceFilters
+) : CommonSequenceFilters {
+    init {
+        validateNoPlainAndSublineageForSameField(fields)
+    }
+}
+
+/**
+ * Rejects requesting the same lineage field both plainly and with a trailing `*` (e.g. `pangoLineage` and
+ * `pangoLineage*`).
+ */
+private fun validateNoPlainAndSublineageForSameField(fields: List<Field>) {
+    val plainFieldNames = fields.filterIsInstance<PlainField>().map { it.fieldName }.toSet()
+    val conflicting = fields.filterIsInstance<LineageWithSublineagesField>()
+        .map { it.fieldName }
+        .filter { it in plainFieldNames }
+    if (conflicting.isNotEmpty()) {
+        throw BadRequestException(
+            "Cannot request the same field both plainly and with a trailing '*': " +
+                conflicting.joinToString(", ") { "'$it' and '$it*'" } + ".",
+        )
+    }
+}
 
 @JacksonComponent
 class AggregatedFiltersRequestDeserializer(

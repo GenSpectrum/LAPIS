@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.genspectrum.lapis.request.ComputedField
+import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
 import org.genspectrum.lapis.request.OrderBySpec
@@ -27,7 +28,10 @@ data class RhyDbQuery<ResponseType>(
 ) {
     /** Renders this query as a SaneQL query string, e.g. `"data".filter(true).group(by:={}, aggs:={count:=count()})`. */
     fun toSaneQl(table: String): String =
-        SaneQlPipeline(table, filterExpression.toSaneQl(), action.toSaneQlSteps()).render()
+        pipeline(table)
+            .filter(filterExpression.toSaneQl())
+            .let { action.applySteps(it) }
+            .render()
 }
 
 interface CommonActionFields {
@@ -40,8 +44,8 @@ interface CommonActionFields {
 const val ORDER_BY_RANDOM_FIELD_NAME = "random"
 
 /**
- * Aggregations that group by more than this many columns (plain fields plus sequence-position fields)
- * are not cached. Their result cardinality grows roughly with the number of matching sequences, so
+ * Aggregations that group by more than this many columns (plain fields, sequence-position fields and
+ * sublineage-inclusive lineage fields) are not cached. Their result cardinality grows roughly with the number of matching sequences, so
  * materializing the full result into a `List` to store it in the cache can exhaust the heap, while
  * the cache hit rate for such queries is close to zero anyway. Non-cacheable queries are streamed
  * straight through instead (see [RhyDbClient.sendQueryAndGetDataVersion]).
@@ -52,56 +56,38 @@ sealed class RhyDbAction<ResponseType>(
     @JsonIgnore val arrowConverter: ArrowRowConverter<ResponseType>,
     @JsonIgnore val cacheable: Boolean,
 ) : CommonActionFields {
-    /** The SaneQL pipeline step(s) specific to this action, e.g. `.group(by:={}, aggs:={count:=count()})`. */
-    protected abstract fun ownSaneQlSteps(): List<SaneQlStep>
+    /** Appends this action's own pipeline step(s) to [pipeline], e.g. `.group(by:={}, aggs:={count:=count()})`. */
+    protected abstract fun applyOwnSteps(pipeline: PipelineBuilder): PipelineBuilder
 
     /**
-     * All SaneQL pipeline steps for this action: [ownSaneQlSteps] followed by the steps common to
+     * Appends all of this action's pipeline steps to [pipeline]: [applyOwnSteps] followed by the steps common to
      * every action (`order`, `offset`, `randomize`, `limit`), derived from [CommonActionFields].
      */
-    fun toSaneQlSteps(): List<SaneQlStep> = ownSaneQlSteps() + commonSaneQlSuffixSteps()
+    fun applySteps(pipeline: PipelineBuilder) =
+        pipeline
+            .let { applyOwnSteps(it) }
+            .let { applyCommonSuffixSteps(it) }
 
-    private fun commonSaneQlSuffixSteps(): List<SaneQlStep> =
-        buildList {
-            val orderByFields = this@RhyDbAction.orderByFields
-            if (orderByFields.isNotEmpty()) {
-                add(
-                    SaneQlStep(
-                        "order",
-                        namedArgs = listOf(SaneQlNamedArg("by", SaneQlList(orderByFields.map { toSaneQl(it) }))),
-                    ),
-                )
-            }
-            val offset = this@RhyDbAction.offset
-            if (offset != null) {
-                add(SaneQlStep("offset", positionalArgs = listOf(SaneQlInt(offset))))
-            }
-            when (val randomize = this@RhyDbAction.randomize) {
-                is RandomizeConfig.Enabled -> {
-                    add(SaneQlStep("randomize"))
-                }
-
-                is RandomizeConfig.WithSeed -> {
-                    add(
-                        SaneQlStep(
-                            "randomize",
-                            namedArgs = listOf(SaneQlNamedArg("seed", SaneQlInt(randomize.seed))),
-                        ),
-                    )
-                }
-
-                is RandomizeConfig.Disabled, null -> {}
-            }
-            val limit = this@RhyDbAction.limit
-            if (limit != null) {
-                add(SaneQlStep("limit", positionalArgs = listOf(SaneQlInt(limit))))
-            }
+    private fun applyCommonSuffixSteps(builder: PipelineBuilder): PipelineBuilder {
+        var result = builder
+        if (orderByFields.isNotEmpty()) {
+            result = result.order(by = orderByFields.map { toSaneQl(it) })
         }
+        offset?.let { result = result.offset(it) }
+        when (val randomize = randomize) {
+            is RandomizeConfig.Enabled -> result = result.randomize()
+            is RandomizeConfig.WithSeed -> result = result.randomize(seed = randomize.seed)
+            is RandomizeConfig.Disabled, null -> {}
+        }
+        limit?.let { result = result.limit(it) }
+        return result
+    }
 
     companion object {
         fun aggregated(
             groupByFields: List<String> = emptyList(),
             computedFields: List<ComputedField> = emptyList(),
+            lineageFields: List<LineageWithSublineagesField> = emptyList(),
             orderByFields: OrderBySpec = OrderBySpec.EMPTY,
             limit: Int? = null,
             offset: Int? = null,
@@ -111,6 +97,7 @@ sealed class RhyDbAction<ResponseType>(
                 groupByFields = groupByFields,
                 sequencePositionFields = sequencePositionFields,
                 computedFields = computedFields,
+                lineageFields = lineageFields,
                 orderByFields = getOrderByFieldsList(orderByFields),
                 randomize = getRandomize(orderByFields),
                 limit = limit,
@@ -247,59 +234,19 @@ sealed class RhyDbAction<ResponseType>(
         val groupByFields: List<String>,
         val sequencePositionFields: List<SequencePositionField> = emptyList(),
         val computedFields: List<ComputedField> = emptyList(),
+        val lineageFields: List<LineageWithSublineagesField> = emptyList(),
         override val orderByFields: List<OrderByField> = emptyList(),
         override val randomize: RandomizeConfig? = null,
         override val limit: Int? = null,
         override val offset: Int? = null,
     ) : RhyDbAction<AggregationData>(
             arrowConverter = AGGREGATION_DATA_ARROW_CONVERTER,
-            cacheable = groupByFields.size + sequencePositionFields.size <= MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
+            cacheable = groupByFields.size + sequencePositionFields.size + lineageFields.size <=
+                MAX_CACHEABLE_GROUP_BY_FIELD_COUNT,
         ) {
         val type: String = "Aggregated"
 
-        override fun ownSaneQlSteps() =
-            buildList {
-                val allComputedMappings =
-                    sequencePositionFields.map { field ->
-                        SaneQlAssignment(
-                            field.outputColumnName,
-                            SaneQlMethodCall(
-                                SaneQlIdentifier(field.sequenceName),
-                                "at",
-                                listOf(SaneQlInt(field.position)),
-                            ),
-                        )
-                    } + computedFields.map { field ->
-                        SaneQlAssignment(
-                            field.outputColumnName,
-                            SaneQlMethodCall(id(field.sourceField), field.function.saneQlMethodName),
-                        )
-                    }
-                if (allComputedMappings.isNotEmpty()) {
-                    add(
-                        SaneQlStep(
-                            "map",
-                            positionalArgs = listOf(SaneQlList(allComputedMappings)),
-                        ),
-                    )
-                }
-                val allGroupByColumns =
-                    groupByFields.map { id(it) } +
-                        sequencePositionFields.map { id(it.outputColumnName) } +
-                        computedFields.map { id(it.outputColumnName) }
-                add(
-                    SaneQlStep(
-                        "group",
-                        namedArgs = listOf(
-                            SaneQlNamedArg("by", SaneQlList(allGroupByColumns)),
-                            SaneQlNamedArg(
-                                "aggs",
-                                SaneQlList(listOf(SaneQlAssignment("count", SaneQlFunctionCall("count")))),
-                            ),
-                        ),
-                    ),
-                )
-            }
+        override fun applyOwnSteps(pipeline: PipelineBuilder) = applyAggregatedSteps(pipeline)
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -316,8 +263,8 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "Mutations"
 
-        override fun ownSaneQlSteps() =
-            listOf(SaneQlStep("mutations", namedArgs = mutationsNamedArgs(minProportion, fields)))
+        override fun applyOwnSteps(pipeline: PipelineBuilder) =
+            pipeline.step("mutations", namedArgs = mutationsNamedArgs(minProportion, fields))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -334,8 +281,8 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "AminoAcidMutations"
 
-        override fun ownSaneQlSteps() =
-            listOf(SaneQlStep("aminoAcidMutations", namedArgs = mutationsNamedArgs(minProportion, fields)))
+        override fun applyOwnSteps(pipeline: PipelineBuilder) =
+            pipeline.step("aminoAcidMutations", namedArgs = mutationsNamedArgs(minProportion, fields))
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -351,11 +298,11 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "Details"
 
-        override fun ownSaneQlSteps() =
+        override fun applyOwnSteps(pipeline: PipelineBuilder) =
             if (fields.isEmpty()) {
-                emptyList()
+                pipeline
             } else {
-                listOf(SaneQlStep("project", positionalArgs = listOf(SaneQlList(fields.map { id(it) }))))
+                pipeline.project(fields.map { id(it) })
             }
     }
 
@@ -371,7 +318,7 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "Insertions"
 
-        override fun ownSaneQlSteps() = listOf(SaneQlStep("insertions"))
+        override fun applyOwnSteps(pipeline: PipelineBuilder) = pipeline.step("insertions")
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -388,13 +335,11 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "MostRecentCommonAncestor"
 
-        override fun ownSaneQlSteps() =
-            listOf(
-                SaneQlStep(
-                    "mostRecentCommonAncestor",
-                    positionalArgs = listOf(str(columnName)),
-                    namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
-                ),
+        override fun applyOwnSteps(pipeline: PipelineBuilder) =
+            pipeline.step(
+                "mostRecentCommonAncestor",
+                positionalArgs = listOf(str(columnName)),
+                namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
             )
     }
 
@@ -412,13 +357,11 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "PhyloSubtree"
 
-        override fun ownSaneQlSteps() =
-            listOf(
-                SaneQlStep(
-                    "phyloSubtree",
-                    positionalArgs = listOf(str(columnName)),
-                    namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
-                ),
+        override fun applyOwnSteps(pipeline: PipelineBuilder) =
+            pipeline.step(
+                "phyloSubtree",
+                positionalArgs = listOf(str(columnName)),
+                namedArgs = printNodesNotInTreeNamedArgs(printNodesNotInTree),
             )
     }
 
@@ -434,7 +377,7 @@ sealed class RhyDbAction<ResponseType>(
         ) {
         val type: String = "AminoAcidInsertions"
 
-        override fun ownSaneQlSteps() = listOf(SaneQlStep("aminoAcidInsertions"))
+        override fun applyOwnSteps(pipeline: PipelineBuilder) = pipeline.step("aminoAcidInsertions")
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -450,9 +393,9 @@ sealed class RhyDbAction<ResponseType>(
             arrowConverter = SEQUENCE_DATA_ARROW_CONVERTER,
             cacheable = false,
         ) {
-        override fun ownSaneQlSteps(): List<SaneQlStep> {
+        override fun applyOwnSteps(pipeline: PipelineBuilder): PipelineBuilder {
             val allFields = additionalFields + sequenceNames
-            return listOf(SaneQlStep("project", positionalArgs = listOf(SaneQlList(allFields.map { id(it) }))))
+            return pipeline.project(allFields.map { id(it) })
         }
     }
 }
@@ -744,16 +687,6 @@ data class IsNotNull(
 ) : RhyDbFilterExpression("IsNotNull") {
     override fun toSaneQl() = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
 }
-
-private fun id(name: String) = SaneQlIdentifier(name)
-
-private fun str(value: String) = SaneQlString(value)
-
-private fun isNull(column: String) = SaneQlFunctionCall("isNull", positionalArgs = listOf(id(column)))
-
-private fun intOrNull(value: Int?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlInt(value)
-
-private fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlFloat(value)
 
 enum class SequenceType {
     @JsonProperty("Fasta")

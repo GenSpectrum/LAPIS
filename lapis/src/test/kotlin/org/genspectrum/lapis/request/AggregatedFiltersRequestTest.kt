@@ -347,6 +347,11 @@ class AggregatedFiltersRequestTest {
                     """,
                     "aminoAcidInsertions must be an array or null",
                 ),
+                Arguments.of(
+                    """{"fields": ["pangoLineage", "pangoLineage*"]}""",
+                    "Cannot request the same field both plainly and with a trailing '*': " +
+                        "'pangoLineage' and 'pangoLineage*'",
+                ),
             )
     }
 }

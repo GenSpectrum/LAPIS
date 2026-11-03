@@ -17,6 +17,7 @@ import org.genspectrum.lapis.request.AggregatedFiltersRequest
 import org.genspectrum.lapis.request.CommonSequenceFilters
 import org.genspectrum.lapis.request.ComputedField
 import org.genspectrum.lapis.request.DetailsFiltersRequest
+import org.genspectrum.lapis.request.LineageWithSublineagesField
 import org.genspectrum.lapis.request.MutationsField
 import org.genspectrum.lapis.request.Order
 import org.genspectrum.lapis.request.OrderByField
@@ -682,6 +683,39 @@ class RhyDbQueryModelTest {
                         groupByFields = emptyList(),
                         computedFields = listOf(isoWeekField),
                         orderByFields = orderByFields,
+                    ),
+                    True,
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `getAggregated splits plain and sublineage-inclusive lineage fields`() {
+        every { rhyDbClientMock.sendQuery(any<RhyDbQuery<AggregationData>>()) } returns Stream.empty()
+        every { rhyDbFilterExpressionMapperMock.map(any<CommonSequenceFilters>()) } returns True
+
+        underTest.getAggregated(
+            AggregatedFiltersRequest(
+                emptyMap(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                emptyList(),
+                listOf(
+                    PlainField("country"),
+                    LineageWithSublineagesField("pangoLineage"),
+                ),
+                OrderBySpec.EMPTY,
+            ),
+        )
+
+        verify {
+            rhyDbClientMock.sendQuery(
+                RhyDbQuery(
+                    RhyDbAction.aggregated(
+                        groupByFields = listOf("country"),
+                        lineageFields = listOf(LineageWithSublineagesField("pangoLineage")),
                     ),
                     True,
                 ),
