@@ -13,20 +13,18 @@ const config = getConfig();
         </tr>
     </thead>
     <tbody>
-        {
-            config.schema.metadata.map((metadata) => (
-                <tr>
-                    <td>{metadata.name}</td>
-                    <td>
-                        {metadata.type}
-                        {metadata.name === config.schema.primaryKey && <> (primary key)</>}
-                    </td>
-                    <td>
-                        {(metadata.type === 'insertion' || metadata.type === 'aaInsertion') &&
-                            'An artificial column that contains insertions'}
-                    </td>
-                </tr>
-            ))
-        }
+        {config.schema.metadata.map((metadata) => (
+            <tr>
+                <td>{metadata.name}</td>
+                <td>
+                    {metadata.type}
+                    {metadata.name === config.schema.primaryKey && <> (primary key)</>}
+                </td>
+                <td>
+                    {(metadata.type === 'insertion' || metadata.type === 'aaInsertion') &&
+                        'An artificial column that contains insertions'}
+                </td>
+            </tr>
+        ))}
     </tbody>
 </table>

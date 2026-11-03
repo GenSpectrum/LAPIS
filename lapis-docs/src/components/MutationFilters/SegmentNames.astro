@@ -5,13 +5,9 @@ const referenceGenomes = getReferenceGenomes();
 const multiSegmented = isMultiSegmented(referenceGenomes);
 ---
 
-{
-    multiSegmented && (
-        <>
-            The following segments are available:
-            {referenceGenomes.nucleotideSequences
-                .flatMap((segment) => [<code>{segment.name}</code>, ', '])
-                .slice(0, -1)}
-        </>
-    )
-}
+{multiSegmented && (
+    <>
+        The following segments are available:
+        {referenceGenomes.nucleotideSequences.flatMap((segment) => [<code>{segment.name}</code>, ', ']).slice(0, -1)}
+    </>
+)}
