@@ -308,3 +308,24 @@ describe('All endpoints', () => {
     });
   }
 });
+
+describe('Form url encoded POST requests', () => {
+  it('should accept requests with many parameters', async () => {
+    const existingPrimaryKeys = ['key_1408408', 'key_1749899', 'key_2016901'];
+    const nonExistingPrimaryKeys = Array.from({ length: 8000 }, (_, i) => `nonExistingKey_${i}`);
+
+    const formUrlEncodedData = new URLSearchParams(
+      [...existingPrimaryKeys, ...nonExistingPrimaryKeys].map(primaryKey => ['primaryKey', primaryKey])
+    );
+
+    const response = await fetch(`${basePath}/sample/aggregated`, {
+      method: 'POST',
+      body: formUrlEncodedData,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const body = await response.text();
+    expect(response.status, 'body was ' + body).equals(200);
+    expect(JSON.parse(body).data).to.deep.equal([{ count: existingPrimaryKeys.length }]);
+  });
+});
