@@ -15,7 +15,7 @@
         "e2e": "playwright test"
     },
     "dependencies": {
-        "@astrojs/react": "^5.0.5",
+        "@astrojs/react": "^7.1.9",
         "@astrojs/starlight": "^0.43.0",
         "@astrojs/starlight-tailwind": "^5.0.0",
         "@tailwindcss/vite": "^4.3.5",
