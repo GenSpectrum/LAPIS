@@ -409,11 +409,15 @@ class RhyDbQueryToSaneQlTest {
                 ),
                 Arguments.of(
                     DateBetween("fieldName", null, LocalDate.of(2022, 6, 3)),
-                    """"fieldName".between(null, '2022-06-03'::date)""",
+                    """"fieldName" <= '2022-06-03'::date""",
                 ),
                 Arguments.of(
                     DateBetween("fieldName", LocalDate.of(2021, 3, 31), null),
-                    """"fieldName".between('2021-03-31'::date, null)""",
+                    """"fieldName" >= '2021-03-31'::date""",
+                ),
+                Arguments.of(
+                    DateBetween("fieldName", null, null),
+                    """isNotNull("fieldName")""",
                 ),
                 // IntBetween
                 Arguments.of(
@@ -422,11 +426,15 @@ class RhyDbQueryToSaneQlTest {
                 ),
                 Arguments.of(
                     IntBetween("age", 18, null),
-                    """"age".between(18, null)""",
+                    """"age" >= 18""",
                 ),
                 Arguments.of(
                     IntBetween("age", null, 65),
-                    """"age".between(null, 65)""",
+                    """"age" <= 65""",
+                ),
+                Arguments.of(
+                    IntBetween("age", null, null),
+                    """isNotNull("age")""",
                 ),
                 // FloatBetween
                 Arguments.of(
@@ -435,7 +443,15 @@ class RhyDbQueryToSaneQlTest {
                 ),
                 Arguments.of(
                     FloatBetween("score", 0.5, null),
-                    """"score".between(0.5, null)""",
+                    """"score" >= 0.5""",
+                ),
+                Arguments.of(
+                    FloatBetween("score", null, 1.0),
+                    """"score" <= 1.0""",
+                ),
+                Arguments.of(
+                    FloatBetween("score", null, null),
+                    """isNotNull("score")""",
                 ),
                 // LineageEquals
                 Arguments.of(

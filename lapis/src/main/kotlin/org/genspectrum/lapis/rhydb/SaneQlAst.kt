@@ -96,6 +96,22 @@ data class SaneQlEquals(
     override fun render() = "${column.render()} = ${value.render()}"
 }
 
+/** `"column" >= value` */
+data class SaneQlGreaterOrEqual(
+    val column: SaneQlExpression,
+    val value: SaneQlExpression,
+) : SaneQlExpression {
+    override fun render() = "${column.render()} >= ${value.render()}"
+}
+
+/** `"column" <= value` */
+data class SaneQlLessOrEqual(
+    val column: SaneQlExpression,
+    val value: SaneQlExpression,
+) : SaneQlExpression {
+    override fun render() = "${column.render()} <= ${value.render()}"
+}
+
 /** `!(child)` */
 data class SaneQlNot(
     val child: SaneQlExpression,

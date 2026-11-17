@@ -528,12 +528,7 @@ data class DateBetween(
     val from: LocalDate?,
     val to: LocalDate?,
 ) : RhyDbFilterExpression("DateBetween") {
-    override fun toSaneQl() =
-        SaneQlMethodCall(
-            receiver = id(column),
-            name = "between",
-            positionalArgs = listOf(SaneQlDate(from), SaneQlDate(to)),
-        )
+    override fun toSaneQl() = range(column = column, from = from, to = to, toLiteral = ::SaneQlDate)
 }
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -632,12 +627,7 @@ data class IntBetween(
     val from: Int?,
     val to: Int?,
 ) : RhyDbFilterExpression("IntBetween") {
-    override fun toSaneQl() =
-        SaneQlMethodCall(
-            receiver = id(column),
-            name = "between",
-            positionalArgs = listOf(intOrNull(from), intOrNull(to)),
-        )
+    override fun toSaneQl() = range(column = column, from = from, to = to, toLiteral = ::SaneQlInt)
 }
 
 data class FloatEquals(
@@ -652,12 +642,7 @@ data class FloatBetween(
     val from: Double?,
     val to: Double?,
 ) : RhyDbFilterExpression("FloatBetween") {
-    override fun toSaneQl() =
-        SaneQlMethodCall(
-            receiver = id(column),
-            name = "between",
-            positionalArgs = listOf(floatOrNull(from), floatOrNull(to)),
-        )
+    override fun toSaneQl() = range(column = column, from = from, to = to, toLiteral = ::SaneQlFloat)
 }
 
 data class StringSearch(
@@ -685,7 +670,7 @@ data class IsNull(
 data class IsNotNull(
     val column: String,
 ) : RhyDbFilterExpression("IsNotNull") {
-    override fun toSaneQl() = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
+    override fun toSaneQl() = isNotNull(column)
 }
 
 enum class SequenceType {
