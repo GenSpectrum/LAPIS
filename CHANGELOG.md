@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.3](https://github.com/GenSpectrum/LAPIS/compare/v0.9.2...v0.9.3) (2026-11-18)
+
+
+### Bug Fixes
+
+* **lapis:** `server.tomcat.max-parameter-count=10000` to allow large POST form requests ([#1969](https://github.com/GenSpectrum/LAPIS/issues/1969)) ([fd58465](https://github.com/GenSpectrum/LAPIS/commit/fd5846582ae265dbeb9ae3be8d7e5ce4ce132672)), closes [#1966](https://github.com/GenSpectrum/LAPIS/issues/1966)
+* **lapis:** handle range filters with no bounds ([#1971](https://github.com/GenSpectrum/LAPIS/issues/1971)) ([849800f](https://github.com/GenSpectrum/LAPIS/commit/849800f8bcf3bb3e08c7c6c0f8d92f7ade577156))
+
 ## [0.9.2](https://github.com/GenSpectrum/LAPIS/compare/v0.9.1...v0.9.2) (2026-11-03)
 
 
