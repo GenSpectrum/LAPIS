@@ -1,0 +1,11 @@
+{
+  "testCaseName": "date from null returns all non-null dates",
+  "lapisRequest": {
+    "dateFrom": null
+  },
+  "expected": [
+    {
+      "count": 99
+    }
+  ]
+}

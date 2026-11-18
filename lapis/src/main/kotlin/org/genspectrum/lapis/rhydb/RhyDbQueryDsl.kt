@@ -14,14 +14,38 @@ fun id(name: String) = SaneQlIdentifier(name)
 /** A single-quoted string literal, e.g. `'theValue'`. */
 fun str(value: String) = SaneQlString(value)
 
-/** An integer literal, or `null` when [value] is null. */
-fun intOrNull(value: Int?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlInt(value)
-
-/** A float literal, or `null` when [value] is null. */
-fun floatOrNull(value: Double?): SaneQlExpression = if (value == null) SaneQlNull else SaneQlFloat(value)
-
 /** `isNull("column")`. */
 fun isNull(column: String) = SaneQlFunctionCall("isNull", positionalArgs = listOf(id(column)))
+
+/** `isNotNull("column")`. */
+fun isNotNull(column: String) = SaneQlFunctionCall("isNotNull", positionalArgs = listOf(id(column)))
+
+/**
+ * A range filter on [column] with optional bounds:
+ * - both bounds null: `isNotNull("column")` (RhyDB cannot infer the type of `between(null, null)`)
+ * - only [from]: `"column" >= from`
+ * - only [to]: `"column" <= to`
+ * - both bounds: `"column".between(from, to)`
+ */
+fun <T : Any> range(
+    column: String,
+    from: T?,
+    to: T?,
+    toLiteral: (T) -> SaneQlExpression,
+): SaneQlExpression =
+    when {
+        from != null && to != null -> SaneQlMethodCall(
+            receiver = id(column),
+            name = "between",
+            positionalArgs = listOf(toLiteral(from), toLiteral(to)),
+        )
+
+        from != null -> SaneQlGreaterOrEqual(column = id(column), value = toLiteral(from))
+
+        to != null -> SaneQlLessOrEqual(column = id(column), value = toLiteral(to))
+
+        else -> isNotNull(column)
+    }
 
 /** `left = right`, e.g. `id("a") eq id("b")` renders `"a" = "b"`. */
 infix fun SaneQlExpression.eq(other: SaneQlExpression) = SaneQlEquals(this, other)

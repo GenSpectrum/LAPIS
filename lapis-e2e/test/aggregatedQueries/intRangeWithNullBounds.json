@@ -1,0 +1,12 @@
+{
+  "testCaseName": "int range with null bounds returns all non-null values",
+  "lapisRequest": {
+    "ageFrom": null,
+    "ageTo": null
+  },
+  "expected": [
+    {
+      "count": 98
+    }
+  ]
+}

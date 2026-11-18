@@ -1,0 +1,11 @@
+{
+  "testCaseName": "float to null returns all non-null values",
+  "lapisRequest": {
+    "qcValueTo": null
+  },
+  "expected": [
+    {
+      "count": 98
+    }
+  ]
+}
